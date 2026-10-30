@@ -55,6 +55,9 @@ public class MainActivity extends Activity {
 
     private final List<Uri> picked = new ArrayList<>();
     private final List<Done> done = new ArrayList<>();
+
+    /** Photos dropped by the last Clear all, kept so it can be undone. */
+    private final List<Uri> undoClear = new ArrayList<>();
     private final ExecutorService pool = Executors.newSingleThreadExecutor();
     private final ExecutorService previews = Executors.newFixedThreadPool(2);
     private final Handler ui = new Handler(Looper.getMainLooper());
@@ -124,7 +127,13 @@ public class MainActivity extends Activity {
         compressButton.setOnClickListener(v -> startCompression());
         previewButton.setOnClickListener(v -> startPreview());
         shareAllButton.setOnClickListener(v -> shareAll());
-        clearAllButton.setOnClickListener(v -> clearSelection());
+        clearAllButton.setOnClickListener(v -> {
+            if (undoClear.isEmpty()) {
+                clearSelection();
+            } else {
+                restoreSelection();
+            }
+        });
         themeToggle.setOnClickListener(v -> toggleTheme());
         formatJpeg.setOnClickListener(v -> setFormat(Compressor.FORMAT_JPEG));
         formatWebp.setOnClickListener(v -> setFormat(Compressor.FORMAT_WEBP));
@@ -150,6 +159,8 @@ public class MainActivity extends Activity {
 
         if (savedInstanceState != null) {
             restoreState(savedInstanceState);
+        } else {
+            restoreQueue();
         }
     }
 
@@ -224,6 +235,23 @@ public class MainActivity extends Activity {
         if (!picked.isEmpty()) {
             updatePickedSummary();
         }
+    }
+
+    /** Brings back the queue that was still there when the app was closed. */
+    private void restoreQueue() {
+        for (String value : SelectionStore.load(this)) {
+            Uri uri = Uri.parse(value);
+            if (uri != null && picked.size() < MAX_PHOTOS && !picked.contains(uri)) {
+                picked.add(uri);
+            }
+        }
+        if (!picked.isEmpty()) {
+            updatePickedSummary();
+        }
+    }
+
+    private void persistQueue() {
+        SelectionStore.save(this, picked);
     }
 
     @SuppressWarnings("unchecked")
@@ -392,6 +420,8 @@ public class MainActivity extends Activity {
             Toast.makeText(this, added + (added == 1 ? " photo added · " : " photos added · ")
                     + picked.size() + " queued", Toast.LENGTH_SHORT).show();
         }
+        undoClear.clear();
+        persistQueue();
         updatePickedSummary();
     }
 
@@ -441,11 +471,11 @@ public class MainActivity extends Activity {
         pickedRow.removeAllViews();
         if (picked.isEmpty()) {
             pickedStrip.setVisibility(View.GONE);
-            clearAllButton.setVisibility(View.GONE);
+            updateClearButton();
             return;
         }
         pickedStrip.setVisibility(View.VISIBLE);
-        clearAllButton.setVisibility(View.VISIBLE);
+        updateClearButton();
         for (Uri uri : picked) {
             View item = LayoutInflater.from(this).inflate(R.layout.item_thumb, pickedRow, false);
             final ImageView image = item.findViewById(R.id.thumbImage);
@@ -467,20 +497,50 @@ public class MainActivity extends Activity {
         if (!picked.remove(uri)) {
             return;
         }
+        undoClear.clear();
+        persistQueue();
         updatePickedSummary();
         if (picked.isEmpty()) {
             Toast.makeText(this, "Selection cleared", Toast.LENGTH_SHORT).show();
         }
     }
 
-    /** Empties the selection in one tap, at the bottom of the strip. */
+    /** Empties the selection in one tap, keeping a copy the chip can restore. */
     private void clearSelection() {
         if (picked.isEmpty()) {
             return;
         }
+        undoClear.clear();
+        undoClear.addAll(picked);
         picked.clear();
+        persistQueue();
         updatePickedSummary();
-        Toast.makeText(this, "Selection cleared", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Selection cleared · tap RESTORE to undo",
+                Toast.LENGTH_SHORT).show();
+    }
+
+    /** Puts back the photos dropped by the last Clear all. */
+    private void restoreSelection() {
+        if (undoClear.isEmpty()) {
+            return;
+        }
+        for (Uri uri : undoClear) {
+            if (picked.size() < MAX_PHOTOS && !picked.contains(uri)) {
+                picked.add(uri);
+            }
+        }
+        undoClear.clear();
+        persistQueue();
+        updatePickedSummary();
+        Toast.makeText(this, "Selection restored", Toast.LENGTH_SHORT).show();
+    }
+
+    /** The chip reads CLEAR ALL, or RESTORE while a clear can still be undone. */
+    private void updateClearButton() {
+        boolean canRestore = !undoClear.isEmpty();
+        clearAllButton.setText(canRestore ? "RESTORE" : "CLEAR ALL");
+        clearAllButton.setVisibility(picked.isEmpty() && !canRestore
+                ? View.GONE : View.VISIBLE);
     }
 
     private Compressor.Options currentOptions() {
