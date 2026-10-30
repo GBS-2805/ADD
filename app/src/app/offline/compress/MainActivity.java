@@ -2,6 +2,7 @@ package app.offline.compress;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.ClipData;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -36,6 +37,9 @@ public class MainActivity extends Activity {
     private static final int REQ_WRITE = 1002;
     private static final int REQ_PREVIEW = 1003;
 
+    /** Hard cap on a batch, matching the queue the strip can hold. */
+    private static final int MAX_PHOTOS = 40;
+
     private static final int[] MAX_DIMENSIONS = {0, 1280, 1920, 2560, 3200, 4096};
     private static final int QUALITY_BASE = 45;
 
@@ -46,6 +50,9 @@ public class MainActivity extends Activity {
     private final Handler ui = new Handler(Looper.getMainLooper());
 
     private int format = Compressor.FORMAT_JPEG;
+
+    /** True when the next picker result should join the queue instead of replacing it. */
+    private boolean appendMode;
 
     private View pickCard;
     private TextView pickTitle;
@@ -181,6 +188,36 @@ public class MainActivity extends Activity {
     }
 
     private void pickImages() {
+        if (picked.size() >= MAX_PHOTOS) {
+            Toast.makeText(this, "That is all " + MAX_PHOTOS + " photos at once",
+                    Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if (picked.isEmpty()) {
+            appendMode = false;
+            launchPicker();
+            return;
+        }
+        // Photos are already queued: ask whether the next pick joins them or
+        // starts over, so a second tap can never silently discard the first.
+        new AlertDialog.Builder(this)
+                .setTitle("Add to your selection?")
+                .setMessage(picked.size() == 1
+                        ? "1 photo is already queued."
+                        : picked.size() + " photos are already queued.")
+                .setPositiveButton("Add more", (dialog, which) -> {
+                    appendMode = true;
+                    launchPicker();
+                })
+                .setNegativeButton("Start from beginning", (dialog, which) -> {
+                    appendMode = false;
+                    launchPicker();
+                })
+                .setNeutralButton("Cancel", null)
+                .show();
+    }
+
+    private void launchPicker() {
         Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
         intent.addCategory(Intent.CATEGORY_OPENABLE);
         intent.setType("image/*");
@@ -204,25 +241,38 @@ public class MainActivity extends Activity {
         if (requestCode != REQ_PICK || resultCode != RESULT_OK || data == null) {
             return;
         }
-        picked.clear();
+        if (!appendMode) {
+            picked.clear();
+        }
+        final int before = picked.size();
         ClipData clip = data.getClipData();
         if (clip != null) {
-            for (int i = 0; i < clip.getItemCount() && picked.size() < 40; i++) {
+            for (int i = 0; i < clip.getItemCount() && picked.size() < MAX_PHOTOS; i++) {
                 Uri uri = clip.getItemAt(i).getUri();
                 if (uri != null && !picked.contains(uri)) {
                     picked.add(uri);
                 }
             }
-        } else if (data.getData() != null) {
-            picked.add(data.getData());
-        }
-        try {
-            if (data.getData() != null) {
-                getContentResolver().takePersistableUriPermission(
-                        data.getData(), Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        } else if (data.getData() != null && picked.size() < MAX_PHOTOS) {
+            Uri uri = data.getData();
+            if (!picked.contains(uri)) {
+                picked.add(uri);
             }
-        } catch (Exception ignored) {
-            // Not every provider offers persistable grants.
+        }
+        for (int i = before; i < picked.size(); i++) {
+            try {
+                getContentResolver().takePersistableUriPermission(
+                        picked.get(i), Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            } catch (Exception ignored) {
+                // Not every provider offers persistable grants.
+            }
+        }
+        final int added = picked.size() - before;
+        if (appendMode && added == 0) {
+            Toast.makeText(this, "Nothing new added", Toast.LENGTH_SHORT).show();
+        } else if (appendMode) {
+            Toast.makeText(this, added + (added == 1 ? " photo added · " : " photos added · ")
+                    + picked.size() + " queued", Toast.LENGTH_SHORT).show();
         }
         updatePickedSummary();
     }
@@ -265,7 +315,7 @@ public class MainActivity extends Activity {
                 total += Compressor.sizeOf(MainActivity.this, uri);
             }
             final long totalBytes = total;
-            ui.post(() -> pickSub.setText(formatBytes(totalBytes) + " total · tap to change"));
+            ui.post(() -> pickSub.setText(formatBytes(totalBytes) + " total · tap to add more"));
         });
     }
 
