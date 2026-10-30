@@ -8,19 +8,19 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 108 108'%3E%3Ccircle cx='54' cy='54' r='52' fill='%23FFB20F'/%3E%3Cg fill='none' stroke='%232B2926' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M34 27.25L54 43.25L74 27.25' stroke-width='7'/%3E%3Cpath d='M40 53.5L54 65.5L68 53.5' stroke-width='5.5'/%3E%3Cpath d='M46 74.25L54 82.25L62 74.25' stroke-width='4'/%3E%3C/g%3E%3C/svg%3E" />
 <style>
   :root {
-    --bg: #0b0f14;
-    --card: #151b23;
-    --card2: #10161d;
-    --stroke: #26313d;
-    --accent: #3be08d;
-    --ink: #04291a;
-    --text: #e9eff6;
-    --muted: #93a2b2;
+    --bg: #f2e4c9;
+    --card: #f7ecd7;
+    --card2: #eadbbd;
+    --stroke: #2b2926;
+    --accent: #ffb20f;
+    --ink: #2b2926;
+    --text: #2b2926;
+    --muted: #4b5563;
   }
   * { box-sizing: border-box; }
   html, body { margin: 0; padding: 0; }
   body {
-    background: radial-gradient(1200px 600px at 50% -10%, #16232e 0%, #0b0f14 55%) no-repeat, #0b0f14;
+    background: var(--bg);
     color: var(--text);
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
@@ -29,51 +29,52 @@
     line-height: 1.55;
   }
   .wrap { max-width: 660px; margin: 0 auto; }
-  .app-icon { width: 72px; height: 72px; border-radius: 50%; filter: drop-shadow(0 14px 30px rgba(255,178,15,.28)); }
+  .app-icon { width: 72px; height: 72px; border-radius: 50%; filter: drop-shadow(5px 5px 0 rgba(43,41,38,.85)); }
   h1 { font-size: 30px; letter-spacing: -.02em; margin: 18px 0 6px; }
   .sub { color: var(--muted); font-size: 15px; margin: 0 0 26px; }
-  .card { background: var(--card); border: 1px solid var(--stroke); border-radius: 20px; padding: 22px; margin-bottom: 14px; }
+  .card { background: var(--card); border: 3px solid var(--stroke); border-radius: 18px; box-shadow: 6px 6px 0 var(--stroke); padding: 22px; margin-bottom: 20px; }
   .download {
     display: flex; align-items: center; justify-content: center; gap: 10px;
     background: var(--accent); color: var(--ink);
     text-decoration: none; font-weight: 700; font-size: 16px;
     padding: 17px 20px; border-radius: 18px;
-    box-shadow: 0 14px 34px rgba(59,224,141,.22);
+    border: 3px solid var(--stroke);
+    box-shadow: 6px 6px 0 var(--stroke);
     transition: transform .12s ease, box-shadow .12s ease;
   }
-  .download:hover { transform: translateY(-1px); box-shadow: 0 18px 40px rgba(59,224,141,.3); }
-  .download:active { transform: translateY(0); }
+  .download:hover { transform: translate(-2px, -2px); box-shadow: 8px 8px 0 var(--stroke); }
+  .download:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0 var(--stroke); }
   .meta { display: flex; flex-wrap: wrap; gap: 8px 18px; color: var(--muted); font-size: 12.5px; margin-top: 14px; }
   .meta b { color: var(--text); font-weight: 600; }
   h2 { font-size: 13px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin: 0 0 12px; }
   ul { margin: 0; padding-left: 18px; }
-  li { margin: 6px 0; font-size: 14.5px; color: #cfdae6; }
+  li { margin: 6px 0; font-size: 14.5px; color: var(--text); }
   li b { color: var(--text); }
   ol { margin: 0; padding-left: 20px; }
-  ol li { font-size: 14.5px; color: #cfdae6; margin: 8px 0; }
+  ol li { font-size: 14.5px; color: var(--text); margin: 8px 0; }
   .note {
     display: flex; gap: 10px; align-items: flex-start;
-    background: #12202a; border: 1px solid #1f3a4a; color: #b9d7e6;
+    background: #fae9c8; border: 2px solid var(--stroke); color: var(--text);
     border-radius: 14px; padding: 13px 15px; font-size: 13.5px; margin-top: 14px;
   }
-  .warn { background: #241d10; border: 1px solid #4a3a17; color: #e8cf9a; }
+  .warn { background: #fef3c7; border: 2px solid #92400e; color: #92400e; }
   .new {
     display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: .1em;
-    text-transform: uppercase; color: var(--accent);
-    background: #122c20; border: 1px solid #255c41; border-radius: 99px;
+    text-transform: uppercase; color: var(--ink);
+    background: var(--accent); border: 2px solid var(--stroke); border-radius: 99px;
     padding: 3px 10px; margin-bottom: 12px;
   }
   .flow { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 4px; }
-  .step { background: var(--card2); border: 1px solid var(--stroke); border-radius: 14px; padding: 12px; }
+  .step { background: var(--card2); border: 2px solid var(--stroke); border-radius: 14px; padding: 12px; }
   .step b { display: block; font-size: 14px; margin-bottom: 4px; }
   .step span { color: var(--muted); font-size: 12px; }
-  .num { color: var(--accent); font-size: 11px; font-weight: 700; letter-spacing: .1em; }
+  .num { color: var(--text); font-size: 11px; font-weight: 700; letter-spacing: .1em; }
   .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  .stat { background: var(--card2); border: 1px solid var(--stroke); border-radius: 14px; padding: 12px 14px; }
+  .stat { background: var(--card2); border: 2px solid var(--stroke); border-radius: 14px; padding: 12px 14px; }
   .stat span { display: block; color: var(--muted); font-size: 11.5px; letter-spacing: .08em; text-transform: uppercase; }
   .stat b { font-size: 17px; }
-  footer { color: #5f7080; font-size: 12px; text-align: center; margin-top: 28px; }
-  code { background: #0e141b; border: 1px solid var(--stroke); border-radius: 6px; padding: 1px 6px; font-size: 12.5px; }
+  footer { color: var(--muted); font-size: 12px; text-align: center; margin-top: 28px; }
+  code { background: var(--card2); border: 1px solid var(--stroke); border-radius: 6px; padding: 1px 6px; font-size: 12.5px; }
   @media (max-width: 460px) {
     h1 { font-size: 25px; }
     .grid, .flow { grid-template-columns: 1fr; }
@@ -98,7 +99,7 @@
   <div class="card">
     <a class="download" href="Compress-1.4.apk" download>
       <svg width="19" height="19" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-        <path d="M12 3v11m0 0 4.5-4.5M12 14l-4.5-4.5M4 17.5V19a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-1.5" stroke="#04291A" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M12 3v11m0 0 4.5-4.5M12 14l-4.5-4.5M4 17.5V19a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-1.5" stroke="#2B2926" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
       Download APK
     </a>
