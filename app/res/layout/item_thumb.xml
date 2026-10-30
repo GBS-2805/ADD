@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginEnd="8dp">
+
+    <ImageView
+        android:id="@+id/thumbImage"
+        android:layout_width="62dp"
+        android:layout_height="62dp"
+        android:background="@drawable/bg_thumb"
+        android:contentDescription="Selected photo"
+        android:scaleType="centerCrop" />
+
+    <TextView
+        android:id="@+id/removeButton"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_gravity="top|end"
+        android:layout_marginTop="2dp"
+        android:layout_marginEnd="2dp"
+        android:background="@drawable/bg_remove"
+        android:clickable="true"
+        android:contentDescription="Remove photo from selection"
+        android:focusable="true"
+        android:gravity="center"
+        android:includeFontPadding="false"
+        android:text="×"
+        android:textColor="@color/text"
+        android:textSize="13sp"
+        android:textStyle="bold" />
+</FrameLayout>

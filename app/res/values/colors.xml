@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- cream is the stand-in for Pantone P 23-3 U (no published hex). -->
+    <color name="bg">#F2E4C9</color>
+    <color name="card">#F7ECD7</color>
+    <color name="card2">#EADBBD</color>
+    <color name="accent">#2B2926</color>
+    <color name="accentInk">#F7ECD7</color>
+    <color name="text">#2B2926</color>
+    <color name="muted">#4B5563</color>
+    <color name="stroke">#2B2926</color>
+    <color name="shadow">#2B2926</color>
+    <color name="warn">#92400E</color>
+    <color name="warnBg">#FEF3C7</color>
+    <color name="iconBg">#FFB20F</color>
+    <color name="highlight">#FFB20F</color>
+    <color name="badgeInk">#2B2926</color>
+    <color name="dropZone">#FAE9C8</color>
+</resources>

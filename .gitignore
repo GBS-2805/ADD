@@ -1,0 +1,7 @@
+# Build output (rebuild with ./build.sh)
+build/
+dist/
+
+# Python caches from the tools/ renderers
+__pycache__/
+*.pyc
