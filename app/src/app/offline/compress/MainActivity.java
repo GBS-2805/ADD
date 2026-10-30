@@ -40,11 +40,21 @@ public class MainActivity extends Activity {
     /** Hard cap on a batch, matching the queue the strip can hold. */
     private static final int MAX_PHOTOS = 40;
 
+    // Keys for the state that has to survive a theme flip (which recreates us).
+    private static final String STATE_PICKED = "picked";
+    private static final String STATE_DONE_SOURCE = "doneSource";
+    private static final String STATE_DONE_FILE = "doneFile";
+    private static final String STATE_DONE_NAME = "doneName";
+    private static final String STATE_DONE_WIDTH = "doneWidth";
+    private static final String STATE_DONE_HEIGHT = "doneHeight";
+    private static final String STATE_DONE_ORIGINAL = "doneOriginal";
+    private static final String STATE_DONE_COMPRESSED = "doneCompressed";
+
     private static final int[] MAX_DIMENSIONS = {0, 1280, 1920, 2560, 3200, 4096};
     private static final int QUALITY_BASE = 45;
 
     private final List<Uri> picked = new ArrayList<>();
-    private final List<Uri> produced = new ArrayList<>();
+    private final List<Done> done = new ArrayList<>();
     private final ExecutorService pool = Executors.newSingleThreadExecutor();
     private final ExecutorService previews = Executors.newFixedThreadPool(2);
     private final Handler ui = new Handler(Looper.getMainLooper());
@@ -137,6 +147,114 @@ public class MainActivity extends Activity {
         setFormat(Compressor.FORMAT_JPEG);
         setBusy(false);
         updateThemeToggle();
+
+        if (savedInstanceState != null) {
+            restoreState(savedInstanceState);
+        }
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        // A theme flip recreates this activity, so the queue and the finished
+        // files are carried across rather than silently dropped.
+        ArrayList<String> sources = new ArrayList<>();
+        for (Uri uri : picked) {
+            sources.add(uri.toString());
+        }
+        outState.putStringArrayList(STATE_PICKED, sources);
+
+        ArrayList<String> resultSources = new ArrayList<>();
+        ArrayList<String> resultFiles = new ArrayList<>();
+        ArrayList<String> names = new ArrayList<>();
+        ArrayList<Integer> widths = new ArrayList<>();
+        ArrayList<Integer> heights = new ArrayList<>();
+        ArrayList<Long> originals = new ArrayList<>();
+        ArrayList<Long> compressed = new ArrayList<>();
+        for (Done entry : done) {
+            resultSources.add(entry.source.toString());
+            resultFiles.add(entry.compressed.toString());
+            names.add(entry.name);
+            widths.add(entry.width);
+            heights.add(entry.height);
+            originals.add(entry.originalBytes);
+            compressed.add(entry.compressedBytes);
+        }
+        outState.putStringArrayList(STATE_DONE_SOURCE, resultSources);
+        outState.putStringArrayList(STATE_DONE_FILE, resultFiles);
+        outState.putStringArrayList(STATE_DONE_NAME, names);
+        outState.putIntegerArrayList(STATE_DONE_WIDTH, widths);
+        outState.putIntegerArrayList(STATE_DONE_HEIGHT, heights);
+        outState.putSerializable(STATE_DONE_ORIGINAL, originals);
+        outState.putSerializable(STATE_DONE_COMPRESSED, compressed);
+    }
+
+    private void restoreState(Bundle state) {
+        ArrayList<String> sources = state.getStringArrayList(STATE_PICKED);
+        if (sources != null) {
+            for (String value : sources) {
+                Uri uri = value == null ? null : Uri.parse(value);
+                if (uri != null && picked.size() < MAX_PHOTOS && !picked.contains(uri)) {
+                    picked.add(uri);
+                }
+            }
+        }
+
+        ArrayList<String> resultSources = state.getStringArrayList(STATE_DONE_SOURCE);
+        ArrayList<String> resultFiles = state.getStringArrayList(STATE_DONE_FILE);
+        ArrayList<String> names = state.getStringArrayList(STATE_DONE_NAME);
+        ArrayList<Integer> widths = state.getIntegerArrayList(STATE_DONE_WIDTH);
+        ArrayList<Integer> heights = state.getIntegerArrayList(STATE_DONE_HEIGHT);
+        ArrayList<Long> originals = serializableList(state, STATE_DONE_ORIGINAL);
+        ArrayList<Long> compressed = serializableList(state, STATE_DONE_COMPRESSED);
+        if (resultSources != null && resultFiles != null && names != null
+                && widths != null && heights != null && originals != null && compressed != null) {
+            int count = Math.min(names.size(), Math.min(resultSources.size(), resultFiles.size()));
+            for (int i = 0; i < count && i < originals.size() && i < compressed.size(); i++) {
+                done.add(new Done(Uri.parse(resultSources.get(i)), Uri.parse(resultFiles.get(i)),
+                        names.get(i), widths.get(i), heights.get(i),
+                        originals.get(i), compressed.get(i)));
+            }
+        }
+
+        if (!done.isEmpty()) {
+            renderDone();
+            showSummary();
+        }
+        if (!picked.isEmpty()) {
+            updatePickedSummary();
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private static ArrayList<Long> serializableList(Bundle state, String key) {
+        Object value = state.getSerializable(key);
+        return value instanceof ArrayList ? (ArrayList<Long>) value : null;
+    }
+
+    /** Rebuilds the results list from the kept entries, used after a recreate. */
+    private void renderDone() {
+        resultsContainer.removeAllViews();
+        for (final Done entry : done) {
+            final ImageView image = addResultRow(entry, null);
+            previews.execute(() -> {
+                final Bitmap thumb = Compressor.thumbnail(MainActivity.this, entry.compressed, 240);
+                if (thumb != null) {
+                    ui.post(() -> image.setImageBitmap(thumb));
+                }
+            });
+        }
+    }
+
+    /** Totals the kept files back into the summary line. */
+    private void showSummary() {
+        long original = 0;
+        long compressed = 0;
+        for (Done entry : done) {
+            original += entry.originalBytes;
+            compressed += entry.compressedBytes;
+        }
+        finishBatch(original, compressed);
     }
 
     /** Flips the saved palette and rebuilds this screen with it. */
@@ -438,7 +556,7 @@ public class MainActivity extends Activity {
 
         final List<Uri> batch = new ArrayList<>(picked);
         resultsContainer.removeAllViews();
-        produced.clear();
+        done.clear();
         summaryText.setVisibility(View.GONE);
         shareAllButton.setVisibility(View.GONE);
         setBusy(true);
@@ -458,9 +576,12 @@ public class MainActivity extends Activity {
                     final Bitmap thumb = Compressor.thumbnail(MainActivity.this, result.uri, 240);
                     totalOriginal += result.originalBytes;
                     totalCompressed += result.compressedBytes;
+                    final Done entry = new Done(source, result.uri, result.name,
+                            result.width, result.height,
+                            result.originalBytes, result.compressedBytes);
                     ui.post(() -> {
-                        addResultRow(source, result, thumb);
-                        produced.add(result.uri);
+                        done.add(entry);
+                        addResultRow(entry, thumb);
                     });
                 } catch (final Exception failure) {
                     ui.post(() -> addErrorRow(source, failure));
@@ -472,7 +593,7 @@ public class MainActivity extends Activity {
         });
     }
 
-    private void addResultRow(final Uri source, Compressor.Result result, Bitmap thumb) {
+    private ImageView addResultRow(final Done entry, Bitmap thumb) {
         View row = LayoutInflater.from(this).inflate(R.layout.item_result, resultsContainer, false);
         ImageView image = row.findViewById(R.id.thumb);
         TextView name = row.findViewById(R.id.name);
@@ -482,13 +603,13 @@ public class MainActivity extends Activity {
         if (thumb != null) {
             image.setImageBitmap(thumb);
         }
-        name.setText(result.name);
+        name.setText(entry.name);
         sizes.setText(String.format(Locale.US, "%d × %d · %s → %s",
-                result.width, result.height,
-                formatBytes(result.originalBytes), formatBytes(result.compressedBytes)));
+                entry.width, entry.height,
+                formatBytes(entry.originalBytes), formatBytes(entry.compressedBytes)));
 
-        if (result.shrank()) {
-            badge.setText("-" + result.savingsPercent() + "%");
+        if (entry.shrank()) {
+            badge.setText("-" + entry.savingsPercent() + "%");
             badge.setBackgroundResource(R.drawable.bg_pill);
             badge.setTextColor(getColor(R.color.badgeInk));
         } else {
@@ -497,9 +618,10 @@ public class MainActivity extends Activity {
             badge.setTextColor(getColor(R.color.warn));
         }
 
-        row.setOnClickListener(v -> openCompare(source, result));
-        row.findViewById(R.id.shareOne).setOnClickListener(v -> share(result.uri));
+        row.setOnClickListener(v -> openCompare(entry.source, entry));
+        row.findViewById(R.id.shareOne).setOnClickListener(v -> share(entry.compressed));
         resultsContainer.addView(row);
+        return image;
     }
 
     private void addErrorRow(Uri source, Exception failure) {
@@ -520,7 +642,7 @@ public class MainActivity extends Activity {
     private void finishBatch(long originalBytes, long compressedBytes) {
         setBusy(false);
         statusRow.setVisibility(View.GONE);
-        if (produced.isEmpty()) {
+        if (done.isEmpty()) {
             Toast.makeText(this, "Nothing could be compressed", Toast.LENGTH_SHORT).show();
             updatePickedSummary();
             return;
@@ -531,8 +653,8 @@ public class MainActivity extends Activity {
         summaryText.setVisibility(View.VISIBLE);
         shareAllButton.setVisibility(View.VISIBLE);
         summaryText.setText(String.format(Locale.US, "Saved %s · %d%% smaller · %d file%s",
-                formatBytes(saved), percent, produced.size(),
-                produced.size() == 1 ? "" : "s"));
+                formatBytes(saved), percent, done.size(),
+                done.size() == 1 ? "" : "s"));
         updatePickedSummary(false);
     }
 
@@ -602,29 +724,33 @@ public class MainActivity extends Activity {
     }
 
     private void shareAll() {
-        if (produced.isEmpty()) {
+        if (done.isEmpty()) {
             return;
         }
-        if (produced.size() == 1) {
-            share(produced.get(0));
+        if (done.size() == 1) {
+            share(done.get(0).compressed);
             return;
+        }
+        ArrayList<Uri> files = new ArrayList<>();
+        for (Done entry : done) {
+            files.add(entry.compressed);
         }
         Intent send = new Intent(Intent.ACTION_SEND_MULTIPLE);
         send.setType("image/*");
-        send.putParcelableArrayListExtra(Intent.EXTRA_STREAM, new ArrayList<>(produced));
+        send.putParcelableArrayListExtra(Intent.EXTRA_STREAM, files);
         send.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         startActivity(Intent.createChooser(send, "Share compressed photos"));
     }
 
-    private void openCompare(Uri original, Compressor.Result result) {
+    private void openCompare(Uri original, Done entry) {
         Intent intent = new Intent(this, CompareActivity.class);
         intent.putExtra(CompareActivity.EXTRA_BEFORE, original.toString());
-        intent.putExtra(CompareActivity.EXTRA_AFTER, result.uri.toString());
-        intent.putExtra(CompareActivity.EXTRA_NAME, result.name);
-        intent.putExtra(CompareActivity.EXTRA_BYTES_BEFORE, result.originalBytes);
-        intent.putExtra(CompareActivity.EXTRA_BYTES_AFTER, result.compressedBytes);
-        intent.putExtra(CompareActivity.EXTRA_WIDTH, result.width);
-        intent.putExtra(CompareActivity.EXTRA_HEIGHT, result.height);
+        intent.putExtra(CompareActivity.EXTRA_AFTER, entry.compressed.toString());
+        intent.putExtra(CompareActivity.EXTRA_NAME, entry.name);
+        intent.putExtra(CompareActivity.EXTRA_BYTES_BEFORE, entry.originalBytes);
+        intent.putExtra(CompareActivity.EXTRA_BYTES_AFTER, entry.compressedBytes);
+        intent.putExtra(CompareActivity.EXTRA_WIDTH, entry.width);
+        intent.putExtra(CompareActivity.EXTRA_HEIGHT, entry.height);
         startActivity(intent);
     }
 
@@ -644,6 +770,39 @@ public class MainActivity extends Activity {
             return String.format(Locale.US, "%.2f MB", mb);
         }
         return String.format(Locale.US, "%.1f MB", mb);
+    }
+
+    /** One finished file, kept so a recreate can redraw the results list. */
+    private static final class Done {
+        final Uri source;
+        final Uri compressed;
+        final String name;
+        final int width;
+        final int height;
+        final long originalBytes;
+        final long compressedBytes;
+
+        Done(Uri source, Uri compressed, String name, int width, int height,
+             long originalBytes, long compressedBytes) {
+            this.source = source;
+            this.compressed = compressed;
+            this.name = name;
+            this.width = width;
+            this.height = height;
+            this.originalBytes = originalBytes;
+            this.compressedBytes = compressedBytes;
+        }
+
+        boolean shrank() {
+            return compressedBytes < originalBytes;
+        }
+
+        int savingsPercent() {
+            if (originalBytes <= 0) {
+                return 0;
+            }
+            return (int) Math.round(100.0 * (originalBytes - compressedBytes) / originalBytes);
+        }
     }
 
     private abstract static class SimpleSeekListener implements SeekBar.OnSeekBarChangeListener {
