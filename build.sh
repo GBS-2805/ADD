@@ -37,8 +37,8 @@ echo "== aapt2 link =="
     --java "$BUILD/gen" \
     --min-sdk-version 26 \
     --target-sdk-version 35 \
-    --version-code 5 \
-    --version-name 1.4 \
+    --version-code 6 \
+    --version-name 1.5 \
     --auto-add-overlay
 
 echo "== javac =="
@@ -87,8 +87,8 @@ echo "== sign =="
 "$BT/apksigner" sign \
     --ks "$KEYSTORE" --ks-pass pass:android --key-pass pass:android \
     --min-sdk-version 26 \
-    --out "$OUT/Compress-1.4.apk" "$BUILD/aligned.apk"
+    --out "$OUT/Compress-1.5.apk" "$BUILD/aligned.apk"
 
-"$BT/apksigner" verify --print-certs "$OUT/Compress-1.4.apk" | head -4
+"$BT/apksigner" verify --print-certs "$OUT/Compress-1.5.apk" | head -4
 echo "== done =="
-ls -lh "$OUT/Compress-1.4.apk"
+ls -lh "$OUT/Compress-1.5.apk"
