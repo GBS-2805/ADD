@@ -14,6 +14,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.Process;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowInsets;
@@ -237,17 +238,46 @@ public class MainActivity extends Activity {
         }
     }
 
-    /** Brings back the queue that was still there when the app was closed. */
+    /**
+     * Brings back the queue that was still there when the app was closed.
+     *
+     * A read grant can lapse while the app is shut, and a photo we can no longer
+     * open would only ever draw as an empty tile, so those are dropped from the
+     * queue (and from prefs) instead of being restored.
+     */
     private void restoreQueue() {
+        int dropped = 0;
         for (String value : SelectionStore.load(this)) {
-            Uri uri = Uri.parse(value);
-            if (uri != null && picked.size() < MAX_PHOTOS && !picked.contains(uri)) {
-                picked.add(uri);
+            Uri uri = value == null ? null : Uri.parse(value);
+            if (uri == null) {
+                dropped++;
+                continue;
             }
+            if (picked.contains(uri) || picked.size() >= MAX_PHOTOS) {
+                continue;
+            }
+            if (!hasReadAccess(uri)) {
+                dropped++;
+                continue;
+            }
+            picked.add(uri);
+        }
+        if (dropped > 0) {
+            persistQueue();
+            Toast.makeText(this, dropped == 1
+                    ? "1 photo dropped · no longer readable"
+                    : dropped + " photos dropped · no longer readable",
+                    Toast.LENGTH_LONG).show();
         }
         if (!picked.isEmpty()) {
             updatePickedSummary();
         }
+    }
+
+    /** True while this app still holds a read grant for the photo behind the URI. */
+    private boolean hasReadAccess(Uri uri) {
+        return checkUriPermission(uri, Process.myPid(), Process.myUid(),
+                Intent.FLAG_GRANT_READ_URI_PERMISSION) != PackageManager.PERMISSION_DENIED;
     }
 
     private void persistQueue() {
