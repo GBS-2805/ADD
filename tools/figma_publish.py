@@ -28,6 +28,21 @@ RENAME = {
 STATE_NUMBERS = {"19", "20", "21", "22"}
 BUNDLE = "site-figma.svg"
 
+# The deploy budget is 10 MiB for the whole site, and an embedded face costs about
+# 32 KB a file. The published artboards therefore point at the site's own font
+# folder -- same origin, so they still render in Poppins -- while the one-canvas
+# bundle, the file people download and drag into Figma, carries the faces inside it.
+FONT_DEFS = re.compile(r"<defs[^>]*><style[^>]*>.*?</style></defs>", re.S)
+RELATIVE_DEFS = (
+    '<defs><style type="text/css">'
+    + "".join(
+        '@font-face{font-family:"Poppins";font-style:normal;font-weight:%s;'
+        'src:url(../assets/fonts/poppins-%s.woff2) format("woff2")}' % (w, w)
+        for w in ("400", "500", "600")
+    )
+    + "</style></defs>"
+)
+
 
 def describe(path):
     head = path.read_text(errors="replace")[:2500]
@@ -96,7 +111,7 @@ def listing(names):
 <main>
   <h1>Figma hand-off</h1>
   <p class="lede">Twenty-two artboards of this site, and the whole set on one canvas.</p>
-  <p class="note">Each file is the page as Chromium laid it out — text on real baselines, a rect per box, PNG copies of the marks. Poppins 400/500/600 travels inside every file, so it looks the same here as in Figma. Drag one into a Figma document to get editable layers; enable the Poppins family once there and run Frame selection to lock the artboard's size.</p>
+  <p class="note">Each file is the page as Chromium laid it out — text on real baselines, a rect per box, PNG copies of the marks. Poppins is loaded from this site's own font folder, so every file renders in the site's type; the one-canvas file carries the faces inside it, for opening away from the site. Drag one into a Figma document to get editable layers; enable the Poppins family once there and run Frame selection to lock the artboard's size.</p>
   %s<p class="back"><a href="../">← Back to the site</a></p>
 </main>
 </body>
@@ -125,7 +140,11 @@ def main():
     for name in dropped:
         (DST / name).unlink()
     for name, artboard in wanted.items():
-        shutil.copyfile(artboard, DST / name)
+        if name == BUNDLE:
+            shutil.copyfile(artboard, DST / name)
+        else:
+            text = FONT_DEFS.sub(RELATIVE_DEFS, artboard.read_text())
+            (DST / name).write_text(text)
 
     (DST / "index.html").write_text(listing(list(wanted)))
     total = sum(p.stat().st_size for p in DST.glob("*.svg"))
