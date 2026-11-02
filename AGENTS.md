@@ -134,7 +134,12 @@ changes as unverified on device rather than illustrating them.
 - Releases go through `python3 tools/bump_version.py <version> --title "…" --note "…"
   --build`: it moves the catalog, both build cases, every live version label and the
   release-note list, then builds, copies the APK into `docs/`, re-measures size and
-  checksum and rebuilds the catalogs. It reads the history first and refuses to bump
+  checksum and rebuilds the catalogs. Then it serves `docs/` and reruns
+  `tools/render_pages.js`, so the gallery is captured from the pages that quote the new
+  build; `--skip-captures` leaves it alone. `--deploy` ends by running `--deploy-cmd`
+  if given, otherwise printing the `sites_deploy` request with a fresh requestId from
+  `tools/site.json` — there is no deploy CLI in this environment. It reads the history
+  first and refuses to bump
   while any note's label is not the catalog version of the commit that added
   it; `--check-notes` runs that check alone. Never replace version strings by hand — a
   blanket find-and-replace once relabelled twelve releases as 2.2, and the notes only

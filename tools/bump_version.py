@@ -2,7 +2,7 @@
 """Move the Icons release to a new version in one step.
 
     python3 tools/bump_version.py 2.4 --title "All brands in the app" \\
-        --note "One sentence for the release list." --build
+        --note "One sentence for the release list." --build --deploy
 
 In order, it moves:
 
@@ -13,37 +13,52 @@ In order, it moves:
 
 With --build it then runs build.sh, copies the signed APK into docs/, deletes the
 previous one, re-measures its size and SHA-256, writes those into the same pages and
-rebuilds the catalogs, so the shelf agrees with the file it ships.
+rebuilds the catalogs.
 
-Without --build nothing is compiled and the size and checksum keep their old values,
-which leaves the shelf failing `build_catalog.py --check` until the build runs.
---dry-run prints the planned edits and writes nothing.
+Then, unless --skip-captures is given, it starts a static server over docs/ and runs
+tools/render_pages.js against it, so the gallery is recaptured from the pages that
+quote the new build rather than the ones before it. Playwright and the browser libs
+come from tools/render_env.py; the environment is checked before anything is written,
+so a machine without them stops the release instead of leaving it half done.
+
+--deploy ends with the deployment. This machine has no deploy CLI, so the Sites tool
+does the upload: the script prints the exact request to give it, with a fresh
+requestId. Pass --deploy-cmd "<command>" to run a real CLI instead, once one exists.
+
+Without --build nothing is compiled, no captures are taken and the size and checksum
+keep their old values, which leaves the shelf failing `build_catalog.py --check` until
+the build runs. --dry-run prints the planned edits and writes nothing.
 
 The release-note list is never rewritten: a note keeps the version it was written
-for, which is what a blanket find-and-replace destroyed the first time.
+for, and the history is checked before anything moves.
 """
 
 import argparse
 import hashlib
 import json
+import os
 import pathlib
 import re
 import shutil
+import socket
 import subprocess
 import sys
+import time
+import urllib.request
+import uuid
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 CATALOG = ROOT / "tools/catalog.json"
 BUILD = ROOT / "build.sh"
 NOTES = ROOT / "docs/tools/index.html"
+SITE = ROOT / "tools/site.json"
 LABEL_FILES = ["docs/index.html", "docs/download/index.html", "docs/icons/index.html",
                "docs/tools/index.html", "README.md", "AGENTS.md", "tools/render_pages.js"]
 
 # A release-note line carries its own version and must never be bumped.
 NOTE_LINE = re.compile(r"<li><b>Icons [0-9.]+ \u00b7 ")
-VERSION = re.compile(r"^[0-9]+(\.[0-9]+)*$")
-
 NOTE_RE = re.compile(r"<li><b>Icons ([0-9.]+) \u00b7 ([^<]+)</b>")
+VERSION = re.compile(r"^[0-9]+(\.[0-9]+)*$")
 
 
 def notes_on_page():
@@ -156,16 +171,102 @@ def add_note(new, title, note, dry):
     return "note %s above the newest" % ("inserted" if not dry else "would go")
 
 
+def capture_env():
+    """The headless-Chromium environment tools/render_env.py sets up."""
+    env = os.environ.copy()
+    env.setdefault("NODE_PATH", "/tmp/pwshot/node_modules")
+    env.setdefault("PLAYWRIGHT_BROWSERS_PATH", "/tmp/pw")
+    env.setdefault("LD_LIBRARY_PATH",
+                   "/tmp/rootfs/usr/lib/x86_64-linux-gnu:/tmp/rootfs/lib/x86_64-linux-gnu")
+    env.setdefault("FONTCONFIG_FILE", "/tmp/rootfs/fonts.conf")
+    return env
+
+
+def capture_preflight():
+    """Fail before any file moves if the capture toolchain is not here."""
+    node = shutil.which("node")
+    if not node:
+        raise SystemExit("captures need node on PATH; run tools/render_env.py or pass --skip-captures")
+    env = capture_env()
+    probe = subprocess.run([node, "-e", "require('playwright')"], cwd=str(ROOT),
+                           env=env, capture_output=True, text=True)
+    if probe.returncode != 0:
+        lines = (probe.stderr or probe.stdout).strip().splitlines()
+        reason = next((line.strip() for line in lines
+                       if "Cannot find module" in line or "MODULE_NOT_FOUND" in line),
+                      "node cannot load it")
+        raise SystemExit("captures need playwright (python3 tools/render_env.py), or pass "
+                         "--skip-captures\n  " + reason)
+    return node, env
+
+
+def free_port():
+    with socket.socket() as sock:
+        sock.bind(("127.0.0.1", 0))
+        return sock.getsockname()[1]
+
+
+def run_captures(node, env):
+    """Serve docs/ and let tools/render_pages.js recapture the gallery from it."""
+    port = free_port()
+    base = "http://127.0.0.1:%d/" % port
+    server = subprocess.Popen(
+        [sys.executable, "-m", "http.server", str(port), "--directory", str(ROOT / "docs")],
+        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    try:
+        for _ in range(60):
+            try:
+                urllib.request.urlopen(base, timeout=1).read(1)
+                break
+            except Exception:
+                time.sleep(0.2)
+        else:
+            raise SystemExit("the capture server never answered on %s" % base)
+        done = subprocess.run([node, "tools/render_pages.js", base, "artifacts"],
+                              cwd=str(ROOT), env=env, capture_output=True, text=True)
+        if done.returncode != 0:
+            print((done.stdout or "")[-1500:])
+            print((done.stderr or "")[-1500:])
+            raise SystemExit("captures failed: the release is moved, but the gallery still "
+                             "shows the build before it")
+        for line in done.stdout.splitlines():
+            if line.startswith("gallery:") or line.startswith("console errors") \
+                    or "removed orphan" in line:
+                print("  " + line)
+    finally:
+        server.terminate()
+        try:
+            server.wait(timeout=5)
+        except subprocess.TimeoutExpired:
+            server.kill()
+
+
+def deploy_request():
+    site = {}
+    if SITE.exists():
+        site = json.loads(SITE.read_text(encoding="utf-8"))
+    return {"siteId": site.get("siteId", ""),
+            "environment": site.get("environment", "preview"),
+            "requestId": "release-" + uuid.uuid4().hex[:12],
+            "manifestPath": "manifest.json"}
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__,
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("version", nargs="?", help="the new version, e.g. 2.4")
-    parser.add_argument("--check-notes", action="store_true",
-                        help="only verify the release notes against the history, change nothing")
     parser.add_argument("--title", help="release-note title, after the version")
     parser.add_argument("--note", help="release-note sentence")
     parser.add_argument("--build", action="store_true",
                         help="build and sign the APK, copy it into docs/ and re-measure it")
+    parser.add_argument("--skip-captures", action="store_true",
+                        help="leave docs/renders/ alone even when building")
+    parser.add_argument("--deploy", action="store_true",
+                        help="end with the deployment request, or run --deploy-cmd")
+    parser.add_argument("--deploy-cmd",
+                        help="a deploy CLI to run instead of printing the Sites request")
+    parser.add_argument("--check-notes", action="store_true",
+                        help="only verify the release notes against the history, change nothing")
     parser.add_argument("--dry-run", action="store_true", help="print the edits, write nothing")
     args = parser.parse_args()
 
@@ -178,11 +279,16 @@ def main():
         raise SystemExit("version must look like 2.4, not %r" % new)
     if bool(args.title) != bool(args.note):
         raise SystemExit("--title and --note go together")
+    if (args.deploy or args.deploy_cmd) and not args.build:
+        raise SystemExit("--deploy needs --build, so the shelf quotes the APK it ships")
 
     # A note whose label is not the version it shipped in is a broken history, and
     # bumping on top of it would only bury the mistake.
     if report_notes():
         raise SystemExit("refusing to bump: give those notes their real versions first")
+
+    captures = args.build and not args.skip_captures
+    toolchain = capture_preflight() if captures else None
 
     catalog = json.loads(CATALOG.read_text(encoding="utf-8"))
     icons = next(tool for tool in catalog["tools"] if tool["id"] == "icons")
@@ -221,6 +327,8 @@ def main():
     if dry:
         print("dry run: nothing written; %s and %s would be replaced once the APK is built"
               % (old_size, old_sha[:10]))
+        if captures:
+            print("         and docs/renders/ would be recaptured from the new pages")
         return 0
 
     if not args.build:
@@ -248,11 +356,28 @@ def main():
         if hits:
             print("  %-30s %d measurement(s)" % (name, hits))
 
-    for script, extra in (("tools/build_catalog.py", []), ("tools/build_catalog.py", ["--check"])):
-        subprocess.run([sys.executable, str(ROOT / script), *extra], cwd=ROOT, check=True)
+    for extra in ([], ["--check"]):
+        subprocess.run([sys.executable, str(ROOT / "tools/build_catalog.py"), *extra],
+                       cwd=ROOT, check=True)
+
+    if captures:
+        print("capturing...")
+        node, env = toolchain
+        run_captures(node, env)
+    else:
+        print("captures skipped: docs/renders/ still shows %s" % old)
+
+    if args.deploy:
+        if args.deploy_cmd:
+            print("deploying with: %s" % args.deploy_cmd)
+            subprocess.run(args.deploy_cmd, shell=True, cwd=ROOT, check=True)
+            print("  deploy command finished")
+        else:
+            print("deploy: this machine has no deploy CLI, so the preview goes out through the")
+            print("        Sites tool. Give it this request:")
+            print(json.dumps(deploy_request(), indent=2))
+
     print("Icons %s is in docs/ and the shelf agrees with it" % new)
-    print("next: node tools/render_pages.js <baseUrl> artifacts  (the captures still show %s)" % old)
-    print("      deploy the preview, then commit")
     return 0
 
 
