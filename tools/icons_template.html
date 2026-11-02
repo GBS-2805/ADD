@@ -109,11 +109,11 @@
   <div class="panel">
     <h2>Landed in the box instead of the clipboard?</h2>
     <textarea id="snippet" readonly spellcheck="false" aria-label="Copied SVG markup"></textarea>
-    <p class="hint">Every copy also lands here, so you can grab it by hand if your browser blocks the clipboard. The markup uses <code>stroke="currentColor"</code>, so the icon takes the colour of the text it sits in — set <code>stroke-width</code> to 1.5 if 2 looks heavy at small sizes.</p>
+    <p class="hint">Every copy also lands here, so you can grab it by hand if your browser blocks the clipboard. The glyphs use <code>fill="currentColor"</code>, so an icon takes the colour of the text it sits in — drop it inside a button and it inherits the button colour.</p>
   </div>
 
   <footer>
-    <p>Icons: <b>Lucide</b>, ISC licence — free for commercial use, modification and redistribution, with the licence notice kept. None of this is Lineicons artwork, and none of it is behind a plan.</p>
+    <p>Icons: the free <b>Lineicons</b> set from <code>LineiconsHQ/Lineicons</code>, MIT licence — free for personal and commercial use. Only the SVGs the repository publishes are here; the paid Pro set on lineicons.com is neither included nor copied.</p>
     <p><a href="../">← Compress for Android</a></p>
   </footer>
 </div>
@@ -128,9 +128,7 @@ const counter = document.getElementById("count");
 const empty = document.getElementById("empty");
 
 function markup(item) {
-  return '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"'
-    + ' fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"'
-    + ' stroke-linejoin="round">' + item.body + "</svg>";
+  return '<svg xmlns="http://www.w3.org/2000/svg" ' + item.attrs + ">" + item.body + "</svg>";
 }
 
 async function copy(item, card, label) {

@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
-"""Build docs/icons/index.html: a copy-to-clipboard media icon page.
+"""Build docs/icons/index.html from the free Lineicons SVG set.
 
-Lineicons' Pro set is paid and its free tier is smaller than it looks, so
-this uses Lucide instead - the same 24x24 stroke style, ISC licensed, so
-every icon can be copied, edited and shipped without a plan.
+Lineicons publishes 600+ icons under MIT in the LineiconsHQ/Lineicons repo.
+The Pro set on lineicons.com is a paid product, so only the free SVGs from
+that repository are used here. Each glyph is recoloured to currentColor so
+it inherits the surrounding text colour, and keeps its own viewBox.
 
-Re-run to refresh the icon list:  python3 tools/fetch_icons.py
+Re-run to refresh:  python3 tools/fetch_icons.py
 """
 
 import json
@@ -18,64 +19,91 @@ import urllib.request
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 TEMPLATE = ROOT / "tools/icons_template.html"
 OUTPUT = ROOT / "docs/icons/index.html"
-# jsDelivr keeps the published file names; the repo's raw paths have moved a
-# few icons around, so it is only the fallback.
-SOURCES = (
-    "https://cdn.jsdelivr.net/npm/lucide-static@latest/icons/%s.svg",
-    "https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/%s.svg",
-)
+SOURCE = ("https://cdn.jsdelivr.net/gh/LineiconsHQ/Lineicons@main"
+          "/assets/svgs/regular/%s.svg")
 
 NAMES = [
-    "image", "images", "camera", "camera-off", "video", "video-off", "film",
-    "clapperboard", "frame", "gallery-horizontal", "gallery-vertical",
-    "picture-in-picture", "cast", "airplay", "maximize",
-    "music", "music-2", "music-3", "music-4", "audio-lines", "audio-waveform",
-    "list-music", "library", "disc", "disc-3", "cassette-tape",
-    "mic", "mic-2", "mic-vocal", "headphones", "radio", "radio-tower",
-    "podcast", "captions",
-    "play", "pause", "circle-play", "circle-pause", "skip-back", "skip-forward",
-    "rewind", "fast-forward", "volume", "volume-1", "volume-2", "volume-x",
-    "tv", "tv-minimal", "monitor-play",
+    # pictures and camera
+    "photos", "gallery", "camera-1", "camera-movie-1", "crop-2",
+    # playback
+    "play", "pause", "next-step-2", "previous-step-2", "shuffle",
+    # sound
+    "music", "beat", "watch-beat-1", "microphone-1", "hand-mic",
+    "headphone-1", "volume-off", "volume-mute", "volume-low", "volume-1",
+    "volume-high", "tower-broadcast-1", "rss-right",
+    # screens
+    "monitor", "monitor-mac", "chromecast", "facetime",
+    # streaming marks
+    "spotify", "apple-music", "youtube-music", "soundcloud", "youtube",
+    "netflix", "twitch", "vimeo", "tiktok",
 ]
+
+COLOR = re.compile(r'(fill|stroke)="#[0-9a-fA-F]{3,8}"')
 
 
 def fetch(name):
-    """Returns the inner markup of one icon, or None when no mirror has it."""
-    for source in SOURCES:
-        for attempt in range(3):
-            try:
-                raw = urllib.request.urlopen(source % name, timeout=20).read().decode("utf-8")
-            except urllib.error.HTTPError as error:
-                if error.code == 404:
-                    break  # missing here, so try the next mirror
-                time.sleep(1 + attempt)
-                continue
-            except Exception:
-                time.sleep(1 + attempt)
-                continue
-            match = re.search(r"<svg[^>]*>(.*)</svg>", raw, re.S)
-            if match:
-                return re.sub(r"\s*\n\s*", "", match.group(1).strip())
-            break
+    """The raw SVG text, or None when the icon is not in the free set."""
+    for attempt in range(3):
+        try:
+            return urllib.request.urlopen(SOURCE % name, timeout=20).read().decode("utf-8")
+        except urllib.error.HTTPError as error:
+            if error.code == 404:
+                return None
+            time.sleep(1 + attempt)
+        except Exception:
+            time.sleep(1 + attempt)
     return None
 
 
+def prepare(raw):
+    """Returns (root attributes, body) with every hard-coded colour removed."""
+    head = re.search(r"<svg([^>]*)>", raw, re.S)
+    inner = re.search(r"<svg[^>]*>(.*)</svg>", raw, re.S)
+    if not head or not inner:
+        return None
+
+    def attr(key, default=""):
+        found = re.search(r'%s="([^"]*)"' % key, head.group(1))
+        return found.group(1) if found else default
+
+    body = COLOR.sub(r'\1="currentColor"', inner.group(1))
+    body = re.sub(r"\s*\n\s*", "", body.strip())
+
+    # Lineicons draws with filled paths, so the root keeps fill="none" and the
+    # colour arrives on the children. A stroke-drawn file keeps its stroke.
+    parts = ['width="%s"' % attr("width", "24"),
+             'height="%s"' % attr("height", "24"),
+             'viewBox="%s"' % attr("viewBox", "0 0 24 24")]
+    if "currentColor" not in body:
+        parts.append('fill="currentColor"')
+    else:
+        parts.append('fill="none"')
+    if 'stroke="' in head.group(1) or 'stroke="currentColor"' in body:
+        parts.append('stroke="currentColor"')
+    return " ".join(parts), body
+
+
 def main():
-    items, missing = [], []
+    icons, missing = [], []
     for name in NAMES:
-        body = fetch(name)
-        if body is None:
+        raw = fetch(name)
+        if raw is None:
             missing.append(name)
             continue
-        items.append({"name": name, "body": body})
+        prepared = prepare(raw)
+        if prepared is None:
+            missing.append(name)
+            continue
+        attrs, body = prepared
+        icons.append({"name": name, "attrs": attrs, "body": body})
 
     page = TEMPLATE.read_text(encoding="utf-8")
-    page = page.replace("__COUNT__", str(len(items)))
-    page = page.replace("__ICONS__", json.dumps(items, ensure_ascii=False))
+    page = page.replace("__COUNT__", str(len(icons)))
+    page = page.replace("__ICONS__", json.dumps(icons, ensure_ascii=False))
     OUTPUT.parent.mkdir(parents=True, exist_ok=True)
     OUTPUT.write_text(page, encoding="utf-8")
 
-    print("icons: %d" % len(items))
+    print("icons: %d" % len(icons))
     print("missing: %s" % (", ".join(missing) if missing else "none"))
     print("wrote %s (%d bytes)" % (OUTPUT.relative_to(ROOT), OUTPUT.stat().st_size))
 
