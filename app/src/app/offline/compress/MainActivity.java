@@ -87,7 +87,6 @@ public class MainActivity extends Activity {
     private TextView summaryText;
     private TextView shareAllButton;
     private TextView clearAllButton;
-    private TextView themeToggle;
     private LinearLayout siteLink;
     private LinearLayout statusRow;
     private LinearLayout resultsContainer;
@@ -120,7 +119,6 @@ public class MainActivity extends Activity {
         summaryText = findViewById(R.id.summaryText);
         shareAllButton = findViewById(R.id.shareAll);
         clearAllButton = findViewById(R.id.clearAll);
-        themeToggle = findViewById(R.id.themeToggle);
         siteLink = findViewById(R.id.siteLink);
         resultsContainer = findViewById(R.id.results);
         pickedStrip = findViewById(R.id.pickedStrip);
@@ -141,7 +139,6 @@ public class MainActivity extends Activity {
                 restoreSelection();
             }
         });
-        themeToggle.setOnClickListener(v -> toggleTheme());
         siteLink.setOnClickListener(v -> openSite());
         formatJpeg.setOnClickListener(v -> setFormat(Compressor.FORMAT_JPEG));
         formatWebp.setOnClickListener(v -> setFormat(Compressor.FORMAT_WEBP));
@@ -163,7 +160,6 @@ public class MainActivity extends Activity {
         updateSizeLabel();
         setFormat(Compressor.FORMAT_JPEG);
         setBusy(false);
-        updateThemeToggle();
 
         if (savedInstanceState != null) {
             restoreState(savedInstanceState);
@@ -320,16 +316,6 @@ public class MainActivity extends Activity {
             compressed += entry.compressedBytes;
         }
         finishBatch(original, compressed);
-    }
-
-    /** Flips the saved palette and rebuilds this screen with it. */
-    private void toggleTheme() {
-        ThemePrefs.setDark(this, !ThemePrefs.isDark(this));
-        recreate();
-    }
-
-    private void updateThemeToggle() {
-        themeToggle.setText(ThemePrefs.isDark(this) ? "DARK ON" : "DARK OFF");
     }
 
     /**

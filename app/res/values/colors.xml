@@ -1,19 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- cream is the stand-in for Pantone P 23-3 U (no published hex). -->
-    <color name="bg">#F2E4C9</color>
-    <color name="card">#F7ECD7</color>
-    <color name="card2">#EADBBD</color>
-    <color name="accent">#2B2926</color>
-    <color name="accentInk">#F7ECD7</color>
-    <color name="text">#2B2926</color>
-    <color name="muted">#4B5563</color>
-    <color name="stroke">#2B2926</color>
-    <color name="shadow">#2B2926</color>
-    <color name="warn">#92400E</color>
-    <color name="warnBg">#FEF3C7</color>
-    <color name="iconBg">#FFB20F</color>
-    <color name="highlight">#FFB20F</color>
-    <color name="badgeInk">#2B2926</color>
-    <color name="dropZone">#FAE9C8</color>
+    <!-- Palette taken from frame 6-27: a light band on an indigo field.
+         Names are kept from the previous theme so no Java has to change. -->
+    <color name="bg">#3F4E96</color>          <!-- the field -->
+    <color name="band">#D9D9D9</color>       <!-- the band, and every call to action -->
+    <color name="ink">#000000</color>        <!-- text on the band -->
+    <color name="text">#D9D9D9</color>       <!-- text on the field -->
+    <color name="muted">#A7ADC6</color>
+    <color name="hairline">#6772A7</color>
+    <color name="panel">#47569C</color>
+    <color name="panel2">#4D5CA4</color>
+
+    <color name="card">#47569C</color>
+    <color name="card2">#4D5CA4</color>
+    <color name="accent">#D9D9D9</color>
+    <color name="accentInk">#000000</color>
+    <color name="stroke">#6772A7</color>
+    <color name="shadow">#00000000</color>    <!-- flat surfaces: nothing casts -->
+    <color name="iconBg">#D9D9D9</color>
+    <color name="highlight">#D9D9D9</color>
+    <color name="badgeInk">#000000</color>
+    <color name="dropZone">#47569C</color>
+
+    <!-- The one functional exception: a warning has to read as a warning. -->
+    <color name="warn">#FFC98A</color>
+    <color name="warnBg">#4D5CA4</color>
 </resources>

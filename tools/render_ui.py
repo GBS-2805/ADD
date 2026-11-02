@@ -28,32 +28,26 @@ from PIL import Image, ImageDraw, ImageFilter, ImageFont
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ART = os.path.join(ROOT, "artifacts")
-FONT_DIR = os.path.join(ROOT, "tools", "fonts")
+FONT_DIR = os.path.join(ROOT, "app", "res", "font")
+GLYPH_FALLBACK = os.path.join(ROOT, "tools", "fonts", "DejaVuSans.ttf")
 LOGO_MARK = os.path.join(ROOT, "tools", "logo-mark.png")
 
 # Galaxy Z Flip 7 inner display: 1080 x 2520 px at ~2.625x -> 411 x 960 dp
 DP_W, DP_H = 411, 960
 S = 2.625
 
-# Mirrors app/res/values/colors.xml and app/res/values-night/colors.xml.
+# Mirrors app/res/values/colors.xml: a light band on an indigo field.
+# There is one palette now, so both names resolve to the same tokens.
 LIGHT = {
-    "bg": (0xF2, 0xE4, 0xC9), "card": (0xF7, 0xEC, 0xD7), "card2": (0xEA, 0xDB, 0xBD),
-    "ink": (0x2B, 0x29, 0x26), "muted": (0x4B, 0x55, 0x63),
-    "stroke": (0x2B, 0x29, 0x26),
-    "primary": (0x2B, 0x29, 0x26), "primary_ink": (0xF7, 0xEC, 0xD7),
-    "badge_ink": (0x2B, 0x29, 0x26), "highlight": (0xFF, 0xB2, 0x0F),
-    "dropzone": (0xFA, 0xE9, 0xC8), "warn_bg": (0xFE, 0xF3, 0xC7),
-    "warn_ink": (0x92, 0x40, 0x0E), "track": (0xDE, 0xD0, 0xB2),
+    "bg": (0x3F, 0x4E, 0x96), "card": (0x47, 0x56, 0x9C), "card2": (0x4D, 0x5C, 0xA4),
+    "ink": (0xD9, 0xD9, 0xD9), "muted": (0xA7, 0xAD, 0xC6),
+    "stroke": (0x67, 0x72, 0xA7),
+    "primary": (0xD9, 0xD9, 0xD9), "primary_ink": (0x00, 0x00, 0x00),
+    "badge_ink": (0x00, 0x00, 0x00), "highlight": (0xD9, 0xD9, 0xD9),
+    "dropzone": (0x47, 0x56, 0x9C), "warn_bg": (0x4D, 0x5C, 0xA4),
+    "warn_ink": (0xFF, 0xC9, 0x8A), "track": (0x67, 0x72, 0xA7),
 }
-DARK = {
-    "bg": (0x2B, 0x29, 0x26), "card": (0x37, 0x33, 0x2E), "card2": (0x44, 0x3F, 0x39),
-    "ink": (0xF7, 0xEC, 0xD7), "muted": (0xA9, 0xA0, 0x93),
-    "stroke": (0xF7, 0xEC, 0xD7),
-    "primary": (0xFF, 0xB2, 0x0F), "primary_ink": (0x2B, 0x29, 0x26),
-    "badge_ink": (0x2B, 0x29, 0x26), "highlight": (0xFF, 0xB2, 0x0F),
-    "dropzone": (0x3A, 0x2F, 0x1E), "warn_bg": (0x42, 0x20, 0x06),
-    "warn_ink": (0xFC, 0xD3, 0x4D), "track": (0x55, 0x4F, 0x47),
-}
+DARK = dict(LIGHT)
 
 BG = CARD = CARD2 = INK = MUTED = STROKE = (0, 0, 0)
 PRIMARY = PRIMARY_INK = BADGE_INK = (0, 0, 0)
@@ -71,9 +65,9 @@ def use_palette(dark):
     HIGHLIGHT, DROPZONE = p["highlight"], p["dropzone"]
     WARN_BG, WARN_INK, TRACK = p["warn_bg"], p["warn_ink"], p["track"]
 
-REG, MED, BOLD = "Roboto-Regular.ttf", "Roboto-Medium.ttf", "Roboto-Bold.ttf"
-FALLBACK = {REG: "DejaVuSans.ttf", MED: "DejaVuSans-Bold.ttf", BOLD: "DejaVuSans-Bold.ttf"}
-MONO = "DejaVuSansMono.ttf"
+REG, MED, BOLD = "poppins_regular.ttf", "poppins_medium.ttf", "poppins_semibold.ttf"
+FALLBACK = {}
+MONO = "poppins_regular.ttf"
 
 
 def px(dp):
@@ -133,8 +127,7 @@ def draw_mixed(draw, xy, text, fnt, fill, fallback=None):
     for ch in text:
         f = fnt
         if ch in FALLBACK_CHARS:
-            f = fallback or ImageFont.truetype(os.path.join(FONT_DIR, "DejaVuSans.ttf"),
-                                               fnt.size)
+            f = fallback or ImageFont.truetype(GLYPH_FALLBACK, fnt.size)
         draw.text((x, y), ch, font=f, fill=fill, anchor="la")
         x += f.getlength(ch)
     return x
@@ -167,19 +160,17 @@ def wrap(text, fnt, max_w):
     return lines
 
 
-def card_box(draw, box, offset=6, border=4, fill=CARD):
-    """White card: hard offset shadow, thick black border, square corners."""
+def card_box(draw, box, offset=0, border=1, fill=CARD):
+    """Flat panel: no shadow, no border, square corners."""
     x0, y0, x1, y1 = box
-    draw.rectangle([x0 + px(offset), y0 + px(offset), x1 + px(offset), y1 + px(offset)],
-                   fill=STROKE)
-    draw.rectangle([x0, y0, x1, y1], fill=fill, outline=STROKE, width=int(px(border)))
+    draw.rectangle([x0, y0, x1, y1], fill=fill)
 
 
-def framed_box(draw, box, offset=4, border=3, fill=CARD):
+def framed_box(draw, box, offset=0, border=1, fill=CARD):
+    """Outlined block: a single hairline, used for ghost buttons and rows."""
     x0, y0, x1, y1 = box
-    draw.rectangle([x0 + px(offset), y0 + px(offset), x1 + px(offset), y1 + px(offset)],
-                   fill=STROKE)
-    draw.rectangle([x0, y0, x1, y1], fill=fill, outline=STROKE, width=int(px(border)))
+    draw.rectangle([x0, y0, x1, y1], fill=fill,
+                   outline=HIGHLIGHT if fill == BG else STROKE, width=max(1, int(px(1.5))))
 
 
 def status_bar(draw, w):
@@ -258,11 +249,10 @@ def square_crop(img, size):
 def seekbar(draw, x, cy, w, fraction):
     track_h = px(4)
     draw.rectangle([x, cy - track_h / 2, x + w, cy + track_h / 2], fill=TRACK)
-    draw.rectangle([x, cy - track_h / 2, x + w * fraction, cy + track_h / 2], fill=INK)
+    draw.rectangle([x, cy - track_h / 2, x + w * fraction, cy + track_h / 2], fill=HIGHLIGHT)
     tx = x + w * fraction
-    draw.ellipse([tx - px(9), cy - px(9), tx + px(9), cy + px(9)], fill=CARD,
-                 outline=INK, width=int(px(2.5)))
-    draw.ellipse([tx - px(5), cy - px(5), tx + px(5), cy + px(5)], fill=INK)
+    draw.ellipse([tx - px(9), cy - px(9), tx + px(9), cy + px(9)], fill=HIGHLIGHT)
+    draw.ellipse([tx - px(4.5), cy - px(4.5), tx + px(4.5), cy + px(4.5)], fill=BG)
 
 
 def segment(draw, x, y, w, h, labels, selected, f_on, f_off):
@@ -296,8 +286,7 @@ def chip(draw, right, cy, label, fnt, fill=None, pad_w=6, h=18):
     # Resolved at call time: the palette is swapped per screen.
     fill = HIGHLIGHT if fill is None else fill
     w = fnt.getlength(label) + px(pad_w) * 2
-    draw.rectangle([right - w, cy - px(h) / 2, right, cy + px(h) / 2],
-                   fill=fill, outline=INK, width=int(px(1)))
+    draw.rectangle([right - w, cy - px(h) / 2, right, cy + px(h) / 2], fill=fill)
     draw.text((right - w / 2, cy), label, font=fnt, fill=BADGE_INK, anchor="mm")
     return w
 
@@ -307,7 +296,7 @@ def badge(draw, right, cy, label, warn=False):
     h = px(22)
     w = f.getlength(label) + px(16)
     draw.rectangle([right - w, cy - h / 2, right, cy + h / 2],
-                   fill=WARN_BG if warn else HIGHLIGHT, outline=INK, width=int(px(2)))
+                   fill=WARN_BG if warn else HIGHLIGHT)
     draw.text((right - w / 2, cy), label, font=f,
               fill=WARN_INK if warn else BADGE_INK, anchor="mm")
     return w
@@ -325,17 +314,15 @@ def share_glyph(draw, cx, cy, size_dp=16):
 
 def plus_circle(draw, cx, cy, d_dp=46):
     r = px(d_dp) / 2
-    draw.ellipse([cx - r + px(3), cy - r + px(3), cx + r + px(3), cy + r + px(3)], fill=INK)
-    draw.ellipse([cx - r, cy - r, cx + r, cy + r], fill=CARD, outline=INK,
-                 width=int(px(4)))
-    draw.text((cx, cy - px(1)), "+", font=font(BOLD, 22), fill=INK, anchor="mm")
+    draw.ellipse([cx - r, cy - r, cx + r, cy + r], fill=(0x5A, 0x69, 0xAE))
+    draw.text((cx, cy - px(1)), "+", font=font(MED, 22), fill=INK, anchor="mm")
 
 
-def section_header(od, x, y, w, title, size=17):
+def section_header(od, x, y, w, title, size=21):
     od.text((x, y), title, font=font(BOLD, size), fill=INK, anchor="la")
-    rule_y = y + px(size + 5)
-    od.rectangle([x, rule_y, x + w, rule_y + px(4)], fill=INK)
-    return rule_y + px(4) + px(12)
+    rule_y = y + px(size + 6)
+    od.rectangle([x, rule_y, x + w, rule_y + px(1)], fill=STROKE)
+    return rule_y + px(1) + px(12)
 
 
 def render_main(selected, results=None, out="main.png", scroll_dp=None, dark=False):
@@ -359,20 +346,11 @@ def render_main(selected, results=None, out="main.png", scroll_dp=None, dark=Fal
     inner_w = (w - pad) - inner - px(14)
 
     y = px(24) + px(16)
-    od.text((pad, y), "IMAGE COMPRESSOR", font=font(BOLD, 25), fill=INK, anchor="la")
+    od.text((pad, y), "Compress", font=font(BOLD, 30), fill=INK, anchor="la")
 
-    tg_f = mono(9.5)
-    tg_label = "DARK ON" if dark else "DARK OFF"
-    tg_w = tg_f.getlength(tg_label) + px(16)
-    tg_h = px(26)
-    framed_box(d, [w - pad - tg_w, y - px(4), w - pad, y - px(4) + tg_h],
-               offset=3, border=3, fill=CARD)
-    od.text((w - pad - tg_w / 2, y - px(4) + tg_h / 2), tg_label, font=tg_f, fill=INK,
-            anchor="mm")
-
-    y += px(32)
-    od.text((pad, y), "BATCH COMPRESS \u2022 100% OFFLINE \u2022 NO UPLOADS",
-            font=mono(10.5), fill=MUTED, anchor="la")
+    y += px(42)
+    od.text((pad, y), "Batch compress \u00b7 100% offline \u00b7 no uploads",
+            font=font(REG, 12.5), fill=MUTED, anchor="la")
     y += px(18)
 
     cards = []      # (top, bottom) of each white card
@@ -387,19 +365,19 @@ def render_main(selected, results=None, out="main.png", scroll_dp=None, dark=Fal
     dz_h = px(16 + 46 + 12 + 20 + 8 + 18 + 16)
     dz_box = [inner, y, w - pad - px(14), y + dz_h]
     cx = (dz_box[0] + dz_box[2]) / 2
-    od.rectangle(dz_box, outline=INK, width=int(px(4)), fill=DROPZONE)
+    od.rectangle(dz_box, outline=HIGHLIGHT, width=int(px(1.5)), fill=DROPZONE)
     # dashed outline on top of the fill
     dash, gap = px(9), px(5)
     x0, y0, x1, y1 = dz_box
     xx = x0
     while xx < x1:
-        od.line([(xx, y0), (min(xx + dash, x1), y0)], fill=INK, width=int(px(4)))
-        od.line([(xx, y1), (min(xx + dash, x1), y1)], fill=INK, width=int(px(4)))
+        od.line([(xx, y0), (min(xx + dash, x1), y0)], fill=HIGHLIGHT, width=int(px(1.5)))
+        od.line([(xx, y1), (min(xx + dash, x1), y1)], fill=HIGHLIGHT, width=int(px(1.5)))
         xx += dash + gap
     yy = y0
     while yy < y1:
-        od.line([(x0, yy), (x0, min(yy + dash, y1))], fill=INK, width=int(px(4)))
-        od.line([(x1, yy), (x1, min(yy + dash, y1))], fill=INK, width=int(px(4)))
+        od.line([(x0, yy), (x0, min(yy + dash, y1))], fill=HIGHLIGHT, width=int(px(1.5)))
+        od.line([(x1, yy), (x1, min(yy + dash, y1))], fill=HIGHLIGHT, width=int(px(1.5)))
         yy += dash + gap
 
     plus_circle(od, cx, y + px(16) + px(23))
@@ -421,9 +399,9 @@ def render_main(selected, results=None, out="main.png", scroll_dp=None, dark=Fal
             photos.append(([tx, y, tx + tile, y + tile], thumb))
             photos.append((None, [tx, y, tx + tile, y + tile]))  # border marker
             bx, by = tx + tile - px(13), y + px(13)
-            od.ellipse([bx - px(12), by - px(12), bx + px(12), by + px(12)],
-                       fill=CARD, outline=INK, width=int(px(2)))
-            od.text((bx, by - px(1)), "\u00d7", font=font(BOLD, 13), fill=INK, anchor="mm")
+            od.ellipse([bx - px(12), by - px(12), bx + px(12), by + px(12)], fill=HIGHLIGHT)
+            od.text((bx, by - px(1)), "\u00d7", font=font(BOLD, 13), fill=BADGE_INK,
+                    anchor="mm")
         y += tile
 
         y += px(10)
@@ -440,7 +418,7 @@ def render_main(selected, results=None, out="main.png", scroll_dp=None, dark=Fal
     cards.append((card_top, y))
 
     # ---- 2. OUTPUT FORMAT ----------------------------------------------
-    y += px(18)
+    y += px(13)
     card_top = y
     y += px(14)
     y = section_header(od, inner, y, inner_w, "2. OUTPUT FORMAT")
@@ -455,7 +433,7 @@ def render_main(selected, results=None, out="main.png", scroll_dp=None, dark=Fal
     cards.append((card_top, y))
 
     # ---- 3. COMPRESSION ------------------------------------------------
-    y += px(18)
+    y += px(13)
     card_top = y
     y += px(14)
     y = section_header(od, inner, y, inner_w, "3. COMPRESSION")
@@ -472,7 +450,7 @@ def render_main(selected, results=None, out="main.png", scroll_dp=None, dark=Fal
     cards.append((card_top, y))
 
     # ---- 4. RESIZE -----------------------------------------------------
-    y += px(18)
+    y += px(13)
     card_top = y
     y += px(14)
     y = section_header(od, inner, y, inner_w, "4. RESIZE (OPTIONAL)")
@@ -488,7 +466,7 @@ def render_main(selected, results=None, out="main.png", scroll_dp=None, dark=Fal
     cards.append((card_top, y))
 
     # ---- actions -------------------------------------------------------
-    y += px(20)
+    y += px(16)
     ghost_button(d, [pad, y, w - pad, y + px(47)], "PREVIEW BEFORE COMPRESSING",
                  font(BOLD, 13.5))
     y += px(47 + 14)
@@ -509,7 +487,7 @@ def render_main(selected, results=None, out="main.png", scroll_dp=None, dark=Fal
             thumb = square_crop(sample_photo(420, 420, row["seed"]), int(px(54)))
             img.paste(thumb, (int(pad + px(12)), int(y + px(12))))
             d.rectangle([pad + px(12), y + px(12), pad + px(12) + px(54),
-                         y + px(12) + px(54)], outline=INK, width=int(px(3)))
+                         y + px(12) + px(54)], outline=STROKE, width=1)
             text_x = pad + px(12) + px(54) + px(12)
             share_cx = w - pad - px(10) - px(16)
             badge_right = share_cx - px(24)
@@ -524,7 +502,7 @@ def render_main(selected, results=None, out="main.png", scroll_dp=None, dark=Fal
             badge(od, badge_right, y + row_h / 2, row["badge"])
             d.ellipse([share_cx - px(16), y + row_h / 2 - px(16),
                        share_cx + px(16), y + row_h / 2 + px(16)],
-                      fill=CARD, outline=INK, width=int(px(3)))
+                      fill=CARD, outline=STROKE, width=1)
             share_glyph(od, share_cx, y + row_h / 2)
             y += row_h + px(14)
         y += px(4)
@@ -558,7 +536,7 @@ def render_main(selected, results=None, out="main.png", scroll_dp=None, dark=Fal
         if box is not None:
             continue
         x0, y0, x1, y1 = payload
-        d.rectangle([x0, y0, x1, y1], outline=INK, width=int(px(3)))
+        d.rectangle([x0, y0, x1, y1], outline=STROKE, width=1)
     img.paste(overlay, (0, 0), overlay)
 
     if tall or scroll_dp:
@@ -616,14 +594,13 @@ def render_compare(out="preview.png", preview=True, fraction=0.56, dark=False):
     # frame first, then the photo inside it
     card_box(d, frame, offset=6, border=4, fill=CARD)
     img.paste(composite, (ox, oy))
-    d.rectangle([ox, oy, ox + fw, oy + fh], outline=INK, width=int(px(3)))
+    d.rectangle([ox, oy, ox + fw, oy + fh], outline=STROKE, width=1)
 
     sx = ox + split
-    d.line([(sx, oy), (sx, oy + fh)], fill=CARD, width=max(1, int(px(3))))
-    d.line([(sx, oy), (sx, oy + fh)], fill=INK, width=max(1, int(px(1))))
+    d.line([(sx, oy), (sx, oy + fh)], fill=BG, width=max(1, int(px(2))))
+    d.line([(sx, oy), (sx, oy + fh)], fill=HIGHLIGHT, width=max(1, int(px(1))))
     hcy = oy + fh / 2
-    d.ellipse([sx - px(17), hcy - px(17), sx + px(17), hcy + px(17)], fill=CARD,
-              outline=INK, width=int(px(3)))
+    d.ellipse([sx - px(17), hcy - px(17), sx + px(17), hcy + px(17)], fill=HIGHLIGHT)
     for direction in (-1, 1):
         ax = sx + direction * px(4)
         tip = sx + direction * px(9)
@@ -635,9 +612,8 @@ def render_compare(out="preview.png", preview=True, fraction=0.56, dark=False):
         tw = text_w(label, f, 0.4)
         cw, ch = tw + px(14), px(24)
         cxp = ox + px(10) if left_side else ox + fw - px(10) - cw
-        d.rectangle([cxp, oy + px(10), cxp + cw, oy + px(10) + ch], fill=CARD,
-                    outline=INK, width=int(px(2)))
-        tracked(od, (cxp + px(7), oy + px(15)), label, f, INK, 0.4)
+        d.rectangle([cxp, oy + px(10), cxp + cw, oy + px(10) + ch], fill=HIGHLIGHT)
+        tracked(od, (cxp + px(7), oy + px(15)), label, f, BADGE_INK, 0.4)
 
     hint = ("THIS IS WHAT YOUR SETTINGS WOULD PRODUCE \u2014 NOTHING SAVED YET" if preview
             else "DRAG THE HANDLE TO COMPARE BEFORE AND AFTER")
@@ -671,10 +647,7 @@ def main():
         render_main(False, out="ui-1-main-empty.png"),
         render_main(True, out="ui-2-main-selected.png"),
         render_compare(out="ui-3-preview-slider.png", preview=True),
-        render_main(True, out="ui-5-main-dark.png", dark=True),
         render_main(False, out="ui-7-footer-light.png", scroll_dp=-1),
-        render_main(False, out="ui-8-footer-dark.png", scroll_dp=-1, dark=True),
-        render_compare(out="ui-6-preview-slider-dark.png", preview=True, dark=True),
         render_main(True, out="ui-4-results.png", results={
             "summary": "Saved 14.2 MB \u00b7 76% smaller \u00b7 3 files",
             "rows": [
