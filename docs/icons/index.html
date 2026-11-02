@@ -88,6 +88,22 @@
   footer { margin-top: 30px; padding-top: 16px; border-top: 2px solid var(--stroke); font-size: 12px; color: var(--muted); }
   footer p { margin: 0 0 8px; max-width: 70ch; }
   footer a { color: var(--text); font-weight: 600; text-decoration: none; border-bottom: 2px solid var(--accent); }
+
+  /* Phone: keep the brand and the theme toggle on one row, and give the counter
+     its own line so it is not squeezed against the search field. */
+  @media (max-width: 520px) {
+    body { padding: 22px 14px 48px; }
+    .topbar { flex-wrap: nowrap; }
+    .brand { font-size: 17px; gap: 7px; }
+    .brand .mark { width: 19px; height: 19px; }
+    .theme-toggle { padding: 6px 9px; font-size: 10px; letter-spacing: .08em; flex: none; }
+    .lead { font-size: 14.5px; }
+    .tools { gap: 8px; }
+    #search { flex: 1 1 100%; }
+    .count { order: 2; margin-left: auto; }
+    .name { font-size: 10px; }
+    .glyph, .glyph svg { width: 30px; height: 30px; }
+  }
 </style>
 </head>
 <body>
