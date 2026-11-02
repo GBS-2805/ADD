@@ -136,8 +136,9 @@ const escape = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/
   }
   const figures = [...shots, ...extras].map((s) => `
       <figure>
+        <h3>${escape(s.title)}</h3>
         <a href="${s.name}.png"><img src="${s.name}.png" alt="${escape(s.title)}" loading="lazy" /></a>
-        <figcaption>${escape(s.title)}<span>${escape(s.caption)}</span></figcaption>
+        <p class="cap">${escape(s.caption)}</p>
       </figure>`).join("");
 
   const page = `<!DOCTYPE html>
@@ -151,13 +152,13 @@ const escape = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/
 <meta name="description" content="__COUNT__ screenshots of the shelf, captured in headless Chromium: the index at its fold, both pull-downs, the two apps, the icon brand pages with their previews and open sets, fonts, portfolio and download, at 1300 wide and 390 on a phone." />
 <link rel="stylesheet" href="../assets/site.css" />
 <style>
-  .figs { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); border-top: 1px solid var(--rule); border-left: 1px solid var(--rule); }
-  figure { margin: 0; display: flex; flex-direction: column; border-right: 1px solid var(--rule); border-bottom: 1px solid var(--rule); }
+  .figs { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 34px; }
+  figure { margin: 0; display: flex; flex-direction: column; border: 1px solid var(--rule); background: rgba(0, 0, 0, .16); }
+  figure h3 { margin: 0; padding: 16px 18px 14px; font-size: 18px; font-weight: 500; line-height: 1.3; border-bottom: 1px solid var(--rule); }
   figure img { display: block; width: 100%; height: auto; border-bottom: 1px solid var(--rule); background: #2c3769; }
-  figcaption { padding: 14px 16px 18px; font-size: 15px; }
-  figcaption span { display: block; margin-top: 3px; font-size: 13px; line-height: 1.5; color: var(--on-dim); }
+  .cap { margin: 0; padding: 14px 18px 18px; font-size: 13px; line-height: 1.55; color: var(--on-dim); }
   .wide { grid-column: 1 / -1; }
-  @media (max-width: 700px) { .figs { grid-template-columns: 1fr; } }
+  @media (max-width: 700px) { .figs { grid-template-columns: 1fr; gap: 24px; } figure h3 { font-size: 17px; } }
 </style>
 </head>
 <body>
