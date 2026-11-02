@@ -11,9 +11,9 @@ the pages.
 
 ## Status
 
-- **Icons 1.2** — APK [`dist/Icons-1.2.apk`](dist/Icons-1.2.apk)
-  (517,506 bytes, signed v1+v2), published as `docs/Icons-1.2.apk`. Package
-  `app.offline.icons` · minSdk 26 · targetSdk 35 · versionCode 3. The whole browser
+- **Icons 1.3** — APK [`dist/Icons-1.3.apk`](dist/Icons-1.3.apk)
+  (517,506 bytes, signed v1+v2), published as `docs/Icons-1.3.apk`. Package
+  `app.offline.icons` · minSdk 26 · targetSdk 35 · versionCode 4. The whole browser
   — both brands, 1,864 glyphs, the stylesheet and Poppins — is bundled in the APK
   and served to a WebView from a private origin.
 - **Compress 1.9** — APK [`dist/Compress-1.9.apk`](dist/Compress-1.9.apk)
@@ -105,6 +105,8 @@ python3 tools/build_catalog.py --check      # check only
   name filter — Coolicons' 30 groups (System, Arrow, Navigation, Edit, File, ...)
   and Lineicons' 51, merged from the vendors' own data. The four older
   Lineicons files the vendor has not categorised appear under All icons only.
+- **Remembers**: each brand keeps the category you last picked and restores it,
+  per brand; choosing All icons forgets it.
 - **The set folds away**: all 1,864 glyphs behind one toggle, scrollable inside a
   sheet with its own filter and count.
 - **Copy the file**: the exact SVG, with a textarea fallback, and inside the APK a
@@ -167,7 +169,7 @@ export ANDROID_SDK_ROOT=$HOME/android-sdk   # needs build-tools;35.0.0 + platfor
 ./build.sh compress   # Compress only
 ```
 
-Output: `dist/Compress-1.9.apk` and `dist/Icons-1.2.apk`. Copy them to `docs/` and
+Output: `dist/Compress-1.9.apk` and `dist/Icons-1.3.apk`. Copy them to `docs/` and
 re-run `python3 tools/build_catalog.py` so the pages, the JSON and the checksums move
 together. Signing uses `$HOME/tools/compress-keystore.jks` (created on first build,
 password `android`); both apps share it, so they update side by side. Replace it with

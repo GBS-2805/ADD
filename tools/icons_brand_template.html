@@ -499,6 +499,10 @@ __BRANDS__
   var surface = "field";
   var built = false;
   var cat = "";
+  var SLUG = "__SLUG__";
+  var CAT_KEY = "icons:cat:" + SLUG;
+  var savedCat = "";
+  try { savedCat = window.localStorage.getItem(CAT_KEY) || ""; } catch (error) { savedCat = ""; }
 
   function markup(item) {
     return '<svg xmlns="http://www.w3.org/2000/svg" ' + item.attrs + ">" + item.body + "</svg>";
@@ -628,6 +632,10 @@ __BRANDS__
   function chooseCat(name) {
     cat = name;
     catLabel.textContent = name || "All icons";
+    try {
+      if (name) { window.localStorage.setItem(CAT_KEY, name); }
+      else { window.localStorage.removeItem(CAT_KEY); }
+    } catch (error) { /* private mode: the page still filters, it just forgets */ }
     Array.prototype.forEach.call(catMenu.children, function (item, index) {
       item.setAttribute("aria-selected", (index === 0 ? "" : CATS[index - 1].name) === cat ? "true" : "false");
     });
@@ -774,6 +782,10 @@ __BRANDS__
     .then(function (payload) {
       items = payload.icons || [];
       if (!items.length) { throw new Error("the catalog is empty"); }
+      if (savedCat) {
+        var known = CATS.some(function (entry) { return entry.name === savedCat; });
+        if (known) { cat = savedCat; catLabel.textContent = savedCat; }
+      }
       renderCats();
       select(items[0], null);
       renderGrid();
