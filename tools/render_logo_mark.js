@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 /**
  * Renders docs/assets/logo.svg to tools/logo-mark.png: the same mark, solid
- * black on a transparent background, so tools/render_ui.py can tint it per
- * palette instead of redrawing the curves with Pillow.
+ * black on a transparent background, so a compositor can tint it instead of
+ * redrawing the curves.
  *
  *   node tools/render_logo_mark.js
  */
