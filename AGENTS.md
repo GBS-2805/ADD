@@ -131,6 +131,12 @@ changes as unverified on device rather than illustrating them.
 - `docs/data/` is generated and public on purpose: the site doubles as the database
   behind the apps. `icons.json` and `coolicons.json` come from `tools/fetch_icons.py`; `index.json`,
   `tools.json`, `fonts.json` and `portfolio.json` come from `tools/build_catalog.py`.
+- Releases go through `python3 tools/bump_version.py <version> --title "…" --note "…"
+  --build`: it moves the catalog, both build cases, every live version label and the
+  release-note list, then builds, copies the APK into `docs/`, re-measures size and
+  checksum and rebuilds the catalogs. Never replace version strings by hand — a
+  blanket find-and-replace once relabelled twelve releases as 2.2, and the notes only
+  recovered their real versions by reading the commits again.
 - `tools/catalog.json` is the single source of truth for the apps, the fonts and the
   portfolio. `tools/build_catalog.py` re-measures the APK and the font files, copies
   each TTF from `app/res/font/` into `docs/assets/fonts/`, writes the JSON and then
