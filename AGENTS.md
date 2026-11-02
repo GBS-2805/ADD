@@ -171,9 +171,12 @@ changes as unverified on device rather than illustrating them.
 - The WebView sits in a frame padded by the window insets. Target 35 draws edge to
   edge, so without that the band hides under the status bar and, on a Flip 7, under
   the camera cutout.
-- The preview exports SVG through the clipboard, or a 512px PNG/WEBP/JPG rendered on
-  the chosen background: the site downloads it, the app writes it to Pictures/Icons
-  through MediaStore (no permission on Android 10+).
+- The preview exports SVG through the clipboard, or a PNG/WEBP/JPG at the chosen size
+  (32 to 1024px) rendered on the chosen background: the site downloads it, the app
+  writes it to Pictures/Icons through MediaStore (no permission on Android 10+).
+- The Export button under those rows zips every glyph the sheet currently shows, in
+  the chosen format and size, as a stored zip written byte by byte in the page; in the
+  app the same bytes reach a second bridge method and land in Downloads/Icons.
 - A page the bundle does not carry shows the address of the same page on the site and
   an Open on the web button; the `WebViewClient` hands any http(s) link to the browser.
 - Compress's palette has one source of truth: `app/res/values/colors.xml` (Icons has

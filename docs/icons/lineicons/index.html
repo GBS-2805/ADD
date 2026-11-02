@@ -33,6 +33,13 @@
   .stage-body[data-active="true"] { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.08fr); }
 
   .preview { display: flex; align-items: center; gap: 26px; padding: 26px 24px; min-height: 196px; border-right: 1px solid var(--rule); }
+  #exports .seg { padding-left: 4px; padding-right: 4px; font-size: 14px; }
+  .bulk-btn { display: block; width: 100%; margin: 12px 0 0; font: inherit; font-size: 14px;
+    padding: 11px 14px; color: var(--on); background: transparent;
+    border: 1px solid var(--rule); cursor: pointer; }
+  .bulk-btn[disabled] { color: var(--mute); border-color: var(--rule); cursor: default; }
+  .bulk-btn:hover { border-color: var(--on); }
+  .bulk-btn:focus-visible { outline: 2px solid var(--band); outline-offset: 2px; }
   .preview-box {
     --w: 2;
     --size: 64px;
@@ -423,6 +430,20 @@
           </div>
         </div>
 
+        <div class="ctl-row" role="group" aria-label="Export size">
+          <span class="ctl-label">Export</span>
+          <div class="segs" id="exports">
+            <button class="seg" type="button" data-export="32" aria-pressed="false">32</button>
+            <button class="seg" type="button" data-export="64" aria-pressed="false">64</button>
+            <button class="seg" type="button" data-export="128" aria-pressed="false">128</button>
+            <button class="seg" type="button" data-export="256" aria-pressed="false">256</button>
+            <button class="seg" type="button" data-export="512" aria-pressed="true">512</button>
+            <button class="seg" type="button" data-export="1024" aria-pressed="false">1024</button>
+          </div>
+        </div>
+
+        <button class="bulk-btn" id="bulkBtn" type="button">Export the set</button>
+
         <p class="status" id="status" aria-live="polite">Lineicons · line style, the free set · MIT</p>
       </div>
     </div>
@@ -497,6 +518,9 @@
   var surfaces = document.getElementById("surfaces");
   var formats = document.getElementById("formats");
   var copyLabel = document.getElementById("copyLabel");
+  var exports_ = document.getElementById("exports");
+  var bulkBtn = document.getElementById("bulkBtn");
+  var visibleItems = [];
   var tabs = Array.prototype.slice.call(document.querySelectorAll(".stage-tab"));
   var CATS = [{"name": "Alerts & Notifications", "count": 1}, {"name": "Arrows", "count": 34}, {"name": "Badge & Rewards", "count": 2}, {"name": "Brands & Logos", "count": 244}, {"name": "Buildings", "count": 5}, {"name": "Business", "count": 9}, {"name": "Charity", "count": 5}, {"name": "Coding", "count": 2}, {"name": "Communication", "count": 10}, {"name": "Construction", "count": 16}, {"name": "Date and Time", "count": 5}, {"name": "Design Tools", "count": 16}, {"name": "Devices", "count": 17}, {"name": "Direction & Navigation", "count": 3}, {"name": "E-Commerce", "count": 8}, {"name": "Editing", "count": 8}, {"name": "Education", "count": 13}, {"name": "Emergency", "count": 1}, {"name": "Emoji", "count": 8}, {"name": "Energy", "count": 2}, {"name": "Fashion", "count": 1}, {"name": "Files & Folders", "count": 7}, {"name": "Fitness", "count": 2}, {"name": "Food & Restaurant", "count": 8}, {"name": "Gaming", "count": 1}, {"name": "Hand Gesture", "count": 3}, {"name": "Health & Medical", "count": 10}, {"name": "Interface", "count": 15}, {"name": "Jewelry & Gems", "count": 2}, {"name": "Map & Marker", "count": 6}, {"name": "Marketing", "count": 7}, {"name": "Media & Entertainment", "count": 14}, {"name": "Money & Currency", "count": 10}, {"name": "Nature", "count": 10}, {"name": "Party & Fest", "count": 7}, {"name": "Search", "count": 5}, {"name": "Security", "count": 6}, {"name": "Server, Storage & Data", "count": 9}, {"name": "Sign", "count": 1}, {"name": "Spinner", "count": 2}, {"name": "Sports", "count": 2}, {"name": "Star", "count": 3}, {"name": "Symbols", "count": 5}, {"name": "Text Editor", "count": 18}, {"name": "Ticket", "count": 2}, {"name": "Travel", "count": 1}, {"name": "User", "count": 2}, {"name": "Vehicles", "count": 17}, {"name": "Weather", "count": 7}, {"name": "Web & Browser", "count": 7}, {"name": "Wireless Connectivity", "count": 3}];
   var catWrap = document.getElementById("catWrap");
@@ -512,7 +536,7 @@
   var surface = "black";
   var format = "svg";
   var MIME = { svg: "image/svg+xml", png: "image/png", webp: "image/webp", jpg: "image/jpeg" };
-  var EXPORT = 512;
+  var exportSize = 512;
   var built = false;
   var cat = "";
   var SLUG = "lineicons";
@@ -614,10 +638,12 @@
     var q = search.value.trim().toLowerCase();
     var frag = document.createDocumentFragment();
     var shown = 0;
+    var picked = [];
     items.forEach(function (item) {
       if (q && item.name.indexOf(q) === -1) { return; }
       if (cat && item.cat !== cat) { return; }
       shown++;
+      picked.push(item);
       var card = document.createElement("button");
       card.type = "button";
       card.className = "icon-card";
@@ -635,6 +661,9 @@
     });
     grid.textContent = "";
     grid.append(frag);
+    visibleItems = picked;
+    bulkBtn.textContent = shown ? "Export " + shown.toLocaleString() : "Nothing to export";
+    bulkBtn.disabled = !shown;
     countEl.textContent = (q || cat) ? shown.toLocaleString() + " / " + items.length.toLocaleString() : items.length.toLocaleString();
     emptyEl.hidden = shown !== 0;
     built = true;
@@ -750,19 +779,19 @@
     copyLabel.textContent = "Copy " + format.toUpperCase();
     statusEl.textContent = format === "svg"
       ? "Copy hands over the SVG file"
-      : "Copy saves a " + EXPORT + "px " + format.toUpperCase() + " tile on the " + surface + " background";
+      : "Copy saves a " + exportSize + "px " + format.toUpperCase() + " tile on the " + surface + " background";
   });
 
   // Browsers cannot hand a raster through the clipboard, so a PNG, WEBP or JPG is
   // drawn from the same tuned glyph at 512px on the chosen background: the app saves
   // it to Pictures/Icons through its bridge, the site downloads it.
-  function raster(mime) {
+  function rasterFor(item, mime) {
     return new Promise(function (resolve, reject) {
       var host = document.createElement("div");
-      host.innerHTML = markup(selected);
+      host.innerHTML = markup(item);
       var node = host.querySelector("svg");
-      node.setAttribute("width", String(EXPORT));
-      node.setAttribute("height", String(EXPORT));
+      node.setAttribute("width", String(exportSize));
+      node.setAttribute("height", String(exportSize));
       node.setAttribute("style", "color:" + (surface === "white" ? "#000000" : "#ffffff"));
       tune(node, weight, MODE !== "stroke");
       var svg = new XMLSerializer().serializeToString(node);
@@ -771,12 +800,12 @@
       var image = new Image();
       image.onload = function () {
         var canvas = document.createElement("canvas");
-        canvas.width = EXPORT;
-        canvas.height = EXPORT;
+        canvas.width = exportSize;
+        canvas.height = exportSize;
         var ctx = canvas.getContext("2d");
         ctx.fillStyle = surface === "white" ? "#ffffff" : "#000000";
-        ctx.fillRect(0, 0, EXPORT, EXPORT);
-        ctx.drawImage(image, 0, 0, EXPORT, EXPORT);
+        ctx.fillRect(0, 0, exportSize, exportSize);
+        ctx.drawImage(image, 0, 0, exportSize, exportSize);
         URL.revokeObjectURL(url);
         resolve(canvas.toDataURL(mime, 0.92));
       };
@@ -813,6 +842,133 @@
     return ok;
   }
 
+  exports_.addEventListener("click", function (event) {
+    var btn = event.target.closest(".seg");
+    if (!btn) { return; }
+    exportSize = Number(btn.getAttribute("data-export"));
+    Array.prototype.forEach.call(exports_.children, function (other) {
+      other.setAttribute("aria-pressed", other === btn ? "true" : "false");
+    });
+    statusEl.textContent = "Exports and the bulk zip are " + exportSize + "px now";
+  });
+
+  var CRC = (function () {
+    var table = new Uint32Array(256);
+    for (var n = 0; n < 256; n++) {
+      var c = n;
+      for (var k = 0; k < 8; k++) { c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; }
+      table[n] = c >>> 0;
+    }
+    return table;
+  })();
+
+  function crc32(bytes) {
+    var c = 0xFFFFFFFF;
+    for (var i = 0; i < bytes.length; i++) { c = CRC[(c ^ bytes[i]) & 0xFF] ^ (c >>> 8); }
+    return (c ^ 0xFFFFFFFF) >>> 0;
+  }
+
+  function bytesOf(dataUrl) {
+    var binary = atob(dataUrl.split(",")[1]);
+    var out = new Uint8Array(binary.length);
+    for (var i = 0; i < binary.length; i++) { out[i] = binary.charCodeAt(i); }
+    return out;
+  }
+
+  // A stored (uncompressed) zip: these are already-compressed images, and hand
+  // writing deflate would buy nothing. Everything is little endian and unsigned.
+  function zipBytes(files) {
+    function u16(n) { return [n & 255, (n >>> 8) & 255]; }
+    function u32(n) { return [n & 255, (n >>> 8) & 255, (n >>> 16) & 255, (n >>> 24) & 255]; }
+    var encoder = new TextEncoder();
+    var parts = [], directory = [], offset = 0;
+    files.forEach(function (file) {
+      var name = encoder.encode(file.name);
+      var crc = crc32(file.bytes);
+      var head = [].concat([0x50, 0x4b, 0x03, 0x04], u16(20), u16(0), u16(0), u16(0), u16(0),
+        u32(crc), u32(file.bytes.length), u32(file.bytes.length), u16(name.length), u16(0));
+      parts.push(new Uint8Array(head), name, file.bytes);
+      directory.push({ name: name, crc: crc, size: file.bytes.length, offset: offset });
+      offset += head.length + name.length + file.bytes.length;
+    });
+    var start = offset;
+    directory.forEach(function (entry) {
+      var head = [].concat([0x50, 0x4b, 0x01, 0x02], u16(20), u16(20), u16(0), u16(0), u16(0), u16(0),
+        u32(entry.crc), u32(entry.size), u32(entry.size), u16(entry.name.length), u16(0), u16(0),
+        u16(0), u16(0), u32(0), u32(entry.offset));
+      parts.push(new Uint8Array(head), entry.name);
+      offset += head.length + entry.name.length;
+    });
+    parts.push(new Uint8Array([].concat([0x50, 0x4b, 0x05, 0x06], u16(0), u16(0),
+      u16(directory.length), u16(directory.length), u32(offset - start), u32(start), u16(0))));
+    var total = parts.reduce(function (n, part) { return n + part.length; }, 0);
+    var out = new Uint8Array(total), at = 0;
+    parts.forEach(function (part) { out.set(part, at); at += part.length; });
+    return out;
+  }
+
+  function zipName() {
+    var query = search.value.trim().toLowerCase();
+    var slug = (query || cat || "all").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+    return BRAND.toLowerCase() + "-" + slug + "-" + format + ".zip";
+  }
+
+  function base64Of(bytes) {
+    var binary = "";
+    for (var i = 0; i < bytes.length; i += 4096) {
+      binary += String.fromCharCode.apply(null, bytes.subarray(i, i + 4096));
+    }
+    return btoa(binary);
+  }
+
+  function bulkExport() {
+    if (!visibleItems.length) { return; }
+    var list = visibleItems.slice();
+    var mime = MIME[format];
+    var files = [], index = 0;
+    bulkBtn.disabled = true;
+    statusEl.textContent = "Packing 0/" + list.length + "…";
+    function next() {
+      if (index >= list.length) { finish(); return; }
+      var item = list[index];
+      statusEl.textContent = "Packing " + (index + 1) + "/" + list.length + " · " + item.name;
+      if (format === "svg") {
+        files.push({ name: item.name + ".svg", bytes: new TextEncoder().encode(markup(item)) });
+        index += 1;
+        window.setTimeout(next, 0);
+        return;
+      }
+      rasterFor(item, mime).then(function (dataUrl) {
+        files.push({ name: item.name + "." + format, bytes: bytesOf(dataUrl) });
+      }).catch(function () {
+        // a glyph that will not draw is left out rather than failing the whole zip
+      }).then(function () { index += 1; window.setTimeout(next, 0); });
+    }
+    function finish() {
+      var blob = zipBytes(files);
+      var name = zipName();
+      if (window.IconsApp && window.IconsApp.saveFile) {
+        window.IconsApp.saveFile("data:application/zip;base64," + base64Of(blob), "application/zip", name);
+        statusEl.textContent = "Saved " + name + " · " + files.length + " files";
+        window.setTimeout(paint, 4000);
+      } else {
+        var url = URL.createObjectURL(new Blob([blob], { type: "application/zip" }));
+        var link = document.createElement("a");
+        link.href = url;
+        link.download = name;
+        document.body.append(link);
+        link.click();
+        link.remove();
+        window.setTimeout(function () { URL.revokeObjectURL(url); }, 6000);
+        statusEl.textContent = "Downloaded " + name + " · " + files.length + " files";
+      }
+      bulkBtn.disabled = false;
+    }
+    next();
+  }
+
+  bulkBtn.addEventListener("click", bulkExport);
+
   document.getElementById("copyBtn").addEventListener("click", function () {
     if (!selected) { return; }
     if (format === "svg") {
@@ -828,10 +984,10 @@
     var mime = MIME[format];
     var name = selected.name + "." + format;
     statusEl.textContent = "Drawing " + name + "…";
-    raster(mime).then(function (dataUrl) {
+    rasterFor(selected, mime).then(function (dataUrl) {
       if (window.IconsApp && window.IconsApp.saveImage) {
         window.IconsApp.saveImage(dataUrl, mime, name);
-        statusEl.textContent = "Saved " + name + " · " + EXPORT + "px · " + surface;
+        statusEl.textContent = "Saved " + name + " · " + exportSize + "px · " + surface;
         return;
       }
       var link = document.createElement("a");
@@ -840,7 +996,7 @@
       document.body.append(link);
       link.click();
       link.remove();
-      statusEl.textContent = "Downloaded " + name + " · " + EXPORT + "px · " + surface;
+      statusEl.textContent = "Downloaded " + name + " · " + exportSize + "px · " + surface;
     }).catch(function (error) {
       statusEl.textContent = "Could not export: " + error.message;
     });

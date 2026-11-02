@@ -130,8 +130,13 @@ public class MainActivity extends Activity {
 
         @JavascriptInterface
         public void saveImage(final String dataUrl, final String mime, final String name) {
-            final String message = writeImage(dataUrl, mime, name);
-            toast(message);
+            toast(writeFile(dataUrl, mime, name, true));
+        }
+
+        /** A bulk zip goes to Downloads, where a file of many pictures belongs. */
+        @JavascriptInterface
+        public void saveFile(final String dataUrl, final String mime, final String name) {
+            toast(writeFile(dataUrl, mime, name, false));
         }
 
         private void toast(final String message) {
@@ -149,7 +154,7 @@ public class MainActivity extends Activity {
      * Android 10 and later MediaStore needs no permission at all; on 8 and 9 the file
      * goes to the app's own pictures folder, which also needs none.
      */
-    private String writeImage(String dataUrl, String mime, String name) {
+    private String writeFile(String dataUrl, String mime, String name, boolean picture) {
         if (dataUrl == null) {
             return "Nothing to save";
         }
@@ -166,12 +171,15 @@ public class MainActivity extends Activity {
         try {
             if (Build.VERSION.SDK_INT >= 29) {
                 ContentValues values = new ContentValues();
-                values.put(MediaStore.Images.Media.DISPLAY_NAME, name);
-                values.put(MediaStore.Images.Media.MIME_TYPE, mime);
-                values.put(MediaStore.Images.Media.RELATIVE_PATH,
-                        Environment.DIRECTORY_PICTURES + "/Icons");
-                Uri uri = getContentResolver().insert(
-                        MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+                values.put(MediaStore.MediaColumns.DISPLAY_NAME, name);
+                values.put(MediaStore.MediaColumns.MIME_TYPE, mime);
+                values.put(MediaStore.MediaColumns.RELATIVE_PATH, picture
+                        ? Environment.DIRECTORY_PICTURES + "/Icons"
+                        : Environment.DIRECTORY_DOWNLOADS + "/Icons");
+                Uri collection = picture
+                        ? MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+                        : MediaStore.Downloads.EXTERNAL_CONTENT_URI;
+                Uri uri = getContentResolver().insert(collection, values);
                 if (uri == null) {
                     return "Could not save " + name;
                 }
@@ -181,9 +189,10 @@ public class MainActivity extends Activity {
                 }
                 out.write(bytes);
                 out.close();
-                return "Saved to Pictures/Icons/" + name;
+                return "Saved to " + (picture ? "Pictures" : "Downloads") + "/Icons/" + name;
             }
-            File dir = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), "Icons");
+            File dir = new File(getExternalFilesDir(
+                    picture ? Environment.DIRECTORY_PICTURES : Environment.DIRECTORY_DOWNLOADS), "Icons");
             if (!dir.exists() && !dir.mkdirs()) {
                 return "Could not create the pictures folder";
             }
