@@ -187,6 +187,10 @@ changes as unverified on device rather than illustrating them.
   `WebViewClient` reading `assets/www`, with a `JavascriptInterface` bridge for copy
   and for saving a raster. It declares no permissions at all, so a page cannot reach
   the network even if one asked.
+- The bundle can be checked without a device, which is the only way to verify an app
+  change here: serve `icons-app/assets/www` and drive it in Playwright, as
+  `tools/webview-check.md` describes. It proves the shipped files, not the window —
+  insets, the clipboard and MediaStore bridge, and back handling stay unverified.
 - The WebView sits in a frame padded by the window insets. Target 35 draws edge to
   edge, so without that the band hides under the status bar and, on a Flip 7, under
   the camera cutout.
