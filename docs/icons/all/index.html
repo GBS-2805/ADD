@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta name="theme-color" content="#3f4e96" />
 <link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml" />
-<title>All brands — one glyph per category, twenty from each set</title>
-<meta name="description" content="Both free icon brands side by side: a tab each, and a sheet of twenty glyphs taken one from each of its categories. 1,864 glyphs in all, with the whole catalog one page away." />
+<title>All brands — one glyph per category, twelve from each set</title>
+<meta name="description" content="Both free icon brands side by side: a tab each, and a sheet of twelve glyphs taken one from each of its categories. 1,864 glyphs in all, with the whole catalog one page away." />
 <link rel="stylesheet" href="../../assets/site.css" />
 <style>
   /* page-only: one compact sheet per brand */
@@ -38,12 +38,12 @@
   .cell {
     display: flex;
     flex-direction: column;
-    gap: 6px;
-    padding: 9px 8px 7px;
+    gap: 3px;
+    padding: 6px 8px 5px;
     border-right: 1px solid var(--rule);
     border-bottom: 1px solid var(--rule);
   }
-  .cell .glyph { display: flex; align-items: center; height: 28px; }
+  .cell .glyph { display: flex; align-items: center; height: 26px; }
   .cell .glyph svg { width: 25px; height: 25px; display: block; }
   .cell .name {
     font-size: 10px;
@@ -81,8 +81,8 @@
   @media (max-width: 700px) {
     .brand-tab { flex: 1 1 auto; font-size: 15px; padding: 9px 12px; }
     .sheet-note { font-size: 11px; }
-    .cell { padding: 8px 7px 6px; }
-    .cell .glyph { height: 26px; }
+    .cell { padding: 5px 6px 4px; }
+    .cell .glyph { height: 24px; }
     .cell .glyph svg { width: 22px; height: 22px; }
     .cell .name { font-size: 9.5px; }
     .cell .cat { font-size: 8px; letter-spacing: .05em; }
@@ -114,7 +114,7 @@
   <div class="who">
     <div class="who-lines">
       <p>All brands</p>
-      <p>1,864 glyphs · 20 each</p>
+      <p>1,864 glyphs · 12 each</p>
     </div>
     <button class="burger" id="burger" type="button" aria-expanded="false" aria-controls="drawer" aria-label="Open side tab">
       <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 7H19M5 12H19M5 17H19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -143,10 +143,10 @@
 <main>
   <header class="page-head">
     <h1>One per category</h1>
-    <p class="lede">Both brands, twenty glyphs each — <b>one from every category</b> a set carries, in the vendor's own order. A quick read of what a set is about, without opening all 1,864 of them.</p>
+    <p class="lede">Both brands, twelve glyphs each — <b>one from every category</b> a set carries, in the vendor's own order. A quick read of what a set is about, without opening all 1,864 of them.</p>
     <p class="meta">
       <span>2 brands</span>
-      <span>20 glyphs each</span>
+      <span>12 glyphs each</span>
       <span>One per category</span>
       <span>Files as they ship</span>
     </p>
@@ -154,10 +154,10 @@
 
   <section>
     <h2>The sheet</h2>
-    <p class="kicker">Twenty glyphs per brand, small enough to take in at once</p>
+    <p class="kicker">Twelve glyphs per brand, small enough to take in at once</p>
     <div class="brand-tabs" id="brandTabs" role="tablist" aria-label="Icon brands"></div>
     <div id="sheets"></div>
-    <p class="fine">Each glyph is the file the page for that brand exports, drawn at its own weight. Sets with fewer than twenty categories fill the sheet from the start of their catalog.</p>
+    <p class="fine">Each glyph is the file the page for that brand exports, drawn at its own weight. Sets with fewer than twelve categories fill the sheet from the start of their catalog.</p>
   </section>
 </main>
 
@@ -169,7 +169,7 @@
 <script>
 (function () {
   var SETS = [{"slug": "lineicons", "name": "Lineicons", "count": 606, "cats": 51, "data": "../../data/icons.json"}, {"slug": "coolicons", "name": "Coolicons", "count": 1258, "cats": 30, "data": "../../data/coolicons.json"}];
-  var CAP = 20;
+  var CAP = 12;
   var tabRow = document.getElementById("brandTabs");
   var sheetHost = document.getElementById("sheets");
   var tabs = [];
@@ -181,8 +181,8 @@
 
   // One glyph per category, in the vendor's own order: the first name in the
   // catalog for that category, since the catalogs are alphabetical. A set with
-  // fewer than twenty categories is filled from the start of its catalog so the
-  // sheet always holds twenty.
+  // fewer than twelve categories is filled from the start of its catalog so the
+  // sheet always holds twelve.
   function choose(payload) {
     var first = {}, order = [], picks = [];
     payload.icons.forEach(function (item) {
