@@ -9,6 +9,7 @@ const out = process.argv[3] || "artifacts";
 const shots = [
   { name: "page-home-light", path: "", w: 1300, h: 900 },
   { name: "page-home-full", path: "", w: 1300, h: 900, full: true },
+  { name: "page-menu", path: "", w: 1300, h: 900, menu: true },
   { name: "page-tools", path: "tools/", w: 1300, h: 900 },
   { name: "page-icons-light", path: "icons/", w: 1300, h: 900 },
   { name: "page-fonts", path: "fonts/", w: 1300, h: 900 },
@@ -16,6 +17,7 @@ const shots = [
   { name: "page-download", path: "download/", w: 1300, h: 900 },
   { name: "phone-home-light", path: "", w: 390, h: 844 },
   { name: "phone-home-full", path: "", w: 390, h: 844, full: true },
+  { name: "phone-menu", path: "", w: 390, h: 844, menu: true },
   { name: "phone-icons-light", path: "icons/", w: 390, h: 844 },
   { name: "phone-download", path: "download/", w: 390, h: 844 },
 ];
@@ -32,17 +34,22 @@ const shots = [
     page.on("pageerror", (e) => errors.push(`${s.name}: pageerror ${String(e.message).slice(0, 140)}`));
     await page.goto(base + s.path, { waitUntil: "networkidle", timeout: 45000 });
     await page.evaluate(() => document.fonts.ready);
+    if (s.menu) {
+      await page.click("#menuBtn");
+      await page.waitForTimeout(220);
+    }
     await page.screenshot({ path: `${out}/${s.name}.png`, fullPage: Boolean(s.full) });
     const info = await page.evaluate(() => ({
       bg: getComputedStyle(document.body).backgroundColor,
       fam: getComputedStyle(document.body).fontFamily,
       poppins: document.fonts.check("17px Poppins"),
       hscroll: document.documentElement.scrollWidth > window.innerWidth + 1,
+      menuOpen: !document.getElementById("menu").hidden,
       doc: [document.documentElement.scrollWidth, document.documentElement.scrollHeight],
     }));
     console.log(
       `${s.name}: bg ${info.bg} | ${info.fam.split(",")[0]} | poppins ${info.poppins}` +
-      ` | hscroll ${info.hscroll} | doc ${info.doc.join("x")}`
+      ` | hscroll ${info.hscroll} | menu ${info.menuOpen} | doc ${info.doc.join("x")}`
     );
     await page.close();
   }

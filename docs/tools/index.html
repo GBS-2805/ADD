@@ -12,13 +12,13 @@
 <body>
 
 <header class="bar">
-  <a class="brand" href="../">
+  <button class="menu-btn" id="menuBtn" type="button" aria-expanded="false" aria-controls="menu" aria-label="Open the menu">
     <svg class="chev" viewBox="0 0 21 20" fill="none" aria-hidden="true">
       <path d="M3 7.1 10.5 1.6 18 7.1" stroke="currentColor" stroke-width="2.1" stroke-linecap="square"/>
       <path d="M3 12.9 10.5 18.4 18 12.9" stroke="currentColor" stroke-width="2.1" stroke-linecap="square"/>
     </svg>
-    <span>Tools</span>
-  </a>
+    <span>Drop-down menu</span>
+  </button>
 
   <a class="mark" href="../" aria-label="Compress — home">
     <svg viewBox="0 0 100 100" role="img" aria-label="Compress logo">
@@ -32,21 +32,29 @@
     </svg>
   </a>
 
-  <div class="who-lines">
-    <p>Compress · Icons</p>
-    <p>2 apps · 1 shipping</p>
+  <div class="who">
+    <div class="who-lines">
+      <p>Tools</p>
+      <p>2 apps · 1 shipping</p>
+    </div>
+    <button class="burger" id="burger" type="button" aria-expanded="false" aria-controls="menu" aria-label="Open menu">
+      <svg viewBox="0 0 29 20" fill="none" aria-hidden="true">
+        <path d="M0 1h29M0 10h29M0 19h29" stroke="currentColor" stroke-width="1.4"/>
+      </svg>
+    </button>
   </div>
 </header>
 
-<nav class="tabs" id="sections" aria-label="Sections">
-  <a href="../">Index</a>
-  <a href="../tools/" aria-current="page">Tools</a>
-  <a href="../icons/">Icons</a>
-  <a href="../fonts/">Fonts</a>
-  <a href="../portfolio/">Portfolio</a>
-  <a href="../download/">Download</a>
-  <a href="../renders/">Renders</a>
+<nav class="menu" id="menu" hidden aria-label="Sections">
+  <a href="../">Index <span>— shelf</span></a>
+  <a href="../tools/" aria-current="page">Tools <span>— 2 apps</span></a>
+  <a href="../icons/">Icons <span>— 606</span></a>
+  <a href="../fonts/">Fonts <span>— 3 faces</span></a>
+  <a href="../portfolio/">Portfolio <span>— 3 projects</span></a>
+  <a href="../download/">Download <span>— 1.9</span></a>
+  <a href="../renders/">Renders <span>— gallery</span></a>
 </nav>
+
 
 <main>
   <header class="page-head">
@@ -65,16 +73,16 @@
     <p class="kicker">One for photos, one for glyphs</p>
     <div class="cards">
       <a class="card" href="#compress">
-        <span class="kind">Compress · Android · <span class="pill live">1.9</span></span>
+        <span class="kind">Android app · Compress</span>
         <h3>Compress</h3>
         <p>Pick photos, preview the result with a before/after slider, then compress. Batch queue, resolution caps, metadata stripped, originals untouched.</p>
-        <span class="tag"><span class="go">Read the detail</span></span>
+        <span class="tag"><span class="pill live">1.9</span><span class="go">Read the detail</span></span>
       </a>
       <a class="card" href="#icons">
-        <span class="kind">Icons · Android · <span class="pill">in build</span></span>
+        <span class="kind">Android app · Icons</span>
         <h3>Icons</h3>
         <p>The 606-glyph browser from this site, packaged for the phone: filter by name, tap to copy the SVG, no network needed.</p>
-        <span class="tag"><span class="go">What it will do</span></span>
+        <span class="tag"><span class="pill">in build</span><span class="go">What it will do</span></span>
       </a>
     </div>
   </section>
@@ -164,5 +172,6 @@
   <span><a href="../">Index</a> · <a href="../download/">Download</a> · signed for personal use</span>
 </footer>
 
+<script src="../assets/site.js" defer></script>
 </body>
 </html>

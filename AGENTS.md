@@ -22,14 +22,15 @@ that text changed.
 
 - Capture with headless Chromium via Playwright, served from a local static server
   over `docs/`, at 1300x900. `tools/render_pages.js` takes every page of the shelf
-  in one run -- the index at its fold and at full height, then tools, icons, fonts,
-  portfolio and download at desktop width, then the index, icons and download at
-  390x844 -- in about ten seconds, and prints console errors and horizontal overflow.
+  in one run -- the index at its fold and at full height, then the pull-down menu
+  open, then tools, icons, fonts, portfolio and download at desktop width, then the
+  index, its menu and download at 390x844 -- in about ten seconds, and prints console
+  errors and horizontal overflow.
 - Save under `artifacts/`, one file per page the change touches. The names the
   gallery already uses are `page-home-light`, `page-home-full`, `page-tools`,
-  `page-icons-light`, `page-fonts`, `page-portfolio`, `page-download`,
-  `phone-home-light`, `phone-home-full`, `phone-icons-light`, `phone-download` and
-  `logo-light`. There is one palette, so there are no dark variants; the `-light`
+  `page-icons-light`, `page-fonts`, `page-portfolio`, `page-download`, `page-menu`,
+  `phone-home-light`, `phone-home-full`, `phone-icons-light`, `phone-download`,
+  `phone-menu` and `logo-light`. There is one palette, so there are no dark variants; the `-light`
   suffix on four of them is history, not a variant.
 - Cover every page the change touches, plus mobile width when the change is
   responsive.
@@ -97,9 +98,11 @@ in one run and prints console errors; it needs the toolchain from
 
 The site has one palette -- an indigo field with a light band -- and no theme switch
 on any page. Every page links one stylesheet, `docs/assets/site.css`: it carries the
-`@font-face` block, the band, the tab strip and the shared type, and its `url()`
-paths are relative to that file so pages at any depth can use it. Page-specific
-rules live in a small `<style>` on the page itself. `docs/icons/index.html` is
+`@font-face` block, the band, the pull-down menu and the shared type, and its
+`url()` paths are relative to that file so pages at any depth can use it. The band
+keeps frame 6-27's own affordances -- chevrons and "Drop-down menu" on the left,
+the 29x20 burger on the right -- and both toggle the menu, which is why every page
+loads `assets/site.js`. Page-specific rules live in a small `<style>` on the page. `docs/icons/index.html` is
 generated on the same system out of `tools/icons_template.html`.
 
 ### The app cannot be captured here
@@ -116,7 +119,8 @@ changes as unverified on device rather than illustrating them.
 - `docs/` is the deployed static site (Sites manifest `manifest.json`, assets from `docs`).
 - The shelf is seven pages, each a folder with an `index.html`: the root index, then
   `tools/`, `icons/`, `fonts/`, `portfolio/`, `download/` and `renders/`. They share
-  `assets/site.css` and a tab strip; no page has its own copy of the palette.
+  `assets/site.css` and `assets/site.js`; no page has its own copy of the palette and
+  each lists all seven destinations in the same pull-down menu.
 - `docs/data/` is generated and public on purpose: the site doubles as the database
   behind the apps. `icons.json` comes from `tools/fetch_icons.py`; `index.json`,
   `tools.json`, `fonts.json` and `portfolio.json` come from `tools/build_catalog.py`.

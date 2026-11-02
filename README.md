@@ -42,9 +42,12 @@ Seven pages, one stylesheet, no framework:
 | `docs/download/` | Standalone APKs, sizes, SHA-256, install steps |
 | `docs/renders/` | Gallery of captures, nothing drawn by hand |
 
-Pages share `docs/assets/site.css` — palette, band, tab strip and type — and carry
-only their own small `<style>` for page-specific pieces. The tab strip appears on
-every page with `aria-current` on the one you are reading.
+Pages share `docs/assets/site.css` — palette, band, menu and type — plus
+`docs/assets/site.js` for the pull-down. The band is frame 6-27's own: chevrons and
+"Drop-down menu" on the left, the mark centred, two lines and the 29x20 burger on
+the right, and both affordances toggle a menu listing all seven destinations with
+`aria-current` on the one you are reading. Pages carry only their own small
+`<style>` for page-specific pieces.
 
 ### The JSON behind it
 

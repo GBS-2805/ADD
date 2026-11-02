@@ -1,7 +1,9 @@
 /* Compress site — one stylesheet for every page.
 
-   Palette, band and type come from the Figma frame 6-27 measurements. Paths
-   inside url() are relative to this file, so a page can sit at any depth. */
+   Palette, band and type come from the Figma frame 6-27 measurements: a 96px
+   band, 40px padding, a 45px centred mark, a 26px label on the left, two 17px
+   lines on the right and a 29x20 burger. Paths inside url() are relative to this
+   file, so a page can sit at any depth. */
 
 @font-face {
   font-family: "Poppins";
@@ -50,10 +52,10 @@ body {
 }
 a { color: inherit; }
 
-/* ---------- header band ---------- */
+/* ---------- header band, exactly as drawn ---------- */
 .bar {
   position: relative;
-  min-height: var(--band-h);
+  height: var(--band-h);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -62,17 +64,25 @@ a { color: inherit; }
   background: var(--band);
   color: var(--ink);
 }
-.brand {
+.menu-btn,
+.burger {
+  font: inherit;
+  color: var(--ink);
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+}
+.menu-btn {
   display: flex;
   align-items: center;
   gap: 38px;
   font-size: 26px;
   line-height: 1;
   letter-spacing: -.01em;
-  text-decoration: none;
   white-space: nowrap;
 }
-.brand:hover { text-decoration: underline; }
+.menu-btn[aria-expanded="true"] span { text-decoration: underline; }
 .chev { width: 21px; height: 20px; flex: none; }
 .mark {
   position: absolute;
@@ -83,49 +93,58 @@ a { color: inherit; }
   display: block;
 }
 .mark svg { display: block; width: 45px; height: 45px; }
+.who { display: flex; align-items: center; gap: 40px; }
 .who-lines { text-align: right; }
 .who-lines p { margin: 0; font-size: 17px; line-height: 24.5px; }
+.burger { width: 29px; height: 20px; flex: none; }
+.burger svg { display: block; }
 
-/* ---------- section tabs ---------- */
-.tabs {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0 26px;
+/* ---------- pull-down menu ---------- */
+.menu {
+  background: var(--band);
+  color: var(--ink);
   padding: 0 var(--pad);
-  border-bottom: 1px solid var(--rule);
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0 40px;
 }
-.tabs a {
+.menu[hidden] { display: none; }
+.menu a {
   display: block;
-  margin-bottom: -1px;
-  padding: 15px 0 12px;
-  border-bottom: 2px solid transparent;
-  font-size: 12px;
-  font-weight: 500;
-  letter-spacing: .1em;
-  text-transform: uppercase;
+  padding: 16px 0;
+  border-top: 1px solid rgba(0, 0, 0, .14);
+  font-size: 17px;
   text-decoration: none;
-  color: var(--on-dim);
 }
-.tabs a:hover { color: var(--on); }
-.tabs a[aria-current] { color: var(--on); border-bottom-color: var(--on); }
+.menu a:hover { text-decoration: underline; }
+.menu a[aria-current] { font-weight: 500; }
+.menu a span { color: rgba(0, 0, 0, .5); }
+.menu a:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
 
 /* ---------- page ---------- */
 main { padding: 0 var(--pad); }
-.page-head { padding: 72px 0 40px; }
+.page-head { padding: 84px 0 40px; }
 h1 {
   margin: 0 0 24px;
-  font-size: clamp(44px, 7vw, 72px);
+  font-size: clamp(46px, 7.4vw, 76px);
   font-weight: 400;
   line-height: 1.02;
   letter-spacing: -.035em;
 }
-.lede { margin: 0; max-width: 56ch; font-size: 20px; line-height: 1.55; }
-.lede b { background: var(--band); color: var(--ink); font-weight: 400; padding: 0 5px; }
+.lede { margin: 0; max-width: 46ch; font-size: 20px; line-height: 1.55; }
+.lede b {
+  background: var(--band);
+  color: var(--ink);
+  font-weight: 400;
+  padding: 0 5px;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
 .meta {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px 24px;
-  margin: 22px 0 0;
+  gap: 8px 26px;
+  margin: 20px 0 0;
   font-size: 14px;
   color: var(--on-dim);
 }
@@ -135,7 +154,7 @@ h1 {
   gap: 12px;
   height: 56px;
   padding: 0 28px;
-  margin-top: 30px;
+  margin-top: 34px;
   background: var(--band);
   color: var(--ink);
   font-size: 17px;
@@ -144,10 +163,11 @@ h1 {
 .cta svg { flex: none; }
 .cta:hover { background: #e8e8e8; }
 
-section { padding: 52px 0; border-top: 1px solid var(--rule); }
+section { padding: 64px 0; border-top: 1px solid var(--rule); }
 h2 { margin: 0 0 8px; font-size: 26px; font-weight: 400; line-height: 1.3; letter-spacing: -.015em; }
+h2 .pill { margin-left: 12px; vertical-align: middle; }
 .kicker { margin: 0 0 26px; font-size: 14px; color: var(--on-dim); }
-.fine { margin: 16px 0 0; font-size: 14px; color: var(--on-dim); max-width: 66ch; }
+.fine { margin: 16px 0 0; font-size: 14px; color: var(--on-dim); max-width: 62ch; }
 
 /* ---------- catalog cells, sharing hairlines ---------- */
 .cards {
@@ -172,6 +192,7 @@ a.card:hover { background: rgba(217, 217, 217, .07); }
 .card h3 { margin: 0; font-size: 22px; font-weight: 400; line-height: 1.3; letter-spacing: -.01em; }
 .card p { margin: 0; font-size: 15px; line-height: 1.55; }
 .card .tag { margin-top: auto; padding-top: 16px; font-size: 13px; color: var(--on-dim); }
+.card .tag .pill { margin-right: 10px; }
 .card .go { color: var(--on); }
 .card .go::after { content: " \2192"; }
 
@@ -222,7 +243,7 @@ ol.steps li::before {
   border-top: 1px solid var(--rule);
   font-size: 14px;
   color: var(--on-dim);
-  max-width: 66ch;
+  max-width: 62ch;
 }
 
 .pill {
@@ -234,6 +255,7 @@ ol.steps li::before {
   letter-spacing: .1em;
   text-transform: uppercase;
   color: var(--on-dim);
+  white-space: nowrap;
 }
 .pill.live { background: var(--band); border-color: var(--band); color: var(--ink); }
 
@@ -256,6 +278,7 @@ footer a:hover { text-decoration: underline; }
 
 @media (max-width: 900px) {
   .who-lines p + p { display: none; }
+  .menu { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .specs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .specs div:nth-child(2n) { border-right: 0; }
   .specs div:nth-child(n+3) { border-top: 1px solid var(--rule); }
@@ -265,16 +288,20 @@ footer a:hover { text-decoration: underline; }
   :root { --pad: 20px; --band-h: 72px; }
   body { font-size: 16px; }
   .bar { gap: 20px; }
-  .brand { gap: 12px; font-size: 15px; letter-spacing: .02em; }
+  /* The label cannot share a 390px row with the centred mark, so the
+     chevrons alone stay as the menu affordance. */
+  .menu-btn { gap: 12px; }
+  .menu-btn span { display: none; }
   .chev { width: 20px; height: 20px; }
   .mark, .mark svg { width: 34px; height: 34px; }
+  .who { gap: 20px; }
   .who-lines p { font-size: 14px; line-height: 1.35; }
-  .tabs { gap: 0 18px; }
-  .tabs a { padding: 13px 0 10px; font-size: 11px; }
-  .page-head { padding: 48px 0 32px; }
+  .burger { width: 24px; }
+  .menu { grid-template-columns: 1fr; }
+  .page-head { padding: 48px 0 28px; }
   .lede { font-size: 18px; }
   .cta { width: 100%; justify-content: center; height: 54px; }
-  section { padding: 40px 0; }
+  section { padding: 44px 0; }
   .cards { grid-template-columns: 1fr; }
   ul.rows li, ol.steps li { flex-direction: column; gap: 2px; }
   ul.rows b { min-width: 0; }
