@@ -20,6 +20,10 @@ deferred to the user to check.
   is not a render.
 - Standalone artwork (SVG marks, icons) is additionally rendered with
   `@resvg/resvg-js` so the asset itself is verifiable apart from the page.
+- Copy each render into `docs/renders/` and deploy, then send its absolute
+  `https://<site-host>/renders/<name>.png` URL. Relative workspace links
+  (`artifacts/...`) do not open in the app on a phone, so they are never the
+  only way a render is offered.
 
 ## Local render setup (no root, no system Chrome)
 
