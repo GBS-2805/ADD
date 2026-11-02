@@ -66,17 +66,18 @@ def main(src="figma"):
         f'viewBox="0 0 {widest:g} {tall}">\n' + "\n".join(parts) + "\n</svg>\n"
     )
     # Every artboard carries the same Poppins faces; the canvas needs one copy.
-    seen = set()
+    # The blocks are matched by what they define, not by their wrapper, because
+    # ElementTree re-serialises <defs> with its own namespace attribute.
+    kept = [0]
 
-    def once(match):
+    def first_faces(match):
         block = match.group(0)
-        if block in seen:
-            return ""
-        seen.add(block)
-        return block
+        if "@font-face" not in block or "font/woff2" not in block:
+            return block
+        kept[0] += 1
+        return block if kept[0] == 1 else ""
 
-    out = re.sub(r"<defs><style[^>]*><\\?/?[^>]*>?.*?</style></defs>", lambda m: m.group(0), out)
-    out = re.sub(r"<defs[^>]*><style[^>]*>.*?</style></defs>", once, out, flags=re.S)
+    out = re.sub(r"<style[^>]*>.*?</style>", first_faces, out, flags=re.S)
 
     path = os.path.join(src, OUT)
     with open(path, "w") as fh:
