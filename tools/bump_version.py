@@ -43,6 +43,56 @@ LABEL_FILES = ["docs/index.html", "docs/download/index.html", "docs/icons/index.
 NOTE_LINE = re.compile(r"<li><b>Icons [0-9.]+ \u00b7 ")
 VERSION = re.compile(r"^[0-9]+(\.[0-9]+)*$")
 
+NOTE_RE = re.compile(r"<li><b>Icons ([0-9.]+) \u00b7 ([^<]+)</b>")
+
+
+def notes_on_page():
+    return NOTE_RE.findall(NOTES.read_text(encoding="utf-8"))
+
+
+def git(*args):
+    return subprocess.run(["git", *args], cwd=ROOT, capture_output=True, text=True)
+
+
+def shipped_with(title):
+    """The Icons version in the commit that first added a note, and its short sha."""
+    found = git("log", "--reverse", "--format=%H", "-S", title, "--", "docs/tools/index.html")
+    if found.returncode != 0:
+        return None, "git could not read the history"
+    if not found.stdout.strip():
+        return None, "no commit adds it yet"
+    sha = found.stdout.split()[0]
+    catalog = git("show", "%s:tools/catalog.json" % sha)
+    if catalog.returncode != 0:
+        return None, "no catalog at " + sha[:8]
+    try:
+        version = next(tool["version"] for tool in json.loads(catalog.stdout)["tools"]
+                       if tool["id"] == "icons")
+    except Exception:
+        return None, "catalog unreadable at " + sha[:8]
+    return version, sha[:8]
+
+
+def report_notes():
+    """Print every note whose label is not the version it shipped in; return how many."""
+    if not (ROOT / ".git").exists():
+        print("release notes: no git history to check against")
+        return 0
+    notes = notes_on_page()
+    problems = 0
+    for label, title in notes:
+        version, where = shipped_with(title)
+        if version is None:
+            print("  note %s \u00b7 %s: %s, unverified" % (label, title, where))
+        elif version != label:
+            problems += 1
+            print("  note %s \u00b7 %s shipped in %s (%s)" % (label, title, version, where))
+    if problems:
+        print("release notes: %d note(s) disagree with the version they shipped in" % problems)
+    else:
+        print("release notes: %d notes, each label matches the version it shipped in" % len(notes))
+    return problems
+
 
 def fmt(number):
     return "{:,}".format(number)
@@ -109,7 +159,9 @@ def add_note(new, title, note, dry):
 def main():
     parser = argparse.ArgumentParser(description=__doc__,
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("version", help="the new version, e.g. 2.4")
+    parser.add_argument("version", nargs="?", help="the new version, e.g. 2.4")
+    parser.add_argument("--check-notes", action="store_true",
+                        help="only verify the release notes against the history, change nothing")
     parser.add_argument("--title", help="release-note title, after the version")
     parser.add_argument("--note", help="release-note sentence")
     parser.add_argument("--build", action="store_true",
@@ -117,11 +169,20 @@ def main():
     parser.add_argument("--dry-run", action="store_true", help="print the edits, write nothing")
     args = parser.parse_args()
 
+    if args.check_notes:
+        return 1 if report_notes() else 0
+    if not args.version:
+        parser.error("a version is required unless --check-notes is given")
     new = args.version.strip()
     if not VERSION.match(new):
         raise SystemExit("version must look like 2.4, not %r" % new)
     if bool(args.title) != bool(args.note):
         raise SystemExit("--title and --note go together")
+
+    # A note whose label is not the version it shipped in is a broken history, and
+    # bumping on top of it would only bury the mistake.
+    if report_notes():
+        raise SystemExit("refusing to bump: give those notes their real versions first")
 
     catalog = json.loads(CATALOG.read_text(encoding="utf-8"))
     icons = next(tool for tool in catalog["tools"] if tool["id"] == "icons")

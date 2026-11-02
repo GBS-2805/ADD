@@ -134,7 +134,9 @@ changes as unverified on device rather than illustrating them.
 - Releases go through `python3 tools/bump_version.py <version> --title "…" --note "…"
   --build`: it moves the catalog, both build cases, every live version label and the
   release-note list, then builds, copies the APK into `docs/`, re-measures size and
-  checksum and rebuilds the catalogs. Never replace version strings by hand — a
+  checksum and rebuilds the catalogs. It reads the history first and refuses to bump
+  while any note's label is not the catalog version of the commit that added
+  it; `--check-notes` runs that check alone. Never replace version strings by hand — a
   blanket find-and-replace once relabelled twelve releases as 2.2, and the notes only
   recovered their real versions by reading the commits again.
 - `tools/catalog.json` is the single source of truth for the apps, the fonts and the
