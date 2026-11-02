@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Media icons — copy SVG, no account</title>
+<meta name="description" content="A copy-ready media icon set: image, camera, video, music, podcast and player icons. Click any icon to copy its SVG markup. No account, no plan, no Pro tier." />
+<style>
+  :root {
+    --bg: #f2e4c9; --card: #f7ecd7; --card2: #eadbbd; --stroke: #2b2926;
+    --accent: #ffb20f; --ink: #2b2926; --text: #2b2926; --muted: #4b5563;
+  }
+  /* Night palette, mirrored from the app's res/values-night/colors.xml. */
+  html[data-theme="dark"] {
+    --bg: #2b2926; --card: #37332e; --card2: #443f39; --stroke: #f7ecd7;
+    --accent: #ffb20f; --ink: #2b2926; --text: #f7ecd7; --muted: #a9a093;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    -webkit-font-smoothing: antialiased; min-height: 100vh; padding: 34px 18px 60px; line-height: 1.55;
+  }
+  .wrap { max-width: 880px; margin: 0 auto; }
+  .topbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  .brand { font-size: 22px; font-weight: 800; letter-spacing: -.02em; }
+  .brand i {
+    display: inline-block; width: 14px; height: 14px; margin-right: 8px;
+    background: var(--accent); border: 2px solid var(--stroke); transform: translateY(-1px);
+  }
+  .theme-toggle {
+    font: inherit; font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+    color: var(--ink); background: var(--accent); border: 2px solid var(--stroke); border-radius: 0;
+    padding: 7px 12px; box-shadow: 3px 3px 0 var(--stroke); cursor: pointer; white-space: nowrap;
+  }
+  .theme-toggle:hover { transform: translate(-1px, -1px); box-shadow: 4px 4px 0 var(--stroke); }
+  .theme-toggle:active { transform: translate(1px, 1px); box-shadow: 2px 2px 0 var(--stroke); }
+  .lead { margin: 16px 0 18px; font-size: 15px; max-width: 60ch; }
+  .lead b { background: var(--accent); color: var(--ink); padding: 0 4px; }
+  .tools { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 16px; }
+  #search {
+    flex: 1 1 220px; min-width: 0; font: inherit; font-size: 14px; color: var(--text);
+    background: var(--card); border: 2px solid var(--stroke); border-radius: 0;
+    padding: 9px 11px; box-shadow: 3px 3px 0 var(--stroke); outline: none;
+  }
+  #search:focus { box-shadow: 3px 3px 0 var(--accent); }
+  #search::placeholder { color: var(--muted); }
+  .count {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px;
+    letter-spacing: .08em; text-transform: uppercase; color: var(--muted); white-space: nowrap;
+  }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(108px, 1fr)); gap: 10px; }
+  .icon-card {
+    appearance: none; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 8px; min-height: 104px; padding: 14px 6px 10px; background: var(--card);
+    border: 2px solid var(--stroke); border-radius: 0; box-shadow: 3px 3px 0 var(--stroke);
+    color: var(--text); cursor: pointer; font: inherit;
+    transition: transform .08s, box-shadow .08s, background .08s;
+  }
+  .icon-card:hover { transform: translate(-1px, -1px); box-shadow: 4px 4px 0 var(--stroke); }
+  .icon-card:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--stroke); }
+  .icon-card:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+  .icon-card.done { background: var(--accent); color: var(--ink); }
+  .glyph { display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; }
+  .glyph svg { width: 32px; height: 32px; }
+  .name {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 9.5px; letter-spacing: .04em;
+    text-transform: uppercase; text-align: center; word-break: break-word; line-height: 1.2;
+  }
+  .empty { font-size: 14px; color: var(--muted); margin: 22px 0; }
+  .panel {
+    margin-top: 26px; background: var(--card); border: 2px solid var(--stroke);
+    box-shadow: 4px 4px 0 var(--stroke); padding: 16px;
+  }
+  .panel h2 { font-size: 15px; margin: 0 0 10px; letter-spacing: -.01em; }
+  #snippet {
+    width: 100%; height: 96px; resize: vertical; border-radius: 0; padding: 10px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11.5px; line-height: 1.5;
+    color: var(--text); background: var(--card2); border: 2px solid var(--stroke);
+  }
+  .hint { font-size: 12.5px; color: var(--muted); margin: 10px 0 0; }
+  .hint code {
+    font-family: ui-monospace, monospace; font-size: 11.5px;
+    background: var(--card2); border: 1px solid var(--stroke); padding: 1px 4px;
+  }
+  footer { margin-top: 30px; padding-top: 16px; border-top: 2px solid var(--stroke); font-size: 12px; color: var(--muted); }
+  footer p { margin: 0 0 8px; max-width: 70ch; }
+  footer a { color: var(--text); font-weight: 600; text-decoration: none; border-bottom: 2px solid var(--accent); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <div class="brand"><i></i>MEDIA ICONS</div>
+    <button class="theme-toggle" id="themeToggle" type="button" aria-pressed="false">DARK OFF</button>
+  </div>
+
+  <p class="lead">__COUNT__ media icons, one click each. <b>Tap an icon to copy its SVG</b> — image, camera, video, music, podcast and player marks. No account, no plan, no Pro gate, nothing to unlock.</p>
+
+  <div class="tools">
+    <input id="search" type="search" placeholder="Filter by name…" aria-label="Filter icons by name" autocomplete="off" />
+    <span class="count" id="count">__COUNT__ icons</span>
+  </div>
+
+  <div class="grid" id="grid"></div>
+  <p class="empty" id="empty" hidden>No icon matches that name.</p>
+
+  <div class="panel">
+    <h2>Landed in the box instead of the clipboard?</h2>
+    <textarea id="snippet" readonly spellcheck="false" aria-label="Copied SVG markup"></textarea>
+    <p class="hint">Every copy also lands here, so you can grab it by hand if your browser blocks the clipboard. The markup uses <code>stroke="currentColor"</code>, so the icon takes the colour of the text it sits in — set <code>stroke-width</code> to 1.5 if 2 looks heavy at small sizes.</p>
+  </div>
+
+  <footer>
+    <p>Icons: <b>Lucide</b>, ISC licence — free for commercial use, modification and redistribution, with the licence notice kept. None of this is Lineicons artwork, and none of it is behind a plan.</p>
+    <p><a href="../">← Compress for Android</a></p>
+  </footer>
+</div>
+
+<script>
+const ICONS = __ICONS__;
+
+const grid = document.getElementById("grid");
+const search = document.getElementById("search");
+const snippet = document.getElementById("snippet");
+const counter = document.getElementById("count");
+const empty = document.getElementById("empty");
+
+function markup(item) {
+  return '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"'
+    + ' fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"'
+    + ' stroke-linejoin="round">' + item.body + "</svg>";
+}
+
+async function copy(item, card, label) {
+  const text = markup(item);
+  snippet.value = text;
+  let ok = false;
+  try {
+    await navigator.clipboard.writeText(text);
+    ok = true;
+  } catch (err) {
+    const area = document.createElement("textarea");
+    area.value = text;
+    area.setAttribute("readonly", "");
+    area.style.position = "fixed";
+    area.style.top = "-1000px";
+    document.body.append(area);
+    area.select();
+    try { ok = document.execCommand("copy"); } catch (err2) { ok = false; }
+    area.remove();
+  }
+  if (!ok) { snippet.focus(); snippet.select(); }
+  label.textContent = ok ? "copied" : "in the box";
+  card.classList.add("done");
+  window.setTimeout(function () {
+    card.classList.remove("done");
+    label.textContent = item.name;
+  }, 1400);
+}
+
+function render(filter) {
+  const q = (filter || "").trim().toLowerCase();
+  grid.textContent = "";
+  let shown = 0;
+  ICONS.forEach(function (item) {
+    if (q && item.name.indexOf(q) === -1) { return; }
+    shown++;
+    const card = document.createElement("button");
+    card.type = "button";
+    card.className = "icon-card";
+    card.setAttribute("aria-label", "Copy " + item.name + " SVG");
+    const glyph = document.createElement("span");
+    glyph.className = "glyph";
+    glyph.innerHTML = markup(item);
+    const label = document.createElement("span");
+    label.className = "name";
+    label.textContent = item.name;
+    card.append(glyph, label);
+    card.addEventListener("click", function () { copy(item, card, label); });
+    grid.append(card);
+  });
+  counter.textContent = shown + (shown === 1 ? " icon" : " icons");
+  empty.hidden = shown !== 0;
+}
+
+search.addEventListener("input", function () { render(search.value); });
+
+const root = document.documentElement;
+const toggle = document.getElementById("themeToggle");
+function paint(dark) {
+  root.setAttribute("data-theme", dark ? "dark" : "light");
+  toggle.textContent = dark ? "DARK ON" : "DARK OFF";
+  toggle.setAttribute("aria-pressed", dark ? "true" : "false");
+}
+let saved = null;
+try { saved = window.localStorage.getItem("compress-theme"); } catch (err) { saved = null; }
+paint(saved === "dark");
+toggle.addEventListener("click", function () {
+  const dark = root.getAttribute("data-theme") !== "dark";
+  paint(dark);
+  try { window.localStorage.setItem("compress-theme", dark ? "dark" : "light"); } catch (err) {}
+});
+
+render("");
+</script>
+</body>
+</html>

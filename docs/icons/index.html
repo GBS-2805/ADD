@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Media icons — copy SVG, no account</title>
+<meta name="description" content="A copy-ready media icon set: image, camera, video, music, podcast and player icons. Click any icon to copy its SVG markup. No account, no plan, no Pro tier." />
+<style>
+  :root {
+    --bg: #f2e4c9; --card: #f7ecd7; --card2: #eadbbd; --stroke: #2b2926;
+    --accent: #ffb20f; --ink: #2b2926; --text: #2b2926; --muted: #4b5563;
+  }
+  /* Night palette, mirrored from the app's res/values-night/colors.xml. */
+  html[data-theme="dark"] {
+    --bg: #2b2926; --card: #37332e; --card2: #443f39; --stroke: #f7ecd7;
+    --accent: #ffb20f; --ink: #2b2926; --text: #f7ecd7; --muted: #a9a093;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    -webkit-font-smoothing: antialiased; min-height: 100vh; padding: 34px 18px 60px; line-height: 1.55;
+  }
+  .wrap { max-width: 880px; margin: 0 auto; }
+  .topbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  .brand { font-size: 22px; font-weight: 800; letter-spacing: -.02em; }
+  .brand i {
+    display: inline-block; width: 14px; height: 14px; margin-right: 8px;
+    background: var(--accent); border: 2px solid var(--stroke); transform: translateY(-1px);
+  }
+  .theme-toggle {
+    font: inherit; font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+    color: var(--ink); background: var(--accent); border: 2px solid var(--stroke); border-radius: 0;
+    padding: 7px 12px; box-shadow: 3px 3px 0 var(--stroke); cursor: pointer; white-space: nowrap;
+  }
+  .theme-toggle:hover { transform: translate(-1px, -1px); box-shadow: 4px 4px 0 var(--stroke); }
+  .theme-toggle:active { transform: translate(1px, 1px); box-shadow: 2px 2px 0 var(--stroke); }
+  .lead { margin: 16px 0 18px; font-size: 15px; max-width: 60ch; }
+  .lead b { background: var(--accent); color: var(--ink); padding: 0 4px; }
+  .tools { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 16px; }
+  #search {
+    flex: 1 1 220px; min-width: 0; font: inherit; font-size: 14px; color: var(--text);
+    background: var(--card); border: 2px solid var(--stroke); border-radius: 0;
+    padding: 9px 11px; box-shadow: 3px 3px 0 var(--stroke); outline: none;
+  }
+  #search:focus { box-shadow: 3px 3px 0 var(--accent); }
+  #search::placeholder { color: var(--muted); }
+  .count {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px;
+    letter-spacing: .08em; text-transform: uppercase; color: var(--muted); white-space: nowrap;
+  }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(108px, 1fr)); gap: 10px; }
+  .icon-card {
+    appearance: none; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 8px; min-height: 104px; padding: 14px 6px 10px; background: var(--card);
+    border: 2px solid var(--stroke); border-radius: 0; box-shadow: 3px 3px 0 var(--stroke);
+    color: var(--text); cursor: pointer; font: inherit;
+    transition: transform .08s, box-shadow .08s, background .08s;
+  }
+  .icon-card:hover { transform: translate(-1px, -1px); box-shadow: 4px 4px 0 var(--stroke); }
+  .icon-card:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--stroke); }
+  .icon-card:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+  .icon-card.done { background: var(--accent); color: var(--ink); }
+  .glyph { display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; }
+  .glyph svg { width: 32px; height: 32px; }
+  .name {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 9.5px; letter-spacing: .04em;
+    text-transform: uppercase; text-align: center; word-break: break-word; line-height: 1.2;
+  }
+  .empty { font-size: 14px; color: var(--muted); margin: 22px 0; }
+  .panel {
+    margin-top: 26px; background: var(--card); border: 2px solid var(--stroke);
+    box-shadow: 4px 4px 0 var(--stroke); padding: 16px;
+  }
+  .panel h2 { font-size: 15px; margin: 0 0 10px; letter-spacing: -.01em; }
+  #snippet {
+    width: 100%; height: 96px; resize: vertical; border-radius: 0; padding: 10px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11.5px; line-height: 1.5;
+    color: var(--text); background: var(--card2); border: 2px solid var(--stroke);
+  }
+  .hint { font-size: 12.5px; color: var(--muted); margin: 10px 0 0; }
+  .hint code {
+    font-family: ui-monospace, monospace; font-size: 11.5px;
+    background: var(--card2); border: 1px solid var(--stroke); padding: 1px 4px;
+  }
+  footer { margin-top: 30px; padding-top: 16px; border-top: 2px solid var(--stroke); font-size: 12px; color: var(--muted); }
+  footer p { margin: 0 0 8px; max-width: 70ch; }
+  footer a { color: var(--text); font-weight: 600; text-decoration: none; border-bottom: 2px solid var(--accent); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <div class="brand"><i></i>MEDIA ICONS</div>
+    <button class="theme-toggle" id="themeToggle" type="button" aria-pressed="false">DARK OFF</button>
+  </div>
+
+  <p class="lead">49 media icons, one click each. <b>Tap an icon to copy its SVG</b> — image, camera, video, music, podcast and player marks. No account, no plan, no Pro gate, nothing to unlock.</p>
+
+  <div class="tools">
+    <input id="search" type="search" placeholder="Filter by name…" aria-label="Filter icons by name" autocomplete="off" />
+    <span class="count" id="count">49 icons</span>
+  </div>
+
+  <div class="grid" id="grid"></div>
+  <p class="empty" id="empty" hidden>No icon matches that name.</p>
+
+  <div class="panel">
+    <h2>Landed in the box instead of the clipboard?</h2>
+    <textarea id="snippet" readonly spellcheck="false" aria-label="Copied SVG markup"></textarea>
+    <p class="hint">Every copy also lands here, so you can grab it by hand if your browser blocks the clipboard. The markup uses <code>stroke="currentColor"</code>, so the icon takes the colour of the text it sits in — set <code>stroke-width</code> to 1.5 if 2 looks heavy at small sizes.</p>
+  </div>
+
+  <footer>
+    <p>Icons: <b>Lucide</b>, ISC licence — free for commercial use, modification and redistribution, with the licence notice kept. None of this is Lineicons artwork, and none of it is behind a plan.</p>
+    <p><a href="../">← Compress for Android</a></p>
+  </footer>
+</div>
+
+<script>
+const ICONS = [{"name": "image", "body": "<rect width=\"18\" height=\"18\" x=\"3\" y=\"3\" rx=\"2\" ry=\"2\" /><circle cx=\"9\" cy=\"9\" r=\"2\" /><path d=\"m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21\" />"}, {"name": "images", "body": "<path d=\"m22 11-1.296-1.296a2.4 2.4 0 0 0-3.408 0L11 16\" /><path d=\"M4 8a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2\" /><circle cx=\"13\" cy=\"7\" r=\"1\" fill=\"currentColor\" /><rect x=\"8\" y=\"2\" width=\"14\" height=\"14\" rx=\"2\" />"}, {"name": "camera", "body": "<path d=\"M13.997 4a2 2 0 0 1 1.76 1.05l.486.9A2 2 0 0 0 18.003 7H20a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h1.997a2 2 0 0 0 1.759-1.048l.489-.904A2 2 0 0 1 10.004 4z\" /><circle cx=\"12\" cy=\"13\" r=\"3\" />"}, {"name": "camera-off", "body": "<path d=\"M14.564 14.558a3 3 0 1 1-4.122-4.121\" /><path d=\"m2 2 20 20\" /><path d=\"M20 20H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h1.997a2 2 0 0 0 .819-.175\" /><path d=\"M9.695 4.024A2 2 0 0 1 10.004 4h3.993a2 2 0 0 1 1.76 1.05l.486.9A2 2 0 0 0 18.003 7H20a2 2 0 0 1 2 2v7.344\" />"}, {"name": "video", "body": "<path d=\"m16 13 5.223 3.482a.5.5 0 0 0 .777-.416V7.87a.5.5 0 0 0-.752-.432L16 10.5\" /><rect x=\"2\" y=\"6\" width=\"14\" height=\"12\" rx=\"2\" />"}, {"name": "video-off", "body": "<path d=\"M10.66 6H14a2 2 0 0 1 2 2v2.5l5.248-3.062A.5.5 0 0 1 22 7.87v8.196\" /><path d=\"M16 16a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h2\" /><path d=\"m2 2 20 20\" />"}, {"name": "film", "body": "<rect width=\"18\" height=\"18\" x=\"3\" y=\"3\" rx=\"2\" /><path d=\"M7 3v18\" /><path d=\"M3 7.5h4\" /><path d=\"M3 12h18\" /><path d=\"M3 16.5h4\" /><path d=\"M17 3v18\" /><path d=\"M17 7.5h4\" /><path d=\"M17 16.5h4\" />"}, {"name": "clapperboard", "body": "<path d=\"m12.296 3.464 3.02 3.956\" /><path d=\"M20.2 6 3 11l-.9-2.4c-.3-1.1.3-2.2 1.3-2.5l13.5-4c1.1-.3 2.2.3 2.5 1.3z\" /><path d=\"M3 11h18v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z\" /><path d=\"m6.18 5.276 3.1 3.899\" />"}, {"name": "frame", "body": "<line x1=\"22\" x2=\"2\" y1=\"6\" y2=\"6\" /><line x1=\"22\" x2=\"2\" y1=\"18\" y2=\"18\" /><line x1=\"6\" x2=\"6\" y1=\"2\" y2=\"22\" /><line x1=\"18\" x2=\"18\" y1=\"2\" y2=\"22\" />"}, {"name": "gallery-horizontal", "body": "<path d=\"M2 3v18\" /><rect width=\"12\" height=\"18\" x=\"6\" y=\"3\" rx=\"2\" /><path d=\"M22 3v18\" />"}, {"name": "gallery-vertical", "body": "<path d=\"M3 2h18\" /><rect width=\"18\" height=\"12\" x=\"3\" y=\"6\" rx=\"2\" /><path d=\"M3 22h18\" />"}, {"name": "picture-in-picture", "body": "<path d=\"M2 10h6V4\" /><path d=\"m2 4 6 6\" /><path d=\"M21 10V7a2 2 0 0 0-2-2h-7\" /><path d=\"M3 14v2a2 2 0 0 0 2 2h3\" /><rect x=\"12\" y=\"14\" width=\"10\" height=\"7\" rx=\"1\" />"}, {"name": "cast", "body": "<path d=\"M2 8V6a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-6\" /><path d=\"M2 12a9 9 0 0 1 8 8\" /><path d=\"M2 16a5 5 0 0 1 4 4\" /><line x1=\"2\" x2=\"2.01\" y1=\"20\" y2=\"20\" />"}, {"name": "airplay", "body": "<path d=\"M5 17H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-1\" /><path d=\"m12 15 5 6H7Z\" />"}, {"name": "maximize", "body": "<path d=\"M8 3H5a2 2 0 0 0-2 2v3\" /><path d=\"M21 8V5a2 2 0 0 0-2-2h-3\" /><path d=\"M3 16v3a2 2 0 0 0 2 2h3\" /><path d=\"M16 21h3a2 2 0 0 0 2-2v-3\" />"}, {"name": "music", "body": "<path d=\"M21 16V3a1 1 0 0 0-1.28-.96l-10 2.917a1 1 0 0 0-.72.96V19\" /><circle cx=\"18\" cy=\"16\" r=\"3\" /><circle cx=\"6\" cy=\"19\" r=\"3\" />"}, {"name": "music-2", "body": "<path d=\"m19 6-5.2-3.9a.5.5 0 0 0-.8.4V18\" /><circle cx=\"9\" cy=\"18\" r=\"4\" />"}, {"name": "music-3", "body": "<circle cx=\"12\" cy=\"18\" r=\"4\" /><path d=\"M16 18V2\" />"}, {"name": "music-4", "body": "<path d=\"M21 16V3a1 1 0 0 0-1.28-.96l-10 2.917a1 1 0 0 0-.72.96V19\" /><path d=\"M21 6 9 9.5\" /><circle cx=\"18\" cy=\"16\" r=\"3\" /><circle cx=\"6\" cy=\"19\" r=\"3\" />"}, {"name": "audio-lines", "body": "<path d=\"M2 10v3\" /><path d=\"M6 6v11\" /><path d=\"M10 3v18\" /><path d=\"M14 8v7\" /><path d=\"M18 5v13\" /><path d=\"M22 10v3\" />"}, {"name": "audio-waveform", "body": "<path d=\"M2 13a2 2 0 0 0 2-2V7a2 2 0 0 1 4 0v13a2 2 0 0 0 4 0V4a2 2 0 0 1 4 0v13a2 2 0 0 0 4 0v-4a2 2 0 0 1 2-2\" />"}, {"name": "list-music", "body": "<path d=\"M16 5H3\" /><path d=\"M11 12H3\" /><path d=\"M11 19H3\" /><path d=\"M21 16V5\" /><circle cx=\"18\" cy=\"16\" r=\"3\" />"}, {"name": "library", "body": "<path d=\"m16 6 4 14\" /><path d=\"M12 6v14\" /><path d=\"M8 8v12\" /><path d=\"M4 4v16\" />"}, {"name": "disc", "body": "<circle cx=\"12\" cy=\"12\" r=\"10\" /><circle cx=\"12\" cy=\"12\" r=\"2\" />"}, {"name": "disc-3", "body": "<circle cx=\"12\" cy=\"12\" r=\"10\" /><path d=\"M6 12c0-1.7.7-3.2 1.8-4.2\" /><circle cx=\"12\" cy=\"12\" r=\"2\" /><path d=\"M18 12c0 1.7-.7 3.2-1.8 4.2\" />"}, {"name": "cassette-tape", "body": "<rect width=\"20\" height=\"16\" x=\"2\" y=\"4\" rx=\"2\" /><circle cx=\"8\" cy=\"10\" r=\"2\" /><path d=\"M8 12h8\" /><circle cx=\"16\" cy=\"10\" r=\"2\" /><path d=\"m6 20 .7-2.9A1.4 1.4 0 0 1 8.1 16h7.8a1.4 1.4 0 0 1 1.4 1l.7 3\" />"}, {"name": "mic", "body": "<path d=\"M12 19v3\" /><path d=\"M19 10v2a7 7 0 0 1-14 0v-2\" /><rect x=\"9\" y=\"2\" width=\"6\" height=\"13\" rx=\"3\" />"}, {"name": "mic-2", "body": "<path d=\"m11 7.601-5.994 8.19a1 1 0 0 0 .1 1.298l.817.818a1 1 0 0 0 1.314.087L15.09 12\" /><path d=\"M16.5 21.174C15.5 20.5 14.372 20 13 20c-2.058 0-3.928 2.356-6 2-2.072-.356-2.775-3.369-1.5-4.5\" /><circle cx=\"16\" cy=\"7\" r=\"5\" />"}, {"name": "mic-vocal", "body": "<path d=\"m11 7.601-5.994 8.19a1 1 0 0 0 .1 1.298l.817.818a1 1 0 0 0 1.314.087L15.09 12\" /><path d=\"M16.5 21.174C15.5 20.5 14.372 20 13 20c-2.058 0-3.928 2.356-6 2-2.072-.356-2.775-3.369-1.5-4.5\" /><circle cx=\"16\" cy=\"7\" r=\"5\" />"}, {"name": "headphones", "body": "<path d=\"M3 14h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7a9 9 0 0 1 18 0v7a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3\" />"}, {"name": "radio", "body": "<path d=\"M16.247 7.761a6 6 0 0 1 0 8.478\" /><path d=\"M19.075 4.933a10 10 0 0 1 0 14.134\" /><path d=\"M4.925 19.067a10 10 0 0 1 0-14.134\" /><path d=\"M7.753 16.239a6 6 0 0 1 0-8.478\" /><circle cx=\"12\" cy=\"12\" r=\"2\" />"}, {"name": "radio-tower", "body": "<path d=\"M4.9 16.1C1 12.2 1 5.8 4.9 1.9\" /><path d=\"M7.8 4.7a6.14 6.14 0 0 0-.8 7.5\" /><circle cx=\"12\" cy=\"9\" r=\"2\" /><path d=\"M16.2 4.8c2 2 2.26 5.11.8 7.47\" /><path d=\"M19.1 1.9a9.96 9.96 0 0 1 0 14.1\" /><path d=\"M9.5 18h5\" /><path d=\"m8 22 4-11 4 11\" />"}, {"name": "podcast", "body": "<path d=\"M12 17v4\" /><path d=\"M18 11a6 6 0 00-3-5.197\" /><path d=\"M2 11a10 10 0 015-8.662\" /><path d=\"M22 11a10 10 0 00-5-8.662\" /><path d=\"M6 11a6 6 0 013-5.197\" /><path d=\"M9 21h6\" /><rect x=\"10\" y=\"9\" width=\"4\" height=\"8\" rx=\"2\" />"}, {"name": "captions", "body": "<rect width=\"18\" height=\"14\" x=\"3\" y=\"5\" rx=\"2\" ry=\"2\" /><path d=\"M7 15h4M15 15h2M7 11h2M13 11h4\" />"}, {"name": "play", "body": "<path d=\"M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z\" />"}, {"name": "pause", "body": "<rect x=\"14\" y=\"3\" width=\"5\" height=\"18\" rx=\"1\" /><rect x=\"5\" y=\"3\" width=\"5\" height=\"18\" rx=\"1\" />"}, {"name": "circle-play", "body": "<path d=\"M9 9.003a1 1 0 0 1 1.517-.859l4.997 2.997a1 1 0 0 1 0 1.718l-4.997 2.997A1 1 0 0 1 9 14.996z\" /><circle cx=\"12\" cy=\"12\" r=\"10\" />"}, {"name": "circle-pause", "body": "<circle cx=\"12\" cy=\"12\" r=\"10\" /><line x1=\"10\" x2=\"10\" y1=\"15\" y2=\"9\" /><line x1=\"14\" x2=\"14\" y1=\"15\" y2=\"9\" />"}, {"name": "skip-back", "body": "<path d=\"M17.971 4.285A2 2 0 0 1 21 6v12a2 2 0 0 1-3.029 1.715l-9.997-5.998a2 2 0 0 1-.003-3.432z\" /><path d=\"M3 20V4\" />"}, {"name": "skip-forward", "body": "<path d=\"M21 4v16\" /><path d=\"M6.029 4.285A2 2 0 0 0 3 6v12a2 2 0 0 0 3.029 1.715l9.997-5.998a2 2 0 0 0 .003-3.432z\" />"}, {"name": "rewind", "body": "<path d=\"M12 6a2 2 0 0 0-3.414-1.414l-6 6a2 2 0 0 0 0 2.828l6 6A2 2 0 0 0 12 18z\" /><path d=\"M22 6a2 2 0 0 0-3.414-1.414l-6 6a2 2 0 0 0 0 2.828l6 6A2 2 0 0 0 22 18z\" />"}, {"name": "fast-forward", "body": "<path d=\"M12 6a2 2 0 0 1 3.414-1.414l6 6a2 2 0 0 1 0 2.828l-6 6A2 2 0 0 1 12 18z\" /><path d=\"M2 6a2 2 0 0 1 3.414-1.414l6 6a2 2 0 0 1 0 2.828l-6 6A2 2 0 0 1 2 18z\" />"}, {"name": "volume", "body": "<path d=\"M11 4.702a.705.705 0 0 0-1.203-.498L6.413 7.587A1.4 1.4 0 0 1 5.416 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.416a1.4 1.4 0 0 1 .997.413l3.383 3.384A.705.705 0 0 0 11 19.298z\" />"}, {"name": "volume-1", "body": "<path d=\"M11 4.702a.705.705 0 0 0-1.203-.498L6.413 7.587A1.4 1.4 0 0 1 5.416 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.416a1.4 1.4 0 0 1 .997.413l3.383 3.384A.705.705 0 0 0 11 19.298z\" /><path d=\"M16 9a5 5 0 0 1 0 6\" />"}, {"name": "volume-2", "body": "<path d=\"M11 4.702a.705.705 0 0 0-1.203-.498L6.413 7.587A1.4 1.4 0 0 1 5.416 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.416a1.4 1.4 0 0 1 .997.413l3.383 3.384A.705.705 0 0 0 11 19.298z\" /><path d=\"M16 9a5 5 0 0 1 0 6\" /><path d=\"M19.364 18.364a9 9 0 0 0 0-12.728\" />"}, {"name": "volume-x", "body": "<path d=\"M11 4.702a.7.7 0 0 0-1.203-.498L6.413 7.587A1.4 1.4 0 0 1 5.416 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.416a1.4 1.4 0 0 1 .997.413l3.383 3.384A.7.7 0 0 0 11 19.298z\" /><path d=\"m16.5 14.5 5-5\" /><path d=\"m16.5 9.5 5 5\" />"}, {"name": "tv", "body": "<path d=\"m17 2-5 5-5-5\" /><rect width=\"20\" height=\"15\" x=\"2\" y=\"7\" rx=\"2\" />"}, {"name": "tv-minimal", "body": "<path d=\"M7 21h10\" /><rect width=\"20\" height=\"14\" x=\"2\" y=\"3\" rx=\"2\" />"}, {"name": "monitor-play", "body": "<path d=\"M15.033 9.44a.647.647 0 0 1 0 1.12l-4.065 2.352a.645.645 0 0 1-.968-.56V7.648a.645.645 0 0 1 .967-.56z\" /><path d=\"M12 17v4\" /><path d=\"M8 21h8\" /><rect x=\"2\" y=\"3\" width=\"20\" height=\"14\" rx=\"2\" />"}];
+
+const grid = document.getElementById("grid");
+const search = document.getElementById("search");
+const snippet = document.getElementById("snippet");
+const counter = document.getElementById("count");
+const empty = document.getElementById("empty");
+
+function markup(item) {
+  return '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"'
+    + ' fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"'
+    + ' stroke-linejoin="round">' + item.body + "</svg>";
+}
+
+async function copy(item, card, label) {
+  const text = markup(item);
+  snippet.value = text;
+  let ok = false;
+  try {
+    await navigator.clipboard.writeText(text);
+    ok = true;
+  } catch (err) {
+    const area = document.createElement("textarea");
+    area.value = text;
+    area.setAttribute("readonly", "");
+    area.style.position = "fixed";
+    area.style.top = "-1000px";
+    document.body.append(area);
+    area.select();
+    try { ok = document.execCommand("copy"); } catch (err2) { ok = false; }
+    area.remove();
+  }
+  if (!ok) { snippet.focus(); snippet.select(); }
+  label.textContent = ok ? "copied" : "in the box";
+  card.classList.add("done");
+  window.setTimeout(function () {
+    card.classList.remove("done");
+    label.textContent = item.name;
+  }, 1400);
+}
+
+function render(filter) {
+  const q = (filter || "").trim().toLowerCase();
+  grid.textContent = "";
+  let shown = 0;
+  ICONS.forEach(function (item) {
+    if (q && item.name.indexOf(q) === -1) { return; }
+    shown++;
+    const card = document.createElement("button");
+    card.type = "button";
+    card.className = "icon-card";
+    card.setAttribute("aria-label", "Copy " + item.name + " SVG");
+    const glyph = document.createElement("span");
+    glyph.className = "glyph";
+    glyph.innerHTML = markup(item);
+    const label = document.createElement("span");
+    label.className = "name";
+    label.textContent = item.name;
+    card.append(glyph, label);
+    card.addEventListener("click", function () { copy(item, card, label); });
+    grid.append(card);
+  });
+  counter.textContent = shown + (shown === 1 ? " icon" : " icons");
+  empty.hidden = shown !== 0;
+}
+
+search.addEventListener("input", function () { render(search.value); });
+
+const root = document.documentElement;
+const toggle = document.getElementById("themeToggle");
+function paint(dark) {
+  root.setAttribute("data-theme", dark ? "dark" : "light");
+  toggle.textContent = dark ? "DARK ON" : "DARK OFF";
+  toggle.setAttribute("aria-pressed", dark ? "true" : "false");
+}
+let saved = null;
+try { saved = window.localStorage.getItem("compress-theme"); } catch (err) { saved = null; }
+paint(saved === "dark");
+toggle.addEventListener("click", function () {
+  const dark = root.getAttribute("data-theme") !== "dark";
+  paint(dark);
+  try { window.localStorage.setItem("compress-theme", dark ? "dark" : "light"); } catch (err) {}
+});
+
+render("");
+</script>
+</body>
+</html>
