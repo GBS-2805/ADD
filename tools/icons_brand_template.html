@@ -477,11 +477,12 @@ __BRANDS__
 
         <div class="ctl-row" role="group" aria-label="Export format">
           <span class="ctl-label">Format</span>
-          <div class="segs" id="formats">
-            <button class="seg" type="button" data-format="svg" aria-pressed="true">SVG</button>
-            <button class="seg" type="button" data-format="png" aria-pressed="false">PNG</button>
-            <button class="seg" type="button" data-format="webp" aria-pressed="false">WEBP</button>
-            <button class="seg" type="button" data-format="jpg" aria-pressed="false">JPG</button>
+          <div class="export-wrap" id="formatWrap">
+            <button class="export-btn" id="formatBtn" type="button" aria-expanded="false" aria-haspopup="listbox" aria-controls="formats">
+              <span id="formatLabel">SVG</span>
+              <svg class="cat-chev" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M8 10L12 14L16 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <div class="export-menu" id="formats" role="listbox" aria-label="Export format" hidden></div>
           </div>
         </div>
 
@@ -571,6 +572,9 @@ __BRANDS__
   var sizes = document.getElementById("sizes");
   var surfaces = document.getElementById("surfaces");
   var formats = document.getElementById("formats");
+  var formatWrap = document.getElementById("formatWrap");
+  var formatBtn = document.getElementById("formatBtn");
+  var formatLabel = document.getElementById("formatLabel");
   var copyLabel = document.getElementById("copyLabel");
   var exportWrap = document.getElementById("exportWrap");
   var exportBtn = document.getElementById("exportBtn");
@@ -782,7 +786,7 @@ __BRANDS__
   });
 
   document.addEventListener("keydown", function (event) {
-    if (event.key === "Escape") { closeCats(); closeExports(); }
+    if (event.key === "Escape") { closeCats(); closeExports(); closeFormats(); }
   });
 
   function setPanel(open) {
@@ -831,14 +835,7 @@ __BRANDS__
     applySurface(btn.getAttribute("data-surface"));
   });
 
-  formats.addEventListener("click", function (event) {
-    var btn = event.target.closest(".seg");
-    if (!btn) { return; }
-    applyFormat(btn.getAttribute("data-format"));
-    statusEl.textContent = format === "svg"
-      ? "Copy hands over the SVG file"
-      : "Copy saves a " + exportSize + "px " + format.toUpperCase() + " tile on the " + surface + " background";
-  });
+
 
   // A PNG, WEBP or JPG is drawn from the same tuned glyph at the chosen export size
   // on the chosen background: the app saves it to Pictures/Icons through its bridge,
@@ -921,13 +918,61 @@ __BRANDS__
     });
   }
 
+  var FORMATS = ["svg", "png", "webp", "jpg"];
+
+  function markFormats() {
+    Array.prototype.forEach.call(formats.children, function (item) {
+      item.setAttribute("aria-selected", item.getAttribute("data-format") === format ? "true" : "false");
+    });
+    formatLabel.textContent = format.toUpperCase();
+  }
+
   function applyFormat(value) {
     if (!MIME[value]) { return; }
     format = value;
-    markGroup(formats, formats.querySelector('[data-format="' + value + '"]'));
+    markFormats();
     copyLabel.textContent = "Copy " + format.toUpperCase();
     store(FORMAT_KEY, format);
   }
+
+  function closeFormats() {
+    formats.hidden = true;
+    formatBtn.setAttribute("aria-expanded", "false");
+  }
+
+  function renderFormats() {
+    var frag = document.createDocumentFragment();
+    FORMATS.forEach(function (value) {
+      var item = document.createElement("button");
+      item.type = "button";
+      item.className = "export-item";
+      item.setAttribute("role", "option");
+      item.setAttribute("data-format", value);
+      item.textContent = value.toUpperCase();
+      item.addEventListener("click", function () {
+        applyFormat(value);
+        statusEl.textContent = format === "svg"
+          ? "Copy hands over the SVG file"
+          : "Copy saves a " + exportSize + "px " + format.toUpperCase() + " tile on the " + surface + " background";
+        closeFormats();
+      });
+      frag.append(item);
+    });
+    formats.textContent = "";
+    formats.append(frag);
+    markFormats();
+  }
+
+  formatBtn.addEventListener("click", function () {
+    var open = formats.hidden;
+    if (open) { closeExports(); }
+    formats.hidden = !open;
+    formatBtn.setAttribute("aria-expanded", open ? "true" : "false");
+  });
+
+  document.addEventListener("click", function (event) {
+    if (!formatWrap.contains(event.target)) { closeFormats(); }
+  });
 
   function markExports() {
     Array.prototype.forEach.call(exportMenu.children, function (item) {
@@ -973,6 +1018,7 @@ __BRANDS__
 
   exportBtn.addEventListener("click", function () {
     var open = exportMenu.hidden;
+    if (open) { closeFormats(); }
     exportMenu.hidden = !open;
     exportBtn.setAttribute("aria-expanded", open ? "true" : "false");
   });
@@ -1168,9 +1214,10 @@ __BRANDS__
   if (window.IconsApp) { document.documentElement.classList.add("in-app"); }
 
   (function restoreExport() {
+    renderFormats();
+    renderExports();
     var savedFormat = recall(FORMAT_KEY);
     if (MIME[savedFormat]) { applyFormat(savedFormat); }
-    renderExports();
     var savedSize = Number(recall(SIZE_KEY));
     if (savedSize && EXPORT_SIZES.indexOf(savedSize) !== -1) {
       applyExportSize(savedSize, false);
