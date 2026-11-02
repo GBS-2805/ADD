@@ -39,6 +39,13 @@ const WIDTHS = [
   { w: 390, h: 844, tag: "phone" },
 ];
 
+// The two pull-outs are states of a page rather than pages of their own, so they
+// are captured after the grid and numbered past its last artboard.
+const STATES = [
+  { slug: "index-menu", url: "/", label: "Index · pull-down", open: "#menuBtn", n: 19, nPhone: 21 },
+  { slug: "index-drawer", url: "/", label: "Index · side tab", open: "#burger", n: 20, nPhone: 22 },
+];
+
 /* ------------------------------------------------------------------ */
 /* runs inside the page                                                */
 /* ------------------------------------------------------------------ */
@@ -410,6 +417,53 @@ async function capture() {
       written.push({
         file,
         label: page_.label,
+        tag: width.tag,
+        size: `${shot.W}×${shot.H}`,
+        bytes: Buffer.byteLength(body),
+        ...shot.counts,
+      });
+      await ctx.close();
+    }
+  }
+
+  // ---- the pull-outs, open, one artboard each at both widths -------------
+  for (const width of WIDTHS) {
+    if (onlyWidths && !onlyWidths.includes(width.tag)) continue;
+    for (const state of STATES) {
+      if (onlyPages && !onlyPages.includes(state.slug)) continue;
+      const ctx = await browser.newContext({
+        viewport: { width: width.w, height: width.h },
+        deviceScaleFactor: 1,
+        reducedMotion: "reduce",
+      });
+      const page = await ctx.newPage();
+      page.on("console", (m) => {
+        if (m.type() === "error") errors.push(`${state.slug}/${width.tag}: ${m.text()}`);
+      });
+      page.on("pageerror", (e) => errors.push(`${state.slug}/${width.tag}: ${e.message}`));
+      await page.goto(base + state.url.replace(/^\//, ""), { waitUntil: "networkidle" });
+      await page.evaluate(() => document.fonts.ready);
+      await page.click(state.open);
+      await page.waitForTimeout(420);
+
+      const shot = await page.evaluate(capture);
+      const n = String(width.tag === "desktop" ? state.n : state.nPhone).padStart(2, "0");
+      const file = `${n}-${state.slug}-${width.tag}.svg`;
+      const head =
+        `<?xml version="1.0" encoding="UTF-8"?>\n` +
+        `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" ` +
+        `width="${shot.W}" height="${shot.H}" viewBox="0 0 ${shot.W} ${shot.H}">\n` +
+        `<title>${state.label} — ${width.w}×${shot.H}</title>\n` +
+        `<g id="${state.label.replace(/[^\w· -]/g, "")} · ${width.tag}">\n` +
+        `<rect x="0" y="0" width="${shot.W}" height="${shot.H}" fill="${(shot.bg.match(/\d+/g) || [63, 78, 150])
+          .slice(0, 3)
+          .map((v) => Number(v).toString(16).padStart(2, "0"))
+          .reduce((a, v) => a + v, "#")}"/>\n`;
+      const body = head + shot.body + "\n</g>\n</svg>\n";
+      fs.writeFileSync(path.join(outDir, file), body);
+      written.push({
+        file,
+        label: state.label,
         tag: width.tag,
         size: `${shot.W}×${shot.H}`,
         bytes: Buffer.byteLength(body),

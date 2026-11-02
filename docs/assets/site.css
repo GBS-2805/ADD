@@ -335,6 +335,7 @@ ol.steps li::before {
   grid-template-columns: repeat(4, minmax(0, 1fr));
   margin-top: 30px;
   border-top: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
 }
 /* Four cells, a rule on the right of every one of them -- including the last,
    which the frame closes the row with -- and a taller cell than the text needs. */
