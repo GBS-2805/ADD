@@ -115,6 +115,9 @@ def main():
     DST.mkdir(parents=True, exist_ok=True)
     wanted = {}
     for artboard in exports:
+        # The four pull-outs answer to their number and to the plain name, so a link
+        # written either way keeps working.
+        wanted[artboard.name] = artboard
         wanted[RENAME.get(artboard.name, artboard.name)] = artboard
     wanted[BUNDLE] = bundle
 
