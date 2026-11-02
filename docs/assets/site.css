@@ -114,6 +114,7 @@ a { color: inherit; }
 .who { display: flex; align-items: center; gap: 26px; }
 .who-lines { text-align: right; }
 .who-lines p { margin: 0; font-size: 17px; line-height: 24.5px; }
+.who-lines .narrow { display: none; }
 .burger {
   display: flex;
   align-items: center;
@@ -226,6 +227,19 @@ h1 {
   -webkit-box-decoration-break: clone;
   box-decoration-break: clone;
 }
+/* The counts the lede used to spell out, one per line, each value on the band
+   colour as the frame draws it. */
+.stats {
+  margin: 26px 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 10px;
+  font-size: 20px;
+  line-height: 1.4;
+}
+.stats li { display: flex; align-items: center; gap: 4px; }
+.stats b { padding: 1px 8px; background: var(--band); color: var(--ink); font-weight: 400; }
 .meta {
   display: flex;
   flex-wrap: wrap;
@@ -382,6 +396,10 @@ footer a:hover { text-decoration: underline; }
   .mark, .mark svg { width: 34px; height: 34px; }
   .who { gap: 8px; }
   .who-lines p { font-size: 14px; line-height: 1.35; }
+  /* The long line needs the width of a desktop band; on a phone the mark would
+     sit on top of it, so the narrow label takes over. */
+  .who-lines .wide { display: none; }
+  .who-lines .narrow { display: block; }
   .burger { width: 36px; height: 36px; margin-right: -6px; }
   .burger svg { width: 24px; height: 24px; }
   .menu { padding-bottom: 6px; }
@@ -392,6 +410,7 @@ footer a:hover { text-decoration: underline; }
   .drawer a { padding: 15px 0; font-size: 19px; }
   .page-head { padding: 48px 0 28px; }
   .lede { font-size: 18px; }
+  .stats { font-size: 18px; }
   .cta { width: 100%; justify-content: center; height: 54px; }
   .ctas { flex-direction: column; }
   section { padding: 44px 0; }
