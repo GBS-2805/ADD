@@ -9,6 +9,16 @@
 <meta name="description" content="23 screenshots of the shelf, captured in headless Chromium: the index at its fold, both pull-downs, the two apps, the icon brand pages with their previews and open sets, fonts, portfolio and download, at 1300 wide and 390 on a phone." />
 <link rel="stylesheet" href="../assets/site.css" />
 <style>
+  .gal-filter { display: flex; flex-wrap: wrap; gap: 10px; margin: 20px 0 34px; }
+  .chip { font: inherit; font-size: 14px; letter-spacing: .01em; padding: 9px 14px; color: var(--on); background: transparent; border: 1px solid var(--rule); cursor: pointer; }
+  .chip span { margin-left: 8px; color: var(--on-dim); }
+  .chip[aria-pressed="true"] { background: var(--band); color: var(--ink); border-color: var(--band); }
+  .chip[aria-pressed="true"] span { color: var(--ink); }
+  .chip:focus-visible { outline: 2px solid var(--band); outline-offset: -3px; }
+  .group { margin: 0 0 56px; }
+  .group > h2 { margin: 0 0 18px; font-size: 24px; font-weight: 500; }
+  .group > h2 span { margin-left: 10px; font-size: 14px; color: var(--on-dim); }
+  .group[hidden] { display: none; }
   .figs { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 34px; }
   figure { margin: 0; display: flex; flex-direction: column; border: 1px solid var(--rule); background: rgba(0, 0, 0, .16); }
   figure h3 { margin: 0; padding: 16px 18px 14px; font-size: 18px; font-weight: 500; line-height: 1.3; border-bottom: 1px solid var(--rule); }
@@ -84,8 +94,12 @@
 
   <section>
     <h2>The captures</h2>
-    <p class="kicker">Newest run first is not a thing here — one run, in order</p>
-    <div class="figs">
+    <p class="kicker">Grouped by page, in the order the run took them</p>
+    <nav class="gal-filter" id="galFilter" aria-label="Filter captures by page"><button class="chip" type="button" data-group="all" aria-pressed="true">All <span>23</span></button><button class="chip" type="button" data-group="Index" aria-pressed="false">Index <span>8</span></button><button class="chip" type="button" data-group="Tools" aria-pressed="false">Tools <span>1</span></button><button class="chip" type="button" data-group="Icons app page" aria-pressed="false">Icons app page <span>2</span></button><button class="chip" type="button" data-group="Coolicons" aria-pressed="false">Coolicons <span>6</span></button><button class="chip" type="button" data-group="Lineicons" aria-pressed="false">Lineicons <span>2</span></button><button class="chip" type="button" data-group="Fonts" aria-pressed="false">Fonts <span>1</span></button><button class="chip" type="button" data-group="Portfolio" aria-pressed="false">Portfolio <span>1</span></button><button class="chip" type="button" data-group="Download" aria-pressed="false">Download <span>1</span></button><button class="chip" type="button" data-group="The mark" aria-pressed="false">The mark <span>1</span></button></nav>
+    <div id="galGroups">
+    <section class="group" data-group="Index">
+      <h2>Index <span>8 captures</span></h2>
+      <div class="figs">
       <figure>
         <h3>Index</h3>
         <a href="page-home-light.png"><img src="page-home-light.png" alt="Index" loading="lazy" /></a>
@@ -107,15 +121,55 @@
         <p class="cap">Download, portfolio and renders over the scrim.</p>
       </figure>
       <figure>
+        <h3>Index on a phone</h3>
+        <a href="phone-home-light.png"><img src="phone-home-light.png" alt="Index on a phone" loading="lazy" /></a>
+        <p class="cap">390×844: the band, the lede and both downloads.</p>
+      </figure>
+      <figure>
+        <h3>Index, phone, full height</h3>
+        <a href="phone-home-full.png"><img src="phone-home-full.png" alt="Index, phone, full height" loading="lazy" /></a>
+        <p class="cap">The whole landing page at phone width.</p>
+      </figure>
+      <figure>
+        <h3>Phone pull-down</h3>
+        <a href="phone-menu.png"><img src="phone-menu.png" alt="Phone pull-down" loading="lazy" /></a>
+        <p class="cap">Four rows under the band, counts on the right.</p>
+      </figure>
+      <figure>
+        <h3>Phone side tab</h3>
+        <a href="phone-drawer.png"><img src="phone-drawer.png" alt="Phone side tab" loading="lazy" /></a>
+        <p class="cap">The tab takes 86% of the width so the page stays behind it.</p>
+      </figure>
+      </div>
+    </section>
+    <section class="group" data-group="Tools">
+      <h2>Tools <span>1 capture</span></h2>
+      <div class="figs">
+      <figure>
         <h3>Tools</h3>
         <a href="page-tools.png"><img src="page-tools.png" alt="Tools" loading="lazy" /></a>
         <p class="cap">Both apps, Icons 1.4 first, each with its own APK.</p>
       </figure>
+      </div>
+    </section>
+    <section class="group" data-group="Icons app page">
+      <h2>Icons app page <span>2 captures</span></h2>
+      <div class="figs">
       <figure>
         <h3>Icons app page</h3>
         <a href="page-icons.png"><img src="page-icons.png" alt="Icons app page" loading="lazy" /></a>
         <p class="cap">The icon brand landing: download, brands, what the app does.</p>
       </figure>
+      <figure>
+        <h3>Icons on a phone</h3>
+        <a href="phone-icons.png"><img src="phone-icons.png" alt="Icons on a phone" loading="lazy" /></a>
+        <p class="cap">The app page at phone width.</p>
+      </figure>
+      </div>
+    </section>
+    <section class="group" data-group="Coolicons">
+      <h2>Coolicons <span>6 captures</span></h2>
+      <div class="figs">
       <figure>
         <h3>Coolicons · preview</h3>
         <a href="page-icons-brand.png"><img src="page-icons-brand.png" alt="Coolicons · preview" loading="lazy" /></a>
@@ -137,70 +191,72 @@
         <p class="cap">The vendor's own 30 categories: System narrows the sheet to 102 glyphs.</p>
       </figure>
       <figure>
-        <h3>Lineicons · categories</h3>
-        <a href="page-lineicons-categories.png"><img src="page-lineicons-categories.png" alt="Lineicons · categories" loading="lazy" /></a>
-        <p class="cap">The other brand's own 51 categories: Brands &amp; Logos holds 244 of its 606 glyphs.</p>
-      </figure>
-      <figure>
-        <h3>Fonts</h3>
-        <a href="page-fonts.png"><img src="page-fonts.png" alt="Fonts" loading="lazy" /></a>
-        <p class="cap">Poppins 400, 500 and 600 with specimens and downloads.</p>
-      </figure>
-      <figure>
-        <h3>Portfolio</h3>
-        <a href="page-portfolio.png"><img src="page-portfolio.png" alt="Portfolio" loading="lazy" /></a>
-        <p class="cap">The apps, the browser and the site, with what was built in each.</p>
-      </figure>
-      <figure>
-        <h3>Download</h3>
-        <a href="page-download.png"><img src="page-download.png" alt="Download" loading="lazy" /></a>
-        <p class="cap">Both APKs, their measured sizes and both SHA-256 hashes.</p>
-      </figure>
-      <figure>
         <h3>Coolicons · shut sheet</h3>
         <a href="phone-icons-sheet.png"><img src="phone-icons-sheet.png" alt="Coolicons · shut sheet" loading="lazy" /></a>
         <p class="cap">Shut, the set is one complete row with a closed edge.</p>
-      </figure>
-      <figure>
-        <h3>Lineicons · categories on a phone</h3>
-        <a href="phone-lineicons-sheet.png"><img src="phone-lineicons-sheet.png" alt="Lineicons · categories on a phone" loading="lazy" /></a>
-        <p class="cap">The same picker on the other brand, stacked under the name filter at 390 wide.</p>
-      </figure>
-      <figure>
-        <h3>Index on a phone</h3>
-        <a href="phone-home-light.png"><img src="phone-home-light.png" alt="Index on a phone" loading="lazy" /></a>
-        <p class="cap">390×844: the band, the lede and both downloads.</p>
-      </figure>
-      <figure>
-        <h3>Index, phone, full height</h3>
-        <a href="phone-home-full.png"><img src="phone-home-full.png" alt="Index, phone, full height" loading="lazy" /></a>
-        <p class="cap">The whole landing page at phone width.</p>
-      </figure>
-      <figure>
-        <h3>Phone pull-down</h3>
-        <a href="phone-menu.png"><img src="phone-menu.png" alt="Phone pull-down" loading="lazy" /></a>
-        <p class="cap">Four rows under the band, counts on the right.</p>
-      </figure>
-      <figure>
-        <h3>Phone side tab</h3>
-        <a href="phone-drawer.png"><img src="phone-drawer.png" alt="Phone side tab" loading="lazy" /></a>
-        <p class="cap">The tab takes 86% of the width so the page stays behind it.</p>
-      </figure>
-      <figure>
-        <h3>Icons on a phone</h3>
-        <a href="phone-icons.png"><img src="phone-icons.png" alt="Icons on a phone" loading="lazy" /></a>
-        <p class="cap">The app page at phone width.</p>
       </figure>
       <figure>
         <h3>Coolicons on a phone</h3>
         <a href="phone-icons-brand.png"><img src="phone-icons-brand.png" alt="Coolicons on a phone" loading="lazy" /></a>
         <p class="cap">Preview, variant rows, and the set opened below.</p>
       </figure>
+      </div>
+    </section>
+    <section class="group" data-group="Lineicons">
+      <h2>Lineicons <span>2 captures</span></h2>
+      <div class="figs">
+      <figure>
+        <h3>Lineicons · categories</h3>
+        <a href="page-lineicons-categories.png"><img src="page-lineicons-categories.png" alt="Lineicons · categories" loading="lazy" /></a>
+        <p class="cap">The other brand's own 51 categories: Brands &amp; Logos holds 244 of its 606 glyphs.</p>
+      </figure>
+      <figure>
+        <h3>Lineicons · categories on a phone</h3>
+        <a href="phone-lineicons-sheet.png"><img src="phone-lineicons-sheet.png" alt="Lineicons · categories on a phone" loading="lazy" /></a>
+        <p class="cap">The same picker on the other brand, stacked under the name filter at 390 wide.</p>
+      </figure>
+      </div>
+    </section>
+    <section class="group" data-group="Fonts">
+      <h2>Fonts <span>1 capture</span></h2>
+      <div class="figs">
+      <figure>
+        <h3>Fonts</h3>
+        <a href="page-fonts.png"><img src="page-fonts.png" alt="Fonts" loading="lazy" /></a>
+        <p class="cap">Poppins 400, 500 and 600 with specimens and downloads.</p>
+      </figure>
+      </div>
+    </section>
+    <section class="group" data-group="Portfolio">
+      <h2>Portfolio <span>1 capture</span></h2>
+      <div class="figs">
+      <figure>
+        <h3>Portfolio</h3>
+        <a href="page-portfolio.png"><img src="page-portfolio.png" alt="Portfolio" loading="lazy" /></a>
+        <p class="cap">The apps, the browser and the site, with what was built in each.</p>
+      </figure>
+      </div>
+    </section>
+    <section class="group" data-group="Download">
+      <h2>Download <span>1 capture</span></h2>
+      <div class="figs">
+      <figure>
+        <h3>Download</h3>
+        <a href="page-download.png"><img src="page-download.png" alt="Download" loading="lazy" /></a>
+        <p class="cap">Both APKs, their measured sizes and both SHA-256 hashes.</p>
+      </figure>
+      </div>
+    </section>
+    <section class="group" data-group="The mark">
+      <h2>The mark <span>1 capture</span></h2>
+      <div class="figs">
       <figure>
         <h3>The mark</h3>
         <a href="logo-light.png"><img src="logo-light.png" alt="The mark" loading="lazy" /></a>
         <p class="cap">The 45px logo at 4×, straight from assets/logo.svg.</p>
       </figure>
+      </div>
+    </section>
     </div>
     <p class="fine">The Android apps cannot be captured on this machine: <code>/dev/kvm</code> is unusable for this account, so the emulator runs under software emulation and every screencap comes back black. The gallery therefore carries no app screenshots rather than a drawing of one.</p>
   </section>
@@ -211,6 +267,23 @@
   <span><a href="../">Index</a> · <a href="../tools/">Tools</a> · <a href="../download/">Download</a></span>
 </footer>
 
+<script>
+(function () {
+  var nav = document.getElementById("galFilter");
+  if (!nav) { return; }
+  nav.addEventListener("click", function (event) {
+    var chip = event.target.closest(".chip");
+    if (!chip) { return; }
+    var want = chip.getAttribute("data-group");
+    Array.prototype.forEach.call(nav.querySelectorAll(".chip"), function (button) {
+      button.setAttribute("aria-pressed", button === chip ? "true" : "false");
+    });
+    Array.prototype.forEach.call(document.querySelectorAll(".group"), function (section) {
+      section.hidden = want !== "all" && section.getAttribute("data-group") !== want;
+    });
+  });
+})();
+</script>
 <script src="../assets/site.js" defer></script>
 </body>
 </html>

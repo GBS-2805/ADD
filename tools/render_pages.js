@@ -134,12 +134,32 @@ const escape = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/
       console.log("removed orphan", file);
     }
   }
-  const figures = [...shots, ...extras].map((s) => `
+  const GROUP_OF = { "": "Index", "tools/": "Tools", "icons/": "Icons app page",
+    "icons/coolicons/": "Coolicons", "icons/lineicons/": "Lineicons", "fonts/": "Fonts",
+    "portfolio/": "Portfolio", "download/": "Download" };
+  const all = [...shots, ...extras];
+  const groups = [];
+  for (const s of all) {
+    const label = s.name === "logo-light" ? "The mark" : (GROUP_OF[s.page] || s.page || "Other");
+    let group = groups.find((g) => g.name === label);
+    if (!group) { group = { name: label, shots: [] }; groups.push(group); }
+    group.shots.push(s);
+  }
+  const card = (s) => `
       <figure>
         <h3>${escape(s.title)}</h3>
         <a href="${s.name}.png"><img src="${s.name}.png" alt="${escape(s.title)}" loading="lazy" /></a>
         <p class="cap">${escape(s.caption)}</p>
-      </figure>`).join("");
+      </figure>`;
+  const chips = [`<button class="chip" type="button" data-group="all" aria-pressed="true">All <span>${all.length}</span></button>`]
+    .concat(groups.map((g) => `<button class="chip" type="button" data-group="${escape(g.name)}" aria-pressed="false">${escape(g.name)} <span>${g.shots.length}</span></button>`))
+    .join("");
+  const sections = groups.map((g) => `
+    <section class="group" data-group="${escape(g.name)}">
+      <h2>${escape(g.name)} <span>${g.shots.length} ${g.shots.length === 1 ? "capture" : "captures"}</span></h2>
+      <div class="figs">${g.shots.map(card).join("")}
+      </div>
+    </section>`).join("");
 
   const page = `<!DOCTYPE html>
 <html lang="en">
@@ -152,6 +172,16 @@ const escape = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/
 <meta name="description" content="__COUNT__ screenshots of the shelf, captured in headless Chromium: the index at its fold, both pull-downs, the two apps, the icon brand pages with their previews and open sets, fonts, portfolio and download, at 1300 wide and 390 on a phone." />
 <link rel="stylesheet" href="../assets/site.css" />
 <style>
+  .gal-filter { display: flex; flex-wrap: wrap; gap: 10px; margin: 20px 0 34px; }
+  .chip { font: inherit; font-size: 14px; letter-spacing: .01em; padding: 9px 14px; color: var(--on); background: transparent; border: 1px solid var(--rule); cursor: pointer; }
+  .chip span { margin-left: 8px; color: var(--on-dim); }
+  .chip[aria-pressed="true"] { background: var(--band); color: var(--ink); border-color: var(--band); }
+  .chip[aria-pressed="true"] span { color: var(--ink); }
+  .chip:focus-visible { outline: 2px solid var(--band); outline-offset: -3px; }
+  .group { margin: 0 0 56px; }
+  .group > h2 { margin: 0 0 18px; font-size: 24px; font-weight: 500; }
+  .group > h2 span { margin-left: 10px; font-size: 14px; color: var(--on-dim); }
+  .group[hidden] { display: none; }
   .figs { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 34px; }
   figure { margin: 0; display: flex; flex-direction: column; border: 1px solid var(--rule); background: rgba(0, 0, 0, .16); }
   figure h3 { margin: 0; padding: 16px 18px 14px; font-size: 18px; font-weight: 500; line-height: 1.3; border-bottom: 1px solid var(--rule); }
@@ -227,8 +257,9 @@ const escape = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/
 
   <section>
     <h2>The captures</h2>
-    <p class="kicker">Newest run first is not a thing here — one run, in order</p>
-    <div class="figs">${figures}
+    <p class="kicker">Grouped by page, in the order the run took them</p>
+    <nav class="gal-filter" id="galFilter" aria-label="Filter captures by page">${chips}</nav>
+    <div id="galGroups">${sections}
     </div>
     <p class="fine">The Android apps cannot be captured on this machine: <code>/dev/kvm</code> is unusable for this account, so the emulator runs under software emulation and every screencap comes back black. The gallery therefore carries no app screenshots rather than a drawing of one.</p>
   </section>
@@ -239,6 +270,23 @@ const escape = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/
   <span><a href="../">Index</a> · <a href="../tools/">Tools</a> · <a href="../download/">Download</a></span>
 </footer>
 
+<script>
+(function () {
+  var nav = document.getElementById("galFilter");
+  if (!nav) { return; }
+  nav.addEventListener("click", function (event) {
+    var chip = event.target.closest(".chip");
+    if (!chip) { return; }
+    var want = chip.getAttribute("data-group");
+    Array.prototype.forEach.call(nav.querySelectorAll(".chip"), function (button) {
+      button.setAttribute("aria-pressed", button === chip ? "true" : "false");
+    });
+    Array.prototype.forEach.call(document.querySelectorAll(".group"), function (section) {
+      section.hidden = want !== "all" && section.getAttribute("data-group") !== want;
+    });
+  });
+})();
+</script>
 <script src="../assets/site.js" defer></script>
 </body>
 </html>
