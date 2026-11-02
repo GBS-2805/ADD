@@ -4,7 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>A design shelf — icons, type and two Android tools</title>
-<meta name="description" content="The material this site is made of: 1,864 icons in two brands, three Poppins faces, a hairline system on one palette, and two offline Android apps built from it. Every catalog has a page and a JSON file." />
+<meta name="description" content="The material this site is made of: 1,864 icons in two brands, three Poppins faces, a hairline system on one palette, and two offline Android apps built from it." />
 <meta name="theme-color" content="#3f4e96" />
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
 <link rel="stylesheet" href="assets/site.css" />
@@ -85,7 +85,7 @@
 
   <section>
     <h2>The material</h2>
-    <p class="kicker">Four catalogs, one page each and one JSON apiece</p>
+    <p class="kicker">Four catalogs, one page each</p>
     <div class="cards">
       <a class="card" href="icons/">
         <span class="kind">Icons · 2 brands · 1,864</span>
@@ -136,18 +136,6 @@
     <p class="fine">The same four values are in <code>docs/assets/site.css</code> and in each app's resources, and the band's geometry comes from the Figma frame that started this: a 96px band, a 45px mark, 26px page name, 17px lines.</p>
   </section>
 
-  <section>
-    <h2>The data</h2>
-    <p class="kicker">Generated, measured, served from the site root</p>
-    <ul class="rows">
-      <li><b>/data/index.json</b><span>The shelf itself: four catalogs, their pages, their JSON and their counts.</span></li>
-      <li><b>/data/tools.json</b><span>Both apps: version, package, APK path, bytes, SHA-256, minimum Android.</span></li>
-      <li><b>/data/icons.json</b> · <b>/data/coolicons.json</b><span>All 1,864 glyphs with their markup, ready to render — the Icons app's whole database, in both brands.</span></li>
-      <li><b>/data/fonts.json</b><span>Each Poppins face with its weight, both file paths and both sizes.</span></li>
-      <li><b>/data/portfolio.json</b><span>The three projects with year, kind, stack and what I built.</span></li>
-    </ul>
-    <p class="fine">Written by <code>tools/build_catalog.py</code> and <code>tools/fetch_icons.py</code>, which also check that the numbers printed on these pages still match the files that ship. Nothing on the shelf is typed twice.</p>
-  </section>
 </main>
 
 <footer>

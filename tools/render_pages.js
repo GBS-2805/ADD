@@ -12,7 +12,7 @@ const gallery = process.argv[4] || "docs/renders";
 
 const shots = [
   { name: "page-home-light", page: "", w: 1300, h: 900, title: "Index", caption: "The landing page at its fold: the material, then two downloads." },
-  { name: "page-home-full", page: "", w: 1300, h: 900, full: true, title: "Index, full height", caption: "The material, both apps, the palette and the JSON list." },
+  { name: "page-home-full", page: "", w: 1300, h: 900, full: true, title: "Index, full height", caption: "The material, both apps and the palette." },
   { name: "page-menu", page: "", w: 1300, h: 900, open: "#menuBtn", title: "Left pull-down", caption: "Index, icons, fonts and tools, one row each." },
   { name: "page-drawer", page: "", w: 1300, h: 900, open: "#burger", title: "Right side tab", caption: "Download, portfolio and renders over the scrim." },
   { name: "page-tools", page: "tools/", w: 1300, h: 900, title: "Tools", caption: "Both apps, Icons 2.3 first, each with its own APK." },
