@@ -39,10 +39,10 @@
       "name": "Icons",
       "kind": "Android app",
       "status": "released",
-      "version": "1.8",
-      "version_code": 9,
+      "version": "1.9",
+      "version_code": 10,
       "package": "app.offline.icons",
-      "apk": "/Icons-1.8.apk",
+      "apk": "/Icons-1.9.apk",
       "min_android": "8.0 (API 26)",
       "summary": "Both free icon brands on the phone: 1,864 glyphs, a preview with weight, size and surface, and the whole set behind one toggle. Bundled offline with no permissions at all.",
       "features": [
@@ -57,7 +57,7 @@
         "The whole set opens into a scrolling sheet instead of filling the page.",
         "Copy hands over the untouched SVG: 24x24 viewBox, currentColor, no baked weight.",
         "No INTERNET permission: the browser and the catalogs ship inside the APK.",
-        "The format and export size you pick are remembered per brand, like the category.",
+        "The format, export size and background you pick are remembered per brand, like the category.",
         "Export size opens a list of six sizes, from 32 to 1024px."
       ],
       "links": [
@@ -71,7 +71,7 @@
         }
       ],
       "bytes": 529794,
-      "sha256": "c8ef86ee26b07ef9701d4e1fa5b7051ad8f8841c692a8a18571eccf745f43998"
+      "sha256": "7d499d80c0aa543e73d5285e0f0f91d0e75e7448b6b685d37afed0e101b84762"
     }
   ]
 }

@@ -817,14 +817,18 @@ __BRANDS__
     paint();
   });
 
+  function applySurface(value) {
+    if (value !== "black" && value !== "white") { return; }
+    surface = value;
+    markGroup(surfaces, surfaces.querySelector('[data-surface="' + value + '"]'));
+    store(SURFACE_KEY, value);
+    paint();
+  }
+
   surfaces.addEventListener("click", function (event) {
     var btn = event.target.closest(".seg");
     if (!btn) { return; }
-    surface = btn.getAttribute("data-surface");
-    Array.prototype.forEach.call(surfaces.children, function (other) {
-      other.setAttribute("aria-pressed", other === btn ? "true" : "false");
-    });
-    paint();
+    applySurface(btn.getAttribute("data-surface"));
   });
 
   formats.addEventListener("click", function (event) {
@@ -898,6 +902,7 @@ __BRANDS__
 
   var FORMAT_KEY = "icons:format:" + SLUG;
   var SIZE_KEY = "icons:export:" + SLUG;
+  var SURFACE_KEY = "icons:surface:" + SLUG;
 
   function store(key, value) {
     try {
@@ -1170,6 +1175,7 @@ __BRANDS__
     if (savedSize && EXPORT_SIZES.indexOf(savedSize) !== -1) {
       applyExportSize(savedSize, false);
     }
+    applySurface(recall(SURFACE_KEY));
   })();
 
   fetch(DATA, { cache: "no-cache" })
