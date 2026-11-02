@@ -3,6 +3,7 @@ package app.offline.compress;
 import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.ActivityNotFoundException;
 import android.content.ClipData;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -37,6 +38,9 @@ public class MainActivity extends Activity {
     private static final int REQ_PICK = 1001;
     private static final int REQ_WRITE = 1002;
     private static final int REQ_PREVIEW = 1003;
+
+    /** Public download page, opened in the browser from the footer link. */
+    private static final String SITE_URL = "https://site-bfde50ad8d634f69a640767bcad4a006.freebuff.page/";
 
     /** Hard cap on a batch, matching the queue the strip can hold. */
     private static final int MAX_PHOTOS = 40;
@@ -84,6 +88,7 @@ public class MainActivity extends Activity {
     private TextView shareAllButton;
     private TextView clearAllButton;
     private TextView themeToggle;
+    private LinearLayout siteLink;
     private LinearLayout statusRow;
     private LinearLayout resultsContainer;
     private HorizontalScrollView pickedStrip;
@@ -116,6 +121,7 @@ public class MainActivity extends Activity {
         shareAllButton = findViewById(R.id.shareAll);
         clearAllButton = findViewById(R.id.clearAll);
         themeToggle = findViewById(R.id.themeToggle);
+        siteLink = findViewById(R.id.siteLink);
         resultsContainer = findViewById(R.id.results);
         pickedStrip = findViewById(R.id.pickedStrip);
         pickedRow = findViewById(R.id.pickedRow);
@@ -136,6 +142,7 @@ public class MainActivity extends Activity {
             }
         });
         themeToggle.setOnClickListener(v -> toggleTheme());
+        siteLink.setOnClickListener(v -> openSite());
         formatJpeg.setOnClickListener(v -> setFormat(Compressor.FORMAT_JPEG));
         formatWebp.setOnClickListener(v -> setFormat(Compressor.FORMAT_WEBP));
 
@@ -323,6 +330,18 @@ public class MainActivity extends Activity {
 
     private void updateThemeToggle() {
         themeToggle.setText(ThemePrefs.isDark(this) ? "DARK ON" : "DARK OFF");
+    }
+
+    /**
+     * Hands the download page to a browser. The app itself still has no network
+     * permission: the intent is resolved by whatever browser is installed.
+     */
+    private void openSite() {
+        try {
+            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(SITE_URL)));
+        } catch (ActivityNotFoundException e) {
+            Toast.makeText(this, "No browser installed", Toast.LENGTH_SHORT).show();
+        }
     }
 
     @Override

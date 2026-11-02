@@ -29,6 +29,7 @@ from PIL import Image, ImageDraw, ImageFilter, ImageFont
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ART = os.path.join(ROOT, "artifacts")
 FONT_DIR = os.path.join(ROOT, "tools", "fonts")
+LOGO_MARK = os.path.join(ROOT, "tools", "logo-mark.png")
 
 # Galaxy Z Flip 7 inner display: 1080 x 2520 px at ~2.625x -> 411 x 960 dp
 DP_W, DP_H = 411, 960
@@ -94,6 +95,19 @@ def font(kind, sp):
 
 def mono(sp):
     return font("mono", sp)
+
+
+def logo_mark(size_px, fill):
+    """The brand mark, rasterised by tools/render_logo_mark.js, tinted to `fill`."""
+    if not os.path.exists(LOGO_MARK):
+        return None
+    src = Image.open(LOGO_MARK).convert("RGBA")
+    w = max(1, int(size_px))
+    h = max(1, int(round(w * src.height / src.width)))
+    alpha = src.getchannel("A").resize((w, h), Image.LANCZOS)
+    tinted = Image.new("RGBA", (w, h), tuple(fill) + (0,))
+    tinted.putalpha(alpha)
+    return tinted
 
 
 def tracked(draw, xy, text, fnt, fill, tracking_dp=0.0):
@@ -330,7 +344,9 @@ def render_main(selected, results=None, out="main.png", scroll_dp=None, dark=Fal
     # canvas and cropped to one screen, scrolled down to the results block.
     tall = bool(results) and scroll_dp is None
     w = int(px(DP_W))
-    h = int(px(DP_H)) + (int(px(900)) if tall else 0)
+    # A negative scroll_dp means "scrolled to the bottom", which needs headroom
+    # below the viewport for the content that is scrolled past.
+    h = int(px(DP_H)) + (int(px(900)) if (tall or scroll_dp) else 0)
     img = Image.new("RGB", (w, h), BG)
     d = ImageDraw.Draw(img)
     status_bar(d, w)
@@ -521,6 +537,16 @@ def render_main(selected, results=None, out="main.png", scroll_dp=None, dark=Fal
         od.text((pad, y), line, font=mono(10.5), fill=MUTED, anchor="la")
         y += px(16)
 
+    # ---- brand footer: mark + the download page for the other apps ------
+    y += px(8)
+    mark = logo_mark(px(26), INK)
+    if mark is not None:
+        overlay.paste(mark, (int(pad), int(y + px(10))), mark)
+    foot_x = pad + px(26 + 10)
+    od.text((foot_x, y + px(10)), "MORE APPS", font=mono(11), fill=INK, anchor="la")
+    draw_mixed(od, (foot_x, y + px(25)), "TAP TO OPEN THE WEBSITE \u2192", mono(10), MUTED)
+    y += px(46)
+
     # cards first (behind), then photos, then text
     for top, bottom in cards:
         card_box(d, [pad, top, w - pad, bottom], offset=6, border=4, fill=CARD)
@@ -536,7 +562,7 @@ def render_main(selected, results=None, out="main.png", scroll_dp=None, dark=Fal
     img.paste(overlay, (0, 0), overlay)
 
     if tall or scroll_dp:
-        scroll = y - int(px(DP_H)) + px(24) if tall else px(scroll_dp)
+        scroll = y - int(px(DP_H)) + px(24) if (tall or scroll_dp < 0) else px(scroll_dp)
         scroll = max(0, min(scroll, h - int(px(DP_H))))
         img = img.crop((0, int(scroll), w, int(scroll) + int(px(DP_H))))
 
@@ -646,6 +672,8 @@ def main():
         render_main(True, out="ui-2-main-selected.png"),
         render_compare(out="ui-3-preview-slider.png", preview=True),
         render_main(True, out="ui-5-main-dark.png", dark=True),
+        render_main(False, out="ui-7-footer-light.png", scroll_dp=-1),
+        render_main(False, out="ui-8-footer-dark.png", scroll_dp=-1, dark=True),
         render_compare(out="ui-6-preview-slider-dark.png", preview=True, dark=True),
         render_main(True, out="ui-4-results.png", results={
             "summary": "Saved 14.2 MB \u00b7 76% smaller \u00b7 3 files",

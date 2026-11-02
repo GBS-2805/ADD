@@ -536,9 +536,58 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="18dp"
             android:fontFamily="monospace"
-            android:lineSpacingExtra="3dp"
-            android:text="Preview opens a slider on your first selected photo — nothing is saved until you compress. Copies land in Pictures/Compress; originals are never modified."
-            android:textColor="@color/muted"
-            android:textSize="10.5sp" />
+            android:lineSpacingExtra="3dp"                android:text="Preview opens a slider on your first selected photo — nothing is saved until you compress. Copies land in Pictures/Compress; originals are never modified."
+                android:textColor="@color/muted"
+                android:textSize="10.5sp" />
+
+        <!-- Brand footer: the mark plus the download page for the other apps. -->
+        <LinearLayout
+            android:id="@+id/siteLink"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="18dp"
+            android:background="?android:attr/selectableItemBackground"
+            android:clickable="true"
+            android:contentDescription="Open the website to download more apps"
+            android:focusable="true"
+            android:gravity="start|center_vertical"
+            android:orientation="horizontal"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp">
+
+            <ImageView
+                android:layout_width="26dp"
+                android:layout_height="26dp"
+                android:contentDescription="@null"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_mark"
+                android:tint="@color/text" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="monospace"
+                    android:text="MORE APPS"
+                    android:textColor="@color/text"
+                    android:textSize="11sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:fontFamily="monospace"
+                    android:text="TAP TO OPEN THE WEBSITE →"
+                    android:textColor="@color/muted"
+                    android:textSize="10sp" />
+            </LinearLayout>
+        </LinearLayout>
     </LinearLayout>
 </ScrollView>
