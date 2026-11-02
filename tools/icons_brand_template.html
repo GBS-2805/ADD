@@ -33,7 +33,6 @@
   .stage-body[data-active="true"] { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.08fr); }
 
   .preview { display: flex; align-items: center; gap: 26px; padding: 26px 24px; min-height: 196px; border-right: 1px solid var(--rule); }
-  #exports .seg { padding-left: 4px; padding-right: 4px; font-size: 14px; }
   .bulk-btn { display: block; width: 100%; margin: 12px 0 0; font: inherit; font-size: 14px;
     padding: 11px 14px; color: var(--on); background: transparent;
     border: 1px solid var(--rule); cursor: pointer; }
@@ -435,6 +434,12 @@ __BRANDS__
             <button class="seg" type="button" data-export="32" aria-pressed="false">32</button>
             <button class="seg" type="button" data-export="64" aria-pressed="false">64</button>
             <button class="seg" type="button" data-export="128" aria-pressed="false">128</button>
+          </div>
+        </div>
+
+        <div class="ctl-row" role="group" aria-label="Export size, larger">
+          <span class="ctl-label" aria-hidden="true"></span>
+          <div class="segs" id="exports-large">
             <button class="seg" type="button" data-export="256" aria-pressed="false">256</button>
             <button class="seg" type="button" data-export="512" aria-pressed="true">512</button>
             <button class="seg" type="button" data-export="1024" aria-pressed="false">1024</button>
@@ -518,6 +523,7 @@ __BRANDS__
   var formats = document.getElementById("formats");
   var copyLabel = document.getElementById("copyLabel");
   var exports_ = document.getElementById("exports");
+  var exportsLarge = document.getElementById("exports-large");
   var bulkBtn = document.getElementById("bulkBtn");
   var visibleItems = [];
   var tabs = Array.prototype.slice.call(document.querySelectorAll(".stage-tab"));
@@ -771,19 +777,15 @@ __BRANDS__
   formats.addEventListener("click", function (event) {
     var btn = event.target.closest(".seg");
     if (!btn) { return; }
-    format = btn.getAttribute("data-format");
-    Array.prototype.forEach.call(formats.children, function (other) {
-      other.setAttribute("aria-pressed", other === btn ? "true" : "false");
-    });
-    copyLabel.textContent = "Copy " + format.toUpperCase();
+    applyFormat(btn.getAttribute("data-format"));
     statusEl.textContent = format === "svg"
       ? "Copy hands over the SVG file"
       : "Copy saves a " + exportSize + "px " + format.toUpperCase() + " tile on the " + surface + " background";
   });
 
-  // Browsers cannot hand a raster through the clipboard, so a PNG, WEBP or JPG is
-  // drawn from the same tuned glyph at 512px on the chosen background: the app saves
-  // it to Pictures/Icons through its bridge, the site downloads it.
+  // A PNG, WEBP or JPG is drawn from the same tuned glyph at the chosen export size
+  // on the chosen background: the app saves it to Pictures/Icons through its bridge,
+  // the site downloads it and puts a PNG on the clipboard as well.
   function rasterFor(item, mime) {
     return new Promise(function (resolve, reject) {
       var host = document.createElement("div");
@@ -841,15 +843,55 @@ __BRANDS__
     return ok;
   }
 
-  exports_.addEventListener("click", function (event) {
-    var btn = event.target.closest(".seg");
-    if (!btn) { return; }
-    exportSize = Number(btn.getAttribute("data-export"));
-    Array.prototype.forEach.call(exports_.children, function (other) {
-      other.setAttribute("aria-pressed", other === btn ? "true" : "false");
+  var FORMAT_KEY = "icons:format:" + SLUG;
+  var SIZE_KEY = "icons:export:" + SLUG;
+
+  function store(key, value) {
+    try {
+      if (value) { window.localStorage.setItem(key, value); }
+      else { window.localStorage.removeItem(key); }
+    } catch (error) { /* private mode: the page still works, it just forgets */ }
+  }
+
+  function recall(key) {
+    try { return window.localStorage.getItem(key) || ""; } catch (error) { return ""; }
+  }
+
+  function markGroup(group, chosen) {
+    Array.prototype.forEach.call(group.children, function (other) {
+      other.setAttribute("aria-pressed", other === chosen ? "true" : "false");
     });
-    statusEl.textContent = "Exports and the bulk zip are " + exportSize + "px now";
-  });
+  }
+
+  function applyFormat(value) {
+    if (!MIME[value]) { return; }
+    format = value;
+    markGroup(formats, formats.querySelector('[data-format="' + value + '"]'));
+    copyLabel.textContent = "Copy " + format.toUpperCase();
+    store(FORMAT_KEY, format);
+  }
+
+  // The six sizes live in two rows, so both have to agree about which one is on.
+  function applyExportSize(value, announce) {
+    exportSize = value;
+    var chosen = document.querySelector('.seg[data-export="' + value + '"]');
+    if (chosen) { markGroup(chosen.parentNode, chosen); }
+    store(SIZE_KEY, String(value));
+    if (announce) {
+      statusEl.textContent = "Exports and the bulk zip are " + exportSize + "px now";
+    }
+  }
+
+  function bindExports(group) {
+    group.addEventListener("click", function (event) {
+      var btn = event.target.closest(".seg");
+      if (!btn) { return; }
+      applyExportSize(Number(btn.getAttribute("data-export")), true);
+    });
+  }
+
+  bindExports(exports_);
+  bindExports(exportsLarge);
 
   var CRC = (function () {
     var table = new Uint32Array(256);
@@ -968,6 +1010,21 @@ __BRANDS__
 
   bulkBtn.addEventListener("click", bulkExport);
 
+  // A raster belongs on the clipboard too, so it can be pasted straight into a
+  // design tool. The clipboard only takes PNG, so a WEBP or JPG is redrawn as one.
+  function copyPng(dataUrl, mime) {
+    if (!navigator.clipboard || !navigator.clipboard.write || !window.ClipboardItem) {
+      return Promise.resolve(false);
+    }
+    var png = mime === "image/png" ? Promise.resolve(dataUrl) : rasterFor(selected, "image/png");
+    return png.then(function (pngData) {
+      var bytes = bytesOf(pngData);
+      return navigator.clipboard.write([
+        new ClipboardItem({ "image/png": new Blob([bytes], { type: "image/png" }) })
+      ]);
+    }).then(function () { return true; }).catch(function () { return false; });
+  }
+
   document.getElementById("copyBtn").addEventListener("click", function () {
     if (!selected) { return; }
     if (format === "svg") {
@@ -996,6 +1053,13 @@ __BRANDS__
       link.click();
       link.remove();
       statusEl.textContent = "Downloaded " + name + " · " + exportSize + "px · " + surface;
+      copyPng(dataUrl, mime).then(function (copied) {
+        if (copied) {
+          statusEl.textContent = "Downloaded " + name + " · " + exportSize + "px · " + surface
+            + " · PNG on the clipboard";
+        }
+        window.setTimeout(paint, 4200);
+      });
     }).catch(function (error) {
       statusEl.textContent = "Could not export: " + error.message;
     });
@@ -1014,6 +1078,15 @@ __BRANDS__
   });
 
   if (window.IconsApp) { document.documentElement.classList.add("in-app"); }
+
+  (function restoreExport() {
+    var savedFormat = recall(FORMAT_KEY);
+    if (MIME[savedFormat]) { applyFormat(savedFormat); }
+    var savedSize = Number(recall(SIZE_KEY));
+    if (savedSize && document.querySelector('.seg[data-export="' + savedSize + '"]')) {
+      applyExportSize(savedSize, false);
+    }
+  })();
 
   fetch(DATA, { cache: "no-cache" })
     .then(function (response) {

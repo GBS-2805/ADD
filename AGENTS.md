@@ -177,6 +177,12 @@ changes as unverified on device rather than illustrating them.
 - The Export button under those rows zips every glyph the sheet currently shows, in
   the chosen format and size, as a stored zip written byte by byte in the page; in the
   app the same bytes reach a second bridge method and land in Downloads/Icons.
+- The six export sizes sit in two rows, and the chosen format and size are remembered
+  per brand in `localStorage` (`icons:format:<slug>`, `icons:export:<slug>`) the same
+  way the category is; both rows are marked by `applyExportSize()` so only one is on.
+- On the site a raster Copy downloads the file and puts a PNG on the clipboard too, so
+  it pastes straight into a design tool; a WEBP or JPG copy is redrawn as PNG for the
+  clipboard, which takes no other image type.
 - A page the bundle does not carry shows the address of the same page on the site and
   an Open on the web button; the `WebViewClient` hands any http(s) link to the browser.
 - Compress's palette has one source of truth: `app/res/values/colors.xml` (Icons has

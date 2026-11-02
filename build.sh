@@ -142,12 +142,12 @@ case "${1:-all}" in
         ;;
     icons)
         stage_icons_assets
-        build_app icons-app Icons Icons-1.6.apk 7 1.6
+        build_app icons-app Icons Icons-1.7.apk 8 1.7
         ;;
     all)
         build_app app Compress Compress-1.9.apk 10 1.9
         stage_icons_assets
-        build_app icons-app Icons Icons-1.6.apk 7 1.6
+        build_app icons-app Icons Icons-1.7.apk 8 1.7
         ;;
     *)
         echo "usage: $0 [all|compress|icons]" >&2
