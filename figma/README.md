@@ -28,13 +28,23 @@ each page in Chromium at the real viewport and translates what it measures.
 Heights are the full scroll height of the page at that width, so an artboard is
 the whole page, not just the fold.
 
+## The whole set on one canvas
+
+`site-figma.svg` is all eighteen artboards on one 1910×33785 canvas, desktop
+down the left column and phone down the right, each labelled with its file name.
+Open that file to look at the set — a browser or the desktop app's file panel
+renders it, where a zip can only be downloaded. One drag puts everything into
+Figma at once; it is stacked from the eighteen files by
+`tools/figma_bundle.py`, so it never needs editing by hand.
+
 ## Importing
 
 1. In Figma: **New design file**. Turn on the Poppins family once
    (*Assets → Fonts*, or just apply it to any text and Figma offers to enable
    the Google font) — every text layer asks for Poppins 400/500/600.
-2. Drag the SVG files onto the canvas. Each becomes a group of layers at its real
-   size; nothing is scaled.
+2. Drag the SVG files onto the canvas, or `site-figma.svg` once to bring in the
+   whole set. Each artboard becomes a group of layers at its real size; nothing
+   is scaled.
 3. Select a group and press **⌥⌘G** (Frame selection) to make it a frame with
    the page's dimensions and clipping.
 4. Rename the frames from the `<title>` inside each file if the import drops it.

@@ -154,7 +154,9 @@ changes as unverified on device rather than illustrating them.
 - `figma/` is the design hand-off: one SVG artboard per page per width, written by
   `tools/figma_export.js` from the pages as Chromium lays them out (text on real
   baselines, a rect per box fragment, ellipsised labels, the CSS-generated arrows
-  and step numbers). Figma imports it as editable layers. It is a translation of
+  and step numbers). Figma imports it as editable layers. `site-figma.svg` stacks
+  all of them on one canvas (`tools/figma_bundle.py`) and is the file to hand over:
+  the app's file panel cannot preview a zip. It is a translation of
   the page, never a hand-drawn one, and it is not deployed: `manifest.json` serves
   `docs/` only. Re-run the exporter after a visual change; do not edit the SVGs.
 - `artifacts/` is scratch: captures in progress, Figma probes, old shots. Nothing
