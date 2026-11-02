@@ -41,11 +41,11 @@
     place-items: center;
     width: 132px;
     height: 132px;
-    background: rgba(0, 0, 0, .2);
+    background: #000;
     border: 1px solid var(--rule);
-    color: var(--on);
+    color: #fff;
   }
-  .preview-box[data-surface="band"] { background: var(--band); color: var(--ink); border-color: var(--band); }
+  .preview-box[data-surface="white"] { background: #fff; color: #000; border-color: #fff; }
   .preview-box svg { width: var(--size); height: var(--size); stroke-width: var(--w); }
   .preview-box[data-mode="fill"] svg path { stroke: currentColor; stroke-width: var(--w); stroke-linejoin: round; }
   .preview-meta { min-width: 0; }
@@ -350,7 +350,7 @@
 <main>
   <header class="page-head">
     <h1>Coolicons</h1>
-    <p class="lede"><b>1,258 glyphs</b>, every one of them whole and free. Pick one below, then set its weight, size and surface — the preview changes as you press, and the copy button hands you the SVG.</p>
+    <p class="lede"><b>1,258 glyphs</b>, every one of them whole and free. Pick one below, then set its weight, size and background — the preview changes as you press, and the copy button hands you the SVG.</p>
     <p class="meta">
       <span>1,258 glyphs</span>
       <span>line, regular</span>
@@ -367,7 +367,7 @@
 
     <div class="stage-body" id="pane-preview" role="tabpanel" aria-labelledby="tab-preview" data-active="true">
       <div class="preview">
-        <div class="preview-box" id="stageGlyph" data-mode="stroke" data-surface="field" aria-hidden="true"></div>
+        <div class="preview-box" id="stageGlyph" data-mode="stroke" data-surface="black" aria-hidden="true"></div>
         <div class="preview-meta">
           <p class="name" id="selName" aria-live="polite">Loading…</p>
           <p class="file" id="selFile"></p>
@@ -405,11 +405,11 @@
           </div>
         </div>
 
-        <div class="ctl-row" role="group" aria-label="Preview surface">
-          <span class="ctl-label">Surface</span>
+        <div class="ctl-row" role="group" aria-label="Preview background">
+          <span class="ctl-label">Background</span>
           <div class="segs" id="surfaces">
-            <button class="seg" type="button" data-surface="field" aria-pressed="true">Field</button>
-            <button class="seg" type="button" data-surface="band" aria-pressed="false">Band</button>
+            <button class="seg" type="button" data-surface="black" aria-pressed="true">Black</button>
+            <button class="seg" type="button" data-surface="white" aria-pressed="false">White</button>
           </div>
         </div>
 
@@ -497,7 +497,7 @@
   var selected = null;
   var weight = "2";
   var size = 64;
-  var surface = "field";
+  var surface = "black";
   var built = false;
   var cat = "";
   var SLUG = "coolicons";

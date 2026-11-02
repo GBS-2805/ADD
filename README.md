@@ -11,9 +11,9 @@ the pages.
 
 ## Status
 
-- **Icons 1.3** — APK [`dist/Icons-1.3.apk`](dist/Icons-1.3.apk)
-  (517,506 bytes, signed v1+v2), published as `docs/Icons-1.3.apk`. Package
-  `app.offline.icons` · minSdk 26 · targetSdk 35 · versionCode 4. The whole browser
+- **Icons 1.4** — APK [`dist/Icons-1.4.apk`](dist/Icons-1.4.apk)
+  (517,506 bytes, signed v1+v2), published as `docs/Icons-1.4.apk`. Package
+  `app.offline.icons` · minSdk 26 · targetSdk 35 · versionCode 5. The whole browser
   — both brands, 1,864 glyphs, the stylesheet and Poppins — is bundled in the APK
   and served to a WebView from a private origin.
 - **Compress 1.9** — APK [`dist/Compress-1.9.apk`](dist/Compress-1.9.apk)
@@ -64,7 +64,7 @@ icons. Pages carry only their own small `<style>` for page-specific pieces.
 
 Each brand page is built around one idea: pick a glyph, then tune how you want to see
 it. The preview sits in its own tab, with a small chip of the same glyph beside the
-controls; weight, size and surface repaint it live without touching the file. The
+controls; weight, size and background repaint it live without touching the file. The
 whole set lives behind one toggle and scrolls inside its own sheet, so the page is a
 preview rather than a wall of 1,258 cells. Copy hands over the untouched markup: a
 24×24 `viewBox`, `currentColor`, no baked weight.
@@ -169,7 +169,7 @@ export ANDROID_SDK_ROOT=$HOME/android-sdk   # needs build-tools;35.0.0 + platfor
 ./build.sh compress   # Compress only
 ```
 
-Output: `dist/Compress-1.9.apk` and `dist/Icons-1.3.apk`. Copy them to `docs/` and
+Output: `dist/Compress-1.9.apk` and `dist/Icons-1.4.apk`. Copy them to `docs/` and
 re-run `python3 tools/build_catalog.py` so the pages, the JSON and the checksums move
 together. Signing uses `$HOME/tools/compress-keystore.jks` (created on first build,
 password `android`); both apps share it, so they update side by side. Replace it with
