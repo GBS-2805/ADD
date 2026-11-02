@@ -1,260 +1,455 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Compress — offline image compressor for Android</title>
 <meta name="description" content="Download Compress: a fully offline Android image compressor. Pick photos, preview your settings with a before/after slider, then compress. No account, no uploads, no internet permission." />
+<meta name="theme-color" content="#3f4e96" />
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
 <style>
+  /* Poppins, self-hosted so the page has no network dependency beyond its own host. */
+  @font-face {
+    font-family: "Poppins";
+    src: url("assets/fonts/poppins-400.woff2") format("woff2");
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: "Poppins";
+    src: url("assets/fonts/poppins-500.woff2") format("woff2");
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: "Poppins";
+    src: url("assets/fonts/poppins-600.woff2") format("woff2");
+    font-weight: 600;
+    font-style: normal;
+    font-display: swap;
+  }
+
+  /* Values measured off frame 6-27 at 1440 wide. */
   :root {
-    --bg: #f2e4c9;
-    --card: #f7ecd7;
-    --card2: #eadbbd;
-    --stroke: #2b2926;
-    --accent: #ffb20f;
-    --ink: #2b2926;
-    --text: #2b2926;
-    --muted: #4b5563;
-    --note: #fae9c8;
-    --warn-bg: #fef3c7;
-    --warn-fg: #92400e;
+    --band: #d9d9d9;             /* header bar                */
+    --page: #3f4e96;             /* page field                */
+    --ink: #000000;              /* text and mark on the band */
+    --on: #d9d9d9;               /* text on the field         */
+    --on-dim: rgba(217, 217, 217, .64);
+    --rule: rgba(217, 217, 217, .26);
+    --pad: 40px;
+    --band-h: 96px;
   }
-  /* Night palette, mirrored from res/values-night/colors.xml. */
-  html[data-theme="dark"] {
-    --bg: #2b2926;
-    --card: #37332e;
-    --card2: #443f39;
-    --stroke: #f7ecd7;
-    --accent: #ffb20f;
-    --ink: #2b2926;
-    --text: #f7ecd7;
-    --muted: #a9a093;
-    --note: #3a2f1e;
-    --warn-bg: #422006;
-    --warn-fg: #fcd34d;
-  }
+
   * { box-sizing: border-box; }
-  html, body { margin: 0; padding: 0; }
+  html { -webkit-text-size-adjust: 100%; }
   body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    margin: 0;
+    background: var(--page);
+    color: var(--on);
+    font-family: "Poppins", "Helvetica Neue", Arial, sans-serif;
+    font-weight: 400;
+    font-size: 17px;
+    line-height: 1.65;
     -webkit-font-smoothing: antialiased;
-    min-height: 100vh;
-    padding: 40px 18px 64px;
+  }
+  a { color: inherit; }
+
+  /* ---------- header, exactly as drawn ---------- */
+  .bar {
+    position: relative;
+    height: var(--band-h);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 40px;
+    padding: 0 var(--pad);
+    background: var(--band);
+    color: var(--ink);
+  }
+  .menu-btn,
+  .burger {
+    font: inherit;
+    color: var(--ink);
+    background: none;
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+  }
+  .menu-btn {
+    display: flex;
+    align-items: center;
+    gap: 38px;
+    font-size: 26px;
+    line-height: 1;
+    letter-spacing: -.01em;
+  }
+  .chev { width: 21px; height: 20px; flex: none; }
+  .mark {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 45px;
+    height: 45px;
+    display: block;
+  }
+  .mark svg { display: block; width: 45px; height: 45px; }
+  .who { display: flex; align-items: center; gap: 40px; }
+  .who-lines { text-align: right; }
+  .who-lines p { margin: 0; font-size: 17px; line-height: 24.5px; }
+  .burger { width: 29px; height: 20px; flex: none; }
+  .burger svg { display: block; }
+
+  /* ---------- drop-down menu ---------- */
+  .menu {
+    background: var(--band);
+    color: var(--ink);
+    padding: 0 var(--pad);
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0 40px;
+  }
+  .menu[hidden] { display: none; }
+  .menu a {
+    display: block;
+    padding: 16px 0;
+    border-top: 1px solid rgba(0, 0, 0, .14);
+    font-size: 17px;
+    text-decoration: none;
+  }
+  .menu a:hover { text-decoration: underline; }
+  .menu a span { color: rgba(0, 0, 0, .5); }
+
+  /* ---------- page ---------- */
+  main { padding: 0 var(--pad); }
+  section { padding: 64px 0; border-top: 1px solid var(--rule); }
+  section:first-child { border-top: 0; padding-top: 84px; }
+
+  h1 {
+    margin: 0 0 24px;
+    font-size: clamp(46px, 7.4vw, 76px);
+    font-weight: 400;
+    line-height: 1.02;
+    letter-spacing: -.035em;
+  }
+  .lede {
+    margin: 0;
+    max-width: 46ch;
+    font-size: 20px;
     line-height: 1.55;
   }
-  .wrap { max-width: 660px; margin: 0 auto; }
-  .app-icon { width: 76px; height: 76px; fill: currentColor; filter: drop-shadow(6px 6px 0 rgba(43,41,38,.85)); }
-  html[data-theme="dark"] .app-icon { filter: none; }
-  .topbar { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
-  .theme-toggle {
-    font-family: inherit; font-size: 11px; font-weight: 700; letter-spacing: .1em;
-    text-transform: uppercase; color: var(--ink); background: var(--accent);
-    border: 1px solid var(--stroke); border-radius: 0; padding: 7px 12px;
-    box-shadow: 3px 3px 0 var(--stroke); cursor: pointer; white-space: nowrap;
+  .cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    height: 56px;
+    padding: 0 28px;
+    margin-top: 34px;
+    background: var(--band);
+    color: var(--ink);
+    font-size: 17px;
+    text-decoration: none;
   }
-  .theme-toggle:hover { transform: translate(-1px, -1px); box-shadow: 4px 4px 0 var(--stroke); }
-  .theme-toggle:active { transform: translate(1px, 1px); box-shadow: 2px 2px 0 var(--stroke); }
-  h1 { font-size: 30px; letter-spacing: -.02em; margin: 18px 0 6px; }
-  .sub { color: var(--muted); font-size: 15px; margin: 0 0 26px; }
-  .card { background: var(--card); border: 4px solid var(--stroke); border-radius: 0; box-shadow: 6px 6px 0 var(--stroke); padding: 22px; margin-bottom: 20px; }
-  .download {
-    display: flex; align-items: center; justify-content: center; gap: 10px;
-    background: var(--accent); color: var(--ink);
-    text-decoration: none; font-weight: 700; font-size: 16px;
-    padding: 17px 20px; border-radius: 0;
-    border: 4px solid var(--stroke);
-    box-shadow: 6px 6px 0 var(--stroke);
-    transition: transform .12s ease, box-shadow .12s ease;
+  .cta svg { flex: none; }
+  .cta:hover { background: #e8e8e8; }
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 26px;
+    margin: 20px 0 0;
+    font-size: 14px;
+    color: var(--on-dim);
   }
-  .download:hover { transform: translate(-2px, -2px); box-shadow: 8px 8px 0 var(--stroke); }
-  .download:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0 var(--stroke); }
-  .meta { display: flex; flex-wrap: wrap; gap: 8px 18px; color: var(--muted); font-size: 12.5px; margin-top: 14px; }
-  .meta b { color: var(--text); font-weight: 600; }
-  h2 { font-size: 13px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin: 0 0 12px; }
-  ul { margin: 0; padding-left: 18px; }
-  li { margin: 6px 0; font-size: 14.5px; color: var(--text); }
-  li b { color: var(--text); }
-  ol { margin: 0; padding-left: 20px; }
-  ol li { font-size: 14.5px; color: var(--text); margin: 8px 0; }
-  .note {
-    display: flex; gap: 10px; align-items: flex-start;
-    background: var(--note); border: 4px solid var(--stroke); color: var(--text);
-    border-radius: 0; padding: 13px 15px; font-size: 13.5px; margin-top: 14px;
+  .fine { margin: 14px 0 0; font-size: 14px; color: var(--on-dim); max-width: 58ch; }
+
+  h2 {
+    margin: 0 0 8px;
+    font-size: 26px;
+    font-weight: 400;
+    line-height: 1.3;
+    letter-spacing: -.015em;
   }
-  .warn { background: var(--warn-bg); border: 4px solid var(--warn-fg); color: var(--warn-fg); }
-  .new {
-    display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: .1em;
-    text-transform: uppercase; color: var(--ink);
-    background: var(--accent); border: 1px solid var(--stroke); border-radius: 0;
-    padding: 3px 10px; margin-bottom: 12px;
+  .kicker {
+    margin: 0 0 26px;
+    font-size: 14px;
+    color: var(--on-dim);
   }
-  .flow { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 4px; }
-  .step { background: var(--card2); border: 4px solid var(--stroke); border-radius: 0; padding: 12px; }
-  .step b { display: block; font-size: 14px; margin-bottom: 4px; }
-  .step span { color: var(--muted); font-size: 12px; }
-  .num { color: var(--text); font-size: 11px; font-weight: 700; letter-spacing: .1em; }
-  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  .stat { background: var(--card2); border: 4px solid var(--stroke); border-radius: 0; padding: 12px 14px; }
-  .stat span { display: block; color: var(--muted); font-size: 11.5px; letter-spacing: .08em; text-transform: uppercase; }
-  .stat b { font-size: 17px; }
-  footer { color: var(--muted); font-size: 12px; text-align: center; margin-top: 28px; }
-  code { background: var(--card2); border: 1px solid var(--stroke); border-radius: 0; padding: 1px 6px; font-size: 12.5px; }
-  @media (max-width: 460px) {
-    body { padding: 26px 14px 52px; }
-    h1 { font-size: 25px; margin-top: 14px; }
-    .grid, .flow { grid-template-columns: 1fr; }
-    .card { padding: 16px; }
-    .meta { gap: 6px 14px; font-size: 12px; }
-    .download { padding: 15px 14px; font-size: 15px; }
-    .app-icon { width: 64px; height: 64px; }
-    .theme-toggle { display: inline-flex; align-items: center; min-height: 40px; }
+  ul.rows { list-style: none; margin: 0; padding: 0; }
+  ul.rows li {
+    padding: 15px 0;
+    border-top: 1px solid var(--rule);
+    display: flex;
+    gap: 20px;
+    align-items: baseline;
+  }
+  ul.rows li:first-child { border-top: 0; padding-top: 0; }
+  ul.rows b { font-weight: 500; flex: none; min-width: 13.5ch; }
+  ul.rows span { color: var(--on); }
+
+  ol.steps { list-style: none; counter-reset: s; margin: 0; padding: 0; }
+  ol.steps li {
+    counter-increment: s;
+    display: flex;
+    gap: 20px;
+    padding: 15px 0;
+    border-top: 1px solid var(--rule);
+  }
+  ol.steps li:first-child { border-top: 0; padding-top: 0; }
+  ol.steps li::before {
+    content: "0" counter(s);
+    color: var(--on-dim);
+    font-size: 14px;
+    line-height: 1.9;
+    flex: none;
+  }
+
+  .specs {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    border-top: 1px solid var(--rule);
+    margin-top: 26px;
+  }
+  .specs div { padding: 18px 20px 18px 0; border-right: 1px solid var(--rule); }
+  .specs div:last-child { border-right: 0; }
+  .specs dt { font-size: 13px; color: var(--on-dim); margin: 0 0 4px; }
+  .specs dd { margin: 0; font-size: 17px; }
+
+  .callout {
+    margin-top: 26px;
+    padding: 18px 0 0;
+    border-top: 1px solid var(--rule);
+    font-size: 14px;
+    color: var(--on-dim);
+    max-width: 62ch;
+  }
+  code { font-family: inherit; background: rgba(217, 217, 217, .12); padding: 1px 6px; }
+
+  footer {
+    margin-top: 24px;
+    padding: 28px var(--pad) 44px;
+    border-top: 1px solid var(--rule);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 40px;
+    justify-content: space-between;
+    font-size: 14px;
+    color: var(--on-dim);
+  }
+  footer a { text-decoration: none; }
+  footer a:hover { text-decoration: underline; }
+
+  section[id] { scroll-margin-top: 16px; }
+
+  @media (max-width: 900px) {
+    .menu { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .specs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .specs div:nth-child(2n) { border-right: 0; }
+    .specs div:nth-child(n+3) { border-top: 1px solid var(--rule); }
+    .who-lines p + p { display: none; }
+  }
+
+  @media (max-width: 700px) {
+    :root { --pad: 20px; --band-h: 72px; }
+    body { font-size: 16px; }
+    .bar { gap: 20px; }
+    /* The label cannot share a 390px row with the centred mark, so the
+       chevrons alone stay as the menu affordance. */
+    .menu-btn span { display: none; }
+    .chev { width: 20px; height: 20px; }
+    .mark, .mark svg { width: 34px; height: 34px; }
+    .who { gap: 20px; }
+    .who-lines p { font-size: 14px; line-height: 1.35; }
+    .burger { width: 24px; }
+    .menu { grid-template-columns: 1fr; }
+    section { padding: 44px 0; }
+    section:first-child { padding-top: 48px; }
+    .lede { font-size: 18px; }
+    .cta { width: 100%; justify-content: center; height: 54px; }
+    ul.rows li, ol.steps li { flex-direction: column; gap: 2px; }
+    ul.rows b { min-width: 0; }
+    ol.steps li::before { line-height: 1.4; }
+    .specs { grid-template-columns: 1fr; }
+    .specs div { border-right: 0; border-top: 1px solid var(--rule); padding-right: 0; }
+    .specs div:first-child { border-top: 0; }
   }
 </style>
-<script>
-  // Applied before the body paints so a dark page never flashes cream first.
-  (function () {
-    var KEY = "compress-theme";
-    var stored = null;
-    try { stored = localStorage.getItem(KEY); } catch (e) {}
-    var dark = stored === "dark";
-    document.documentElement.setAttribute("data-theme", dark ? "dark" : "light");
-    document.addEventListener("DOMContentLoaded", function () {
-      var button = document.getElementById("themeToggle");
-      if (!button) return;
-      function paint() {
-        dark = document.documentElement.getAttribute("data-theme") === "dark";
-        button.textContent = dark ? "DARK ON" : "DARK OFF";
-        button.setAttribute("aria-pressed", dark ? "true" : "false");
-      }
-      paint();
-      button.addEventListener("click", function () {
-        dark = !dark;
-        document.documentElement.setAttribute("data-theme", dark ? "dark" : "light");
-        try { localStorage.setItem(KEY, dark ? "dark" : "light"); } catch (e) {}
-        paint();
-      });
-    });
-  })();
-</script>
 </head>
 <body>
-<div class="wrap">
 
-  <div class="topbar">
-  <svg class="app-icon" viewBox="0 0 120.6 123.11" role="img" aria-label="Compress logo"><path d="m29.58,61.92c.11,1.85.17,3.7.36,5.54.11,1.02-.23,1.23-1.19,1.29-4.47.26-5.38,1.22-5.27,5.67.13,5.14,2.74,9.13,6.27,12.56,1.53,1.49,2.96,1.05,3.89-.88.61-1.27.96-2.64,1.04-4.06.06-1.13.53-1.24,1.41-.69,1.72,1.08,2.92,2.71,4.38,4.07,8.66,8.04,18.38,13.89,30.58,14.51.52.03,1.04-.02,1.56,0,1.36.07,1.57-.53.89-1.58-.36-.56-.82-1.05-1.21-1.58-1.5-2.04-.63-4.17,1.89-4.53,3.34-.47,6.44.69,9.57,1.56,4.15,1.15,8.3,2.3,12.65,1.03,2.54-.74,2.78-1.66.84-3.54-.63-.61-1.41-1.08-2.11-1.63-2.43-1.91-2.63-3.35-.64-5.76,2.51-3.05,6.01-4.22,9.75-4.74,4.81-.67,9.26.31,13.25,3.19,1.39,1.01,1.75,1.97.94,3.7-9.48,20.25-25.12,32.69-47.2,36.28-29.25,4.75-57.41-12.11-67.54-39.86C-8.51,49.01,10.62,11.88,44.98,2.31c31.94-8.9,65.21,8.7,75.4,39.81.46,1.42.23,2.38-.66,3.4-4.28,4.87-9.78,6.13-15.92,5.16-4.99-.79-9.16-3.27-12.65-6.88-1.34-1.38-2.66-2.79-3.87-4.28-13.61-16.78-43.35-15.8-54.84,7.54-2.32,4.71-3.19,9.66-2.85,14.86Z"/><path d="m80.89,57.02c.88-.09,2.06-.21,3.22.13,1.56.46,1.88,1.6.75,2.8-1.16,1.23-2.59,1.52-4.25,1.33-4.23-.48-5.14.47-4.58,4.78.43,3.35,1.88,6.19,4.52,8.36.99.81,1.67.93,2.18-.62,1.55-4.74,1.61-4.72,6.46-4.56,1.28.04,2.56-.04,3.49-1.05.76-.83,1.38-1.54,2.5-.44,1.07,1.05,1.29,2.15.42,3.35-1.18,1.61-2.84,2.29-4.82,2.23-1.25-.04-2.77-.51-3.68.03-.98.58-.39,2.29-.7,3.49-.75,2.89-2.94,3.94-5.77,2.62-5.71-2.66-10.17-13.01-8.12-18.87.86-2.45,2.86-3.21,5.21-3.41.96-.08,1.92-.11,3.18-.18Z"/><path d="m52.62,58.41c.19-1.57.26-3.23,1.99-3.92,1.62-.65,2.9.23,3.92,1.33,2.41,2.61,3.79,5.64,2.86,9.26-.6,2.33-2.43,2.97-4.42,1.62-2.92-1.97-3.98-4.98-4.35-8.29Z"/><path d="m44.97,66.78c-.03,1.9-.18,3.24-1.63,3.9-1.5.68-2.61-.25-3.53-1.19-2.06-2.11-3.15-4.68-2.7-7.66.4-2.62,2.46-3.4,4.53-1.73,2.25,1.82,3.29,4.3,3.33,6.68Z"/></svg>
-  <button class="theme-toggle" id="themeToggle" type="button" aria-pressed="false">DARK OFF</button>
+<header class="bar">
+  <button class="menu-btn" id="menuBtn" type="button" aria-expanded="false" aria-controls="menu" aria-label="Menu">
+    <svg class="chev" viewBox="0 0 21 20" fill="none" aria-hidden="true">
+      <path d="M3 7.1 10.5 1.6 18 7.1" stroke="currentColor" stroke-width="2.1" stroke-linecap="square"/>
+      <path d="M3 12.9 10.5 18.4 18 12.9" stroke="currentColor" stroke-width="2.1" stroke-linecap="square"/>
+    </svg>
+    <span>Drop-down menu</span>
+  </button>
+
+  <a class="mark" href="./" aria-label="Compress — home">
+    <svg viewBox="0 0 100 100" role="img" aria-label="Compress logo">
+      <circle cx="50" cy="50" r="50" fill="#000000"/>
+      <g fill="#d9d9d9" transform="translate(17.5 16.5) scale(.545)">
+        <path d="m29.58,61.92c.11,1.85.17,3.7.36,5.54.11,1.02-.23,1.23-1.19,1.29-4.47.26-5.38,1.22-5.27,5.67.13,5.14,2.74,9.13,6.27,12.56,1.53,1.49,2.96,1.05,3.89-.88.61-1.27.96-2.64,1.04-4.06.06-1.13.53-1.24,1.41-.69,1.72,1.08,2.92,2.71,4.38,4.07,8.66,8.04,18.38,13.89,30.58,14.51.52.03,1.04-.02,1.56,0,1.36.07,1.57-.53.89-1.58-.36-.56-.82-1.05-1.21-1.58-1.5-2.04-.63-4.17,1.89-4.53,3.34-.47,6.44.69,9.57,1.56,4.15,1.15,8.3,2.3,12.65,1.03,2.54-.74,2.78-1.66.84-3.54-.63-.61-1.41-1.08-2.11-1.63-2.43-1.91-2.63-3.35-.64-5.76,2.51-3.05,6.01-4.22,9.75-4.74,4.81-.67,9.26.31,13.25,3.19,1.39,1.01,1.75,1.97.94,3.7-9.48,20.25-25.12,32.69-47.2,36.28-29.25,4.75-57.41-12.11-67.54-39.86C-8.51,49.01,10.62,11.88,44.98,2.31c31.94-8.9,65.21,8.7,75.4,39.81.46,1.42.23,2.38-.66,3.4-4.28,4.87-9.78,6.13-15.92,5.16-4.99-.79-9.16-3.27-12.65-6.88-1.34-1.38-2.66-2.79-3.87-4.28-13.61-16.78-43.35-15.8-54.84,7.54-2.32,4.71-3.19,9.66-2.85,14.86Z"/>
+        <path d="m80.89,57.02c.88-.09,2.06-.21,3.22.13,1.56.46,1.88,1.6.75,2.8-1.16,1.23-2.59,1.52-4.25,1.33-4.23-.48-5.14.47-4.58,4.78.43,3.35,1.88,6.19,4.52,8.36.99.81,1.67.93,2.18-.62,1.55-4.74,1.61-4.72,6.46-4.56,1.28.04,2.56-.04,3.49-1.05.76-.83,1.38-1.54,2.5-.44,1.07,1.05,1.29,2.15.42,3.35-1.18,1.61-2.84,2.29-4.82,2.23-1.25-.04-2.77-.51-3.68.03-.98.58-.39,2.29-.7,3.49-.75,2.89-2.94,3.94-5.77,2.62-5.71-2.66-10.17-13.01-8.12-18.87.86-2.45,2.86-3.21,5.21-3.41.96-.08,1.92-.11,3.18-.18Z"/>
+        <path d="m52.62,58.41c.19-1.57.26-3.23,1.99-3.92,1.62-.65,2.9.23,3.92,1.33,2.41,2.61,3.79,5.64,2.86,9.26-.6,2.33-2.43,2.97-4.42,1.62-2.92-1.97-3.98-4.98-4.35-8.29Z"/>
+        <path d="m44.97,66.78c-.03,1.9-.18,3.24-1.63,3.9-1.5.68-2.61-.25-3.53-1.19-2.06-2.11-3.15-4.68-2.7-7.66.4-2.62,2.46-3.4,4.53-1.73,2.25,1.82,3.29,4.3,3.33,6.68Z"/>
+      </g>
+    </svg>
+  </a>
+
+  <div class="who">
+    <div class="who-lines">
+      <p>Compress</p>
+      <p>Offline - No uploads - APK</p>
+    </div>
+    <button class="burger" id="burger" type="button" aria-expanded="false" aria-controls="menu" aria-label="Open menu">
+      <svg viewBox="0 0 29 20" fill="none" aria-hidden="true">
+        <path d="M0 1h29M0 10h29M0 19h29" stroke="currentColor" stroke-width="1.4"/>
+      </svg>
+    </button>
   </div>
+</header>
 
-  <h1>Compress</h1>
-  <p class="sub">Pick the photos you want, preview the settings with a before/after slider, then compress. Fully offline — the app has no internet permission at all.</p>
+<nav class="menu" id="menu" hidden>
+  <a href="#download">Download <span>— 1.8</span></a>
+  <a href="#new">What's new</a>
+  <a href="#does">What it does</a>
+  <a href="#install">Install</a>
+  <a href="#under">Under the hood</a>
+  <a href="icons/">Icons <span>— 606</span></a>
+  <a href="renders/">Renders</a>
+</nav>
 
-  <div class="card">
-    <a class="download" href="Compress-1.8.apk" download>
+<main>
+  <section id="download">
+    <h1>Compress</h1>
+    <p class="lede">Pick the photos you want, preview the settings with a before/after slider, then compress. Fully offline — the app has no internet permission at all.</p>
+    <a class="cta" href="Compress-1.8.apk" download>
       <svg width="19" height="19" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-        <path d="M12 3v11m0 0 4.5-4.5M12 14l-4.5-4.5M4 17.5V19a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-1.5" stroke="#2B2926" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M12 3v11m0 0 4.5-4.5M12 14l-4.5-4.5M4 17.5V19a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-1.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
       Download APK
     </a>
-    <div class="meta">
-      <span><b>Compress 1.8</b></span>
+    <p class="meta">
+      <span>Compress 1.8</span>
       <span>58 KB</span>
       <span>Android 8.0+ · arm64 &amp; x86</span>
       <span>No ads · no account</span>
-    </div>
-    <div class="note">
-      <span>✓</span>
-      <span>Built for your Galaxy Z Flip 7 (Android 16). Signed, no third-party libraries, round launcher icon.</span>
-    </div>
-  </div>
+    </p>
+    <p class="fine">Built for your Galaxy Z Flip 7 (Android 16). Signed, no third-party libraries, round launcher icon.</p>
+  </section>
 
-  <div class="card">
-    <div class="new">New in 1.8</div>
-    <h2>Your mark, and a door out</h2>
-    <ul>
-      <li><b>Your logo in the app</b> — the mark now sits at the bottom left of the main screen, next to a <b>MORE APPS</b> link.</li>
-      <li><b>A way back to the site</b> — tapping that link opens the download page in your browser, so the apps that come next are one tap away from inside this one. It follows the light and dark palettes.</li>
-      <li><b>Still no network permission</b> — Compress hands the address to your browser and never makes a request itself, so "fully offline" stays literally true.</li>
+  <section id="new">
+    <h2>New in 1.8</h2>
+    <p class="kicker">Your mark, and a door out</p>
+    <ul class="rows">
+      <li><b>Your logo in the app</b><span>The mark now sits at the bottom left of the main screen, next to a <b>MORE APPS</b> link.</span></li>
+      <li><b>A way back</b><span>Tapping that link opens this page in your browser, so the next app is one tap from inside this one. It follows the light and dark palettes.</span></li>
+      <li><b>Still offline</b><span>Compress hands the address to your browser and never makes a request itself, so "fully offline" stays literally true.</span></li>
     </ul>
-  </div>
+  </section>
 
-  <div class="card">
-    <div class="new">Since 1.5</div>
-    <h2>Adding photos no longer starts over</h2>
-    <ul>
-      <li><b>Add more, or start again</b> — picking photos when some are already queued now asks first. <b>Add more</b> keeps everything you have and appends the new picks, <b>Start from beginning</b> replaces them, and Cancel leaves the queue untouched.</li>
-      <li><b>Duplicates are ignored</b> — the same photo picked twice is only counted once, and a batch still caps at 40.</li>
-      <li><b>Dark mode keeps your work</b> — flipping the palette no longer wipes the queue or the finished results; both come back redrawn in the new colours.</li>
+  <section>
+    <h2>Since 1.5</h2>
+    <p class="kicker">Adding photos no longer starts over</p>
+    <ul class="rows">
+      <li><b>Add or restart</b><span>Picking photos when some are queued asks first: <b>Add more</b> appends, <b>Start from beginning</b> replaces, Cancel leaves the queue alone.</span></li>
+      <li><b>No duplicates</b><span>The same photo picked twice counts once, and a batch still caps at 40.</span></li>
+      <li><b>Dark mode keeps work</b><span>Flipping the palette no longer wipes the queue or the results.</span></li>
     </ul>
-  </div>
+  </section>
 
-  <div class="card">
-    <div class="new">Since 1.4</div>
-    <h2>Rebuilt around the picker</h2>
-    <ul>
-      <li><b>New look</b> — thick ink borders, hard offset shadows and amber highlights, on cream paper. Each step is numbered, <b>1. ADD IMAGES</b> through <b>4. RESIZE (OPTIONAL)</b>.</li>
-      <li><b>Dark mode that sticks</b> — a <b>dark mode chip</b> in the header flips the whole app to ink-dark; the choice is saved, so it is still dark the next time you open it.</li>
-      <li><b>Clear all</b> — a chip at the bottom of the selection strip empties the queue in one tap, alongside the per-photo <b>×</b>.</li>
-      <li><b>New icon</b> — an amber disc with three chevrons, largest at the top, evenly spaced and centred on the circle.</li>
+  <section>
+    <h2>Since 1.4</h2>
+    <p class="kicker">Rebuilt around the picker</p>
+    <ul class="rows">
+      <li><b>Numbered steps</b><span>From <b>1. ADD IMAGES</b> through <b>4. RESIZE (OPTIONAL)</b>, one card each.</span></li>
+      <li><b>Dark mode that sticks</b><span>The choice is saved, so it is still dark the next time you open it.</span></li>
+      <li><b>Clear all</b><span>A chip at the end of the strip empties the queue in one tap, alongside the per-photo <b>×</b>.</span></li>
+      <li><b>New icon</b><span>An amber disc with three chevrons, largest at the top.</span></li>
     </ul>
-  </div>
+  </section>
 
-  <div class="card">
-    <div class="new">Since 1.3</div>
-    <h2>Edit the selection before you commit</h2>
-    <div class="flow">
-      <div class="step"><span class="num">1</span><b>Pick photos</b><span>Strip shows what is queued.</span></div>
-      <div class="step"><span class="num">2</span><b>Preview settings</b><span>Slider compares original with a trial encode.</span></div>
-      <div class="step"><span class="num">3</span><b>Compress</b><span>Only then are files written to Pictures/Compress.</span></div>
-    </div>
-    <ul style="margin-top:14px">
-      <li><b>Remove a photo</b> — tap the <b>×</b> on any thumbnail to drop it from the batch. Remove everything and the picker resets, so a wrong tap never costs you a whole re-selection.</li>
-      <li><b>Preview is a dry run</b> — the trial encode stays in the cache and is deleted once both images load; nothing is written until you compress.</li>
-      <li><b>Settings still preview first</b> — change quality, resolution or format and preview again to see the new result.</li>
+  <section>
+    <h2>Since 1.3</h2>
+    <p class="kicker">Edit the selection before you commit</p>
+    <ul class="rows">
+      <li><b>Remove a photo</b><span>Tap the <b>×</b> on any thumbnail. Remove everything and the picker resets, so a wrong tap never costs a re-selection.</span></li>
+      <li><b>Preview is a dry run</b><span>The trial encode stays in the cache and is deleted once both images load; nothing is written until you compress.</span></li>
+      <li><b>Settings preview first</b><span>Change quality, resolution or format and preview again to see the new result.</span></li>
     </ul>
-  </div>
+  </section>
 
-  <div class="card">
+  <section id="does">
     <h2>What it does</h2>
-    <ul>
-      <li><b>Real quality control</b> — pick a quality level; the encoder retries lower until the file actually gets smaller.</li>
-      <li><b>Downscale in one step</b> — cap the longest edge at 1280, 1920, 2560, 3200 or 4096 px (or keep original).</li>
-      <li><b>Batch it</b> — select up to 40 photos, see per-file savings, then share them all in one go.</li>
-      <li><b>Keeps orientation</b> — EXIF rotation is applied to the pixels, so portrait shots stay upright.</li>
-      <li><b>Metadata stripped</b> — location and device tags are dropped during re-encode.</li>
-      <li><b>Non-destructive</b> — compressed copies go to <code>Pictures/Compress</code>; originals are untouched.</li>
-      <li><b>Verify afterwards</b> — tapping a saved result reopens the slider so you can confirm the file matches the preview.</li>
+    <p class="kicker">Four screens, no account</p>
+    <ul class="rows">
+      <li><b>Real quality</b><span>Pick a level; the encoder retries lower until the file actually gets smaller.</span></li>
+      <li><b>Downscale</b><span>Cap the longest edge at 1280, 1920, 2560, 3200 or 4096 px, or keep the original.</span></li>
+      <li><b>Batch it</b><span>Up to 40 photos, per-file savings, then share them all in one go.</span></li>
+      <li><b>Orientation</b><span>EXIF rotation is applied to the pixels, so portrait shots stay upright.</span></li>
+      <li><b>Metadata</b><span>Location and device tags are dropped during re-encode.</span></li>
+      <li><b>Non-destructive</b><span>Copies go to <code>Pictures/Compress</code>; originals are untouched.</span></li>
+      <li><b>Verify</b><span>Tapping a saved result reopens the slider so you can confirm the file matches the preview.</span></li>
     </ul>
-  </div>
+  </section>
 
-  <div class="card">
+  <section id="install">
     <h2>Install on the Flip 7</h2>
-    <ol>
-      <li>Tap <b>Download APK</b> above and wait for it to finish (it is tiny).</li>
-      <li>Open it from the notification shade, or <b>Files → Downloads</b>.</li>
-      <li>Android will say the install is blocked: tap <b>Settings</b>, enable <b>Allow from this source</b>, then go back.</li>
-      <li>Tap <b>Install</b> → <b>Open</b>. If Play Protect warns about an unknown developer, choose <b>Install anyway</b>.</li>
-      <li>Updating from an earlier build keeps your data — same signing key, higher version code.</li>
+    <p class="kicker">Five taps, then never again</p>
+    <ol class="steps">
+      <li><span>Tap <b>Download APK</b> above and wait for it to finish — it is tiny.</span></li>
+      <li><span>Open it from the notification shade, or <b>Files → Downloads</b>.</span></li>
+      <li><span>Android says the install is blocked: tap <b>Settings</b>, enable <b>Allow from this source</b>, then go back.</span></li>
+      <li><span>Tap <b>Install</b> → <b>Open</b>. If Play Protect warns about an unknown developer, choose <b>Install anyway</b>.</span></li>
+      <li><span>Updating from an earlier build keeps your data — same signing key, higher version code.</span></li>
     </ol>
-    <div class="note warn">
-      <span>!</span>
-      <span>This is a self-signed build, so Play Protect may call it unrecognised. That is expected for apps installed outside the Play Store, not a sign of tampering.</span>
-    </div>
-  </div>
+    <p class="callout">This is a self-signed build, so Play Protect may call it unrecognised. That is expected for apps installed outside the Play Store, not a sign of tampering.</p>
+  </section>
 
-  <div class="card">
+  <section id="under">
     <h2>Under the hood</h2>
-    <div class="grid">
-      <div class="stat"><span>Network permission</span><b>None</b></div>
-      <div class="stat"><span>Storage permission</span><b>None (Android 10+)</b></div>
-      <div class="stat"><span>Code</span><b>Platform APIs only</b></div>
-      <div class="stat"><span>Min Android</span><b>8.0 / API 26</b></div>
-    </div>
-  </div>
+    <p class="kicker">No SDKs, no analytics, no network</p>
+    <dl class="specs">
+      <div><dt>Network permission</dt><dd>None</dd></div>
+      <div><dt>Storage permission</dt><dd>None (Android 10+)</dd></div>
+      <div><dt>Code</dt><dd>Platform APIs only</dd></div>
+      <div><dt>Min Android</dt><dd>8.0 / API 26</dd></div>
+    </dl>
+  </section>
+</main>
 
-  <footer>Compress 1.8 · package app.offline.compress · signed debug-keystore build for personal use</footer>
-</div>
+<footer>
+  <span>Compress 1.8 · app.offline.compress</span>
+  <span><a href="icons/">Icons</a> · <a href="renders/">Renders</a> · signed for personal use</span>
+</footer>
+
+<script>
+  (function () {
+    var menu = document.getElementById("menu");
+    var buttons = [document.getElementById("menuBtn"), document.getElementById("burger")];
+    function setOpen(open) {
+      menu.hidden = !open;
+      buttons.forEach(function (b) {
+        if (b) b.setAttribute("aria-expanded", open ? "true" : "false");
+      });
+      if (document.getElementById("burger")) {
+        document.getElementById("burger").setAttribute("aria-label", open ? "Close menu" : "Open menu");
+      }
+    }
+    buttons.forEach(function (b) {
+      if (!b) return;
+      b.addEventListener("click", function () { setOpen(menu.hidden); });
+    });
+    menu.addEventListener("click", function (e) {
+      if (e.target.closest("a")) setOpen(false);
+    });
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape") setOpen(false);
+    });
+  })();
+</script>
 </body>
 </html>
