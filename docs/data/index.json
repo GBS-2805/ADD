@@ -18,7 +18,25 @@
       "title": "Icons",
       "href": "/icons/",
       "data": "/data/icons.json",
-      "count": 606
+      "count": 1864,
+      "sets": [
+        {
+          "id": "Lineicons",
+          "source": "LineiconsHQ/Lineicons",
+          "licence": "MIT",
+          "style": null,
+          "count": 606,
+          "data": "/data/icons.json"
+        },
+        {
+          "id": "Coolicons",
+          "source": "krystonschwarze/coolicons",
+          "licence": "MIT",
+          "style": "line/regular",
+          "count": 1258,
+          "data": "/data/coolicons.json"
+        }
+      ]
     },
     {
       "id": "fonts",

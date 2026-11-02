@@ -1,46 +1,52 @@
-/* Pull-down accordion. The chevrons beside the page name and the burger on the
-   right both open the same panel; inside it one group is open at a time, and
-   Escape or picking a destination closes the whole thing. */
+/* Band chrome. The chevrons on the left open a pull-down accordion with the four
+   section links; the burger on the right pulls out a side tab with the other
+   three. Opening one closes the other, Escape closes both, and the scrim behind
+   the tab dismisses it. */
 (function () {
-  var panel = document.getElementById("menu");
-  var controls = [document.getElementById("menuBtn"), document.getElementById("burger")].filter(Boolean);
-  if (!panel || !controls.length) return;
-
+  var menu = document.getElementById("menu");
+  var menuBtn = document.getElementById("menuBtn");
+  var drawer = document.getElementById("drawer");
   var burger = document.getElementById("burger");
-  var groups = Array.prototype.slice.call(panel.querySelectorAll(".group"));
+  var scrim = document.getElementById("scrim");
+  var closer = document.getElementById("drawerClose");
+  if (!menu || !menuBtn || !drawer || !burger) return;
 
-  function setPanel(open) {
-    panel.hidden = !open;
-    controls.forEach(function (control) {
-      control.setAttribute("aria-expanded", open ? "true" : "false");
-    });
-    if (burger) burger.setAttribute("aria-label", open ? "Close menu" : "Open menu");
+  function setMenu(open) {
+    menu.setAttribute("data-open", open ? "true" : "false");
+    menuBtn.setAttribute("aria-expanded", open ? "true" : "false");
+    menuBtn.setAttribute("aria-label", open ? "Close sections" : "Open sections");
   }
 
-  controls.forEach(function (control) {
-    control.addEventListener("click", function () { setPanel(panel.hidden); });
-  });
+  function setDrawer(open) {
+    drawer.setAttribute("data-open", open ? "true" : "false");
+    burger.setAttribute("aria-expanded", open ? "true" : "false");
+    burger.setAttribute("aria-label", open ? "Close side tab" : "Open side tab");
+    if (scrim) scrim.setAttribute("data-open", open ? "true" : "false");
+    document.body.classList.toggle("drawer-open", open);
+    if (open) setMenu(false);
+  }
 
-  groups.forEach(function (group) {
-    var button = group.querySelector(".group-btn");
-    button.addEventListener("click", function () {
-      var willOpen = group.getAttribute("data-open") !== "true";
-      groups.forEach(function (other) {
-        other.setAttribute("data-open", "false");
-        other.querySelector(".group-btn").setAttribute("aria-expanded", "false");
-      });
-      if (willOpen) {
-        group.setAttribute("data-open", "true");
-        button.setAttribute("aria-expanded", "true");
-      }
-    });
+  menuBtn.addEventListener("click", function () {
+    var open = menu.getAttribute("data-open") !== "true";
+    setMenu(open);
+    if (open) setDrawer(false);
   });
+  burger.addEventListener("click", function () {
+    setDrawer(drawer.getAttribute("data-open") !== "true");
+  });
+  if (closer) closer.addEventListener("click", function () { setDrawer(false); });
+  if (scrim) scrim.addEventListener("click", function () { setDrawer(false); });
 
-  panel.addEventListener("click", function (event) {
-    if (event.target.closest("a")) setPanel(false);
+  menu.addEventListener("click", function (event) {
+    if (event.target.closest("a")) setMenu(false);
+  });
+  drawer.addEventListener("click", function (event) {
+    if (event.target.closest("a")) setDrawer(false);
   });
 
   document.addEventListener("keydown", function (event) {
-    if (event.key === "Escape") setPanel(false);
+    if (event.key !== "Escape") return;
+    setMenu(false);
+    setDrawer(false);
   });
 })();

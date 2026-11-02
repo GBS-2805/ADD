@@ -16,7 +16,7 @@
       "title": "Icons browser",
       "kind": "Web tool",
       "year": 2026,
-      "summary": "All 606 free Lineicons glyphs in one filterable grid, one tap each to copy the SVG, with a textarea fallback for browsers that block the clipboard.",
+      "summary": "All 1,864 glyphs from two free sets in one filterable grid, one tap each to copy the SVG, with a textarea fallback for browsers that block the clipboard.",
       "built": "The fetch pipeline, the recolouring to currentColor, the grid and clipboard handling, and the JSON the phone app will read.",
       "stack": "Vanilla JavaScript, one HTML file, Python fetch script",
       "href": "/icons/"

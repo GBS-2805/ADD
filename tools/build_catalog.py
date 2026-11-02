@@ -30,6 +30,7 @@ DOCS = ROOT / "docs"
 DATA = DOCS / "data"
 CATALOG = ROOT / "tools/catalog.json"
 ICONS = DATA / "icons.json"
+COOLICONS = DATA / "coolicons.json"
 
 PAGES = {
     "index": DOCS / "index.html",
@@ -87,10 +88,18 @@ def measure(catalog):
     return catalog
 
 
-def icon_count():
-    if not ICONS.exists():
-        fail("no docs/data/icons.json yet; run tools/fetch_icons.py first")
-    return json.loads(ICONS.read_text(encoding="utf-8"))["count"]
+def icon_sets():
+    """Both free sets, with the totals the pages have to quote."""
+    sets, total = [], 0
+    for path in (ICONS, COOLICONS):
+        if not path.exists():
+            fail("no %s yet; run tools/fetch_icons.py first" % path.relative_to(ROOT))
+        payload = json.loads(path.read_text(encoding="utf-8"))
+        total += payload["count"]
+        sets.append({"id": payload.get("set", path.stem), "source": payload.get("source"),
+                     "licence": payload.get("licence"), "style": payload.get("style"),
+                     "count": payload["count"], "data": "/data/" + path.name})
+    return total, sets
 
 
 def write(path, payload):
@@ -99,7 +108,7 @@ def write(path, payload):
     print("wrote %-28s %8d bytes" % (path.relative_to(ROOT), size(path)))
 
 
-def build(catalog, count):
+def build(catalog, count, sets):
     generated = datetime.date.today().isoformat()
     index = {
         "generated": generated,
@@ -108,7 +117,7 @@ def build(catalog, count):
             {"id": "tools", "title": "Tools", "href": "/tools/", "data": "/data/tools.json",
              "count": len(catalog["tools"])},
             {"id": "icons", "title": "Icons", "href": "/icons/", "data": "/data/icons.json",
-             "count": count},
+             "count": count, "sets": sets},
             {"id": "fonts", "title": "Fonts", "href": "/fonts/", "data": "/data/fonts.json",
              "count": len(catalog["fonts"])},
             {"id": "portfolio", "title": "Portfolio", "href": "/portfolio/",
@@ -174,14 +183,14 @@ def main():
     args = parser.parse_args()
 
     catalog = measure(json.loads(CATALOG.read_text(encoding="utf-8")))
-    count = icon_count()
+    count, sets = icon_sets()
     if not args.check:
-        build(catalog, count)
+        build(catalog, count, sets)
 
     released = [app["name"] for app in catalog["tools"] if app.get("apk")]
-    print("catalog: %d tools (%s shipping), %d fonts, %d projects, %d icons"
+    print("catalog: %d tools (%s shipping), %d fonts, %d projects, %d icons in %d sets"
           % (len(catalog["tools"]), ", ".join(released), len(catalog["fonts"]),
-             len(catalog["portfolio"]), count))
+             len(catalog["portfolio"]), count, len(sets)))
 
     problems = check(catalog, count)
     if problems:

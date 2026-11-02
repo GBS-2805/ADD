@@ -1,10 +1,11 @@
 /* Compress site — one stylesheet for every page.
 
    Palette, band and type come from the Figma frame 6-27 measurements: a 96px
-   band, 40px padding, a 45px centred mark, two 17px lines on the right and a
-   29x20 burger. The page name sits on the left beside the menu control, and the
-   pull-down itself is an accordion. Paths inside url() are relative to this file,
-   so a page can sit at any depth. */
+   band, 40px padding, a 45px centred mark, two 17px lines on the right. The page
+   name sits on the left beside the pull-down control; the burger on the right
+   pulls out a side tab. Every glyph in that chrome is a Coolicons line icon
+   (krystonschwarze/coolicons, MIT), sized to the frame's measurements. Paths in
+   url() are relative to this file, so a page can sit at any depth. */
 
 @font-face {
   font-family: "Poppins";
@@ -29,10 +30,10 @@
 }
 
 :root {
-  --band: #d9d9d9;             /* header bar                */
-  --page: #3f4e96;             /* page field                */
-  --ink: #000000;              /* text and mark on the band */
-  --on: #d9d9d9;               /* text on the field         */
+  --band: #d9d9d9;             /* header bar, pull-down and side tab */
+  --page: #3f4e96;             /* page field                         */
+  --ink: #000000;              /* text and glyphs on the band        */
+  --on: #d9d9d9;               /* text on the field                  */
   --on-dim: rgba(217, 217, 217, .64);
   --rule: rgba(217, 217, 217, .26);
   --pad: 40px;
@@ -51,6 +52,7 @@ body {
   line-height: 1.65;
   -webkit-font-smoothing: antialiased;
 }
+body.drawer-open { overflow: hidden; }
 a { color: inherit; }
 
 /* ---------- header band, as frame 6-27 draws it ---------- */
@@ -64,10 +66,12 @@ a { color: inherit; }
   padding: 0 var(--pad);
   background: var(--band);
   color: var(--ink);
+  z-index: 20;
 }
 .lead { display: flex; align-items: center; gap: 14px; }
 .menu-btn,
-.burger {
+.burger,
+.drawer-close {
   font: inherit;
   color: var(--ink);
   background: none;
@@ -76,8 +80,8 @@ a { color: inherit; }
   cursor: pointer;
 }
 .menu-btn {
-  /* Icon-only control: the 21x20 glyph centred in a 40px tap target, pulled back
-     by its own padding so it still lines up with the 40px page gutter. */
+  /* Coolicons chevron-double-down in a real 40px tap target, pulled back so the
+     glyph still lines up with the 40px page gutter. */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -85,9 +89,11 @@ a { color: inherit; }
   height: 40px;
   margin-left: -10px;
 }
+.menu-btn .chev { width: 24px; height: 24px; transition: transform .2s ease; }
+.menu-btn[aria-expanded="true"] .chev { transform: scaleY(-1); }
 .menu-btn:focus-visible,
-.burger:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
-.chev { width: 21px; height: 20px; flex: none; }
+.burger:focus-visible,
+.drawer-close:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
 .page-name {
   font-size: 26px;
   line-height: 1;
@@ -105,62 +111,101 @@ a { color: inherit; }
   display: block;
 }
 .mark svg { display: block; width: 45px; height: 45px; }
-.who { display: flex; align-items: center; gap: 34px; }
+.who { display: flex; align-items: center; gap: 26px; }
 .who-lines { text-align: right; }
 .who-lines p { margin: 0; font-size: 17px; line-height: 24.5px; }
-.burger { width: 29px; height: 20px; flex: none; }
-.burger svg { display: block; }
+.burger {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  margin-right: -8px;
+}
+.burger svg { width: 26px; height: 26px; }
 
-/* ---------- pull-down menu, as an accordion ---------- */
+/* ---------- left: accordion pull-down, four destinations ---------- */
 .menu {
   background: var(--band);
   color: var(--ink);
-  padding: 0 var(--pad) 10px;
+  padding: 0 var(--pad) 8px;
+  z-index: 19;
 }
-.menu[hidden] { display: none; }
-.group { border-top: 1px solid rgba(0, 0, 0, .14); }
-.group-btn {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  width: 100%;
-  padding: 16px 0;
-  font: inherit;
-  font-size: 17px;
-  font-weight: 500;
-  color: var(--ink);
-  text-align: left;
-  background: none;
-  border: 0;
-  cursor: pointer;
+.menu[data-open="false"] { display: none; }
+.menu[data-open="true"] { animation: panel-in .18s ease both; }
+@keyframes panel-in {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: none; }
 }
-.group-btn:hover > span:first-child { text-decoration: underline; }
-.group-btn .note { margin-left: auto; font-size: 14px; font-weight: 400; color: rgba(0, 0, 0, .5); }
-.group-chev { width: 15px; height: 15px; flex: none; transition: transform .2s ease; }
-.group[data-open="true"] .group-chev { transform: rotate(180deg); }
-.group-body {
-  display: grid;
-  grid-template-rows: 0fr;
-  visibility: hidden;
-  transition: grid-template-rows .22s ease, visibility 0s .22s;
-}
-.group[data-open="true"] .group-body {
-  grid-template-rows: 1fr;
-  visibility: visible;
-  transition: grid-template-rows .22s ease, visibility 0s;
-}
-.group-inner { overflow: hidden; }
 .menu a {
-  display: block;
-  padding: 12px 0 12px 26px;
-  border-top: 1px solid rgba(0, 0, 0, .08);
-  font-size: 17px;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 15px 0;
+  border-top: 1px solid rgba(0, 0, 0, .14);
+  font-size: 19px;
   text-decoration: none;
 }
+.menu a span { font-size: 14px; color: rgba(0, 0, 0, .5); }
 .menu a:hover { text-decoration: underline; }
-.menu a[aria-current] { font-weight: 500; }
-.menu a span { color: rgba(0, 0, 0, .5); }
+.menu a[aria-current="page"] { font-weight: 500; }
 .menu a:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+
+/* ---------- right: side pull-out tab, three destinations ---------- */
+.scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  background: rgba(0, 0, 0, .36);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity .22s ease, visibility 0s .22s;
+}
+.scrim[data-open="true"] { opacity: 1; visibility: visible; transition: opacity .22s ease, visibility 0s; }
+.drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  width: min(340px, 88vw);
+  height: 100%;
+  padding: 0 var(--pad) 32px;
+  background: var(--band);
+  color: var(--ink);
+  box-shadow: -24px 0 60px rgba(0, 0, 0, .24);
+  transform: translateX(101%);
+  visibility: hidden;
+  transition: transform .24s ease, visibility 0s .24s;
+}
+.drawer[data-open="true"] { transform: none; visibility: visible; transition: transform .24s ease, visibility 0s; }
+.drawer-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: var(--band-h);
+  border-bottom: 1px solid rgba(0, 0, 0, .14);
+}
+.drawer-head p { margin: 0; font-size: 14px; font-weight: 500; letter-spacing: .1em; text-transform: uppercase; }
+.drawer-close { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; margin-right: -8px; }
+.drawer-close svg { width: 24px; height: 24px; }
+.drawer a {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 17px 0;
+  border-bottom: 1px solid rgba(0, 0, 0, .14);
+  font-size: 21px;
+  text-decoration: none;
+}
+.drawer a span { font-size: 14px; color: rgba(0, 0, 0, .5); }
+.drawer a:hover { text-decoration: underline; }
+.drawer a[aria-current="page"] { font-weight: 500; }
+.drawer a:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+.drawer .drawer-note { margin: auto 0 0; font-size: 13px; line-height: 1.5; color: rgba(0, 0, 0, .5); }
 
 /* ---------- page ---------- */
 main { padding: 0 var(--pad); }
@@ -201,7 +246,7 @@ h1 {
   font-size: 17px;
   text-decoration: none;
 }
-.cta svg { flex: none; }
+.cta svg { flex: none; width: 20px; height: 20px; }
 .cta:hover { background: #e8e8e8; }
 
 section { padding: 64px 0; border-top: 1px solid var(--rule); }
@@ -213,8 +258,6 @@ h2 .pill { margin-left: 12px; vertical-align: middle; }
 /* ---------- catalog cells, sharing hairlines ---------- */
 .cards {
   display: grid;
-  /* auto-fit, not auto-fill: a page with two cards should not leave an empty
-     bordered cell hanging off the right edge. */
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   border-top: 1px solid var(--rule);
   border-left: 1px solid var(--rule);
@@ -327,18 +370,22 @@ footer a:hover { text-decoration: underline; }
 @media (max-width: 700px) {
   :root { --pad: 20px; --band-h: 72px; }
   body { font-size: 16px; }
-  .bar { gap: 16px; }
-  .lead { gap: 8px; }
+  .bar { gap: 12px; }
+  .lead { gap: 6px; }
   .menu-btn { width: 34px; height: 34px; margin-left: -8px; }
-  .chev { width: 20px; height: 20px; }
+  .menu-btn .chev { width: 22px; height: 22px; }
   .page-name { font-size: 15px; letter-spacing: .02em; }
   .mark, .mark svg { width: 34px; height: 34px; }
-  .who { gap: 16px; }
+  .who { gap: 8px; }
   .who-lines p { font-size: 14px; line-height: 1.35; }
-  .burger { width: 24px; }
-  .menu { padding-bottom: 8px; }
-  .group-btn { padding: 14px 0; font-size: 16px; }
-  .menu a { padding: 11px 0 11px 20px; font-size: 16px; }
+  .burger { width: 36px; height: 36px; margin-right: -6px; }
+  .burger svg { width: 24px; height: 24px; }
+  .menu { padding-bottom: 6px; }
+  .menu a { padding: 13px 0; font-size: 17px; }
+  .menu a span { font-size: 13px; }
+  .drawer { width: min(320px, 86vw); }
+  .drawer-head { height: 72px; }
+  .drawer a { padding: 15px 0; font-size: 19px; }
   .page-head { padding: 48px 0 28px; }
   .lede { font-size: 18px; }
   .cta { width: 100%; justify-content: center; height: 54px; }

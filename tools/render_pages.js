@@ -10,15 +10,17 @@ const shots = [
   { name: "page-home-light", path: "", w: 1300, h: 900 },
   { name: "page-home-full", path: "", w: 1300, h: 900, full: true },
   { name: "page-menu", path: "", w: 1300, h: 900, open: "#menuBtn" },
-  { name: "page-menu-more", path: "", w: 1300, h: 900, open: "#menuBtn", group: 2 },
+  { name: "page-drawer", path: "", w: 1300, h: 900, open: "#burger" },
   { name: "page-tools", path: "tools/", w: 1300, h: 900 },
   { name: "page-icons-light", path: "icons/", w: 1300, h: 900 },
+  { name: "page-icons-coolicons", path: "icons/", w: 1300, h: 900, set: 1 },
   { name: "page-fonts", path: "fonts/", w: 1300, h: 900 },
   { name: "page-portfolio", path: "portfolio/", w: 1300, h: 900 },
   { name: "page-download", path: "download/", w: 1300, h: 900 },
   { name: "phone-home-light", path: "", w: 390, h: 844 },
   { name: "phone-home-full", path: "", w: 390, h: 844, full: true },
   { name: "phone-menu", path: "", w: 390, h: 844, open: "#menuBtn" },
+  { name: "phone-drawer", path: "", w: 390, h: 844, open: "#burger" },
   { name: "phone-icons-light", path: "icons/", w: 390, h: 844 },
   { name: "phone-download", path: "download/", w: 390, h: 844 },
 ];
@@ -37,29 +39,33 @@ const shots = [
     await page.evaluate(() => document.fonts.ready);
     if (s.open) {
       await page.click(s.open);
-      await page.waitForTimeout(220);
-    }
-    if (s.group) {
-      await page.click(`#menu .group:nth-of-type(${s.group}) .group-btn`);
       await page.waitForTimeout(320);
     }
+    if (s.set) {
+      await page.click(`.set[data-set="${s.set}"]`);
+      await page.waitForTimeout(220);
+    }
     await page.screenshot({ path: `${out}/${s.name}.png`, fullPage: Boolean(s.full) });
-    const info = await page.evaluate(() => ({
-      bg: getComputedStyle(document.body).backgroundColor,
-      fam: getComputedStyle(document.body).fontFamily,
-      poppins: document.fonts.check("17px Poppins"),
-      hscroll: document.documentElement.scrollWidth > window.innerWidth + 1,
-      panel: !document.getElementById("menu").hidden,
-      openGroups: Array.prototype.map.call(
-        document.querySelectorAll("#menu .group"),
-        (g) => g.getAttribute("data-open")
-      ),
-      doc: [document.documentElement.scrollWidth, document.documentElement.scrollHeight],
-    }));
+    const info = await page.evaluate(() => {
+      const menu = document.getElementById("menu");
+      const drawer = document.getElementById("drawer");
+      return {
+        bg: getComputedStyle(document.body).backgroundColor,
+        fam: getComputedStyle(document.body).fontFamily,
+        poppins: document.fonts.check("17px Poppins"),
+        hscroll: document.documentElement.scrollWidth > window.innerWidth + 1,
+        menu: menu ? menu.getAttribute("data-open") : "none",
+        drawer: drawer ? drawer.getAttribute("data-open") : "none",
+        drawerVisible: drawer ? getComputedStyle(drawer).visibility : "none",
+        cards: document.querySelectorAll(".icon-card").length,
+        note: (document.getElementById("note") || {}).textContent || "",
+        doc: [document.documentElement.scrollWidth, document.documentElement.scrollHeight],
+      };
+    });
     console.log(
       `${s.name}: bg ${info.bg} | ${info.fam.split(",")[0]} | poppins ${info.poppins}` +
-      ` | hscroll ${info.hscroll} | panel ${info.panel} | groups [${info.openGroups.join(",")}]` +
-      ` | doc ${info.doc.join("x")}`
+      ` | hscroll ${info.hscroll} | menu ${info.menu} | drawer ${info.drawer}/${info.drawerVisible}` +
+      ` | cards ${info.cards}${info.note ? " | " + info.note.slice(0, 48) : ""} | doc ${info.doc.join("x")}`
     );
     await page.close();
   }

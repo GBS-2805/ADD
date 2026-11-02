@@ -4,7 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Compress — tools, icons, fonts</title>
-<meta name="description" content="The database behind two offline Android tools: 606 free icons, three Poppins faces, the apps as standalone APKs and the work behind them. Every catalog has a page and a JSON file." />
+<meta name="description" content="The database behind two offline Android tools: 1,864 free icons in two sets, three Poppins faces, the apps as standalone APKs and the work behind them. Every catalog has a page and a JSON file." />
 <meta name="theme-color" content="#3f4e96" />
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
 <link rel="stylesheet" href="assets/site.css" />
@@ -13,11 +13,8 @@
 
 <header class="bar">
   <div class="lead">
-    <button class="menu-btn" id="menuBtn" type="button" aria-expanded="false" aria-controls="menu" aria-label="Open menu">
-      <svg class="chev" viewBox="0 0 21 20" fill="none" aria-hidden="true">
-        <path d="M3 7.1 10.5 1.6 18 7.1" stroke="currentColor" stroke-width="2.1" stroke-linecap="square"/>
-        <path d="M3 12.9 10.5 18.4 18 12.9" stroke="currentColor" stroke-width="2.1" stroke-linecap="square"/>
-      </svg>
+    <button class="menu-btn" id="menuBtn" type="button" aria-expanded="false" aria-controls="menu" aria-label="Open sections">
+      <svg class="chev" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M8 13L12 17L16 13M8 7L12 11L16 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
     </button>
     <a class="page-name" href="./">Index</a>
   </div>
@@ -39,55 +36,38 @@
       <p>Compress</p>
       <p>Tools · Icons · Fonts</p>
     </div>
-    <button class="burger" id="burger" type="button" aria-expanded="false" aria-controls="menu" aria-label="Open menu">
-      <svg viewBox="0 0 29 20" fill="none" aria-hidden="true">
-        <path d="M0 1h29M0 10h29M0 19h29" stroke="currentColor" stroke-width="1.4"/>
-      </svg>
+    <button class="burger" id="burger" type="button" aria-expanded="false" aria-controls="drawer" aria-label="Open side tab">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 7H19M5 12H19M5 17H19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
     </button>
   </div>
 </header>
 
-<nav class="menu" id="menu" hidden aria-label="Menu">
-  <div class="group" data-open="true">
-    <button class="group-btn" type="button" aria-expanded="true" aria-controls="menu-sections">
-      <span>Sections</span>
-      <span class="note">4 pages</span>
-      <svg class="group-chev" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m5 9 7 7 7-7" stroke="currentColor" stroke-width="2"/></svg>
-    </button>
-    <div class="group-body" id="menu-sections">
-      <div class="group-inner">
-        <a href="./" aria-current="page">Index <span>— shelf</span></a>
-        <a href="tools/">Tools <span>— 2 apps</span></a>
-        <a href="icons/">Icons <span>— 606</span></a>
-        <a href="fonts/">Fonts <span>— 3 faces</span></a>
-      </div>
-    </div>
-  </div>
-  <div class="group" data-open="false">
-    <button class="group-btn" type="button" aria-expanded="false" aria-controls="menu-more">
-      <span>More</span>
-      <span class="note">3 pages</span>
-      <svg class="group-chev" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m5 9 7 7 7-7" stroke="currentColor" stroke-width="2"/></svg>
-    </button>
-    <div class="group-body" id="menu-more">
-      <div class="group-inner">
-        <a href="portfolio/">Portfolio <span>— 3 projects</span></a>
-        <a href="renders/">Renders <span>— gallery</span></a>
-        <a href="download/">Download <span>— 1.9</span></a>
-      </div>
-    </div>
-  </div>
+<nav class="menu" id="menu" data-open="false" aria-label="Sections">
+  <a href="./" aria-current="page">Index<span>shelf</span></a>
+  <a href="icons/">Icons<span>1,864 glyphs</span></a>
+  <a href="fonts/">Fonts<span>3 faces</span></a>
+  <a href="tools/">Tools<span>2 apps</span></a>
 </nav>
+
+<div class="scrim" id="scrim" data-open="false"></div>
+<aside class="drawer" id="drawer" data-open="false" aria-label="More">
+  <div class="drawer-head">
+    <p>More</p>
+    <button class="drawer-close" id="drawerClose" type="button" aria-label="Close side tab"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 6L18 18M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+  </div>
+  <a href="download/">Download<span>1.9</span></a>
+  <a href="portfolio/">Portfolio<span>3 projects</span></a>
+  <a href="renders/">Renders<span>gallery</span></a>
+  <p class="drawer-note">Compress · offline Android tools, the icons they use and the fonts they are set in.</p>
+</aside>
 
 
 <main>
   <header class="page-head">
     <h1>The shelf</h1>
-    <p class="lede">Two offline Android tools, and the material they are built from: <b>606 icons</b>, three Poppins faces, the apps as standalone APKs, and the work behind them. Every catalog below has a page here and a JSON file an app can read.</p>
+    <p class="lede">Two offline Android tools, and the material they are built from: <b>1,864 icons</b> across two sets, three Poppins faces, the apps as standalone APKs, and the work behind them. Every catalog below has a page here and a JSON file an app can read.</p>
     <a class="cta" href="Compress-1.9.apk" download>
-      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-        <path d="M12 3v11m0 0 4.5-4.5M12 14l-4.5-4.5M4 17.5V19a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-1.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
+      <svg class="cta-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M8 12L12 16L16 12M12 16V4M6 20H18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
       Download Compress 1.9
     </a>
     <p class="meta">
@@ -109,9 +89,9 @@
         <span class="tag"><span class="go">Open tools</span></span>
       </a>
       <a class="card" href="icons/">
-        <span class="kind">Icons · 606 glyphs</span>
+        <span class="kind">Icons · 1,864 glyphs</span>
         <h3>Icons</h3>
-        <p>The complete free Lineicons set, one click per glyph to copy its SVG. The same names and markup the Icons app reads.</p>
+        <p>Two complete free sets, 606 Lineicons and 1,258 Coolicons, one click per glyph to copy its SVG. The same names and markup the Icons app reads.</p>
         <span class="tag"><span class="go">Browse icons</span></span>
       </a>
       <a class="card" href="fonts/">
@@ -135,7 +115,7 @@
     <ul class="rows">
       <li><b>/data/index.json</b><span>The shelf itself: four catalogs, their pages, their JSON and their counts.</span></li>
       <li><b>/data/tools.json</b><span>Both apps: version, package, APK path, bytes, SHA-256, minimum Android.</span></li>
-      <li><b>/data/icons.json</b><span>All 606 glyphs with their markup, ready to render — the Icons app's whole database.</span></li>
+      <li><b>/data/icons.json</b> · <b>/data/coolicons.json</b><span>All 1,864 glyphs with their markup, ready to render — the Icons app's whole database, in both sets.</span></li>
       <li><b>/data/fonts.json</b><span>Each Poppins face with its weight, both file paths and both sizes.</span></li>
       <li><b>/data/portfolio.json</b><span>The three projects with year, kind, stack and what I built.</span></li>
     </ul>
@@ -147,7 +127,7 @@
     <p class="kicker">No store, no account, no update server</p>
     <ul class="rows">
       <li><b>Compress 1.9</b><span>Shipping now — <a href="download/">download, size and checksum</a>.</span></li>
-      <li><b>Icons</b><span>In build. The web version already is the browser the app will wrap: <a href="icons/">606 icons</a>.</span></li>
+      <li><b>Icons</b><span>In build. The web version already is the browser the app will wrap: <a href="icons/">1,864 icons</a>.</span></li>
     </ul>
   </section>
 </main>

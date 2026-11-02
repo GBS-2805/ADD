@@ -13,8 +13,8 @@ one palette and all published as JSON alongside the pages.
   (272,592 bytes, signed v1+v2, round adaptive icon), published as
   `docs/Compress-1.9.apk`. Package `app.offline.compress` · minSdk 26 · targetSdk 35
   · versionCode 10 · versionName 1.9.
-- **Icons** — in build. The web browser it wraps is live at `docs/icons/`: 606 free
-  Lineicons glyphs, copy-on-tap, no account.
+- **Icons** — in build. The web browser it wraps is live at `docs/icons/`: 1,864
+  glyphs in two free sets (606 Lineicons, 1,258 Coolicons), copy-on-tap, no account.
 - Theme: **one palette**, taken from the Figma frame `6-27` — an indigo field
   (`#3F4E96`), a light band (`#D9D9D9`) that also fills every call to action, black
   ink on the band, light text on the field, and hairline rules where the old theme
@@ -36,19 +36,19 @@ Seven pages, one stylesheet, no framework:
 | --- | --- |
 | `docs/index.html` | Index: the four catalogs, the JSON list, the download |
 | `docs/tools/` | Both apps, Compress in detail, install steps, release notes |
-| `docs/icons/` | All 606 free Lineicons, filter and copy (generated) |
+| `docs/icons/` | Both free sets, 1,864 glyphs, filter and copy (generated) |
 | `docs/fonts/` | Poppins 400/500/600, specimens, woff2 and TTF downloads |
 | `docs/portfolio/` | Three projects, what I built in each, constraints |
 | `docs/download/` | Standalone APKs, sizes, SHA-256, install steps |
 | `docs/renders/` | Gallery of captures, nothing drawn by hand |
 
-Pages share `docs/assets/site.css` — palette, band, menu and type — plus
-`docs/assets/site.js` for the pull-down. The band is frame 6-27's geometry with the
-page name on the left beside the chevron control, the mark centred, and two lines
-plus the 29x20 burger on the right. Both controls open one accordion pull-down:
-Sections (index, tools, icons, fonts) and More (portfolio, renders, download), one
-group open at a time, with `aria-current` on the page you are reading. Pages carry only their own small
-`<style>` for page-specific pieces.
+Pages share `docs/assets/site.css` — palette, band, menus and type — plus
+`docs/assets/site.js` for both menus. The band is frame 6-27's geometry with the page
+name on the left inside a 40px tap target, the mark centred, and two lines plus the
+burger on the right. The chevron opens a four-row pull-down (index, icons, fonts,
+tools); the burger pulls out a right-hand side tab (download, portfolio, renders),
+over a scrim. The glyphs in that chrome are Coolicons line icons. Pages carry only
+their own small `<style>` for page-specific pieces.
 
 ### The JSON behind it
 
@@ -57,7 +57,8 @@ The site is also the database the apps read, so the same numbers go to both:
 ```
 docs/data/index.json       the four catalogs, their pages, their counts, the downloads
 docs/data/tools.json       both apps: version, package, APK path, bytes, SHA-256
-docs/data/icons.json       all 606 glyphs with their markup (the Icons app's database)
+docs/data/icons.json       all 606 Lineicons glyphs with their markup
+docs/data/coolicons.json   all 1,258 Coolicons line glyphs (the Icons app's database)
 docs/data/fonts.json       each Poppins face: weight, woff2 path, TTF path, sizes
 docs/data/portfolio.json   the three projects
 ```
@@ -69,7 +70,7 @@ fall behind the app, writes the four JSON files, and then **fails** if a page st
 quotes a stale version, size or checksum. Nothing on the shelf is typed twice.
 
 ```bash
-python3 tools/fetch_icons.py       # icon page + data/icons.json (needs the network)
+python3 tools/fetch_icons.py       # icon page + both catalogs (needs the network)
 python3 tools/build_catalog.py     # measure, write the catalogs, check the pages
 python3 tools/build_catalog.py --check   # check only
 ```
@@ -106,7 +107,7 @@ build.sh                                           SDK-tools build (aapt2 + java
 docs/                                              the seven-page static shelf + data/
 tools/catalog.json                                 apps, fonts, portfolio (one source)
 tools/build_catalog.py                             measures the shipped files, writes data/
-tools/fetch_icons.py                               icon page + data/icons.json
+tools/fetch_icons.py                               icon page + both icon catalogs
 tools/icons_template.html                          the only place to edit the icons page
 tools/render_pages.js                              captures every page at desktop + phone
 manifest.json, worker.js                           Sites deployment
@@ -141,8 +142,9 @@ node tools/render_pages.js http://127.0.0.1:8765/ artifacts
 ```
 
 `render_pages.js` shoots every page in one run — the index at its fold and full
-height, then tools, icons, fonts, portfolio and download at 1300x900, then the index,
-icons and download at 390x844 — and prints console errors and horizontal overflow.
+height, then the left accordion and the right side tab open, then tools, both icon
+sets, fonts, portfolio and download at 1300x900, then the index, its two menus and
+download at 390x844 — and prints console errors and horizontal overflow.
 
 **The Android app cannot be captured on this machine**, so the gallery shows no app
 screens. `/dev/kvm` exists but the account here is not in the `kvm` group and `sudo`
@@ -159,7 +161,8 @@ layout's `dp` values; those were removed along with the renderer that produced t
   verification, `resources.arsc` stored uncompressed for targetSdk 30+ installs, a
   byte-exact download from the published page, and an install and launch on an
   Android emulator whose system UI was too broken to photograph.
-- The Icons app does not exist yet. Its data does: `docs/data/icons.json`.
+- The Icons app does not exist yet. Its data does: `docs/data/icons.json` and
+  `docs/data/coolicons.json`.
 - The restyle itself is unconfirmed on hardware: colours, Poppins metrics and the
   hairline spacing have only been checked as resource values and layouts.
 - HEIC input depends on the device decoder (`BitmapFactory`); output is JPEG/WebP.

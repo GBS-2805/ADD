@@ -23,11 +23,8 @@
 
 <header class="bar">
   <div class="lead">
-    <button class="menu-btn" id="menuBtn" type="button" aria-expanded="false" aria-controls="menu" aria-label="Open menu">
-      <svg class="chev" viewBox="0 0 21 20" fill="none" aria-hidden="true">
-        <path d="M3 7.1 10.5 1.6 18 7.1" stroke="currentColor" stroke-width="2.1" stroke-linecap="square"/>
-        <path d="M3 12.9 10.5 18.4 18 12.9" stroke="currentColor" stroke-width="2.1" stroke-linecap="square"/>
-      </svg>
+    <button class="menu-btn" id="menuBtn" type="button" aria-expanded="false" aria-controls="menu" aria-label="Open sections">
+      <svg class="chev" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M8 13L12 17L16 13M8 7L12 11L16 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
     </button>
     <a class="page-name" href="../">Fonts</a>
   </div>
@@ -47,47 +44,32 @@
   <div class="who">
     <div class="who-lines">
       <p>Compress</p>
-      <p>3 faces · OFL</p>
+      <p>Tools · Icons · Fonts</p>
     </div>
-    <button class="burger" id="burger" type="button" aria-expanded="false" aria-controls="menu" aria-label="Open menu">
-      <svg viewBox="0 0 29 20" fill="none" aria-hidden="true">
-        <path d="M0 1h29M0 10h29M0 19h29" stroke="currentColor" stroke-width="1.4"/>
-      </svg>
+    <button class="burger" id="burger" type="button" aria-expanded="false" aria-controls="drawer" aria-label="Open side tab">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 7H19M5 12H19M5 17H19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
     </button>
   </div>
 </header>
 
-<nav class="menu" id="menu" hidden aria-label="Menu">
-  <div class="group" data-open="true">
-    <button class="group-btn" type="button" aria-expanded="true" aria-controls="menu-sections">
-      <span>Sections</span>
-      <span class="note">4 pages</span>
-      <svg class="group-chev" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m5 9 7 7 7-7" stroke="currentColor" stroke-width="2"/></svg>
-    </button>
-    <div class="group-body" id="menu-sections">
-      <div class="group-inner">
-        <a href="../">Index <span>— shelf</span></a>
-        <a href="../tools/">Tools <span>— 2 apps</span></a>
-        <a href="../icons/">Icons <span>— 606</span></a>
-        <a href="../fonts/" aria-current="page">Fonts <span>— 3 faces</span></a>
-      </div>
-    </div>
-  </div>
-  <div class="group" data-open="false">
-    <button class="group-btn" type="button" aria-expanded="false" aria-controls="menu-more">
-      <span>More</span>
-      <span class="note">3 pages</span>
-      <svg class="group-chev" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m5 9 7 7 7-7" stroke="currentColor" stroke-width="2"/></svg>
-    </button>
-    <div class="group-body" id="menu-more">
-      <div class="group-inner">
-        <a href="../portfolio/">Portfolio <span>— 3 projects</span></a>
-        <a href="../renders/">Renders <span>— gallery</span></a>
-        <a href="../download/">Download <span>— 1.9</span></a>
-      </div>
-    </div>
-  </div>
+<nav class="menu" id="menu" data-open="false" aria-label="Sections">
+  <a href="../">Index<span>shelf</span></a>
+  <a href="../icons/">Icons<span>1,864 glyphs</span></a>
+  <a href="../fonts/" aria-current="page">Fonts<span>3 faces</span></a>
+  <a href="../tools/">Tools<span>2 apps</span></a>
 </nav>
+
+<div class="scrim" id="scrim" data-open="false"></div>
+<aside class="drawer" id="drawer" data-open="false" aria-label="More">
+  <div class="drawer-head">
+    <p>More</p>
+    <button class="drawer-close" id="drawerClose" type="button" aria-label="Close side tab"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 6L18 18M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+  </div>
+  <a href="../download/">Download<span>1.9</span></a>
+  <a href="../portfolio/">Portfolio<span>3 projects</span></a>
+  <a href="../renders/">Renders<span>gallery</span></a>
+  <p class="drawer-note">Compress · offline Android tools, the icons they use and the fonts they are set in.</p>
+</aside>
 
 
 <main>
