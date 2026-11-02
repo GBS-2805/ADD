@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#3f4e96" />
 <link rel="icon" href="__ROOT__assets/favicon.svg" type="image/svg+xml" />
 <title>All brands — one glyph per category, twelve from each set</title>
-<meta name="description" content="Both free icon brands on one page: a section each, and both sheets start with the same shared categories so the sets line up. __TOTAL__ glyphs in all, with the whole catalog one page away." />
+<meta name="description" content="Both free icon brands on one page, twelve glyphs each, starting with the categories both sets carry. __TOTAL__ glyphs in all, with the whole catalog one page away." />
 <link rel="stylesheet" href="__ROOT__assets/site.css" />
 <style>
   /* page-only: every brand is a section under the one before it, each with its
@@ -133,26 +133,19 @@ __BRANDS__
   <a href="__ROOT__download/">Download<span>apps</span></a>
   <a href="__ROOT__portfolio/">Portfolio<span>3 projects</span></a>
   <a href="__ROOT__renders/">Renders<span>gallery</span></a>
-  <p class="drawer-note">All brands · one glyph from each category of each set, __TOTAL__ glyphs behind it. Each brand's sheet follows the one above it.</p>
+  <p class="drawer-note">All brands · a glyph from each category, __TOTAL__ in all.</p>
 </aside>
 
 <main>
   <header class="page-head">
     <h1>One per category</h1>
-    <p class="lede">Both brands, twelve glyphs each — the <b>categories both sets carry come first</b>, in one order for both, then each set's own. A quick read of what a set is about, and of where two sets overlap, without opening all __TOTAL__ of them.</p>
-    <p class="meta">
-      <span>2 brands</span>
-      <span>12 glyphs each</span>
-      <span>One per category</span>
-      <span>Files as they ship</span>
-    </p>
+    <p class="lede">Twelve glyphs from each brand: <b>the eight categories both sets carry first</b>, then four of its own.</p>
   </header>
 
   <section>
     <h2>The sheets</h2>
-    <p class="kicker">Twelve glyphs per brand, small enough to take in at once</p>
     <div id="sheets"></div>
-    <p class="fine">Each glyph is the file the page for that brand exports, drawn at its own weight. Categories are matched on name alone, so a set that spells one differently still shares the row; a set short of twelve is topped up with its own after the shared rows.</p>
+    <p class="fine">Each glyph is the file that brand's page exports, drawn at its own weight.</p>
   </section>
 </main>
 
@@ -243,8 +236,7 @@ __BRANDS__
   function note(chosen) {
     var own = chosen.picks.length - Math.min(chosen.shared, chosen.picks.length);
     if (chosen.shared && own > 0) {
-      return "The " + chosen.shared + " categories every set carries, then " + own
-        + " more of its own " + chosen.cats;
+      return chosen.shared + " shared categories, then " + own + " of its " + chosen.cats;
     }
     if (chosen.cats > CAP) {
       return chosen.picks.length.toLocaleString() + " glyphs, one from each of the first "

@@ -21,7 +21,7 @@ const shots = [
   { name: "page-icons-panel", page: "icons/coolicons/", w: 1300, h: 900, panel: true, scroll: "panel", title: "Coolicons · the set", caption: "All 1,258 glyphs behind one toggle, scrolling in their own sheet." },
   { name: "page-icons-variants", page: "icons/coolicons/", w: 1300, h: 900, panel: true, pick: 6, weight: "2.5", surface: "white", title: "Coolicons · variants", caption: "Heaviest line on the white tile: the same file, repainted live." },
   { name: "page-icons-categories", page: "icons/coolicons/", w: 1300, h: 900, panel: true, category: "System", scroll: "panel", title: "Coolicons · categories", caption: "The vendor's own 30 categories: System narrows the sheet to 102 glyphs." },
-  { name: "page-all", page: "icons/all/", w: 1300, h: 900, full: true, title: "All brands \u00b7 one per category", caption: "One brand under the next, both sheets opening with the same eight categories so the rows line up." },
+  { name: "page-all", page: "icons/all/", w: 1300, h: 900, full: true, title: "All brands \u00b7 one per category", caption: "Both brands, each sheet opening with the same eight categories." },
   { name: "page-lineicons-categories", page: "icons/lineicons/", w: 1300, h: 900, panel: true, category: "Brands & Logos", scroll: "panel", title: "Lineicons · categories", caption: "The other brand's own 51 categories: Brands & Logos holds 244 of its 606 glyphs." },
   { name: "page-fonts", page: "fonts/", w: 1300, h: 900, title: "Fonts", caption: "Poppins 400, 500 and 600 with specimens and downloads." },
   { name: "page-portfolio", page: "portfolio/", w: 1300, h: 900, title: "Portfolio", caption: "The apps, the browser and the site, with what was built in each." },
@@ -34,8 +34,8 @@ const shots = [
   { name: "phone-drawer", page: "", w: 390, h: 844, open: "#burger", title: "Phone side tab", caption: "The tab takes 86% of the width so the page stays behind it." },
   { name: "phone-icons", page: "icons/", w: 390, h: 844, title: "Icons on a phone", caption: "The app page at phone width." },
   { name: "phone-icons-brand", page: "icons/coolicons/", w: 390, h: 844, panel: true, pick: 2, scroll: "stage", title: "Coolicons on a phone", caption: "Preview, variant rows, and the set opened below." },
-  { name: "phone-all", page: "icons/all/", w: 390, h: 844, full: true, title: "All brands on a phone", caption: "Both brands at 390 wide: the shared eight fill the first two rows of each sheet." },
-  { name: "phone-all-coolicons", page: "icons/all/", w: 390, h: 844, scroll: "pane-coolicons", title: "All brands \u00b7 the second brand", caption: "Coolicons one scroll under Lineicons, opening with the same eight categories." },
+  { name: "phone-all", page: "icons/all/", w: 390, h: 844, full: true, title: "All brands on a phone", caption: "Both sheets stacked at 390 wide, four across." },
+  { name: "phone-all-coolicons", page: "icons/all/", w: 390, h: 844, scroll: "pane-coolicons", title: "All brands \u00b7 the second brand", caption: "Coolicons, one scroll under Lineicons." },
 ];
 
 // Rendered apart from a page, so the gallery names it but the loop does not shoot it.
