@@ -162,8 +162,11 @@ changes as unverified on device rather than illustrating them.
   instead of inlining glyphs, and the APK bundles those same files.
 - The left pull-down of all three icon pages opens with All, linking to
   `/icons/all/`: twelve glyphs per brand, one from every category — the first name in
-  the catalog for that category, in the vendor's own order. A set with fewer than
-  twelve categories fills the sheet from the start of its catalog. There are no tabs:
+  the catalog for that category. Categories are matched across sets on a plain key
+  (case, plural, punctuation), and the ones every set carries come first in one order —
+  the average of each vendor's own position — so the sheets line up row for row when
+  read down the page; a set short of twelve is topped up with its own categories from
+  the start of its catalog. There are no tabs:
   every brand is a section stacked under the one before it, so the page is the list and
   a third set only needs another section. A phone gets the name, its note, the sheet
   four across and three down (about 200px tall) and the link to the whole set; from

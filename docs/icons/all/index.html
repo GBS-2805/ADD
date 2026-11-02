@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#3f4e96" />
 <link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml" />
 <title>All brands — one glyph per category, twelve from each set</title>
-<meta name="description" content="Both free icon brands on one page: a section each, carrying a sheet of twelve glyphs taken one from each of its categories. 1,864 glyphs in all, with the whole catalog one page away." />
+<meta name="description" content="Both free icon brands on one page: a section each, and both sheets start with the same shared categories so the sets line up. 1,864 glyphs in all, with the whole catalog one page away." />
 <link rel="stylesheet" href="../../assets/site.css" />
 <style>
   /* page-only: every brand is a section under the one before it, each with its
@@ -141,7 +141,7 @@
 <main>
   <header class="page-head">
     <h1>One per category</h1>
-    <p class="lede">Both brands, twelve glyphs each — <b>one from every category</b> a set carries, in the vendor's own order. A quick read of what a set is about, without opening all 1,864 of them.</p>
+    <p class="lede">Both brands, twelve glyphs each — the <b>categories both sets carry come first</b>, in one order for both, then each set's own. A quick read of what a set is about, and of where two sets overlap, without opening all 1,864 of them.</p>
     <p class="meta">
       <span>2 brands</span>
       <span>12 glyphs each</span>
@@ -154,7 +154,7 @@
     <h2>The sheets</h2>
     <p class="kicker">Twelve glyphs per brand, small enough to take in at once</p>
     <div id="sheets"></div>
-    <p class="fine">Each glyph is the file the page for that brand exports, drawn at its own weight. Sets with fewer than twelve categories fill the sheet from the start of their catalog.</p>
+    <p class="fine">Each glyph is the file the page for that brand exports, drawn at its own weight. Categories are matched on name alone, so a set that spells one differently still shares the row; a set short of twelve is topped up with its own after the shared rows.</p>
   </section>
 </main>
 
@@ -173,29 +173,81 @@
     return '<svg xmlns="http://www.w3.org/2000/svg" ' + item.attrs + ">" + item.body + "</svg>";
   }
 
-  // One glyph per category, in the vendor's own order: the first name in the
-  // catalog for that category, since the catalogs are alphabetical. A set with
-  // fewer than twelve categories is filled from the start of its catalog so the
-  // sheet always holds twelve.
-  function choose(payload) {
-    var first = {}, order = [], picks = [];
+  // Categories are matched across sets on a plain key, so Lineicons' "Arrows" and
+  // Coolicons' "Arrow" are the same row.
+  function key(name) {
+    var s = String(name).toLowerCase().replace(/&/g, " and ")
+      .replace(/[^a-z0-9 ]+/g, " ").replace(/\s+/g, " ").trim();
+    return s.charAt(s.length - 1) === "s" ? s.slice(0, -1) : s;
+  }
+
+  // The vendor's own category order, minus any category with no glyph behind it.
+  function categories(payload) {
+    var present = {}, list = [];
     payload.icons.forEach(function (item) {
-      if (!item.cat || first[item.cat]) { return; }
-      first[item.cat] = item;
-      order.push(item.cat);
+      if (item.cat && !present[item.cat]) { present[item.cat] = true; list.push(item.cat); }
     });
-    var vendor = (payload.cat_order || []).filter(function (name) { return first[name]; });
-    var cats = vendor.concat(order.filter(function (name) { return vendor.indexOf(name) === -1; }));
-    cats.forEach(function (name) {
-      if (picks.length < CAP) { picks.push(first[name]); }
+    var vendor = (payload.cat_order || []).filter(function (name) { return present[name]; });
+    return vendor.concat(list.filter(function (name) { return vendor.indexOf(name) === -1; }));
+  }
+
+  // The first name in the catalog for each category; the catalogs are alphabetical.
+  function firstOf(payload) {
+    var first = {};
+    payload.icons.forEach(function (item) {
+      if (item.cat && !first[key(item.cat)]) { first[key(item.cat)] = item; }
+    });
+    return first;
+  }
+
+  // The categories every set carries, in one order for all of them: the average of
+  // each vendor's own position, so the sheets line up row for row when they are read
+  // down the page. A set missing one of them simply has fewer shared rows.
+  function sharedKeys(results) {
+    var maps = [], totals = {};
+    results.forEach(function (result) {
+      if (!result.payload) { return; }
+      var map = {};
+      categories(result.payload).forEach(function (name, place) {
+        var k = key(name);
+        map[k] = name;
+        totals[k] = (totals[k] || 0) + place;
+      });
+      maps.push(map);
+    });
+    if (maps.length < 2) { return []; }
+    return Object.keys(maps[0]).filter(function (k) {
+      return maps.every(function (map) { return map[k]; });
+    }).sort(function (a, b) {
+      return totals[a] - totals[b] || (a < b ? -1 : 1);
+    });
+  }
+
+  // The shared rows first, in the shared order, then this set's own categories from
+  // the start of its catalog until the sheet is full.
+  function choose(payload, shared) {
+    var first = firstOf(payload), all = categories(payload), picks = [], used = {};
+    shared.forEach(function (k) {
+      if (first[k] && picks.length < CAP) { picks.push(first[k]); used[k] = true; }
+    });
+    all.forEach(function (name) {
+      var k = key(name);
+      if (picks.length >= CAP || used[k] || !first[k]) { return; }
+      picks.push(first[k]);
+      used[k] = true;
     });
     for (var i = 0; i < payload.icons.length && picks.length < CAP; i++) {
       if (picks.indexOf(payload.icons[i]) === -1) { picks.push(payload.icons[i]); }
     }
-    return { picks: picks, cats: cats.length };
+    return { picks: picks, cats: all.length, shared: shared.length };
   }
 
   function note(chosen) {
+    var own = chosen.picks.length - Math.min(chosen.shared, chosen.picks.length);
+    if (chosen.shared && own > 0) {
+      return "The " + chosen.shared + " categories every set carries, then " + own
+        + " more of its own " + chosen.cats;
+    }
     if (chosen.cats > CAP) {
       return chosen.picks.length.toLocaleString() + " glyphs, one from each of the first "
         + CAP + " of its " + chosen.cats + " categories";
@@ -205,7 +257,7 @@
       + (extra > 0 ? ", then " + extra + " more from the set" : "");
   }
 
-  function buildSheet(set, payload) {
+  function buildSheet(set, payload, shared) {
     var pane = document.createElement("div");
     pane.className = "sheet-body";
     pane.id = "pane-" + set.slug;
@@ -223,7 +275,7 @@
       pane.append(broken);
       return pane;
     }
-    var chosen = choose(payload);
+    var chosen = choose(payload, shared);
     var line = document.createElement("p");
     line.className = "sheet-note";
     line.textContent = note(chosen);
@@ -254,10 +306,6 @@
     return pane;
   }
 
-  function add(result) {
-    sheetHost.append(buildSheet(result.set, result.payload));
-  }
-
   Promise.all(SETS.map(function (set) {
     return fetch(set.data, { cache: "no-store" })
       .then(function (response) {
@@ -267,7 +315,10 @@
       .then(function (payload) { return { set: set, payload: payload }; })
       .catch(function () { return { set: set, payload: null }; });
   })).then(function (results) {
-    results.forEach(add);
+    var shared = sharedKeys(results);
+    results.forEach(function (result) {
+      sheetHost.append(buildSheet(result.set, result.payload, shared));
+    });
   });
 })();
 </script>
