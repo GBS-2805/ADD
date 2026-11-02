@@ -1,7 +1,7 @@
 {
   "site": {
     "name": "Compress",
-    "tagline": "A shelf for offline Android tools, the icons they use and the fonts they are set in.",
+    "tagline": "A design shelf: two free icon brands, Poppins, one palette, and two offline Android apps built from them.",
     "package": "app.offline.compress"
   },
   "tools": [
@@ -26,28 +26,43 @@
         "Verify: tapping a saved result reopens the slider so you can confirm the file matches the preview."
       ],
       "links": [
-        { "label": "Tool page", "href": "/tools/" },
-        { "label": "Download APK", "href": "/Compress-1.9.apk" }
+        {
+          "label": "Tool page",
+          "href": "/tools/"
+        },
+        {
+          "label": "Download APK",
+          "href": "/Compress-1.9.apk"
+        }
       ]
     },
     {
       "id": "icons",
       "name": "Icons",
       "kind": "Android app",
-      "status": "in-build",
-      "version": null,
-      "version_code": null,
-      "package": null,
-      "apk": null,
-      "min_android": null,
-      "summary": "The 1,864-glyph browser from this site, packaged for the phone: filter by name, tap to copy the SVG. It reads the same icon JSON this site serves.",
+      "status": "released",
+      "version": "1.0",
+      "version_code": 1,
+      "package": "app.offline.icons",
+      "apk": "/Icons-1.0.apk",
+      "min_android": "8.0 (API 26)",
+      "summary": "Both free icon brands on the phone: 1,864 glyphs, a preview with weight, size and surface, and the whole set behind one toggle. Bundled offline with no permissions at all.",
       "features": [
-        "Both free sets on device, 606 Lineicons and 1,258 Coolicons, with no network.",
-        "Filter by name, tap a glyph, copy its markup.",
-        "The same glyphs and names as /icons/ and /data/icons.json."
+        "Two brands, 606 Lineicons and 1,258 Coolicons, bundled with the pages and the fonts.",
+        "A preview tab with weight, size and surface that repaints the glyph live.",
+        "The whole set opens into a scrolling sheet instead of filling the page.",
+        "Copy hands over the untouched SVG: 24x24 viewBox, currentColor, no baked weight.",
+        "No INTERNET permission: the browser is inside the APK, so there is nothing to request."
       ],
       "links": [
-        { "label": "Browse on the web", "href": "/icons/" }
+        {
+          "label": "Icons page",
+          "href": "/icons/"
+        },
+        {
+          "label": "Download APK",
+          "href": "/Icons-1.0.apk"
+        }
       ]
     }
   ],
@@ -93,12 +108,12 @@
     },
     {
       "id": "icons",
-      "title": "Icons browser",
-      "kind": "Web tool",
+      "title": "Icons app and browser",
+      "kind": "Android app + web tool",
       "year": 2026,
-      "summary": "All 1,864 glyphs from two free sets in one filterable grid, one tap each to copy the SVG, with a textarea fallback for browsers that block the clipboard.",
-      "built": "The fetch pipeline, the recolouring to currentColor, the grid and clipboard handling, and the JSON the phone app will read.",
-      "stack": "Vanilla JavaScript, one HTML file, Python fetch script",
+      "summary": "All 1,864 glyphs from two free brands with a live preview, variant controls and the set folded into a scrolling sheet; the same page ships as an offline Android app.",
+      "built": "The fetch pipeline, the two generated brand pages, the preview and variant logic, the collapsible set, the WebView wrapper that serves the bundle from a private origin, and the catalogs both read.",
+      "stack": "Vanilla JavaScript, Java WebView, Python fetch script",
       "href": "/icons/"
     },
     {

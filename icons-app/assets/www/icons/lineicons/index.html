@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="theme-color" content="#3f4e96" />
+<link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml" />
+<title>Lineicons — 606 glyphs, preview and variants</title>
+<meta name="description" content="Lineicons: 606 line style, the free set glyphs, MIT. Pick a glyph, set its weight, size and surface in a live preview, then copy the SVG. Offline, no account." />
+<link rel="stylesheet" href="../../assets/site.css" />
+<style>
+  /* page-only: the preview tab, its variant controls and the collapsible set */
+  .stage { margin: 6px 0 0; border: 1px solid var(--rule); }
+  .stage-tabs { display: flex; border-bottom: 1px solid var(--rule); }
+  .stage-tab {
+    appearance: none;
+    padding: 13px 22px;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--on-dim);
+    background: none;
+    border: 0;
+    border-right: 1px solid var(--rule);
+    border-radius: 0;
+    cursor: pointer;
+  }
+  .stage-tab[aria-selected="true"] { color: var(--ink); background: var(--band); }
+  .stage-tab:focus-visible { outline: 2px solid var(--band); outline-offset: -3px; }
+  .stage-body { display: none; }
+  .stage-body[data-active="true"] { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.08fr); }
+
+  .preview { display: flex; align-items: center; gap: 26px; padding: 26px 24px; min-height: 196px; border-right: 1px solid var(--rule); }
+  .preview-box {
+    --w: 2;
+    --size: 64px;
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 132px;
+    height: 132px;
+    background: rgba(0, 0, 0, .2);
+    border: 1px solid var(--rule);
+    color: var(--on);
+  }
+  .preview-box[data-surface="band"] { background: var(--band); color: var(--ink); border-color: var(--band); }
+  .preview-box svg { width: var(--size); height: var(--size); stroke-width: var(--w); }
+  .preview-box[data-mode="fill"] svg path { stroke: currentColor; stroke-width: var(--w); stroke-linejoin: round; }
+  .preview-meta { min-width: 0; }
+  .preview-meta .name { margin: 0; font-size: 21px; line-height: 1.3; letter-spacing: -.01em; word-break: break-all; }
+  .preview-meta .file { margin: 4px 0 0; font-size: 13px; color: var(--on-dim); word-break: break-all; }
+  .preview-meta .hint { margin: 14px 0 0; font-size: 13px; color: var(--on-dim); max-width: 24ch; }
+
+  .controls { display: flex; flex-direction: column; gap: 14px; padding: 22px 24px; }
+  .ctl-head { display: flex; align-items: center; gap: 14px; }
+  .mini {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 38px;
+    height: 38px;
+    background: var(--band);
+    color: var(--ink);
+    --w: 2;
+  }
+  .mini svg { width: 22px; height: 22px; stroke-width: var(--w); }
+  .mini[data-mode="fill"] svg path { stroke: currentColor; stroke-width: var(--w); stroke-linejoin: round; }
+  .ctl-head p { margin: 0 auto 0 0; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--on-dim); }
+  .copy-btn {
+    appearance: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    height: 38px;
+    padding: 0 16px;
+    font: inherit;
+    font-size: 14px;
+    color: var(--ink);
+    background: var(--band);
+    border: 0;
+    border-radius: 0;
+    cursor: pointer;
+  }
+  .copy-btn:hover { background: #ececec; }
+  .copy-btn:focus-visible { outline: 2px solid var(--band); outline-offset: 2px; }
+  .copy-btn svg { width: 17px; height: 17px; }
+  .ctl-row { display: flex; align-items: center; gap: 12px; }
+  .ctl-label { flex: none; width: 58px; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--on-dim); }
+  .segs { display: flex; flex: 1 1 auto; border: 1px solid var(--rule); }
+  .seg {
+    appearance: none;
+    flex: 1 1 0;
+    min-width: 46px;
+    padding: 8px 4px;
+    font: inherit;
+    font-size: 14px;
+    color: var(--on);
+    background: none;
+    border: 0;
+    border-right: 1px solid var(--rule);
+    border-radius: 0;
+    cursor: pointer;
+  }
+  .seg:last-child { border-right: 0; }
+  .seg[aria-pressed="true"] { background: var(--band); color: var(--ink); }
+  .seg:focus-visible { outline: 2px solid var(--band); outline-offset: -3px; }
+  .status { margin: 0; font-size: 13px; color: var(--on-dim); min-height: 1.4em; }
+
+  .markup { display: grid; gap: 10px; padding: 22px 24px; }
+  #snippet {
+    width: 100%;
+    height: 132px;
+    resize: vertical;
+    padding: 12px 14px;
+    font-family: "Poppins", sans-serif;
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--on);
+    background: rgba(0, 0, 0, .2);
+    border: 1px solid var(--rule);
+    border-radius: 0;
+    outline: none;
+  }
+  #snippet:focus { border-color: var(--on); }
+  .markup p { margin: 0; font-size: 13px; color: var(--on-dim); max-width: 62ch; }
+
+  /* the whole set lives behind one toggle so the page stays quiet */
+  .set-panel { margin: 40px 0 0; border: 1px solid var(--rule); border-bottom: 0; }
+  .panel-toggle {
+    appearance: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    width: 100%;
+    padding: 18px 22px;
+    font: inherit;
+    text-align: left;
+    color: var(--on);
+    background: none;
+    border: 0;
+    border-bottom: 1px solid var(--rule);
+    border-radius: 0;
+    cursor: pointer;
+  }
+  .panel-toggle b { font-size: 19px; font-weight: 400; letter-spacing: -.01em; }
+  .panel-toggle .panel-sub { display: block; margin-top: 3px; font-size: 13px; color: var(--on-dim); }
+  .panel-toggle:hover b { text-decoration: underline; }
+  .panel-toggle:focus-visible { outline: 2px solid var(--band); outline-offset: -3px; }
+  .panel-toggle .chev { flex: none; width: 24px; height: 24px; transition: transform .2s ease; }
+  .panel-toggle[aria-expanded="true"] .chev { transform: scaleY(-1); }
+  .panel[data-open="false"] { display: none; }
+  .panel[data-open="true"] { animation: panel-in .18s ease both; }
+  @keyframes panel-in { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+
+  .panel-bar { display: flex; align-items: center; gap: 16px; padding: 14px 22px; border-bottom: 1px solid var(--rule); }
+  .search-wrap { position: relative; flex: 1 1 auto; }
+  .search-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); width: 19px; height: 19px; color: var(--on-dim); pointer-events: none; }
+  #search {
+    width: 100%;
+    height: 48px;
+    padding: 0 14px 0 44px;
+    font: inherit;
+    font-size: 16px;
+    color: var(--on);
+    background: transparent;
+    border: 1px solid var(--rule);
+    border-radius: 0;
+    outline: none;
+  }
+  #search::placeholder { color: var(--on-dim); }
+  #search:focus { border-color: var(--on); }
+  .panel-bar .count { flex: none; margin: 0; font-size: 13px; color: var(--on-dim); }
+
+  .grid-wrap { max-height: min(58vh, 540px); overflow-y: auto; overscroll-behavior: contain; border-top: 0; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(98px, 1fr)); }
+  .icon-card {
+    appearance: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    min-height: 96px;
+    padding: 14px 6px 11px;
+    font: inherit;
+    color: var(--on);
+    background: none;
+    border: 0;
+    border-right: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+    border-radius: 0;
+    cursor: pointer;
+    transition: background .09s;
+  }
+  .icon-card:hover { background: rgba(217, 217, 217, .08); }
+  .icon-card:focus-visible { outline: 2px solid var(--band); outline-offset: -4px; }
+  .icon-card[aria-pressed="true"] { background: var(--band); color: var(--ink); }
+  .icon-card .glyph { display: grid; place-items: center; width: 30px; height: 30px; }
+  .icon-card .glyph svg { width: 30px; height: 30px; }
+  .icon-card .name { font-size: 9px; font-weight: 500; letter-spacing: .06em; text-transform: uppercase; line-height: 1.25; text-align: center; word-break: break-word; color: var(--on-dim); }
+  .icon-card[aria-pressed="true"] .name { color: var(--ink); }
+  .empty { margin: 0; padding: 18px 22px; font-size: 14px; color: var(--on-dim); }
+  .panel-foot { display: flex; flex-wrap: wrap; gap: 6px 24px; justify-content: space-between; padding: 13px 22px; border-top: 1px solid var(--rule); font-size: 13px; color: var(--on-dim); }
+  footer p { margin: 0; max-width: 62ch; }
+
+  @media (max-width: 900px) {
+    .stage-body[data-active="true"] { grid-template-columns: 1fr; }
+    .preview { border-right: 0; border-bottom: 1px solid var(--rule); }
+  }
+  @media (max-width: 700px) {
+    .stage-tab { padding: 11px 16px; font-size: 12px; }
+    .preview { padding: 20px; gap: 18px; min-height: 0; }
+    .preview-box { width: 104px; height: 104px; }
+    .preview-meta .hint { display: none; }
+    .controls { padding: 18px 20px; }
+    .ctl-label { width: 52px; }
+    .seg { min-width: 0; padding: 8px 2px; font-size: 13px; }
+    .panel-toggle { padding: 15px 18px; }
+    .panel-toggle b { font-size: 17px; }
+    .panel-bar { padding: 12px 18px; gap: 12px; }
+    #search { height: 46px; font-size: 15px; padding: 0 12px 0 40px; }
+    .search-icon { left: 12px; width: 17px; height: 17px; }
+    .grid { grid-template-columns: repeat(auto-fill, minmax(88px, 1fr)); }
+    .icon-card { min-height: 88px; }
+    .grid-wrap { max-height: min(62vh, 460px); }
+    .set-panel { margin-top: 32px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="bar">
+  <div class="lead">
+    <button class="menu-btn" id="menuBtn" type="button" aria-expanded="false" aria-controls="menu" aria-label="Open icon brands">
+      <svg class="chev" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M8 13L12 17L16 13M8 7L12 11L16 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+    <a class="page-name" href="../../icons/">Icons</a>
+  </div>
+
+  <a class="mark" href="../../" aria-label="Home">
+    <svg viewBox="0 0 100 100" role="img" aria-label="Logo">
+      <circle cx="50" cy="50" r="50" fill="#000000"/>
+      <g fill="#d9d9d9" transform="translate(17.5 16.5) scale(.545)">
+        <path d="m29.58,61.92c.11,1.85.17,3.7.36,5.54.11,1.02-.23,1.23-1.19,1.29-4.47.26-5.38,1.22-5.27,5.67.13,5.14,2.74,9.13,6.27,12.56,1.53,1.49,2.96,1.05,3.89-.88.61-1.27.96-2.64,1.04-4.06.06-1.13.53-1.24,1.41-.69,1.72,1.08,2.92,2.71,4.38,4.07,8.66,8.04,18.38,13.89,30.58,14.51.52.03,1.04-.02,1.56,0,1.36.07,1.57-.53.89-1.58-.36-.56-.82-1.05-1.21-1.58-1.5-2.04-.63-4.17,1.89-4.53,3.34-.47,6.44.69,9.57,1.56,4.15,1.15,8.3,2.3,12.65,1.03,2.54-.74,2.78-1.66.84-3.54-.63-.61-1.41-1.08-2.11-1.63-2.43-1.91-2.63-3.35-.64-5.76,2.51-3.05,6.01-4.22,9.75-4.74,4.81-.67,9.26.31,13.25,3.19,1.39,1.01,1.75,1.97.94,3.7-9.48,20.25-25.12,32.69-47.2,36.28-29.25,4.75-57.41-12.11-67.54-39.86C-8.51,49.01,10.62,11.88,44.98,2.31c31.94-8.9,65.21,8.7,75.4,39.81.46,1.42.23,2.38-.66,3.4-4.28,4.87-9.78,6.13-15.92,5.16-4.99-.79-9.16-3.27-12.65-6.88-1.34-1.38-2.66-2.79-3.87-4.28-13.61-16.78-43.35-15.8-54.84,7.54-2.32,4.71-3.19,9.66-2.85,14.86Z"/>
+        <path d="m80.89,57.02c.88-.09,2.06-.21,3.22.13,1.56.46,1.88,1.6.75,2.8-1.16,1.23-2.59,1.52-4.25,1.33-4.23-.48-5.14.47-4.58,4.78.43,3.35,1.88,6.19,4.52,8.36.99.81,1.67.93,2.18-.62,1.55-4.74,1.61-4.72,6.46-4.56,1.28.04,2.56-.04,3.49-1.05.76-.83,1.38-1.54,2.5-.44,1.07,1.05,1.29,2.15.42,3.35-1.18,1.61-2.84,2.29-4.82,2.23-1.25-.04-2.77-.51-3.68.03-.98.58-.39,2.29-.7,3.49-.75,2.89-2.94,3.94-5.77,2.62-5.71-2.66-10.17-13.01-8.12-18.87.86-2.45,2.86-3.21,5.21-3.41.96-.08,1.92-.11,3.18-.18Z"/>
+        <path d="m52.62,58.41c.19-1.57.26-3.23,1.99-3.92,1.62-.65,2.9.23,3.92,1.33,2.41,2.61,3.79,5.64,2.86,9.26-.6,2.33-2.43,2.97-4.42,1.62-2.92-1.97-3.98-4.98-4.35-8.29Z"/>
+        <path d="m44.97,66.78c-.03,1.9-.18,3.24-1.63,3.9-1.5.68-2.61-.25-3.53-1.19-2.06-2.11-3.15-4.68-2.7-7.66.4-2.62,2.46-3.4,4.53-1.73,2.25,1.82,3.29,4.3,3.33,6.68Z"/>
+      </g>
+    </svg>
+  </a>
+
+  <div class="who">
+    <div class="who-lines">
+      <p>Lineicons</p>
+      <p>606 glyphs · MIT</p>
+    </div>
+    <button class="burger" id="burger" type="button" aria-expanded="false" aria-controls="drawer" aria-label="Open side tab">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 7H19M5 12H19M5 17H19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+  </div>
+</header>
+
+<nav class="menu" id="menu" data-open="false" aria-label="Icon brands">
+  <a href="../../icons/lineicons/" aria-current="page">Lineicons<span>606</span></a>
+  <a href="../../icons/coolicons/">Coolicons<span>1,258</span></a>
+</nav>
+
+<div class="scrim" id="scrim" data-open="false"></div>
+<aside class="drawer" id="drawer" data-open="false" aria-label="More">
+  <div class="drawer-head">
+    <p>More</p>
+    <button class="drawer-close" id="drawerClose" type="button" aria-label="Close side tab"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 6L18 18M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+  </div>
+  <a href="../../download/">Download<span>apps</span></a>
+  <a href="../../portfolio/">Portfolio<span>3 projects</span></a>
+  <a href="../../renders/">Renders<span>gallery</span></a>
+  <p class="drawer-note">Lineicons · 606 glyphs, line style, the free set, MIT. The app reads the same catalog this page renders.</p>
+</aside>
+
+<main>
+  <header class="page-head">
+    <h1>Lineicons</h1>
+    <p class="lede"><b>606 glyphs</b>, every one of them whole and free. Pick one below, then set its weight, size and surface — the preview changes as you press, and the copy button hands you the SVG.</p>
+    <p class="meta">
+      <span>606 glyphs</span>
+      <span>line style, the free set</span>
+      <span>MIT</span>
+      <span>No Pro tier</span>
+    </p>
+  </header>
+
+  <div class="stage">
+    <div class="stage-tabs" role="tablist" aria-label="Icon detail">
+      <button class="stage-tab" id="tab-preview" type="button" role="tab" aria-selected="true" aria-controls="pane-preview" data-pane="preview">Preview</button>
+      <button class="stage-tab" id="tab-markup" type="button" role="tab" aria-selected="false" aria-controls="pane-markup" data-pane="markup">Markup</button>
+    </div>
+
+    <div class="stage-body" id="pane-preview" role="tabpanel" aria-labelledby="tab-preview" data-active="true">
+      <div class="preview">
+        <div class="preview-box" id="stageGlyph" data-mode="fill" data-surface="field" aria-hidden="true"></div>
+        <div class="preview-meta">
+          <p class="name" id="selName" aria-live="polite">Loading…</p>
+          <p class="file" id="selFile"></p>
+          <p class="hint">Selected glyph. Open the set below to pick another.</p>
+        </div>
+      </div>
+
+      <div class="controls">
+        <div class="ctl-head">
+          <span class="mini" id="mini" data-mode="fill" aria-hidden="true"></span>
+          <p>Preview</p>
+          <button class="copy-btn" id="copyBtn" type="button">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M10 13C11.3807 14.3807 13.6193 14.3807 15 13L18 10C19.3807 8.61929 19.3807 6.38071 18 5C16.6193 3.61929 14.3807 3.61929 13 5L11 7M14 11C12.6193 9.61929 10.3807 9.61929 9 11L6 14C4.61929 15.3807 4.61929 17.6193 6 19C7.38071 20.3807 9.61929 20.3807 11 19L13 17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Copy SVG
+          </button>
+        </div>
+
+        <div class="ctl-row" role="group" aria-label="Line weight">
+          <span class="ctl-label">Weight</span>
+          <div class="segs" id="weights">
+            <button class="seg" type="button" data-weight="1" aria-pressed="false">1</button>
+            <button class="seg" type="button" data-weight="1.5" aria-pressed="false">1.5</button>
+            <button class="seg" type="button" data-weight="2" aria-pressed="true">2</button>
+            <button class="seg" type="button" data-weight="2.5" aria-pressed="false">2.5</button>
+          </div>
+        </div>
+
+        <div class="ctl-row" role="group" aria-label="Preview size">
+          <span class="ctl-label">Size</span>
+          <div class="segs" id="sizes">
+            <button class="seg" type="button" data-size="32" aria-pressed="false">32</button>
+            <button class="seg" type="button" data-size="48" aria-pressed="false">48</button>
+            <button class="seg" type="button" data-size="64" aria-pressed="true">64</button>
+            <button class="seg" type="button" data-size="96" aria-pressed="false">96</button>
+          </div>
+        </div>
+
+        <div class="ctl-row" role="group" aria-label="Preview surface">
+          <span class="ctl-label">Surface</span>
+          <div class="segs" id="surfaces">
+            <button class="seg" type="button" data-surface="field" aria-pressed="true">Field</button>
+            <button class="seg" type="button" data-surface="band" aria-pressed="false">Band</button>
+          </div>
+        </div>
+
+        <p class="status" id="status" aria-live="polite">Lineicons · line style, the free set · MIT</p>
+      </div>
+    </div>
+
+    <div class="stage-body" id="pane-markup" role="tabpanel" aria-labelledby="tab-markup" data-active="false">
+      <div class="markup">
+        <textarea id="snippet" readonly spellcheck="false" aria-label="SVG markup of the selected glyph"></textarea>
+        <p>The markup is the file as it ships: a 24×24 <code>viewBox</code>, <code>currentColor</code> so the glyph takes the colour of the text around it, and no weight or size baked in — those are the preview's settings, not the file's.</p>
+      </div>
+    </div>
+  </div>
+
+  <section class="set-panel">
+    <button class="panel-toggle" id="panelToggle" type="button" aria-expanded="false" aria-controls="panel">
+      <span>
+        <b>Lineicons · all 606 glyphs</b>
+        <span class="panel-sub">Opens into a scrolling sheet — tap one to preview it</span>
+      </span>
+      <svg class="chev" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M8 13L12 17L16 13M8 7L12 11L16 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+
+    <div class="panel" id="panel" data-open="false">
+      <div class="panel-bar">
+        <div class="search-wrap">
+          <svg class="search-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 10C3 13.86599 6.13401 17 10 17C13.86599 17 17 13.86599 17 10C17 6.13401 13.86599 3 10 3C6.13401 3 3 6.13401 3 10ZM15 15L21 21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <input id="search" type="search" placeholder="Filter Lineicons by name…" aria-label="Filter glyphs by name" autocomplete="off" />
+        </div>
+        <p class="count" id="count">606</p>
+      </div>
+      <div class="grid-wrap"><div class="grid" id="grid"></div></div>
+      <p class="empty" id="empty" hidden>No glyph in Lineicons matches that name.</p>
+      <div class="panel-foot">
+        <span>LineiconsHQ/Lineicons · MIT</span>
+        <a href="../../data/icons.json"><code>/data/icons.json</code></a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <p>Lineicons is a whole free set from <code>LineiconsHQ/Lineicons</code>, MIT licensed: 606 glyphs, line style, the free set. The paid icons sold on the vendor's site are neither included nor copied.</p>
+  <p><a href="../../icons/">Icons</a> · <a href="../../">Index</a> · <a href="../../fonts/">Fonts</a> · <a href="../../download/">Download</a></p>
+</footer>
+
+<script>
+(function () {
+  var DATA = "../../data/icons.json";
+  var MODE = "fill";
+  var BRAND = "Lineicons";
+
+  var box = document.getElementById("stageGlyph");
+  var mini = document.getElementById("mini");
+  var nameEl = document.getElementById("selName");
+  var fileEl = document.getElementById("selFile");
+  var statusEl = document.getElementById("status");
+  var grid = document.getElementById("grid");
+  var search = document.getElementById("search");
+  var countEl = document.getElementById("count");
+  var emptyEl = document.getElementById("empty");
+  var snippet = document.getElementById("snippet");
+  var panel = document.getElementById("panel");
+  var panelToggle = document.getElementById("panelToggle");
+  var weights = document.getElementById("weights");
+  var sizes = document.getElementById("sizes");
+  var surfaces = document.getElementById("surfaces");
+  var tabs = Array.prototype.slice.call(document.querySelectorAll(".stage-tab"));
+
+  var FILL_WEIGHT = { "1": 0, "1.5": 0.4, "2": 0.8, "2.5": 1.2 };
+  var items = [];
+  var selected = null;
+  var weight = "2";
+  var size = 64;
+  var surface = "field";
+  var built = false;
+
+  function markup(item) {
+    return '<svg xmlns="http://www.w3.org/2000/svg" ' + item.attrs + ">" + item.body + "</svg>";
+  }
+
+  function paint() {
+    if (!selected) { return; }
+    var svg = markup(selected);
+    box.innerHTML = svg;
+    mini.innerHTML = svg;
+    box.style.setProperty("--size", size + "px");
+    var w = MODE === "stroke" ? weight : FILL_WEIGHT[weight];
+    box.style.setProperty("--w", w);
+    mini.style.setProperty("--w", MODE === "stroke" ? weight : String(Number(weight) - 0.6));
+    box.setAttribute("data-surface", surface);
+    nameEl.textContent = selected.name;
+    fileEl.textContent = selected.name + ".svg · " + BRAND + " · " + MODE;
+    snippet.value = svg;
+    statusEl.textContent = BRAND + " · " + selected.name + " · weight " + weight + " · " + size + "px · " + surface;
+  }
+
+  function select(item, card) {
+    selected = item;
+    paint();
+    var cards = grid.querySelectorAll(".icon-card");
+    for (var i = 0; i < cards.length; i++) {
+      cards[i].setAttribute("aria-pressed", cards[i] === card ? "true" : "false");
+    }
+  }
+
+  function renderGrid() {
+    if (!items.length) { return; }
+    var q = search.value.trim().toLowerCase();
+    var frag = document.createDocumentFragment();
+    var shown = 0;
+    items.forEach(function (item) {
+      if (q && item.name.indexOf(q) === -1) { return; }
+      shown++;
+      var card = document.createElement("button");
+      card.type = "button";
+      card.className = "icon-card";
+      card.setAttribute("aria-pressed", selected === item ? "true" : "false");
+      card.setAttribute("aria-label", "Preview " + item.name);
+      var glyph = document.createElement("span");
+      glyph.className = "glyph";
+      glyph.innerHTML = markup(item);
+      var label = document.createElement("span");
+      label.className = "name";
+      label.textContent = item.name;
+      card.append(glyph, label);
+      card.addEventListener("click", function () { select(item, card); });
+      frag.append(card);
+    });
+    grid.textContent = "";
+    grid.append(frag);
+    countEl.textContent = q ? shown.toLocaleString() + " / " + items.length.toLocaleString() : items.length.toLocaleString();
+    emptyEl.hidden = shown !== 0;
+    built = true;
+  }
+
+  function setPanel(open) {
+    panel.setAttribute("data-open", open ? "true" : "false");
+    panelToggle.setAttribute("aria-expanded", open ? "true" : "false");
+    if (open && !built) { renderGrid(); }
+  }
+
+  panelToggle.addEventListener("click", function () {
+    setPanel(panel.getAttribute("data-open") !== "true");
+  });
+
+  search.addEventListener("input", renderGrid);
+
+  weights.addEventListener("click", function (event) {
+    var btn = event.target.closest(".seg");
+    if (!btn) { return; }
+    weight = btn.getAttribute("data-weight");
+    Array.prototype.forEach.call(weights.children, function (other) {
+      other.setAttribute("aria-pressed", other === btn ? "true" : "false");
+    });
+    paint();
+  });
+
+  sizes.addEventListener("click", function (event) {
+    var btn = event.target.closest(".seg");
+    if (!btn) { return; }
+    size = Number(btn.getAttribute("data-size"));
+    Array.prototype.forEach.call(sizes.children, function (other) {
+      other.setAttribute("aria-pressed", other === btn ? "true" : "false");
+    });
+    paint();
+  });
+
+  surfaces.addEventListener("click", function (event) {
+    var btn = event.target.closest(".seg");
+    if (!btn) { return; }
+    surface = btn.getAttribute("data-surface");
+    Array.prototype.forEach.call(surfaces.children, function (other) {
+      other.setAttribute("aria-pressed", other === btn ? "true" : "false");
+    });
+    paint();
+  });
+
+  function copyText(text) {
+    if (window.IconsApp && window.IconsApp.copy) {
+      window.IconsApp.copy(text);
+      return Promise.resolve(true);
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      return navigator.clipboard.writeText(text).then(function () { return true; }).catch(function () { return legacy(text); });
+    }
+    return Promise.resolve(legacy(text));
+  }
+
+  function legacy(text) {
+    var area = document.createElement("textarea");
+    area.value = text;
+    area.setAttribute("readonly", "");
+    area.style.position = "fixed";
+    area.style.top = "-1000px";
+    document.body.append(area);
+    area.select();
+    var ok = false;
+    try { ok = document.execCommand("copy"); } catch (err) { ok = false; }
+    area.remove();
+    return ok;
+  }
+
+  document.getElementById("copyBtn").addEventListener("click", function () {
+    if (!selected) { return; }
+    var text = markup(selected);
+    snippet.value = text;
+    copyText(text).then(function (ok) {
+      statusEl.textContent = ok ? "Copied " + selected.name + ".svg to the clipboard" : "Clipboard blocked — the markup is in the Markup tab";
+      if (!ok) { snippet.focus(); snippet.select(); showTab("markup"); }
+      window.setTimeout(paint, 2200);
+    });
+  });
+
+  function showTab(name) {
+    tabs.forEach(function (tab) {
+      var active = tab.getAttribute("data-pane") === name;
+      tab.setAttribute("aria-selected", active ? "true" : "false");
+      document.getElementById("pane-" + tab.getAttribute("data-pane")).setAttribute("data-active", active ? "true" : "false");
+    });
+  }
+
+  tabs.forEach(function (tab) {
+    tab.addEventListener("click", function () { showTab(tab.getAttribute("data-pane")); });
+  });
+
+  if (window.IconsApp) { document.documentElement.classList.add("in-app"); }
+
+  fetch(DATA, { cache: "no-cache" })
+    .then(function (response) {
+      if (!response.ok) { throw new Error(DATA + " returned " + response.status); }
+      return response.json();
+    })
+    .then(function (payload) {
+      items = payload.icons || [];
+      if (!items.length) { throw new Error("the catalog is empty"); }
+      select(items[0], null);
+      renderGrid();
+    })
+    .catch(function (error) {
+      nameEl.textContent = "The catalog did not load";
+      statusEl.textContent = error.message;
+    });
+})();
+</script>
+<script src="../../assets/site.js" defer></script>
+</body>
+</html>

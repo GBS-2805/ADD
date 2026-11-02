@@ -1,54 +1,73 @@
-# Compress — offline tool apps and the shelf they live on
+# Compress — two offline Android tools and the design shelf they sit on
 
 Two small Android apps that work with no network at all, plus the static site that
-acts as their database. The photo app's manifest deliberately declares **no
-`INTERNET` permission**, so it physically cannot upload anything.
+is both their documentation and their database. The photo app's manifest and the
+icon app's manifest both declare **no `INTERNET` permission**, so they physically
+cannot upload anything or phone home.
 
-`docs/` is the shelf: tools, icons, fonts, portfolio and downloads, all served from
-one palette and all published as JSON alongside the pages.
+The site is a general design shelf: `docs/` carries the icons, the fonts, the work
+and the downloads, all served from one palette and all published as JSON alongside
+the pages.
 
 ## Status
 
+- **Icons 1.0** — APK [`dist/Icons-1.0.apk`](dist/Icons-1.0.apk)
+  (505,218 bytes, signed v1+v2), published as `docs/Icons-1.0.apk`. Package
+  `app.offline.icons` · minSdk 26 · targetSdk 35 · versionCode 1. The whole browser
+  — both brands, 1,864 glyphs, the stylesheet and Poppins — is bundled in the APK
+  and served to a WebView from a private origin.
 - **Compress 1.9** — APK [`dist/Compress-1.9.apk`](dist/Compress-1.9.apk)
   (272,592 bytes, signed v1+v2, round adaptive icon), published as
-  `docs/Compress-1.9.apk`. Package `app.offline.compress` · minSdk 26 · targetSdk 35
-  · versionCode 10 · versionName 1.9.
-- **Icons** — in build. The web browser it wraps is live at `docs/icons/`: 1,864
-  glyphs in two free sets (606 Lineicons, 1,258 Coolicons), copy-on-tap, no account.
+  `docs/Compress-1.9.apk`. Package `app.offline.compress` · versionCode 10.
+- **Icons browser** — live at `docs/icons/`: two free brands, 606 Lineicons and
+  1,258 Coolicons, each on its own page with a preview, variant controls and the
+  set folded into a scrolling sheet. Copy-on-tap, no account.
 - Theme: **one palette**, taken from the Figma frame `6-27` — an indigo field
   (`#3F4E96`), a light band (`#D9D9D9`) that also fills every call to action, black
   ink on the band, light text on the field, and hairline rules where the old theme
   used border-plus-shadow cards. Surfaces are flat: `shadow` is fully transparent.
-- Type: Poppins, self-hosted. The site serves woff2 from `docs/assets/fonts/`; the
-  app bundles `res/font/poppins_{regular,medium,semibold}.ttf`.
-- **No dark mode**, on the site or in the app. `res/values-night` is deleted and the
-  header toggle is gone from the layout and the Java. `ThemePrefs` remains only to
-  force night mode off in the system UI.
+- Type: Poppins, self-hosted. The site serves woff2 from `docs/assets/fonts/`; both
+  apps bundle Poppins (Compress as `res/font/`, Icons inside the web bundle).
+- **No dark mode**, on the site or in either app. `res/values-night` is deleted and
+  the header toggle is gone from the layout and the Java. `ThemePrefs` remains only
+  to force night mode off in the system UI.
 
-`dist/` keeps the older builds (1.3 through 1.9) as history. Only the current APK is
-copied into `docs/`.
+`dist/` keeps the older builds (1.3 through 1.9) as history. Only the current APKs
+are copied into `docs/`.
 
 ## The shelf
 
-Seven pages, one stylesheet, no framework:
+Nine pages, one stylesheet, no framework:
 
 | Page | What it is |
 | --- | --- |
-| `docs/index.html` | Index: the four catalogs, the JSON list, the download |
-| `docs/tools/` | Both apps, Compress in detail, install steps, release notes |
-| `docs/icons/` | Both free sets, 1,864 glyphs, filter and copy (generated) |
+| `docs/index.html` | Index: the material, both apps, the palette, the JSON list |
+| `docs/tools/` | Both apps in detail, install steps, release notes |
+| `docs/icons/` | Icons app landing: download, the two brands, what the app does |
+| `docs/icons/lineicons/` | Lineicons: preview tab, variants, the set (generated) |
+| `docs/icons/coolicons/` | Coolicons: preview tab, variants, the set (generated) |
 | `docs/fonts/` | Poppins 400/500/600, specimens, woff2 and TTF downloads |
 | `docs/portfolio/` | Three projects, what I built in each, constraints |
-| `docs/download/` | Standalone APKs, sizes, SHA-256, install steps |
+| `docs/download/` | Both APKs, sizes, SHA-256, install steps |
 | `docs/renders/` | Gallery of captures, nothing drawn by hand |
 
 Pages share `docs/assets/site.css` — palette, band, menus and type — plus
 `docs/assets/site.js` for both menus. The band is frame 6-27's geometry with the page
 name on the left inside a 40px tap target, the mark centred, and two lines plus the
 burger on the right. The chevron opens a four-row pull-down (index, icons, fonts,
-tools); the burger pulls out a right-hand side tab (download, portfolio, renders),
-over a scrim. The glyphs in that chrome are Coolicons line icons. Pages carry only
-their own small `<style>` for page-specific pieces.
+tools); the burger pulls out a right-hand side tab (download, portfolio, renders)
+over a scrim. On the icon pages that left pull-down lists the **brands** instead, and
+each brand row is a link to its page. The glyphs in that chrome are Coolicons line
+icons. Pages carry only their own small `<style>` for page-specific pieces.
+
+### The brand pages
+
+Each brand page is built around one idea: pick a glyph, then tune how you want to see
+it. The preview sits in its own tab, with a small chip of the same glyph beside the
+controls; weight, size and surface repaint it live without touching the file. The
+whole set lives behind one toggle and scrolls inside its own sheet, so the page is a
+preview rather than a wall of 1,258 cells. Copy hands over the untouched markup: a
+24×24 `viewBox`, `currentColor`, no baked weight.
 
 ### The JSON behind it
 
@@ -58,22 +77,36 @@ The site is also the database the apps read, so the same numbers go to both:
 docs/data/index.json       the four catalogs, their pages, their counts, the downloads
 docs/data/tools.json       both apps: version, package, APK path, bytes, SHA-256
 docs/data/icons.json       all 606 Lineicons glyphs with their markup
-docs/data/coolicons.json   all 1,258 Coolicons line glyphs (the Icons app's database)
+docs/data/coolicons.json   all 1,258 Coolicons glyphs (the Icons app's database)
 docs/data/fonts.json       each Poppins face: weight, woff2 path, TTF path, sizes
 docs/data/portfolio.json   the three projects
 ```
 
 `tools/catalog.json` is the single handwritten source for apps, fonts and portfolio.
-`tools/build_catalog.py` measures what actually ships — the APK's bytes and hash, each
+`tools/build_catalog.py` measures what actually ships — each APK's bytes and hash, each
 font binary — copies every app TTF into `docs/assets/fonts/` so the download cannot
 fall behind the app, writes the four JSON files, and then **fails** if a page still
 quotes a stale version, size or checksum. Nothing on the shelf is typed twice.
 
 ```bash
-python3 tools/fetch_icons.py       # icon page + both catalogs (needs the network)
-python3 tools/build_catalog.py     # measure, write the catalogs, check the pages
-python3 tools/build_catalog.py --check   # check only
+python3 tools/fetch_icons.py                # fetch both sets, write data + pages
+python3 tools/fetch_icons.py --pages-only   # rewrite the pages from the catalogs
+python3 tools/build_catalog.py              # measure, write the catalogs, check the pages
+python3 tools/build_catalog.py --check      # check only
 ```
+
+## What Icons does
+
+- **Two brands, both whole**: 606 Lineicons and 1,258 Coolicons, generated from the
+  vendors' repositories and recoloured to `currentColor`.
+- **A live preview**: the selected glyph in its own tab, with weight (1 → 2.5), size
+  (32 → 96) and surface (field or band) applied in the preview only.
+- **The set folds away**: all 1,864 glyphs behind one toggle, scrollable inside a
+  sheet with its own filter and count.
+- **Copy the file**: the exact SVG, with a textarea fallback, and inside the APK a
+  Java bridge that puts it on the clipboard.
+- **Offline**: the app has no `INTERNET` permission; the bundle is served from
+  `https://icons.local` by a `WebViewClient` that reads `assets/www`.
 
 ## What Compress does
 
@@ -103,13 +136,18 @@ app/src/app/offline/compress/SelectionStore.java   keeps the picked set across a
 app/src/app/offline/compress/ThemePrefs.java       forces night mode off (one palette)
 app/res/                                           27 resources: 3 layouts, 14 drawables,
                                                    Poppins, one values/ (no values-night)
-build.sh                                           SDK-tools build (aapt2 + javac + d8 + apksigner)
-docs/                                              the seven-page static shelf + data/
+icons-app/AndroidManifest.xml                      Icons manifest (no permissions at all)
+icons-app/src/app/offline/icons/MainActivity.java  WebView, asset origin, clipboard bridge
+icons-app/res/                                      one theme, one vector launcher icon
+icons-app/assets/                                   staged at build time from docs/ (not committed)
+build.sh                                           SDK-tools build: ./build.sh [all|compress|icons]
+docs/                                              the nine-page static shelf + data/
 tools/catalog.json                                 apps, fonts, portfolio (one source)
 tools/build_catalog.py                             measures the shipped files, writes data/
-tools/fetch_icons.py                               icon page + both icon catalogs
-tools/icons_template.html                          the only place to edit the icons page
-tools/render_pages.js                              captures every page at desktop + phone
+tools/fetch_icons.py                               both icon pages + both catalogs
+tools/icons_hub_template.html                      the Icons app landing page
+tools/icons_brand_template.html                    the per-brand preview page
+tools/render_pages.js                              captures every page and writes the gallery
 manifest.json, worker.js                           Sites deployment
 ```
 
@@ -120,49 +158,53 @@ No Gradle, no AndroidX, no downloads beyond the SDK itself.
 ```bash
 export JAVA_HOME=/path/to/jdk17
 export ANDROID_SDK_ROOT=$HOME/android-sdk   # needs build-tools;35.0.0 + platforms;android-35
-./build.sh
+./build.sh            # both APKs
+./build.sh icons      # Icons only: stages docs/ into icons-app/assets, then builds
+./build.sh compress   # Compress only
 ```
 
-Output: `dist/Compress-1.9.apk`. Copy it to `docs/` and re-run
-`python3 tools/build_catalog.py` so the download page, the JSON and the checksum move
+Output: `dist/Compress-1.9.apk` and `dist/Icons-1.0.apk`. Copy them to `docs/` and
+re-run `python3 tools/build_catalog.py` so the pages, the JSON and the checksums move
 together. Signing uses `$HOME/tools/compress-keystore.jks` (created on first build,
-password `android`). Replace it with your own key for anything beyond personal
-sideloading.
+password `android`); both apps share it, so they update side by side. Replace it with
+your own key for anything beyond personal sideloading.
 
 ## Screenshots: captures only
 
 The site carries exactly one kind of image: a screenshot of a page that actually ran
 in a headless browser. The gallery at `docs/renders/index.html` lists those captures,
-and the folder holds nothing else.
+the folder holds nothing else, and `render_pages.js` writes the gallery from its own
+shot list — so a listed file cannot go missing and an orphan cannot survive a run.
 
 ```bash
 python3 tools/render_env.py                        # rebuild Chromium + libs in /tmp (~4 min)
 python3 -m http.server 8765 --directory docs &
-node tools/render_pages.js http://127.0.0.1:8765/ artifacts
+node tools/render_pages.js http://127.0.0.1:8765/ artifacts docs/renders
 ```
 
 `render_pages.js` shoots every page in one run — the index at its fold and full
-height, then the left accordion and the right side tab open, then tools, both icon
-sets, fonts, portfolio and download at 1300x900, then the index, its two menus and
-download at 390x844 — and prints console errors and horizontal overflow.
+height, the left pull-down and the right side tab, tools, the Icons app page, the
+Coolicons preview, the open set and a variant, fonts, portfolio and download at
+1300×900, then the index, its two menus and both icon pages at 390×844 — and prints
+console errors and horizontal overflow.
 
-**The Android app cannot be captured on this machine**, so the gallery shows no app
+**Neither Android app can be captured on this machine**, so the gallery shows no app
 screens. `/dev/kvm` exists but the account here is not in the `kvm` group and `sudo`
 is blocked by `no_new_privs`, so the emulator falls back to software emulation; there
-it boots, installs and starts 1.9 fine, but Android's `system_server` sits in a
+it boots, installs and starts the apps fine, but Android's `system_server` sits in a
 permanent "Application Not Responding" state and every screenshot comes back as a
 flat black frame. Earlier versions of this README shipped screens drawn from the
 layout's `dp` values; those were removed along with the renderer that produced them.
 
 ## Not yet done
 
-- Compress has never been exercised on a physical device. Verified: resource/link
-  compilation, javac type checking, dex packaging, zipalign, v1+v2 signature
-  verification, `resources.arsc` stored uncompressed for targetSdk 30+ installs, a
-  byte-exact download from the published page, and an install and launch on an
-  Android emulator whose system UI was too broken to photograph.
-- The Icons app does not exist yet. Its data does: `docs/data/icons.json` and
-  `docs/data/coolicons.json`.
+- **Icons has not been run on a device.** The bundle, the manifest and the signing
+  are verified; the WebView surface, the clipboard bridge and the private origin are
+  reviewed code, not observed behaviour. Compress has never been exercised on a
+  physical device either: verified resource/link compilation, javac type checking,
+  dex packaging, zipalign, v1+v2 signature verification, `resources.arsc` stored
+  uncompressed for targetSdk 30+ installs, and a byte-exact download from the
+  published page.
 - The restyle itself is unconfirmed on hardware: colours, Poppins metrics and the
   hairline spacing have only been checked as resource values and layouts.
 - HEIC input depends on the device decoder (`BitmapFactory`); output is JPEG/WebP.

@@ -3,28 +3,19 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Renders — captures of the site</title>
-<meta name="description" content="Captures of every page in the Compress shelf, at desktop and phone width, taken in headless Chromium." />
 <meta name="theme-color" content="#3f4e96" />
 <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml" />
+<title>Renders — 19 captures of this site</title>
+<meta name="description" content="19 screenshots of the shelf, captured in headless Chromium: the index at its fold, both pull-downs, the two apps, the icon brand pages with their previews and open sets, fonts, portfolio and download, at 1300 wide and 390 on a phone." />
 <link rel="stylesheet" href="../assets/site.css" />
 <style>
-  /* page-only: the capture grid */
-  .gallery {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 32px 40px;
-    padding-bottom: 44px;
-  }
-  figure { margin: 0; }
-  figure a { display: block; border: 1px solid var(--rule); }
-  figure a:hover { border-color: var(--on-dim); }
-  figure img { display: block; width: 100%; height: auto; }
-  figcaption { margin-top: 12px; font-size: 15px; }
-  figcaption span { display: block; font-size: 14px; color: var(--on-dim); }
-  @media (max-width: 820px) {
-    .gallery { grid-template-columns: 1fr; gap: 28px; }
-  }
+  .figs { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); border-top: 1px solid var(--rule); border-left: 1px solid var(--rule); }
+  figure { margin: 0; display: flex; flex-direction: column; border-right: 1px solid var(--rule); border-bottom: 1px solid var(--rule); }
+  figure img { display: block; width: 100%; height: auto; border-bottom: 1px solid var(--rule); background: #2c3769; }
+  figcaption { padding: 14px 16px 18px; font-size: 15px; }
+  figcaption span { display: block; margin-top: 3px; font-size: 13px; line-height: 1.5; color: var(--on-dim); }
+  .wide { grid-column: 1 / -1; }
+  @media (max-width: 700px) { .figs { grid-template-columns: 1fr; } }
 </style>
 </head>
 <body>
@@ -52,7 +43,7 @@
   <div class="who">
     <div class="who-lines">
       <p>Compress</p>
-      <p>Tools · Icons · Fonts</p>
+      <p>19 captures</p>
     </div>
     <button class="burger" id="burger" type="button" aria-expanded="false" aria-controls="drawer" aria-label="Open side tab">
       <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 7H19M5 12H19M5 17H19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -73,114 +64,112 @@
     <p>More</p>
     <button class="drawer-close" id="drawerClose" type="button" aria-label="Close side tab"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 6L18 18M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
   </div>
-  <a href="../download/">Download<span>1.9</span></a>
+  <a href="../download/">Download<span>2 apps</span></a>
   <a href="../portfolio/">Portfolio<span>3 projects</span></a>
   <a href="../renders/" aria-current="page">Renders<span>gallery</span></a>
-  <p class="drawer-note">Compress · offline Android tools, the icons they use and the fonts they are set in.</p>
+  <p class="drawer-note">Every image here is a screenshot of a page that ran in a headless browser. Nothing is drawn by hand.</p>
 </aside>
-
 
 <main>
   <header class="page-head">
     <h1>Renders</h1>
-    <p class="lede">Every image here is a capture of a real page in headless Chromium — <b>1300×900</b> on a desktop, 390×844 on a phone. Nothing is drawn by hand or mocked up. Tap any image to open it full size.</p>
+    <p class="lede"><b>19 captures</b>, all from one headless Chromium run against the built pages. Desktop at 1300×900, phones at 390×844, and nothing in the folder that this page does not list.</p>
+    <p class="meta">
+      <span>19 images</span>
+      <span>1300×900 and 390×844</span>
+      <span>2× device scale</span>
+      <span>No app screens</span>
+    </p>
   </header>
 
   <section>
-    <h2>Desktop — 1300×900</h2>
-    <p class="kicker">All seven pages, top of the fold</p>
-    <div class="gallery">
+    <h2>The captures</h2>
+    <p class="kicker">Newest run first is not a thing here — one run, in order</p>
+    <div class="figs">
       <figure>
-        <a href="page-home-light.png"><img src="page-home-light.png" alt="The index page: band with the mark centred, indigo field, the catalogs below." loading="lazy" /></a>
-        <figcaption>Index<span>The shelf: hero, the four catalogs and the download button.</span></figcaption>
+        <a href="page-home-light.png"><img src="page-home-light.png" alt="Index" loading="lazy" /></a>
+        <figcaption>Index<span>The landing page at its fold: the material, then two downloads.</span></figcaption>
       </figure>
       <figure>
-        <a href="page-home-full.png"><img src="page-home-full.png" alt="The whole index page in one tall capture." loading="lazy" /></a>
-        <figcaption>Index, everything<span>Catalogs, the JSON rows and the standalone section.</span></figcaption>
+        <a href="page-home-full.png"><img src="page-home-full.png" alt="Index, full height" loading="lazy" /></a>
+        <figcaption>Index, full height<span>The material, both apps, the palette and the JSON list.</span></figcaption>
       </figure>
       <figure>
-        <a href="page-menu.png"><img src="page-menu.png" alt="The four-row pull-down open under the band" loading="lazy" /></a>
+        <a href="page-menu.png"><img src="page-menu.png" alt="Left pull-down" loading="lazy" /></a>
         <figcaption>Left pull-down<span>Index, icons, fonts and tools, one row each.</span></figcaption>
       </figure>
       <figure>
-        <a href="page-drawer.png"><img src="page-drawer.png" alt="Side tab open" loading="lazy" /></a>
-        <figcaption>Side tab<span>Right-hand drawer: download, portfolio, renders.</span></figcaption>
+        <a href="page-drawer.png"><img src="page-drawer.png" alt="Right side tab" loading="lazy" /></a>
+        <figcaption>Right side tab<span>Download, portfolio and renders over the scrim.</span></figcaption>
       </figure>
       <figure>
-        <a href="page-tools.png"><img src="page-tools.png" alt="The tools page: two app cards, Compress detail and install steps." loading="lazy" /></a>
-        <figcaption>Tools<span>Two apps, then Compress in full.</span></figcaption>
+        <a href="page-tools.png"><img src="page-tools.png" alt="Tools" loading="lazy" /></a>
+        <figcaption>Tools<span>Both apps, Icons 1.0 first, each with its own APK.</span></figcaption>
       </figure>
       <figure>
-        <a href="page-icons-light.png"><img src="page-icons-light.png" alt="The icons page: filter field above a grid of hairline icon cells." loading="lazy" /></a>
-        <figcaption>Icons<span>1,864 glyphs in two sets, hairline cells, filter on top.</span></figcaption>
-      </figure>
-
-    <figure>
-        <a href="page-icons-coolicons.png"><img src="page-icons-coolicons.png" alt="Coolicons set" loading="lazy" /></a>
-        <figcaption>Icons, Coolicons<span>The second set: 1,258 line glyphs, same grid and copy.</span></figcaption>
+        <a href="page-icons.png"><img src="page-icons.png" alt="Icons app page" loading="lazy" /></a>
+        <figcaption>Icons app page<span>The icon brand landing: download, brands, what the app does.</span></figcaption>
       </figure>
       <figure>
-        <a href="page-fonts.png"><img src="page-fonts.png" alt="The fonts page: three Poppins face cards with specimens and download links." loading="lazy" /></a>
-        <figcaption>Fonts<span>Three faces, each with both file formats.</span></figcaption>
+        <a href="page-icons-brand.png"><img src="page-icons-brand.png" alt="Coolicons · preview" loading="lazy" /></a>
+        <figcaption>Coolicons · preview<span>The preview tab with weight, size and surface beside it.</span></figcaption>
       </figure>
       <figure>
-        <a href="page-portfolio.png"><img src="page-portfolio.png" alt="The portfolio page: a spec strip and three project cards." loading="lazy" /></a>
-        <figcaption>Portfolio<span>Three projects and what I built in each.</span></figcaption>
+        <a href="page-icons-panel.png"><img src="page-icons-panel.png" alt="Coolicons · the set" loading="lazy" /></a>
+        <figcaption>Coolicons · the set<span>All 1,258 glyphs behind one toggle, scrolling in their own sheet.</span></figcaption>
       </figure>
       <figure>
-        <a href="page-download.png"><img src="page-download.png" alt="The download page: Compress APK card, Icons in build, checksums." loading="lazy" /></a>
-        <figcaption>Download<span>APK, checksum, install steps.</span></figcaption>
+        <a href="page-icons-variants.png"><img src="page-icons-variants.png" alt="Coolicons · variants" loading="lazy" /></a>
+        <figcaption>Coolicons · variants<span>Heaviest line on the band: the same file, repainted live.</span></figcaption>
+      </figure>
+      <figure>
+        <a href="page-fonts.png"><img src="page-fonts.png" alt="Fonts" loading="lazy" /></a>
+        <figcaption>Fonts<span>Poppins 400, 500 and 600 with specimens and downloads.</span></figcaption>
+      </figure>
+      <figure>
+        <a href="page-portfolio.png"><img src="page-portfolio.png" alt="Portfolio" loading="lazy" /></a>
+        <figcaption>Portfolio<span>The apps, the browser and the site, with what was built in each.</span></figcaption>
+      </figure>
+      <figure>
+        <a href="page-download.png"><img src="page-download.png" alt="Download" loading="lazy" /></a>
+        <figcaption>Download<span>Both APKs, their measured sizes and both SHA-256 hashes.</span></figcaption>
+      </figure>
+      <figure>
+        <a href="phone-home-light.png"><img src="phone-home-light.png" alt="Index on a phone" loading="lazy" /></a>
+        <figcaption>Index on a phone<span>390×844: the band, the lede and both downloads.</span></figcaption>
+      </figure>
+      <figure>
+        <a href="phone-home-full.png"><img src="phone-home-full.png" alt="Index, phone, full height" loading="lazy" /></a>
+        <figcaption>Index, phone, full height<span>The whole landing page at phone width.</span></figcaption>
+      </figure>
+      <figure>
+        <a href="phone-menu.png"><img src="phone-menu.png" alt="Phone pull-down" loading="lazy" /></a>
+        <figcaption>Phone pull-down<span>Four rows under the band, counts on the right.</span></figcaption>
+      </figure>
+      <figure>
+        <a href="phone-drawer.png"><img src="phone-drawer.png" alt="Phone side tab" loading="lazy" /></a>
+        <figcaption>Phone side tab<span>The tab takes 86% of the width so the page stays behind it.</span></figcaption>
+      </figure>
+      <figure>
+        <a href="phone-icons.png"><img src="phone-icons.png" alt="Icons on a phone" loading="lazy" /></a>
+        <figcaption>Icons on a phone<span>The app page at phone width.</span></figcaption>
+      </figure>
+      <figure>
+        <a href="phone-icons-brand.png"><img src="phone-icons-brand.png" alt="Coolicons on a phone" loading="lazy" /></a>
+        <figcaption>Coolicons on a phone<span>Preview, variant rows, and the set opened below.</span></figcaption>
+      </figure>
+      <figure>
+        <a href="logo-light.png"><img src="logo-light.png" alt="The mark" loading="lazy" /></a>
+        <figcaption>The mark<span>The 45px logo at 4×, straight from assets/logo.svg.</span></figcaption>
       </figure>
     </div>
-  </section>
-
-  <section>
-    <h2>Phone — 390×844</h2>
-    <p class="kicker">The tab strip wraps; nothing scrolls sideways</p>
-    <div class="gallery">
-      <figure>
-        <a href="phone-home-light.png"><img src="phone-home-light.png" alt="The index page at phone width." loading="lazy" /></a>
-        <figcaption>Index<span>Full-width download button, stacked meta.</span></figcaption>
-      </figure>
-      <figure>
-        <a href="phone-home-full.png"><img src="phone-home-full.png" alt="The whole index page at phone width." loading="lazy" /></a>
-        <figcaption>Index, everything<span>Cards stack to one column.</span></figcaption>
-      </figure>
-      <figure>
-        <a href="phone-menu.png"><img src="phone-menu.png" alt="The pull-down menu open at phone width, one destination per row." loading="lazy" /></a>
-        <figcaption>Left menu on a phone<span>One column, chevrons the only affordance.</span></figcaption>
-      </figure>
-
-    <figure>
-        <a href="phone-drawer.png"><img src="phone-drawer.png" alt="Side tab open on a phone" loading="lazy" /></a>
-        <figcaption>Side tab, phone<span>The same drawer at 390 wide.</span></figcaption>
-      </figure>
-      <figure>
-        <a href="phone-icons-light.png"><img src="phone-icons-light.png" alt="The icons page at phone width." loading="lazy" /></a>
-        <figcaption>Icons<span>Three columns, no horizontal scroll.</span></figcaption>
-      </figure>
-      <figure>
-        <a href="phone-download.png"><img src="phone-download.png" alt="The download page at phone width." loading="lazy" /></a>
-        <figcaption>Download<span>Specs stack, checksum wraps inside the row.</span></figcaption>
-      </figure>
-    </div>
-  </section>
-
-  <section>
-    <h2>The mark</h2>
-    <p class="kicker">Rendered straight from <code>assets/logo.svg</code>, apart from any page</p>
-    <div class="gallery">
-      <figure>
-        <a href="logo-light.png"><img src="logo-light.png" alt="The mark drawn in ink on the band grey." loading="lazy" /></a>
-        <figcaption>The mark — on the band<span>Same geometry the header knocks out of the black disc.</span></figcaption>
-      </figure>
-    </div>
+    <p class="fine">The Android apps cannot be captured on this machine: <code>/dev/kvm</code> is unusable for this account, so the emulator runs under software emulation and every screencap comes back black. The gallery therefore carries no app screenshots rather than a drawing of one.</p>
   </section>
 </main>
 
 <footer>
-  <span>Compress 1.9 · the shelf as rendered</span>
-  <span><a href="../">Index</a> · <a href="../icons/">Icons</a> · <a href="../download/">Download</a></span>
+  <span>19 captures · <code>tools/render_pages.js</code></span>
+  <span><a href="../">Index</a> · <a href="../tools/">Tools</a> · <a href="../download/">Download</a></span>
 </footer>
 
 <script src="../assets/site.js" defer></script>

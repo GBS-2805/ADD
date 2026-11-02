@@ -2,7 +2,7 @@
   "generated": "2026-11-02",
   "site": {
     "name": "Compress",
-    "tagline": "A shelf for offline Android tools, the icons they use and the fonts they are set in.",
+    "tagline": "A design shelf: two free icon brands, Poppins, one palette, and two offline Android apps built from them.",
     "package": "app.offline.compress"
   },
   "catalogs": [
@@ -61,6 +61,14 @@
       "apk": "/Compress-1.9.apk",
       "bytes": 272592,
       "sha256": "5862071cf91e0eac6ddd5207f6d6d1cc99dc1e06d67f88bdfbe4efc6ea4ebbfd"
+    },
+    {
+      "id": "icons",
+      "name": "Icons",
+      "version": "1.0",
+      "apk": "/Icons-1.0.apk",
+      "bytes": 505218,
+      "sha256": "5b2a114bd818419467b13fc7bddfff3b694b4e3a868e01a809bfa26b56809b3a"
     }
   ]
 }

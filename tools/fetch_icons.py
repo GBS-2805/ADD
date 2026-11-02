@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build docs/icons/index.html and the two icon catalogs from free SVG sets.
+"""Build the icon pages and the two icon catalogs from free SVG sets.
 
 Two MIT sets, both taken whole:
 
@@ -11,13 +11,20 @@ Two MIT sets, both taken whole:
     same drawings, so one style is the set.
 
 Every glyph is recoloured to currentColor so it inherits the surrounding text
-colour, and keeps its own viewBox. The page loads the two JSON catalogs at run
-time instead of inlining 1,864 glyphs twice, so the HTML stays small and the
-files the phone app reads are the files the page renders.
+colour, and keeps its own viewBox. Three pages come out of two templates:
 
-Re-run to refresh:  python3 tools/fetch_icons.py
+  docs/icons/index.html                  the Icons app's landing page (brands + APK)
+  docs/icons/<brand>/index.html          one page per brand: preview, variants, set
+
+Each brand page loads its own catalog at run time instead of inlining glyphs, so
+the pages stay small and the files the phone app reads are the files the pages
+render.
+
+    python3 tools/fetch_icons.py                # fetch both sets, write data + pages
+    python3 tools/fetch_icons.py --pages-only   # rewrite the pages from the catalogs
 """
 
+import argparse
 import datetime
 import json
 import pathlib
@@ -29,8 +36,10 @@ import urllib.request
 from concurrent.futures import ThreadPoolExecutor
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-TEMPLATE = ROOT / "tools/icons_template.html"
-OUTPUT = ROOT / "docs/icons/index.html"
+HUB_TEMPLATE = ROOT / "tools/icons_hub_template.html"
+BRAND_TEMPLATE = ROOT / "tools/icons_brand_template.html"
+OUT_HUB = ROOT / "docs/icons/index.html"
+APK = ROOT / "docs/Icons-1.0.apk"
 DATA_LINE = ROOT / "docs/data/icons.json"
 DATA_COOL = ROOT / "docs/data/coolicons.json"
 TREE_CACHE = pathlib.Path("/tmp/coolicons-tree.json")
@@ -47,6 +56,16 @@ COOL_URL = ("https://raw.githubusercontent.com/krystonschwarze/coolicons/main"
 COOL_DIR = "icons/svg/line/regular/"
 
 COLOR = re.compile(r'(fill|stroke)="#[0-9a-fA-F]{3,8}"')
+
+# slug, display name, vendor repository, how the style is described, catalog.
+BRANDS = [
+    {"slug": "lineicons", "name": "Lineicons", "source": "LineiconsHQ/Lineicons",
+     "style": "line style, the free set", "data": DATA_LINE, "note":
+     "The free Lineicons set, whole: __COUNT__ glyphs drawn as filled paths on a 24 px grid."},
+    {"slug": "coolicons", "name": "Coolicons", "source": "krystonschwarze/coolicons",
+     "style": "line style, regular corners", "data": DATA_COOL, "note":
+     "Coolicons drawn as strokes with regular corners: __COUNT__ glyphs, the variant that matches the hairline chrome these pages use."},
+]
 
 
 def line_names():
@@ -179,51 +198,155 @@ def write_catalog(path, payload):
     print("data: %-28s %9d bytes" % (path.relative_to(ROOT), path.stat().st_size))
 
 
-def main():
-    line_list = line_names()
-    cool_list = cool_names()
-    print("Lineicons: %d names | Coolicons line/regular: %d names" % (len(line_list), len(cool_list)))
+def fmt(number):
+    return "{:,}".format(number)
 
-    line_icons, line_missing = download(line_list, LINE_URL)
-    cool_icons, cool_missing = download(cool_list, COOL_URL)
-    total = len(line_icons) + len(cool_icons)
 
-    page = TEMPLATE.read_text(encoding="utf-8")
-    for token, value in (("__TOTAL__", "{:,}".format(total)),
-                         ("__LINE__", "{:,}".format(len(line_icons))),
-                         ("__COOL__", "{:,}".format(len(cool_icons)))):
+def mode_of(payload):
+    """stroke when the glyphs are drawn with strokes, fill when they are shapes."""
+    sample = payload["icons"][0]["attrs"] if payload.get("icons") else ""
+    return "stroke" if 'stroke="currentColor"' in sample else "fill"
+
+
+def brands():
+    """The catalogs on disk, with the numbers and modes the pages quote."""
+    out = []
+    for brand in BRANDS:
+        if not brand["data"].exists():
+            raise SystemExit("no %s yet; run without --pages-only first"
+                             % brand["data"].relative_to(ROOT))
+        payload = json.loads(brand["data"].read_text(encoding="utf-8"))
+        entry = dict(brand)
+        entry.update({
+            "count": payload["count"],
+            "mode": mode_of(payload),
+            "licence": payload.get("licence", "MIT"),
+            "style": payload.get("style", brand["style"]).replace("/", ", "),
+            "file": "/data/" + brand["data"].name,
+        })
+        out.append(entry)
+    return out
+
+
+def menu(root, current):
+    rows = []
+    for brand in brands():
+        marker = ' aria-current="page"' if brand["slug"] == current else ""
+        rows.append('  <a href="%sicons/%s/"%s>%s<span>%s</span></a>'
+                    % (root, brand["slug"], marker, brand["name"], fmt(brand["count"])))
+    return "\n".join(rows)
+
+
+def brand_cards(entries):
+    cards = []
+    for brand in entries:
+        cards.append(
+            '<a class="brand" href="%s/">\n'
+            '        <span class="kind">Brand · %s · %s</span>\n'
+            '        <h3>%s</h3>\n'
+            '        <p>%s</p>\n'
+            '        <span class="go">Open %s</span>\n'
+            '      </a>' % (brand["slug"], brand["licence"], fmt(brand["count"]),
+                             brand["name"],
+                             brand["note"].replace("__COUNT__", fmt(brand["count"])),
+                             brand["name"]))
+    return "\n      ".join(cards)
+
+
+def write_hub(entries):
+    total = sum(brand["count"] for brand in entries)
+    page = HUB_TEMPLATE.read_text(encoding="utf-8")
+    tokens = {
+        "__ROOT__": "../",
+        "__TOTAL__": fmt(total),
+        "__LINE__": fmt(entries[0]["count"]),
+        "__COOL__": fmt(entries[1]["count"]),
+        "__BRANDS__": menu("../", None),
+        "__BRANDCARDS__": brand_cards(entries),
+    }
+    for token, value in tokens.items():
         page = page.replace(token, value)
-    OUTPUT.parent.mkdir(parents=True, exist_ok=True)
-    OUTPUT.write_text(page, encoding="utf-8")
+    OUT_HUB.parent.mkdir(parents=True, exist_ok=True)
+    OUT_HUB.write_text(page, encoding="utf-8")
+    print("page: %-28s %9d bytes" % (OUT_HUB.relative_to(ROOT), OUT_HUB.stat().st_size))
 
-    generated = datetime.date.today().isoformat()
-    write_catalog(DATA_LINE, {
-        "generated": generated,
-        "set": "Lineicons",
-        "source": "LineiconsHQ/Lineicons",
-        "licence": "MIT",
-        "count": len(line_icons),
-        "missing": line_missing,
-        "icons": line_icons,
-    })
-    write_catalog(DATA_COOL, {
-        "generated": generated,
-        "set": "Coolicons",
-        "source": "krystonschwarze/coolicons",
-        "licence": "MIT",
-        "style": "line/regular",
-        "count": len(cool_icons),
-        "missing": cool_missing,
-        "icons": cool_icons,
-    })
 
-    print("Lineicons %d (missing %d) | Coolicons %d (missing %d) | total %d"
-          % (len(line_icons), len(line_missing), len(cool_icons), len(cool_missing), total))
-    print("wrote %s (%d bytes)" % (OUTPUT.relative_to(ROOT), OUTPUT.stat().st_size))
-    if line_missing:
-        print("line missing: %s" % ", ".join(line_missing[:12]), file=sys.stderr)
-    if cool_missing:
-        print("cool missing: %s" % ", ".join(cool_missing[:12]), file=sys.stderr)
+def write_brand(brand, entries):
+    total = sum(entry["count"] for entry in entries)
+    page = BRAND_TEMPLATE.read_text(encoding="utf-8")
+    tokens = {
+        "__ROOT__": "../../",
+        "__BRAND__": brand["name"],
+        "__SLUG__": brand["slug"],
+        "__COUNT__": str(brand["count"]),
+        "__COUNTFMT__": fmt(brand["count"]),
+        "__TOTALFMT__": fmt(total),
+        "__LICENCE__": brand["licence"],
+        "__SOURCE__": brand["source"],
+        "__STYLE__": brand["style"],
+        "__MODE__": brand["mode"],
+        "__DATA__": "../../data/" + brand["data"].name,
+        "__DATAFILE__": brand["file"],
+        "__BRANDS__": menu("../../", brand["slug"]),
+    }
+    for token, value in tokens.items():
+        page = page.replace(token, value)
+    out = ROOT / "docs/icons" / brand["slug"] / "index.html"
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(page, encoding="utf-8")
+    print("page: %-28s %9d bytes" % (out.relative_to(ROOT), out.stat().st_size))
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--pages-only", action="store_true",
+                        help="regenerate the pages from the catalogs already on disk")
+    args = parser.parse_args()
+
+    if args.pages_only:
+        entries = brands()
+    else:
+        line_list = line_names()
+        cool_list = cool_names()
+        print("Lineicons: %d names | Coolicons line/regular: %d names"
+              % (len(line_list), len(cool_list)))
+
+        line_icons, line_missing = download(line_list, LINE_URL)
+        cool_icons, cool_missing = download(cool_list, COOL_URL)
+        generated = datetime.date.today().isoformat()
+        write_catalog(DATA_LINE, {
+            "generated": generated,
+            "set": "Lineicons",
+            "source": "LineiconsHQ/Lineicons",
+            "licence": "MIT",
+            "count": len(line_icons),
+            "missing": line_missing,
+            "icons": line_icons,
+        })
+        write_catalog(DATA_COOL, {
+            "generated": generated,
+            "set": "Coolicons",
+            "source": "krystonschwarze/coolicons",
+            "licence": "MIT",
+            "style": "line/regular",
+            "count": len(cool_icons),
+            "missing": cool_missing,
+            "icons": cool_icons,
+        })
+        print("Lineicons %d (missing %d) | Coolicons %d (missing %d)"
+              % (len(line_icons), len(line_missing), len(cool_icons), len(cool_missing)))
+        if line_missing:
+            print("line missing: %s" % ", ".join(line_missing[:12]), file=sys.stderr)
+        if cool_missing:
+            print("cool missing: %s" % ", ".join(cool_missing[:12]), file=sys.stderr)
+        entries = brands()
+
+    write_hub(entries)
+    for brand in entries:
+        write_brand(brand, entries)
+    print("brands: %s | total %d glyphs"
+          % (", ".join("%s %d" % (b["name"], b["count"]) for b in entries),
+             sum(b["count"] for b in entries)))
     return 0
 
 

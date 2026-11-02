@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Tools — Compress and Icons for Android</title>
-<meta name="description" content="Two offline Android tools: Compress, which shrinks photos with a before/after preview, and Icons, which brings the 1,864-glyph browser to the phone. Standalone APKs, no store, no account." />
+<title>Tools — Icons 1.0 and Compress 1.9 for Android</title>
+<meta name="description" content="Two offline Android tools: Icons 1.0, which bundles the 1,864-glyph browser, and Compress 1.9, which shrinks photos with a before/after preview. Standalone APKs, no store, no account." />
 <meta name="theme-color" content="#3f4e96" />
 <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml" />
 <link rel="stylesheet" href="../assets/site.css" />
@@ -34,7 +34,7 @@
   <div class="who">
     <div class="who-lines">
       <p>Compress</p>
-      <p>Tools · Icons · Fonts</p>
+      <p>Icons · Fonts · Tools</p>
     </div>
     <button class="burger" id="burger" type="button" aria-expanded="false" aria-controls="drawer" aria-label="Open side tab">
       <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 7H19M5 12H19M5 17H19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -55,12 +55,11 @@
     <p>More</p>
     <button class="drawer-close" id="drawerClose" type="button" aria-label="Close side tab"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 6L18 18M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
   </div>
-  <a href="../download/">Download<span>1.9</span></a>
+  <a href="../download/">Download<span>2 apps</span></a>
   <a href="../portfolio/">Portfolio<span>3 projects</span></a>
   <a href="../renders/">Renders<span>gallery</span></a>
-  <p class="drawer-note">Compress · offline Android tools, the icons they use and the fonts they are set in.</p>
+  <p class="drawer-note">Compress · a design shelf: two free icon brands, Poppins, one palette, and two offline apps built from them.</p>
 </aside>
-
 
 <main>
   <header class="page-head">
@@ -68,38 +67,62 @@
     <p class="lede">Two small Android apps that do one job each. Both work offline, both ask for nothing but the files you hand them, and both are signed with the same key so one can hand you to the other.</p>
     <p class="meta">
       <span>2 apps</span>
+      <span>Icons 1.0 shipping</span>
       <span>Compress 1.9 shipping</span>
-      <span>Icons in build</span>
       <span>No third-party libraries</span>
     </p>
   </header>
 
   <section>
     <h2>The two</h2>
-    <p class="kicker">One for photos, one for glyphs</p>
+    <p class="kicker">One for glyphs, one for photos</p>
     <div class="cards">
+      <a class="card" href="#icons">
+        <span class="kind">Android app · Icons</span>
+        <h3>Icons</h3>
+        <p>Both free brands in your pocket: pick a glyph, set its weight, size and surface in a live preview, open the whole set in a scrolling sheet, copy the SVG.</p>
+        <span class="tag"><span class="pill live">1.0</span><span class="go">Read the detail</span></span>
+      </a>
       <a class="card" href="#compress">
         <span class="kind">Android app · Compress</span>
         <h3>Compress</h3>
         <p>Pick photos, preview the result with a before/after slider, then compress. Batch queue, resolution caps, metadata stripped, originals untouched.</p>
         <span class="tag"><span class="pill live">1.9</span><span class="go">Read the detail</span></span>
       </a>
-      <a class="card" href="#icons">
-        <span class="kind">Android app · Icons</span>
-        <h3>Icons</h3>
-        <p>The 1,864-glyph browser from this site, packaged for the phone: filter by name, tap to copy the SVG, no network needed.</p>
-        <span class="tag"><span class="pill">in build</span><span class="go">What it will do</span></span>
-      </a>
     </div>
+  </section>
+
+  <section id="icons">
+    <h2>Icons</h2>
+    <p class="kicker">1.0 · app.offline.icons · 505,218 bytes</p>
+    <a class="cta" href="../Icons-1.0.apk" download>
+      <svg class="cta-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M8 12L12 16L16 12M12 16V4M6 20H18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Download APK
+    </a>
+    <p class="meta">
+      <span>Android 8.0+ · all ABIs</span>
+      <span>No permissions at all</span>
+      <span>Version code 1</span>
+    </p>
+    <p class="fine">The browser you can use here without installing is <a href="../icons/">/icons/</a>; the APK is that same page, its stylesheet, Poppins and both catalogs, wrapped in a WebView that serves them from a private origin inside the app. Nothing is fetched, because the app cannot fetch: there is no <code>INTERNET</code> permission in the manifest.</p>
+
+    <h2 style="margin-top:44px">What it does</h2>
+    <p class="kicker">A preview, three controls, one sheet</p>
+    <ul class="rows">
+      <li><b>Brand pull-down</b><span>The chevron lists the brands — Lineicons and Coolicons — and each opens its own page with its own catalog.</span></li>
+      <li><b>Live preview</b><span>The selected glyph sits in its own tab. Weight, size and surface repaint it as you press; the file itself never changes.</span></li>
+      <li><b>Quiet set</b><span>All 1,864 glyphs live behind one toggle and scroll inside their own sheet, so the page reads as a preview rather than a wall.</span></li>
+      <li><b>Copy</b><span>Copy SVG hands over the exact file: 24×24 viewBox, <code>currentColor</code>, no baked size or weight.</span></li>
+      <li><b>Offline</b><span>Both catalogs, the pages and the fonts travel inside the APK. One palette, Poppins, hairline rules — the same system as this site.</span></li>
+    </ul>
+    <p class="fine">The app reads <code>/data/icons.json</code> and <code>/data/coolicons.json</code> — the files this site publishes — bundled at build time by <code>tools/build.sh icons</code>, so the phone cannot drift from the web.</p>
   </section>
 
   <section id="compress">
     <h2>Compress</h2>
     <p class="kicker">1.9 · app.offline.compress · 272,592 bytes</p>
     <a class="cta" href="../Compress-1.9.apk" download>
-      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-        <path d="M12 3v11m0 0 4.5-4.5M12 14l-4.5-4.5M4 17.5V19a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-1.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
+      <svg class="cta-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M8 12L12 16L16 12M12 16V4M6 20H18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
       Download APK
     </a>
     <p class="meta">
@@ -107,7 +130,7 @@
       <span>No ads · no account</span>
       <span>Version code 10</span>
     </p>
-    <p class="fine">Built for your Galaxy Z Flip 7 (Android 16). Signed, no third-party libraries, round launcher icon. The checksum is on the <a href="../download/">download page</a>.</p>
+    <p class="fine">Built for a Galaxy Z Flip 7 (Android 16). Signed, no third-party libraries, adaptive launcher icon. The checksum is on the <a href="../download/">download page</a>.</p>
 
     <h2 style="margin-top:44px">What it does</h2>
     <p class="kicker">Four screens, no account</p>
@@ -122,22 +145,11 @@
     </ul>
   </section>
 
-  <section id="icons">
-    <h2>Icons</h2>
-    <p class="kicker">The same set, on the phone</p>
-    <ul class="rows">
-      <li><b>Both sets</b><span>All 1,864 glyphs, 606 Lineicons and 1,258 Coolicons, built into the APK rather than fetched, so it browses on a plane.</span></li>
-      <li><b>Filter, tap, copy</b><span>Type part of a name, tap the glyph, the markup lands on the clipboard.</span></li>
-      <li><b>One source</b><span>Generated from <code>/data/icons.json</code>, the file this site serves, so names and markup cannot drift between phone and web.</span></li>
-    </ul>
-    <p class="fine">The app is in build. Until it ships, <a href="../icons/">the browser here</a> does the same job and the JSON behind it is already public.</p>
-  </section>
-
   <section>
     <h2>Install</h2>
     <p class="kicker">Five taps, then never again</p>
     <ol class="steps">
-      <li><span>Tap <b>Download APK</b> above and wait for it to finish — it is tiny.</span></li>
+      <li><span>Tap <b>Download APK</b> for the app you want and wait for it to finish — both are small.</span></li>
       <li><span>Open it from the notification shade, or <b>Files → Downloads</b>.</span></li>
       <li><span>Android says the install is blocked: tap <b>Settings</b>, enable <b>Allow from this source</b>, then go back.</span></li>
       <li><span>Tap <b>Install</b> → <b>Open</b>. If Play Protect warns about an unknown developer, choose <b>Install anyway</b>.</span></li>
@@ -150,7 +162,7 @@
     <h2>Under the hood</h2>
     <p class="kicker">No SDKs, no analytics, no network</p>
     <dl class="specs">
-      <div><dt>Network permission</dt><dd>None</dd></div>
+      <div><dt>Network permission</dt><dd>None, in either app</dd></div>
       <div><dt>Storage permission</dt><dd>None (Android 10+)</dd></div>
       <div><dt>Code</dt><dd>Platform APIs only</dd></div>
       <div><dt>Min Android</dt><dd>8.0 / API 26</dd></div>
@@ -159,22 +171,23 @@
 
   <section>
     <h2>Release notes</h2>
-    <p class="kicker">Compress, newest first</p>
+    <p class="kicker">Newest first</p>
     <ul class="rows">
+      <li><b>Icons 1.0 · First build</b><span>Both brands, 1,864 glyphs, bundled with the pages, the stylesheet and Poppins. WebView on a private origin so <code>fetch</code> and the clipboard behave exactly as they do on the site.</span></li>
+      <li><b>Icons 1.0 · Preview and variants</b><span>A preview tab with weight, size and surface, and a copy button that hands over the untouched SVG.</span></li>
+      <li><b>Icons 1.0 · The set folds away</b><span>All glyphs sit behind one toggle and scroll inside their own sheet instead of filling the page.</span></li>
+      <li><b>Icons 1.0 · No permissions</b><span>Not even <code>INTERNET</code>: the browser is inside the APK, so there is nothing to request.</span></li>
       <li><b>1.9 · Poppins</b><span>Every heading, label and number is set in Poppins instead of the system font and its mono captions.</span></li>
       <li><b>1.9 · One field</b><span>The app is indigo with band-grey actions and hairline rules where thick ink borders used to be.</span></li>
       <li><b>1.9 · One palette</b><span>The dark-mode toggle is gone because the design carries a single palette. Nothing else about compressing photos changed.</span></li>
       <li><b>1.8 · Mark</b><span>The logo sits at the bottom left of the main screen, next to a <b>MORE APPS</b> link back to this shelf.</span></li>
-      <li><b>1.8 · A way out</b><span>That link opens this page in your browser and never makes a request itself, so "fully offline" stays literally true.</span></li>
       <li><b>1.5 · Adding photos</b><span>Picking when some are queued asks first: <b>Add more</b> appends, <b>Start from beginning</b> replaces, Cancel leaves it alone.</span></li>
-      <li><b>1.4 · Rebuilt</b><span>Numbered steps from <b>1. ADD IMAGES</b> to <b>4. RESIZE</b>, one card each, with a Clear all chip and a saved dark mode.</span></li>
-      <li><b>1.3 · Edit first</b><span>Remove a photo with <b>×</b> before committing, and preview is a dry run that writes nothing until you compress.</span></li>
     </ul>
   </section>
 </main>
 
 <footer>
-  <span>Compress 1.9 · Icons in build</span>
+  <span>Icons 1.0 · Compress 1.9</span>
   <span><a href="../">Index</a> · <a href="../download/">Download</a> · signed for personal use</span>
 </footer>
 

@@ -38,26 +38,32 @@
       "id": "icons",
       "name": "Icons",
       "kind": "Android app",
-      "status": "in-build",
-      "version": null,
-      "version_code": null,
-      "package": null,
-      "apk": null,
-      "min_android": null,
-      "summary": "The 1,864-glyph browser from this site, packaged for the phone: filter by name, tap to copy the SVG. It reads the same icon JSON this site serves.",
+      "status": "released",
+      "version": "1.0",
+      "version_code": 1,
+      "package": "app.offline.icons",
+      "apk": "/Icons-1.0.apk",
+      "min_android": "8.0 (API 26)",
+      "summary": "Both free icon brands on the phone: 1,864 glyphs, a preview with weight, size and surface, and the whole set behind one toggle. Bundled offline with no permissions at all.",
       "features": [
-        "Both free sets on device, 606 Lineicons and 1,258 Coolicons, with no network.",
-        "Filter by name, tap a glyph, copy its markup.",
-        "The same glyphs and names as /icons/ and /data/icons.json."
+        "Two brands, 606 Lineicons and 1,258 Coolicons, bundled with the pages and the fonts.",
+        "A preview tab with weight, size and surface that repaints the glyph live.",
+        "The whole set opens into a scrolling sheet instead of filling the page.",
+        "Copy hands over the untouched SVG: 24x24 viewBox, currentColor, no baked weight.",
+        "No INTERNET permission: the browser is inside the APK, so there is nothing to request."
       ],
       "links": [
         {
-          "label": "Browse on the web",
+          "label": "Icons page",
           "href": "/icons/"
+        },
+        {
+          "label": "Download APK",
+          "href": "/Icons-1.0.apk"
         }
       ],
-      "bytes": null,
-      "sha256": null
+      "bytes": 505218,
+      "sha256": "5b2a114bd818419467b13fc7bddfff3b694b4e3a868e01a809bfa26b56809b3a"
     }
   ]
 }
