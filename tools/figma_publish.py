@@ -4,8 +4,9 @@
 `figma/` stays the source: `tools/figma_export.js` writes it and
 `tools/figma_bundle.py` stacks it. This copies the result into `docs/figma/`,
 which `manifest.json` does serve, writes the listing at `docs/figma/index.html`,
-and removes any artboard that is no longer exported. The four pull-out artboards
-also get the names the links use; every page artboard keeps its number.
+and removes any artboard that is no longer exported. Every page artboard keeps its
+number; the four pull-outs are served under the plain name the links use, because
+serving both names duplicated 181 KB the deploy budget does not have.
 
     python3 tools/figma_publish.py
 """
@@ -27,22 +28,6 @@ RENAME = {
 }
 STATE_NUMBERS = {"19", "20", "21", "22"}
 BUNDLE = "site-figma.svg"
-
-# The deploy budget is 10 MiB for the whole site, and an embedded face costs about
-# 32 KB a file. The published artboards therefore point at the site's own font
-# folder -- same origin, so they still render in Poppins -- while the one-canvas
-# bundle, the file people download and drag into Figma, carries the faces inside it.
-FONT_DEFS = re.compile(r"<defs[^>]*><style[^>]*>.*?</style></defs>", re.S)
-RELATIVE_DEFS = (
-    '<defs><style type="text/css">'
-    + "".join(
-        '@font-face{font-family:"Poppins";font-style:normal;font-weight:%s;'
-        'src:url(../assets/fonts/poppins-%s.woff2) format("woff2")}' % (w, w)
-        for w in ("400", "500", "600")
-    )
-    + "</style></defs>"
-)
-
 
 def describe(path):
     head = path.read_text(errors="replace")[:2500]
@@ -111,7 +96,7 @@ def listing(names):
 <main>
   <h1>Figma hand-off</h1>
   <p class="lede">Twenty-two artboards of this site, and the whole set on one canvas.</p>
-  <p class="note">Each file is the page as Chromium laid it out — text on real baselines, a rect per box, PNG copies of the marks. Poppins is loaded from this site's own font folder, so every file renders in the site's type; the one-canvas file carries the faces inside it, for opening away from the site. Drag one into a Figma document to get editable layers; enable the Poppins family once there and run Frame selection to lock the artboard's size.</p>
+  <p class="note">Each file is the page as Chromium laid it out — text on real baselines, a rect per box, PNG copies of the marks. Poppins 400/500/600 is embedded in every file, so each one renders in the site's type wherever it is opened, not in the viewer's fallback sans. Drag one into a Figma document to get editable layers; enable the Poppins family once there and run Frame selection to lock the artboard's size.</p>
   %s<p class="back"><a href="../">← Back to the site</a></p>
 </main>
 </body>
@@ -130,9 +115,9 @@ def main():
     DST.mkdir(parents=True, exist_ok=True)
     wanted = {}
     for artboard in exports:
-        # The four pull-outs answer to their number and to the plain name, so a link
-        # written either way keeps working.
-        wanted[artboard.name] = artboard
+        # One name per artboard. Serving the four pull-outs under their number as well
+        # as their plain name cost 181 KB of byte-identical copies, and now that every
+        # file carries its own fonts there is no room for two of the same artboard.
         wanted[RENAME.get(artboard.name, artboard.name)] = artboard
     wanted[BUNDLE] = bundle
 
@@ -140,16 +125,17 @@ def main():
     for name in dropped:
         (DST / name).unlink()
     for name, artboard in wanted.items():
-        if name == BUNDLE:
-            shutil.copyfile(artboard, DST / name)
-        else:
-            text = FONT_DEFS.sub(RELATIVE_DEFS, artboard.read_text())
-            (DST / name).write_text(text)
+        shutil.copyfile(artboard, DST / name)
 
     (DST / "index.html").write_text(listing(list(wanted)))
     total = sum(p.stat().st_size for p in DST.glob("*.svg"))
     print("docs/figma: %d files, %.1f MB, listing written%s" % (
         len(wanted), total / 1e6, (", dropped " + ", ".join(dropped)) if dropped else ""))
+
+    budget = 10485760
+    docs = sum(p.stat().st_size for p in pathlib.Path("docs").rglob("*") if p.is_file())
+    note = "OVER BUDGET - the host will refuse this deploy" if docs > budget else "ok"
+    print("docs: %s of 10.0 MiB, %s left - %s" % (human(docs), human(abs(budget - docs)), note))
 
 
 if __name__ == "__main__":
