@@ -1,140 +1,277 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="theme-color" content="#3f4e96" />
 <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml" />
 <title>Lineicons, all __COUNT__ free icons — copy SVG</title>
 <meta name="description" content="The complete free Lineicons set: __COUNT__ copy-ready SVG icons. Click any icon to copy its markup. No account, no plan, no Pro tier." />
 <style>
+  /* Poppins, self-hosted from the site's own assets, same files the landing page uses. */
+  @font-face {
+    font-family: "Poppins";
+    src: url("../assets/fonts/poppins-400.woff2") format("woff2");
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: "Poppins";
+    src: url("../assets/fonts/poppins-500.woff2") format("woff2");
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: "Poppins";
+    src: url("../assets/fonts/poppins-600.woff2") format("woff2");
+    font-weight: 600;
+    font-style: normal;
+    font-display: swap;
+  }
+
+  /* Same measured system as the landing page: an indigo field, a light band. */
   :root {
-    --bg: #f2e4c9; --card: #f7ecd7; --card2: #eadbbd; --stroke: #2b2926;
-    --accent: #ffb20f; --ink: #2b2926; --text: #2b2926; --muted: #4b5563;
+    --band: #d9d9d9;
+    --page: #3f4e96;
+    --ink: #000000;
+    --on: #d9d9d9;
+    --on-dim: rgba(217, 217, 217, .64);
+    --rule: rgba(217, 217, 217, .26);
+    --pad: 40px;
+    --band-h: 96px;
   }
-  /* Night palette, mirrored from the app's res/values-night/colors.xml. */
-  html[data-theme="dark"] {
-    --bg: #2b2926; --card: #37332e; --card2: #443f39; --stroke: #f7ecd7;
-    --accent: #ffb20f; --ink: #2b2926; --text: #f7ecd7; --muted: #a9a093;
-  }
+
   * { box-sizing: border-box; }
-  html, body { margin: 0; padding: 0; }
+  html { -webkit-text-size-adjust: 100%; }
   body {
-    background: var(--bg); color: var(--text);
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    -webkit-font-smoothing: antialiased; min-height: 100vh; padding: 34px 18px 60px; line-height: 1.55;
+    margin: 0;
+    background: var(--page);
+    color: var(--on);
+    font-family: "Poppins", "Helvetica Neue", Arial, sans-serif;
+    font-weight: 400;
+    font-size: 17px;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
   }
-  .wrap { max-width: 880px; margin: 0 auto; }
-  .topbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  a { color: inherit; }
+
+  /* ---------- header, the same band the landing page wears ---------- */
+  .bar {
+    position: relative;
+    height: var(--band-h);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 40px;
+    padding: 0 var(--pad);
+    background: var(--band);
+    color: var(--ink);
+  }
   .brand {
-    display: flex; align-items: center; gap: 9px;
-    font-size: 22px; font-weight: 800; letter-spacing: -.02em;
+    font-size: 26px;
+    line-height: 1;
+    letter-spacing: -.01em;
+    white-space: nowrap;
   }
-  .brand .mark { width: 24px; height: 24px; flex: none; fill: currentColor; }
-  .theme-toggle {
-    font: inherit; font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
-    color: var(--ink); background: var(--accent); border: 2px solid var(--stroke); border-radius: 0;
-    padding: 7px 12px; box-shadow: 3px 3px 0 var(--stroke); cursor: pointer; white-space: nowrap;
+  .mark {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 45px;
+    height: 45px;
+    display: block;
   }
-  .theme-toggle:hover { transform: translate(-1px, -1px); box-shadow: 4px 4px 0 var(--stroke); }
-  .theme-toggle:active { transform: translate(1px, 1px); box-shadow: 2px 2px 0 var(--stroke); }
-  .lead { margin: 16px 0 18px; font-size: 15px; max-width: 60ch; }
-  .lead b { background: var(--accent); color: var(--ink); padding: 0 4px; }
-  .tools { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 16px; }
+  .mark svg { display: block; width: 45px; height: 45px; }
+  .who-lines { text-align: right; }
+  .who-lines p { margin: 0; font-size: 17px; line-height: 24.5px; }
+
+  /* ---------- page ---------- */
+  main { padding: 0 var(--pad); }
+  .lead {
+    margin: 0;
+    padding: 84px 0 34px;
+    max-width: 46ch;
+    font-size: 20px;
+    line-height: 1.55;
+  }
+  .lead b { background: var(--band); color: var(--ink); font-weight: 400; padding: 0 5px; }
+
+  .tools { padding-bottom: 34px; }
   #search {
-    flex: 1 1 220px; min-width: 0; font: inherit; font-size: 14px; color: var(--text);
-    background: var(--card); border: 2px solid var(--stroke); border-radius: 0;
-    padding: 9px 11px; box-shadow: 3px 3px 0 var(--stroke); outline: none;
+    width: 100%;
+    height: 56px;
+    font: inherit;
+    font-size: 17px;
+    color: var(--on);
+    background: transparent;
+    border: 1px solid var(--rule);
+    border-radius: 0;
+    padding: 0 18px;
+    outline: none;
   }
-  #search:focus { box-shadow: 3px 3px 0 var(--accent); }
-  #search::placeholder { color: var(--muted); }
-  .count {
-    font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px;
-    letter-spacing: .08em; text-transform: uppercase; color: var(--muted); white-space: nowrap;
+  #search::placeholder { color: var(--on-dim); }
+  #search:focus { border-color: var(--on); }
+
+  /* Cells share hairlines instead of drawing their own heavy borders. */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(112px, 1fr));
+    border-top: 1px solid var(--rule);
+    border-left: 1px solid var(--rule);
   }
-  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(108px, 1fr)); gap: 10px; }
   .icon-card {
-    appearance: none; display: flex; flex-direction: column; align-items: center; justify-content: center;
-    gap: 8px; min-height: 104px; padding: 14px 6px 10px; background: var(--card);
-    border: 2px solid var(--stroke); border-radius: 0; box-shadow: 3px 3px 0 var(--stroke);
-    color: var(--text); cursor: pointer; font: inherit;
-    transition: transform .08s, box-shadow .08s, background .08s;
+    appearance: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    min-height: 106px;
+    padding: 18px 8px 14px;
+    background: none;
+    border: 0;
+    border-right: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+    border-radius: 0;
+    color: var(--on);
+    cursor: pointer;
+    font: inherit;
+    transition: background .09s;
   }
-  .icon-card:hover { transform: translate(-1px, -1px); box-shadow: 4px 4px 0 var(--stroke); }
-  .icon-card:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--stroke); }
-  .icon-card:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
-  .icon-card.done { background: var(--accent); color: var(--ink); }
+  .icon-card:hover { background: rgba(217, 217, 217, .08); }
+  .icon-card:focus-visible { outline: 2px solid var(--band); outline-offset: -4px; }
+  .icon-card.done { background: var(--band); color: var(--ink); }
   .glyph { display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; }
   .glyph svg { width: 32px; height: 32px; }
   .name {
-    font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 9.5px; letter-spacing: .04em;
-    text-transform: uppercase; text-align: center; word-break: break-word; line-height: 1.2;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    text-align: center;
+    word-break: break-word;
+    line-height: 1.25;
+    color: var(--on-dim);
   }
-  .empty { font-size: 14px; color: var(--muted); margin: 22px 0; }
-  .panel {
-    margin-top: 26px; background: var(--card); border: 2px solid var(--stroke);
-    box-shadow: 4px 4px 0 var(--stroke); padding: 16px;
-  }
-  .panel h2 { font-size: 15px; margin: 0 0 10px; letter-spacing: -.01em; }
-  #snippet {
-    width: 100%; height: 96px; resize: vertical; border-radius: 0; padding: 10px;
-    font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11.5px; line-height: 1.5;
-    color: var(--text); background: var(--card2); border: 2px solid var(--stroke);
-  }
-  .hint { font-size: 12.5px; color: var(--muted); margin: 10px 0 0; }
-  .hint code {
-    font-family: ui-monospace, monospace; font-size: 11.5px;
-    background: var(--card2); border: 1px solid var(--stroke); padding: 1px 4px;
-  }
-  footer { margin-top: 30px; padding-top: 16px; border-top: 2px solid var(--stroke); font-size: 12px; color: var(--muted); }
-  footer p { margin: 0 0 8px; max-width: 70ch; }
-  footer a { color: var(--text); font-weight: 600; text-decoration: none; border-bottom: 2px solid var(--accent); }
+  .icon-card.done .name { color: var(--ink); }
 
-  /* Phone: keep the brand and the theme toggle on one row, and give the counter
-     its own line so it is not squeezed against the search field. */
-  @media (max-width: 520px) {
-    body { padding: 22px 14px 48px; }
-    .topbar { flex-wrap: nowrap; }
-    .brand { font-size: 17px; gap: 7px; }
-    .brand .mark { width: 19px; height: 19px; }
-    .theme-toggle { display: inline-flex; align-items: center; min-height: 40px;
-                    padding: 8px 11px; font-size: 11px; letter-spacing: .08em; flex: none; }
-    .lead { font-size: 14.5px; }
-    .tools { gap: 8px; }
-    #search { flex: 1 1 100%; }
-    .count { order: 2; margin-left: auto; }
-    .name { font-size: 10px; }
-    .glyph, .glyph svg { width: 30px; height: 30px; }
+  .empty { font-size: 14px; color: var(--on-dim); margin: 22px 0; }
+
+  .panel {
+    margin-top: 64px;
+    padding: 28px 0 0;
+    border-top: 1px solid var(--rule);
+  }
+  .panel h2 {
+    margin: 0 0 8px;
+    font-size: 26px;
+    font-weight: 400;
+    line-height: 1.3;
+    letter-spacing: -.015em;
+  }
+  #snippet {
+    width: 100%;
+    height: 96px;
+    resize: vertical;
+    margin-top: 14px;
+    padding: 14px 16px;
+    border: 1px solid var(--rule);
+    border-radius: 0;
+    font-family: "Poppins", sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--on);
+    background: rgba(0, 0, 0, .16);
+    outline: none;
+  }
+  #snippet:focus { border-color: var(--on); }
+  .hint { font-size: 14px; color: var(--on-dim); margin: 14px 0 0; max-width: 62ch; }
+  code { font-family: inherit; background: rgba(0, 0, 0, .16); padding: 1px 6px; }
+
+  footer {
+    margin-top: 44px;
+    padding: 28px var(--pad) 44px;
+    border-top: 1px solid var(--rule);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 40px;
+    justify-content: space-between;
+    font-size: 14px;
+    color: var(--on-dim);
+  }
+  footer p { margin: 0; max-width: 62ch; }
+  footer a { text-decoration: none; }
+  footer a:hover { text-decoration: underline; }
+
+  @media (max-width: 900px) {
+    .who-lines p + p { display: none; }
+  }
+
+  @media (max-width: 700px) {
+    :root { --pad: 20px; --band-h: 72px; }
+    body { font-size: 16px; }
+    .bar { gap: 20px; }
+    .brand { font-size: 15px; letter-spacing: .02em; }
+    .mark, .mark svg { width: 34px; height: 34px; }
+    .who-lines p { font-size: 14px; line-height: 1.35; }
+    .lead { padding: 48px 0 28px; font-size: 18px; }
+    .tools { padding-bottom: 28px; }
+    #search { height: 54px; font-size: 16px; padding: 0 14px; }
+    .grid { grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); }
+    .icon-card { min-height: 96px; padding: 14px 6px 12px; }
+    .glyph, .glyph svg { width: 28px; height: 28px; }
+    .name { font-size: 9px; }
+    .panel { margin-top: 48px; padding-top: 24px; }
+    .panel h2 { font-size: 22px; }
   }
 </style>
 </head>
 <body>
-<div class="wrap">
-  <div class="topbar">
-    <div class="brand"><svg class="mark" viewBox="0 0 120.6 123.11" aria-hidden="true" focusable="false"><path d="m29.58,61.92c.11,1.85.17,3.7.36,5.54.11,1.02-.23,1.23-1.19,1.29-4.47.26-5.38,1.22-5.27,5.67.13,5.14,2.74,9.13,6.27,12.56,1.53,1.49,2.96,1.05,3.89-.88.61-1.27.96-2.64,1.04-4.06.06-1.13.53-1.24,1.41-.69,1.72,1.08,2.92,2.71,4.38,4.07,8.66,8.04,18.38,13.89,30.58,14.51.52.03,1.04-.02,1.56,0,1.36.07,1.57-.53.89-1.58-.36-.56-.82-1.05-1.21-1.58-1.5-2.04-.63-4.17,1.89-4.53,3.34-.47,6.44.69,9.57,1.56,4.15,1.15,8.3,2.3,12.65,1.03,2.54-.74,2.78-1.66.84-3.54-.63-.61-1.41-1.08-2.11-1.63-2.43-1.91-2.63-3.35-.64-5.76,2.51-3.05,6.01-4.22,9.75-4.74,4.81-.67,9.26.31,13.25,3.19,1.39,1.01,1.75,1.97.94,3.7-9.48,20.25-25.12,32.69-47.2,36.28-29.25,4.75-57.41-12.11-67.54-39.86C-8.51,49.01,10.62,11.88,44.98,2.31c31.94-8.9,65.21,8.7,75.4,39.81.46,1.42.23,2.38-.66,3.4-4.28,4.87-9.78,6.13-15.92,5.16-4.99-.79-9.16-3.27-12.65-6.88-1.34-1.38-2.66-2.79-3.87-4.28-13.61-16.78-43.35-15.8-54.84,7.54-2.32,4.71-3.19,9.66-2.85,14.86Z"/><path d="m80.89,57.02c.88-.09,2.06-.21,3.22.13,1.56.46,1.88,1.6.75,2.8-1.16,1.23-2.59,1.52-4.25,1.33-4.23-.48-5.14.47-4.58,4.78.43,3.35,1.88,6.19,4.52,8.36.99.81,1.67.93,2.18-.62,1.55-4.74,1.61-4.72,6.46-4.56,1.28.04,2.56-.04,3.49-1.05.76-.83,1.38-1.54,2.5-.44,1.07,1.05,1.29,2.15.42,3.35-1.18,1.61-2.84,2.29-4.82,2.23-1.25-.04-2.77-.51-3.68.03-.98.58-.39,2.29-.7,3.49-.75,2.89-2.94,3.94-5.77,2.62-5.71-2.66-10.17-13.01-8.12-18.87.86-2.45,2.86-3.21,5.21-3.41.96-.08,1.92-.11,3.18-.18Z"/><path d="m52.62,58.41c.19-1.57.26-3.23,1.99-3.92,1.62-.65,2.9.23,3.92,1.33,2.41,2.61,3.79,5.64,2.86,9.26-.6,2.33-2.43,2.97-4.42,1.62-2.92-1.97-3.98-4.98-4.35-8.29Z"/><path d="m44.97,66.78c-.03,1.9-.18,3.24-1.63,3.9-1.5.68-2.61-.25-3.53-1.19-2.06-2.11-3.15-4.68-2.7-7.66.4-2.62,2.46-3.4,4.53-1.73,2.25,1.82,3.29,4.3,3.33,6.68Z"/></svg>LINEICONS · FREE</div>
-    <button class="theme-toggle" id="themeToggle" type="button" aria-pressed="false">DARK OFF</button>
-  </div>
 
+<header class="bar">
+  <div class="brand">LINEICONS · FREE</div>
+
+  <a class="mark" href="../" aria-label="Compress — home">
+    <svg viewBox="0 0 100 100" role="img" aria-label="Compress logo">
+      <circle cx="50" cy="50" r="50" fill="#000000"/>
+      <g fill="#d9d9d9" transform="translate(17.5 16.5) scale(.545)">
+        <path d="m29.58,61.92c.11,1.85.17,3.7.36,5.54.11,1.02-.23,1.23-1.19,1.29-4.47.26-5.38,1.22-5.27,5.67.13,5.14,2.74,9.13,6.27,12.56,1.53,1.49,2.96,1.05,3.89-.88.61-1.27.96-2.64,1.04-4.06.06-1.13.53-1.24,1.41-.69,1.72,1.08,2.92,2.71,4.38,4.07,8.66,8.04,18.38,13.89,30.58,14.51.52.03,1.04-.02,1.56,0,1.36.07,1.57-.53.89-1.58-.36-.56-.82-1.05-1.21-1.58-1.5-2.04-.63-4.17,1.89-4.53,3.34-.47,6.44.69,9.57,1.56,4.15,1.15,8.3,2.3,12.65,1.03,2.54-.74,2.78-1.66.84-3.54-.63-.61-1.41-1.08-2.11-1.63-2.43-1.91-2.63-3.35-.64-5.76,2.51-3.05,6.01-4.22,9.75-4.74,4.81-.67,9.26.31,13.25,3.19,1.39,1.01,1.75,1.97.94,3.7-9.48,20.25-25.12,32.69-47.2,36.28-29.25,4.75-57.41-12.11-67.54-39.86C-8.51,49.01,10.62,11.88,44.98,2.31c31.94-8.9,65.21,8.7,75.4,39.81.46,1.42.23,2.38-.66,3.4-4.28,4.87-9.78,6.13-15.92,5.16-4.99-.79-9.16-3.27-12.65-6.88-1.34-1.38-2.66-2.79-3.87-4.28-13.61-16.78-43.35-15.8-54.84,7.54-2.32,4.71-3.19,9.66-2.85,14.86Z"/>
+        <path d="m80.89,57.02c.88-.09,2.06-.21,3.22.13,1.56.46,1.88,1.6.75,2.8-1.16,1.23-2.59,1.52-4.25,1.33-4.23-.48-5.14.47-4.58,4.78.43,3.35,1.88,6.19,4.52,8.36.99.81,1.67.93,2.18-.62,1.55-4.74,1.61-4.72,6.46-4.56,1.28.04,2.56-.04,3.49-1.05.76-.83,1.38-1.54,2.5-.44,1.07,1.05,1.29,2.15.42,3.35-1.18,1.61-2.84,2.29-4.82,2.23-1.25-.04-2.77-.51-3.68.03-.98.58-.39,2.29-.7,3.49-.75,2.89-2.94,3.94-5.77,2.62-5.71-2.66-10.17-13.01-8.12-18.87.86-2.45,2.86-3.21,5.21-3.41.96-.08,1.92-.11,3.18-.18Z"/>
+        <path d="m52.62,58.41c.19-1.57.26-3.23,1.99-3.92,1.62-.65,2.9.23,3.92,1.33,2.41,2.61,3.79,5.64,2.86,9.26-.6,2.33-2.43,2.97-4.42,1.62-2.92-1.97-3.98-4.98-4.35-8.29Z"/>
+        <path d="m44.97,66.78c-.03,1.9-.18,3.24-1.63,3.9-1.5.68-2.61-.25-3.53-1.19-2.06-2.11-3.15-4.68-2.7-7.66.4-2.62,2.46-3.4,4.53-1.73,2.25,1.82,3.29,4.3,3.33,6.68Z"/>
+      </g>
+    </svg>
+  </a>
+
+  <div class="who-lines">
+    <p id="count">__COUNT__ icons</p>
+    <p>MIT · no account</p>
+  </div>
+</header>
+
+<main>
   <p class="lead">All __COUNT__ free Lineicons, one click each. <b>Tap an icon to copy its SVG</b> — the whole open-source set, not a sample. No account, no plan, no Pro gate, nothing to unlock.</p>
 
   <div class="tools">
     <input id="search" type="search" placeholder="Filter by name…" aria-label="Filter icons by name" autocomplete="off" />
-    <span class="count" id="count">__COUNT__ icons</span>
   </div>
 
   <div class="grid" id="grid"></div>
   <p class="empty" id="empty" hidden>No icon matches that name.</p>
 
-  <div class="panel">
+  <section class="panel">
     <h2>Landed in the box instead of the clipboard?</h2>
     <textarea id="snippet" readonly spellcheck="false" aria-label="Copied SVG markup"></textarea>
     <p class="hint">Every copy also lands here, so you can grab it by hand if your browser blocks the clipboard. The glyphs use <code>fill="currentColor"</code>, so an icon takes the colour of the text it sits in — drop it inside a button and it inherits the button colour.</p>
-  </div>
+  </section>
+</main>
 
-  <footer>
-    <p>Icons: the complete free <b>Lineicons</b> set from <code>LineiconsHQ/Lineicons</code>, MIT licence — free for personal and commercial use. Every SVG the repository publishes is here; the paid Pro set on lineicons.com is neither included nor copied.</p>
-    <p><a href="../">← Compress for Android</a></p>
-  </footer>
-</div>
+<footer>
+  <p>Icons: the complete free <b>Lineicons</b> set from <code>LineiconsHQ/Lineicons</code>, MIT licence — free for personal and commercial use. Every SVG the repository publishes is here; the paid Pro set on lineicons.com is neither included nor copied.</p>
+  <p><a href="../">← Compress for Android</a> · <a href="../renders/">Renders</a></p>
+</footer>
 
 <script>
 const ICONS = __ICONS__;
@@ -204,22 +341,6 @@ function render(filter) {
 }
 
 search.addEventListener("input", function () { render(search.value); });
-
-const root = document.documentElement;
-const toggle = document.getElementById("themeToggle");
-function paint(dark) {
-  root.setAttribute("data-theme", dark ? "dark" : "light");
-  toggle.textContent = dark ? "DARK ON" : "DARK OFF";
-  toggle.setAttribute("aria-pressed", dark ? "true" : "false");
-}
-let saved = null;
-try { saved = window.localStorage.getItem("compress-theme"); } catch (err) { saved = null; }
-paint(saved === "dark");
-toggle.addEventListener("click", function () {
-  const dark = root.getAttribute("data-theme") !== "dark";
-  paint(dark);
-  try { window.localStorage.setItem("compress-theme", dark ? "dark" : "light"); } catch (err) {}
-});
 
 render("");
 </script>
