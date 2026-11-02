@@ -163,13 +163,14 @@ changes as unverified on device rather than illustrating them.
 - The left pull-down of all three icon pages opens with All, linking to
   `/icons/all/`: twelve glyphs per brand, one from every category — the first name in
   the catalog for that category, in the vendor's own order. A set with fewer than
-  twelve categories fills the sheet from the start of its catalog. The sheet reads the
-  same JSON the brand pages do, and is compact on purpose: four across, three down with
-  a 3px gap inside each cell, so a brand is one 4x3 block about 200px tall rather than
-  a column that runs past the fold. A phone keeps the brand tabs and shows one block at
-  a time; from 1000px the tabs go and the blocks become columns of a three-wide grid,
-  so two brands sit side by side and a third still lands on one scroll. Do not widen the
-  cells or raise the cap without rechecking that a block fits the fold.
+  twelve categories fills the sheet from the start of its catalog. There are no tabs:
+  every brand is a section stacked under the one before it, so the page is the list and
+  a third set only needs another section. A phone gets the name, its note, the sheet
+  four across and three down (about 200px tall) and the link to the whole set; from
+  1000px the name and note move to the left of the sheet, which goes six across and two
+  down, so a brand reads as one row. Do not widen the cells, raise the cap or bring
+  back a one-brand-at-a-time control without rechecking that a section still fits with
+  no sideways scroll.
 - Every vendor glyph carries its own `stroke-width` attribute, and a presentation
   attribute beats a value inherited from the `<svg>`. The preview therefore writes
   the chosen weight onto each element (`tune()` in the template), not onto a parent.

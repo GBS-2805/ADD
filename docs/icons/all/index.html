@@ -6,25 +6,14 @@
 <meta name="theme-color" content="#3f4e96" />
 <link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml" />
 <title>All brands — one glyph per category, twelve from each set</title>
-<meta name="description" content="Both free icon brands side by side: a tab each, and a sheet of twelve glyphs taken one from each of its categories. 1,864 glyphs in all, with the whole catalog one page away." />
+<meta name="description" content="Both free icon brands on one page: a section each, carrying a sheet of twelve glyphs taken one from each of its categories. 1,864 glyphs in all, with the whole catalog one page away." />
 <link rel="stylesheet" href="../../assets/site.css" />
 <style>
-  /* page-only: one compact sheet per brand */
-  .brand-tabs { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 18px; }
-  .brand-tab {
-    font: inherit;
-    font-size: 16px;
-    padding: 10px 18px;
-    color: var(--on);
-    background: none;
-    border: 1px solid var(--rule);
-    cursor: pointer;
-  }
-  .brand-tab span { margin-left: 10px; font-size: 13px; color: var(--on-dim); }
-  .brand-tab:hover { background: rgba(217, 217, 217, .08); }
-  .brand-tab[aria-selected="true"] { background: var(--band); color: var(--ink); border-color: var(--band); }
-  .brand-tab[aria-selected="true"] span { color: var(--ink); }
-  .brand-tab:focus-visible { outline: 2px solid var(--band); outline-offset: -3px; }
+  /* page-only: every brand is a section under the one before it, each with its
+     own compact sheet -- the page is the list, so a third set is just a third
+     section and nothing has to be opened */
+  #sheets { display: grid; gap: 30px; }
+  .sheet-body + .sheet-body { padding-top: 26px; border-top: 1px solid var(--rule); }
 
   .brand-name { margin: 0 0 2px; font-size: 19px; font-weight: 400; letter-spacing: -.01em; }
   .brand-name span { margin-left: 10px; font-size: 12px; color: var(--on-dim); }
@@ -63,23 +52,32 @@
     overflow: hidden;
     text-overflow: ellipsis;
   }
-  .sheet-body[hidden] { display: none; }
   .sheet-link { margin: 12px 0 0; font-size: 13px; }
   .sheet-link a { text-decoration: none; }
   .sheet-link a:hover { text-decoration: underline; }
 
-  /* web: every brand at once, in three columns, so a third set still lands on one scroll */
+  /* web: the name and note sit to the left of the sheet, so a brand is one row
+     and the sets read down the page instead of across it */
   @media (min-width: 1000px) {
-    .brand-tabs { display: none; }
-    #sheets { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 30px; align-items: start; }
-    .sheet-body[hidden] { display: block; }
-  }
-  /* a phone keeps the tabs, one sheet at a time */
-  @media (max-width: 999px) {
-    .brand-name { display: none; }
+    #sheets { gap: 34px; }
+    .sheet-body {
+      display: grid;
+      grid-template-columns: minmax(180px, 230px) minmax(0, 640px);
+      grid-template-rows: auto auto 1fr;
+      justify-content: space-between;
+      column-gap: 40px;
+      align-items: start;
+    }
+    .sheet-body > .brand-name { grid-column: 1; grid-row: 1; }
+    .sheet-body > .sheet-note { grid-column: 1; grid-row: 2; }
+    .sheet-body > .sheet-link { grid-column: 1; grid-row: 3; margin-top: 12px; }
+    .sheet-body > .sheet {
+      grid-column: 2;
+      grid-row: 1 / span 3;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+    }
   }
   @media (max-width: 700px) {
-    .brand-tab { flex: 1 1 auto; font-size: 15px; padding: 9px 12px; }
     .sheet-note { font-size: 11px; }
     .cell { padding: 5px 6px 4px; }
     .cell .glyph { height: 24px; }
@@ -137,7 +135,7 @@
   <a href="../../download/">Download<span>apps</span></a>
   <a href="../../portfolio/">Portfolio<span>3 projects</span></a>
   <a href="../../renders/">Renders<span>gallery</span></a>
-  <p class="drawer-note">All brands · one glyph from each category of each set, 1,864 glyphs behind it. Pick a brand in the tabs.</p>
+  <p class="drawer-note">All brands · one glyph from each category of each set, 1,864 glyphs behind it. Each brand's sheet follows the one above it.</p>
 </aside>
 
 <main>
@@ -153,9 +151,8 @@
   </header>
 
   <section>
-    <h2>The sheet</h2>
+    <h2>The sheets</h2>
     <p class="kicker">Twelve glyphs per brand, small enough to take in at once</p>
-    <div class="brand-tabs" id="brandTabs" role="tablist" aria-label="Icon brands"></div>
     <div id="sheets"></div>
     <p class="fine">Each glyph is the file the page for that brand exports, drawn at its own weight. Sets with fewer than twelve categories fill the sheet from the start of their catalog.</p>
   </section>
@@ -170,10 +167,7 @@
 (function () {
   var SETS = [{"slug": "lineicons", "name": "Lineicons", "count": 606, "cats": 51, "data": "../../data/icons.json"}, {"slug": "coolicons", "name": "Coolicons", "count": 1258, "cats": 30, "data": "../../data/coolicons.json"}];
   var CAP = 12;
-  var tabRow = document.getElementById("brandTabs");
   var sheetHost = document.getElementById("sheets");
-  var tabs = [];
-  var panes = [];
 
   function markup(item) {
     return '<svg xmlns="http://www.w3.org/2000/svg" ' + item.attrs + ">" + item.body + "</svg>";
@@ -215,9 +209,6 @@
     var pane = document.createElement("div");
     pane.className = "sheet-body";
     pane.id = "pane-" + set.slug;
-    pane.setAttribute("role", "tabpanel");
-    pane.setAttribute("aria-labelledby", "tab-" + set.slug);
-    pane.hidden = true;
     var head = document.createElement("h3");
     head.className = "brand-name";
     head.append(document.createTextNode(set.name));
@@ -263,42 +254,8 @@
     return pane;
   }
 
-  function select(index) {
-    tabs.forEach(function (tab, i) {
-      tab.setAttribute("aria-selected", i === index ? "true" : "false");
-      tab.tabIndex = i === index ? 0 : -1;
-      panes[i].hidden = i !== index;
-    });
-  }
-
-  function add(result, index) {
-    var set = result.set;
-    var tab = document.createElement("button");
-    tab.type = "button";
-    tab.className = "brand-tab";
-    tab.id = "tab-" + set.slug;
-    tab.setAttribute("role", "tab");
-    tab.setAttribute("aria-controls", "pane-" + set.slug);
-    tab.setAttribute("aria-selected", "false");
-    tab.tabIndex = -1;
-    tab.append(document.createTextNode(set.name));
-    var count = document.createElement("span");
-    count.textContent = set.count.toLocaleString();
-    tab.append(count);
-    tab.addEventListener("click", function () { select(index); });
-    tab.addEventListener("keydown", function (event) {
-      var step = event.key === "ArrowRight" ? 1 : event.key === "ArrowLeft" ? -1 : 0;
-      if (!step) { return; }
-      event.preventDefault();
-      var next = (index + step + tabs.length) % tabs.length;
-      select(next);
-      tabs[next].focus();
-    });
-    tabs.push(tab);
-    tabRow.append(tab);
-    var pane = buildSheet(set, result.payload);
-    panes.push(pane);
-    sheetHost.append(pane);
+  function add(result) {
+    sheetHost.append(buildSheet(result.set, result.payload));
   }
 
   Promise.all(SETS.map(function (set) {
@@ -311,7 +268,6 @@
       .catch(function () { return { set: set, payload: null }; });
   })).then(function (results) {
     results.forEach(add);
-    if (tabs.length) { select(0); }
   });
 })();
 </script>
