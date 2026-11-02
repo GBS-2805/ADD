@@ -15,6 +15,7 @@ colour, and keeps its own viewBox. Three pages come out of two templates:
 
   docs/icons/index.html                  the Icons app's landing page (brands + APK)
   docs/icons/<brand>/index.html          one page per brand: preview, variants, set
+  docs/icons/all/index.html              all brands: a tab each, 20 glyphs one per category
 
 Each brand page loads its own catalog at run time instead of inlining glyphs, so
 the pages stay small and the files the phone app reads are the files the pages
@@ -39,6 +40,7 @@ from concurrent.futures import ThreadPoolExecutor
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 HUB_TEMPLATE = ROOT / "tools/icons_hub_template.html"
 BRAND_TEMPLATE = ROOT / "tools/icons_brand_template.html"
+ALL_TEMPLATE = ROOT / "tools/icons_all_template.html"
 OUT_HUB = ROOT / "docs/icons/index.html"
 APK = ROOT / "docs/Icons-1.2.apk"
 DATA_LINE = ROOT / "docs/data/icons.json"
@@ -340,8 +342,12 @@ def brands():
 
 
 def menu(root, current):
-    rows = []
-    for brand in brands():
+    entries = brands()
+    total = sum(brand["count"] for brand in entries)
+    marker = ' aria-current="page"' if current == "all" else ""
+    rows = ['  <a href="%sicons/all/"%s>All<span>%s</span></a>'
+            % (root, marker, fmt(total))]
+    for brand in entries:
         marker = ' aria-current="page"' if brand["slug"] == current else ""
         rows.append('  <a href="%sicons/%s/"%s>%s<span>%s</span></a>'
                     % (root, brand["slug"], marker, brand["name"], fmt(brand["count"])))
@@ -362,6 +368,26 @@ def brand_cards(entries):
                              brand["note"].replace("__COUNT__", fmt(brand["count"])),
                              brand["name"]))
     return "\n      ".join(cards)
+
+
+def write_all(entries):
+    total = sum(brand["count"] for brand in entries)
+    page = ALL_TEMPLATE.read_text(encoding="utf-8")
+    sets = [{"slug": brand["slug"], "name": brand["name"], "count": brand["count"],
+             "cats": len(brand["cats"]), "data": "../../data/" + brand["data"].name}
+            for brand in entries]
+    tokens = {
+        "__ROOT__": "../../",
+        "__TOTAL__": fmt(total),
+        "__SETS__": json.dumps(sets),
+        "__BRANDS__": menu("../../", "all"),
+    }
+    for token, value in tokens.items():
+        page = page.replace(token, value)
+    out = ROOT / "docs/icons/all/index.html"
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(page, encoding="utf-8")
+    print("page: %-28s %9d bytes" % (out.relative_to(ROOT), out.stat().st_size))
 
 
 def write_hub(entries):
@@ -494,6 +520,7 @@ def main():
     write_hub(entries)
     for brand in entries:
         write_brand(brand, entries)
+    write_all(entries)
     print("brands: %s | total %d glyphs"
           % (", ".join("%s %d" % (b["name"], b["count"]) for b in entries),
              sum(b["count"] for b in entries)))
