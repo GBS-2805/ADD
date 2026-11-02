@@ -520,6 +520,46 @@
         parts[i].setAttribute("stroke-linecap", "round");
       }
     }
+    if (!stroke) { solidDots(svg, w); }
+  }
+
+  // A closed subpath no bigger than the stroke turnes inside out: the renderer
+  // draws its outline twice over the middle and leaves a pinhole where the two
+  // edges meet. Coolicons' accessibility glyph is one path whose 1-unit head does
+  // this at weight 2 (stroke = diameter exactly) and again at 2.5, which is the
+  // white dot that appeared and vanished as the weight changed. Splitting such a
+  // subpath out and filling it keeps the dot solid at every weight.
+  function splitSubpaths(d) {
+    var out = [], re = /[Mm][^Mm]*/g, m;
+    while ((m = re.exec(d))) { out.push(m[0]); }
+    return out;
+  }
+
+  function solidDots(svg, w) {
+    var list = Array.prototype.slice.call(svg.querySelectorAll("path"));
+    for (var i = 0; i < list.length; i++) {
+      var path = list[i];
+      var parts = splitSubpaths(path.getAttribute("d") || "");
+      if (parts.length < 2) { continue; }
+      var pieces = [], split = false, j, box, piece, closed;
+      for (j = 0; j < parts.length; j++) {
+        piece = path.cloneNode(false);
+        piece.setAttribute("d", parts[j]);
+        svg.appendChild(piece);
+        box = piece.getBBox();
+        svg.removeChild(piece);
+        closed = /[Zz]\s*$/.test(parts[j]);
+        if (closed && Math.min(box.width, box.height) <= w) {
+          piece.setAttribute("fill", "currentColor");
+          split = true;
+        }
+        pieces.push(piece);
+      }
+      if (!split) { continue; }
+      var frag = svg.ownerDocument.createDocumentFragment();
+      for (j = 0; j < pieces.length; j++) { frag.appendChild(pieces[j]); }
+      path.parentNode.replaceChild(frag, path);
+    }
   }
 
   function paint() {

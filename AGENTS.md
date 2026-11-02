@@ -150,10 +150,15 @@ changes as unverified on device rather than illustrating them.
   attribute beats a value inherited from the `<svg>`. The preview therefore writes
   the chosen weight onto each element (`tune()` in the template), not onto a parent.
   Setting it in CSS on the svg looks correct and does nothing.
-- Coolicons' categories are the vendor's own: `fetch_icons.py --categories` merges
-  `icons/data/index.json` into `docs/data/coolicons.json` as `cat`, and the sheet's
-  picker renders them in the vendor's order. Lineicons publishes no categories, so
-  its page hides the picker instead of inventing a taxonomy.
+- Both sets carry their vendor's own categories: `fetch_icons.py --categories` merges
+  Coolicons' `icons/data/index.json` and Lineicons' public search index into the two
+  catalogs as `cat`, keeps each vendor's order in `cat_order`, and the sheet's picker
+  renders them. The four older Lineicons files the vendor has not categorised show
+  under All icons only; never invent a bucket for them.
+- A closed subpath no bigger than the stroke turns inside out: the renderer leaves a
+  pinhole where the stroke meets itself (Coolicons' 1-unit head showed it at weight 2,
+  and again at 2.5). `solidDots()` splits those subpaths out of the preview and fills
+  them, so dots stay solid at every weight; the file itself is never touched.
 - APK builds go through `build.sh` into `dist/`; released APKs are committed inside
   `docs/`. `dist/` keeps older builds as history, `docs/` ships only the current one.
   `./build.sh` builds both, `./build.sh icons` or `./build.sh compress` builds one.

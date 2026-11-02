@@ -486,7 +486,7 @@
   var sizes = document.getElementById("sizes");
   var surfaces = document.getElementById("surfaces");
   var tabs = Array.prototype.slice.call(document.querySelectorAll(".stage-tab"));
-  var CATS = [];
+  var CATS = [{"name": "Alerts & Notifications", "count": 1}, {"name": "Arrows", "count": 34}, {"name": "Badge & Rewards", "count": 2}, {"name": "Brands & Logos", "count": 244}, {"name": "Buildings", "count": 5}, {"name": "Business", "count": 9}, {"name": "Charity", "count": 5}, {"name": "Coding", "count": 2}, {"name": "Communication", "count": 10}, {"name": "Construction", "count": 16}, {"name": "Date and Time", "count": 5}, {"name": "Design Tools", "count": 16}, {"name": "Devices", "count": 17}, {"name": "Direction & Navigation", "count": 3}, {"name": "E-Commerce", "count": 8}, {"name": "Editing", "count": 8}, {"name": "Education", "count": 13}, {"name": "Emergency", "count": 1}, {"name": "Emoji", "count": 8}, {"name": "Energy", "count": 2}, {"name": "Fashion", "count": 1}, {"name": "Files & Folders", "count": 7}, {"name": "Fitness", "count": 2}, {"name": "Food & Restaurant", "count": 8}, {"name": "Gaming", "count": 1}, {"name": "Hand Gesture", "count": 3}, {"name": "Health & Medical", "count": 10}, {"name": "Interface", "count": 15}, {"name": "Jewelry & Gems", "count": 2}, {"name": "Map & Marker", "count": 6}, {"name": "Marketing", "count": 7}, {"name": "Media & Entertainment", "count": 14}, {"name": "Money & Currency", "count": 10}, {"name": "Nature", "count": 10}, {"name": "Party & Fest", "count": 7}, {"name": "Search", "count": 5}, {"name": "Security", "count": 6}, {"name": "Server, Storage & Data", "count": 9}, {"name": "Sign", "count": 1}, {"name": "Spinner", "count": 2}, {"name": "Sports", "count": 2}, {"name": "Star", "count": 3}, {"name": "Symbols", "count": 5}, {"name": "Text Editor", "count": 18}, {"name": "Ticket", "count": 2}, {"name": "Travel", "count": 1}, {"name": "User", "count": 2}, {"name": "Vehicles", "count": 17}, {"name": "Weather", "count": 7}, {"name": "Web & Browser", "count": 7}, {"name": "Wireless Connectivity", "count": 3}];
   var catWrap = document.getElementById("catWrap");
   var catBtn = document.getElementById("catBtn");
   var catMenu = document.getElementById("catMenu");
@@ -519,6 +519,46 @@
         parts[i].setAttribute("stroke-linejoin", "round");
         parts[i].setAttribute("stroke-linecap", "round");
       }
+    }
+    if (!stroke) { solidDots(svg, w); }
+  }
+
+  // A closed subpath no bigger than the stroke turnes inside out: the renderer
+  // draws its outline twice over the middle and leaves a pinhole where the two
+  // edges meet. Coolicons' accessibility glyph is one path whose 1-unit head does
+  // this at weight 2 (stroke = diameter exactly) and again at 2.5, which is the
+  // white dot that appeared and vanished as the weight changed. Splitting such a
+  // subpath out and filling it keeps the dot solid at every weight.
+  function splitSubpaths(d) {
+    var out = [], re = /[Mm][^Mm]*/g, m;
+    while ((m = re.exec(d))) { out.push(m[0]); }
+    return out;
+  }
+
+  function solidDots(svg, w) {
+    var list = Array.prototype.slice.call(svg.querySelectorAll("path"));
+    for (var i = 0; i < list.length; i++) {
+      var path = list[i];
+      var parts = splitSubpaths(path.getAttribute("d") || "");
+      if (parts.length < 2) { continue; }
+      var pieces = [], split = false, j, box, piece, closed;
+      for (j = 0; j < parts.length; j++) {
+        piece = path.cloneNode(false);
+        piece.setAttribute("d", parts[j]);
+        svg.appendChild(piece);
+        box = piece.getBBox();
+        svg.removeChild(piece);
+        closed = /[Zz]\s*$/.test(parts[j]);
+        if (closed && Math.min(box.width, box.height) <= w) {
+          piece.setAttribute("fill", "currentColor");
+          split = true;
+        }
+        pieces.push(piece);
+      }
+      if (!split) { continue; }
+      var frag = svg.ownerDocument.createDocumentFragment();
+      for (j = 0; j < pieces.length; j++) { frag.appendChild(pieces[j]); }
+      path.parentNode.replaceChild(frag, path);
     }
   }
 

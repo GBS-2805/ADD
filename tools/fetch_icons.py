@@ -22,7 +22,7 @@ render.
 
     python3 tools/fetch_icons.py                # fetch both sets, write data + pages
     python3 tools/fetch_icons.py --pages-only   # rewrite the pages from the catalogs
-    python3 tools/fetch_icons.py --categories   # merge the vendor's categories, then pages
+    python3 tools/fetch_icons.py --categories   # merge each vendor's categories, then pages
 """
 
 import argparse
@@ -40,7 +40,7 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 HUB_TEMPLATE = ROOT / "tools/icons_hub_template.html"
 BRAND_TEMPLATE = ROOT / "tools/icons_brand_template.html"
 OUT_HUB = ROOT / "docs/icons/index.html"
-APK = ROOT / "docs/Icons-1.0.apk"
+APK = ROOT / "docs/Icons-1.2.apk"
 DATA_LINE = ROOT / "docs/data/icons.json"
 DATA_COOL = ROOT / "docs/data/coolicons.json"
 TREE_CACHE = pathlib.Path("/tmp/coolicons-tree.json")
@@ -59,8 +59,18 @@ COOL_INDEX = ("https://raw.githubusercontent.com/krystonschwarze/coolicons/main"
               "/icons/data/index.json")
 CAT_CACHE = pathlib.Path("/tmp/coolicons-index.json")
 
+# Lineicons ships no category file in its repository, but its site indexes every
+# icon with a category and a free/pro flag and serves that from this public search
+# endpoint, with the same client key the site itself sends. Only free rows are read.
+LINE_SEARCH = ("https://lineicons-search.deploy.pimjo.com"
+               "/indexes/bucket-lineicon-icons/search")
+LINE_SEARCH_KEY = "7KZpvPXJK61sOdRKKfOA0N4UekEQpz5z"
+LINE_SITEMAP = "https://lineicons.com/sitemap-0.xml"
+LINE_CAT_CACHE = pathlib.Path("/tmp/lineicons-categories.json")
+
 # Coolicons' own category order, as its browser lists them. Anything the vendor
-# adds later is appended alphabetically rather than dropped.
+# adds later is appended alphabetically rather than dropped. Lineicons' order
+# comes from its own sitemap and is stored beside the catalog.
 CAT_ORDER = ["System", "Arrow", "Navigation", "Edit", "File", "Communication",
              "User", "Media", "Calendar", "Devices", "Development", "AI", "Design",
              "Shape", "Symbols", "Home", "Buildings", "Travel", "Nature", "Animals",
@@ -138,11 +148,7 @@ def cool_names():
 
 
 def cool_categories():
-    """name -> the vendor's category, from Coolicons' own icons/data/index.json.
-
-    Lineicons publishes no categories, so this returns nothing for it and its page
-    simply hides the picker instead of inventing a taxonomy.
-    """
+    """name -> the vendor's category, from Coolicons' own icons/data/index.json."""
     if CAT_CACHE.exists():
         payload = json.loads(CAT_CACHE.read_text(encoding="utf-8"))
     else:
@@ -158,7 +164,58 @@ def cool_categories():
             for item in payload.get("icons", []) if item.get("name")}
 
 
-def category_list(icons):
+def line_categories():
+    """name -> the vendor's category, and the vendor's category order.
+
+    Reads only rows flagged free and keeps only the categories of names that are
+    actually in the free repository, so a Pro icon can never pull a glyph of ours
+    into its category. The order is the one lineicons.com lists on its own site.
+    """
+    if LINE_CAT_CACHE.exists():
+        payload = json.loads(LINE_CAT_CACHE.read_text(encoding="utf-8"))
+    else:
+        rows, offset = [], 0
+        while True:
+            body = json.dumps({
+                "q": "", "filter": ['variant = "free"'], "limit": 1000, "offset": offset,
+                "attributesToRetrieve": ["name", "category_slug", "categoryName"],
+            }).encode("utf-8")
+            request = urllib.request.Request(
+                LINE_SEARCH, data=body,
+                headers={"Content-Type": "application/json",
+                         "Authorization": "Bearer " + LINE_SEARCH_KEY,
+                         "Origin": "https://lineicons.com",
+                         "Referer": "https://lineicons.com/"})
+            try:
+                data = json.loads(urllib.request.urlopen(request, timeout=45).read())
+            except Exception as error:
+                print("lineicons categories unavailable (%s)" % error, file=sys.stderr)
+                return {}, []
+            rows += data.get("hits", [])
+            offset += 1000
+            if not data.get("hits") or offset >= data.get("estimatedTotalHits", 0):
+                break
+        found = {}
+        for row in rows:
+            found.setdefault(row["name"], [row.get("categoryName") or row["category_slug"],
+                                           row["category_slug"]])
+        order = []
+        try:
+            sitemap = urllib.request.urlopen(
+                urllib.request.Request(LINE_SITEMAP, headers={"User-Agent": "compress-site"}),
+                timeout=45).read().decode("utf-8", "replace")
+            display = {slug: name for name, slug in found.values()}
+            order = [display[slug] for slug in re.findall(r"/icons/category/([a-z0-9-]+)</loc>",
+                                                          sitemap) if slug in display]
+        except Exception as error:
+            print("lineicons category order unavailable (%s)" % error, file=sys.stderr)
+        payload = {"names": found, "order": order}
+        LINE_CAT_CACHE.write_text(json.dumps(payload), encoding="utf-8")
+    return ({name: value[0] for name, value in payload["names"].items()},
+            payload.get("order", []))
+
+
+def category_list(icons, order=None):
     """Categories with counts, in the vendor's order, for the page's picker."""
     counts = {}
     for icon in icons:
@@ -167,8 +224,8 @@ def category_list(icons):
             counts[name] = counts.get(name, 0) + 1
     if not counts:
         return []
-    ordered = [name for name in CAT_ORDER if name in counts]
-    ordered += sorted(name for name in counts if name not in CAT_ORDER)
+    ordered = [name for name in (order or CAT_ORDER) if name in counts]
+    ordered += sorted(name for name in counts if name not in ordered)
     return [{"name": name, "count": counts[name]} for name in ordered]
 
 
@@ -272,7 +329,7 @@ def brands():
         entry = dict(brand)
         entry.update({
             "count": payload["count"],
-            "cats": category_list(payload["icons"]),
+            "cats": category_list(payload["icons"], payload.get("cat_order")),
             "mode": mode_of(payload),
             "licence": payload.get("licence", "MIT"),
             "style": payload.get("style", brand["style"]).replace("/", ", "),
@@ -374,8 +431,21 @@ def main():
             if name:
                 icon["cat"] = name
                 merged += 1
+        payload["cat_order"] = CAT_ORDER
         write_catalog(DATA_COOL, payload)
-        print("categories merged: %d of %d glyphs" % (merged, payload["count"]))
+        print("coolicons categories: %d of %d glyphs" % (merged, payload["count"]))
+
+        payload = json.loads(DATA_LINE.read_text(encoding="utf-8"))
+        mapping, order = line_categories()
+        merged = 0
+        for icon in payload["icons"]:
+            name = mapping.get(icon["name"], "")
+            if name:
+                icon["cat"] = name
+                merged += 1
+        payload["cat_order"] = order
+        write_catalog(DATA_LINE, payload)
+        print("lineicons categories: %d of %d glyphs" % (merged, payload["count"]))
         entries = brands()
     else:
         line_list = line_names()
@@ -388,12 +458,16 @@ def main():
         mapping = cool_categories()
         for icon in cool_icons:
             icon["cat"] = mapping.get(icon["name"], "")
+        line_mapping, line_order = line_categories()
+        for icon in line_icons:
+            icon["cat"] = line_mapping.get(icon["name"], "")
         generated = datetime.date.today().isoformat()
         write_catalog(DATA_LINE, {
             "generated": generated,
             "set": "Lineicons",
             "source": "LineiconsHQ/Lineicons",
             "licence": "MIT",
+            "cat_order": line_order,
             "count": len(line_icons),
             "missing": line_missing,
             "icons": line_icons,
@@ -404,6 +478,7 @@ def main():
             "source": "krystonschwarze/coolicons",
             "licence": "MIT",
             "style": "line/regular",
+            "cat_order": CAT_ORDER,
             "count": len(cool_icons),
             "missing": cool_missing,
             "icons": cool_icons,
