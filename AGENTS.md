@@ -22,15 +22,15 @@ that text changed.
 
 - Capture with headless Chromium via Playwright, served from a local static server
   over `docs/`, at 1300x900. `tools/render_pages.js` takes every page of the shelf
-  in one run -- the index at its fold and at full height, then the pull-down menu
-  open, then tools, icons, fonts, portfolio and download at desktop width, then the
-  index, its menu and download at 390x844 -- in about ten seconds, and prints console
-  errors and horizontal overflow.
+  in one run -- the index at its fold and at full height, then both pull-downs open
+  (left, then right), then tools, icons, fonts, portfolio and download at desktop
+  width, then the index, its left menu and download at 390x844 -- in about ten
+  seconds, and prints console errors and horizontal overflow.
 - Save under `artifacts/`, one file per page the change touches. The names the
   gallery already uses are `page-home-light`, `page-home-full`, `page-tools`,
   `page-icons-light`, `page-fonts`, `page-portfolio`, `page-download`, `page-menu`,
-  `phone-home-light`, `phone-home-full`, `phone-icons-light`, `phone-download`,
-  `phone-menu` and `logo-light`. There is one palette, so there are no dark variants; the `-light`
+  `page-menu-right`, `phone-home-light`, `phone-home-full`, `phone-icons-light`,
+  `phone-download`, `phone-menu` and `logo-light`. There is one palette, so there are no dark variants; the `-light`
   suffix on four of them is history, not a variant.
 - Cover every page the change touches, plus mobile width when the change is
   responsive.
@@ -119,8 +119,10 @@ changes as unverified on device rather than illustrating them.
 - `docs/` is the deployed static site (Sites manifest `manifest.json`, assets from `docs`).
 - The shelf is seven pages, each a folder with an `index.html`: the root index, then
   `tools/`, `icons/`, `fonts/`, `portfolio/`, `download/` and `renders/`. They share
-  `assets/site.css` and `assets/site.js`; no page has its own copy of the palette and
-  each lists all seven destinations in the same pull-down menu.
+  `assets/site.css` and `assets/site.js`; no page has its own copy of the palette.
+  Each page carries the same two pull-downs: the chevrons on the left open index,
+  tools, icons and fonts, the burger on the right opens portfolio, renders and
+  download. Only one is open at a time, and `site.js` owns that pairing.
 - `docs/data/` is generated and public on purpose: the site doubles as the database
   behind the apps. `icons.json` comes from `tools/fetch_icons.py`; `index.json`,
   `tools.json`, `fonts.json` and `portfolio.json` come from `tools/build_catalog.py`.

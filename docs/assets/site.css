@@ -121,6 +121,12 @@ a { color: inherit; }
 .menu a span { color: rgba(0, 0, 0, .5); }
 .menu a:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
 
+/* The right-hand panel holds the rest, aligned to the burger that opens it. */
+.menu.end {
+  grid-template-columns: repeat(3, minmax(0, max-content));
+  justify-content: end;
+}
+
 /* ---------- page ---------- */
 main { padding: 0 var(--pad); }
 .page-head { padding: 84px 0 40px; }
@@ -298,6 +304,7 @@ footer a:hover { text-decoration: underline; }
   .who-lines p { font-size: 14px; line-height: 1.35; }
   .burger { width: 24px; }
   .menu { grid-template-columns: 1fr; }
+  .menu.end { grid-template-columns: 1fr; justify-content: stretch; }
   .page-head { padding: 48px 0 28px; }
   .lede { font-size: 18px; }
   .cta { width: 100%; justify-content: center; height: 54px; }
