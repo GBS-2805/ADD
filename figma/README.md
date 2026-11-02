@@ -64,7 +64,7 @@ base64 woff2, about 32 KB a file, because an SVG that only names the family rend
 in whatever sans the viewer has. Open any of these in a browser — here, from
 `/figma/` on the site, or from a phone's download — and the type is the site's.
 That is what sets the hand-off's cost: with the faces in, the whole site sits about
-127 KB under the host's 10 MiB deploy ceiling, so `tools/figma_publish.py` prints
+124 KB under the host's 10 MiB deploy ceiling, so `tools/figma_publish.py` prints
 the headroom on every run and anything new has to fit inside it. Figma does not read `@font-face` from an SVG, so it still asks to enable the
 Google font once on import.
 
