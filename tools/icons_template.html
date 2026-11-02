@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Media icons — copy SVG, no account</title>
-<meta name="description" content="A copy-ready media icon set: image, camera, video, music, podcast and player icons. Click any icon to copy its SVG markup. No account, no plan, no Pro tier." />
+<title>Lineicons, all __COUNT__ free icons — copy SVG</title>
+<meta name="description" content="The complete free Lineicons set: __COUNT__ copy-ready SVG icons. Click any icon to copy its markup. No account, no plan, no Pro tier." />
 <style>
   :root {
     --bg: #f2e4c9; --card: #f7ecd7; --card2: #eadbbd; --stroke: #2b2926;
@@ -92,11 +92,11 @@
 <body>
 <div class="wrap">
   <div class="topbar">
-    <div class="brand"><i></i>MEDIA ICONS</div>
+    <div class="brand"><i></i>LINEICONS · FREE</div>
     <button class="theme-toggle" id="themeToggle" type="button" aria-pressed="false">DARK OFF</button>
   </div>
 
-  <p class="lead">__COUNT__ media icons, one click each. <b>Tap an icon to copy its SVG</b> — image, camera, video, music, podcast and player marks. No account, no plan, no Pro gate, nothing to unlock.</p>
+  <p class="lead">All __COUNT__ free Lineicons, one click each. <b>Tap an icon to copy its SVG</b> — the whole open-source set, not a sample. No account, no plan, no Pro gate, nothing to unlock.</p>
 
   <div class="tools">
     <input id="search" type="search" placeholder="Filter by name…" aria-label="Filter icons by name" autocomplete="off" />
@@ -113,7 +113,7 @@
   </div>
 
   <footer>
-    <p>Icons: the free <b>Lineicons</b> set from <code>LineiconsHQ/Lineicons</code>, MIT licence — free for personal and commercial use. Only the SVGs the repository publishes are here; the paid Pro set on lineicons.com is neither included nor copied.</p>
+    <p>Icons: the complete free <b>Lineicons</b> set from <code>LineiconsHQ/Lineicons</code>, MIT licence — free for personal and commercial use. Every SVG the repository publishes is here; the paid Pro set on lineicons.com is neither included nor copied.</p>
     <p><a href="../">← Compress for Android</a></p>
   </footer>
 </div>
@@ -161,6 +161,7 @@ async function copy(item, card, label) {
 function render(filter) {
   const q = (filter || "").trim().toLowerCase();
   grid.textContent = "";
+  const rows = document.createDocumentFragment();
   let shown = 0;
   ICONS.forEach(function (item) {
     if (q && item.name.indexOf(q) === -1) { return; }
@@ -177,8 +178,9 @@ function render(filter) {
     label.textContent = item.name;
     card.append(glyph, label);
     card.addEventListener("click", function () { copy(item, card, label); });
-    grid.append(card);
+    rows.append(card);
   });
+  grid.append(rows);
   counter.textContent = shown + (shown === 1 ? " icon" : " icons");
   empty.hidden = shown !== 0;
 }
