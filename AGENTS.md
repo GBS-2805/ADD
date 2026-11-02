@@ -165,9 +165,17 @@ changes as unverified on device rather than illustrating them.
   The Icons build stages its web bundle out of `docs/` into `icons-app/assets/`, which
   is generated and not committed: one copy of every glyph, not two.
 - The Icons app is a WebView over that bundle, served from `https://icons.local` by a
-  `WebViewClient` reading `assets/www`, with a `JavascriptInterface` bridge for copy.
-  It declares no permissions at all, so a page cannot reach the network even if one
-  asked.
+  `WebViewClient` reading `assets/www`, with a `JavascriptInterface` bridge for copy
+  and for saving a raster. It declares no permissions at all, so a page cannot reach
+  the network even if one asked.
+- The WebView sits in a frame padded by the window insets. Target 35 draws edge to
+  edge, so without that the band hides under the status bar and, on a Flip 7, under
+  the camera cutout.
+- The preview exports SVG through the clipboard, or a 512px PNG/WEBP/JPG rendered on
+  the chosen background: the site downloads it, the app writes it to Pictures/Icons
+  through MediaStore (no permission on Android 10+).
+- A page the bundle does not carry shows the address of the same page on the site and
+  an Open on the web button; the `WebViewClient` hands any http(s) link to the browser.
 - Compress's palette has one source of truth: `app/res/values/colors.xml` (Icons has
   its own in `icons-app/res/values/styles.xml`). Names are kept from the old theme on
   purpose, so a rename touches every drawable, layout and Java file that references

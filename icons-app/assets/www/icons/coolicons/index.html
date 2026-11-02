@@ -381,7 +381,7 @@
           <p>Preview</p>
           <button class="copy-btn" id="copyBtn" type="button">
             <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M10 13C11.3807 14.3807 13.6193 14.3807 15 13L18 10C19.3807 8.61929 19.3807 6.38071 18 5C16.6193 3.61929 14.3807 3.61929 13 5L11 7M14 11C12.6193 9.61929 10.3807 9.61929 9 11L6 14C4.61929 15.3807 4.61929 17.6193 6 19C7.38071 20.3807 9.61929 20.3807 11 19L13 17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            Copy SVG
+            <span id="copyLabel">Copy SVG</span>
           </button>
         </div>
 
@@ -410,6 +410,16 @@
           <div class="segs" id="surfaces">
             <button class="seg" type="button" data-surface="black" aria-pressed="true">Black</button>
             <button class="seg" type="button" data-surface="white" aria-pressed="false">White</button>
+          </div>
+        </div>
+
+        <div class="ctl-row" role="group" aria-label="Export format">
+          <span class="ctl-label">Format</span>
+          <div class="segs" id="formats">
+            <button class="seg" type="button" data-format="svg" aria-pressed="true">SVG</button>
+            <button class="seg" type="button" data-format="png" aria-pressed="false">PNG</button>
+            <button class="seg" type="button" data-format="webp" aria-pressed="false">WEBP</button>
+            <button class="seg" type="button" data-format="jpg" aria-pressed="false">JPG</button>
           </div>
         </div>
 
@@ -485,6 +495,8 @@
   var weights = document.getElementById("weights");
   var sizes = document.getElementById("sizes");
   var surfaces = document.getElementById("surfaces");
+  var formats = document.getElementById("formats");
+  var copyLabel = document.getElementById("copyLabel");
   var tabs = Array.prototype.slice.call(document.querySelectorAll(".stage-tab"));
   var CATS = [{"name": "System", "count": 102}, {"name": "Arrow", "count": 149}, {"name": "Navigation", "count": 23}, {"name": "Edit", "count": 89}, {"name": "File", "count": 74}, {"name": "Communication", "count": 55}, {"name": "User", "count": 22}, {"name": "Media", "count": 57}, {"name": "Calendar", "count": 36}, {"name": "Devices", "count": 38}, {"name": "Development", "count": 21}, {"name": "AI", "count": 42}, {"name": "Design", "count": 34}, {"name": "Shape", "count": 106}, {"name": "Symbols", "count": 61}, {"name": "Home", "count": 21}, {"name": "Buildings", "count": 19}, {"name": "Travel", "count": 55}, {"name": "Nature", "count": 37}, {"name": "Animals", "count": 25}, {"name": "Food", "count": 18}, {"name": "Health", "count": 15}, {"name": "Science", "count": 15}, {"name": "Sports & Games", "count": 23}, {"name": "Faces", "count": 10}, {"name": "Zodiac", "count": 12}, {"name": "Brands", "count": 33}, {"name": "Charts", "count": 17}, {"name": "Commerce", "count": 24}, {"name": "Finance", "count": 25}];
   var catWrap = document.getElementById("catWrap");
@@ -498,6 +510,9 @@
   var weight = "2";
   var size = 64;
   var surface = "black";
+  var format = "svg";
+  var MIME = { svg: "image/svg+xml", png: "image/png", webp: "image/webp", jpg: "image/jpeg" };
+  var EXPORT = 512;
   var built = false;
   var cat = "";
   var SLUG = "coolicons";
@@ -725,6 +740,54 @@
     paint();
   });
 
+  formats.addEventListener("click", function (event) {
+    var btn = event.target.closest(".seg");
+    if (!btn) { return; }
+    format = btn.getAttribute("data-format");
+    Array.prototype.forEach.call(formats.children, function (other) {
+      other.setAttribute("aria-pressed", other === btn ? "true" : "false");
+    });
+    copyLabel.textContent = "Copy " + format.toUpperCase();
+    statusEl.textContent = format === "svg"
+      ? "Copy hands over the SVG file"
+      : "Copy saves a " + EXPORT + "px " + format.toUpperCase() + " tile on the " + surface + " background";
+  });
+
+  // Browsers cannot hand a raster through the clipboard, so a PNG, WEBP or JPG is
+  // drawn from the same tuned glyph at 512px on the chosen background: the app saves
+  // it to Pictures/Icons through its bridge, the site downloads it.
+  function raster(mime) {
+    return new Promise(function (resolve, reject) {
+      var host = document.createElement("div");
+      host.innerHTML = markup(selected);
+      var node = host.querySelector("svg");
+      node.setAttribute("width", String(EXPORT));
+      node.setAttribute("height", String(EXPORT));
+      node.setAttribute("style", "color:" + (surface === "white" ? "#000000" : "#ffffff"));
+      tune(node, weight, MODE !== "stroke");
+      var svg = new XMLSerializer().serializeToString(node);
+      var blob = new Blob([svg], { type: "image/svg+xml;charset=utf-8" });
+      var url = URL.createObjectURL(blob);
+      var image = new Image();
+      image.onload = function () {
+        var canvas = document.createElement("canvas");
+        canvas.width = EXPORT;
+        canvas.height = EXPORT;
+        var ctx = canvas.getContext("2d");
+        ctx.fillStyle = surface === "white" ? "#ffffff" : "#000000";
+        ctx.fillRect(0, 0, EXPORT, EXPORT);
+        ctx.drawImage(image, 0, 0, EXPORT, EXPORT);
+        URL.revokeObjectURL(url);
+        resolve(canvas.toDataURL(mime, 0.92));
+      };
+      image.onerror = function () {
+        URL.revokeObjectURL(url);
+        reject(new Error("the glyph did not draw"));
+      };
+      image.src = url;
+    });
+  }
+
   function copyText(text) {
     if (window.IconsApp && window.IconsApp.copy) {
       window.IconsApp.copy(text);
@@ -752,12 +815,34 @@
 
   document.getElementById("copyBtn").addEventListener("click", function () {
     if (!selected) { return; }
-    var text = markup(selected);
-    snippet.value = text;
-    copyText(text).then(function (ok) {
-      statusEl.textContent = ok ? "Copied " + selected.name + ".svg to the clipboard" : "Clipboard blocked — the markup is in the Markup tab";
-      if (!ok) { snippet.focus(); snippet.select(); showTab("markup"); }
-      window.setTimeout(paint, 2200);
+    if (format === "svg") {
+      var text = markup(selected);
+      snippet.value = text;
+      copyText(text).then(function (ok) {
+        statusEl.textContent = ok ? "Copied " + selected.name + ".svg to the clipboard" : "Clipboard blocked — the markup is in the Markup tab";
+        if (!ok) { snippet.focus(); snippet.select(); showTab("markup"); }
+        window.setTimeout(paint, 2200);
+      });
+      return;
+    }
+    var mime = MIME[format];
+    var name = selected.name + "." + format;
+    statusEl.textContent = "Drawing " + name + "…";
+    raster(mime).then(function (dataUrl) {
+      if (window.IconsApp && window.IconsApp.saveImage) {
+        window.IconsApp.saveImage(dataUrl, mime, name);
+        statusEl.textContent = "Saved " + name + " · " + EXPORT + "px · " + surface;
+        return;
+      }
+      var link = document.createElement("a");
+      link.href = dataUrl;
+      link.download = name;
+      document.body.append(link);
+      link.click();
+      link.remove();
+      statusEl.textContent = "Downloaded " + name + " · " + EXPORT + "px · " + surface;
+    }).catch(function (error) {
+      statusEl.textContent = "Could not export: " + error.message;
     });
   });
 

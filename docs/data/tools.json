@@ -39,14 +39,16 @@
       "name": "Icons",
       "kind": "Android app",
       "status": "released",
-      "version": "1.4",
-      "version_code": 5,
+      "version": "1.5",
+      "version_code": 6,
       "package": "app.offline.icons",
-      "apk": "/Icons-1.4.apk",
+      "apk": "/Icons-1.5.apk",
       "min_android": "8.0 (API 26)",
       "summary": "Both free icon brands on the phone: 1,864 glyphs, a preview with weight, size and surface, and the whole set behind one toggle. Bundled offline with no permissions at all.",
       "features": [
         "Two brands, 606 Lineicons and 1,258 Coolicons, bundled with the pages and the fonts.",
+        "Copy exports SVG, or a 512px PNG, WEBP or JPG drawn on the chosen background.",
+        "No content sits under the status bar or a camera cutout: the browser is inset.",
         "Black and white preview tiles, labelled plainly, for judging a glyph's contrast.",
         "A preview tab whose weight, size and background repaint the glyph as you press.",
         "The category you last picked is remembered per brand, and All icons forgets it.",
@@ -65,8 +67,8 @@
           "href": "/Icons-1.0.apk"
         }
       ],
-      "bytes": 517506,
-      "sha256": "8566c12335bc32c83183dae2c34b601ff178440b95548305cd8b155b888988bf"
+      "bytes": 521602,
+      "sha256": "b57f20a68c4a493d9e8e7204cf73bdd9a5116d8388ee2bf054bbe559bd351777"
     }
   ]
 }
