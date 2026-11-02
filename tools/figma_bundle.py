@@ -14,6 +14,10 @@ import re
 import sys
 import xml.etree.ElementTree as ET
 
+# Written without a prefix: ElementTree otherwise emits <ns0:defs> for every
+# element it re-serialises, which bloats the canvas and hides the font blocks.
+ET.register_namespace("", "http://www.w3.org/2000/svg")
+
 GAP = 220       # vertical gutter between artboards
 TOP = 170       # room for the first label
 PHONE_X = 1520  # left edge of the phone column (1300 desktop width + gap)
