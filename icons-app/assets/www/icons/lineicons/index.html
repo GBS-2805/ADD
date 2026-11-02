@@ -189,6 +189,66 @@
   #snippet:focus { border-color: var(--on); }
   .markup p { margin: 0; font-size: 13px; color: var(--on-dim); max-width: 62ch; }
 
+  .estimate { margin: 16px 0 0; padding-top: 12px; border-top: 1px solid var(--rule); font-size: 13px; line-height: 1.5; color: var(--on-dim); }
+
+  /* the selection tab: what the double taps collected, above the sheet */
+  .sel-tab { border: 1px solid var(--rule); border-bottom: 0; }
+  .sel-head { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 13px 22px; }
+  .sel-head p { margin: 0 auto 0 0; font-size: 13px; color: var(--on-dim); }
+  .sel-head b { font-size: 14px; font-weight: 500; color: var(--on); }
+  .sel-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+  .sel-btn {
+    appearance: none;
+    padding: 7px 12px;
+    font: inherit;
+    font-size: 13px;
+    color: var(--on);
+    background: transparent;
+    border: 1px solid var(--rule);
+    border-radius: 0;
+    cursor: pointer;
+  }
+  .sel-btn:hover:not([disabled]) { border-color: var(--on); }
+  .sel-btn[disabled] { color: var(--mute); cursor: default; }
+  .sel-btn:focus-visible { outline: 2px solid var(--band); outline-offset: 2px; }
+  .sel-strip { display: flex; align-items: center; gap: 8px; min-height: 52px; padding: 0 22px 13px; overflow-x: auto; overscroll-behavior-x: contain; }
+  .sel-hint { margin: 0; font-size: 13px; color: var(--on-dim); }
+  .sel-chip {
+    appearance: none;
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    color: var(--on);
+    background: transparent;
+    border: 1px solid var(--rule);
+    border-radius: 0;
+    cursor: pointer;
+  }
+  .sel-chip svg { width: 20px; height: 20px; }
+  .sel-chip:hover { border-color: var(--on); }
+  .sel-chip:focus-visible { outline: 2px solid var(--band); outline-offset: 2px; }
+  .sel-more { flex: none; font-size: 12px; color: var(--on-dim); white-space: nowrap; }
+
+  .add-all {
+    appearance: none;
+    flex: none;
+    height: 48px;
+    padding: 0 14px;
+    font: inherit;
+    font-size: 14px;
+    color: var(--on);
+    background: transparent;
+    border: 1px solid var(--rule);
+    border-radius: 0;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .add-all:hover:not([disabled]) { border-color: var(--on); }
+  .add-all[disabled] { color: var(--mute); cursor: default; }
+  .add-all:focus-visible { outline: 2px solid var(--band); outline-offset: 2px; }
+
   /* the whole set lives behind one toggle so the page stays quiet */
   /* the sheet is a <section>, and sections carry the page's own padding: strip it
      and let the toggle be a complete rectangle whether the sheet is open or shut */
@@ -319,6 +379,7 @@
     border-radius: 0;
     cursor: pointer;
     transition: background .09s;
+    touch-action: manipulation;
   }
   .icon-card:hover { background: rgba(217, 217, 217, .08); }
   .icon-card:focus-visible { outline: 2px solid var(--band); outline-offset: -4px; }
@@ -327,6 +388,17 @@
   .icon-card .glyph svg { width: 30px; height: 30px; }
   .icon-card .name { font-size: 9px; font-weight: 500; letter-spacing: .06em; text-transform: uppercase; line-height: 1.25; text-align: center; word-break: break-word; color: var(--on-dim); }
   .icon-card[aria-pressed="true"] .name { color: var(--ink); }
+  .icon-card { position: relative; }
+  .icon-card[data-picked="true"]::after {
+    content: "";
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 7px;
+    height: 7px;
+    background: var(--band);
+  }
+  .icon-card[aria-pressed="true"][data-picked="true"]::after { background: var(--ink); }
   .empty { margin: 0; padding: 18px 22px; font-size: 14px; color: var(--on-dim); }
   .panel-foot { display: flex; flex-wrap: wrap; gap: 6px 24px; justify-content: space-between; padding: 13px 22px; border-top: 1px solid var(--rule); font-size: 13px; color: var(--on-dim); }
   footer p { margin: 0; max-width: 62ch; }
@@ -351,6 +423,10 @@
     .panel-bar .search-wrap { flex: 1 1 100%; order: 1; }
     .panel-bar .cat-wrap { order: 2; }
     .panel-bar .count { order: 3; margin-left: auto; }
+    .panel-bar .add-all { order: 4; height: 46px; font-size: 13px; }
+    .sel-head { padding: 12px 18px; }
+    .sel-head p { flex: 1 1 100%; }
+    .sel-strip { padding: 0 18px 12px; min-height: 46px; }
     .cat-btn { height: 46px; font-size: 14px; }
     .cat-menu { width: min(244px, calc(100vw - 60px)); }
     .grid { grid-template-columns: repeat(auto-fill, minmax(88px, 1fr)); }
@@ -435,6 +511,7 @@
           <p class="name" id="selName" aria-live="polite">Loading…</p>
           <p class="file" id="selFile"></p>
           <p class="hint">Selected glyph. Open the set below to pick another.</p>
+          <p class="estimate" id="estimate" aria-live="polite">Estimate: reading the catalog…</p>
         </div>
       </div>
 
@@ -513,10 +590,21 @@
   </div>
 
   <section class="set-panel">
+    <div class="sel-tab" id="selTab">
+      <div class="sel-head">
+        <p><b id="selCount">No icons</b> in the export selection</p>
+        <div class="sel-actions">
+          <button class="sel-btn" id="selRemove" type="button" disabled>Remove selected</button>
+          <button class="sel-btn" id="selClear" type="button" disabled>Remove all</button>
+        </div>
+      </div>
+      <div class="sel-strip" id="selStrip"></div>
+    </div>
+
     <button class="panel-toggle" id="panelToggle" type="button" aria-expanded="false" aria-controls="panel">
       <span>
         <b>Lineicons · all 606 glyphs</b>
-        <span class="panel-sub">Opens into a scrolling sheet — tap one to preview it</span>
+        <span class="panel-sub">Opens into a scrolling sheet — tap to preview, double-tap to collect for export</span>
       </span>
       <svg class="chev" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M8 13L12 17L16 13M8 7L12 11L16 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
     </button>
@@ -535,6 +623,7 @@
           <div class="cat-menu" id="catMenu" role="listbox" aria-label="Icon category" hidden></div>
         </div>
         <p class="count" id="count">606</p>
+        <button class="add-all" id="addAllBtn" type="button">Add all</button>
       </div>
       <div class="grid-wrap"><div class="grid" id="grid"></div></div>
       <p class="empty" id="empty" hidden>No glyph in Lineicons matches that name in that category.</p>
@@ -589,6 +678,12 @@
   var catBtn = document.getElementById("catBtn");
   var catMenu = document.getElementById("catMenu");
   var catLabel = document.getElementById("catLabel");
+  var selCount = document.getElementById("selCount");
+  var selStrip = document.getElementById("selStrip");
+  var selRemove = document.getElementById("selRemove");
+  var selClear = document.getElementById("selClear");
+  var addAllBtn = document.getElementById("addAllBtn");
+  var estimateEl = document.getElementById("estimate");
 
   var FILL_WEIGHT = { "1": 0, "1.5": 0.4, "2": 0.8, "2.5": 1.2 };
   var items = [];
@@ -696,6 +791,177 @@
     }
   }
 
+  var chosen = [];
+  var chosenSet = {};
+  var bulkFilled = false;
+  var lastTap = { name: "", at: 0 };
+  var estimateTimer = 0;
+  var estimateToken = 0;
+
+  function inSelection(item) { return chosenSet[item.name] === true; }
+
+  function addPick(item) {
+    if (chosenSet[item.name]) { return false; }
+    chosenSet[item.name] = true;
+    chosen.push(item);
+    return true;
+  }
+
+  function dropPick(item) {
+    if (!chosenSet[item.name]) { return false; }
+    delete chosenSet[item.name];
+    chosen = chosen.filter(function (other) { return other.name !== item.name; });
+    return true;
+  }
+
+  function clearPicks() {
+    chosen = [];
+    chosenSet = {};
+    bulkFilled = false;
+  }
+
+  // With nothing collected the export is what the sheet shows, exactly as before.
+  function exportList() { return chosen.length ? chosen : visibleItems; }
+
+  function labelExport() {
+    var list = exportList();
+    bulkBtn.textContent = list.length ? "Export " + list.length.toLocaleString() : "Nothing to export";
+    bulkBtn.disabled = !list.length;
+  }
+
+  function markCards() {
+    var cards = grid.querySelectorAll(".icon-card");
+    for (var i = 0; i < cards.length; i++) {
+      cards[i].setAttribute("data-picked", chosenSet[cards[i].getAttribute("data-name")] ? "true" : "false");
+    }
+  }
+
+  function renderSelection() {
+    var n = chosen.length;
+    selCount.textContent = n ? n.toLocaleString() + (n === 1 ? " icon" : " icons") : "No icons";
+    selRemove.disabled = !(selected && inSelection(selected));
+    selClear.disabled = !n;
+    selStrip.textContent = "";
+    if (!n) {
+      var hint = document.createElement("p");
+      hint.className = "sel-hint";
+      hint.textContent = "Double-tap a glyph in the sheet to collect it, or press Add all.";
+      selStrip.append(hint);
+    } else {
+      var frag = document.createDocumentFragment();
+      chosen.slice(0, 18).forEach(function (item) {
+        var chip = document.createElement("button");
+        chip.type = "button";
+        chip.className = "sel-chip";
+        chip.title = item.name;
+        chip.setAttribute("aria-label", "Preview " + item.name + " from the selection");
+        chip.innerHTML = markup(item);
+        chip.addEventListener("click", function () { select(item, null); renderSelection(); });
+        frag.append(chip);
+      });
+      selStrip.append(frag);
+      if (n > 18) {
+        var more = document.createElement("span");
+        more.className = "sel-more";
+        more.textContent = "+" + (n - 18).toLocaleString();
+        selStrip.append(more);
+      }
+    }
+    markCards();
+    labelExport();
+    queueEstimate();
+  }
+
+  function togglePick(item) {
+    if (inSelection(item)) {
+      dropPick(item);
+      statusEl.textContent = "Removed " + item.name + " · " + chosen.length.toLocaleString() + " in the selection";
+    } else {
+      addPick(item);
+      bulkFilled = false;
+      statusEl.textContent = "Added " + item.name + " · " + chosen.length.toLocaleString() + " in the selection";
+    }
+    renderSelection();
+  }
+
+  selRemove.addEventListener("click", function () {
+    if (!selected || !inSelection(selected)) { return; }
+    dropPick(selected);
+    statusEl.textContent = "Removed " + selected.name + " · " + chosen.length.toLocaleString() + " in the selection";
+    renderSelection();
+  });
+
+  selClear.addEventListener("click", function () {
+    if (!chosen.length) { return; }
+    var was = chosen.length;
+    clearPicks();
+    statusEl.textContent = "Cleared " + was.toLocaleString() + " from the selection";
+    renderSelection();
+  });
+
+  addAllBtn.addEventListener("click", function () {
+    if (!visibleItems.length) { return; }
+    clearPicks();
+    visibleItems.forEach(addPick);
+    bulkFilled = true;
+    statusEl.textContent = "Added all " + visibleItems.length.toLocaleString() + " shown glyphs to the selection";
+    renderSelection();
+  });
+
+  function fmtBytes(n) {
+    if (n < 1024) { return n + " B"; }
+    if (n < 1024 * 1024) { return (n < 10240 ? (n / 1024).toFixed(1) : Math.round(n / 1024)) + " KB"; }
+    return (n / (1024 * 1024)).toFixed(1) + " MB";
+  }
+
+  function queueEstimate() {
+    window.clearTimeout(estimateTimer);
+    estimateTimer = window.setTimeout(runEstimate, 240);
+  }
+
+  function sayEstimate(count, bytes) {
+    estimateEl.textContent = "Estimate: " + count.toLocaleString() + (count === 1 ? " icon" : " icons")
+      + " · about " + fmtBytes(bytes) + " zipped · " + format.toUpperCase()
+      + (format === "svg" ? "" : " at " + exportSize + " px")
+      + " · " + (chosen.length ? "the selection" : "what the sheet shows");
+  }
+
+  // The zip is written here, so its size is the sum of the files it will hold.
+  // SVG is counted exactly; a raster is sampled on four glyphs spread through the
+  // list, because drawing all 1,258 to measure them is the export itself.
+  function runEstimate() {
+    var list = exportList();
+    var token = ++estimateToken;
+    if (!list || !list.length) {
+      estimateEl.textContent = "Nothing in the sheet to export yet.";
+      return;
+    }
+    if (format === "svg") {
+      var bytes = 0;
+      list.forEach(function (item) { bytes += markup(item).length + item.name.length + 30; });
+      sayEstimate(list.length, bytes);
+      return;
+    }
+    estimateEl.textContent = "Estimating " + list.length.toLocaleString() + " icons…";
+    var mime = MIME[format];
+    var step = Math.max(1, Math.floor(list.length / 4));
+    var samples = [];
+    for (var i = 0; i < list.length && samples.length < 4; i += step) { samples.push(list[i]); }
+    Promise.all(samples.map(function (item) {
+      return rasterFor(item, mime).then(function (url) { return bytesOf(url).length; })
+        .catch(function () { return 0; });
+    })).then(function (sizes) {
+      if (token !== estimateToken) { return; }
+      var good = sizes.filter(function (n) { return n > 0; });
+      if (!good.length) {
+        estimateEl.textContent = list.length.toLocaleString() + " icons · size unknown for " + format.toUpperCase();
+        return;
+      }
+      var avg = good.reduce(function (a, b) { return a + b; }, 0) / good.length;
+      sayEstimate(list.length, Math.round(avg * list.length * 1.03));
+    });
+  }
+
   function renderGrid() {
     if (!items.length) { return; }
     var q = search.value.trim().toLowerCase();
@@ -712,6 +978,8 @@
       card.className = "icon-card";
       card.setAttribute("aria-pressed", selected === item ? "true" : "false");
       card.setAttribute("aria-label", "Preview " + item.name);
+      card.setAttribute("data-name", item.name);
+      card.setAttribute("data-picked", inSelection(item) ? "true" : "false");
       var glyph = document.createElement("span");
       glyph.className = "glyph";
       glyph.innerHTML = markup(item);
@@ -719,17 +987,30 @@
       label.className = "name";
       label.textContent = item.name;
       card.append(glyph, label);
-      card.addEventListener("click", function () { select(item, card); });
+      // A second press inside the window collects the glyph; the sheet's own
+      // press stays a preview, so a slow reader sees no change.
+      card.addEventListener("click", function () {
+        select(item, card);
+        var now = Date.now();
+        if (lastTap.name === item.name && now - lastTap.at < 460) {
+          lastTap = { name: "", at: 0 };
+          togglePick(item);
+          return;
+        }
+        lastTap = { name: item.name, at: now };
+      });
+      card.addEventListener("dblclick", function (event) { event.preventDefault(); });
       frag.append(card);
     });
     grid.textContent = "";
     grid.append(frag);
     visibleItems = picked;
-    bulkBtn.textContent = shown ? "Export " + shown.toLocaleString() : "Nothing to export";
-    bulkBtn.disabled = !shown;
+    addAllBtn.textContent = shown ? "Add all " + shown.toLocaleString() : "Add all";
+    addAllBtn.disabled = !shown;
     countEl.textContent = (q || cat) ? shown.toLocaleString() + " / " + items.length.toLocaleString() : items.length.toLocaleString();
     emptyEl.hidden = shown !== 0;
     built = true;
+    renderSelection();
   }
 
   function closeCats() {
@@ -747,6 +1028,9 @@
     Array.prototype.forEach.call(catMenu.children, function (item, index) {
       item.setAttribute("aria-selected", (index === 0 ? "" : CATS[index - 1].name) === cat ? "true" : "false");
     });
+    // Add all filled the selection from the category that was showing; a new
+    // category starts clean so each one can be exported by itself.
+    if (bulkFilled) { clearPicks(); }
     closeCats();
     renderGrid();
   }
@@ -810,6 +1094,7 @@
       other.setAttribute("aria-pressed", other === btn ? "true" : "false");
     });
     paint();
+    queueEstimate();
   });
 
   sizes.addEventListener("click", function (event) {
@@ -828,6 +1113,7 @@
     markGroup(surfaces, surfaces.querySelector('[data-surface="' + value + '"]'));
     store(SURFACE_KEY, value);
     paint();
+    queueEstimate();
   }
 
   surfaces.addEventListener("click", function (event) {
@@ -934,6 +1220,7 @@
     markFormats();
     copyLabel.textContent = "Copy " + format.toUpperCase();
     store(FORMAT_KEY, format);
+    queueEstimate();
   }
 
   function closeFormats() {
@@ -987,6 +1274,7 @@
     exportSize = value;
     markExports();
     store(SIZE_KEY, String(value));
+    queueEstimate();
     if (announce) {
       statusEl.textContent = "Exports and the bulk zip are " + exportSize + "px now";
     }
@@ -1085,7 +1373,8 @@
 
   function zipName() {
     var query = search.value.trim().toLowerCase();
-    var slug = (query || cat || "all").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+    var base = chosen.length ? (bulkFilled && cat ? cat : "selection") : (query || cat || "all");
+    var slug = base.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
     return BRAND.toLowerCase() + "-" + slug + "-" + format + ".zip";
   }
 
@@ -1098,8 +1387,8 @@
   }
 
   function bulkExport() {
-    if (!visibleItems.length) { return; }
-    var list = visibleItems.slice();
+    var list = exportList().slice();
+    if (!list.length) { return; }
     var mime = MIME[format];
     var files = [], index = 0;
     bulkBtn.disabled = true;

@@ -177,6 +177,13 @@ changes as unverified on device rather than illustrating them.
 - The Export button under those rows zips every glyph the sheet currently shows, in
   the chosen format and size, as a stored zip written byte by byte in the page; in the
   app the same bytes reach a second bridge method and land in Downloads/Icons.
+- Double-tapping a glyph in the sheet collects it into the selection tab above the
+  sheet, which shows the collected glyphs, Remove selected (the previewed one) and
+  Remove all. Add all in the sheet's bar collects exactly what the filter and category
+  show. While a selection exists Export packs it instead of the sheet's view; changing
+  category clears a selection that Add all filled, so each category exports by itself.
+- A line under the preview estimates the zip: an exact SVG total, or four glyphs
+  sampled across the list and scaled for a raster, with the icon count and export size.
 - Format and export size are both pull-downs rather than rows of segments: four
   formats and six sizes (32 to 1024px) inside listboxes, borrowing the category
   picker's menu. Only one list is open at a time. The chosen format
