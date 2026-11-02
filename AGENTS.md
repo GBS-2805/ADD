@@ -161,10 +161,15 @@ changes as unverified on device rather than illustrating them.
   never the output. Each page is ~27 KB: it loads its brand's catalog at run time
   instead of inlining glyphs, and the APK bundles those same files.
 - The left pull-down of all three icon pages opens with All, linking to
-  `/icons/all/`: a tab per brand, and in each tab twenty glyphs, one from every
-  category — the first name in the catalog for that category, in the vendor's own
-  order. A set with fewer than twenty categories fills the sheet from the start of
-  its catalog. The sheet reads the same JSON the brand pages do.
+  `/icons/all/`: twenty glyphs per brand, one from every category — the first name in
+  the catalog for that category, in the vendor's own order. A set with fewer than
+  twenty categories fills the sheet from the start of its catalog. The sheet reads the
+  same JSON the brand pages do, and is compact on purpose: four across, five down, so
+  each brand is one 4x5 block rather than a column that runs past the fold. A phone
+  keeps the brand tabs and shows one block at a time (389px tall, under one screen);
+  from 1000px the tabs go and the blocks become columns of a three-wide grid, so two
+  brands sit side by side and a third still lands on one scroll. Do not widen the cells
+  back to two-across phone / five-across web without rechecking that a block fits.
 - Every vendor glyph carries its own `stroke-width` attribute, and a presentation
   attribute beats a value inherited from the `<svg>`. The preview therefore writes
   the chosen weight onto each element (`tune()` in the template), not onto a parent.
