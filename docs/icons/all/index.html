@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta name="theme-color" content="#3f4e96" />
 <link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml" />
-<title>All brands — one glyph per category, twelve from each set</title>
-<meta name="description" content="Both free icon brands on one page, twelve glyphs each, starting with the categories both sets carry. 1,864 glyphs in all, with the whole catalog one page away." />
+<title>All brands — one icon per category, twelve from each set</title>
+<meta name="description" content="Both free icon brands on one page, twelve icons each, starting with the categories both sets carry. 1,864 icons in all, with the whole catalog one page away." />
 <link rel="stylesheet" href="../../assets/site.css" />
 <style>
   /* page-only: every brand is a section under the one before it, each with its
@@ -112,7 +112,7 @@
   <div class="who">
     <div class="who-lines">
       <p>All brands</p>
-      <p>1,864 glyphs · 12 each</p>
+      <p>1,864 icons · 12 each</p>
     </div>
     <button class="burger" id="burger" type="button" aria-expanded="false" aria-controls="drawer" aria-label="Open side tab">
       <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 7H19M5 12H19M5 17H19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -135,24 +135,24 @@
   <a href="../../download/">Download<span>apps</span></a>
   <a href="../../portfolio/">Portfolio<span>3 projects</span></a>
   <a href="../../renders/">Renders<span>gallery</span></a>
-  <p class="drawer-note">All brands · a glyph from each category, 1,864 in all.</p>
+  <p class="drawer-note">All brands · an icon from each category, 1,864 in all.</p>
 </aside>
 
 <main>
   <header class="page-head">
     <h1>One per category</h1>
-    <p class="lede">Twelve glyphs from each brand: <b>the eight categories both sets carry first</b>, then four of its own.</p>
+    <p class="lede">Twelve icons from each brand: <b>the eight categories both sets carry first</b>, then four of its own.</p>
   </header>
 
   <section>
     <h2>The sheets</h2>
     <div id="sheets"></div>
-    <p class="fine">Each glyph is the file that brand's page exports, drawn at its own weight.</p>
+    <p class="fine">Each icon is the file that brand's page exports, drawn at its own weight.</p>
   </section>
 </main>
 
 <footer>
-  <p>All brands · 1,864 glyphs, both sets MIT. The paid icons sold on either vendor's site are neither included nor copied.</p>
+  <p>All brands · 1,864 icons, both sets MIT. The paid icons sold on either vendor's site are neither included nor copied.</p>
   <p><a href="../../icons/">Icons</a> · <a href="../../">Index</a> · <a href="../../tools/">Tools</a> · <a href="../../download/">Download</a></p>
 </footer>
 
@@ -174,7 +174,7 @@
     return s.charAt(s.length - 1) === "s" ? s.slice(0, -1) : s;
   }
 
-  // The vendor's own category order, minus any category with no glyph behind it.
+  // The vendor's own category order, minus any category with no icon behind it.
   function categories(payload) {
     var present = {}, list = [];
     payload.icons.forEach(function (item) {
@@ -241,7 +241,7 @@
       return chosen.shared + " shared categories, then " + own + " of its " + chosen.cats;
     }
     if (chosen.cats > CAP) {
-      return chosen.picks.length.toLocaleString() + " glyphs, one from each of the first "
+      return chosen.picks.length.toLocaleString() + " icons, one from each of the first "
         + CAP + " of its " + chosen.cats + " categories";
     }
     var extra = chosen.picks.length - chosen.cats;
@@ -257,7 +257,7 @@
     head.className = "brand-name";
     head.append(document.createTextNode(set.name));
     var headCount = document.createElement("span");
-    headCount.textContent = set.count.toLocaleString() + " glyphs";
+    headCount.textContent = set.count.toLocaleString() + " icons";
     head.append(headCount);
     pane.append(head);
     if (!payload) {
@@ -292,7 +292,7 @@
     more.className = "sheet-link";
     var link = document.createElement("a");
     link.href = "../" + set.slug + "/";
-    link.textContent = "All " + set.count.toLocaleString() + " " + set.name + " glyphs \u2192";
+    link.textContent = "All " + set.count.toLocaleString() + " " + set.name + " icons \u2192";
     more.append(link);
     pane.append(line, sheet, more);
     return pane;

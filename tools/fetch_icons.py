@@ -10,14 +10,14 @@ Two MIT sets, both taken whole:
     and duocolor styles with sharp and round corners; those are variants of the
     same drawings, so one style is the set.
 
-Every glyph is recoloured to currentColor so it inherits the surrounding text
+Every icon is recoloured to currentColor so it inherits the surrounding text
 colour, and keeps its own viewBox. Three pages come out of two templates:
 
   docs/icons/index.html                  the Icons app's landing page (brands + APK)
   docs/icons/<brand>/index.html          one page per brand: preview, variants, set
-  docs/icons/all/index.html              all brands: a tab each, 20 glyphs one per category
+  docs/icons/all/index.html              all brands: a tab each, 20 icons one per category
 
-Each brand page loads its own catalog at run time instead of inlining glyphs, so
+Each brand page loads its own catalog at run time instead of inlining icons, so
 the pages stay small and the files the phone app reads are the files the pages
 render.
 
@@ -84,10 +84,10 @@ COLOR = re.compile(r'(fill|stroke)="#[0-9a-fA-F]{3,8}"')
 BRANDS = [
     {"slug": "lineicons", "name": "Lineicons", "source": "LineiconsHQ/Lineicons",
      "style": "line style, the free set", "data": DATA_LINE, "note":
-     "The free Lineicons set, whole: __COUNT__ glyphs drawn as filled paths on a 24 px grid."},
+     "The free Lineicons set, whole: __COUNT__ icons drawn as filled paths on a 24 px grid."},
     {"slug": "coolicons", "name": "Coolicons", "source": "krystonschwarze/coolicons",
      "style": "line style, regular corners", "data": DATA_COOL, "note":
-     "Coolicons drawn as strokes with regular corners: __COUNT__ glyphs, the variant that matches the hairline chrome these pages use."},
+     "Coolicons drawn as strokes with regular corners: __COUNT__ icons, the variant that matches the hairline chrome these pages use."},
 ]
 
 
@@ -170,7 +170,7 @@ def line_categories():
     """name -> the vendor's category, and the vendor's category order.
 
     Reads only rows flagged free and keeps only the categories of names that are
-    actually in the free repository, so a Pro icon can never pull a glyph of ours
+    actually in the free repository, so a Pro icon can never pull a icon of ours
     into its category. The order is the one lineicons.com lists on its own site.
     """
     if LINE_CAT_CACHE.exists():
@@ -315,7 +315,7 @@ def fmt(number):
 
 
 def mode_of(payload):
-    """stroke when the glyphs are drawn with strokes, fill when they are shapes."""
+    """stroke when the icons are drawn with strokes, fill when they are shapes."""
     sample = payload["icons"][0]["attrs"] if payload.get("icons") else ""
     return "stroke" if 'stroke="currentColor"' in sample else "fill"
 
@@ -459,7 +459,7 @@ def main():
                 merged += 1
         payload["cat_order"] = CAT_ORDER
         write_catalog(DATA_COOL, payload)
-        print("coolicons categories: %d of %d glyphs" % (merged, payload["count"]))
+        print("coolicons categories: %d of %d icons" % (merged, payload["count"]))
 
         payload = json.loads(DATA_LINE.read_text(encoding="utf-8"))
         mapping, order = line_categories()
@@ -471,7 +471,7 @@ def main():
                 merged += 1
         payload["cat_order"] = order
         write_catalog(DATA_LINE, payload)
-        print("lineicons categories: %d of %d glyphs" % (merged, payload["count"]))
+        print("lineicons categories: %d of %d icons" % (merged, payload["count"]))
         entries = brands()
     else:
         line_list = line_names()
@@ -521,7 +521,7 @@ def main():
     for brand in entries:
         write_brand(brand, entries)
     write_all(entries)
-    print("brands: %s | total %d glyphs"
+    print("brands: %s | total %d icons"
           % (", ".join("%s %d" % (b["name"], b["count"]) for b in entries),
              sum(b["count"] for b in entries)))
     return 0

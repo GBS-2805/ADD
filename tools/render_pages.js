@@ -18,11 +18,11 @@ const shots = [
   { name: "page-tools", page: "tools/", w: 1300, h: 900, title: "Tools", caption: "Both apps, Icons 2.3 first, each with its own APK." },
   { name: "page-icons", page: "icons/", w: 1300, h: 900, title: "Icons app page", caption: "The icon brand landing: download, brands, what the app does." },
   { name: "page-icons-brand", page: "icons/coolicons/", w: 1300, h: 900, title: "Coolicons · preview", caption: "The preview tab with weight, size and background beside it." },
-  { name: "page-icons-panel", page: "icons/coolicons/", w: 1300, h: 900, panel: true, scroll: "panel", title: "Coolicons · the set", caption: "All 1,258 glyphs behind one toggle, scrolling in their own sheet." },
+  { name: "page-icons-panel", page: "icons/coolicons/", w: 1300, h: 900, panel: true, scroll: "panel", title: "Coolicons · the set", caption: "All 1,258 icons behind one toggle, scrolling in their own sheet." },
   { name: "page-icons-variants", page: "icons/coolicons/", w: 1300, h: 900, panel: true, pick: 6, weight: "2.5", surface: "white", title: "Coolicons · variants", caption: "Heaviest line on the white tile: the same file, repainted live." },
-  { name: "page-icons-categories", page: "icons/coolicons/", w: 1300, h: 900, panel: true, category: "System", scroll: "panel", title: "Coolicons · categories", caption: "The vendor's own 30 categories: System narrows the sheet to 102 glyphs." },
+  { name: "page-icons-categories", page: "icons/coolicons/", w: 1300, h: 900, panel: true, category: "System", scroll: "panel", title: "Coolicons · categories", caption: "The vendor's own 30 categories: System narrows the sheet to 102 icons." },
   { name: "page-all", page: "icons/all/", w: 1300, h: 900, full: true, title: "All brands \u00b7 one per category", caption: "Both brands, each sheet opening with the same eight categories." },
-  { name: "page-lineicons-categories", page: "icons/lineicons/", w: 1300, h: 900, panel: true, category: "Brands & Logos", scroll: "panel", title: "Lineicons · categories", caption: "The other brand's own 51 categories: Brands & Logos holds 244 of its 606 glyphs." },
+  { name: "page-lineicons-categories", page: "icons/lineicons/", w: 1300, h: 900, panel: true, category: "Brands & Logos", scroll: "panel", title: "Lineicons · categories", caption: "The other brand's own 51 categories: Brands & Logos holds 244 of its 606 icons." },
   { name: "page-fonts", page: "fonts/", w: 1300, h: 900, title: "Fonts", caption: "Poppins 400, 500 and 600 with specimens and downloads." },
   { name: "page-portfolio", page: "portfolio/", w: 1300, h: 900, title: "Portfolio", caption: "The apps, the browser and the site, with what was built in each." },
   { name: "page-download", page: "download/", w: 1300, h: 900, title: "Download", caption: "Both APKs, their measured sizes and both SHA-256 hashes." },
@@ -230,7 +230,7 @@ const escape = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/
 
 <nav class="menu" id="menu" data-open="false" aria-label="Sections">
   <a href="../">Index<span>shelf</span></a>
-  <a href="../icons/">Icons<span>1,864 glyphs</span></a>
+  <a href="../icons/">Icons<span>1,864 icons</span></a>
   <a href="../fonts/">Fonts<span>3 faces</span></a>
   <a href="../tools/">Tools<span>2 apps</span></a>
 </nav>
