@@ -1,15 +1,28 @@
 # Working rules for this repo
 
-## Renders are mandatory for page changes
+## Renders: only when the change is visual
 
-Any change that alters a page in `docs/` must be delivered with **viewable image
-renders** of the result. Never describe a visual change in prose alone and never
-defer the check to the user.
+A change to a page in `docs/` needs image renders **only if it changes what the page
+looks like**: layout, spacing, colour, typography, iconography, or the presence and
+position of an element.
+
+**Skip renders entirely** -- and skip `docs/renders/`, the gallery page and the
+deploy that would carry them -- for changes that cannot alter appearance:
+
+- copy and wording edits, including headings, labels and alt text;
+- link and URL changes, or swapping a `href`, `src` target or favicon path;
+- attributes, metadata, comments, formatting and other non-visual markup;
+- anything outside `docs/` at all.
+
+When skipping, say so in one line in the reply (`No render: copy-only change`) so the
+omission reads as a decision rather than an oversight. Do not capture a page to prove
+that text changed.
+
+**When a render is warranted**:
 
 - Capture with headless Chromium via Playwright (`npx playwright install chromium`,
   browsers under `PLAYWRIGHT_BROWSERS_PATH=/tmp/pw`), served from a local static
-  server over `docs/`, at 1300x900. A four-shot run (two pages x two themes) plus
-the gallery check takes about 20 seconds; the one-time browser setup is done.
+  server over `docs/`, at 1300x900. A four-shot run takes about 4 seconds.
 - Save under `artifacts/`, one file per page and per theme actually affected
   (`page-home-light.png`, `page-home-dark.png`, `page-icons-light.png`, ...).
 - Cover every page the change touches, in the themes it touches, plus mobile width
@@ -20,8 +33,8 @@ the gallery check takes about 20 seconds; the one-time browser setup is done.
   is not a render.
 - Standalone artwork (SVG marks, icons) is additionally rendered with
   `@resvg/resvg-js` so the asset itself is verifiable apart from the page.
-- Copy each render into `docs/renders/`, add it to `docs/renders/index.html`, and
-  deploy — the gallery only shows files listed there.
+- Only then copy into `docs/renders/`, add it to `docs/renders/index.html`, and
+  deploy -- the gallery only shows files listed there.
 
 ### How renders are sent (learned the hard way)
 
