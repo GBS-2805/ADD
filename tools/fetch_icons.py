@@ -22,6 +22,7 @@ render.
 
     python3 tools/fetch_icons.py                # fetch both sets, write data + pages
     python3 tools/fetch_icons.py --pages-only   # rewrite the pages from the catalogs
+    python3 tools/fetch_icons.py --categories   # merge the vendor's categories, then pages
 """
 
 import argparse
@@ -54,6 +55,16 @@ COOL_TREE = ("https://api.github.com/repos/krystonschwarze/coolicons"
 COOL_URL = ("https://raw.githubusercontent.com/krystonschwarze/coolicons/main"
             "/icons/svg/line/regular/%s.svg")
 COOL_DIR = "icons/svg/line/regular/"
+COOL_INDEX = ("https://raw.githubusercontent.com/krystonschwarze/coolicons/main"
+              "/icons/data/index.json")
+CAT_CACHE = pathlib.Path("/tmp/coolicons-index.json")
+
+# Coolicons' own category order, as its browser lists them. Anything the vendor
+# adds later is appended alphabetically rather than dropped.
+CAT_ORDER = ["System", "Arrow", "Navigation", "Edit", "File", "Communication",
+             "User", "Media", "Calendar", "Devices", "Development", "AI", "Design",
+             "Shape", "Symbols", "Home", "Buildings", "Travel", "Nature", "Animals",
+             "Food", "Health", "Science", "Sports & Games", "Faces", "Zodiac", "Brands"]
 
 COLOR = re.compile(r'(fill|stroke)="#[0-9a-fA-F]{3,8}"')
 
@@ -124,6 +135,48 @@ def cool_names():
     if not names:
         raise SystemExit("Coolicons line style came back empty; nothing written")
     return sorted(set(names))
+
+
+def cool_categories():
+    """name -> the vendor's category, from Coolicons' own icons/data/index.json.
+
+    Lineicons publishes no categories, so this returns nothing for it and its page
+    simply hides the picker instead of inventing a taxonomy.
+    """
+    if CAT_CACHE.exists():
+        payload = json.loads(CAT_CACHE.read_text(encoding="utf-8"))
+    else:
+        try:
+            request = urllib.request.Request(COOL_INDEX, headers={"User-Agent": "compress-site"})
+            raw = urllib.request.urlopen(request, timeout=45).read()
+        except Exception as error:
+            print("coolicons categories unavailable (%s)" % error, file=sys.stderr)
+            return {}
+        payload = json.loads(raw)
+        CAT_CACHE.write_text(json.dumps(payload), encoding="utf-8")
+    return {item["name"]: item.get("category", "")
+            for item in payload.get("icons", []) if item.get("name")}
+
+
+def category_list(icons):
+    """Categories with counts, in the vendor's order, for the page's picker."""
+    counts = {}
+    for icon in icons:
+        name = icon.get("cat")
+        if name:
+            counts[name] = counts.get(name, 0) + 1
+    if not counts:
+        return []
+    ordered = [name for name in CAT_ORDER if name in counts]
+    ordered += sorted(name for name in counts if name not in CAT_ORDER)
+    return [{"name": name, "count": counts[name]} for name in ordered]
+
+
+def release():
+    """The Icons version and APK filename, so the hub cannot quote a stale build."""
+    catalog = json.loads((ROOT / "tools/catalog.json").read_text(encoding="utf-8"))
+    icons = next(tool for tool in catalog["tools"] if tool["id"] == "icons")
+    return icons["version"], icons["apk"].lstrip("/")
 
 
 def fetch(url):
@@ -219,6 +272,7 @@ def brands():
         entry = dict(brand)
         entry.update({
             "count": payload["count"],
+            "cats": category_list(payload["icons"]),
             "mode": mode_of(payload),
             "licence": payload.get("licence", "MIT"),
             "style": payload.get("style", brand["style"]).replace("/", ", "),
@@ -256,8 +310,11 @@ def brand_cards(entries):
 def write_hub(entries):
     total = sum(brand["count"] for brand in entries)
     page = HUB_TEMPLATE.read_text(encoding="utf-8")
+    version, apk = release()
     tokens = {
         "__ROOT__": "../",
+        "__VERSION__": version,
+        "__APK__": apk,
         "__TOTAL__": fmt(total),
         "__LINE__": fmt(entries[0]["count"]),
         "__COOL__": fmt(entries[1]["count"]),
@@ -288,6 +345,7 @@ def write_brand(brand, entries):
         "__DATA__": "../../data/" + brand["data"].name,
         "__DATAFILE__": brand["file"],
         "__BRANDS__": menu("../../", brand["slug"]),
+        "__CATS__": json.dumps(brand["cats"]),
     }
     for token, value in tokens.items():
         page = page.replace(token, value)
@@ -301,9 +359,23 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--pages-only", action="store_true",
                         help="regenerate the pages from the catalogs already on disk")
+    parser.add_argument("--categories", action="store_true",
+                        help="merge Coolicons' categories into the catalog, then write pages")
     args = parser.parse_args()
 
     if args.pages_only:
+        entries = brands()
+    elif args.categories:
+        payload = json.loads(DATA_COOL.read_text(encoding="utf-8"))
+        mapping = cool_categories()
+        merged = 0
+        for icon in payload["icons"]:
+            name = mapping.get(icon["name"], "")
+            if name:
+                icon["cat"] = name
+                merged += 1
+        write_catalog(DATA_COOL, payload)
+        print("categories merged: %d of %d glyphs" % (merged, payload["count"]))
         entries = brands()
     else:
         line_list = line_names()
@@ -313,6 +385,9 @@ def main():
 
         line_icons, line_missing = download(line_list, LINE_URL)
         cool_icons, cool_missing = download(cool_list, COOL_URL)
+        mapping = cool_categories()
+        for icon in cool_icons:
+            icon["cat"] = mapping.get(icon["name"], "")
         generated = datetime.date.today().isoformat()
         write_catalog(DATA_LINE, {
             "generated": generated,

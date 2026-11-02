@@ -65,10 +65,10 @@
     {
       "id": "icons",
       "name": "Icons",
-      "version": "1.0",
-      "apk": "/Icons-1.0.apk",
-      "bytes": 505218,
-      "sha256": "5b2a114bd818419467b13fc7bddfff3b694b4e3a868e01a809bfa26b56809b3a"
+      "version": "1.1",
+      "apk": "/Icons-1.1.apk",
+      "bytes": 513410,
+      "sha256": "4b52d7ddac9001cbe22f8cb7878f9af6bfc2b98c4f40b66db8ad155d963d0f9b"
     }
   ]
 }

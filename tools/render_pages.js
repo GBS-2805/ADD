@@ -15,14 +15,16 @@ const shots = [
   { name: "page-home-full", page: "", w: 1300, h: 900, full: true, title: "Index, full height", caption: "The material, both apps, the palette and the JSON list." },
   { name: "page-menu", page: "", w: 1300, h: 900, open: "#menuBtn", title: "Left pull-down", caption: "Index, icons, fonts and tools, one row each." },
   { name: "page-drawer", page: "", w: 1300, h: 900, open: "#burger", title: "Right side tab", caption: "Download, portfolio and renders over the scrim." },
-  { name: "page-tools", page: "tools/", w: 1300, h: 900, title: "Tools", caption: "Both apps, Icons 1.0 first, each with its own APK." },
+  { name: "page-tools", page: "tools/", w: 1300, h: 900, title: "Tools", caption: "Both apps, Icons 1.1 first, each with its own APK." },
   { name: "page-icons", page: "icons/", w: 1300, h: 900, title: "Icons app page", caption: "The icon brand landing: download, brands, what the app does." },
   { name: "page-icons-brand", page: "icons/coolicons/", w: 1300, h: 900, title: "Coolicons · preview", caption: "The preview tab with weight, size and surface beside it." },
   { name: "page-icons-panel", page: "icons/coolicons/", w: 1300, h: 900, panel: true, scroll: "panel", title: "Coolicons · the set", caption: "All 1,258 glyphs behind one toggle, scrolling in their own sheet." },
   { name: "page-icons-variants", page: "icons/coolicons/", w: 1300, h: 900, panel: true, pick: 6, weight: "2.5", surface: "band", title: "Coolicons · variants", caption: "Heaviest line on the band: the same file, repainted live." },
+  { name: "page-icons-categories", page: "icons/coolicons/", w: 1300, h: 900, panel: true, category: "System", scroll: "panel", title: "Coolicons · categories", caption: "The vendor's own 30 categories: System narrows the sheet to 102 glyphs." },
   { name: "page-fonts", page: "fonts/", w: 1300, h: 900, title: "Fonts", caption: "Poppins 400, 500 and 600 with specimens and downloads." },
   { name: "page-portfolio", page: "portfolio/", w: 1300, h: 900, title: "Portfolio", caption: "The apps, the browser and the site, with what was built in each." },
   { name: "page-download", page: "download/", w: 1300, h: 900, title: "Download", caption: "Both APKs, their measured sizes and both SHA-256 hashes." },
+  { name: "phone-icons-sheet", page: "icons/coolicons/", w: 390, h: 844, scroll: "sheet", title: "Coolicons · shut sheet", caption: "Shut, the set is one complete row with a closed edge." },
   { name: "phone-home-light", page: "", w: 390, h: 844, title: "Index on a phone", caption: "390×844: the band, the lede and both downloads." },
   { name: "phone-home-full", page: "", w: 390, h: 844, full: true, title: "Index, phone, full height", caption: "The whole landing page at phone width." },
   { name: "phone-menu", page: "", w: 390, h: 844, open: "#menuBtn", title: "Phone pull-down", caption: "Four rows under the band, counts on the right." },
@@ -70,9 +72,19 @@ const escape = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/
       await page.click(`#surfaces .seg[data-surface="${s.surface}"]`);
       await page.waitForTimeout(120);
     }
+    if (s.category) {
+      await page.click("#catBtn");
+      await page.waitForTimeout(120);
+      await page.evaluate((name) => {
+        const hit = Array.from(document.querySelectorAll(".cat-item"))
+          .find((b) => b.textContent.trim().startsWith(name));
+        if (hit) hit.click();
+      }, s.category);
+      await page.waitForTimeout(200);
+    }
     if (s.scroll) {
       await page.evaluate((target) => {
-        const el = document.getElementById(target);
+        const el = target === "sheet" ? document.querySelector(".set-panel") : document.getElementById(target);
         if (el) el.scrollIntoView({ block: "start" });
       }, s.scroll);
       await page.waitForTimeout(200);
@@ -93,6 +105,7 @@ const escape = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/
         panel: panel ? panel.getAttribute("data-open") : "none",
         cards: document.querySelectorAll(".icon-card").length,
         selected: (document.getElementById("selName") || {}).textContent || "",
+        cat: (document.getElementById("catLabel") || {}).textContent || "",
         status: (document.getElementById("status") || {}).textContent || "",
         doc: [document.documentElement.scrollWidth, document.documentElement.scrollHeight],
       };

@@ -146,6 +146,14 @@ changes as unverified on device rather than illustrating them.
   regenerate with `python3 tools/fetch_icons.py --pages-only`, never the output.
   Each page is ~27 KB: it loads its brand's catalog at run time instead of inlining
   glyphs, and the APK bundles those same files.
+- Every vendor glyph carries its own `stroke-width` attribute, and a presentation
+  attribute beats a value inherited from the `<svg>`. The preview therefore writes
+  the chosen weight onto each element (`tune()` in the template), not onto a parent.
+  Setting it in CSS on the svg looks correct and does nothing.
+- Coolicons' categories are the vendor's own: `fetch_icons.py --categories` merges
+  `icons/data/index.json` into `docs/data/coolicons.json` as `cat`, and the sheet's
+  picker renders them in the vendor's order. Lineicons publishes no categories, so
+  its page hides the picker instead of inventing a taxonomy.
 - APK builds go through `build.sh` into `dist/`; released APKs are committed inside
   `docs/`. `dist/` keeps older builds as history, `docs/` ships only the current one.
   `./build.sh` builds both, `./build.sh icons` or `./build.sh compress` builds one.
