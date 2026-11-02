@@ -33,7 +33,7 @@ def describe(path):
     head = path.read_text(errors="replace")[:2500]
     title = re.search(r"<title>(.*?)</title>", head)
     size = re.search(r'width="([\d.]+)" height="([\d.]+)"', head)
-    dims = "×".join(size.group(i).rstrip("0").rstrip(".") for i in (1, 2)) if size else ""
+    dims = "×".join("%g" % float(size.group(i)) for i in (1, 2)) if size else ""
     return (title.group(1) if title else path.stem), dims
 
 
