@@ -159,7 +159,10 @@ changes as unverified on device rather than illustrating them.
   the app's file panel cannot preview a zip. It is a translation of
   the page, never a hand-drawn one. `tools/figma_publish.py` mirrors the exports
   into `docs/figma/`, which the site does serve, so every artboard can be
-  downloaded from a phone at `/figma/<file>`; `figma/` stays the source. Re-run the
+  downloaded from a phone at `/figma/<file>`, and writes the listing at `/figma/`.
+  Each artboard carries Poppins 400/500/600 as base64 woff2, because a file that
+  only names the family renders in the viewer's fallback sans. `figma/` stays the
+  source. Re-run the
   exporter after a visual change, then the bundle and the publish step; never edit
   the SVGs.
 - `artifacts/` is scratch: captures in progress, Figma probes, old shots. Nothing

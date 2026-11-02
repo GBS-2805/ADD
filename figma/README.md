@@ -59,6 +59,12 @@ Colour and type come through as plain values, not styles: the field is
 text is `#D9D9D9` at 64%. Poppins 400/500/600 is the whole type scale —
 76/26/22/20/17/15/14/13/12px.
 
+Those faces travel inside every artboard: Poppins 400, 500 and 600 are embedded as
+base64 woff2, about 32 KB a file, because an SVG that only names the family renders
+in whatever sans the viewer has. Open any of these in a browser and the type is the
+site's. Figma does not read `@font-face` from an SVG, so it still asks to enable the
+Google font once on import.
+
 ## What is a layer and what is an image
 
 - Text, boxes, hairlines, pills and card borders are vector layers: edit them
@@ -98,4 +104,6 @@ site does serve, so the hand-off is at `/figma/` on the deployed host:
 `/figma/site-figma.svg` for the whole canvas. Page artboards keep their numbers;
 the four pull-outs also answer to the names the links use. The script removes any
 file it did not just write, so a retired artboard cannot linger on the site. Run
-it after `figma_bundle.py`, or the site keeps serving the previous export.
+it after `figma_bundle.py`, or the site keeps serving the previous export. It also
+writes `/figma/` itself — the listing page, every artboard with its dimensions and
+weight — so the folder can be browsed from a phone without knowing a file name.

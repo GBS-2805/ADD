@@ -46,6 +46,23 @@ const STATES = [
   { slug: "index-drawer", url: "/", label: "Index · side tab", open: "#burger", n: 20, nPhone: 22 },
 ];
 
+// A file that only names Poppins renders in whatever sans the viewer happens to
+// have, which is not the page's type. The three faces are 8 KB each, so they
+// travel inside the artboard as base64 and it looks the same in any browser.
+const FONT_CSS =
+  "<defs><style type=\"text/css\">" +
+  [
+    ["400", "poppins-400.woff2"],
+    ["500", "poppins-500.woff2"],
+    ["600", "poppins-600.woff2"],
+  ]
+    .map(([weight, file]) => {
+      const b64 = fs.readFileSync(path.join("docs/assets/fonts", file)).toString("base64");
+      return `@font-face{font-family:"Poppins";font-style:normal;font-weight:${weight};src:url(data:font/woff2;base64,${b64}) format("woff2")}`;
+    })
+    .join("") +
+  "</style></defs>";
+
 /* ------------------------------------------------------------------ */
 /* runs inside the page                                                */
 /* ------------------------------------------------------------------ */
@@ -412,7 +429,7 @@ async function capture() {
           .slice(0, 3)
           .map((v) => Number(v).toString(16).padStart(2, "0"))
           .reduce((a, v) => a + v, "#")}"/>\n`;
-      const body = head + shot.body + "\n</g>\n</svg>\n";
+      const body = head + FONT_CSS + shot.body + "\n</g>\n</svg>\n";
       fs.writeFileSync(path.join(outDir, file), body);
       written.push({
         file,
@@ -459,7 +476,7 @@ async function capture() {
           .slice(0, 3)
           .map((v) => Number(v).toString(16).padStart(2, "0"))
           .reduce((a, v) => a + v, "#")}"/>\n`;
-      const body = head + shot.body + "\n</g>\n</svg>\n";
+      const body = head + FONT_CSS + shot.body + "\n</g>\n</svg>\n";
       fs.writeFileSync(path.join(outDir, file), body);
       written.push({
         file,

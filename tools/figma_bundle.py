@@ -10,6 +10,7 @@ artboards down the right, each labelled with its file name above it.
 """
 import glob
 import os
+import re
 import sys
 import xml.etree.ElementTree as ET
 
@@ -64,6 +65,19 @@ def main(src="figma"):
         f'<svg xmlns="http://www.w3.org/2000/svg" width="{widest:g}" height="{tall}" '
         f'viewBox="0 0 {widest:g} {tall}">\n' + "\n".join(parts) + "\n</svg>\n"
     )
+    # Every artboard carries the same Poppins faces; the canvas needs one copy.
+    seen = set()
+
+    def once(match):
+        block = match.group(0)
+        if block in seen:
+            return ""
+        seen.add(block)
+        return block
+
+    out = re.sub(r"<defs><style[^>]*><\\?/?[^>]*>?.*?</style></defs>", lambda m: m.group(0), out)
+    out = re.sub(r"<defs[^>]*><style[^>]*>.*?</style></defs>", once, out, flags=re.S)
+
     path = os.path.join(src, OUT)
     with open(path, "w") as fh:
         fh.write(out)
