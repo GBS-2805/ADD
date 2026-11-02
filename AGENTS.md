@@ -2,10 +2,9 @@
 
 ## Renders are mandatory for page changes
 
-Any change that alters a page in `docs/` must be delivered with a **viewable image
-render** of the result, linked in the reply as an inline image
-(`![what it shows](artifacts/<name>.png)`), never described in prose alone and never
-deferred to the user to check.
+Any change that alters a page in `docs/` must be delivered with **viewable image
+renders** of the result. Never describe a visual change in prose alone and never
+defer the check to the user.
 
 - Capture with headless Chromium via Playwright (`npx playwright install chromium`,
   browsers under `PLAYWRIGHT_BROWSERS_PATH=/tmp/pw`), served from a local static
@@ -20,10 +19,23 @@ deferred to the user to check.
   is not a render.
 - Standalone artwork (SVG marks, icons) is additionally rendered with
   `@resvg/resvg-js` so the asset itself is verifiable apart from the page.
-- Copy each render into `docs/renders/` and deploy, then send its absolute
-  `https://<site-host>/renders/<name>.png` URL. Relative workspace links
-  (`artifacts/...`) do not open in the app on a phone, so they are never the
-  only way a render is offered.
+- Copy each render into `docs/renders/`, add it to `docs/renders/index.html`, and
+  deploy — the gallery only shows files listed there.
+
+### How renders are sent (learned the hard way)
+
+The person reading this works from a phone. Deliver renders like this, every time:
+
+1. Lead with **one tappable markdown link** to the gallery:
+   `[Open the renders gallery](https://<site-host>/renders/)`.
+2. Offer individual images as **short labelled markdown links**
+   (`[Compress page — cream theme](https://<site-host>/renders/x.png)`).
+3. **Never** paste a bare `https://...` URL as the only way in: long URLs wrap
+   mid-address and a phone will not linkify them.
+4. **Never** rely on workspace-relative paths (`artifacts/x.png`) or inline
+   `![](...)` embeds built from them — neither resolves outside the desktop app.
+5. Verify before sending: the gallery returns 200, every listed image loads with a
+   real `naturalWidth`, and no capture is missing from the page.
 
 ## Local render setup (no root, no system Chrome)
 
