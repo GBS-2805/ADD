@@ -61,8 +61,11 @@ text is `#D9D9D9` at 64%. Poppins 400/500/600 is the whole type scale —
 
 Those faces travel inside every artboard: Poppins 400, 500 and 600 are embedded as
 base64 woff2, about 32 KB a file, because an SVG that only names the family renders
-in whatever sans the viewer has. Open any of these in a browser and the type is the
-site's. Figma does not read `@font-face` from an SVG, so it still asks to enable the
+in whatever sans the viewer has. Open any of these in a browser — here, from
+`/figma/` on the site, or from a phone's download — and the type is the site's.
+That is what sets the hand-off's cost: with the faces in, the whole site sits about
+127 KB under the host's 10 MiB deploy ceiling, so `tools/figma_publish.py` prints
+the headroom on every run and anything new has to fit inside it. Figma does not read `@font-face` from an SVG, so it still asks to enable the
 Google font once on import.
 
 ## What is a layer and what is an image
@@ -102,7 +105,11 @@ compared with the pages they came from.
 site does serve, so the hand-off is at `/figma/` on the deployed host:
 `/figma/01-index-desktop.svg` and so on for the twenty-two artboards, plus
 `/figma/site-figma.svg` for the whole canvas. Page artboards keep their numbers;
-the four pull-outs also answer to the names the links use. The script removes any
+on the site the four pull-outs are served under the plain name the links use
+(`pull-down-desktop.svg`, `side-tab-phone.svg` and so on), so the numbered copies
+stay in `figma/` alone — one name per artboard, because duplicates cost more of
+the deploy budget than the hand-off can spare now that each file carries its fonts.
+The script removes any
 file it did not just write, so a retired artboard cannot linger on the site. Run
 it after `figma_bundle.py`, or the site keeps serving the previous export. It also
 writes `/figma/` itself — the listing page, every artboard with its dimensions and
