@@ -8,7 +8,8 @@ defer the check to the user.
 
 - Capture with headless Chromium via Playwright (`npx playwright install chromium`,
   browsers under `PLAYWRIGHT_BROWSERS_PATH=/tmp/pw`), served from a local static
-  server over `docs/`, at 1300x900.
+  server over `docs/`, at 1300x900. A four-shot run (two pages x two themes) plus
+the gallery check takes about 20 seconds; the one-time browser setup is done.
 - Save under `artifacts/`, one file per page and per theme actually affected
   (`page-home-light.png`, `page-home-dark.png`, `page-icons-light.png`, ...).
 - Cover every page the change touches, in the themes it touches, plus mobile width
@@ -26,15 +27,17 @@ defer the check to the user.
 
 The person reading this works from a phone. Deliver renders like this, every time:
 
-1. Lead with **one tappable markdown link** to the gallery:
+1. Lead with **one tappable markdown link to the live site**:
+   `[Open the site](https://<site-host>/)`.
+2. Follow immediately with **one tappable markdown link to the gallery**:
    `[Open the renders gallery](https://<site-host>/renders/)`.
-2. Offer individual images as **short labelled markdown links**
+3. Offer individual images as **short labelled markdown links**
    (`[Compress page — cream theme](https://<site-host>/renders/x.png)`).
-3. **Never** paste a bare `https://...` URL as the only way in: long URLs wrap
+4. **Never** paste a bare `https://...` URL as the only way in: long URLs wrap
    mid-address and a phone will not linkify them.
-4. **Never** rely on workspace-relative paths (`artifacts/x.png`) or inline
+5. **Never** rely on workspace-relative paths (`artifacts/x.png`) or inline
    `![](...)` embeds built from them — neither resolves outside the desktop app.
-5. Verify before sending: the gallery returns 200, every listed image loads with a
+6. Verify before sending: the gallery returns 200, every listed image loads with a
    real `naturalWidth`, and no capture is missing from the page.
 
 ## Local render setup (no root, no system Chrome)
