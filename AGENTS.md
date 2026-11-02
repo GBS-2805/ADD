@@ -177,9 +177,10 @@ changes as unverified on device rather than illustrating them.
 - The Export button under those rows zips every glyph the sheet currently shows, in
   the chosen format and size, as a stored zip written byte by byte in the page; in the
   app the same bytes reach a second bridge method and land in Downloads/Icons.
-- The six export sizes sit in two rows, and the chosen format and size are remembered
-  per brand in `localStorage` (`icons:format:<slug>`, `icons:export:<slug>`) the same
-  way the category is; both rows are marked by `applyExportSize()` so only one is on.
+- The export size is a pull-down rather than a row of segments: six sizes (32 to
+  1024px) inside a listbox, borrowing the category picker's menu. The chosen format
+  and size are remembered per brand in `localStorage` (`icons:format:<slug>`,
+  `icons:export:<slug>`) the same way the category is.
 - On the site a raster Copy downloads the file and puts a PNG on the clipboard too, so
   it pastes straight into a design tool; a WEBP or JPG copy is redrawn as PNG for the
   clipboard, which takes no other image type.

@@ -33,6 +33,63 @@
   .stage-body[data-active="true"] { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.08fr); }
 
   .preview { display: flex; align-items: center; gap: 26px; padding: 26px 24px; min-height: 196px; border-right: 1px solid var(--rule); }
+  .export-wrap { position: relative; flex: 1 1 auto; min-width: 0; }
+  .export-btn {
+    appearance: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    width: 100%;
+    padding: 9px 14px;
+    font: inherit;
+    font-size: 15px;
+    color: var(--on);
+    background: transparent;
+    border: 1px solid var(--rule);
+    border-radius: 0;
+    cursor: pointer;
+  }
+  .export-btn:hover { background: rgba(217, 217, 217, .08); }
+  .export-btn:focus-visible { outline: 2px solid var(--band); outline-offset: -3px; }
+  .export-btn .cat-chev { width: 18px; height: 18px; transition: transform .18s ease; }
+  .export-btn[aria-expanded="true"] .cat-chev { transform: scaleY(-1); }
+  .export-menu {
+    position: absolute;
+    z-index: 7;
+    top: calc(100% + 6px);
+    left: 0;
+    right: 0;
+    padding: 6px;
+    background: #35417f;
+    border: 1px solid var(--rule);
+    box-shadow: 0 20px 44px rgba(0, 0, 0, .34);
+  }
+  .export-menu[hidden] { display: none; }
+  .export-item {
+    appearance: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    width: 100%;
+    padding: 10px;
+    font: inherit;
+    font-size: 14px;
+    text-align: left;
+    color: var(--on);
+    background: none;
+    border: 0;
+    border-radius: 0;
+    cursor: pointer;
+  }
+  .export-item .export-n { font-size: 12px; color: var(--on-dim); }
+  .export-item:hover,
+  .export-item[aria-selected="true"] { background: var(--band); color: var(--ink); }
+  .export-item:hover .export-n,
+  .export-item[aria-selected="true"] .export-n { color: var(--ink); }
+  .export-item:focus-visible { outline: 2px solid var(--band); outline-offset: -3px; }
+
   .bulk-btn { display: block; width: 100%; margin: 12px 0 0; font: inherit; font-size: 14px;
     padding: 11px 14px; color: var(--on); background: transparent;
     border: 1px solid var(--rule); cursor: pointer; }
@@ -430,19 +487,12 @@ __BRANDS__
 
         <div class="ctl-row" role="group" aria-label="Export size">
           <span class="ctl-label">Export</span>
-          <div class="segs" id="exports">
-            <button class="seg" type="button" data-export="32" aria-pressed="false">32</button>
-            <button class="seg" type="button" data-export="64" aria-pressed="false">64</button>
-            <button class="seg" type="button" data-export="128" aria-pressed="false">128</button>
-          </div>
-        </div>
-
-        <div class="ctl-row" role="group" aria-label="Export size, larger">
-          <span class="ctl-label" aria-hidden="true"></span>
-          <div class="segs" id="exports-large">
-            <button class="seg" type="button" data-export="256" aria-pressed="false">256</button>
-            <button class="seg" type="button" data-export="512" aria-pressed="true">512</button>
-            <button class="seg" type="button" data-export="1024" aria-pressed="false">1024</button>
+          <div class="export-wrap" id="exportWrap">
+            <button class="export-btn" id="exportBtn" type="button" aria-expanded="false" aria-haspopup="listbox" aria-controls="exportMenu">
+              <span id="exportLabel">512 px</span>
+              <svg class="cat-chev" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M8 10L12 14L16 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <div class="export-menu" id="exportMenu" role="listbox" aria-label="Export size" hidden></div>
           </div>
         </div>
 
@@ -522,8 +572,10 @@ __BRANDS__
   var surfaces = document.getElementById("surfaces");
   var formats = document.getElementById("formats");
   var copyLabel = document.getElementById("copyLabel");
-  var exports_ = document.getElementById("exports");
-  var exportsLarge = document.getElementById("exports-large");
+  var exportWrap = document.getElementById("exportWrap");
+  var exportBtn = document.getElementById("exportBtn");
+  var exportLabel = document.getElementById("exportLabel");
+  var exportMenu = document.getElementById("exportMenu");
   var bulkBtn = document.getElementById("bulkBtn");
   var visibleItems = [];
   var tabs = Array.prototype.slice.call(document.querySelectorAll(".stage-tab"));
@@ -541,6 +593,7 @@ __BRANDS__
   var surface = "black";
   var format = "svg";
   var MIME = { svg: "image/svg+xml", png: "image/png", webp: "image/webp", jpg: "image/jpeg" };
+  var EXPORT_SIZES = [32, 64, 128, 256, 512, 1024];
   var exportSize = 512;
   var built = false;
   var cat = "";
@@ -729,7 +782,7 @@ __BRANDS__
   });
 
   document.addEventListener("keydown", function (event) {
-    if (event.key === "Escape") { closeCats(); }
+    if (event.key === "Escape") { closeCats(); closeExports(); }
   });
 
   function setPanel(open) {
@@ -871,27 +924,57 @@ __BRANDS__
     store(FORMAT_KEY, format);
   }
 
-  // The six sizes live in two rows, so both have to agree about which one is on.
+  function markExports() {
+    Array.prototype.forEach.call(exportMenu.children, function (item) {
+      item.setAttribute("aria-selected",
+        Number(item.getAttribute("data-export")) === exportSize ? "true" : "false");
+    });
+    exportLabel.textContent = exportSize + " px";
+  }
+
   function applyExportSize(value, announce) {
     exportSize = value;
-    var chosen = document.querySelector('.seg[data-export="' + value + '"]');
-    if (chosen) { markGroup(chosen.parentNode, chosen); }
+    markExports();
     store(SIZE_KEY, String(value));
     if (announce) {
       statusEl.textContent = "Exports and the bulk zip are " + exportSize + "px now";
     }
   }
 
-  function bindExports(group) {
-    group.addEventListener("click", function (event) {
-      var btn = event.target.closest(".seg");
-      if (!btn) { return; }
-      applyExportSize(Number(btn.getAttribute("data-export")), true);
-    });
+  function closeExports() {
+    exportMenu.hidden = true;
+    exportBtn.setAttribute("aria-expanded", "false");
   }
 
-  bindExports(exports_);
-  bindExports(exportsLarge);
+  function renderExports() {
+    var frag = document.createDocumentFragment();
+    EXPORT_SIZES.forEach(function (value) {
+      var item = document.createElement("button");
+      item.type = "button";
+      item.className = "export-item";
+      item.setAttribute("role", "option");
+      item.setAttribute("data-export", String(value));
+      item.textContent = value + " px";
+      item.addEventListener("click", function () {
+        applyExportSize(value, true);
+        closeExports();
+      });
+      frag.append(item);
+    });
+    exportMenu.textContent = "";
+    exportMenu.append(frag);
+    markExports();
+  }
+
+  exportBtn.addEventListener("click", function () {
+    var open = exportMenu.hidden;
+    exportMenu.hidden = !open;
+    exportBtn.setAttribute("aria-expanded", open ? "true" : "false");
+  });
+
+  document.addEventListener("click", function (event) {
+    if (!exportWrap.contains(event.target)) { closeExports(); }
+  });
 
   var CRC = (function () {
     var table = new Uint32Array(256);
@@ -1082,8 +1165,9 @@ __BRANDS__
   (function restoreExport() {
     var savedFormat = recall(FORMAT_KEY);
     if (MIME[savedFormat]) { applyFormat(savedFormat); }
+    renderExports();
     var savedSize = Number(recall(SIZE_KEY));
-    if (savedSize && document.querySelector('.seg[data-export="' + savedSize + '"]')) {
+    if (savedSize && EXPORT_SIZES.indexOf(savedSize) !== -1) {
       applyExportSize(savedSize, false);
     }
   })();
