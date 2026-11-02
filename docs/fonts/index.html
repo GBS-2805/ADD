@@ -22,13 +22,15 @@
 <body>
 
 <header class="bar">
-  <button class="menu-btn" id="menuBtn" type="button" aria-expanded="false" aria-controls="menu" aria-label="Open the menu">
-    <svg class="chev" viewBox="0 0 21 20" fill="none" aria-hidden="true">
-      <path d="M3 7.1 10.5 1.6 18 7.1" stroke="currentColor" stroke-width="2.1" stroke-linecap="square"/>
-      <path d="M3 12.9 10.5 18.4 18 12.9" stroke="currentColor" stroke-width="2.1" stroke-linecap="square"/>
-    </svg>
-    <span>Drop-down menu</span>
-  </button>
+  <div class="lead">
+    <button class="menu-btn" id="menuBtn" type="button" aria-expanded="false" aria-controls="menu" aria-label="Open menu">
+      <svg class="chev" viewBox="0 0 21 20" fill="none" aria-hidden="true">
+        <path d="M3 7.1 10.5 1.6 18 7.1" stroke="currentColor" stroke-width="2.1" stroke-linecap="square"/>
+        <path d="M3 12.9 10.5 18.4 18 12.9" stroke="currentColor" stroke-width="2.1" stroke-linecap="square"/>
+      </svg>
+    </button>
+    <a class="page-name" href="../">Fonts</a>
+  </div>
 
   <a class="mark" href="../" aria-label="Compress — home">
     <svg viewBox="0 0 100 100" role="img" aria-label="Compress logo">
@@ -44,7 +46,7 @@
 
   <div class="who">
     <div class="who-lines">
-      <p>Poppins</p>
+      <p>Compress</p>
       <p>3 faces · OFL</p>
     </div>
     <button class="burger" id="burger" type="button" aria-expanded="false" aria-controls="menu" aria-label="Open menu">
@@ -55,17 +57,36 @@
   </div>
 </header>
 
-<nav class="menu" id="menu" hidden aria-label="Sections">
-  <a href="../">Index <span>— shelf</span></a>
-  <a href="../tools/">Tools <span>— 2 apps</span></a>
-  <a href="../icons/">Icons <span>— 606</span></a>
-  <a href="../fonts/" aria-current="page">Fonts <span>— 3 faces</span></a>
-</nav>
-
-<nav class="menu end" id="more" hidden aria-label="More">
-  <a href="../portfolio/">Portfolio <span>— 3 projects</span></a>
-  <a href="../renders/">Renders <span>— gallery</span></a>
-  <a href="../download/">Download <span>— 1.9</span></a>
+<nav class="menu" id="menu" hidden aria-label="Menu">
+  <div class="group" data-open="true">
+    <button class="group-btn" type="button" aria-expanded="true" aria-controls="menu-sections">
+      <span>Sections</span>
+      <span class="note">4 pages</span>
+      <svg class="group-chev" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m5 9 7 7 7-7" stroke="currentColor" stroke-width="2"/></svg>
+    </button>
+    <div class="group-body" id="menu-sections">
+      <div class="group-inner">
+        <a href="../">Index <span>— shelf</span></a>
+        <a href="../tools/">Tools <span>— 2 apps</span></a>
+        <a href="../icons/">Icons <span>— 606</span></a>
+        <a href="../fonts/" aria-current="page">Fonts <span>— 3 faces</span></a>
+      </div>
+    </div>
+  </div>
+  <div class="group" data-open="false">
+    <button class="group-btn" type="button" aria-expanded="false" aria-controls="menu-more">
+      <span>More</span>
+      <span class="note">3 pages</span>
+      <svg class="group-chev" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m5 9 7 7 7-7" stroke="currentColor" stroke-width="2"/></svg>
+    </button>
+    <div class="group-body" id="menu-more">
+      <div class="group-inner">
+        <a href="../portfolio/">Portfolio <span>— 3 projects</span></a>
+        <a href="../renders/">Renders <span>— gallery</span></a>
+        <a href="../download/">Download <span>— 1.9</span></a>
+      </div>
+    </div>
+  </div>
 </nav>
 
 

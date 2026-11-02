@@ -10,7 +10,7 @@ const shots = [
   { name: "page-home-light", path: "", w: 1300, h: 900 },
   { name: "page-home-full", path: "", w: 1300, h: 900, full: true },
   { name: "page-menu", path: "", w: 1300, h: 900, open: "#menuBtn" },
-  { name: "page-menu-right", path: "", w: 1300, h: 900, open: "#burger" },
+  { name: "page-menu-more", path: "", w: 1300, h: 900, open: "#menuBtn", group: 2 },
   { name: "page-tools", path: "tools/", w: 1300, h: 900 },
   { name: "page-icons-light", path: "icons/", w: 1300, h: 900 },
   { name: "page-fonts", path: "fonts/", w: 1300, h: 900 },
@@ -39,18 +39,27 @@ const shots = [
       await page.click(s.open);
       await page.waitForTimeout(220);
     }
+    if (s.group) {
+      await page.click(`#menu .group:nth-of-type(${s.group}) .group-btn`);
+      await page.waitForTimeout(320);
+    }
     await page.screenshot({ path: `${out}/${s.name}.png`, fullPage: Boolean(s.full) });
     const info = await page.evaluate(() => ({
       bg: getComputedStyle(document.body).backgroundColor,
       fam: getComputedStyle(document.body).fontFamily,
       poppins: document.fonts.check("17px Poppins"),
       hscroll: document.documentElement.scrollWidth > window.innerWidth + 1,
-      open: ["menu", "more"].filter((id) => !document.getElementById(id).hidden),
+      panel: !document.getElementById("menu").hidden,
+      openGroups: Array.prototype.map.call(
+        document.querySelectorAll("#menu .group"),
+        (g) => g.getAttribute("data-open")
+      ),
       doc: [document.documentElement.scrollWidth, document.documentElement.scrollHeight],
     }));
     console.log(
       `${s.name}: bg ${info.bg} | ${info.fam.split(",")[0]} | poppins ${info.poppins}` +
-      ` | hscroll ${info.hscroll} | open [${info.open.join(",")}] | doc ${info.doc.join("x")}`
+      ` | hscroll ${info.hscroll} | panel ${info.panel} | groups [${info.openGroups.join(",")}]` +
+      ` | doc ${info.doc.join("x")}`
     );
     await page.close();
   }

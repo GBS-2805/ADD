@@ -29,7 +29,7 @@ that text changed.
 - Save under `artifacts/`, one file per page the change touches. The names the
   gallery already uses are `page-home-light`, `page-home-full`, `page-tools`,
   `page-icons-light`, `page-fonts`, `page-portfolio`, `page-download`, `page-menu`,
-  `page-menu-right`, `phone-home-light`, `phone-home-full`, `phone-icons-light`,
+  `page-menu-more`, `phone-home-light`, `phone-home-full`, `phone-icons-light`,
   `phone-download`, `phone-menu` and `logo-light`. There is one palette, so there are no dark variants; the `-light`
   suffix on four of them is history, not a variant.
 - Cover every page the change touches, plus mobile width when the change is
@@ -100,9 +100,10 @@ The site has one palette -- an indigo field with a light band -- and no theme sw
 on any page. Every page links one stylesheet, `docs/assets/site.css`: it carries the
 `@font-face` block, the band, the pull-down menu and the shared type, and its
 `url()` paths are relative to that file so pages at any depth can use it. The band
-keeps frame 6-27's own affordances -- chevrons and "Drop-down menu" on the left,
-the 29x20 burger on the right -- and both toggle the menu, which is why every page
-loads `assets/site.js`. Page-specific rules live in a small `<style>` on the page. `docs/icons/index.html` is
+keeps frame 6-27's measured geometry -- 26px page name on the left with the
+21x20 chevrons, the 45px mark centred, two 17px lines and the 29x20 burger on the
+right -- and both controls toggle the accordion, which is why every page loads
+`assets/site.js`. Page-specific rules live in a small `<style>` on the page. `docs/icons/index.html` is
 generated on the same system out of `tools/icons_template.html`.
 
 ### The app cannot be captured here
@@ -120,9 +121,10 @@ changes as unverified on device rather than illustrating them.
 - The shelf is seven pages, each a folder with an `index.html`: the root index, then
   `tools/`, `icons/`, `fonts/`, `portfolio/`, `download/` and `renders/`. They share
   `assets/site.css` and `assets/site.js`; no page has its own copy of the palette.
-  Each page carries the same two pull-downs: the chevrons on the left open index,
-  tools, icons and fonts, the burger on the right opens portfolio, renders and
-  download. Only one is open at a time, and `site.js` owns that pairing.
+  The page name sits on the left of the band, beside the chevron control, and both
+  that control and the burger open one pull-down: an accordion whose Sections group
+  (index, tools, icons, fonts) and More group (portfolio, renders, download) open
+  one at a time. `site.js` owns that behaviour.
 - `docs/data/` is generated and public on purpose: the site doubles as the database
   behind the apps. `icons.json` comes from `tools/fetch_icons.py`; `index.json`,
   `tools.json`, `fonts.json` and `portfolio.json` come from `tools/build_catalog.py`.
