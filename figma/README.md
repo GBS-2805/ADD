@@ -69,8 +69,8 @@ text is `#D9D9D9` at 64%. Poppins 400/500/600 is the whole type scale —
 - The header band is exported closed on every page. Artboards 19–22 carry the two
   pull-outs open — the left accordion (`index-menu`) and the right side tab
   (`index-drawer`), at both widths — because they are the site's navigation.
-  The four are also served from `/figma/` on the site so they can be downloaded
-  straight from a phone.
+  Every file in this folder is also served from `/figma/` on the site (see
+  Regenerating), so none of it needs a desktop app to reach.
 
 ## Regenerating
 
@@ -83,10 +83,19 @@ fresh VM. Then:
     export NODE_PATH=/tmp/pwshot/node_modules
     python3 -m http.server 8321 --directory docs &
     node tools/figma_export.js http://127.0.0.1:8321/ figma
+    python3 tools/figma_bundle.py
+    python3 tools/figma_publish.py
 
 `--pages=index` and `--widths=desktop` narrow a run; `--preview=01,10` also
 writes clipped PNGs of the exported artboards to `artifacts/` so they can be
 compared with the pages they came from.
 
-This folder is a design hand-off, not part of the deployed site: `manifest.json`
-serves `docs/` only, so none of it is published.
+## Downloading it
+
+`python3 tools/figma_publish.py` mirrors this folder into `docs/figma/`, which the
+site does serve, so the hand-off is at `/figma/` on the deployed host:
+`/figma/01-index-desktop.svg` and so on for the twenty-two artboards, plus
+`/figma/site-figma.svg` for the whole canvas. Page artboards keep their numbers;
+the four pull-outs also answer to the names the links use. The script removes any
+file it did not just write, so a retired artboard cannot linger on the site. Run
+it after `figma_bundle.py`, or the site keeps serving the previous export.
