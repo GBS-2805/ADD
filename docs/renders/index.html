@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Renders — Compress</title>
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml" />
+<style>
+  :root { --bg: #f2e4c9; --ink: #2b2926; --muted: #6b6357; --line: #2b2926; --card: #f7ecd7; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 24px 16px 64px;
+    background: var(--bg); color: var(--ink);
+    font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  header { max-width: 720px; margin: 0 auto 14px; display: flex; align-items: center; gap: 10px; }
+  header img { width: 30px; height: 30px; flex: none; }
+  h1 { font-size: 20px; letter-spacing: -.01em; margin: 0; }
+  .note { max-width: 720px; margin: 0 auto 24px; font-size: 14px; color: var(--muted); }
+  main { max-width: 720px; margin: 0 auto; display: grid; gap: 22px; }
+  figure { margin: 0; background: var(--card); border: 2px solid var(--line); box-shadow: 5px 5px 0 var(--line); }
+  figure a { display: block; }
+  img.shot { display: block; width: 100%; height: auto; border-bottom: 2px solid var(--line); }
+  figcaption { padding: 10px 12px; font-size: 14px; font-weight: 700; }
+  figcaption span { display: block; font-weight: 400; color: var(--muted); font-size: 13px; margin-top: 2px; }
+  a { color: inherit; }
+</style>
+</head>
+<body>
+<header>
+  <img src="../assets/logo.svg" alt="Compress logo" width="30" height="30" />
+  <h1>Renders of the live pages</h1>
+</header>
+<p class="note">Captured at 1300&times;900 in headless Chromium. Tap an image to open it full size.</p>
+<main>
+  <figure>
+    <a href="page-home-light.png"><img class="shot" src="page-home-light.png" alt="Compress page, cream theme, logo above the Download APK button." loading="lazy" /></a>
+    <figcaption>Compress page — cream theme <span>Logo mark at top, download card, What's new in 1.7.</span></figcaption>
+  </figure>
+  <figure>
+    <a href="page-home-dark.png"><img class="shot" src="page-home-dark.png" alt="Compress page, dark theme, logo in cream on a dark disc." loading="lazy" /></a>
+    <figcaption>Compress page — dark theme <span>Same mark, inverted to cream on ink.</span></figcaption>
+  </figure>
+  <figure>
+    <a href="page-icons-light.png"><img class="shot" src="page-icons-light.png" alt="Icons page, cream theme, logo beside the LINEICONS FREE title." loading="lazy" /></a>
+    <figcaption>Icons page — cream theme <span>Logo beside the brand line, 606 icons below.</span></figcaption>
+  </figure>
+  <figure>
+    <a href="page-icons-dark.png"><img class="shot" src="page-icons-dark.png" alt="Icons page, dark theme." loading="lazy" /></a>
+    <figcaption>Icons page — dark theme <span>Full free set, filter field, no paywall.</span></figcaption>
+  </figure>
+  <figure>
+    <a href="logo-light.png"><img class="shot" src="logo-light.png" alt="The logo drawn in ink on a cream background." loading="lazy" /></a>
+    <figcaption>Logo — on cream <span>Rendered from the shipped logo.svg.</span></figcaption>
+  </figure>
+  <figure>
+    <a href="logo-dark.png"><img class="shot" src="logo-dark.png" alt="The logo drawn in cream on a dark background." loading="lazy" /></a>
+    <figcaption>Logo — on ink <span>Same file, currentColor fill.</span></figcaption>
+  </figure>
+</main>
+</body>
+</html>
