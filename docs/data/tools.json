@@ -39,10 +39,10 @@
       "name": "Icons",
       "kind": "Android app",
       "status": "released",
-      "version": "2.2",
-      "version_code": 13,
+      "version": "2.3",
+      "version_code": 14,
       "package": "app.offline.icons",
-      "apk": "/Icons-2.2.apk",
+      "apk": "/Icons-2.3.apk",
       "min_android": "8.0 (API 26)",
       "summary": "Both free icon brands on the phone: 1,864 glyphs, a preview with weight, size and surface, and the whole set behind one toggle. Bundled offline with no permissions at all.",
       "features": [
@@ -72,8 +72,8 @@
           "href": "/Icons-1.0.apk"
         }
       ],
-      "bytes": 533890,
-      "sha256": "aaec8aa6b53d34048ede4ba33a9578bf89698fbe79d50cfb5ae10f857fe854b9"
+      "bytes": 538063,
+      "sha256": "9621bc0ac50301c3de83457852cfcb68ed00ee90459f0b797445cafb08c2a122"
     }
   ]
 }

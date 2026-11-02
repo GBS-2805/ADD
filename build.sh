@@ -124,6 +124,7 @@ stage_icons_assets() {
     cp "$ROOT/docs/icons/index.html" "$www/icons/"
     cp -r "$ROOT/docs/icons/lineicons" "$www/icons/"
     cp -r "$ROOT/docs/icons/coolicons" "$www/icons/"
+    cp -r "$ROOT/docs/icons/all" "$www/icons/"
     cp "$ROOT/docs/assets/site.css" "$ROOT/docs/assets/site.js" \
        "$ROOT/docs/assets/favicon.svg" "$www/assets/"
     cp "$ROOT"/docs/assets/fonts/*.woff2 "$www/assets/fonts/"
@@ -142,12 +143,12 @@ case "${1:-all}" in
         ;;
     icons)
         stage_icons_assets
-        build_app icons-app Icons Icons-2.2.apk 13 2.2
+        build_app icons-app Icons Icons-2.3.apk 14 2.3
         ;;
     all)
         build_app app Compress Compress-1.9.apk 10 1.9
         stage_icons_assets
-        build_app icons-app Icons Icons-2.2.apk 13 2.2
+        build_app icons-app Icons Icons-2.3.apk 14 2.3
         ;;
     *)
         echo "usage: $0 [all|compress|icons]" >&2
