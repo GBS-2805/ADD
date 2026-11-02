@@ -1,0 +1,38 @@
+{
+  "generated": "2026-11-02",
+  "fonts": [
+    {
+      "family": "Poppins",
+      "weight": 400,
+      "name": "Regular",
+      "woff2": "/assets/fonts/poppins-400.woff2",
+      "ttf": "/assets/fonts/poppins-400.ttf",
+      "app_res": "app/res/font/poppins_regular.ttf",
+      "use": "Body text, ledes, section copy and every label on this site.",
+      "woff2_bytes": 7900,
+      "ttf_bytes": 160316
+    },
+    {
+      "family": "Poppins",
+      "weight": 500,
+      "name": "Medium",
+      "woff2": "/assets/fonts/poppins-500.woff2",
+      "ttf": "/assets/fonts/poppins-500.ttf",
+      "app_res": "app/res/font/poppins_medium.ttf",
+      "use": "Icon names, row labels and the small caps in the tab strip.",
+      "woff2_bytes": 7740,
+      "ttf_bytes": 158576
+    },
+    {
+      "family": "Poppins",
+      "weight": 600,
+      "name": "SemiBold",
+      "woff2": "/assets/fonts/poppins-600.woff2",
+      "ttf": "/assets/fonts/poppins-600.ttf",
+      "app_res": "app/res/font/poppins_semibold.ttf",
+      "use": "App titles and the one number that matters on each screen.",
+      "woff2_bytes": 7992,
+      "ttf_bytes": 157312
+    }
+  ]
+}

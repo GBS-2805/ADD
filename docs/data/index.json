@@ -1,0 +1,48 @@
+{
+  "generated": "2026-11-02",
+  "site": {
+    "name": "Compress",
+    "tagline": "A shelf for offline Android tools, the icons they use and the fonts they are set in.",
+    "package": "app.offline.compress"
+  },
+  "catalogs": [
+    {
+      "id": "tools",
+      "title": "Tools",
+      "href": "/tools/",
+      "data": "/data/tools.json",
+      "count": 2
+    },
+    {
+      "id": "icons",
+      "title": "Icons",
+      "href": "/icons/",
+      "data": "/data/icons.json",
+      "count": 606
+    },
+    {
+      "id": "fonts",
+      "title": "Fonts",
+      "href": "/fonts/",
+      "data": "/data/fonts.json",
+      "count": 3
+    },
+    {
+      "id": "portfolio",
+      "title": "Portfolio",
+      "href": "/portfolio/",
+      "data": "/data/portfolio.json",
+      "count": 3
+    }
+  ],
+  "downloads": [
+    {
+      "id": "compress",
+      "name": "Compress",
+      "version": "1.9",
+      "apk": "/Compress-1.9.apk",
+      "bytes": 272592,
+      "sha256": "5862071cf91e0eac6ddd5207f6d6d1cc99dc1e06d67f88bdfbe4efc6ea4ebbfd"
+    }
+  ]
+}

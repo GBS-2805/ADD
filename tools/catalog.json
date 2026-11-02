@@ -1,0 +1,115 @@
+{
+  "site": {
+    "name": "Compress",
+    "tagline": "A shelf for offline Android tools, the icons they use and the fonts they are set in.",
+    "package": "app.offline.compress"
+  },
+  "tools": [
+    {
+      "id": "compress",
+      "name": "Compress",
+      "kind": "Android app",
+      "status": "released",
+      "version": "1.9",
+      "version_code": 10,
+      "package": "app.offline.compress",
+      "apk": "/Compress-1.9.apk",
+      "min_android": "8.0 (API 26)",
+      "summary": "Pick photos, preview the settings with a before/after slider, then compress. Fully offline: the app has no internet permission at all.",
+      "features": [
+        "Real quality: the encoder retries lower until the file actually gets smaller.",
+        "Downscale: cap the longest edge at 1280, 1920, 2560, 3200 or 4096 px, or keep the original.",
+        "Batch: up to 40 photos, per-file savings, then share them all in one go.",
+        "Orientation: EXIF rotation is applied to the pixels, so portrait shots stay upright.",
+        "Metadata: location and device tags are dropped during re-encode.",
+        "Non-destructive: copies go to Pictures/Compress, originals are untouched.",
+        "Verify: tapping a saved result reopens the slider so you can confirm the file matches the preview."
+      ],
+      "links": [
+        { "label": "Tool page", "href": "/tools/" },
+        { "label": "Download APK", "href": "/Compress-1.9.apk" }
+      ]
+    },
+    {
+      "id": "icons",
+      "name": "Icons",
+      "kind": "Android app",
+      "status": "in-build",
+      "version": null,
+      "version_code": null,
+      "package": null,
+      "apk": null,
+      "min_android": null,
+      "summary": "The 606-glyph browser from this site, packaged for the phone: filter by name, tap to copy the SVG. It reads the same icon JSON this site serves.",
+      "features": [
+        "The whole free Lineicons set, on device, with no network.",
+        "Filter by name, tap a glyph, copy its markup.",
+        "The same glyphs and names as /icons/ and /data/icons.json."
+      ],
+      "links": [
+        { "label": "Browse on the web", "href": "/icons/" }
+      ]
+    }
+  ],
+  "fonts": [
+    {
+      "family": "Poppins",
+      "weight": 400,
+      "name": "Regular",
+      "woff2": "/assets/fonts/poppins-400.woff2",
+      "ttf": "/assets/fonts/poppins-400.ttf",
+      "app_res": "app/res/font/poppins_regular.ttf",
+      "use": "Body text, ledes, section copy and every label on this site."
+    },
+    {
+      "family": "Poppins",
+      "weight": 500,
+      "name": "Medium",
+      "woff2": "/assets/fonts/poppins-500.woff2",
+      "ttf": "/assets/fonts/poppins-500.ttf",
+      "app_res": "app/res/font/poppins_medium.ttf",
+      "use": "Icon names, row labels and the small caps in the tab strip."
+    },
+    {
+      "family": "Poppins",
+      "weight": 600,
+      "name": "SemiBold",
+      "woff2": "/assets/fonts/poppins-600.woff2",
+      "ttf": "/assets/fonts/poppins-600.ttf",
+      "app_res": "app/res/font/poppins_semibold.ttf",
+      "use": "App titles and the one number that matters on each screen."
+    }
+  ],
+  "portfolio": [
+    {
+      "id": "compress",
+      "title": "Compress",
+      "kind": "Android app",
+      "year": 2026,
+      "summary": "An offline image compressor with a before/after slider, batch queue and per-file savings. No account, no uploads, no internet permission.",
+      "built": "The whole app: picker flow, preview pipeline, encoder retry loop, queue management, sharing, launcher icon and the settings screen.",
+      "stack": "Java, Android platform APIs only",
+      "href": "/tools/"
+    },
+    {
+      "id": "icons",
+      "title": "Icons browser",
+      "kind": "Web tool",
+      "year": 2026,
+      "summary": "All 606 free Lineicons glyphs in one filterable grid, one tap each to copy the SVG, with a textarea fallback for browsers that block the clipboard.",
+      "built": "The fetch pipeline, the recolouring to currentColor, the grid and clipboard handling, and the JSON the phone app will read.",
+      "stack": "Vanilla JavaScript, one HTML file, Python fetch script",
+      "href": "/icons/"
+    },
+    {
+      "id": "site",
+      "title": "This site",
+      "kind": "Static site",
+      "year": 2026,
+      "summary": "The shelf: catalogs for the tools, icons, fonts and work, all built from the same measurements as the apps and all readable as JSON.",
+      "built": "The measured layout, one shared stylesheet, the JSON builder that re-measures every shipped file, and the render gallery.",
+      "stack": "Hand-written HTML and CSS, Python build steps, static hosting",
+      "href": "/"
+    }
+  ]
+}

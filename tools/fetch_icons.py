@@ -13,6 +13,7 @@ colour, and keeps its own viewBox (most are 24x24, a few are 25x24).
 Re-run to refresh:  python3 tools/fetch_icons.py
 """
 
+import datetime
 import json
 import pathlib
 import re
@@ -25,6 +26,7 @@ from concurrent.futures import ThreadPoolExecutor
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 TEMPLATE = ROOT / "tools/icons_template.html"
 OUTPUT = ROOT / "docs/icons/index.html"
+DATA = ROOT / "docs/data/icons.json"
 
 TREE_URL = "https://data.jsdelivr.com/v1/packages/gh/LineiconsHQ/Lineicons@main"
 SOURCE = ("https://cdn.jsdelivr.net/gh/LineiconsHQ/Lineicons@main"
@@ -133,6 +135,19 @@ def main():
     page = page.replace("__ICONS__", json.dumps(icons, ensure_ascii=False))
     OUTPUT.parent.mkdir(parents=True, exist_ok=True)
     OUTPUT.write_text(page, encoding="utf-8")
+
+    # The same glyphs as a JSON catalog, which is what the Icons app reads and
+    # what tools/build_catalog.py counts when it checks the pages.
+    DATA.parent.mkdir(parents=True, exist_ok=True)
+    DATA.write_text(json.dumps({
+        "generated": datetime.date.today().isoformat(),
+        "source": "LineiconsHQ/Lineicons",
+        "licence": "MIT",
+        "count": len(icons),
+        "missing": missing,
+        "icons": icons,
+    }, ensure_ascii=False) + "\n", encoding="utf-8")
+    print("data: %s (%d bytes)" % (DATA.relative_to(ROOT), DATA.stat().st_size))
 
     print("icons: %d" % len(icons))
     print("missing: %s" % (", ".join(missing) if missing else "none"))

@@ -21,13 +21,16 @@ that text changed.
 **When a render is warranted**:
 
 - Capture with headless Chromium via Playwright, served from a local static server
-  over `docs/`, at 1300x900. `tools/render_pages.js` does the whole set -- home page,
-  its full height, the open menu and the phone widths -- in about 4 seconds and
-  prints console errors.
-- Save under `artifacts/`, one file per page the change touches
-  (`page-home.png`, `page-home-full.png`, `phone-home.png`, `page-icons.png`, ...).
-  There is one palette, so there are no dark variants; gallery files already on the
-  site keep their existing `-light` names.
+  over `docs/`, at 1300x900. `tools/render_pages.js` takes every page of the shelf
+  in one run -- the index at its fold and at full height, then tools, icons, fonts,
+  portfolio and download at desktop width, then the index, icons and download at
+  390x844 -- in about ten seconds, and prints console errors and horizontal overflow.
+- Save under `artifacts/`, one file per page the change touches. The names the
+  gallery already uses are `page-home-light`, `page-home-full`, `page-tools`,
+  `page-icons-light`, `page-fonts`, `page-portfolio`, `page-download`,
+  `phone-home-light`, `phone-home-full`, `phone-icons-light`, `phone-download` and
+  `logo-light`. There is one palette, so there are no dark variants; the `-light`
+  suffix on four of them is history, not a variant.
 - Cover every page the change touches, plus mobile width when the change is
   responsive.
 - Inspect each render before sending it. If the render shows a layout, colour or
@@ -93,10 +96,11 @@ in one run and prints console errors; it needs the toolchain from
 `tools/render_env.py`.
 
 The site has one palette -- an indigo field with a light band -- and no theme switch
-on any page. Both pages use it: `docs/icons/index.html` is generated from the same
-system (band header, centred mark, hairline cells) out of `tools/icons_template.html`,
-with its own copy of the Poppins `@font-face` block because it lives one level down
-and reads the fonts as `../assets/fonts/`.
+on any page. Every page links one stylesheet, `docs/assets/site.css`: it carries the
+`@font-face` block, the band, the tab strip and the shared type, and its `url()`
+paths are relative to that file so pages at any depth can use it. Page-specific
+rules live in a small `<style>` on the page itself. `docs/icons/index.html` is
+generated on the same system out of `tools/icons_template.html`.
 
 ### The app cannot be captured here
 
@@ -110,6 +114,17 @@ changes as unverified on device rather than illustrating them.
 ## Project shape
 
 - `docs/` is the deployed static site (Sites manifest `manifest.json`, assets from `docs`).
+- The shelf is seven pages, each a folder with an `index.html`: the root index, then
+  `tools/`, `icons/`, `fonts/`, `portfolio/`, `download/` and `renders/`. They share
+  `assets/site.css` and a tab strip; no page has its own copy of the palette.
+- `docs/data/` is generated and public on purpose: the site doubles as the database
+  behind the apps. `icons.json` comes from `tools/fetch_icons.py`; `index.json`,
+  `tools.json`, `fonts.json` and `portfolio.json` come from `tools/build_catalog.py`.
+- `tools/catalog.json` is the single source of truth for the apps, the fonts and the
+  portfolio. `tools/build_catalog.py` re-measures the APK and the font files, copies
+  each TTF from `app/res/font/` into `docs/assets/fonts/`, writes the JSON and then
+  fails if any page still quotes a stale version, size or checksum. Run it after any
+  change to a version number or a shipped file.
 - `docs/renders/` is the gallery page plus the captures it lists. The page shows
   only files named in `index.html`, so the folder must hold exactly those.
 - `artifacts/` is scratch: captures in progress, Figma probes, old shots. Nothing
