@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Fonts — Poppins and Redaction 50, one sheet per family</title>
 <meta name="description" content="Poppins and Redaction 50 as served by this site: every weight and italic, woff2 for the web and TTF for Android, with sizes listed and free to download under the SIL Open Font License." />
-<meta name="theme-color" content="#3f4e96" />
+<meta name="theme-color" content="#00d7a0" />
 <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml" />
 <link rel="stylesheet" href="../assets/site.css" />
 <style>
@@ -48,7 +48,7 @@
     background-position: calc(100% - 17px) 50%, calc(100% - 12px) 50%;
     background-size: 5px 5px, 5px 5px; background-repeat: no-repeat; }
   .familybar select:focus-visible { outline: 2px solid var(--band); outline-offset: 2px; }
-  .familybar select option { color: #000; background: #d9d9d9; }
+  .familybar select option { color: var(--on); background: var(--page); }
 
   .families { margin-top: 22px; }
   .family { padding: 26px 0 24px; border-top: 1px solid var(--rule); }
@@ -124,7 +124,7 @@
 <main>
   <header class="page-head">
     <h1>Fonts</h1>
-    <p class="lede">Everything here is set in <b>Poppins</b>, with <b>Redaction 50</b> alongside for display. The site serves its own copies — no Google Fonts request, no third-party host in the page — and every binary is below to download.</p>
+    <p class="lede"><b>Poppins</b> and <b>Redaction 50</b>, served from this site — no Google Fonts request — with every weight and italic to download.</p>
     <p class="meta">
       <span id="fontFamilies">2 families</span>
       <span id="fontStyles">21 styles</span>
@@ -155,7 +155,7 @@ font-size: 48px;</code>
         inputmode="numeric" aria-label="Size in pixels" /> px</span>
       <button type="button" class="try-reset" id="tryReset" hidden>Reset</button>
     </div>
-    <p class="fine">The same woff2 these pages already loaded — no image, no extra request, no Google Fonts. A sheet's Try button sets the preview here.</p>
+    <p class="fine">No image, no extra request. A sheet's Try button sets the preview here.</p>
   </section>
 
   <section>
@@ -164,7 +164,7 @@ font-size: 48px;</code>
     <div class="families" id="families">
       <p class="fine" id="familyStatus">Loading the families…</p>
     </div>
-    <p class="fine">Each sheet lists one family's faces. The three Poppins faces the apps bundle are byte-for-byte copies from <code>app/res/font/</code>; the rest are fetched once by <code>tools/fetch_fonts.py</code> and served from this site.</p>
+    <p class="fine">The three app Poppins faces are copied from <code>app/res/font/</code>; the rest come from <code>tools/fetch_fonts.py</code>.</p>
   </section>
 
   <section>
@@ -183,7 +183,7 @@ font-size: 48px;</code>
   <section>
     <h2>Licence</h2>
     <p class="kicker">SIL Open Font License 1.1</p>
-    <p class="kicker" style="max-width:66ch; margin-bottom:0">Poppins and Redaction 50 are free for personal and commercial use, including bundling them in an app and serving them from a site. The licence travels with the font: keep the OFL text with any copy you redistribute, and do not sell the font on its own. The icon set being browsable here is a separate licence — MIT, on the <a href="../icons/">icons page</a>.</p>
+    <p class="kicker" style="max-width:66ch; margin-bottom:0">Both families are SIL OFL 1.1: free to use and bundle. Keep the licence with any copy and do not sell the font on its own. The icons are MIT, on the <a href="../icons/">icons page</a>.</p>
   </section>
 </main>
 

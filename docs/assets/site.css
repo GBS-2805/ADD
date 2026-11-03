@@ -29,13 +29,33 @@
   font-display: swap;
 }
 
+
+/* Light mode: the page and the logo swap places; the band stays green. */
+html[data-theme="light"] {
+  color-scheme: light;
+  --page: var(--cream);
+  --ink: var(--cream);
+  --on: var(--coal);
+  --on-dim: rgba(19, 21, 19, .64);
+  --rule: rgba(19, 21, 19, .22);
+  --tint: rgba(19, 21, 19, .06);
+}
+
 :root {
-  --band: #d9d9d9;             /* header bar, pull-down and side tab */
-  --page: #3f4e96;             /* page field                         */
-  --ink: #000000;              /* text and glyphs on the band        */
-  --on: #d9d9d9;               /* text on the field                  */
-  --on-dim: rgba(217, 217, 217, .64);
-  --rule: rgba(217, 217, 217, .26);
+  --green: #00d7a0;            /* the band, in both modes            */
+  --coal: #131513;             /* off-black                          */
+  --cream: #f2eee3;            /* off-white                          */
+  --band: var(--green);
+  --page: var(--coal);
+  --ink: var(--coal);          /* logo and icons on the band         */
+  --on: var(--cream);
+  --on-dim: rgba(242, 238, 227, .62);
+  --rule: rgba(242, 238, 227, .22);
+  --tint: rgba(242, 238, 227, .07);
+  --band-ink: #0f120f;         /* words on the green                 */
+  --band-dim: rgba(15, 18, 15, .62);
+  --band-line: rgba(15, 18, 15, .22);
+  --band-hover: #17e6ad;
   --pad: 40px;
   --band-h: 96px;
 }
@@ -128,7 +148,7 @@ a { color: inherit; }
 /* ---------- left: accordion pull-down, four destinations ---------- */
 .menu {
   background: var(--band);
-  color: var(--ink);
+  color: var(--band-ink);
   padding: 0 var(--pad) 8px;
   z-index: 19;
 }
@@ -144,11 +164,11 @@ a { color: inherit; }
   justify-content: space-between;
   gap: 24px;
   padding: 15px 0;
-  border-top: 1px solid rgba(0, 0, 0, .14);
+  border-top: 1px solid var(--band-line);
   font-size: 19px;
   text-decoration: none;
 }
-.menu a span { font-size: 14px; color: rgba(0, 0, 0, .5); }
+.menu a span { font-size: 14px; color: var(--band-dim); }
 .menu a:hover { text-decoration: underline; }
 .menu a[aria-current="page"] { font-weight: 500; }
 .menu a:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
@@ -175,7 +195,7 @@ a { color: inherit; }
   height: 100%;
   padding: 0 var(--pad) 32px;
   background: var(--band);
-  color: var(--ink);
+  color: var(--band-ink);
   box-shadow: -24px 0 60px rgba(0, 0, 0, .24);
   transform: translateX(101%);
   visibility: hidden;
@@ -187,7 +207,7 @@ a { color: inherit; }
   align-items: center;
   justify-content: space-between;
   height: var(--band-h);
-  border-bottom: 1px solid rgba(0, 0, 0, .14);
+  border-bottom: 1px solid var(--band-line);
 }
 .drawer-head p { margin: 0; font-size: 14px; font-weight: 500; letter-spacing: .1em; text-transform: uppercase; }
 .drawer-close { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; margin-right: -8px; }
@@ -198,15 +218,15 @@ a { color: inherit; }
   justify-content: space-between;
   gap: 24px;
   padding: 17px 0;
-  border-bottom: 1px solid rgba(0, 0, 0, .14);
+  border-bottom: 1px solid var(--band-line);
   font-size: 21px;
   text-decoration: none;
 }
-.drawer a span { font-size: 14px; color: rgba(0, 0, 0, .5); }
+.drawer a span { font-size: 14px; color: var(--band-dim); }
 .drawer a:hover { text-decoration: underline; }
 .drawer a[aria-current="page"] { font-weight: 500; }
 .drawer a:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
-.drawer .drawer-note { margin: auto 0 0; font-size: 13px; line-height: 1.5; color: rgba(0, 0, 0, .5); }
+.drawer .drawer-note { margin: auto 0 0; font-size: 13px; line-height: 1.5; color: var(--band-dim); }
 
 /* ---------- page ---------- */
 main { padding: 0 var(--pad); }
@@ -221,7 +241,7 @@ h1 {
 .lede { margin: 0; max-width: 46ch; font-size: 20px; line-height: 1.55; }
 .lede b {
   background: var(--band);
-  color: var(--ink);
+  color: var(--band-ink);
   font-weight: 400;
   padding: 0 5px;
   -webkit-box-decoration-break: clone;
@@ -239,7 +259,7 @@ h1 {
   line-height: 1.4;
 }
 .stats li { display: flex; align-items: center; gap: 4px; }
-.stats b { padding: 1px 8px; background: var(--band); color: var(--ink); font-weight: 400; }
+.stats b { padding: 1px 8px; background: var(--band); color: var(--band-ink); font-weight: 400; }
 .meta {
   display: flex;
   flex-wrap: wrap;
@@ -256,12 +276,12 @@ h1 {
   padding: 0 28px;
   margin-top: 34px;
   background: var(--band);
-  color: var(--ink);
+  color: var(--band-ink);
   font-size: 17px;
   text-decoration: none;
 }
 .cta svg { flex: none; width: 20px; height: 20px; }
-.cta:hover { background: #e8e8e8; }
+.cta:hover { background: var(--band-hover); }
 
 .ctas { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 34px; }
 .ctas .cta { margin-top: 0; }
@@ -291,7 +311,7 @@ h2 .pill { margin-left: 12px; vertical-align: middle; }
   border-bottom: 1px solid var(--rule);
   text-decoration: none;
 }
-a.card:hover { background: rgba(217, 217, 217, .07); }
+a.card:hover { background: var(--tint); }
 .card .kind { font-size: 12px; font-weight: 500; letter-spacing: .1em; text-transform: uppercase; color: var(--on-dim); }
 .card h3 { margin: 0; font-size: 22px; font-weight: 400; line-height: 1.3; letter-spacing: -.01em; }
 .card p { margin: 0; font-size: 15px; line-height: 1.55; }
@@ -364,9 +384,9 @@ ol.steps li::before {
   color: var(--on-dim);
   white-space: nowrap;
 }
-.pill.live { background: var(--band); border-color: var(--band); color: var(--ink); }
+.pill.live { background: var(--band); border-color: var(--band); color: var(--band-ink); }
 
-code { padding: 1px 6px; font-family: inherit; background: rgba(0, 0, 0, .16); }
+code { padding: 1px 6px; font-family: inherit; background: var(--tint); }
 .hash { word-break: break-all; }
 
 footer {
@@ -382,6 +402,25 @@ footer {
 }
 footer a { text-decoration: none; }
 footer a:hover { text-decoration: underline; }
+
+
+/* Theme control, injected into the band by site.js. */
+.theme-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  margin-right: 4px;
+  font: inherit;
+  color: var(--ink);
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+}
+.theme-btn svg { width: 22px; height: 22px; }
+.theme-btn:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
 
 @media (max-width: 900px) {
   .who-lines p + p { display: none; }
@@ -401,14 +440,12 @@ footer a:hover { text-decoration: underline; }
   .menu-btn .chev { width: 22px; height: 22px; }
   .page-name { font-size: 15px; letter-spacing: .02em; }
   .mark, .mark svg { width: 34px; height: 34px; }
-  .who { gap: 8px; }
-  .who-lines p { font-size: 14px; line-height: 1.35; }
-  /* The long line needs the width of a desktop band; on a phone the mark would
-     sit on top of it, so the narrow label takes over. */
-  .who-lines .wide { display: none; }
-  .who-lines .narrow { display: block; }
-  .who-lines { width: auto; }
-  .who-lines.keep p.big { font-size: clamp(9.5px, calc((50vw - 83px) / 10.21), 14px); letter-spacing: 0; }
+    .who { gap: 8px; }
+    /* Too narrow for the descriptor once the theme control sits beside the
+       burger: the mark and the page name carry the band instead. */
+    .who-lines { display: none; }
+  .theme-btn { width: 36px; height: 36px; margin-right: 0; }
+  .theme-btn svg { width: 20px; height: 20px; }
   .burger { width: 36px; height: 36px; margin-right: -6px; }
   .burger svg { width: 24px; height: 24px; }
   .menu { padding-bottom: 6px; }
@@ -437,6 +474,4 @@ footer a:hover { text-decoration: underline; }
 @media (max-width: 340px) {
   :root { --pad: 12px; }
   .mark, .mark svg { width: 28px; height: 28px; }
-  .who-lines.keep p:first-child { display: none; }
-  .who-lines.keep p.big { font-size: 9px; }
 }

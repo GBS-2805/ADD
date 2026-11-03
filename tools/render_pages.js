@@ -218,7 +218,7 @@ const escape = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<meta name="theme-color" content="#3f4e96" />
+<meta name="theme-color" content="#00d7a0" />
 <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml" />
 <title>Renders — __COUNT__ captures of this site</title>
 <meta name="description" content="__COUNT__ screenshots of the shelf, captured in headless Chromium: the index at its fold, both pull-downs, the two apps, the icon brand pages with their previews and open sets, fonts, portfolio and download, at 1300 wide and 390 on a phone." />
@@ -296,7 +296,7 @@ const escape = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/
 <main>
   <header class="page-head">
     <h1>Renders</h1>
-    <p class="lede"><b>__COUNT__ captures</b>, all from one headless Chromium run against the built pages. Desktop at 1300×900, phones at 390×844, and nothing in the folder that this page does not list.</p>
+    <p class="lede"><b>__COUNT__ captures</b> of the built pages: desktop at 1300×900, phones at 390×844.</p>
     <p class="meta">
       <span>__COUNT__ images</span>
       <span>1300×900 and 390×844</span>

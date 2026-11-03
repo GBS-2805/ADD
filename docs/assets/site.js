@@ -3,6 +3,28 @@
    three. Opening one closes the other, Escape closes both, and the scrim behind
    the tab dismisses it. */
 (function () {
+  var THEME_KEY = "site:theme";
+  var SUN = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="2"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M19.1 4.9l-1.4 1.4M6.3 17.7l-1.4 1.4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
+  var MOON = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 1 0 10.5 10.5Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>';
+
+  function storedTheme() {
+    try {
+      var value = localStorage.getItem(THEME_KEY);
+      if (value === "light" || value === "dark") return value;
+    } catch (error) { /* blocked store: fall through to the system */ }
+    return window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches
+      ? "light" : "dark";
+  }
+  function applyTheme(theme) {
+    document.documentElement.setAttribute("data-theme", theme);
+    var button = document.getElementById("themeBtn");
+    if (!button) return;
+    button.innerHTML = theme === "light" ? MOON : SUN;
+    button.setAttribute("aria-label",
+      theme === "light" ? "Switch to dark theme" : "Switch to light theme");
+  }
+  applyTheme(storedTheme());
+
   var menu = document.getElementById("menu");
   var menuBtn = document.getElementById("menuBtn");
   var drawer = document.getElementById("drawer");
@@ -24,6 +46,21 @@
     if (scrim) scrim.setAttribute("data-open", open ? "true" : "false");
     document.body.classList.toggle("drawer-open", open);
     if (open) setMenu(false);
+  }
+
+  var who = document.querySelector(".who");
+  if (who && !document.getElementById("themeBtn")) {
+    var themeBtn = document.createElement("button");
+    themeBtn.type = "button";
+    themeBtn.id = "themeBtn";
+    themeBtn.className = "theme-btn";
+    who.insertBefore(themeBtn, burger);
+    applyTheme(document.documentElement.getAttribute("data-theme") || storedTheme());
+    themeBtn.addEventListener("click", function () {
+      var next = document.documentElement.getAttribute("data-theme") === "light" ? "dark" : "light";
+      try { localStorage.setItem(THEME_KEY, next); } catch (error) { /* forget it */ }
+      applyTheme(next);
+    });
   }
 
   menuBtn.addEventListener("click", function () {

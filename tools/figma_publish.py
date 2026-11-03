@@ -103,10 +103,11 @@ def listing(names):
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<meta name="theme-color" content="#3f4e96" />
+<meta name="theme-color" content="#00d7a0" />
 <title>Figma hand-off — every artboard of this site</title>
 <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml" />
 <link rel="stylesheet" href="../assets/site.css" />
+<script src="../assets/site.js" defer></script>
 <style>
   main { padding: 52px 40px 64px; max-width: 1040px; }
   h1 { margin: 0 0 10px; font-size: 40px; font-weight: 400; line-height: 1.15; letter-spacing: -.02em; }
@@ -130,7 +131,7 @@ def listing(names):
 <main>
   <h1>Figma hand-off</h1>
   <p class="lede">%s</p>
-  <p class="note">Each file is the page as Chromium laid it out — text on real baselines, a rect per box, PNG copies of the marks. Poppins 400/500/600 is embedded in every file, so each one renders in the site's type wherever it is opened, not in the viewer's fallback sans. Drag one into a Figma document to get editable layers; enable the Poppins family once there and run Frame selection to lock the artboard's size.</p>
+  <p class="note">Each file is the page as Chromium laid it out: real text, a rect per box, PNG marks. Poppins is embedded, so it renders in the site's type. Drag one into Figma for editable layers.</p>
   %s<p class="back"><a href="../">← Back to the site</a></p>
 </main>
 </body>
