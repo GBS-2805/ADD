@@ -2,6 +2,12 @@
   "notes": [
     {
       "id": "icons",
+      "version": "2.11",
+      "title": "Weight on every grid",
+      "note": "The preview's weight now reaches every set: Phosphor (256-unit grid) and Plump Solid (48) scale the stroke to their own units, so 1 to 2.5 finally changes them."
+    },
+    {
+      "id": "icons",
       "version": "2.10",
       "title": "Phosphor and Plump Solid",
       "note": "Two more brands on the shelf: Phosphor's 1,512 regular outline icons and Streamline's 500 Plump Solid glyphs, both in the app off the same catalogs."

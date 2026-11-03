@@ -23,17 +23,17 @@
 <text x="305" y="441.52" fill-opacity="0.64" font-size="14" xml:space="preserve">Android 8.0+</text>
 <text x="418" y="441.52" fill-opacity="0.64" font-size="14" xml:space="preserve">No internet permission</text>
 <rect x="40" y="488.61" width="1220" height="1" fill="#d9d9d9" fill-opacity="0.26"/>
-<text x="40" y="582.61" font-size="30" letter-spacing="-0.45" xml:space="preserve">Icons 2.10</text>
-<rect x="194.06" y="563.52" width="80.81" height="21.75" fill="#d9d9d9"/>
-<rect x="194.06" y="563.52" width="80.81" height="1" fill="#d9d9d9"/>
-<rect x="273.88" y="563.52" width="1" height="21.75" fill="#d9d9d9"/>
-<rect x="194.06" y="584.27" width="80.81" height="1" fill="#d9d9d9"/>
-<rect x="194.06" y="563.52" width="1" height="21.75" fill="#d9d9d9"/>
-<text x="204.06" y="577.52" fill="#000000" font-size="11" font-weight="500" letter-spacing="1.1" xml:space="preserve">SHIPPING</text>
-<text x="40" y="615.11" fill-opacity="0.64" font-size="14" xml:space="preserve">app.offline.icons · version code 21 · 1,864 icons bundled</text>
-<rect x="40" y="682.2" width="299" height="56" fill="#d9d9d9"/>
+<text x="40" y="582.61" font-size="30" letter-spacing="-0.45" xml:space="preserve">Icons 2.11</text>
+<rect x="185.06" y="563.52" width="80.81" height="21.75" fill="#d9d9d9"/>
+<rect x="185.06" y="563.52" width="80.81" height="1" fill="#d9d9d9"/>
+<rect x="264.88" y="563.52" width="1" height="21.75" fill="#d9d9d9"/>
+<rect x="185.06" y="584.27" width="80.81" height="1" fill="#d9d9d9"/>
+<rect x="185.06" y="563.52" width="1" height="21.75" fill="#d9d9d9"/>
+<text x="195.06" y="577.52" fill="#000000" font-size="11" font-weight="500" letter-spacing="1.1" xml:space="preserve">SHIPPING</text>
+<text x="40" y="615.11" fill-opacity="0.64" font-size="14" xml:space="preserve">app.offline.icons · version code 22 · 1,864 icons bundled</text>
+<rect x="40" y="682.2" width="293" height="56" fill="#d9d9d9"/>
 <image x="68" y="700.2" width="20" height="20" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADwAAAA8CAYAAAA6/NlyAAAC00lEQVR4AeyaW0oDMRSGq0sQb6DiFRehIOIafBUfVFyGugxRd+EKvDzqo0/i5UFXIej/qQOdIW2TNMl02sg5TXJycvL/+cfSGWa8NWJ/mfCwC54VzgoP2QnkSzqBoBPa4/Df6aubzlIrPCtqT/KLf6c/o34yS014V8zaCdInpnAaS0140kBryhCLFkpNOBoR28KZsO1JNTUvK9xU5Wxxj5rCrUzY9tJoal5WuKnK2eLOCtueVFPzssJNVc4Wd1bY9qSamhdS4WkdwqWcxzemG31NOVnoer+bhyR8r4oHch7QPapdlvvaihY+yIt61NawfwtF+FhQ1uSFLahzK1+UuxprbrRoXl7YujqQV9OfhSJsQjGnIMpAQF0rI5c1rLVa4JoUivC5Nn6RVw3gdwpCRE1XW9JsJ7LUvtJ83xaKMEB29PEhrxqXJkQg/V2d1JgYcxwMB6RQyahJ7VLQdxCS8LtAbMkBqKZkEIGQ6YtsVZkcCDnqloxa1KR2acJv0Ar+AIBLb1NgAKqmZCi9X4r8DfbUdCJLLWoqJYyFVLhAhBoANZEucnq1rKUGtXrlOs3HIAwAgHIpfjJwdNawlhqOS3unxyLMzlyKG+qglhorI5c1rLVa4JoUkzBYUAm1UI1xNyeHXNZ0y+trLjZhwKEWqqEeY5MzRw65pvlgsRSEAYtqfAlBjHG7E2OOnPZ4lH4qwoCH0DadihNjrhKOM0xJGAbP+uBOiJ+J3ErSJ6ZwGktNGFav+uAW8kgtfTXprA7C6dgZdsqEDYcyVCFfhXm/iv/DU51GHc7eYND2buZDuP1dqxNtV4fzoNDrHS8fwrxXxftV4lqrgQEsTiB8CDttEDl5zKm+kn0IX2vdl7xuAwNYnHD4EH7TDjyS5YfDmfp1OHuDASyCYG8+hKnOb19+GtbxDc2e7A0GsDi5L2GnTQYpORMeJDViYMkKxzjVQao5cgr/AAAA///eVkthAAAABklEQVQDADLTknkJIfEtAAAAAElFTkSuQmCC"/>
-<text x="100" y="716.17" fill="#000000" font-size="17" xml:space="preserve">Download Icons-2.10.apk</text>
+<text x="100" y="716.17" fill="#000000" font-size="17" xml:space="preserve">Download Icons-2.11.apk</text>
 <rect x="40" y="768.2" width="1220" height="1" fill="#d9d9d9" fill-opacity="0.26"/>
 <rect x="40" y="875.64" width="1220" height="1" fill="#d9d9d9" fill-opacity="0.26"/>
 <rect x="344" y="769.2" width="1" height="106.44" fill="#d9d9d9" fill-opacity="0.26"/>
@@ -122,10 +122,10 @@
 <rect x="40" y="2217.34" width="1220" height="1" fill="#d9d9d9" fill-opacity="0.26"/>
 <text x="40" y="2311.34" font-size="30" letter-spacing="-0.45" xml:space="preserve">Checksums</text>
 <text x="40" y="2343.84" fill-opacity="0.64" font-size="14" xml:space="preserve">Measured from the files on this site</text>
-<text x="40" y="2396.94" font-size="17" font-weight="500" xml:space="preserve">Icons-2.10.apk</text>
+<text x="40" y="2396.94" font-size="17" font-weight="500" xml:space="preserve">Icons-2.11.apk</text>
 <text x="225" y="2396.94" font-size="17" xml:space="preserve">1,017,926 bytes · SHA-256</text>
-<rect x="438" y="2377.94" width="666" height="26" fill="#000000" fill-opacity="0.16"/>
-<text x="444" y="2396.94" font-size="17" xml:space="preserve">241f2f560f2ca4f278713a06060a5c7940152bd7f202492d6c88df928278e309</text>
+<rect x="438" y="2377.94" width="671" height="26" fill="#000000" fill-opacity="0.16"/>
+<text x="444" y="2396.94" font-size="17" xml:space="preserve">7862330e57faaccf5871860a2b97ab21bd35e95df5ef7f73452d037caef23999</text>
 <rect x="40" y="2419.98" width="1220" height="1" fill="#d9d9d9" fill-opacity="0.26"/>
 <text x="40" y="2455.98" font-size="17" font-weight="500" xml:space="preserve">Compress-2.1.apk</text>
 <text x="225" y="2455.98" font-size="17" xml:space="preserve">272,592 bytes · SHA-256</text>
@@ -136,7 +136,7 @@
 <text x="505" y="2517.03" fill-opacity="0.64" font-size="16" xml:space="preserve">, so a script can</text>
 <text x="40" y="2542.63" fill-opacity="0.64" font-size="16" xml:space="preserve">check a download without parsing this page.</text>
 <rect x="0" y="2638.22" width="1300" height="1" fill="#d9d9d9" fill-opacity="0.26"/>
-<text x="40" y="2683.22" fill-opacity="0.64" font-size="14" xml:space="preserve">Icons 2.10 · Compress 2.1 · standalone, signed</text>
+<text x="40" y="2683.22" fill-opacity="0.64" font-size="14" xml:space="preserve">Icons 2.11 · Compress 2.1 · standalone, signed</text>
 <text x="1127" y="2683.22" fill-opacity="0.64" font-size="14" xml:space="preserve">Index</text>
 <text x="1164" y="2683.22" fill-opacity="0.64" font-size="14" xml:space="preserve">·</text>
 <text x="1175" y="2683.22" fill-opacity="0.64" font-size="14" xml:space="preserve">Tools</text>
