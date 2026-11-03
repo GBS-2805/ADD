@@ -226,9 +226,24 @@ def human(number):
 SWEEP_SKIP = ("docs/releases", "docs/figma", "docs/renders", "docs/data")
 
 
+# 2.5 is both a version of this app and the heaviest stroke the icon preview offers,
+# so a sweep must not read every 2.5 as a label. These are the shapes the weight
+# takes; a version label matches none of them, and the pill above is left alone.
+WEIGHT_NOISE = (
+    re.compile(r"\bweight\s*:\s*\"[^\"]*\""),        # render_pages.js capture config
+    re.compile(r"weight\s*\([^)\n]*\)"),               # "weight (1 -> 2.5)" in prose
+    re.compile(r"again at [\d.]+"),                      # prose about the stroke closing
+    re.compile(r"at weight [\d.]+"),
+    re.compile(r"FILL_WEIGHT[^\n]*"),                    # the ladder in the page script
+    re.compile(r"<button[^>]*data-weight[^>]*>[^<]*</button>"),
+)
+
+
 def visible(text, path):
     """What a reader sees: markup carries coordinates that look like versions."""
     text = re.sub(r'\sd="[^"]*"', " ", text)          # path data, in HTML and in JS
+    for noise in WEIGHT_NOISE:
+        text = noise.sub(" ", text)
     return re.sub(r"<[^>]*>", " ", text) if path.endswith(".html") else text
 
 

@@ -128,7 +128,9 @@ stage_icons_assets() {
     cp "$ROOT/docs/assets/site.css" "$ROOT/docs/assets/site.js" \
        "$ROOT/docs/assets/favicon.svg" "$www/assets/"
     cp "$ROOT"/docs/assets/fonts/*.woff2 "$www/assets/fonts/"
-    cp "$ROOT/docs/data/icons.json" "$ROOT/docs/data/coolicons.json" "$www/data/"
+    cp "$ROOT/docs/data/icons.json" "$ROOT/docs/data/coolicons.json" \
+       "$ROOT/docs/data/lineicons-sheet.json" "$ROOT/docs/data/coolicons-sheet.json" \
+       "$www/data/"
     # The site root is not bundled; a page that asks for "/" gets the browser.
     cat > "$www/index.html" <<'HTML'
 <!doctype html><meta charset="utf-8"><meta http-equiv="refresh" content="0;url=icons/">
@@ -143,12 +145,12 @@ case "${1:-all}" in
         ;;
     icons)
         stage_icons_assets
-        build_app icons-app Icons Icons-2.5.apk 16 2.5
+        build_app icons-app Icons Icons-2.6.apk 17 2.6
         ;;
     all)
         build_app app Compress Compress-2.1.apk 12 2.1
         stage_icons_assets
-        build_app icons-app Icons Icons-2.5.apk 16 2.5
+        build_app icons-app Icons Icons-2.6.apk 17 2.6
         ;;
     *)
         echo "usage: $0 [all|compress|icons]" >&2

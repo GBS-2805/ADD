@@ -1,6 +1,12 @@
 {
   "notes": [
     {
+      "id": "icons",
+      "version": "2.6",
+      "title": "The all-brands sheet works in the app",
+      "note": "The Icons bundle stages the two sheet catalogs its All brands page reads, so that page draws its twelve-per-brand sheet inside the app instead of empty sections."
+    },
+    {
       "id": "compress",
       "version": "2.1",
       "title": "New address",

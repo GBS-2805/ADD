@@ -17,7 +17,7 @@ files and driving them in a browser proves what the app loads.
 - `docs/data/icons.json` and `coolicons.json`;
 - a redirect `index.html` pointing at `icons/`.
 
-Thirteen files, tracked in this repository, so a release commit carries them. Never
+Fifteen files, tracked in this repository, so a release commit carries them. Never
 hand-edit that tree: it is rewritten on every build.
 
 ## 2. Serve it the way the WebView does
@@ -75,13 +75,19 @@ const BASE = process.argv[2];
 })();
 ```
 
-The last run actually recorded, from the 2.3 build. It predates the all-brands page
-being split into stacked sections, so it exercised the old tabbed shape and not the
-`sections` probe above:
+A good run, from 2.6 (the shipped build):
 
-    sections [{"brand":"Lineicons","cells":12,"cats":12},{"brand":"Coolicons","cells":12,"cats":12}]
-    (that is what the current page should print: `fetch_icons.py` caps the sheet at
-     `CAP = 12` glyphs per brand, one from each category the two sets share)
+    sections [{"brand":"Lineicons606","cells":12,"svgs":12,"cats":12},{"brand":"Coolicons1,258","cells":12,"svgs":12,"cats":12}]
+    poppins loaded: true
+    /icons/all/ 200   /icons/lineicons/ 200   /icons/coolicons/ 200
+    /data/lineicons-sheet.json 200   /data/coolicons-sheet.json 200
+    console errors: none
+
+Two sections of twelve cells each -- `fetch_icons.py` caps the sheet at `CAP = 12`
+glyphs per brand, one from each category the two sets share. The two `-sheet.json`
+lines are the ones that matter most: the page fetches those, not the full catalogs, and
+before 2.6 the bundle carried only the catalogs, so this page rendered empty sections
+inside the app while looking perfect on the site.
     /icons/all/ 200   /icons/lineicons/ 200   /icons/coolicons/ 200
     /icons/ 200   /data/coolicons.json 200
     coolicons All -> /icons/all/ 200
@@ -89,7 +95,7 @@ being split into stacked sections, so it exercised the old tabbed shape and not 
 
 And check the artifact itself:
 
-    python3 -c "import zipfile;n=zipfile.ZipFile('docs/Icons-2.5.apk').namelist();print([x for x in n if 'www/icons/all' in x or x.endswith('www/icons/index.html')])"
+    python3 -c "import zipfile;n=zipfile.ZipFile('docs/Icons-2.6.apk').namelist();print([x for x in n if 'www/icons/all' in x or x.endswith('www/icons/index.html')])"
 
 ## What this proves, and what it does not
 
@@ -108,8 +114,7 @@ origin-keyed — nothing currently is.
 For those, the honest options are a phone: install the APK, screenshot, and treat the
 PNGs as device captures; or a machine with KVM and `adb screencap`.
 
-Last actually run against the bundle: Icons 2.3, versionCode 14, 538,063 bytes, sha
-`9621bc0a…`, on 2026-11-02. The shipped build is now **2.5, versionCode 16** — same
-538,063-byte size, different APK — so this date covers 2.3 only. Re-run the harness
-whenever the bundle changes and move this line to the build it proved, rather than
-reading it as a standing claim about the current APK.
+Last run against the bundle: **Icons 2.6, versionCode 17, 570,995 bytes**, sha
+`74ee2c891a…`, on 2026-11-03 — the run quoted above. Move this line whenever the
+bundle changes and the harness is re-run; it is a record of one build, not a standing
+claim about the current APK.
