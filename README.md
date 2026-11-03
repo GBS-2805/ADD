@@ -14,7 +14,7 @@ the pages.
 - **Icons 2.10** — APK [`dist/Icons-2.10.apk`](dist/Icons-2.10.apk)
   (1,017,926 bytes, signed v1+v2), published as `docs/Icons-2.10.apk`. Package
   `app.offline.icons` · minSdk 26 · targetSdk 35 · versionCode 21. The whole browser
-  — both brands, 1,864 glyphs, the stylesheet and Poppins — is bundled in the APK
+  — all four brands, 3,876 glyphs, the stylesheet and Poppins — is bundled in the APK
   and served to a WebView from a private origin.
 - **Compress 2.1** — APK [`dist/Compress-2.1.apk`](dist/Compress-2.1.apk)
   (272,592 bytes, signed v1+v2, round adaptive icon), published as
@@ -43,7 +43,7 @@ Twelve pages, one stylesheet, no framework:
 | --- | --- |
 | `docs/index.html` | Index: the material, both apps, the palette, the JSON list |
 | `docs/tools/` | Both apps in detail, install steps, a link to the release notes |
-| `docs/icons/` | Icons app landing: download, the two brands, what the app does |
+| `docs/icons/` | Icons app landing: download, the four brands, what the app does |
 | `docs/icons/lineicons/` | Lineicons: preview tab, variants, the set (generated) |
 | `docs/icons/coolicons/` | Coolicons: preview tab, variants, the set (generated) |
 | `docs/icons/all/` | All brands: one section per brand, twelve glyphs each (generated) |
@@ -92,7 +92,7 @@ fall behind the app, writes the four JSON files, and then **fails** if a page st
 quotes a stale version, size or checksum. Nothing on the shelf is typed twice.
 
 ```bash
-python3 tools/fetch_icons.py                # fetch both sets, write data + pages
+python3 tools/fetch_icons.py                # fetch every set, write data + pages
 python3 tools/fetch_icons.py --pages-only   # rewrite the pages from the catalogs
 python3 tools/build_catalog.py              # measure, write the catalogs, check the pages
 python3 tools/build_catalog.py --check      # check only
@@ -100,11 +100,12 @@ python3 tools/build_catalog.py --check      # check only
 
 ## What Icons does
 
-- **Two brands, both whole**: 606 Lineicons and 1,258 Coolicons, generated from the
+- **Four brands, each whole**: 606 Lineicons, 1,258 Coolicons, 1,512 Phosphor and 500
+    Plump Solid, generated from the
   vendors' repositories and recoloured to `currentColor`.
 - **A live preview**: the selected glyph in its own tab, with weight (1 → 2.5), size
   (32 → 96) and surface (field or band) applied in the preview only.
-- **Categories**: both brands filter by their vendor's own taxonomy, beside the
+- **Categories**: the sets whose vendor publishes one filter by its own taxonomy, beside the
   name filter — Coolicons' 30 groups (System, Arrow, Navigation, Edit, File, ...)
   and Lineicons' 51, merged from the vendors' own data. The four older
   Lineicons files the vendor has not categorised appear under All icons only.

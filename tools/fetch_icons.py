@@ -687,6 +687,8 @@ def write_hub(entries):
         "__VERSION__": version,
         "__LICENCES__": licences,
         "__SETLIST__": setlist,
+        "__BRANDCOUNT__": {1: "one", 2: "two", 3: "three", 4: "four",
+                          5: "five", 6: "six"}.get(len(entries), str(len(entries))),
         "__DATALIST__": rows,
         "__APK__": apk,
         "__TOTAL__": fmt(total),

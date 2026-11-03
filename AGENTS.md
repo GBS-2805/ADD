@@ -264,6 +264,10 @@ changes as unverified on device rather than illustrating them.
   attribute beats a value inherited from the `<svg>`. The preview therefore writes
   the chosen weight onto each element (`tune()` in the template), not onto a parent.
   Setting it in CSS on the svg looks correct and does nothing.
+  The weights are chosen on that 24-unit grid, so `tune()` scales the stroke to the
+  glyph's own viewBox first: Phosphor draws on 256 and Plump on 48, where a 24-unit
+  stroke is invisible and the weight control looks dead. Scale in that one function,
+  which the preview, the thumbnails and the raster export all go through.
 - Three of the four sets carry their vendor's own categories (Plump publishes
   none, so its page filters by name only): `fetch_icons.py --categories`
   merges Coolicons' `icons/data/index.json`, Lineicons' public search index and
