@@ -165,7 +165,8 @@ changes as unverified on device rather than illustrating them.
   `tools/render_pages.js`): each capture is encoded losslessly and at q82 and the
   smaller file wins, so flat UI stays pixel-exact (lossless is smaller there) and a
   16,000px phone page takes the lossy one. The one canvas
-  keeps each artwork payload once in `<defs>` and paints instances with `<use>`.
+  inlines every mark instead of painting it through `<use>`, which Figma does not
+  import: a shared payload came back as a gap in every artboard.
 - The shelf is twelve pages, each a folder with an `index.html`: the root index, then
   `tools/`, `icons/` and its two brand folders plus the all-brands sheet at
   `icons/all/`, `fonts/`, `portfolio/`, `download/`, `renders/`, `figma/` (written by
@@ -261,7 +262,9 @@ changes as unverified on device rather than illustrating them.
 - `figma/` is the design hand-off: one SVG artboard per page per width, written by
   `tools/figma_export.js` from the pages as Chromium lays them out (text on real
   baselines, a rect per box fragment, ellipsised labels, the CSS-generated arrows
-  and step numbers). Figma imports it as editable layers. `site-figma.svg` stacks
+  and step numbers). Figma imports it as editable layers, and every text run keeps its own
+  `font-family`, `font-size`, `font-weight` and `fill` -- a run that only inherits
+  them from the wrapper group imported as an empty layer, leaving just the blocks. `site-figma.svg` stacks
   all of them on one canvas (`tools/figma_bundle.py`) and is the file to hand over:
   the app's file panel cannot preview a zip. It is a translation of
   the page, never a hand-drawn one. `tools/figma_publish.py` mirrors the exports
