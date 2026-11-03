@@ -195,6 +195,9 @@ changes as unverified on device rather than illustrating them.
   regenerated from the catalogs it counted, meta descriptions included. `docs/releases/`
   is left out on purpose -- its notes are history and keep the numbers they shipped
   with. Never hand-edit a total or a brand count; add the brand and run the generator.
+  The two icon pages are not in `COUNT_PAGES`: `fetch_icons.py` writes them from
+  tokens and states each brand's own count in prose, so the rewrite would replace
+  those numbers with the shelf total.
 - `tools/catalog.json` is the single source of truth for the apps, the fonts and the
   portfolio. `tools/build_catalog.py` re-measures the APK and the font files, copies
   each TTF from `app/res/font/` into `docs/assets/fonts/`, writes the JSON and then
