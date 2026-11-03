@@ -356,6 +356,9 @@ changes as unverified on device rather than illustrating them.
   clipboard, which takes no other image type.
 - A page the bundle does not carry shows the address of the same page on the site and
   an Open on the web button; the `WebViewClient` hands any http(s) link to the browser.
+  The fallback is built in Java, so it is not in the staged bundle: drive it with
+  `tools/webview-fallback-check.js`, which reassembles it from `classes.dex` and fails
+  unless the copy and both links render.
 - Compress's palette has one source of truth: `app/res/values/colors.xml` (Icons has
   its own in `icons-app/res/values/styles.xml`). Names are kept from the old theme on
   purpose, so a rename touches every drawable, layout and Java file that references
