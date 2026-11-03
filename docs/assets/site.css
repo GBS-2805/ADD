@@ -116,6 +116,7 @@ a { color: inherit; }
 .who-lines p { margin: 0; font-size: 17px; line-height: 24.5px; }
 .who-lines .narrow,
 .who-lines .phone { display: none; }
+.who-lines.keep p.phone { display: none; }
 .burger {
   display: flex;
   align-items: center;
@@ -409,7 +410,7 @@ footer a:hover { text-decoration: underline; }
   .who-lines .wide { display: none; }
   .who-lines .narrow { display: block; }
   .who-lines { width: auto; }
-  .who-lines.keep p { display: none; }
+  .who-lines.keep p.big { display: none; }
   .who-lines.keep p.phone { display: block; font-size: 14px; }
   .burger { width: 36px; height: 36px; margin-right: -6px; }
   .burger svg { width: 24px; height: 24px; }
