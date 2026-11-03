@@ -39,7 +39,7 @@
 <text x="456" y="516.48" fill="#131513" font-family="Poppins" font-size="17" font-weight="400" xml:space="preserve">Icons 2.19</text>
 <text x="40" y="574.52" fill="#131513" fill-opacity="0.64" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">Android 8.0+</text>
 <text x="153" y="574.52" fill="#131513" fill-opacity="0.64" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">No internet permission</text>
-<text x="337" y="574.52" fill="#131513" fill-opacity="0.64" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">Signed, no store</text>
+<text x="337" y="574.52" fill="#131513" fill-opacity="0.64" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">No sign in, no subscriptions</text>
 <rect x="40" y="621.61" width="1220" height="1" fill="#131513" fill-opacity="0.22"/>
 <text x="40" y="715.61" fill="#131513" font-family="Poppins" font-size="30" font-weight="400" letter-spacing="-0.45" xml:space="preserve">The materials</text>
 <text x="40" y="748.11" fill="#131513" fill-opacity="0.64" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">Four catalogs, one page each</text>
@@ -63,8 +63,8 @@
 <rect x="345.75" y="989.23" width="304.75" height="1" fill="#131513" fill-opacity="0.22"/>
 <text x="367.75" y="820.2" fill="#131513" fill-opacity="0.64" font-family="Poppins" font-size="12" font-weight="500" letter-spacing="1.2" xml:space="preserve">FONTS · 2 FAMILIES</text>
 <text x="367.75" y="855" fill="#131513" font-family="Poppins" font-size="22" font-weight="400" letter-spacing="-0.22" xml:space="preserve">Fonts</text>
-<text x="367.75" y="887.59" fill="#131513" font-family="Poppins" font-size="15" font-weight="400" xml:space="preserve">Poppins and Redaction 50 — woff2</text>
-<text x="367.75" y="910.84" fill="#131513" font-family="Poppins" font-size="15" font-weight="400" xml:space="preserve">for the web, TTF for the apps.</text>
+<text x="367.75" y="887.59" fill="#131513" font-family="Poppins" font-size="15" font-weight="400" xml:space="preserve">Collection of fonts: woff2 for the</text>
+<text x="367.75" y="910.84" fill="#131513" font-family="Poppins" font-size="15" font-weight="400" xml:space="preserve">web, TTF for the apps, and more.</text>
 <text x="453.75" y="960.8" fill="#131513" font-family="Poppins" font-size="13" font-weight="400" xml:space="preserve"> →</text>
 <text x="367.75" y="960.8" fill="#131513" font-family="Poppins" font-size="13" font-weight="400" xml:space="preserve">Open fonts</text>
 <rect x="954.25" y="782.2" width="1" height="208.03" fill="#131513" fill-opacity="0.22"/>
