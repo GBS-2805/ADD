@@ -166,6 +166,74 @@ public class MainActivity extends Activity {
         } else {
             restoreQueue();
         }
+
+        acceptShared(getIntent());
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+        acceptShared(intent);
+    }
+
+    /**
+     * Photos handed over by another app's Share, appended to the queue.
+     *
+     * The action is cleared once it has been read, because a theme flip recreates
+     * this activity and would otherwise queue the same photos a second time.
+     */
+    private void acceptShared(Intent intent) {
+        if (intent == null) {
+            return;
+        }
+        String action = intent.getAction();
+        if (!Intent.ACTION_SEND.equals(action) && !Intent.ACTION_SEND_MULTIPLE.equals(action)) {
+            return;
+        }
+        intent.setAction(null);
+
+        ArrayList<Uri> incoming = new ArrayList<>();
+        if (Intent.ACTION_SEND.equals(action)) {
+            Uri single = intent.getParcelableExtra(Intent.EXTRA_STREAM);
+            if (single != null) {
+                incoming.add(single);
+            }
+        } else {
+            ArrayList<Uri> many = intent.getParcelableArrayListExtra(Intent.EXTRA_STREAM);
+            if (many != null) {
+                incoming.addAll(many);
+            }
+        }
+
+        final int before = picked.size();
+        for (Uri uri : incoming) {
+            if (uri == null || picked.contains(uri) || picked.size() >= MAX_PHOTOS) {
+                continue;
+            }
+            picked.add(uri);
+            try {
+                getContentResolver().takePersistableUriPermission(
+                        uri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            } catch (Exception ignored) {
+                // A share grant lasts as long as this activity; not every provider
+                // offers one that outlives it.
+            }
+        }
+
+        final int added = picked.size() - before;
+        if (added > 0) {
+            undoClear.clear();
+            persistQueue();
+            updatePickedSummary();
+            Toast.makeText(this, added == 1
+                    ? "1 photo shared in · " + picked.size() + " queued"
+                    : added + " photos shared in · " + picked.size() + " queued",
+                    Toast.LENGTH_SHORT).show();
+        } else if (!incoming.isEmpty()) {
+            Toast.makeText(this, "That is all " + MAX_PHOTOS + " photos at once",
+                    Toast.LENGTH_SHORT).show();
+        }
     }
 
     @Override

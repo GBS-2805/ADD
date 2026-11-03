@@ -6,10 +6,10 @@
       "name": "Compress",
       "kind": "Android app",
       "status": "released",
-      "version": "1.9",
-      "version_code": 10,
+      "version": "2.0",
+      "version_code": 11,
       "package": "app.offline.compress",
-      "apk": "/Compress-1.9.apk",
+      "apk": "/Compress-2.0.apk",
       "min_android": "8.0 (API 26)",
       "summary": "Pick photos, preview the settings with a before/after slider, then compress. Fully offline: the app has no internet permission at all.",
       "features": [
@@ -32,7 +32,7 @@
         }
       ],
       "bytes": 272592,
-      "sha256": "5862071cf91e0eac6ddd5207f6d6d1cc99dc1e06d67f88bdfbe4efc6ea4ebbfd"
+      "sha256": "258d62dd7c6cb7b0df26fa4b23461b1e2aaa3d8b9d6523afb316116239289c21"
     },
     {
       "id": "icons",

@@ -139,14 +139,14 @@ HTML
 
 case "${1:-all}" in
     compress)
-        build_app app Compress Compress-1.9.apk 10 1.9
+        build_app app Compress Compress-2.0.apk 11 2.0
         ;;
     icons)
         stage_icons_assets
         build_app icons-app Icons Icons-2.4.apk 15 2.4
         ;;
     all)
-        build_app app Compress Compress-1.9.apk 10 1.9
+        build_app app Compress Compress-2.0.apk 11 2.0
         stage_icons_assets
         build_app icons-app Icons Icons-2.4.apk 15 2.4
         ;;
