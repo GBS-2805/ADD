@@ -215,7 +215,8 @@ changes as unverified on device rather than illustrating them.
   styles the apps bundle keep an `app_res` path, and `build_catalog.py` still copies
   those from `app/res/font/`, so the download cannot drift from the APK. The fonts
   page fetches `/data/fonts.json` and shows one family sheet at a time behind a
-  family picker; a row's Try button sets the preview and `fonts:preview` remembers
+  family's own face pull-down; a sheet's Try button sets the preview and
+  `fonts:preview` remembers
   the choice. Font sizes are generated into the catalog rather than quoted in HTML,
   so `build_catalog.py` checks that page for its catalog link and picker instead.
 - `docs/renders/` is the gallery page plus the captures it lists. The page shows

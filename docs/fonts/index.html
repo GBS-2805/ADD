@@ -50,8 +50,12 @@
   .familybar select:focus-visible { outline: 2px solid var(--band); outline-offset: 2px; }
   .familybar select option { color: #000; background: #d9d9d9; }
 
-  .sheet { margin-top: 22px; border-top: 1px solid var(--rule); }
-  .face { display: grid; gap: 9px; padding: 24px 0 22px; border-bottom: 1px solid var(--rule); }
+  .families { margin-top: 22px; }
+  .family { padding: 26px 0 24px; border-top: 1px solid var(--rule); }
+  .family-head { display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap; }
+  .family-head h3 { margin: 0; font-size: 26px; font-weight: 400; line-height: 1.2; letter-spacing: -.01em; }
+  .family-head .kind { font-size: 12px; font-weight: 500; letter-spacing: .1em; text-transform: uppercase; color: var(--on-dim); }
+  .face { display: grid; gap: 9px; padding: 18px 0 0; }
   .face-top { display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap; }
   .face-top h3 { margin: 0; font-size: 22px; font-weight: 400; line-height: 1.2; letter-spacing: -.01em; }
   .face .kind { font-size: 12px; font-weight: 500; letter-spacing: .1em; text-transform: uppercase; color: var(--on-dim); }
@@ -156,15 +160,10 @@ font-size: 48px;</code>
 
   <section>
     <h2>Font families</h2>
-    <p class="kicker">One sheet per family — pick a family, then try any face in it</p>
-    <div class="familybar">
-      <label for="familyPick">Family</label>
-      <select id="familyPick" aria-label="Font family">
-        <option>Poppins</option>
-      </select>
+    <p class="kicker">One sheet per family — each pull-down picks the face its sheet shows</p>
+    <div class="families" id="families">
+      <p class="fine" id="familyStatus">Loading the families…</p>
     </div>
-    <p class="kicker" id="familyNote" style="margin:14px 0 0">Loading the family sheet…</p>
-    <div class="sheet" id="sheet"></div>
     <p class="fine">Each sheet lists one family's faces. The three Poppins faces the apps bundle are byte-for-byte copies from <code>app/res/font/</code>; the rest are fetched once by <code>tools/fetch_fonts.py</code> and served from this site.</p>
   </section>
 
@@ -204,15 +203,15 @@ font-size: 48px;</code>
   var reset = document.getElementById("tryReset");
   var rule = document.getElementById("tryRule");
   var copy = document.getElementById("tryCopy");
-  var pick = document.getElementById("familyPick");
-  var sheet = document.getElementById("sheet");
-  var note = document.getElementById("familyNote");
+  var familiesEl = document.getElementById("families");
+  var status = document.getElementById("familyStatus");
   var familiesOut = document.getElementById("fontFamilies");
   var stylesOut = document.getElementById("fontStyles");
   var bytesOut = document.getElementById("fontBytes");
 
   var data = [];
-  var state = { family: "Poppins", weight: 400, style: "normal", size: 48 };
+  var shown = {};
+  var state = { family: "Poppins", weight: 400, style: "normal" };
   var DEFAULTS = {
     family: "Poppins", weight: 400, style: "normal",
     text: text.defaultValue, size: size.defaultValue
@@ -226,6 +225,9 @@ font-size: 48px;</code>
     return fam.styles.filter(function (item) {
       return item.weight === weight && item.style === style;
     })[0];
+  }
+  function defaultFace(fam) {
+    return face(fam, 400, "normal") || fam.styles[0];
   }
   function clamp(px) { return Math.min(MAX, Math.max(MIN, px)); }
   function bytes(value) { return value.toLocaleString("en-US"); }
@@ -250,39 +252,75 @@ font-size: 48px;</code>
     document.head.appendChild(tag);
   }
 
-  function fillPicker() {
-    pick.innerHTML = "";
-    data.forEach(function (fam) {
-      var option = document.createElement("option");
-      option.value = fam.family;
-      option.textContent = fam.family;
-      pick.appendChild(option);
-    });
-    pick.value = state.family;
+  function stats() {
+    if (!data.length) { return; }
+    var styles = data.reduce(function (n, fam) { return n + fam.styles.length; }, 0);
+    var woff2 = data.reduce(function (n, fam) { return n + fam.woff2_bytes; }, 0);
+    familiesOut.textContent = data.length + " families";
+    stylesOut.textContent = styles + " styles";
+    bytesOut.textContent = "woff2 " + bytes(woff2) + " bytes total";
   }
 
-  function render() {
-    var fam = family(state.family) || data[0];
-    if (!fam) { return; }
-    state.family = fam.family;
-    pick.value = fam.family;
-    note.textContent = fam.kind + " · " + fam.styles.length + " styles · " + fam.licence;
-    sheet.innerHTML = fam.styles.map(function (item) {
-      var active = item.weight === state.weight && item.style === state.style;
-      return '<article class="face">' +
-        '<div class="face-top"><span class="kind">' + fam.family + " · " + item.weight +
-          (item.style === "italic" ? " italic" : "") + "</span><h3>" + item.name + "</h3></div>" +
-        '<p class="specimen" style="font-family:\'' + fam.family + "';font-weight:" + item.weight +
-          ";font-style:" + item.style + '">Offline, no account.</p>' +
-        (item.use ? '<p class="face-use">' + item.use + "</p>" : "") +
-        '<div class="face-foot"><span class="tag">woff2 ' + bytes(item.woff2_bytes) +
-          " bytes · ttf " + bytes(item.ttf_bytes) + " bytes</span>" +
-        '<a href="' + item.woff2 + '" download>woff2</a>' +
-        '<a href="' + item.ttf + '" download>ttf</a>' +
-        '<button type="button" class="try-style" data-family="' + fam.family +
-          '" data-weight="' + item.weight + '" data-style="' + item.style +
-          '" aria-pressed="' + active + '">Try ' + item.name + "</button></div></article>";
+  function faceMarkup(fam, item) {
+    var active = fam.family === state.family && item.weight === state.weight &&
+      item.style === state.style;
+    return '<div class="face">' +
+      '<p class="specimen" style="font-family:\'' + fam.family + "';font-weight:" + item.weight +
+        ";font-style:" + item.style + '">Offline, no account.</p>' +
+      (item.use ? '<p class="face-use">' + item.use + "</p>" : "") +
+      '<div class="face-foot"><span class="tag">woff2 ' + bytes(item.woff2_bytes) +
+        " bytes · ttf " + bytes(item.ttf_bytes) + " bytes</span>" +
+      '<a href="' + item.woff2 + '" download>woff2</a>' +
+      '<a href="' + item.ttf + '" download>ttf</a>' +
+      '<button type="button" class="try-style" data-family="' + fam.family +
+        '" data-weight="' + item.weight + '" data-style="' + item.style +
+        '" aria-pressed="' + active + '">Try ' + item.name + "</button></div></div>";
+  }
+
+  function picked(fam) {
+    var choice = shown[fam.family];
+    var item = choice && face(fam, choice.weight, choice.style);
+    return item || defaultFace(fam);
+  }
+
+  function renderFamilies() {
+    if (!data.length) { return; }
+    status.hidden = true;
+    familiesEl.innerHTML = data.map(function (fam, index) {
+      var choice = picked(fam);
+      shown[fam.family] = { weight: choice.weight, style: choice.style };
+      var options = fam.styles.map(function (item) {
+        var value = item.weight + ":" + item.style;
+        var label = item.name + " — " + item.weight + (item.style === "italic" ? " italic" : "");
+        var selected = item.weight === choice.weight && item.style === choice.style;
+        return '<option value="' + value + '"' + (selected ? " selected" : "") + ">" + label + "</option>";
+      }).join("");
+      return '<section class="family" data-family="' + fam.family + '">' +
+        '<div class="family-head"><h3>' + fam.family + '</h3><span class="kind">' + fam.kind +
+          " · " + fam.styles.length + " styles · " + fam.licence + "</span></div>" +
+        '<div class="familybar"><label for="pick-' + index + '">Face</label>' +
+          '<select class="face-pick" id="pick-' + index + '" data-family="' + fam.family + '">' +
+          options + "</select></div>" +
+        '<div class="face-slot" data-family="' + fam.family + '">' + faceMarkup(fam, choice) + "</div>" +
+        "</section>";
     }).join("");
+  }
+
+  function updateSlot(name) {
+    var fam = family(name);
+    if (!fam) { return; }
+    var slot = familiesEl.querySelector('.face-slot[data-family="' + name + '"]');
+    if (slot) { slot.innerHTML = faceMarkup(fam, picked(fam)); }
+    syncPressed();
+  }
+
+  function syncPressed() {
+    Array.prototype.forEach.call(document.querySelectorAll(".try-style"), function (button) {
+      var on = button.getAttribute("data-family") === state.family &&
+        Number(button.getAttribute("data-weight")) === state.weight &&
+        button.getAttribute("data-style") === state.style;
+      button.setAttribute("aria-pressed", on ? "true" : "false");
+    });
   }
 
   function paint() {
@@ -301,15 +339,7 @@ font-size: 48px;</code>
     lines.push("font-size: " + size.value + "px;");
     rule.textContent = lines.join("\n");
     reset.hidden = !changed();
-  }
-
-  function stats() {
-    if (!data.length) { return; }
-    var styles = data.reduce(function (n, fam) { return n + fam.styles.length; }, 0);
-    var woff2 = data.reduce(function (n, fam) { return n + fam.woff2_bytes; }, 0);
-    familiesOut.textContent = data.length + " families";
-    stylesOut.textContent = styles + " styles";
-    bytesOut.textContent = "woff2 " + bytes(woff2) + " bytes total";
+    syncPressed();
   }
 
   function remember() {
@@ -339,17 +369,7 @@ font-size: 48px;</code>
       state.family = fam.family;
       state.weight = Number(saved.weight);
       state.style = String(saved.style);
-    }
-  }
-
-  function applyFamily(name) {
-    var fam = family(name);
-    if (!fam) { return; }
-    state.family = fam.family;
-    if (!face(fam, state.weight, state.style)) {
-      var regular = face(fam, 400, "normal") || fam.styles[0];
-      state.weight = regular.weight;
-      state.style = regular.style;
+      shown[fam.family] = { weight: state.weight, style: state.style };
     }
   }
 
@@ -385,20 +405,22 @@ font-size: 48px;</code>
     copied(ok);
   });
 
-  pick.addEventListener("change", function () {
-    applyFamily(pick.value);
-    render();
-    paint();
-    remember();
+  familiesEl.addEventListener("change", function (event) {
+    var select = event.target.closest(".face-pick");
+    if (!select) { return; }
+    var parts = select.value.split(":");
+    shown[select.getAttribute("data-family")] = { weight: Number(parts[0]), style: parts[1] };
+    updateSlot(select.getAttribute("data-family"));
   });
 
-  sheet.addEventListener("click", function (event) {
+  familiesEl.addEventListener("click", function (event) {
     var button = event.target.closest(".try-style");
     if (!button) { return; }
     state.family = button.getAttribute("data-family");
     state.weight = Number(button.getAttribute("data-weight"));
     state.style = button.getAttribute("data-style");
-    render();
+    shown[state.family] = { weight: state.weight, style: state.style };
+    updateSlot(state.family);
     paint();
     remember();
   });
@@ -410,7 +432,8 @@ font-size: 48px;</code>
     state.family = DEFAULTS.family;
     state.weight = Number(DEFAULTS.weight);
     state.style = DEFAULTS.style;
-    render();
+    shown = {};
+    renderFamilies();
     paint();
     try {
       localStorage.removeItem(KEY);
@@ -430,14 +453,14 @@ font-size: 48px;</code>
     .then(function (payload) {
       data = payload.families || [];
       injectFaces();
-      fillPicker();
       stats();
       restore();
-      render();
+      renderFamilies();
       paint();
+      status.hidden = true;
     })
     .catch(function () {
-      note.textContent = "The family catalog did not load; the preview still works.";
+      status.textContent = "The family catalog did not load; the preview still works.";
       paint();
     });
 })();

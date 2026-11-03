@@ -297,8 +297,8 @@ def check(catalog, count):
     # the family picker the sheet is driven by.
     if "data/fonts.json" not in text["fonts"]:
         problems.append("fonts: no link to /data/fonts.json")
-    if 'id="familyPick"' not in text["fonts"]:
-        problems.append("fonts: the family picker is missing")
+    if 'id="families"' not in text["fonts"]:
+        problems.append("fonts: the family sheets are missing")
     for family in catalog["fonts"]:
         if not family.get("styles"):
             problems.append("fonts: %s has no styles" % family["family"])
