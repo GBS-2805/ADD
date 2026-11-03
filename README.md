@@ -14,13 +14,13 @@ the pages.
 - **Icons 2.17** — APK [`dist/Icons-2.17.apk`](dist/Icons-2.17.apk)
   (1,841,488 bytes, signed v1+v2), published as `docs/Icons-2.17.apk`. Package
   `app.offline.icons` · minSdk 26 · targetSdk 35 · versionCode 28. The whole browser
-  — all four brands, 3,876 glyphs, the stylesheet and Poppins — is bundled in the APK
+  — all four brands, 4,373 glyphs, the stylesheet and Poppins — is bundled in the APK
   and served to a WebView from a private origin.
 - **Compress 2.1** — APK [`dist/Compress-2.1.apk`](dist/Compress-2.1.apk)
   (272,592 bytes, signed v1+v2, round adaptive icon), published as
   `docs/Compress-2.1.apk`. Package `app.offline.compress` · versionCode 12.
-- **Icons browser** — live at `docs/icons/`: two free brands, 606 Lineicons and
-  1,258 Coolicons, each on its own page with a preview, variant controls and the
+- **Icons browser** — live at `docs/icons/`: four free brands — 606 Lineicons,
+  1,258 Coolicons, 1,512 Phosphor and 997 Streamline — each on its own page with a preview, variant controls and the
   set folded into a scrolling sheet. Copy-on-tap, no account.
 - Theme: **one palette**, taken from the Figma frame `6-27` — an indigo field
   (`#3F4E96`), a light band (`#D9D9D9`) that also fills every call to action, black
@@ -113,7 +113,7 @@ python3 tools/build_catalog.py --check      # check only
   per brand; choosing All icons forgets it.
 - **The set folds away**: a brand's glyphs scroll inside a sheet with its own filter
   and count, and the all-brands page stacks every brand as a section — twelve glyphs
-  each, drawn from the categories the sets share — so all 1,864 stay reachable
+  each, drawn from the categories the sets share — so all 4,373 stay reachable
   without a wall of cells.
 - **Copy the file**: the exact SVG, with a textarea fallback, and inside the APK a
   Java bridge that puts it on the clipboard.

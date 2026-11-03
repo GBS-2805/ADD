@@ -156,7 +156,11 @@ def refresh_counts(total, brands):
         text = re.sub(r"(?<![\d,])\d[\d,]*(?=\s+(?:icons|shapes)\b)", total_text, before)
         text = re.sub(r"\b\d[\d,]*(?=-icon\b)", total_text, text)
         text = re.sub(r"\b(?:one|two|three|four|five|six|seven|eight|nine|ten|\d+)"
-                      r"(?=\s+(?:free\s+)?(?:brands|sets)\b)", word, text)
+                      r"(?=\s+(?:free\s+)?(?:icon\s+)?(?:brands|sets)\b)", word, text)
+        # The stats list states the total with no unit beside it, and a material
+        # card repeats it after the brand count.
+        text = re.sub(r"(?<=<span>Icons:</span><b>)\d[\d,]*(?=</b>)", total_text, text)
+        text = re.sub(r"(?<=Icons ·)([^<]*· )\d[\d,]*(?!\d)", r"\g<1>" + total_text, text)
         if text != before:
             path.write_text(text, encoding="utf-8")
             touched.append(name)
@@ -190,6 +194,64 @@ def build(catalog, count, sets):
     write(DATA / "tools.json", {"generated": generated, "tools": catalog["tools"]})
     write(DATA / "fonts.json", {"generated": generated, "fonts": catalog["fonts"]})
     write(DATA / "portfolio.json", {"generated": generated, "entries": catalog["portfolio"]})
+
+
+def category_sizes():
+    """Category tallies from the catalogs, so a caption like "102 icons" is legal."""
+    sizes = set()
+    for path in DATA.glob("*.json"):
+        if path.stem.endswith("-sheet") or path.stem in ("index", "tools", "fonts", "portfolio"):
+            continue
+        try:
+            payload = json.loads(path.read_text(encoding="utf-8"))
+        except ValueError:
+            continue
+        tally = {}
+        for glyph in payload.get("icons", []):
+            cat = glyph.get("cat")
+            if cat:
+                tally[cat] = tally.get(cat, 0) + 1
+        sizes.update(tally.values())
+    return sizes
+
+
+def audit(total, sets):
+    """Every "N icons" and every "N brands" on the site must match the catalogs.
+
+    refresh_counts fixes the phrases it knows, but a sentence phrased some other
+    way escapes it -- which is how a landing page kept saying 3,876 while its own
+    meta description said 4,373. This reads the built pages back and refuses any
+    count that is neither the total, a set's own count, nor a category size.
+    """
+    allowed = {total} | {entry["count"] for entry in sets} | category_sizes()
+    word = BRAND_WORDS.get(len(sets), str(len(sets)))
+    problems = []
+    for path in sorted(DOCS.rglob("*.html")):
+        rel = path.relative_to(ROOT).as_posix()
+        if rel.startswith(("docs/releases/", "docs/figma/")):
+            continue
+        text = path.read_text(encoding="utf-8")
+        for match in re.finditer(r"(?<![\w.-])(\d[\d,]*)\s+icons\b", text):
+            value = int(match.group(1).replace(",", ""))
+            if value not in allowed:
+                problems.append("%s: says %s icons, which is no total, set or category here"
+                                % (rel, match.group(1)))
+        for match in re.finditer(r"<span>Icons:</span><b>(\d[\d,]*)</b>", text):
+            if int(match.group(1).replace(",", "")) != total:
+                problems.append("%s: stats list says %s icons, not %s"
+                                % (rel, match.group(1), "{:,}".format(total)))
+        for match in re.finditer(r"Icons ·[^<]*·\s*(\d[\d,]*)", text):
+            if int(match.group(1).replace(",", "")) != total:
+                problems.append("%s: material card says %s icons, not %s"
+                                % (rel, match.group(1), "{:,}".format(total)))
+        for match in re.finditer(r"\b(one|two|three|four|five|six|seven|eight|nine|ten|\d+)"
+                                 r"\s+(?:free\s+)?(?:icon\s+)?(?:brands|sets)\b",
+                                 text, re.IGNORECASE):
+            stated = match.group(1).lower()
+            if stated not in (word, str(len(sets))):
+                problems.append("%s: says \"%s\" but %s brands are built"
+                                % (rel, match.group(0), len(sets)))
+    return problems
 
 
 def check(catalog, count):
@@ -250,7 +312,7 @@ def main():
           % (len(catalog["tools"]), ", ".join(released), len(catalog["fonts"]),
              len(catalog["portfolio"]), count, len(sets)))
 
-    problems = check(catalog, count)
+    problems = check(catalog, count) + audit(count, sets)
     if problems:
         print("\nstale in the pages:", file=sys.stderr)
         for problem in problems:

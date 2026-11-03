@@ -11,6 +11,18 @@ const base = process.argv[2] || "http://127.0.0.1:8765/";
 const out = process.argv[3] || "artifacts";
 const gallery = process.argv[4] || "docs/renders";
 
+// The gallery's own menu quotes the icon total, so take it from the catalog the
+// pages are built from rather than typing a number that goes stale.
+const iconTotal = (() => {
+  try {
+    const data = JSON.parse(fs.readFileSync(path.join(__dirname, "..", "docs", "data", "index.json"), "utf8"));
+    const icons = data.catalogs.find((c) => c.id === "icons");
+    return icons.count.toLocaleString("en-US");
+  } catch (error) {
+    return "";
+  }
+})();
+
 const shots = [
   { name: "page-home-light", page: "", w: 1300, h: 900, title: "Index", caption: "The landing page at its fold: the material, then two downloads." },
   { name: "page-home-full", page: "", w: 1300, h: 900, full: true, title: "Index, full height", caption: "The material, both apps and the palette." },
@@ -254,7 +266,7 @@ const escape = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/
 
 <nav class="menu" id="menu" data-open="false" aria-label="Sections">
   <a href="../">Index<span>shelf</span></a>
-  <a href="../icons/">Icons<span>1,864 icons</span></a>
+  <a href="../icons/">Icons<span>${iconTotal} icons</span></a>
   <a href="../fonts/">Fonts<span>3 faces</span></a>
   <a href="../tools/">Tools<span>2 apps</span></a>
 </nav>
