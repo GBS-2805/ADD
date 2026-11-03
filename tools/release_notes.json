@@ -2,6 +2,12 @@
   "notes": [
     {
       "id": "icons",
+      "version": "2.16",
+      "title": "Ink you choose",
+      "note": "A Colour row under Background sets the ink: Auto, white, black, indigo, green, red or any custom colour. Duo and Flat are tinted rather than flattened, so their two tones survive the choice."
+    },
+    {
+      "id": "icons",
       "version": "2.15",
       "title": "Four styles, one brand",
       "note": "Plump Solid becomes Streamline: 997 icons in Line, Duo, Solid and Flat on one page, switched by a Style row, with Duo and Flat keeping the vendor's own palette."
