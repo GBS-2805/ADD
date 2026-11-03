@@ -21,6 +21,7 @@ import argparse
 import datetime
 import hashlib
 import json
+import re
 import pathlib
 import shutil
 import sys
@@ -111,6 +112,43 @@ def write(path, payload):
     print("wrote %-28s %8d bytes" % (path.relative_to(ROOT), size(path)))
 
 
+COUNT_PAGES = ["docs/index.html", "docs/tools/index.html", "docs/portfolio/index.html",
+               "docs/download/index.html", "docs/fonts/index.html",
+               "docs/icons/index.html", "docs/icons/all/index.html"]
+BRAND_WORDS = {1: "one", 2: "two", 3: "three", 4: "four", 5: "five", 6: "six",
+               7: "seven", 8: "eight", 9: "nine", 10: "ten"}
+
+
+def refresh_counts(total, brands):
+    """Rewrite every icon total and brand count the pages state.
+
+    The shelf quotes those numbers in headings, meta descriptions, drawers and
+    footers. Rather than chase them by hand whenever a brand is added, the
+    generator rewrites the phrases it owns -- "N icons", "N-icon", "in four
+    brands", "four free sets" -- from the catalogs it has just counted. The
+    releases page is deliberately left out: its notes are history and keep the
+    numbers they were written with.
+    """
+    total_text = "{:,}".format(total)
+    word = BRAND_WORDS.get(brands, str(brands))
+    touched = []
+    for name in COUNT_PAGES:
+        path = ROOT / name
+        if not path.exists():
+            continue
+        before = path.read_text(encoding="utf-8")
+        text = re.sub(r"(?<![\d,])\d[\d,]*(?=\s+(?:icons|shapes)\b)", total_text, before)
+        text = re.sub(r"\b\d[\d,]*(?=-icon\b)", total_text, text)
+        text = re.sub(r"\b(?:one|two|three|four|five|six|seven|eight|nine|ten|\d+)"
+                      r"(?=\s+(?:free\s+)?(?:brands|sets)\b)", word, text)
+        if text != before:
+            path.write_text(text, encoding="utf-8")
+            touched.append(name)
+    print("counts: %s icons in %s brands -> %s"
+          % (total_text, brands, ", ".join(touched) or "already right"))
+    return touched
+
+
 def build(catalog, count, sets):
     generated = datetime.date.today().isoformat()
     index = {
@@ -187,6 +225,7 @@ def main():
 
     catalog = measure(json.loads(CATALOG.read_text(encoding="utf-8")))
     count, sets = icon_sets()
+    refresh_counts(count, len(sets))
     if not args.check:
         build(catalog, count, sets)
 

@@ -190,6 +190,11 @@ changes as unverified on device rather than illustrating them.
   that go stale with those pages, and the deploy headroom. Never replace version
   strings by hand — a blanket find-and-replace once relabelled twelve releases as
   2.2, and the notes only recovered their real versions by reading the commits again.
+- `build_catalog.py` also rewrites the numbers the pages state: every "N icons",
+  "N-icon" and "in four brands" / "four free sets" phrase in the shelf pages is
+  regenerated from the catalogs it counted, meta descriptions included. `docs/releases/`
+  is left out on purpose -- its notes are history and keep the numbers they shipped
+  with. Never hand-edit a total or a brand count; add the brand and run the generator.
 - `tools/catalog.json` is the single source of truth for the apps, the fonts and the
   portfolio. `tools/build_catalog.py` re-measures the APK and the font files, copies
   each TTF from `app/res/font/` into `docs/assets/fonts/`, writes the JSON and then
