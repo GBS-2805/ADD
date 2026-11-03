@@ -31,22 +31,28 @@ BUNDLE = "site-figma.svg"
 
 # The exporter writes every image twice: the payload under plain `href` and again
 # under `xlink:href`. One copy paints the picture and the other is dead weight --
-# just over a megabyte across the served artboards. Drop the redundant attribute,
-# but only when the two are byte-identical, so the picture cannot change.
+# just over a megabyte across the served artboards. Drop the redundant attribute
+# and spell what is left the same way in every file: `xlink:href`, which every SVG
+# reader accepts and Figma's importer expects.
 IMAGE_TAG = re.compile(r"<image\b[^>]*?/>")
 ATTRIBUTE = re.compile(r'([\w:-]+)="([^"]*)"')
+XLINK = "http://www.w3.org/1999/xlink"
 
 
 def one_payload(text):
-    keep = "xlink:href" if "xmlns:xlink" in text[:800] else "href"
-    drop = "href" if keep == "xlink:href" else "xlink:href"
+    if "xmlns:xlink" not in text[:4000]:
+        text = text.replace("<svg ", '<svg xmlns:xlink="%s" ' % XLINK, 1)
 
     def strip(match):
         tag = match.group(0)
         hrefs = {k: v for k, v in ATTRIBUTE.findall(tag) if k.endswith("href")}
-        if len(hrefs) < 2 or len(set(hrefs.values())) != 1:
-            return tag
-        return re.sub(r'\s+%s="[^"]*"' % re.escape(drop), "", tag, count=1)
+        if not hrefs or len(set(hrefs.values())) > 1:
+            return tag  # nothing to drop, or the copies disagree: leave it alone
+        value = next(iter(hrefs.values()))
+        tag = re.sub(r'\s+href="[^"]*"', "", tag, count=1)
+        if not re.search(r'\sxlink:href="', tag):
+            tag = tag[: -len("/>")].rstrip() + ' xlink:href="%s"/>' % value
+        return tag
 
     return IMAGE_TAG.sub(strip, text)
 
