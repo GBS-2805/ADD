@@ -12,6 +12,8 @@ WebP exists, so the gallery folder never holds two copies of one capture.
 import pathlib
 import sys
 
+WEBP_LIMIT = 16000
+
 from PIL import Image
 
 LOSSY = None  # lossless on purpose: these are evidence, not decoration.
@@ -34,7 +36,17 @@ def main(argv):
             missing.append(name)
             continue
         out = dst / (name + ".webp")
-        Image.open(png).convert("RGB").save(out, "WEBP", lossless=True, method=6)
+        image = Image.open(png).convert("RGB")
+        # WebP refuses anything longer than 16,383 px, and a full-height capture at 2x
+        # device scale can pass that. Shrink the outliers to fit: a slightly smaller
+        # screenshot beats a capture run that aborts and leaves the gallery behind.
+        longest = max(image.size)
+        if longest > WEBP_LIMIT:
+            scale = WEBP_LIMIT / longest
+            image = image.resize((max(1, round(image.width * scale)),
+                                  max(1, round(image.height * scale))), Image.LANCZOS)
+            print("  shrunk %s to %dx%d" % (png.name, image.width, image.height))
+        image.save(out, "WEBP", lossless=True, method=6)
         smaller += png.stat().st_size - out.stat().st_size
         made.append(name)
         if png.parent == dst:
