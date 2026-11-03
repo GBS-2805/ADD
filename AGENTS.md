@@ -47,6 +47,9 @@ that text changed.
   hand if `assets/logo.svg` changes.
 - Only then copy into `docs/renders/`, add it to `docs/renders/index.html`, and
   deploy -- the gallery only shows files listed there.
+- To look at captures without publishing anything, set `RENDERS_NO_GALLERY=1` on
+  `tools/render_pages.js`: the shots stay in `artifacts/`, `docs/renders/` is left
+  alone, and no deploy or release is involved.
 
 ### Renders are captures, never drawings
 

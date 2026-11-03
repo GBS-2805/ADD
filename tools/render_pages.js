@@ -153,6 +153,14 @@ const escape = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/
   console.log("console errors:", errors.length ? errors : "none");
   await browser.close();
 
+  if (process.env.RENDERS_NO_GALLERY === "1") {
+    // Captures stay where they were taken: nothing enters docs/, so nothing has to
+    // be deployed or released just to look at them.
+    console.log(`renders left in ${out}; docs/renders untouched (RENDERS_NO_GALLERY=1)`);
+    await browser.close();
+    process.exit(0);
+  }
+
   // Copy the shots in and rebuild the gallery, so the folder and the page agree.
   // The captures go in as lossless WebP: same pixels, about a third of the bytes,
   // which is what keeps the whole site inside the host's 10 MiB deploy budget.
