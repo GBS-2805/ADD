@@ -231,13 +231,21 @@ changes as unverified on device rather than illustrating them.
   `tools/icons_all_template.html` (the all-brands sheet at `docs/icons/all/`).
   Edit the templates and regenerate with `python3 tools/fetch_icons.py --pages-only`,
   never the output. Each page is ~27 KB: it loads its brand's catalog at run time
-  instead of inlining glyphs. The Icons bundle stages all four JSONs -- `icons.json`
+  instead of inlining glyphs. The Icons bundle stages one catalog and one sheet per brand -- `icons.json`
   and `coolicons.json` for the brand pages, `lineicons-sheet.json` and
   `coolicons-sheet.json` for the all-brands sheet, which fetches the sheets  rather than the full catalogs. Miss one and that page renders empty sections inside the
   app while still perfect on the site, which is what the 2.5 build shipped and the next
-    release fixed. The staging list is written by hand, so `build.sh` runs
+    release fixed. That list is derived from the brand table (`--data-files`), so `build.sh` runs
     `tools/check_bundle.py` over the staged pages and fails the build if a
     reference any of them makes does not resolve inside the bundle.
+- Brands are declared in one table in `tools/fetch_icons.py`: slug, display name,
+  source, licence and where its catalog lives. Lineicons, Coolicons and Phosphor
+  are fetched (Phosphor's regular weight, 1,512 outline icons, from its npm
+  package); Ziia's two Geometric Shapes sets have no public source and are read
+  from exported SVGs in `icon-src/geometric-shapes-1/` and `-2/`, each brand
+  appearing as soon as its folder holds files. A brand with no catalog yet is
+  skipped rather than failing the run, so the pages stay whole while one is still
+  being exported.
 - The left pull-down of all three icon pages opens with All, linking to
   `/icons/all/`: twelve glyphs per brand, one from every category — the first name in
   the catalog for that category. Categories are matched across sets on a plain key
@@ -246,7 +254,7 @@ changes as unverified on device rather than illustrating them.
   read down the page; a set short of twelve is topped up with its own categories from
   the start of its catalog. There are no tabs:
   every brand is a section stacked under the one before it, so the page is the list and
-  a third set only needs another section. A phone gets the name, its note, the sheet
+  a new set only needs another section. A phone gets the name, its note, the sheet
   four across and three down (about 200px tall) and the link to the whole set; from
   1000px the name and note move to the left of the sheet, which goes six across and two
   down, so a brand reads as one row. Do not widen the cells, raise the cap or bring

@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta name="theme-color" content="#3f4e96" />
 <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml" />
-<title>Icons — 1,864 icons in two free brands, offline</title>
-<meta name="description" content="The Icons app and the browser it wraps: 606 Lineicons and 1,258 Coolicons, 1,864 icons, a live preview with weight, size and surface, and copy-to-clipboard. Offline, no account, no network permission." />
+<title>Icons — 3,376 icons in two free brands, offline</title>
+<meta name="description" content="The Icons app and the browser it wraps: Lineicons, Coolicons and Phosphor, 3,376 icons, a live preview with weight, size and surface, and copy-to-clipboard. Offline, no account, no network permission." />
 <link rel="stylesheet" href="../assets/site.css" />
 <style>
   /* page-only: the brand cards and the app notes */
@@ -57,9 +57,10 @@
 </header>
 
 <nav class="menu" id="menu" data-open="false" aria-label="Icon brands">
-  <a href="../icons/all/">All<span>1,864</span></a>
+  <a href="../icons/all/">All<span>3,376</span></a>
   <a href="../icons/lineicons/">Lineicons<span>606</span></a>
   <a href="../icons/coolicons/">Coolicons<span>1,258</span></a>
+  <a href="../icons/phosphor/">Phosphor<span>1,512</span></a>
 </nav>
 
 <div class="scrim" id="scrim" data-open="false"></div>
@@ -72,13 +73,13 @@
   <a href="../portfolio/">Portfolio<span>3 projects</span></a>
   <a href="../renders/">Renders<span>gallery</span></a>
   <a href="../releases/">Releases<span>history</span></a>
-  <p class="drawer-note">Icons · 1,864 icons in two brands, packaged offline. The shelf is at the index.</p>
+  <p class="drawer-note">Icons · 3,376 icons in two brands, packaged offline. The shelf is at the index.</p>
 </aside>
 
 <main>
   <header class="page-head">
     <h1>Icons</h1>
-    <p class="lede">Two whole free sets in one browser — <b>1,864 icons</b>. Pick a brand, preview any icon at the weight, size and surface you need, then copy the SVG. The app ships this page and its two catalogs inside the APK, so it works with the radio off.</p>
+    <p class="lede">Two whole free sets in one browser — <b>3,376 icons</b>. Pick a brand, preview any icon at the weight, size and surface you need, then copy the SVG. The app ships this page and its two catalogs inside the APK, so it works with the radio off.</p>
     <a class="cta" href="../Icons-2.9.apk" download id="apk">
       <svg class="cta-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M8 12L12 16L16 12M12 16V4M6 20H18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
       Download Icons 2.9
@@ -107,6 +108,12 @@
         <p>Coolicons drawn as strokes with regular corners: 1,258 icons, the variant that matches the hairline chrome these pages use.</p>
         <span class="go">Open Coolicons</span>
       </a>
+      <a class="brand" href="phosphor/">
+        <span class="kind">Brand · MIT · 1,512</span>
+        <h3>Phosphor</h3>
+        <p>Phosphor's regular weight, whole: 1,512 outline icons drawn on a 256 px grid, the weight its own site calls the default.</p>
+        <span class="go">Open Phosphor</span>
+      </a>
     </div>
   </section>
 
@@ -115,7 +122,7 @@
     <p class="kicker">The same page, bundled offline</p>
     <ul class="rows">
       <li><b>Two brands</b><span>The left pull-down lists the brands; each one opens its own page with its own catalog.</span></li>
-      <li><b>Categories</b><span>Coolicons filters by the vendor's own categories — System, Arrow, Edit, Media and the rest — beside the name filter, inside the set.</span></li>
+      <li><b>Categories</b><span>The sets whose vendor publishes categories filter by them beside the name filter; the rest filter by name alone.</span></li>
       <li><b>Live preview</b><span>Pick an icon and it fills the preview tab. Weight, size and surface repaint it as you press, without touching the file.</span></li>
       <li><b>Quiet by default</b><span>The whole set hides behind one toggle and scrolls inside its own sheet, so the page is a preview rather than a wall of icons.</span></li>
       <li><b>Copy the file</b><span>Copy SVG puts the exact markup on the clipboard: 24×24 viewBox, <code>currentColor</code>, no baked weight.</span></li>
@@ -127,8 +134,9 @@
     <h2>Same files</h2>
     <p class="kicker">The app reads what this site serves</p>
     <ul class="rows">
-      <li><b><a href="../data/icons.json">/data/icons.json</a></b><span>606 Lineicons icons with their markup.</span></li>
-      <li><b><a href="../data/coolicons.json">/data/coolicons.json</a></b><span>1,258 Coolicons icons, line style with regular corners.</span></li>
+            <li><b><a href="../data/icons.json">/data/icons.json</a></b><span>606 Lineicons icons with their markup.</span></li>
+      <li><b><a href="../data/coolicons.json">/data/coolicons.json</a></b><span>1,258 Coolicons icons with their markup.</span></li>
+      <li><b><a href="../data/phosphor.json">/data/phosphor.json</a></b><span>1,512 Phosphor icons with their markup.</span></li>
     </ul>
     <p class="fine">Both catalogs are generated from the vendors' repositories by <code>tools/fetch_icons.py</code>, which also writes these pages. Names and markup cannot drift between the phone and the web, because there is only one copy of each icon.</p>
   </section>
@@ -146,7 +154,7 @@
 </main>
 
 <footer>
-  <p>Icons 2.9 · app.offline.icons · 606 Lineicons and 1,258 Coolicons, both MIT. The paid icons sold on either vendor's site are neither included nor copied.</p>
+  <p>Icons 2.9 · app.offline.icons · Lineicons, Coolicons and Phosphor. Every set is MIT except the two Geometric Shapes sets, which are Ziia's Figma files. The paid icons sold on either vendor's site are neither included nor copied.</p>
   <p><a href="../">Index</a> · <a href="../tools/">Tools</a> · <a href="../fonts/">Fonts</a> · <a href="../download/">Download</a> · <a href="../renders/">Renders</a></p>
 </footer>
 

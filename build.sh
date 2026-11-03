@@ -122,15 +122,13 @@ stage_icons_assets() {
     rm -rf "$ROOT/icons-app/assets"
     mkdir -p "$www/icons" "$www/assets/fonts" "$www/data"
     cp "$ROOT/docs/icons/index.html" "$www/icons/"
-    cp -r "$ROOT/docs/icons/lineicons" "$www/icons/"
-    cp -r "$ROOT/docs/icons/coolicons" "$www/icons/"
-    cp -r "$ROOT/docs/icons/all" "$www/icons/"
+    for dir in "$ROOT"/docs/icons/*/; do cp -r "$dir" "$www/icons/"; done
     cp "$ROOT/docs/assets/site.css" "$ROOT/docs/assets/site.js" \
        "$ROOT/docs/assets/favicon.svg" "$www/assets/"
     cp "$ROOT"/docs/assets/fonts/*.woff2 "$www/assets/fonts/"
-    cp "$ROOT/docs/data/icons.json" "$ROOT/docs/data/coolicons.json" \
-       "$ROOT/docs/data/lineicons-sheet.json" "$ROOT/docs/data/coolicons-sheet.json" \
-       "$www/data/"
+    for name in $(cd "$ROOT" && python3 tools/fetch_icons.py --data-files); do
+        [ -f "$ROOT/docs/data/$name" ] && cp "$ROOT/docs/data/$name" "$www/data/"
+    done
     # The site root is not bundled; a page that asks for "/" gets the browser.
     cat > "$www/index.html" <<'HTML'
 <!doctype html><meta charset="utf-8"><meta http-equiv="refresh" content="0;url=icons/">

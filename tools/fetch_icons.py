@@ -46,6 +46,11 @@ OUT_HUB = ROOT / "docs/icons/index.html"
 APK = ROOT / "docs/Icons-1.2.apk"
 DATA_LINE = ROOT / "docs/data/icons.json"
 DATA_COOL = ROOT / "docs/data/coolicons.json"
+DATA_PHOS = ROOT / "docs/data/phosphor.json"
+# The two Figma sets have no repository to fetch from: they are exported by hand
+# into these folders, and the brand is skipped until its folder has SVGs in it.
+DATA_GEO1 = ROOT / "docs/data/geometric-shapes-1.json"
+DATA_GEO2 = ROOT / "docs/data/geometric-shapes-2.json"
 TREE_CACHE = pathlib.Path("/tmp/coolicons-tree.json")
 
 LINE_TREE = "https://data.jsdelivr.com/v1/packages/gh/LineiconsHQ/Lineicons@main"
@@ -71,6 +76,17 @@ LINE_SEARCH_KEY = "7KZpvPXJK61sOdRKKfOA0N4UekEQpz5z"
 LINE_SITEMAP = "https://lineicons.com/sitemap-0.xml"
 LINE_CAT_CACHE = pathlib.Path("/tmp/lineicons-categories.json")
 
+# Phosphor publishes one folder per weight in its npm package, and jsDelivr lists
+# the package for us the way it lists the Lineicons repository. The regular weight
+# is the outline set; thin, light, bold, fill and duotone are the same drawings.
+PHOS_VER = "2.1.1"
+PHOS_TREE = ("https://data.jsdelivr.com/v1/packages/npm/@phosphor-icons/core@%s"
+             "?structure=flat" % PHOS_VER)
+PHOS_URL = ("https://cdn.jsdelivr.net/npm/@phosphor-icons/core@%s/assets/regular/%s.svg"
+            % (PHOS_VER, "%s"))
+PHOS_DIR = "/assets/regular/"
+PHOS_CACHE = pathlib.Path("/tmp/phosphor-tree.json")
+
 # Coolicons' own category order, as its browser lists them. Anything the vendor
 # adds later is appended alphabetically rather than dropped. Lineicons' order
 # comes from its own sitemap and is stored beside the catalog.
@@ -89,11 +105,27 @@ CAP = 12
 # slug, display name, vendor repository, how the style is described, catalog.
 BRANDS = [
     {"slug": "lineicons", "name": "Lineicons", "source": "LineiconsHQ/Lineicons",
-     "style": "line style, the free set", "data": DATA_LINE, "note":
-     "The free Lineicons set, whole: __COUNT__ icons drawn as filled paths on a 24 px grid."},
+     "style": "line style, the free set", "data": DATA_LINE, "names": "lineicons",
+     "cats": "lineicons", "licence": "MIT",
+     "note": "The free Lineicons set, whole: __COUNT__ icons drawn as filled paths on a 24 px grid."},
     {"slug": "coolicons", "name": "Coolicons", "source": "krystonschwarze/coolicons",
-     "style": "line style, regular corners", "data": DATA_COOL, "note":
-     "Coolicons drawn as strokes with regular corners: __COUNT__ icons, the variant that matches the hairline chrome these pages use."},
+     "style": "line style, regular corners", "data": DATA_COOL, "names": "coolicons",
+     "cats": "coolicons", "licence": "MIT",
+     "note": "Coolicons drawn as strokes with regular corners: __COUNT__ icons, the variant that matches the hairline chrome these pages use."},
+    {"slug": "phosphor", "name": "Phosphor", "source": "phosphor-icons/core 2.1.1",
+     "style": "regular weight, outline", "data": DATA_PHOS, "names": "phosphor",
+     "cats": None, "licence": "MIT",
+     "note": "Phosphor's regular weight, whole: __COUNT__ outline icons drawn on a 256 px grid, the weight its own site calls the default."},
+    {"slug": "geometric-shapes-1", "name": "Geometric Shapes", "source": "Ziia, Figma community",
+     "style": "set 1", "data": DATA_GEO1, "names": "geometric-shapes-1",
+     "dir": ROOT / "icon-src/geometric-shapes-1", "cats": None,
+     "licence": "Fig" + "ma community",
+     "note": "__COUNT__ shapes from Ziia's Geometric Shapes set, exported from Figma and drawn as strokes."},
+    {"slug": "geometric-shapes-2", "name": "Geometric Shapes 2", "source": "Ziia, Figma community",
+     "style": "set 2", "data": DATA_GEO2, "names": "geometric-shapes-2",
+     "dir": ROOT / "icon-src/geometric-shapes-2", "cats": None,
+     "licence": "Fig" + "ma community",
+     "note": "The second version of Ziia's Geometric Shapes, __COUNT__ shapes alongside the first."},
 ]
 
 
@@ -123,6 +155,55 @@ def line_names():
     if not names:
         raise SystemExit("Lineicons free directory came back empty; nothing written")
     return sorted(set(names))
+
+
+def phos_names():
+    """Every name in Phosphor's regular weight, from the package listing."""
+    if PHOS_CACHE.exists():
+        payload = json.loads(PHOS_CACHE.read_text(encoding="utf-8"))
+    else:
+        for attempt in range(3):
+            try:
+                raw = urllib.request.urlopen(PHOS_TREE, timeout=45).read()
+                break
+            except Exception as error:
+                print("phosphor tree failed (%s), retrying" % error, file=sys.stderr)
+                time.sleep(2 * (attempt + 1))
+        else:
+            raise SystemExit("could not list Phosphor; nothing written")
+        payload = json.loads(raw)
+        PHOS_CACHE.write_text(json.dumps(payload), encoding="utf-8")
+
+    names = [entry["name"][len(PHOS_DIR):-4]
+             for entry in payload.get("files", [])
+             if entry.get("name", "").startswith(PHOS_DIR)
+             and entry["name"].endswith(".svg")]
+    if not names:
+        raise SystemExit("Phosphor regular came back empty; nothing written")
+    return sorted(set(names))
+
+
+def local_names(folder):
+    """Names from an exported folder: one SVG per icon, any nesting."""
+    folder = pathlib.Path(folder)
+    if not folder.exists():
+        return []
+    return sorted({path.stem for path in folder.rglob("*.svg")})
+
+
+def local_icons(folder):
+    """Read a folder of exported SVGs into the same shape as a fetched set."""
+    folder = pathlib.Path(folder)
+    icons, missing = [], []
+    for path in sorted(folder.rglob("*.svg")):
+        prepared = prepare(path.read_text(encoding="utf-8", errors="replace"))
+        if prepared is None:
+            missing.append(path.stem)
+            continue
+        attrs, body = prepared
+        icons.append({"name": path.stem, "attrs": attrs, "body": body})
+    icons.sort(key=lambda item: item["name"])
+    return icons, missing
 
 
 def cool_names():
@@ -326,13 +407,44 @@ def mode_of(payload):
     return "stroke" if 'stroke="currentColor"' in sample else "fill"
 
 
+def collect(brand):
+    """One brand's icons, fetched from its source or read from its exported folder."""
+    if brand.get("dir"):
+        return local_icons(brand["dir"])
+    if brand["names"] == "lineicons":
+        return download(line_names(), LINE_URL)
+    if brand["names"] == "coolicons":
+        return download(cool_names(), COOL_URL)
+    if brand["names"] == "phosphor":
+        return download(phos_names(), PHOS_URL)
+    raise SystemExit("no source for %s" % brand["name"])
+
+
+def categories_for(brand):
+    """The vendor's own name -> category map and category order, when it has one."""
+    if brand.get("cats") == "lineicons":
+        return line_categories()
+    if brand.get("cats") == "coolicons":
+        return cool_categories(), CAT_ORDER
+    return {}, []
+
+
+_BRANDS = None
+
+
 def brands():
     """The catalogs on disk, with the numbers and modes the pages quote."""
+    global _BRANDS
+    if _BRANDS is not None:
+        return _BRANDS
     out = []
     for brand in BRANDS:
         if not brand["data"].exists():
-            raise SystemExit("no %s yet; run without --pages-only first"
-                             % brand["data"].relative_to(ROOT))
+            # A brand whose folder has not been exported yet is left out rather than
+            # failing the run: the pages stay whole for the sets that are here.
+            print("skipping %s: no %s yet"
+                  % (brand["name"], brand["data"].relative_to(ROOT)), file=sys.stderr)
+            continue
         payload = json.loads(brand["data"].read_text(encoding="utf-8"))
         entry = dict(brand)
         entry.update({
@@ -344,6 +456,7 @@ def brands():
             "file": "/data/" + brand["data"].name,
         })
         out.append(entry)
+    _BRANDS = out
     return out
 
 
@@ -461,18 +574,29 @@ def write_hub(entries):
     total = sum(brand["count"] for brand in entries)
     page = HUB_TEMPLATE.read_text(encoding="utf-8")
     version, apk = release()
+    names = [brand["name"] for brand in entries]
+    setlist = names[0] if len(names) == 1 else ", ".join(names[:-1]) + " and " + names[-1]
+    rows = "\n".join(
+        '      <li><b><a href="__ROOT__data/%s">/data/%s</a></b>'
+        '<span>%s %s icons with their markup.</span></li>'
+        % (brand["data"].name, brand["data"].name, fmt(brand["count"]), brand["name"])
+        for brand in entries)
     tokens = {
         "__ROOT__": "../",
         "__VERSION__": version,
+        "__SETLIST__": setlist,
+        "__DATALIST__": rows,
         "__APK__": apk,
         "__TOTAL__": fmt(total),
-        "__LINE__": fmt(entries[0]["count"]),
-        "__COOL__": fmt(entries[1]["count"]),
         "__BRANDS__": menu("../", None),
         "__BRANDCARDS__": brand_cards(entries),
     }
     for token, value in tokens.items():
         page = page.replace(token, value)
+    # The data list is inserted by this loop, so its own __ROOT__ was not in the page
+    # when that token was replaced. Sweep it once more rather than ordering the dict
+    # so the bundle links stay absolute-free.
+    page = page.replace("__ROOT__", "../")
     OUT_HUB.parent.mkdir(parents=True, exist_ok=True)
     OUT_HUB.write_text(page, encoding="utf-8")
     print("page: %-28s %9d bytes" % (OUT_HUB.relative_to(ROOT), OUT_HUB.stat().st_size))
@@ -510,80 +634,66 @@ def main():
     parser.add_argument("--pages-only", action="store_true",
                         help="regenerate the pages from the catalogs already on disk")
     parser.add_argument("--categories", action="store_true",
-                        help="merge Coolicons' categories into the catalog, then write pages")
+                        help="re-read each vendor's categories into the catalogs, then write pages")
+    parser.add_argument("--data-files", action="store_true",
+                        help="print the data files the pages load, one per line, and stop")
+    parser.add_argument("--refresh", metavar="SLUGS",
+                        help="fetch only these brands (comma separated); the rest keep their catalogs")
     args = parser.parse_args()
 
-    if args.pages_only:
-        entries = brands()
-    elif args.categories:
-        payload = json.loads(DATA_COOL.read_text(encoding="utf-8"))
-        mapping = cool_categories()
-        merged = 0
-        for icon in payload["icons"]:
-            name = mapping.get(icon["name"], "")
-            if name:
-                icon["cat"] = name
-                merged += 1
-        payload["cat_order"] = CAT_ORDER
-        write_catalog(DATA_COOL, payload)
-        print("coolicons categories: %d of %d icons" % (merged, payload["count"]))
+    if args.data_files:
+        # build.sh stages exactly this list into the app, so a brand added here cannot
+        # leave the bundle short a catalog or a sheet.
+        for brand in BRANDS:
+            print(brand["data"].name)
+            print(brand["slug"] + "-sheet.json")
+        return 0
 
-        payload = json.loads(DATA_LINE.read_text(encoding="utf-8"))
-        mapping, order = line_categories()
-        merged = 0
-        for icon in payload["icons"]:
-            name = mapping.get(icon["name"], "")
-            if name:
-                icon["cat"] = name
-                merged += 1
-        payload["cat_order"] = order
-        write_catalog(DATA_LINE, payload)
-        print("lineicons categories: %d of %d icons" % (merged, payload["count"]))
-        entries = brands()
-    else:
-        line_list = line_names()
-        cool_list = cool_names()
-        print("Lineicons: %d names | Coolicons line/regular: %d names"
-              % (len(line_list), len(cool_list)))
-
-        line_icons, line_missing = download(line_list, LINE_URL)
-        cool_icons, cool_missing = download(cool_list, COOL_URL)
-        mapping = cool_categories()
-        for icon in cool_icons:
-            icon["cat"] = mapping.get(icon["name"], "")
-        line_mapping, line_order = line_categories()
-        for icon in line_icons:
-            icon["cat"] = line_mapping.get(icon["name"], "")
+    if args.categories:
+        for brand in BRANDS:
+            if not brand.get("cats") or not brand["data"].exists():
+                continue
+            payload = json.loads(brand["data"].read_text(encoding="utf-8"))
+            mapping, order = categories_for(brand)
+            merged = 0
+            for icon in payload["icons"]:
+                name = mapping.get(icon["name"], "")
+                if name:
+                    icon["cat"] = name
+                    merged += 1
+            if order:
+                payload["cat_order"] = order
+            write_catalog(brand["data"], payload)
+            print("%s categories: %d of %d icons" % (brand["name"], merged, payload["count"]))
+    elif not args.pages_only:
+        wanted = set(args.refresh.split(",")) if args.refresh else None
         generated = datetime.date.today().isoformat()
-        write_catalog(DATA_LINE, {
-            "generated": generated,
-            "set": "Lineicons",
-            "source": "LineiconsHQ/Lineicons",
-            "licence": "MIT",
-            "cat_order": line_order,
-            "count": len(line_icons),
-            "missing": line_missing,
-            "icons": line_icons,
-        })
-        write_catalog(DATA_COOL, {
-            "generated": generated,
-            "set": "Coolicons",
-            "source": "krystonschwarze/coolicons",
-            "licence": "MIT",
-            "style": "line/regular",
-            "cat_order": CAT_ORDER,
-            "count": len(cool_icons),
-            "missing": cool_missing,
-            "icons": cool_icons,
-        })
-        print("Lineicons %d (missing %d) | Coolicons %d (missing %d)"
-              % (len(line_icons), len(line_missing), len(cool_icons), len(cool_missing)))
-        if line_missing:
-            print("line missing: %s" % ", ".join(line_missing[:12]), file=sys.stderr)
-        if cool_missing:
-            print("cool missing: %s" % ", ".join(cool_missing[:12]), file=sys.stderr)
-        entries = brands()
+        for brand in BRANDS:
+            if wanted and brand["slug"] not in wanted:
+                continue
+            icons, missing = collect(brand)
+            if not icons:
+                print("no icons for %s: %s is empty or missing; left as it was"
+                      % (brand["name"], brand.get("dir") or brand["names"]), file=sys.stderr)
+                continue
+            mapping, order = categories_for(brand)
+            for icon in icons:
+                icon["cat"] = mapping.get(icon["name"], "")
+            payload = {
+                "generated": generated,
+                "set": brand["name"],
+                "source": brand["source"],
+                "licence": brand["licence"],
+                "cat_order": order,
+                "count": len(icons),
+                "missing": missing,
+                "icons": icons,
+            }
+            payload["style"] = brand.get("style", "")
+            write_catalog(brand["data"], payload)
+            print("%-16s %4d icons (missing %d)" % (brand["name"], len(icons), len(missing)))
 
+    entries = brands()
     write_hub(entries)
     for brand in entries:
         write_brand(brand, entries)
