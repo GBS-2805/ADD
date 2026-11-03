@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
-"""Store the gallery's captures as lossless WebP instead of PNG.
+"""Store the gallery's captures as WebP instead of PNG.
 
     python3 tools/to_webp.py <pngDir> <galleryDir> <name> [<name> ...]
 
-The screenshots are the heaviest thing the site serves and the whole site has to
-fit in the host's 10 MiB deploy budget. Lossless WebP keeps exactly the same
-pixels in roughly a third of the bytes -- it is a re-encoding, not a re-take, so
-every image is still a capture of a page that ran. The PNG is removed once its
-WebP exists, so the gallery folder never holds two copies of one capture.
+The screenshots are the heaviest thing the site serves. Each capture is encoded
+twice -- losslessly and at LOSSY_QUALITY -- and the smaller file wins: flat panels
+and sharp text compress better losslessly (the landing page is 92 KB lossless
+against 217 KB at q82), while a 16,000px phone page is a third of the size lossy
+(1.9 MB -> 799 KB at 35.5 dB PSNR). Picking per image means the folder never grows
+to save bytes, and every image is still a capture of a page that ran: a
+re-encoding, not a re-take. The PNG is removed once its WebP exists.
 """
 import pathlib
 import sys
@@ -16,7 +18,8 @@ WEBP_LIMIT = 16000
 
 from PIL import Image
 
-LOSSY = None  # lossless on purpose: these are evidence, not decoration.
+# Tried against lossless on every capture; whichever file is smaller is kept.
+LOSSY_QUALITY = 82
 
 
 def main(argv):
@@ -46,7 +49,17 @@ def main(argv):
             image = image.resize((max(1, round(image.width * scale)),
                                   max(1, round(image.height * scale))), Image.LANCZOS)
             print("  shrunk %s to %dx%d" % (png.name, image.width, image.height))
-        image.save(out, "WEBP", lossless=True, method=6)
+        import io
+        plain = io.BytesIO()
+        image.save(plain, "WEBP", lossless=True, method=6)
+        lossy = io.BytesIO()
+        image.save(lossy, "WEBP", quality=LOSSY_QUALITY, method=6)
+        if len(lossy.getvalue()) < len(plain.getvalue()):
+            out.write_bytes(lossy.getvalue())
+            print("  lossy q%d for %s: %.1f KB vs %.1f KB lossless"
+                  % (LOSSY_QUALITY, name, len(lossy.getvalue()) / 1024, len(plain.getvalue()) / 1024))
+        else:
+            out.write_bytes(plain.getvalue())
         smaller += png.stat().st_size - out.stat().st_size
         made.append(name)
         if png.parent == dst:

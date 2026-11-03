@@ -153,8 +153,10 @@ changes as unverified on device rather than illustrating them.
   10 MiB for the whole folder**, refusing an oversize one with `invalid_type`, an error
   that never mentions size -- so if a Sites deploy fails for no visible reason, check
   the budget first. `python3 tools/figma_publish.py` prints the headroom on every
-  run. Captures ship as lossless WebP (`tools/to_webp.py`,
-  wired into `tools/render_pages.js`): same pixels, a third of the bytes. The one canvas
+  run. Captures ship as WebP (`tools/to_webp.py`, wired into
+  `tools/render_pages.js`): each capture is encoded losslessly and at q82 and the
+  smaller file wins, so flat UI stays pixel-exact (lossless is smaller there) and a
+  16,000px phone page takes the lossy one. The one canvas
   keeps each artwork payload once in `<defs>` and paints instances with `<use>`.
 - The shelf is twelve pages, each a folder with an `index.html`: the root index, then
   `tools/`, `icons/` and its two brand folders plus the all-brands sheet at
