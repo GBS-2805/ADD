@@ -2,6 +2,12 @@
   "notes": [
     {
       "id": "icons",
+      "version": "2.4",
+      "title": "All brands, 103 KB",
+      "note": "The all-brands sheet in the app now downloads one glyph per category from a per-set sheet instead of both catalogs, so the same twelve picks come down at 103 KB rather than 1.67 MB."
+    },
+    {
+      "id": "icons",
       "version": "2.3",
       "title": "All brands in the app",
       "note": "The left pull-down opens with All, and the page behind it travels inside the APK: a tab per brand over a sheet of twenty icons, one from each category, so the two sets can be read side by side with the radio off."

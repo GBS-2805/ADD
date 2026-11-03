@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-02",
+  "generated": "2026-11-03",
   "site": {
     "name": "Compress",
     "tagline": "A design shelf: two free icon brands, Poppins, one palette, and two offline Android apps built from them.",
@@ -65,10 +65,10 @@
     {
       "id": "icons",
       "name": "Icons",
-      "version": "2.3",
-      "apk": "/Icons-2.3.apk",
+      "version": "2.4",
+      "apk": "/Icons-2.4.apk",
       "bytes": 538063,
-      "sha256": "9621bc0ac50301c3de83457852cfcb68ed00ee90459f0b797445cafb08c2a122"
+      "sha256": "962a98f89fdd73e977f92f2a6a891a49162c0db6a4852a9be7c70d6fbec5ffb3"
     }
   ]
 }
