@@ -266,7 +266,7 @@ async function capture() {
             out.push(
               `<image x="${round(r.left)}" y="${round(top)}" width="${round(r.width)}" height="${round(
                 r.height
-              )}" href="${uri}" xlink:href="${uri}"/>`
+              )}" href="${uri}"/>`
             );
             images++;
           }
@@ -376,6 +376,51 @@ async function capture() {
   return { W, H, bg, body: out.join("\n"), counts: { rects, texts, images } };
 }
 
+
+/* Lossless slimming: three faces of text markup are redundant.
+ *
+ *  - every <image> carried its payload twice, once under href and once under
+ *    xlink:href, because old readers wanted the second; the served copies drop one
+ *    copy anyway, so the source should not store it.
+ *  - font-family="Poppins" was repeated on every text run, and so were the size,
+ *    weight and fill that most runs share. Those attributes inherit, so the ones a
+ *    clear majority of the artboard's text shares are written once on the artboard
+ *    group and left off the runs that match it. A run that differs keeps its own.
+ */
+function slim(markup) {
+  const TEXT = /<text\b[^>]*>/g;
+  const ATTR = /([\w:-]+)="([^"]*)"/g;
+  const INHERIT = ["font-family", "font-size", "font-weight", "fill"];
+  const tags = markup.match(TEXT) || [];
+  if (!tags.length) return { defaults: "", markup };
+
+  const counts = {};
+  for (const tag of tags) {
+    for (const [, k, v] of tag.matchAll(ATTR)) {
+      if (!INHERIT.includes(k)) continue;
+      if (!counts[k]) counts[k] = new Map();
+      counts[k].set(v, (counts[k].get(v) || 0) + 1);
+    }
+  }
+  const winner = {};
+  for (const [k, seen] of Object.entries(counts)) {
+    const [value, n] = [...seen.entries()].sort((a, b) => b[1] - a[1])[0];
+    // Only a clear majority: hoisting a value half the runs disagree with would
+    // trade one repeat for another and complicate the file for nothing.
+    if (n / tags.length >= 0.6) winner[k] = value;
+  }
+  const keys = Object.keys(winner);
+  if (!keys.length) return { defaults: "", markup };
+
+  const defaults = keys.map((k) => ` ${k}="${winner[k]}"`).join("");
+  const body = markup.replace(TEXT, (tag) =>
+    tag
+      .replace(new RegExp(ATTR.source, "g"), (whole, k, v) => (winner[k] === v ? "" : whole))
+      .replace(/\s{2,}/g, " ")
+  );
+  return { defaults, markup: body };
+}
+
 /* ------------------------------------------------------------------ */
 
 (async () => {
@@ -422,7 +467,7 @@ async function capture() {
       const file = `${n}-${page_.slug}-${width.tag}.svg`;
       const head =
         `<?xml version="1.0" encoding="UTF-8"?>\n` +
-        `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" ` +
+        `<svg xmlns="http://www.w3.org/2000/svg" ` +
         `width="${shot.W}" height="${shot.H}" viewBox="0 0 ${shot.W} ${shot.H}">\n` +
         `<title>${page_.label} — ${width.w}×${shot.H}</title>\n` +
         `<g id="${page_.label.replace(/[^\w· -]/g, "")} · ${width.tag}">\n` +
@@ -430,7 +475,12 @@ async function capture() {
           .slice(0, 3)
           .map((v) => Number(v).toString(16).padStart(2, "0"))
           .reduce((a, v) => a + v, "#")}"/>\n`;
-      const body = head + FONT_CSS + shot.body + "\n</g>\n</svg>\n";
+      const slimmed = slim(shot.body);
+      const body =
+        head.replace("<g ", `<g${slimmed.defaults} `) +
+        FONT_CSS +
+        slimmed.markup +
+        "\n</g>\n</svg>\n";
       fs.writeFileSync(path.join(outDir, file), body);
       written.push({
         file,
@@ -469,7 +519,7 @@ async function capture() {
       const file = `${n}-${state.slug}-${width.tag}.svg`;
       const head =
         `<?xml version="1.0" encoding="UTF-8"?>\n` +
-        `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" ` +
+        `<svg xmlns="http://www.w3.org/2000/svg" ` +
         `width="${shot.W}" height="${shot.H}" viewBox="0 0 ${shot.W} ${shot.H}">\n` +
         `<title>${state.label} — ${width.w}×${shot.H}</title>\n` +
         `<g id="${state.label.replace(/[^\w· -]/g, "")} · ${width.tag}">\n` +
@@ -477,7 +527,12 @@ async function capture() {
           .slice(0, 3)
           .map((v) => Number(v).toString(16).padStart(2, "0"))
           .reduce((a, v) => a + v, "#")}"/>\n`;
-      const body = head + FONT_CSS + shot.body + "\n</g>\n</svg>\n";
+      const slimmed = slim(shot.body);
+      const body =
+        head.replace("<g ", `<g${slimmed.defaults} `) +
+        FONT_CSS +
+        slimmed.markup +
+        "\n</g>\n</svg>\n";
       fs.writeFileSync(path.join(outDir, file), body);
       written.push({
         file,

@@ -33,12 +33,17 @@ def artboard(path):
     """The artboard's size and its layers, without its own <svg> wrapper."""
     root = ET.parse(path).getroot()
     kids = [c for c in root if tag(c) != "title"]
+    keep = ""
     if len(kids) == 1 and tag(kids[0]) in ("g", "svg"):
         node = kids[0]
         body = (node.text or "") + "".join(ET.tostring(c, encoding="unicode") for c in node)
+        # The artboard carries the text defaults it earned by hoisting them off every
+        # run (font family, the majority size and weight). Unwrapping the group must
+        # not drop them, or the canvas would paint its text in the default fill.
+        keep = "".join(' %s="%s"' % (k, v) for k, v in node.attrib.items() if k != "id")
     else:
         body = "".join(ET.tostring(c, encoding="unicode") for c in kids)
-    return float(root.get("width")), float(root.get("height")), body
+    return float(root.get("width")), float(root.get("height")), body, keep
 
 
 # Pages whose export can go stale. The listing and the gallery are written by this
@@ -77,7 +82,7 @@ def main(src="figma"):
 
     parts, widest, y_desk, y_phone = [], 0.0, TOP, TOP
     for f in files:
-        w, h, body = artboard(f)
+        w, h, body, keep = artboard(f)
         phone = w < 700
         x = PHONE_X if phone else 0
         if phone:
@@ -86,7 +91,7 @@ def main(src="figma"):
             y, y_desk = y_desk, y_desk + h + GAP
         name = os.path.basename(f)[: -len(".svg")]
         parts.append(
-            f'<g transform="translate({x:g} {y:g})">'
+            f'<g transform="translate({x:g} {y:g})"{keep}>'
             f'<text x="0" y="-46" font-family="Poppins" font-size="26" font-weight="500" '
             f'fill="#8f96a8">{name}</text>{body}</g>'
         )
