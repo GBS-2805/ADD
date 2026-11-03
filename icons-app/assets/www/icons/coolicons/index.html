@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta name="theme-color" content="#3f4e96" />
 <link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml" />
-<title>Coolicons — 1,258 glyphs, preview and variants</title>
-<meta name="description" content="Coolicons: 1,258 line, regular glyphs, MIT. Pick a glyph, set its weight, size and surface in a live preview, then copy the SVG. Offline, no account." />
+<title>Coolicons — 1,258 icons, preview and variants</title>
+<meta name="description" content="Coolicons: 1,258 line, regular icons, MIT. Pick an icon, set its weight, size and surface in a live preview, then copy the SVG. Offline, no account." />
 <link rel="stylesheet" href="../../assets/site.css" />
 <style>
   /* page-only: the preview tab, its variant controls and the collapsible set */
@@ -459,7 +459,7 @@
   <div class="who">
     <div class="who-lines">
       <p>Coolicons</p>
-      <p>1,258 glyphs · MIT</p>
+      <p>1,258 icons · MIT</p>
     </div>
     <button class="burger" id="burger" type="button" aria-expanded="false" aria-controls="drawer" aria-label="Open side tab">
       <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 7H19M5 12H19M5 17H19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -482,15 +482,16 @@
   <a href="../../download/">Download<span>apps</span></a>
   <a href="../../portfolio/">Portfolio<span>3 projects</span></a>
   <a href="../../renders/">Renders<span>gallery</span></a>
-  <p class="drawer-note">Coolicons · 1,258 glyphs, line, regular, MIT. The app reads the same catalog this page renders.</p>
+  <a href="../../releases/">Releases<span>history</span></a>
+  <p class="drawer-note">Coolicons · 1,258 icons, line, regular, MIT. The app reads the same catalog this page renders.</p>
 </aside>
 
 <main>
   <header class="page-head">
     <h1>Coolicons</h1>
-    <p class="lede"><b>1,258 glyphs</b>, every one of them whole and free. Pick one below, then set its weight, size and background — the preview changes as you press, and the copy button hands you the SVG.</p>
+    <p class="lede"><b>1,258 icons</b>, every one of them whole and free. Pick one below, then set its weight, size and background — the preview changes as you press, and the copy button hands you the SVG.</p>
     <p class="meta">
-      <span>1,258 glyphs</span>
+      <span>1,258 icons</span>
       <span>line, regular</span>
       <span>MIT</span>
       <span>No Pro tier</span>
@@ -509,7 +510,7 @@
         <div class="preview-meta">
           <p class="name" id="selName" aria-live="polite">Loading…</p>
           <p class="file" id="selFile"></p>
-          <p class="hint">Selected glyph. Open the set below to pick another.</p>
+          <p class="hint">Selected icon. Open the set below to pick another.</p>
         </div>
       </div>
 
@@ -581,8 +582,8 @@
 
     <div class="stage-body" id="pane-markup" role="tabpanel" aria-labelledby="tab-markup" data-active="false">
       <div class="markup">
-        <textarea id="snippet" readonly spellcheck="false" aria-label="SVG markup of the selected glyph"></textarea>
-        <p>The markup is the file as it ships: a 24×24 <code>viewBox</code>, <code>currentColor</code> so the glyph takes the colour of the text around it, and no weight or size baked in — those are the preview's settings, not the file's.</p>
+        <textarea id="snippet" readonly spellcheck="false" aria-label="SVG markup of the selected icon"></textarea>
+        <p>The markup is the file as it ships: a 24×24 <code>viewBox</code>, <code>currentColor</code> so the icon takes the colour of the text around it, and no weight or size baked in — those are the preview's settings, not the file's.</p>
       </div>
     </div>
   </div>
@@ -601,7 +602,7 @@
 
     <button class="panel-toggle" id="panelToggle" type="button" aria-expanded="false" aria-controls="panel">
       <span>
-        <b>Coolicons · all 1,258 glyphs</b>
+        <b>Coolicons · all 1,258 icons</b>
         <span class="panel-sub">Opens into a scrolling sheet — tap to preview, double-tap to collect for export</span>
       </span>
       <svg class="chev" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M8 13L12 17L16 13M8 7L12 11L16 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -611,7 +612,7 @@
       <div class="panel-bar">
         <div class="search-wrap">
           <svg class="search-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 10C3 13.86599 6.13401 17 10 17C13.86599 17 17 13.86599 17 10C17 6.13401 13.86599 3 10 3C6.13401 3 3 6.13401 3 10ZM15 15L21 21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          <input id="search" type="search" placeholder="Filter Coolicons by name…" aria-label="Filter glyphs by name" autocomplete="off" />
+          <input id="search" type="search" placeholder="Filter Coolicons by name…" aria-label="Filter icons by name" autocomplete="off" />
         </div>
         <div class="cat-wrap" id="catWrap" hidden>
           <button class="cat-btn" id="catBtn" type="button" aria-expanded="false" aria-haspopup="listbox" aria-controls="catMenu">
@@ -624,7 +625,7 @@
         <button class="add-all" id="addAllBtn" type="button">Add all</button>
       </div>
       <div class="grid-wrap"><div class="grid" id="grid"></div></div>
-      <p class="empty" id="empty" hidden>No glyph in Coolicons matches that name in that category.</p>
+      <p class="empty" id="empty" hidden>No icon in Coolicons matches that name in that category.</p>
       <div class="panel-foot">
         <span>krystonschwarze/coolicons · MIT</span>
         <a href="../../data/coolicons.json"><code>/data/coolicons.json</code></a>
@@ -634,7 +635,7 @@
 </main>
 
 <footer>
-  <p>Coolicons is a whole free set from <code>krystonschwarze/coolicons</code>, MIT licensed: 1,258 glyphs, line, regular. The paid icons sold on the vendor's site are neither included nor copied.</p>
+  <p>Coolicons is a whole free set from <code>krystonschwarze/coolicons</code>, MIT licensed: 1,258 icons, line, regular. The paid icons sold on the vendor's site are neither included nor copied.</p>
   <p><a href="../../icons/">Icons</a> · <a href="../../">Index</a> · <a href="../../fonts/">Fonts</a> · <a href="../../download/">Download</a></p>
 </footer>
 
@@ -704,7 +705,7 @@
     return '<svg xmlns="http://www.w3.org/2000/svg" ' + item.attrs + ">" + item.body + "</svg>";
   }
 
-  // Every vendor glyph carries its own stroke-width attribute, and a presentation
+  // Every vendor icon carries its own stroke-width attribute, and a presentation
   // attribute beats a value inherited from the <svg>. So the preview writes the
   // chosen weight onto each element instead of trusting the stylesheet.
   function tune(svg, w, stroke) {
@@ -724,7 +725,7 @@
 
   // A closed subpath no bigger than the stroke turnes inside out: the renderer
   // draws its outline twice over the middle and leaves a pinhole where the two
-  // edges meet. Coolicons' accessibility glyph is one path whose 1-unit head does
+  // edges meet. Coolicons' accessibility icon is one path whose 1-unit head does
   // this at weight 2 (stroke = diameter exactly) and again at 2.5, which is the
   // white dot that appeared and vanished as the weight changed. Splitting such a
   // subpath out and filling it keeps the dot solid at every weight.
@@ -843,7 +844,7 @@
     if (!n) {
       var hint = document.createElement("p");
       hint.className = "sel-hint";
-      hint.textContent = "Double-tap a glyph in the sheet to collect it, or press Add all.";
+      hint.textContent = "Double-tap an icon in the sheet to collect it, or press Add all.";
       selStrip.append(hint);
     } else {
       var frag = document.createDocumentFragment();
@@ -902,7 +903,7 @@
     clearPicks();
     visibleItems.forEach(addPick);
     bulkFilled = true;
-    announce("Added all " + visibleItems.length.toLocaleString() + " shown glyphs to the selection");
+    announce("Added all " + visibleItems.length.toLocaleString() + " shown icons to the selection");
     renderSelection();
   });
 
@@ -943,7 +944,7 @@
   }
 
   // The zip is written here, so its size is the sum of the files it will hold.
-  // SVG is counted exactly; a raster is sampled on four glyphs spread through the
+  // SVG is counted exactly; a raster is sampled on four icons spread through the
   // list, because drawing all 1,258 to measure them is the export itself.
   function runEstimate() {
     var list = exportList();
@@ -1003,7 +1004,7 @@
       label.className = "name";
       label.textContent = item.name;
       card.append(glyph, label);
-      // A second press inside the window collects the glyph; the sheet's own
+      // A second press inside the window collects the icon; the sheet's own
       // press stays a preview, so a slow reader sees no change.
       card.addEventListener("click", function () {
         select(item, card);
@@ -1140,7 +1141,7 @@
 
 
 
-  // A PNG, WEBP or JPG is drawn from the same tuned glyph at the chosen export size
+  // A PNG, WEBP or JPG is drawn from the same tuned icon at the chosen export size
   // on the chosen background: the app saves it to Pictures/Icons through its bridge,
   // the site downloads it and puts a PNG on the clipboard as well.
   function rasterFor(item, mime) {
@@ -1169,7 +1170,7 @@
       };
       image.onerror = function () {
         URL.revokeObjectURL(url);
-        reject(new Error("the glyph did not draw"));
+        reject(new Error("the icon did not draw"));
       };
       image.src = url;
     });
@@ -1422,7 +1423,7 @@
       rasterFor(item, mime).then(function (dataUrl) {
         files.push({ name: item.name + "." + format, bytes: bytesOf(dataUrl) });
       }).catch(function () {
-        // a glyph that will not draw is left out rather than failing the whole zip
+        // an icon that will not draw is left out rather than failing the whole zip
       }).then(function () { index += 1; window.setTimeout(next, 0); });
     }
     function finish() {
