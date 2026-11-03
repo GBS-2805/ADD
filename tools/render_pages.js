@@ -5,6 +5,7 @@
 const { chromium } = require("playwright");
 const fs = require("fs");
 const path = require("path");
+const { execFileSync } = require("child_process");
 
 const base = process.argv[2] || "http://127.0.0.1:8765/";
 const out = process.argv[3] || "artifacts";
@@ -127,12 +128,15 @@ const escape = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/
   await browser.close();
 
   // Copy the shots in and rebuild the gallery, so the folder and the page agree.
-  for (const s of shots) {
-    fs.copyFileSync(path.join(out, `${s.name}.png`), path.join(gallery, `${s.name}.png`));
-  }
-  const kept = new Set([...shots, ...extras].map((s) => `${s.name}.png`));
+  // The captures go in as lossless WebP: same pixels, about a third of the bytes,
+  // which is what keeps the whole site inside the host's 10 MiB deploy budget.
+  execFileSync("python3", [
+    path.join(__dirname, "to_webp.py"), out, gallery,
+    ...[...shots, ...extras].map((s) => s.name),
+  ], { stdio: "inherit" });
+  const kept = new Set([...shots, ...extras].map((s) => `${s.name}.webp`));
   for (const file of fs.readdirSync(gallery)) {
-    if (file.endsWith(".png") && !kept.has(file)) {
+    if (/\.(png|webp)$/.test(file) && !kept.has(file)) {
       fs.unlinkSync(path.join(gallery, file));
       console.log("removed orphan", file);
     }
@@ -152,7 +156,7 @@ const escape = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/
   const card = (s) => `
       <figure>
         <h3>${escape(s.title)}</h3>
-        <a href="${s.name}.png"><img src="${s.name}.png" alt="${escape(s.title)}" loading="lazy" /></a>
+        <a href="${s.name}.webp"><img src="${s.name}.webp" alt="${escape(s.title)}" loading="lazy" /></a>
         <p class="cap">${escape(s.caption)}</p>
       </figure>`;
   const chips = [`<button class="chip" type="button" data-group="all" aria-pressed="true">All <span>${all.length}</span></button>`]

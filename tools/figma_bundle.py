@@ -83,10 +83,68 @@ def main(src="figma"):
 
     out = re.sub(r"<style[^>]*>.*?</style>", first_faces, out, flags=re.S)
 
+    # Each artboard embeds its own copy of the mark and of every icon sheet, so the
+    # canvas carried the same artwork hundreds of times over. Keep one copy of each
+    # in <defs>, at the origin and its natural size, and paint every instance with
+    # <use> -- the reference carries no x/y of its own, so the instance's own offset
+    # and scale are the only placement it gets.
+    image = re.compile(r"<image\b([^>]*?)/>", re.S)
+    attr = re.compile(r'([\w:-]+)="([^"]*)"')
+    artwork = {}
+
+    def intern(match):
+        attrs = dict(attr.findall(match.group(1)))
+        key = "xlink:href" if "xlink:href" in attrs else ("href" if "href" in attrs else None)
+        if not key or not attrs[key].startswith("data:image"):
+            return match.group(0)
+        payload = attrs[key]
+        if payload not in artwork:
+            artwork[payload] = {
+                "name": "artwork%d" % (len(artwork) + 1),
+                "w": float(attrs.get("width", 0)) or 1.0,
+                "h": float(attrs.get("height", 0)) or 1.0,
+                "key": key,
+            }
+        art = artwork[payload]
+        x, y = float(attrs.get("x", 0)), float(attrs.get("y", 0))
+        sx = (float(attrs.get("width", art["w"])) or art["w"]) / art["w"]
+        sy = (float(attrs.get("height", art["h"])) or art["h"]) / art["h"]
+        move = "translate(%g %g)" % (x, y)
+        if (sx, sy) != (1.0, 1.0):
+            move += " scale(%g %g)" % (sx, sy)
+        # Anything that paints the instance -- opacity, clip-path, id -- stays on the use.
+        # The exporter writes the payload under both href and xlink:href; carrying
+        # either onto the <use> would store the image all over again.
+        extra = "".join(
+            ' %s="%s"' % (k, v)
+            for k, v in attrs.items()
+            if k not in ("x", "y", "width", "height", "preserveAspectRatio")
+            and not k.endswith("href")
+        )
+        return '<use %s="#%s"%s transform="%s"/>' % (key, art["name"], extra, move)
+
+    out = image.sub(intern, out)
+
+    if artwork:
+        key = next(iter(artwork.values()))["key"]
+        if key.startswith("xlink:") and "xmlns:xlink" not in out[:600]:
+            out = out.replace(
+                "<svg ", '<svg xmlns:xlink="http://www.w3.org/1999/xlink" ', 1)
+        defs = "<defs>" + "".join(
+            '<image id="%s" x="0" y="0" width="%g" height="%g" %s="%s"/>'
+            % (art["name"], art["w"], art["h"], art["key"], payload)
+            for payload, art in artwork.items()
+        ) + "</defs>"
+        close = out.index(">") + 1
+        out = out[:close] + defs + out[close:]
+
     path = os.path.join(src, OUT)
     with open(path, "w") as fh:
         fh.write(out)
-    return f"{path}  {widest:g}x{tall}  {len(out) // 1024} KB  {len(parts)} artboards"
+    return (
+        f"{path}  {widest:g}x{tall}  {len(out) // 1024} KB  {len(parts)} artboards  "
+        f"{len(artwork)} unique artwork payloads"
+    )
 
 
 if __name__ == "__main__":
