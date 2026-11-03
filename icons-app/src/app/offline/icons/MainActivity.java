@@ -303,7 +303,7 @@ public class MainActivity extends Activity {
                 + "<p style=\"margin:0 0 10px;font-size:13px;letter-spacing:.12em;"
                 + "text-transform:uppercase;opacity:.65\">Icons \u00b7 offline</p>"
                 + "<h1 style=\"margin:0 0 14px;font-size:28px;font-weight:400\">That page lives on the site</h1>"
-                + "<p style=\"margin:0 0 12px;max-width:34ch\">The app bundles the icon browser: both brands, "
+                + "<p style=\"margin:0 0 12px;max-width:34ch\">The app bundles the icon browser: every brand, "
                 + "their catalogs, the preview and the fonts. Downloads, the portfolio and the render "
                 + "gallery stay online.</p>"
                 + "<p style=\"margin:0 0 26px\"><code style=\"font-size:13px;word-break:break-all\">"
