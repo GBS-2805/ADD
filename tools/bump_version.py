@@ -119,6 +119,31 @@ def keyed(version):
     return tuple(int(part) for part in version.split("."))
 
 
+# The dating rule broke twice in ways that each looked like a fix: reading the notes
+# file and the tools page together sent a title that also runs as page copy to the commit
+# that printed the copy, and reading the notes file alone dropped verified notes from 26
+# to 11. Pinned notes must still date to the build they shipped in, and the count of
+# verified notes may not fall below the floor.
+NOTES_VERIFIED_FLOOR = 27
+NOTES_PINS = (("Art Design Database", "icons", "2.7"),
+              ("The all-brands sheet works in the app", "icons", "2.6"))
+
+
+def regress_notes():
+    """Failures that mean the dating got worse, and the number of notes it verifies."""
+    fails = []
+    for title, app, label in NOTES_PINS:
+        version, where = shipped_with(title, app, label)
+        if version != label:
+            fails.append("pinned note %s %s dated to %s (%s)" % (app, label, version, where))
+    verified = sum(1 for entry in notes()
+                   if shipped_with(entry["title"], entry["id"], entry["version"])[0]
+                   == entry["version"])
+    if verified < NOTES_VERIFIED_FLOOR:
+        fails.append("%d notes verify, the floor is %d" % (verified, NOTES_VERIFIED_FLOOR))
+    return fails, verified
+
+
 def report_notes(extra=None):
     """Check each note against its app's version at the commit that first added it.
 
@@ -156,7 +181,13 @@ def report_notes(extra=None):
               "%d written after it%s"
               % (len(entries), len(entries) - late - unverified, late,
                  "" if not unverified else ", %d not in the history yet" % unverified))
-    return problems
+    fails, verified = regress_notes()
+    for line in fails:
+        print("  " + line)
+    print("  dating: %d verified, floor %d, %d pinned, %s"
+          % (verified, NOTES_VERIFIED_FLOOR, len(NOTES_PINS),
+             "REGRESSED" if fails else "unchanged"))
+    return problems + len(fails)
 
 
 def fmt(number):
