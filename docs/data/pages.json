@@ -1,0 +1,104 @@
+{
+  "origin": "https://artbase-olive.vercel.app",
+  "count": 14,
+  "pages": [
+    {
+      "path": "/download/",
+      "title": "Download — Icons 2.19 and Compress 2.1, standalone APKs",
+      "description": "Icons 2.19 (1,841,488 bytes) and Compress 2.1 (272,592 bytes) as standalone signed APKs, Android 8.0+, SHA-256 listed for both. No store, no account, no update server.",
+      "heading": "Download",
+      "section": "download"
+    },
+    {
+      "path": "/figma/",
+      "title": "Figma hand-off — every artboard of this site",
+      "description": "",
+      "heading": "Figma hand-off",
+      "section": "figma"
+    },
+    {
+      "path": "/fonts/",
+      "title": "Fonts — Poppins and Redaction 50, one sheet per family",
+      "description": "Poppins and Redaction 50 as served by this site: every weight and italic, woff2 for the web and TTF for Android, with sizes listed and free to download under the SIL Open Font License.",
+      "heading": "Fonts",
+      "section": "fonts"
+    },
+    {
+      "path": "/icons/all/",
+      "title": "All brands — one icon per category, twelve from each set",
+      "description": "Every free icon brand on one page, twelve icons each, starting with the categories they share. 4,373 icons in all, with the whole catalog one page away.",
+      "heading": "One per category",
+      "section": "icons"
+    },
+    {
+      "path": "/icons/coolicons/",
+      "title": "Coolicons — 1,258 icons, preview and variants",
+      "description": "Coolicons: 1,258 line, regular icons, MIT. Pick an icon, set its weight, size and surface in a live preview, then copy the SVG. Offline, no account.",
+      "heading": "Coolicons",
+      "section": "icons"
+    },
+    {
+      "path": "/icons/",
+      "title": "Icons — 4,373 icons in four free brands, offline",
+      "description": "The Icons app and the browser it wraps: Lineicons, Coolicons, Phosphor and Streamline, 4,373 icons, a live preview with weight, size and surface, and copy-to-clipboard. Offline, no account, no network permission.",
+      "heading": "Icons",
+      "section": "icons"
+    },
+    {
+      "path": "/icons/lineicons/",
+      "title": "Lineicons — 606 icons, preview and variants",
+      "description": "Lineicons: 606 line style, the free set icons, MIT. Pick an icon, set its weight, size and surface in a live preview, then copy the SVG. Offline, no account.",
+      "heading": "Lineicons",
+      "section": "icons"
+    },
+    {
+      "path": "/icons/phosphor/",
+      "title": "Phosphor — 1,512 icons, preview and variants",
+      "description": "Phosphor: 1,512 regular weight, outline icons, MIT. Pick an icon, set its weight, size and surface in a live preview, then copy the SVG. Offline, no account.",
+      "heading": "Phosphor",
+      "section": "icons"
+    },
+    {
+      "path": "/icons/streamline/",
+      "title": "Streamline — 997 icons, preview and variants",
+      "description": "Streamline: 997 Line, Duo, Solid and Flat icons, CC BY 4.0. Pick an icon, set its weight, size and surface in a live preview, then copy the SVG. Offline, no account.",
+      "heading": "Streamline",
+      "section": "icons"
+    },
+    {
+      "path": "/",
+      "title": "A design shelf — icons, type and two Android tools",
+      "description": "The material this site is made of: 4,373 icons in four brands, three Poppins faces, a hairline system on one palette, and two offline Android apps built from it.",
+      "heading": "A design shelf.",
+      "section": ""
+    },
+    {
+      "path": "/portfolio/",
+      "title": "Portfolio — the work behind the shelf",
+      "description": "Three projects: Compress for Android, the 4,373-icon browser, and this site. What I built in each, the stack, and the constraints they were built under.",
+      "heading": "Portfolio",
+      "section": "portfolio"
+    },
+    {
+      "path": "/releases/",
+      "title": "Releases — 39 builds, with the date and size of each",
+      "description": "Every build this shelf has shipped: 39 releases, each with the day it went out and the APK size that shipped with it, read back out of the repository's own history.",
+      "heading": "Releases",
+      "section": "releases"
+    },
+    {
+      "path": "/renders/",
+      "title": "Renders — 33 captures of this site",
+      "description": "33 screenshots of the shelf, captured in headless Chromium: the index at its fold, both pull-downs, the two apps, the icon brand pages with their previews and open sets, fonts, portfolio and download, at 1300 wide and 390 on a phone.",
+      "heading": "Renders",
+      "section": "renders"
+    },
+    {
+      "path": "/tools/",
+      "title": "Tools — Icons 2.19 and Compress 2.1 for Android",
+      "description": "Two offline Android tools: Icons 2.19, which bundles the 4,373-icon browser, and Compress 2.1, which shrinks photos with a before/after preview. Standalone APKs, no store, no account.",
+      "heading": "Tool apps",
+      "section": "tools"
+    }
+  ]
+}

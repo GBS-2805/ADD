@@ -83,6 +83,7 @@ docs/data/icons.json       all 606 Lineicons glyphs with their markup
 docs/data/coolicons.json   all 1,258 Coolicons glyphs (the Icons app's database)
 docs/data/fonts.json       each Poppins face: weight, woff2 path, TTF path, sizes
 docs/data/portfolio.json   the three projects
+docs/data/pages.json       every page: path, title, description, section
 ```
 
 `tools/catalog.json` is the single handwritten source for apps, fonts and portfolio.
@@ -96,6 +97,8 @@ python3 tools/fetch_icons.py                # fetch every set, write data + page
 python3 tools/fetch_icons.py --pages-only   # rewrite the pages from the catalogs
 python3 tools/build_catalog.py              # measure, write the catalogs, check the pages
 python3 tools/build_catalog.py --check      # check only
+python3 tools/build_site.py                 # pages.json, sitemap.xml, robots.txt
+python3 tools/build_site.py --check         # fail when those three are stale
 ```
 
 ## What Icons does
@@ -162,6 +165,7 @@ tools/fetch_icons.py                               both icon pages + both catalo
 tools/icons_hub_template.html                      the Icons app landing page
 tools/icons_brand_template.html                    the per-brand preview page
 tools/render_pages.js                              captures every page and writes the gallery
+tools/build_site.py                                page manifest, sitemap, robots from the pages
 tools/deploy_vercel.py                             deploys docs/ to Vercel, verifies it, moves the links
 manifest.json, worker.js                           Sites deployment (fallback host)
 ```

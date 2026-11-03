@@ -87,10 +87,10 @@ or handed to someone else. Folder ids live in `tools/site.json` under `drive`; r
 them from there rather than searching Drive by name, which also finds unrelated
 `renders` folders.
 
-- **`figma/`** holds the 25 files (24 artboards plus `site-figma.svg`). Nothing is
-  overwritten: clear `figma/old`, move last release's current files into it, then
-  upload the new set. `old` is one generation deep, so an overwritten artboard is
-  recoverable but two releases back is not.
+- **`figma/`** holds the 25 files (24 artboards plus `site-figma.svg`) and only the
+  current generation. Upload the new set, then delete every file in the folder that
+  is not in it -- old artboards go to Drive's trash, not into an `old/` folder.
+  Nested `old/` folders are how three generations once piled up there.
 - **`renders/`** is replaced in place. Upload the new captures, then delete every
   file that is not in the new set. There is no render history on purpose: a
   screenshot of a page that has since changed is worse than no screenshot.
@@ -151,7 +151,9 @@ changes as unverified on device rather than illustrating them.
   (Vercel project `artbase`; the address is rented, not owned, so see **The address is
   rented, not owned** at the end of this file). Deploy with
   `python3 tools/deploy_vercel.py`: it uploads `docs/`, checks every route on the new
-  host, and only then rewrites the origin in
+  host -- the list comes from the tree itself (`tools/build_site.py`), so a page or
+  capture added to the shelf is checked without being added here -- and only then
+  rewrites the origin in
   `tools/site.json` and the two app constants, so a failed deploy leaves the repo
   pointing at the host that still serves. The token is the `VERCEL_TOKEN` secret, read
   from the environment and never an argument. Vercel has no per-deploy size cap.
@@ -179,6 +181,12 @@ changes as unverified on device rather than illustrating them.
   set's category list, so that page fetches ~90 KB instead of both full catalogs (1.67 MB);
   `index.json`,
   `tools.json`, `fonts.json` and `portfolio.json` come from `tools/build_catalog.py`.
+  `pages.json` (every page's path, title, description, heading and section), plus
+  `docs/sitemap.xml` and `docs/robots.txt`, come from `tools/build_site.py`, which
+  scans the pages on disk; its `--check` fails when any of the three is stale, and
+  nothing else writes them.
+- `docs/vercel.json` is the deployed cache policy: the font files are immutable for a
+  year, everything else revalidates. It is not generated and not served as a page.
 - Releases go through `python3 tools/bump_version.py <version> --title "…" --note "…"
   --build`: it moves the catalog, both build cases and every live version label, adds
   the new note to `tools/release_notes.json`, then builds, copies the APK into `docs/`,

@@ -104,6 +104,7 @@ def listing(names):
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta name="theme-color" content="#00d7a0" />
+<meta name="description" content="Every page of this site as a Figma-importable artboard, plus the whole set on one canvas." />
 <title>Figma hand-off — every artboard of this site</title>
 <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml" />
 <link rel="stylesheet" href="../assets/site.css" />

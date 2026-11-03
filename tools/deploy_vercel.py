@@ -22,36 +22,16 @@ import subprocess
 import sys
 import urllib.error
 import urllib.request
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 SITE = ROOT / "tools/site.json"
-CATALOG = ROOT / "tools/catalog.json"
 PROJECT = "artbase"          # created on first deploy if the account has no project by this name
 CLI = ("npx", "-y", "vercel@latest")
 
-# The shelf's routes, and the type each one must come back as. A host that serves
-# the APK as text/html still returns 200, and that is the failure worth catching.
-ROUTES = [
-    ("/", "text/html"),
-    ("/tools/", "text/html"),
-    ("/icons/", "text/html"),
-    ("/icons/all/", "text/html"),
-    ("/icons/coolicons/", "text/html"),
-    ("/icons/lineicons/", "text/html"),
-    ("/icons/streamline/", "text/html"),
-    ("/fonts/", "text/html"),
-    ("/portfolio/", "text/html"),
-    ("/download/", "text/html"),
-    ("/releases/", "text/html"),
-    ("/renders/", "text/html"),
-    ("/figma/", "text/html"),
-    ("/assets/site.css", "text/css"),
-    ("/assets/site.js", "javascript"),
-    ("/data/icons.json", "application/json"),
-    ("/renders/page-tools.webp", "image/webp"),
-    ("/figma/site-figma.svg", "image/svg+xml"),
-]
+sys.path.insert(0, str(ROOT / "tools"))
+from build_site import routes as site_routes  # noqa: E402 - the tools directory is on the path above
 
 # Text files that can hold the origin. The generated trees are skipped: they are
 # rebuilt from templates or from git and never carry a link back to the host.
@@ -166,38 +146,55 @@ def deploy():
     return origin_of(urls[-1])
 
 
-def apk_routes():
-    """The APKs the catalog ships, read from it rather than spelled out here.
+def probe(origin, route, wanted):
+    """GET one route and read only enough of it to judge what came back.
 
-    A hard-coded release filename goes stale the moment the next build ships, and
-    the check then fails on a file that is supposed to be gone.
+    Reading 64 bytes and closing keeps the check cheap even when the shelf serves
+    hundreds of captures and megabyte artboards: the bytes are not the point, the
+    status and the content type are.
     """
-    shipped = json.loads(CATALOG.read_text(encoding="utf-8")).get("tools", [])
-    return [(tool["apk"], "android.package-archive") for tool in shipped if tool.get("apk")]
+    request = urllib.request.Request(origin + route, headers={"User-Agent": "deploy-check"})
+    try:
+        with urllib.request.urlopen(request, timeout=30) as response:
+            ctype = response.headers.get("content-type", "")
+            length = response.headers.get("content-length")
+            head = response.read(64)
+    except urllib.error.HTTPError as error:
+        return route, f"HTTP {error.code}", 0
+    except Exception as error:                          # noqa: BLE001 - report, do not mask
+        return route, f"{type(error).__name__}: {error}", 0
+    if wanted not in ctype:
+        return route, f"served as {ctype!r}, expected {wanted}", 0
+    if route.endswith(".apk") and not head.startswith(b"PK"):
+        return route, "not a zip/APK", 0
+    size = int(length) if length and length.isdigit() else len(head)
+    return route, None, size
 
 
 def verify(origin):
-    """GET every route; a 200 with the wrong type is still a failure."""
-    problems = []
-    for route, wanted in ROUTES + apk_routes():
-        request = urllib.request.Request(origin + route, headers={"User-Agent": "deploy-check"})
-        try:
-            with urllib.request.urlopen(request, timeout=30) as response:
-                status, ctype, body = response.status, response.headers.get("content-type", ""), response.read()
-        except urllib.error.HTTPError as error:
-            problems.append(f"{route}  HTTP {error.code}")
+    """Check every file the deploy serves; a 200 with the wrong type is a failure.
+
+    The routes come from the tree itself (tools/build_site.py), so a page or capture
+    added to the shelf is checked without anyone adding it to a list here.
+    """
+    checks = site_routes()
+    pages = {route for route, wanted in checks if wanted == "text/html"}
+    if not checks:
+        return ["no routes found under docs/ - is the folder there?"]
+
+    with ThreadPoolExecutor(max_workers=8) as pool:
+        results = list(pool.map(lambda item: probe(origin, *item), checks))
+
+    problems = [f"{route}  {error}" for route, error, _ in results if error]
+    assets = 0
+    for route, error, size in results:
+        if error:
             continue
-        except Exception as error:                      # noqa: BLE001 - report, do not mask
-            problems.append(f"{route}  {type(error).__name__}: {error}")
-            continue
-        if status != 200:
-            problems.append(f"{route}  HTTP {status}")
-        elif wanted not in ctype:
-            problems.append(f"{route}  served as {ctype!r}, expected {wanted}")
-        elif route.endswith(".apk") and not body.startswith(b"PK"):
-            problems.append(f"{route}  not a zip/APK ({len(body)} bytes)")
+        if route in pages:
+            print(f"  ok  {route:<28} text/html  {size}b")
         else:
-            print(f"  ok  {route:<26} {status}  {ctype.split(';')[0]}  {len(body)}b")
+            assets += 1
+    print(f"  ok  {assets} other files (css, js, json, images, fonts, APKs)")
     return problems
 
 
@@ -221,7 +218,7 @@ def main():
                 print(f"  {path.relative_to(ROOT).as_posix()}: {line.strip()[:100]}")
 
     if args.check:
-        print(f"\nwould deploy docs/ as project {PROJECT!r}, then check {len(ROUTES)} routes "
+        print(f"\nwould deploy docs/ as project {PROJECT!r}, then check {len(site_routes())} routes "
               f"and rewrite the {len(files)} files above")
         print("VERCEL_TOKEN is set" if os.environ.get("VERCEL_TOKEN") else
               "VERCEL_TOKEN is not set - deploy would stop here")
