@@ -262,6 +262,13 @@ changes as unverified on device rather than illustrating them.
   row. Switching style keeps the previewed name and the collected icons by name,
   drops the ones that style does not have, says how many went, and names the zip
   after the style.
+- The Colour row under Background sets the ink: Auto, white, black, indigo, green, red
+  and a custom picker, remembered per brand (`icons:ink:<slug>`). Ink styles take it as
+  `currentColor` through `--glyph`, so the preview, the thumbnails, the chips and the
+  raster export follow. Duo and Flat are tinted rather than flattened: the darkest tone
+  becomes the ink, each lighter tone the same ink at an opacity that keeps their order,
+  so the style survives the choice. Auto restores the vendor palette. Never collapse a
+  palette glyph to a single colour -- that turns Duo into Solid.
 - The left pull-down of all three icon pages opens with All, linking to
   `/icons/all/`: twelve glyphs per brand, one from every category — the first name in
   the catalog for that category. Categories are matched across sets on a plain key

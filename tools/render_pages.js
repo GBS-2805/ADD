@@ -22,7 +22,8 @@ const shots = [
   { name: "page-icons-panel", page: "icons/coolicons/", w: 1300, h: 900, panel: true, scroll: "panel", title: "Coolicons · the set", caption: "All 1,258 icons behind one toggle, scrolling in their own sheet." },
   { name: "page-icons-variants", page: "icons/coolicons/", w: 1300, h: 900, panel: true, pick: 6, weight: "2.5", surface: "white", title: "Coolicons · variants", caption: "Heaviest line on the white tile: the same file, repainted live." },
   { name: "page-icons-streamline", page: "icons/streamline/", w: 1300, h: 900, panel: true, scroll: "stage", title: "Streamline \u00b7 four styles", caption: "One brand, four styles: Line selected, with the Style row above the preview and the set opened below." },
-  { name: "page-icons-streamline-duo", page: "icons/streamline/", w: 1300, h: 900, panel: true, style: "duo", scroll: "stage", title: "Streamline \u00b7 Duo", caption: "The same 997 drawings in Duo, keeping Streamline's own two-tone palette." },  { name: "page-icons-categories", page: "icons/coolicons/", w: 1300, h: 900, panel: true, category: "System", scroll: "panel", title: "Coolicons · categories", caption: "The vendor's own 30 categories: System narrows the sheet to 102 icons." },
+  { name: "page-icons-streamline-duo", page: "icons/streamline/", w: 1300, h: 900, panel: true, style: "duo", scroll: "stage", title: "Streamline \u00b7 Duo", caption: "The same 997 drawings in Duo, keeping Streamline's own two-tone palette." },
+  { name: "page-icons-ink", page: "icons/streamline/", w: 1300, h: 900, panel: true, ink: "#0e9f6e", scroll: "stage", title: "Streamline \u00b7 green ink", caption: "The Colour row at work: the Line set and its sheet drawn in the chosen ink." },  { name: "page-icons-categories", page: "icons/coolicons/", w: 1300, h: 900, panel: true, category: "System", scroll: "panel", title: "Coolicons · categories", caption: "The vendor's own 30 categories: System narrows the sheet to 102 icons." },
   { name: "page-all", page: "icons/all/", w: 1300, h: 900, full: true, title: "All brands \u00b7 one per category", caption: "Four brands, the three categorized sheets opening with the same three shared categories." },
   { name: "page-lineicons-categories", page: "icons/lineicons/", w: 1300, h: 900, panel: true, category: "Brands & Logos", scroll: "panel", title: "Lineicons · categories", caption: "The other brand's own 51 categories: Brands & Logos holds 244 of its 606 icons." },
   { name: "page-fonts", page: "fonts/", w: 1300, h: 900, title: "Fonts", caption: "Poppins 400, 500 and 600 with specimens and downloads." },
@@ -85,6 +86,10 @@ const escape = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/
     if (s.surface) {
       await page.click(`#surfaces .seg[data-surface="${s.surface}"]`);
       await page.waitForTimeout(120);
+    }
+    if (s.ink) {
+      await page.click(`#inks [data-ink="${s.ink}"]`);
+      await page.waitForTimeout(320);
     }
     if (s.category) {
       await page.click("#catBtn");

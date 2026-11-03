@@ -433,6 +433,26 @@
     .set-panel { margin-top: 32px; }
   }
   .ctl-row[hidden] { display: none; }
+  .inks { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+  .ink {
+    width: 26px; height: 26px; padding: 0; border-radius: 50%;
+    border: 1px solid var(--rule); background: var(--sw, transparent); cursor: pointer;
+  }
+  .ink.auto {
+    width: auto; padding: 0 10px; border-radius: 6px; background: transparent;
+    font-size: 12px; color: var(--on);
+  }
+  .ink[aria-pressed="true"] { outline: 2px solid var(--on); outline-offset: 2px; }
+  .ink:focus-visible { outline: 2px solid var(--band); outline-offset: 2px; }
+  #inkPick {
+    width: 30px; height: 30px; padding: 0; border: 1px solid var(--rule);
+    border-radius: 6px; background: transparent; cursor: pointer;
+  }
+  .preview-box[data-surface="black"] { color: var(--glyph, #fff); }
+  .preview-box[data-surface="white"] { color: var(--glyph, #000); }
+  .mini { color: var(--glyph, var(--ink)); }
+  .icon-card .glyph { color: var(--glyph, inherit); }
+  .sel-chip svg { color: var(--glyph, inherit); }
 </style>
 </head>
 <body>
@@ -557,6 +577,19 @@
           </div>
         </div>
 
+        <div class="ctl-row" role="group" aria-label="Icon colour">
+          <span class="ctl-label">Colour</span>
+          <div class="inks" id="inks">
+            <button class="ink auto" type="button" data-ink="" aria-pressed="true" title="Follow the background">Auto</button>
+            <button class="ink" type="button" data-ink="#ffffff" style="--sw: #ffffff" aria-label="White" aria-pressed="false"></button>
+            <button class="ink" type="button" data-ink="#000000" style="--sw: #000000" aria-label="Black" aria-pressed="false"></button>
+            <button class="ink" type="button" data-ink="#4147d5" style="--sw: #4147d5" aria-label="Indigo" aria-pressed="false"></button>
+            <button class="ink" type="button" data-ink="#0e9f6e" style="--sw: #0e9f6e" aria-label="Green" aria-pressed="false"></button>
+            <button class="ink" type="button" data-ink="#e02424" style="--sw: #e02424" aria-label="Red" aria-pressed="false"></button>
+            <input type="color" id="inkPick" aria-label="Custom icon colour" value="#4147d5" />
+          </div>
+        </div>
+
         <div class="ctl-row" role="group" aria-label="Export format">
           <span class="ctl-label">Format</span>
           <div class="export-wrap" id="formatWrap">
@@ -666,6 +699,8 @@
   var weights = document.getElementById("weights");
   var sizes = document.getElementById("sizes");
   var surfaces = document.getElementById("surfaces");
+  var inks = document.getElementById("inks");
+  var inkPick = document.getElementById("inkPick");
   var formats = document.getElementById("formats");
   var formatWrap = document.getElementById("formatWrap");
   var formatBtn = document.getElementById("formatBtn");
@@ -815,6 +850,12 @@
   // A brand can carry the same drawings in several styles (Streamline does). The
   // catalog in hand is the current style's; the others are fetched the first time
   // the toggle asks for them and then kept for the visit.
+  // The chosen ink. Ink styles take it as currentColor; Duo and Flat are tinted
+  // rather than flattened, so their second tone survives as an opacity.
+  var ink = "";
+  var tints = {};
+  var currentPayload = null;
+
   var STYLE = null;
   var COLOUR = false;
   var TUNED = true;
@@ -935,7 +976,8 @@
       var byName = {};
       next.forEach(function (item) { byName[item.name] = item; });
       applyStyle(entry);
-      items = next;
+      currentPayload = payload;
+      items = displayed(next);
       CATS = catsFor(payload);
       chosen = names.map(function (name) { return byName[name]; }).filter(Boolean);
       chosenSet = {};
@@ -1272,6 +1314,93 @@
     applySurface(btn.getAttribute("data-surface"));
   });
 
+  function luminance(hex) {
+    var h = hex.replace("#", "");
+    if (h.length === 3) { h = h.split("").map(function (c) { return c + c; }).join(""); }
+    var parts = [0, 2, 4].map(function (at) {
+      var v = parseInt(h.substr(at, 2), 16) / 255;
+      return v <= 0.04045 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+    });
+    return 0.2126 * parts[0] + 0.7152 * parts[1] + 0.0722 * parts[2];
+  }
+
+  // A palette glyph cannot take currentColor wholesale: every tone would become one
+  // flat shape and Duo would stop looking like Duo. The darkest tone becomes the ink,
+  // each lighter one the same ink at an opacity that keeps their order.
+  function tinted(item) {
+    var seen = {};
+    item.body.replace(/(fill|stroke)="(#[0-9a-fA-F]{3,8})"/g, function (m, prop, hex) {
+      seen[hex.toLowerCase()] = true;
+      return m;
+    });
+    var tones = Object.keys(seen).sort(function (a, b) { return luminance(a) - luminance(b); });
+    var darkest = tones[0] || "";
+    var body = item.body.replace(/(fill|stroke)="(#[0-9a-fA-F]{3,8})"/g, function (m, prop, hex) {
+      if (hex.toLowerCase() === darkest) { return prop + '="currentColor"'; }
+      var key = prop === "fill" ? "fill-opacity" : "stroke-opacity";
+      var alpha = Math.round((0.10 + 0.45 * luminance(hex)) * 100) / 100;
+      return prop + '="currentColor" ' + key + '="' + alpha + '"';
+    });
+    return { name: item.name, cat: item.cat, attrs: item.attrs, body: body };
+  }
+
+  function displayed(list) {
+    if (!COLOUR || !ink) { return list; }
+    var key = (STYLE ? STYLE.slug : "") + ink;
+    if (!tints[key]) {
+      tints[key] = list.map(tinted);
+    }
+    return tints[key];
+  }
+
+  function applyInkColour() {
+    if (ink) { document.documentElement.style.setProperty("--glyph", ink); }
+    else { document.documentElement.style.removeProperty("--glyph"); }
+  }
+
+  function markInks() {
+    Array.prototype.forEach.call(inks.querySelectorAll(".ink"), function (button) {
+      var value = button.getAttribute("data-ink");
+      button.setAttribute("aria-pressed", value === ink ? "true" : "false");
+    });
+    inkPick.value = ink || "#4147d5";
+  }
+
+  function setInk(value, tell) {
+    ink = /^#[0-9a-fA-F]{6}$/.test(value || "") ? value.toLowerCase() : "";
+    store(INK_KEY, ink);
+    applyInkColour();
+    markInks();
+    if (COLOUR && currentPayload) {
+      var keepName = selected ? selected.name : "";
+      var names = chosen.map(function (item) { return item.name; });
+      items = displayed(currentPayload.icons || []);
+      var byName = {};
+      items.forEach(function (item) { byName[item.name] = item; });
+      chosen = names.map(function (name) { return byName[name]; }).filter(Boolean);
+      chosenSet = {};
+      chosen.forEach(function (item) { chosenSet[item.name] = true; });
+      selected = byName[keepName] || items[0];
+      renderGrid();
+      paint();
+    } else {
+      paint();
+    }
+    if (tell) {
+      announce(ink ? "Icons drawn in " + ink.toUpperCase() : "Icons follow the background");
+    }
+  }
+
+  inks.addEventListener("click", function (event) {
+    var button = event.target.closest(".ink");
+    if (!button) { return; }
+    setInk(button.getAttribute("data-ink"), true);
+  });
+
+  inkPick.addEventListener("input", function () {
+    setInk(inkPick.value, true);
+  });
+
 
 
   // A PNG, WEBP or JPG is drawn from the same tuned icon at the chosen export size
@@ -1284,8 +1413,9 @@
       var node = host.querySelector("svg");
       node.setAttribute("width", String(exportSize));
       node.setAttribute("height", String(exportSize));
+      node.setAttribute("style", "color:"
+        + (ink || (surface === "white" ? "#000000" : "#ffffff")));
       if (TUNED && !COLOUR) {
-        node.setAttribute("style", "color:" + (surface === "white" ? "#000000" : "#ffffff"));
         tune(node, weight, MODE !== "stroke");
       }
       var svg = new XMLSerializer().serializeToString(node);
@@ -1339,6 +1469,7 @@
   var FORMAT_KEY = "icons:format:" + SLUG;
   var SIZE_KEY = "icons:export:" + SLUG;
   var SURFACE_KEY = "icons:surface:" + SLUG;
+  var INK_KEY = "icons:ink:" + SLUG;
 
   function store(key, value) {
     try {
@@ -1665,6 +1796,7 @@
       applyExportSize(savedSize, false);
     }
     applySurface(recall(SURFACE_KEY));
+    setInk(recall(INK_KEY), false);
   })();
 
   var initial = STYLES.length ? (styleBySlug(recall(STYLE_KEY)) || STYLES[0]) : null;
@@ -1674,7 +1806,8 @@
 
   loadCatalog(initialData)
     .then(function (payload) {
-      items = payload.icons || [];
+      currentPayload = payload;
+      items = displayed(payload.icons || []);
       if (!items.length) { throw new Error("the catalog is empty"); }
       CATS = catsFor(payload);
       if (savedCat) {
