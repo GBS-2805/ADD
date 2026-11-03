@@ -126,12 +126,14 @@ in one run and prints console errors; it needs the toolchain from
 The site has two modes over one palette: a green band (`#0fbf92`) in both, an off-black
 page (`#131513`) with cream type (`#f2eee3`) in dark, and cream with off-black in light.
 A new visitor follows `prefers-color-scheme`; `site.js` swaps `data-theme` on `<html>`
-for the toggle it injects into the band and remembers the choice under `site:theme`,
+for the toggle it injects into the side tab and remembers the choice under `site:theme`,
 so generated pages inherit both. Every page links one stylesheet, `docs/assets/site.css`: it carries the
 `@font-face` block, the band, the pull-down menu and the shared type, and its
 `url()` paths are relative to that file so pages at any depth can use it. The band
 keeps frame 6-27's measured geometry -- 26px page name on the left inside a 40px
-tap target, the 45px mark centred, two 17px lines and the burger on the right --
+tap target, the 45px mark centred, two 17px lines and the burger on the right, and the theme control living in the side
+tab rather than the band; a phone drops the descriptor for `ADD` over
+`Art • Design • Database` --
 while the glyphs themselves are Coolicons line icons (MIT), which is why every
 page loads `assets/site.js`. Page-specific rules live in a small `<style>` on the page. `docs/icons/index.html` is
 generated on the same system out of the two icon templates.

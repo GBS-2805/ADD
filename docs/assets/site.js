@@ -19,7 +19,8 @@
     document.documentElement.setAttribute("data-theme", theme);
     var button = document.getElementById("themeBtn");
     if (!button) return;
-    button.innerHTML = theme === "light" ? MOON : SUN;
+    var icon = button.querySelector(".ico") || button;
+    icon.innerHTML = theme === "light" ? MOON : SUN;
     button.setAttribute("aria-label",
       theme === "light" ? "Switch to dark theme" : "Switch to light theme");
   }
@@ -65,19 +66,32 @@
     drawer.insertBefore(searchLink, drawerNote);
   }
 
-  var who = document.querySelector(".who");
-  if (who && !document.getElementById("themeBtn")) {
+  // The theme control lives in the side tab now, under its links: the band keeps
+  // only the page name, the mark and the burger at every width.
+  if (!document.getElementById("themeBtn")) {
     var themeBtn = document.createElement("button");
     themeBtn.type = "button";
     themeBtn.id = "themeBtn";
-    themeBtn.className = "theme-btn";
-    who.insertBefore(themeBtn, burger);
+    themeBtn.className = "drawer-theme";
+    themeBtn.innerHTML = '<span>Theme</span><span class="ico"></span>';
+    if (drawerNote) drawer.insertBefore(themeBtn, drawerNote);
+    else drawer.appendChild(themeBtn);
     applyTheme(document.documentElement.getAttribute("data-theme") || storedTheme());
     themeBtn.addEventListener("click", function () {
       var next = document.documentElement.getAttribute("data-theme") === "light" ? "dark" : "light";
       try { localStorage.setItem(THEME_KEY, next); } catch (error) { /* forget it */ }
       applyTheme(next);
     });
+  }
+
+  // A phone has no room for the two-line descriptor, so the band carries the short
+  // name over the long one instead. Injected here, so every page gets both.
+  var who = document.querySelector(".who");
+  if (who && !who.querySelector(".who-lines.phone")) {
+    var phone = document.createElement("div");
+    phone.className = "who-lines phone";
+    phone.innerHTML = '<p class="big">ADD</p><p class="sub">Art &#8226; Design &#8226; Database</p>';
+    who.insertBefore(phone, who.firstChild);
   }
 
   menuBtn.addEventListener("click", function () {
