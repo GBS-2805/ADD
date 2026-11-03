@@ -37,6 +37,8 @@ const shots = [
   { name: "phone-icons-brand", page: "icons/coolicons/", w: 390, h: 844, panel: true, pick: 2, scroll: "stage", title: "Coolicons on a phone", caption: "Preview, variant rows, and the set opened below." },
   { name: "phone-all", page: "icons/all/", w: 390, h: 844, full: true, title: "All brands on a phone", caption: "Both sheets stacked at 390 wide, four across." },
   { name: "phone-all-coolicons", page: "icons/all/", w: 390, h: 844, scroll: "pane-coolicons", title: "All brands \u00b7 the second brand", caption: "Coolicons, one scroll under Lineicons." },
+  { name: "page-releases", page: "releases/", w: 1300, h: 900, title: "Releases", caption: "Every build the shelf has shipped, newest first, with the day, the size and the note." },
+  { name: "phone-releases", page: "releases/", w: 390, h: 844, full: true, title: "Releases on a phone", caption: "The same history at 390 wide." },
 ];
 
 // Rendered apart from a page, so the gallery names it but the loop does not shoot it.
@@ -144,7 +146,7 @@ const escape = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/
   const GROUP_OF = { "": "Index", "tools/": "Tools", "icons/": "Icons app page",
     "icons/coolicons/": "Coolicons", "icons/lineicons/": "Lineicons",
     "icons/all/": "All brands", "fonts/": "Fonts",
-    "portfolio/": "Portfolio", "download/": "Download" };
+    "portfolio/": "Portfolio", "download/": "Download", "releases/": "Releases" };
   const all = [...shots, ...extras];
   const groups = [];
   for (const s of all) {
@@ -245,6 +247,7 @@ const escape = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/
   <a href="../download/">Download<span>2 apps</span></a>
   <a href="../portfolio/">Portfolio<span>3 projects</span></a>
   <a href="../renders/" aria-current="page">Renders<span>gallery</span></a>
+  <a href="../releases/">Releases<span>history</span></a>
   <p class="drawer-note">Every image here is a screenshot of a page that ran in a headless browser. Nothing is drawn by hand.</p>
 </aside>
 

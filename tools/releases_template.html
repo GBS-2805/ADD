@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Releases — __TOTAL__ builds, with the date and size of each</title>
+<meta name="description" content="Every build this shelf has shipped: __TOTAL__ releases, each with the day it went out and the APK size that shipped with it, read back out of the repository's own history." />
+<meta name="theme-color" content="#3f4e96" />
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml" />
+<link rel="stylesheet" href="../assets/site.css" />
+<style>
+  .rel { list-style: none; margin: 0; padding: 0; }
+  .rel li { padding: 18px 0; border-top: 1px solid var(--rule); }
+  .rel li:first-child { border-top: 0; padding-top: 0; }
+  .rel-top { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 14px; }
+  .rel-top > b { font-size: 21px; font-weight: 500; line-height: 1.2; }
+  .rel-meta { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 16px; margin-left: auto; font-size: 13px; color: var(--on-dim); }
+  .rel-meta .sha { padding: 0; background: none; }
+  .rel-note { margin: 8px 0 0; font-size: 15px; line-height: 1.55; max-width: 76ch; }
+  .rel-note b { display: block; font-weight: 500; }
+  .rel-none { margin: 8px 0 0; font-size: 15px; color: var(--on-dim); }
+  @media (max-width: 700px) {
+    .rel-top > b { font-size: 19px; }
+    .rel-meta { margin-left: 0; width: 100%; }
+    .rel-note { font-size: 14px; }
+  }
+</style>
+</head>
+<body>
+
+__CHROME__
+
+<main>
+  <header class="page-head">
+    <h1>Releases</h1>
+    <p class="lede">Every build this shelf has shipped, with the day it went out and <b>the size of the APK</b> that went out with it — read back out of the repository's own history, not typed in.</p>
+    <p class="meta">
+__META_LINES__
+    </p>
+  </header>
+
+  <section>
+    <h2>Icons <span class="pill live">__ICONS_LIVE__</span></h2>
+    <p class="kicker">__ICONS_KICKER__</p>
+    <ul class="rel">
+__ICONS_ROWS__
+    </ul>
+    <p class="fine">The file that ships today, with its SHA-256, is on the <a href="../download/">download page</a>. A size here is the APK blob as it sat in the repository at that commit, so a rebuild shows up as a different number rather than a quietly corrected one.</p>
+  </section>
+
+  <section>
+    <h2>Compress <span class="pill live">__COMPRESS_LIVE__</span></h2>
+    <p class="kicker">__COMPRESS_KICKER__</p>
+    <ul class="rel">
+__COMPRESS_ROWS__
+    </ul>
+    <p class="fine">Compress predates this site. The first build it ever served here is the one at the bottom of the list, so anything earlier has no APK in this history to measure.</p>
+  </section>
+
+  <section>
+    <h2>How this page is made</h2>
+    <p class="kicker">Generated from the history, every time</p>
+    <ul class="rows">
+      <li><b>The list</b><span>It walks the commits that changed <code>tools/catalog.json</code> and records each version it finds there, so a version this history never shipped cannot appear on the page.</span></li>
+      <li><b>The size</b><span><code>git cat-file -s</code> on the APK blob at that commit: the bytes that actually went out, not a rebuild measured today.</span></li>
+      <li><b>The notes</b><span>Titles and sentences come from the list on the <a href="../tools/">tools page</a>, where each note is checked against the version whose commit first added it.</span></li>
+      <li><b>Keeping up</b><span><code>python3 tools/build_releases.py</code> writes this page, and <code>tools/bump_version.py</code> runs it at the end of every release, so the history here cannot fall behind the shelf.</span></li>
+    </ul>
+  </section>
+</main>
+
+<footer>
+  <span>Icons __ICONS_LIVE__ · Compress __COMPRESS_LIVE__ · __TOTAL__ releases from history</span>
+  <span><a href="../">Index</a> · <a href="../tools/">Tools</a> · <a href="../download/">Download</a></span>
+</footer>
+
+<script src="../assets/site.js" defer></script>
+</body>
+</html>

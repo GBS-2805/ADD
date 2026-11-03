@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Releases — 21 builds, with the date and size of each</title>
+<meta name="description" content="Every build this shelf has shipped: 21 releases, each with the day it went out and the APK size that shipped with it, read back out of the repository's own history." />
+<meta name="theme-color" content="#3f4e96" />
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml" />
+<link rel="stylesheet" href="../assets/site.css" />
+<style>
+  .rel { list-style: none; margin: 0; padding: 0; }
+  .rel li { padding: 18px 0; border-top: 1px solid var(--rule); }
+  .rel li:first-child { border-top: 0; padding-top: 0; }
+  .rel-top { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 14px; }
+  .rel-top > b { font-size: 21px; font-weight: 500; line-height: 1.2; }
+  .rel-meta { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 16px; margin-left: auto; font-size: 13px; color: var(--on-dim); }
+  .rel-meta .sha { padding: 0; background: none; }
+  .rel-note { margin: 8px 0 0; font-size: 15px; line-height: 1.55; max-width: 76ch; }
+  .rel-note b { display: block; font-weight: 500; }
+  .rel-none { margin: 8px 0 0; font-size: 15px; color: var(--on-dim); }
+  @media (max-width: 700px) {
+    .rel-top > b { font-size: 19px; }
+    .rel-meta { margin-left: 0; width: 100%; }
+    .rel-note { font-size: 14px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="bar">
+  <div class="lead">
+    <button class="menu-btn" id="menuBtn" type="button" aria-expanded="false" aria-controls="menu" aria-label="Open sections">
+      <svg class="chev" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M8 13L12 17L16 13M8 7L12 11L16 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+    <a class="page-name" href="../">Releases</a>
+  </div>
+
+  <a class="mark" href="../" aria-label="Compress — home">
+    <svg viewBox="0 0 120.6 123.11" role="img" aria-label="Compress logo" fill="currentColor">
+        <path d="m29.58,61.92c.11,1.85.17,3.7.36,5.54.11,1.02-.23,1.23-1.19,1.29-4.47.26-5.38,1.22-5.27,5.67.13,5.14,2.74,9.13,6.27,12.56,1.53,1.49,2.96,1.05,3.89-.88.61-1.27.96-2.64,1.04-4.06.06-1.13.53-1.24,1.41-.69,1.72,1.08,2.92,2.71,4.38,4.07,8.66,8.04,18.38,13.89,30.58,14.51.52.03,1.04-.02,1.56,0,1.36.07,1.57-.53.89-1.58-.36-.56-.82-1.05-1.21-1.58-1.5-2.04-.63-4.17,1.89-4.53,3.34-.47,6.44.69,9.57,1.56,4.15,1.15,8.3,2.3,12.65,1.03,2.54-.74,2.78-1.66.84-3.54-.63-.61-1.41-1.08-2.11-1.63-2.43-1.91-2.63-3.35-.64-5.76,2.51-3.05,6.01-4.22,9.75-4.74,4.81-.67,9.26.31,13.25,3.19,1.39,1.01,1.75,1.97.94,3.7-9.48,20.25-25.12,32.69-47.2,36.28-29.25,4.75-57.41-12.11-67.54-39.86C-8.51,49.01,10.62,11.88,44.98,2.31c31.94-8.9,65.21,8.7,75.4,39.81.46,1.42.23,2.38-.66,3.4-4.28,4.87-9.78,6.13-15.92,5.16-4.99-.79-9.16-3.27-12.65-6.88-1.34-1.38-2.66-2.79-3.87-4.28-13.61-16.78-43.35-15.8-54.84,7.54-2.32,4.71-3.19,9.66-2.85,14.86Z"/>
+        <path d="m80.89,57.02c.88-.09,2.06-.21,3.22.13,1.56.46,1.88,1.6.75,2.8-1.16,1.23-2.59,1.52-4.25,1.33-4.23-.48-5.14.47-4.58,4.78.43,3.35,1.88,6.19,4.52,8.36.99.81,1.67.93,2.18-.62,1.55-4.74,1.61-4.72,6.46-4.56,1.28.04,2.56-.04,3.49-1.05.76-.83,1.38-1.54,2.5-.44,1.07,1.05,1.29,2.15.42,3.35-1.18,1.61-2.84,2.29-4.82,2.23-1.25-.04-2.77-.51-3.68.03-.98.58-.39,2.29-.7,3.49-.75,2.89-2.94,3.94-5.77,2.62-5.71-2.66-10.17-13.01-8.12-18.87.86-2.45,2.86-3.21,5.21-3.41.96-.08,1.92-.11,3.18-.18Z"/>
+        <path d="m52.62,58.41c.19-1.57.26-3.23,1.99-3.92,1.62-.65,2.9.23,3.92,1.33,2.41,2.61,3.79,5.64,2.86,9.26-.6,2.33-2.43,2.97-4.42,1.62-2.92-1.97-3.98-4.98-4.35-8.29Z"/>
+        <path d="m44.97,66.78c-.03,1.9-.18,3.24-1.63,3.9-1.5.68-2.61-.25-3.53-1.19-2.06-2.11-3.15-4.68-2.7-7.66.4-2.62,2.46-3.4,4.53-1.73,2.25,1.82,3.29,4.3,3.33,6.68Z"/>
+      </svg>
+  </a>
+
+  <div class="who">
+    <div class="who-lines">
+      <p>Compress</p>
+      <p>Icons · Fonts · Tools</p>
+    </div>
+    <button class="burger" id="burger" type="button" aria-expanded="false" aria-controls="drawer" aria-label="Open side tab">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 7H19M5 12H19M5 17H19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+  </div>
+</header>
+
+<nav class="menu" id="menu" data-open="false" aria-label="Sections">
+  <a href="../">Index<span>shelf</span></a>
+  <a href="../icons/">Icons<span>1,864 icons</span></a>
+  <a href="../fonts/">Fonts<span>3 faces</span></a>
+  <a href="../tools/">Tools<span>2 apps</span></a>
+</nav>
+
+<div class="scrim" id="scrim" data-open="false"></div>
+<aside class="drawer" id="drawer" data-open="false" aria-label="More">
+  <div class="drawer-head">
+    <p>More</p>
+    <button class="drawer-close" id="drawerClose" type="button" aria-label="Close side tab"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 6L18 18M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+  </div>
+  <a href="../download/">Download<span>2 apps</span></a>
+  <a href="../portfolio/">Portfolio<span>3 projects</span></a>
+  <a href="../renders/">Renders<span>gallery</span></a>
+  <a href="../releases/" aria-current="page">Releases<span>history</span></a>
+  <p class="drawer-note">Every build this shelf has shipped, read back out of its own history.</p>
+</aside>
+
+<main>
+  <header class="page-head">
+    <h1>Releases</h1>
+    <p class="lede">Every build this shelf has shipped, with the day it went out and <b>the size of the APK</b> that went out with it — read back out of the repository's own history, not typed in.</p>
+    <p class="meta">
+      <span>21 releases</span>
+      <span>14 Icons · 7 Compress</span>
+      <span>30 Oct 2026 – 2 Nov 2026</span>
+      <span>Read from git, not typed</span>
+    </p>
+  </header>
+
+  <section>
+    <h2>Icons <span class="pill live">2.3</span></h2>
+    <p class="kicker">14 releases, newest first · 505,218 to 538,063 bytes</p>
+    <ul class="rel">
+      <li>
+        <div class="rel-top"><b>2.3</b> <span class="pill live">shipping</span><span class="rel-meta"><span>2 Nov 2026</span><span>538,063 bytes</span><code class="sha">245fc49</code></span></div>
+          <p class="rel-note"><b>All brands in the app</b> The left pull-down opens with All, and the page behind it travels inside the APK: a tab per brand over a sheet of twenty icons, one from each category, so the two sets can be read side by side with the radio off.</p>
+      </li>
+      <li>
+        <div class="rel-top"><b>2.2</b><span class="rel-meta"><span>2 Nov 2026</span><span>533,890 bytes</span><code class="sha">96023da</code></span></div>
+          <p class="rel-note"><b>Estimate under Export</b> The zip estimate moved into the line under the Export button, where the running summary used to be, and the collected icons now wrap into rows instead of running off the edge of the tab.</p>
+      </li>
+      <li>
+        <div class="rel-top"><b>2.1</b><span class="rel-meta"><span>2 Nov 2026</span><span>533,890 bytes</span><code class="sha">33847de</code></span></div>
+          <p class="rel-note"><b>Pick what you export</b> Double-tap an icon in the sheet and it collects into a tab above it, with Remove selected and Remove all. Add all takes the whole category, and a category change starts the selection clean. The line under the preview estimates the zip before you press Export.</p>
+      </li>
+      <li>
+        <div class="rel-top"><b>2.0</b><span class="rel-meta"><span>2 Nov 2026</span><span>529,794 bytes</span><code class="sha">490fc66</code></span></div>
+          <p class="rel-note"><b>Format in a list</b> Format is a pull-down like the size: SVG, PNG, WEBP or JPG, one at a time, and the copy button renames itself to match. The two lists never open together.</p>
+      </li>
+      <li>
+        <div class="rel-top"><b>1.9</b><span class="rel-meta"><span>2 Nov 2026</span><span>529,794 bytes</span><code class="sha">4acf940</code></span></div>
+          <p class="rel-note"><b>Black or white, remembered</b> Your background choice now sticks per brand alongside the format and the size, so a white tile survives a reload and the exports come back on white.</p>
+      </li>
+      <li>
+        <div class="rel-top"><b>1.8</b><span class="rel-meta"><span>2 Nov 2026</span><span>529,794 bytes</span><code class="sha">3dccf1f</code></span></div>
+          <p class="rel-note"><b>One size, in a list</b> The export size is now a pull-down holding all six sizes from 32 to 1024px, instead of a row that had to squeeze. What you pick still carries over to the zip.</p>
+      </li>
+      <li>
+        <div class="rel-top"><b>1.7</b><span class="rel-meta"><span>2 Nov 2026</span><span>525,698 bytes</span><code class="sha">5abb774</code></span></div>
+          <p class="rel-note"><b>Sizes on two rows, and a pasteable PNG</b> The six export sizes now sit on two rows, so none of them is squeezed. The format and size you pick are remembered per brand, and on the site copying a raster also puts a PNG on the clipboard to paste straight into a design tool.</p>
+      </li>
+      <li>
+        <div class="rel-top"><b>1.6</b><span class="rel-meta"><span>2 Nov 2026</span><span>525,698 bytes</span><code class="sha">4e95ff8</code></span></div>
+          <p class="rel-note"><b>Whole sets at any size</b> The export size now runs from 32 to 1024px, and one button packs every icon the sheet shows into a single zip, in the format you picked. Inside the app that zip lands in Downloads/Icons.</p>
+      </li>
+      <li>
+        <div class="rel-top"><b>1.5</b><span class="rel-meta"><span>2 Nov 2026</span><span>521,602 bytes</span><code class="sha">8453524</code></span></div>
+          <p class="rel-note"><b>Exports</b> Copy hands over the SVG, or a 512px PNG, WEBP or JPG drawn on the black or white background. The app saves those to Pictures/Icons.</p>
+          <p class="rel-note"><b>Clear of the cutout</b> The browser is inset below the status bar and a camera cutout, so the band is no longer clipped. A page the app does not carry now offers the site address and an Open on the web button.</p>
+      </li>
+      <li>
+        <div class="rel-top"><b>1.4</b><span class="rel-meta"><span>2 Nov 2026</span><span>517,506 bytes</span><code class="sha">5589534</code></span></div>
+          <p class="rel-note"><b>Plain backgrounds</b> The preview tile is a black or white swatch now, labelled as such, instead of the palette’s field and band.</p>
+      </li>
+      <li>
+        <div class="rel-top"><b>1.3</b><span class="rel-meta"><span>2 Nov 2026</span><span>517,506 bytes</span><code class="sha">0c3fb86</code></span></div>
+          <p class="rel-note"><b>It remembers</b> The category you picked last is restored the next time you open a brand, and All icons forgets it.</p>
+      </li>
+      <li>
+        <div class="rel-top"><b>1.2</b><span class="rel-meta"><span>2 Nov 2026</span><span>517,506 bytes</span><code class="sha">eecb4d5</code></span></div>
+          <p class="rel-none">No release note was written for this build.</p>
+      </li>
+      <li>
+        <div class="rel-top"><b>1.1</b><span class="rel-meta"><span>2 Nov 2026</span><span>513,410 bytes</span><code class="sha">624e4d1</code></span></div>
+          <p class="rel-note"><b>Categories</b> Both sets filter by their vendor's own categories — Coolicons' 30, Lineicons' 51 — beside the name filter. The weight control now writes the chosen stroke onto every element, and fills the dots the stroke would otherwise turn inside out.</p>
+      </li>
+      <li>
+        <div class="rel-top"><b>1.0</b><span class="rel-meta"><span>2 Nov 2026</span><span>505,218 bytes</span><code class="sha">4afc145</code></span></div>
+          <p class="rel-note"><b>First build</b> Both brands, 1,864 icons, bundled with the pages, the stylesheet and Poppins. WebView on a private origin so <code>fetch</code> and the clipboard behave exactly as they do on the site.</p>
+          <p class="rel-note"><b>Preview and variants</b> A preview tab with weight, size and background, and a copy button that hands over the untouched SVG.</p>
+          <p class="rel-note"><b>The set folds away</b> All icons sit behind one toggle and scroll inside their own sheet instead of filling the page.</p>
+          <p class="rel-note"><b>No permissions</b> Not even <code>INTERNET</code>: the browser is inside the APK, so there is nothing to request.</p>
+      </li>
+    </ul>
+    <p class="fine">The file that ships today, with its SHA-256, is on the <a href="../download/">download page</a>. A size here is the APK blob as it sat in the repository at that commit, so a rebuild shows up as a different number rather than a quietly corrected one.</p>
+  </section>
+
+  <section>
+    <h2>Compress <span class="pill live">1.9</span></h2>
+    <p class="kicker">7 releases, newest first · 46,876 to 272,592 bytes</p>
+    <ul class="rel">
+      <li>
+        <div class="rel-top"><b>1.9</b> <span class="pill live">shipping</span><span class="rel-meta"><span>2 Nov 2026</span><span>272,592 bytes</span><code class="sha">83138d2</code></span></div>
+          <p class="rel-note"><b>Poppins</b> Every heading, label and number is set in Poppins instead of the system font and its mono captions.</p>
+          <p class="rel-note"><b>One field</b> The app is indigo with band-grey actions and hairline rules where thick ink borders used to be.</p>
+          <p class="rel-note"><b>One palette</b> The dark-mode toggle is gone because the design carries a single palette. Nothing else about compressing photos changed.</p>
+      </li>
+      <li>
+        <div class="rel-top"><b>1.8</b><span class="rel-meta"><span>2 Nov 2026</span><span>59,378 bytes</span><code class="sha">7fd95fc</code></span></div>
+          <p class="rel-note"><b>Mark</b> The logo sits at the bottom left of the main screen, next to a <b>MORE APPS</b> link back to this shelf.</p>
+      </li>
+      <li>
+        <div class="rel-top"><b>1.7</b><span class="rel-meta"><span>31 Oct 2026</span><span>55,212 bytes</span><code class="sha">5a713ed</code></span></div>
+          <p class="rel-none">No release note was written for this build.</p>
+      </li>
+      <li>
+        <div class="rel-top"><b>1.6</b><span class="rel-meta"><span>30 Oct 2026</span><span>55,212 bytes</span><code class="sha">754c86f</code></span></div>
+          <p class="rel-none">No release note was written for this build.</p>
+      </li>
+      <li>
+        <div class="rel-top"><b>1.5</b><span class="rel-meta"><span>30 Oct 2026</span><span>55,212 bytes</span><code class="sha">7e80a67</code></span></div>
+          <p class="rel-note"><b>Adding photos</b> Picking when some are queued asks first: <b>Add more</b> appends, <b>Start from beginning</b> replaces, Cancel leaves it alone.</p>
+      </li>
+      <li>
+        <div class="rel-top"><b>1.4</b><span class="rel-meta"><span>30 Oct 2026</span><span>51,116 bytes</span><code class="sha">4e5d547</code></span></div>
+          <p class="rel-none">No release note was written for this build.</p>
+      </li>
+      <li>
+        <div class="rel-top"><b>1.3</b><span class="rel-meta"><span>30 Oct 2026</span><span>46,876 bytes</span><code class="sha">3b5b1f6</code></span></div>
+          <p class="rel-none">No release note was written for this build.</p>
+      </li>
+    </ul>
+    <p class="fine">Compress predates this site. The first build it ever served here is the one at the bottom of the list, so anything earlier has no APK in this history to measure.</p>
+  </section>
+
+  <section>
+    <h2>How this page is made</h2>
+    <p class="kicker">Generated from the history, every time</p>
+    <ul class="rows">
+      <li><b>The list</b><span>It walks the commits that changed <code>tools/catalog.json</code> and records each version it finds there, so a version this history never shipped cannot appear on the page.</span></li>
+      <li><b>The size</b><span><code>git cat-file -s</code> on the APK blob at that commit: the bytes that actually went out, not a rebuild measured today.</span></li>
+      <li><b>The notes</b><span>Titles and sentences come from the list on the <a href="../tools/">tools page</a>, where each note is checked against the version whose commit first added it.</span></li>
+      <li><b>Keeping up</b><span><code>python3 tools/build_releases.py</code> writes this page, and <code>tools/bump_version.py</code> runs it at the end of every release, so the history here cannot fall behind the shelf.</span></li>
+    </ul>
+  </section>
+</main>
+
+<footer>
+  <span>Icons 2.3 · Compress 1.9 · 21 releases from history</span>
+  <span><a href="../">Index</a> · <a href="../tools/">Tools</a> · <a href="../download/">Download</a></span>
+</footer>
+
+<script src="../assets/site.js" defer></script>
+</body>
+</html>
