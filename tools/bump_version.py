@@ -24,6 +24,10 @@ quote the new build rather than the ones before it. Playwright and the browser l
 come from tools/render_env.py; the environment is checked before anything is written,
 so a machine without them stops the release instead of leaving it half done.
 
+  With --commit it then commits twice: the release, and the history page that names the
+  sha of that commit. It refuses to start on a worktree that already has changes, because
+  the commit stages everything and a release must not carry work that is not part of it.
+
 --deploy ends with the deployment. Without --deploy-cmd the Sites tool does the
 upload: the script prints the exact request to give it, with a fresh requestId. Pass
 --deploy-cmd "<command>" to run a real CLI instead; the site lives on Vercel, so a
@@ -78,6 +82,25 @@ def notes():
 
 def git(*args):
     return subprocess.run(["git", *args], cwd=ROOT, capture_output=True, text=True)
+
+
+def unrelated_changes():
+    """Paths already changed in the worktree, sorted -- work a release must not carry."""
+    done = subprocess.run(["git", "status", "--porcelain", "-z", "--untracked-files=all"],
+                          cwd=ROOT, capture_output=True, text=True)
+    if done.returncode != 0:
+        raise SystemExit("git status failed: " + (done.stderr or done.stdout).strip())
+    paths, renamed = set(), False
+    for entry in done.stdout.split("\0"):
+        if not entry:
+            continue
+        if renamed:
+            renamed = False          # the source path of a rename follows as its own entry
+            continue
+        paths.add(entry[3:])
+        if entry[0] in "RC":
+            renamed = True
+    return sorted(paths)
 
 
 def regenerate_history():
@@ -549,6 +572,22 @@ def main():
         raise SystemExit("--title and --note go together")
     if (args.deploy or args.deploy_cmd) and not args.build:
         raise SystemExit("--deploy needs --build, so the shelf quotes the APK it ships")
+
+    # A release commit stages the whole tree, so anything already changed would ride
+    # along with it. Say so before the bump writes a single file, not after.
+    if args.commit:
+        dirty = unrelated_changes()
+        if dirty:
+            listed = ", ".join(dirty[:4]) + (
+                " and %d more" % (len(dirty) - 4) if len(dirty) > 4 else "")
+            problem = ("%s %s already changed, so a release commit would carry work that "
+                       "is not part of the release; commit or stash %s and run the bump again"
+                       % (listed, "was" if len(dirty) == 1 else "were",
+                          "it" if len(dirty) == 1 else "them"))
+            if args.dry_run:
+                print("  --commit would refuse: " + problem)
+            else:
+                raise SystemExit("refusing to commit: " + problem)
 
     # A note whose label is not the version it shipped in is a broken history, and
     # bumping on top of it would only bury the mistake.

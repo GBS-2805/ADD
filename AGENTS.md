@@ -176,7 +176,10 @@ changes as unverified on device rather than illustrating them.
   the new note to `tools/release_notes.json`, then builds, copies the APK into `docs/`,
   re-measures size and checksum and rebuilds the catalogs. Then it serves `docs/` and reruns
   `tools/render_pages.js`, so the gallery is captured from the pages that quote the new
-  build; `--skip-captures` leaves it alone. `--deploy` ends by running `--deploy-cmd`
+  build; `--skip-captures` leaves it alone. `--commit` makes the two commits a
+  history row needs -- the release, then the page naming its sha -- and refuses to
+  start on a worktree with changes already in it, so a release never carries work
+  that is not part of it. `--deploy` ends by running `--deploy-cmd`
   if given — for a Vercel release, `--deploy-cmd "python3 tools/deploy_vercel.py"` —
   otherwise printing the `sites_deploy` request with a fresh requestId from
   `tools/site.json`. It reads the history
@@ -201,8 +204,9 @@ changes as unverified on device rather than illustrating them.
   instead of keeping a second list. Regenerate with `python3 tools/build_releases.py`
   -- a version bump runs it before it finishes, and a deploy runs it before it
   uploads but refuses to upload a page that differs from HEAD, because a page read
-  out of git can only carry a build once that build is committed. After a release,
-  commit the regenerated page and deploy again. Never edit the output.
+  out of git can only carry a build once that build is committed, which is why a
+  bump with `--commit` commits the release and then the page naming it. Never edit
+  the output.
 - `figma/` is the design hand-off: one SVG artboard per page per width, written by
   `tools/figma_export.js` from the pages as Chromium lays them out (text on real
   baselines, a rect per box fragment, ellipsised labels, the CSS-generated arrows
