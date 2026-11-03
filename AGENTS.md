@@ -264,11 +264,13 @@ changes as unverified on device rather than illustrating them.
   attribute beats a value inherited from the `<svg>`. The preview therefore writes
   the chosen weight onto each element (`tune()` in the template), not onto a parent.
   Setting it in CSS on the svg looks correct and does nothing.
-- Both sets carry their vendor's own categories: `fetch_icons.py --categories` merges
-  Coolicons' `icons/data/index.json` and Lineicons' public search index into the two
-  catalogs as `cat`, keeps each vendor's order in `cat_order`, and the sheet's picker
-  renders them. The four older Lineicons files the vendor has not categorised show
-  under All icons only; never invent a bucket for them.
+- All three sets carry their vendor's own categories: `fetch_icons.py --categories`
+  merges Coolicons' `icons/data/index.json`, Lineicons' public search index and
+  Phosphor's `IconCategory` (its own `phosphor-icons/core` repo: `src/types.ts` for the
+  names and order, `src/icons.ts` per icon) into the catalogs as `cat`, keeps each
+  vendor's order in `cat_order`, and the sheet's picker renders them. The four older
+  Lineicons files the vendor has not categorised show under All icons only; never
+  invent a bucket for them.
 - A closed subpath no bigger than the stroke turns inside out: the renderer leaves a
   pinhole where the stroke meets itself (Coolicons' 1-unit head showed it at weight 2,
   and again at 2.5). `solidDots()` splits those subpaths out of the preview and fills

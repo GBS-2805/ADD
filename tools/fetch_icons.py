@@ -86,6 +86,14 @@ PHOS_URL = ("https://cdn.jsdelivr.net/npm/@phosphor-icons/core@%s/assets/regular
             % (PHOS_VER, "%s"))
 PHOS_DIR = "/assets/regular/"
 PHOS_CACHE = pathlib.Path("/tmp/phosphor-tree.json")
+# Phosphor's npm package ships no metadata, but its repository does: src/icons.ts
+# carries one entry per icon listing the categories its own site filters by, and
+# src/types.ts declares the IconCategory enum with those names and their order.
+# Read those rather than inventing buckets.
+PHOS_META = "https://raw.githubusercontent.com/phosphor-icons/core/main/src/types.ts"
+PHOS_ICONS = "https://raw.githubusercontent.com/phosphor-icons/core/main/src/icons.ts"
+PHOS_META_CACHE = pathlib.Path("/tmp/phosphor-types.ts")
+PHOS_ICONS_CACHE = pathlib.Path("/tmp/phosphor-icons.ts")
 
 # Coolicons' own category order, as its browser lists them. Anything the vendor
 # adds later is appended alphabetically rather than dropped. Lineicons' order
@@ -114,7 +122,7 @@ BRANDS = [
      "note": "Coolicons drawn as strokes with regular corners: __COUNT__ icons, the variant that matches the hairline chrome these pages use."},
     {"slug": "phosphor", "name": "Phosphor", "source": "phosphor-icons/core 2.1.1",
      "style": "regular weight, outline", "data": DATA_PHOS, "names": "phosphor",
-     "cats": None, "licence": "MIT",
+     "cats": "phosphor", "licence": "MIT",
      "note": "Phosphor's regular weight, whole: __COUNT__ outline icons drawn on a 256 px grid, the weight its own site calls the default."},
     {"slug": "geometric-shapes-1", "name": "Geometric Shapes", "source": "Ziia, Figma community",
      "style": "set 1", "data": DATA_GEO1, "names": "geometric-shapes-1",
@@ -181,6 +189,43 @@ def phos_names():
     if not names:
         raise SystemExit("Phosphor regular came back empty; nothing written")
     return sorted(set(names))
+
+
+def phos_categories():
+    """name -> Phosphor's own first category, and its category order.
+
+    The enum values are lower case and sometimes phrased ("technology & development"),
+    so each is title cased for display while the sheet matches on its plain key.
+    """
+    def text(url, cache):
+        if cache.exists():
+            return cache.read_text(encoding="utf-8")
+        try:
+            raw = urllib.request.urlopen(url, timeout=45).read().decode("utf-8", "replace")
+        except Exception as error:
+            print("phosphor categories unavailable (%s)" % error, file=sys.stderr)
+            return None
+        cache.write_text(raw, encoding="utf-8")
+        return raw
+
+    types = text(PHOS_META, PHOS_META_CACHE)
+    icons = text(PHOS_ICONS, PHOS_ICONS_CACHE)
+    if not types or not icons:
+        return {}, []
+
+    block = types.split("enum IconCategory")[1].split("}")[0]
+    enum = dict(re.findall(r'([A-Z_]+)\s*=\s*"([^"]+)"', block))
+    label = {key: " ".join(word.capitalize() for word in value.split())
+             for key, value in enum.items()}
+
+    found = {}
+    for name, cats in re.findall(r'name:\s*"([^"]+)".{0,600}?categories:\s*\[([^\]]*)\]',
+                                 icons, re.S):
+        keys = re.findall(r"IconCategory\.([A-Z_]+)", cats)
+        if keys and keys[0] in label:
+            found[name] = label[keys[0]]
+    used = set(found.values())
+    return found, [name for name in label.values() if name in used]
 
 
 def local_names(folder):
@@ -426,6 +471,8 @@ def categories_for(brand):
         return line_categories()
     if brand.get("cats") == "coolicons":
         return cool_categories(), CAT_ORDER
+    if brand.get("cats") == "phosphor":
+        return phos_categories()
     return {}, []
 
 
