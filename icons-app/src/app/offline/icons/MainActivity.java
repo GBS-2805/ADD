@@ -45,7 +45,7 @@ public class MainActivity extends Activity {
 
     private static final String ORIGIN = "https://icons.local";
     private static final String ENTRY = ORIGIN + "/icons/index.html";
-    private static final String SITE = "https://site-bfde50ad8d634f69a640767bcad4a006.freebuff.page";
+    private static final String SITE = "https://artbase-olive.vercel.app";
     private static final String FIELD = "#3F4E96";
 
     private WebView web;

@@ -40,7 +40,7 @@ public class MainActivity extends Activity {
     private static final int REQ_PREVIEW = 1003;
 
     /** Public download page, opened in the browser from the footer link. */
-    private static final String SITE_URL = "https://site-bfde50ad8d634f69a640767bcad4a006.freebuff.page/";
+    private static final String SITE_URL = "https://artbase-olive.vercel.app/";
 
     /** Hard cap on a batch, matching the queue the strip can hold. */
     private static final int MAX_PHOTOS = 40;
