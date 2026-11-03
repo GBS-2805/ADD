@@ -153,9 +153,10 @@ changes as unverified on device rather than illustrating them.
   run. Captures ship as lossless WebP (`tools/to_webp.py`,
   wired into `tools/render_pages.js`): same pixels, a third of the bytes. The one canvas
   keeps each artwork payload once in `<defs>` and paints instances with `<use>`.
-- The shelf is eleven pages, each a folder with an `index.html`: the root index, then
+- The shelf is twelve pages, each a folder with an `index.html`: the root index, then
   `tools/`, `icons/` and its two brand folders plus the all-brands sheet at
-  `icons/all/`, `fonts/`, `portfolio/`, `download/`, `renders/` and `releases/`. They share
+  `icons/all/`, `fonts/`, `portfolio/`, `download/`, `renders/`, `figma/` (written by
+  `figma_publish.py`) and `releases/`. They share
   `assets/site.css` and `assets/site.js`; no page has its own copy of the palette.
   The page name sits on the left of the band beside a chevron control that opens a
   pull-down accordion with four destinations (index, icons, fonts, tools); the
@@ -218,7 +219,11 @@ changes as unverified on device rather than illustrating them.
   `tools/icons_all_template.html` (the all-brands sheet at `docs/icons/all/`).
   Edit the templates and regenerate with `python3 tools/fetch_icons.py --pages-only`,
   never the output. Each page is ~27 KB: it loads its brand's catalog at run time
-  instead of inlining glyphs, and the APK bundles those same files.
+  instead of inlining glyphs. The Icons bundle stages `icons.json` and `coolicons.json`
+  and nothing else, so the all-brands sheet -- which fetches `lineicons-sheet.json` and
+  `coolicons-sheet.json` -- has no data inside the APK and renders empty sections there,
+  while the site is unaffected. Adding those two files to `stage_icons_assets` in
+  `build.sh` is the whole fix; it needs a build and a re-capture to ship.
 - The left pull-down of all three icon pages opens with All, linking to
   `/icons/all/`: twelve glyphs per brand, one from every category — the first name in
   the catalog for that category. Categories are matched across sets on a plain key

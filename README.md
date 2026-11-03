@@ -37,7 +37,7 @@ the pages.
 
 ## The shelf
 
-Eleven pages, one stylesheet, no framework:
+Twelve pages, one stylesheet, no framework:
 
 | Page | What it is |
 | --- | --- |
@@ -46,11 +46,13 @@ Eleven pages, one stylesheet, no framework:
 | `docs/icons/` | Icons app landing: download, the two brands, what the app does |
 | `docs/icons/lineicons/` | Lineicons: preview tab, variants, the set (generated) |
 | `docs/icons/coolicons/` | Coolicons: preview tab, variants, the set (generated) |
+| `docs/icons/all/` | All brands: one section per brand, twelve glyphs each (generated) |
 | `docs/fonts/` | Poppins 400/500/600, specimens, woff2 and TTF downloads |
 | `docs/portfolio/` | Three projects, what I built in each, constraints |
 | `docs/download/` | Both APKs, sizes, SHA-256, install steps |
 | `docs/renders/` | Gallery of captures, nothing drawn by hand |
 | `docs/releases/` | Every build, with the day, the APK size and the note written for it |
+| `docs/figma/` | The design hand-off, listed so every artboard downloads from a phone |
 
 Pages share `docs/assets/site.css` — palette, band, menus and type — plus
 `docs/assets/site.js` for both menus. The band is frame 6-27's geometry with the page
@@ -108,8 +110,10 @@ python3 tools/build_catalog.py --check      # check only
   Lineicons files the vendor has not categorised appear under All icons only.
 - **Remembers**: each brand keeps the category you last picked and restores it,
   per brand; choosing All icons forgets it.
-- **The set folds away**: all 1,864 glyphs behind one toggle, scrollable inside a
-  sheet with its own filter and count.
+- **The set folds away**: a brand's glyphs scroll inside a sheet with its own filter
+  and count, and the all-brands page stacks every brand as a section — twelve glyphs
+  each, drawn from the categories the sets share — so all 1,864 stay reachable
+  without a wall of cells.
 - **Copy the file**: the exact SVG, with a textarea fallback, and inside the APK a
   Java bridge that puts it on the clipboard.
 - **Offline**: the app has no `INTERNET` permission; the bundle is served from
@@ -230,6 +234,11 @@ need a version bump to carry the new host. `AGENTS.md` has the full sequence.
 
 ## Not yet done
 
+- **The all-brands page is empty inside the Icons app.** It fetches
+  `data/lineicons-sheet.json` and `data/coolicons-sheet.json`, and `build.sh` stages only
+  `icons.json` and `coolicons.json`, so in the APK its sections render with no glyphs.
+  The site is unaffected, and the failure is silent because the page treats a failed
+  fetch as “no data”. The fix is those two files in `stage_icons_assets`, then a build.
 - **Icons has not been run on a device.** The bundle, the manifest and the signing
   are verified; the WebView surface, the clipboard bridge and the private origin are
   reviewed code, not observed behaviour. Compress has never been exercised on a

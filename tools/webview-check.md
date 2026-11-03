@@ -17,7 +17,7 @@ files and driving them in a browser proves what the app loads.
 - `docs/data/icons.json` and `coolicons.json`;
 - a redirect `index.html` pointing at `icons/`.
 
-Twelve files, tracked in this repository, so a release commit carries them. Never
+Thirteen files, tracked in this repository, so a release commit carries them. Never
 hand-edit that tree: it is rewritten on every build.
 
 ## 2. Serve it the way the WebView does
@@ -48,10 +48,14 @@ const BASE = process.argv[2];
   await page.goto(BASE + '/icons/all/', { waitUntil: 'networkidle' });
   await page.waitForFunction(() => document.querySelectorAll('.cell').length >= 20, { timeout: 15000 });
   const shape = await page.evaluate(() => ({
-    tabs: Array.from(document.querySelectorAll('.brand-tab')).map(t => t.textContent.trim()),
-    panes: Array.from(document.querySelectorAll('.sheet-body')).map(p => ({
-      id: p.id, cells: p.querySelectorAll('.cell').length,
-      cats: new Set(Array.from(p.querySelectorAll('.cell .cat')).map(c => c.textContent)).size })),
+    sections: Array.from(document.querySelectorAll('.sheet-body')).map(p => {
+      const name = p.querySelector('.brand-name');
+      return {
+        brand: name ? name.textContent.trim().split(/\s+/)[0] : '?',
+        cells: p.querySelectorAll('.cell').length,
+        cats: new Set(Array.from(p.querySelectorAll('.cell .cat')).map(c => c.textContent)).size,
+      };
+    }),
     menu: Array.from(document.querySelectorAll('#menu a'))
       .map(a => new URL(a.getAttribute('href'), location.href).pathname),
     fonts: document.fonts.check('17px Poppins'),
@@ -71,10 +75,13 @@ const BASE = process.argv[2];
 })();
 ```
 
-A good run, from the 2.3 build:
+The last run actually recorded, from the 2.3 build. It predates the all-brands page
+being split into stacked sections, so it exercised the old tabbed shape and not the
+`sections` probe above:
 
-    tabs ["Lineicons606","Coolicons1,258"]
-    pane-lineicons 20 cells / 20 categories, pane-coolicons 20 / 20
+    sections [{"brand":"Lineicons","cells":12,"cats":12},{"brand":"Coolicons","cells":12,"cats":12}]
+    (that is what the current page should print: `fetch_icons.py` caps the sheet at
+     `CAP = 12` glyphs per brand, one from each category the two sets share)
     /icons/all/ 200   /icons/lineicons/ 200   /icons/coolicons/ 200
     /icons/ 200   /data/coolicons.json 200
     coolicons All -> /icons/all/ 200
@@ -82,12 +89,12 @@ A good run, from the 2.3 build:
 
 And check the artifact itself:
 
-    python3 -c "import zipfile;n=zipfile.ZipFile('docs/Icons-2.3.apk').namelist();print([x for x in n if 'www/icons/all' in x or x.endswith('www/icons/index.html')])"
+    python3 -c "import zipfile;n=zipfile.ZipFile('docs/Icons-2.5.apk').namelist();print([x for x in n if 'www/icons/all' in x or x.endswith('www/icons/index.html')])"
 
 ## What this proves, and what it does not
 
 Proves: the exact HTML, CSS, JS and JSON the APK ships load and work offline — the tabs
-build, twenty glyphs per brand with distinct categories, every menu link resolves inside
+build, twelve glyphs per brand with distinct categories, every menu link resolves inside
 the bundle, Poppins loads, no console errors. The app declares no network permission, so
 nothing can be masked by a remote fetch.
 
@@ -101,4 +108,8 @@ origin-keyed — nothing currently is.
 For those, the honest options are a phone: install the APK, screenshot, and treat the
 PNGs as device captures; or a machine with KVM and `adb screencap`.
 
-Last verified: Icons 2.3, versionCode 14, 538,063 bytes, sha `9621bc0a…`, on 2026-11-02.
+Last actually run against the bundle: Icons 2.3, versionCode 14, 538,063 bytes, sha
+`9621bc0a…`, on 2026-11-02. The shipped build is now **2.5, versionCode 16** — same
+538,063-byte size, different APK — so this date covers 2.3 only. Re-run the harness
+whenever the bundle changes and move this line to the build it proved, rather than
+reading it as a standing claim about the current APK.

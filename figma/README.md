@@ -12,20 +12,20 @@ each page in Chromium at the real viewport and translates what it measures.
 | `04-icons-lineicons-desktop.svg` | Icons · Lineicons | 1300×1417 |
 | `05-icons-coolicons-desktop.svg` | Icons · Coolicons | 1300×1417 |
 | `06-fonts-desktop.svg` | Fonts | 1300×2063 |
-| `07-tools-desktop.svg` | Tools | 1300×4334 |
+| `07-tools-desktop.svg` | Tools | 1300×4421 |
 | `08-portfolio-desktop.svg` | Portfolio | 1300×2931 |
 | `09-download-desktop.svg` | Download | 1300×2734 |
-| `10-releases-desktop.svg` | Releases | 1300×5163 |
+| `10-releases-desktop.svg` | Releases | 1300×5704 |
 | `11-index-phone.svg` | Index | 390×3297 |
 | `12-icons-phone.svg` | Icons | 390×3716 |
 | `13-icons-all-phone.svg` | Icons · All brands | 390×1449 |
 | `14-icons-lineicons-phone.svg` | Icons · Lineicons | 390×1625 |
 | `15-icons-coolicons-phone.svg` | Icons · Coolicons | 390×1594 |
 | `16-fonts-phone.svg` | Fonts | 390×2899 |
-| `17-tools-phone.svg` | Tools | 390×6190 |
+| `17-tools-phone.svg` | Tools | 390×6329 |
 | `18-portfolio-phone.svg` | Portfolio | 390×4470 |
 | `19-download-phone.svg` | Download | 390×3861 |
-| `20-releases-phone.svg` | Releases | 390×6510 |
+| `20-releases-phone.svg` | Releases | 390×7194 |
 | `21-index-menu-desktop.svg` | Index · pull-down | 1300×2326 |
 | `22-index-drawer-desktop.svg` | Index · side tab | 1300×2069 |
 | `23-index-menu-phone.svg` | Index · pull-down | 390×3524 |
@@ -36,7 +36,7 @@ the whole page, not just the fold.
 
 ## The whole set on one canvas
 
-`site-figma.svg` is all twenty-four artboards on one 1910×45192 canvas, desktop
+`site-figma.svg` is all twenty-four artboards on one 1910×46015 canvas, desktop
 down the left column and phone down the right, each labelled with its file name.
 Open that file to look at the set — a browser or the desktop app's file panel
 renders it, where a zip can only be downloaded. One drag puts everything into
@@ -65,9 +65,11 @@ Those faces travel inside every artboard: Poppins 400, 500 and 600 are embedded 
 base64 woff2, about 32 KB a file, because an SVG that only names the family renders
 in whatever sans the viewer has. Open any of these in a browser — here, from
 `/figma/` on the site, or from a phone's download — and the type is the site's.
-That is what sets the hand-off's cost: with the faces in, the whole site sits about
-2.98 MB under the host's 10 MiB deploy ceiling, so `tools/figma_publish.py` prints
-the headroom on every run and anything new has to fit inside it. Figma does not read `@font-face` from an SVG, so it still asks to enable the
+That is what sets the hand-off's cost: with the faces in, `docs/figma/` measures
+2.54 MB (2,661,344 bytes) and the whole site 7.05 MB. The Vercel host has no deploy
+cap, so nothing here is near a limit today; the Sites fallback still refuses a folder
+over 10 MiB, which is why `tools/figma_publish.py` keeps printing the headroom on
+every run. Figma does not read `@font-face` from an SVG, so it still asks to enable the
 Google font once on import.
 
 ## What is a layer and what is an image
