@@ -32,8 +32,8 @@ that text changed.
   `page-icons`, `page-icons-brand`, `page-icons-panel`, `page-icons-variants`,
   `page-fonts`, `page-portfolio`, `page-download`, `phone-fonts`, `phone-home-light`,
   `phone-home-full`, `phone-menu`, `phone-drawer`, `phone-icons`,
-  `phone-icons-brand` and `logo-light`.. There is one palette, so there are no dark variants; the `-light`
-  suffix on some of them is history, not a variant.
+  `phone-icons-brand` and `logo-light`.. The gallery holds the light mode only, so there are no
+  dark variants; the `-light` suffix on some of them is history, not a variant.
 - Cover every page the change touches, plus mobile width when the change is
   responsive.
 - Inspect each render before sending it. If the render shows a layout, colour or
@@ -123,8 +123,11 @@ Screenshots are of a local server over `docs/` (`python3 -m http.server`), viewp
 in one run and prints console errors; it needs the toolchain from
 `tools/render_env.py`.
 
-The site has one palette -- an indigo field with a light band -- and no theme switch
-on any page. Every page links one stylesheet, `docs/assets/site.css`: it carries the
+The site has two modes over one palette: a green band (`#00d7a0`) in both, an off-black
+page (`#131513`) with cream type (`#f2eee3`) in dark, and cream with off-black in light.
+A new visitor follows `prefers-color-scheme`; `site.js` swaps `data-theme` on `<html>`
+for the toggle it injects into the band and remembers the choice under `site:theme`,
+so generated pages inherit both. Every page links one stylesheet, `docs/assets/site.css`: it carries the
 `@font-face` block, the band, the pull-down menu and the shared type, and its
 `url()` paths are relative to that file so pages at any depth can use it. The band
 keeps frame 6-27's measured geometry -- 26px page name on the left inside a 40px
