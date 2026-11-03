@@ -24,6 +24,9 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 DOCS = ROOT / "docs"
 SITE = ROOT / "tools/site.json"
 
+# Vercel consumes its config on upload and does not serve it, so it is not a route.
+NOT_SERVED = {"vercel.json"}
+
 PAGES = DOCS / "data/pages.json"
 SITEMAP = DOCS / "sitemap.xml"
 ROBOTS = DOCS / "robots.txt"
@@ -106,6 +109,8 @@ def routes():
         if not wanted:
             continue
         rel = path.relative_to(DOCS).as_posix()
+        if rel in NOT_SERVED:
+            continue
         found.append(("/" + rel, wanted))
     return found
 
