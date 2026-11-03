@@ -32,8 +32,8 @@ the pages.
   the header toggle is gone from the layout and the Java. `ThemePrefs` remains only
   to force night mode off in the system UI.
 
-`dist/` keeps the older builds (1.3 through 1.9) as history. Only the current APKs
-are copied into `docs/`.
+`dist/` keeps every older build as history; only the current APKs are copied into
+`docs/`.
 
 ## The shelf
 

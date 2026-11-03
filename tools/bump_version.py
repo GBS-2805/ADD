@@ -61,7 +61,8 @@ BUILD = ROOT / "build.sh"
 NOTES = ROOT / "tools/release_notes.json"
 SITE = ROOT / "tools/site.json"
 LABEL_FILES = ["docs/index.html", "docs/download/index.html", "docs/icons/index.html",
-               "docs/tools/index.html", "README.md", "AGENTS.md", "tools/render_pages.js"]
+               "docs/tools/index.html", "docs/portfolio/index.html", "README.md",
+               "AGENTS.md", "tools/render_pages.js"]
 
 # A note carries its own version and must never be bumped, so the notes live in a
 # file of their own instead of beside the labels a bump walks over.
@@ -191,8 +192,11 @@ def label_pairs(app, old, new, old_code, new_code):
             # spells the code with a space; neither carries the app's name.
             (f'class="pill live">{old}<', f'class="pill live">{new}<'),
             (f'class="pill live">app {old}<', f'class="pill live">app {new}<'),
+            (f"{old} \u00b7 app.offline.{app} \u00b7", f"{new} \u00b7 app.offline.{app} \u00b7"),
+            (f"Android app \u00b7 {old} \u00b7", f"Android app \u00b7 {new} \u00b7"),
             (f"versionCode {old_code}", f"versionCode {new_code}", name.lower()),
-            (f"version code {old_code}", f"version code {new_code}", name.lower())]
+            (f"version code {old_code}", f"version code {new_code}", name.lower()),
+            (f"Version code {old_code}", f"Version code {new_code}", name.lower())]
 
 
 # A page and the artboards made from it. The exporter writes one board per page per
@@ -210,10 +214,49 @@ def human(number):
     return "%d KB" % round(number / 1024) if number < 1048576 else "%.2f MB" % (number / 1048576)
 
 
+# Pages whose text is generated elsewhere, or is a list of every version the shelf has
+# ever run: neither holds a live label the bump has to move.
+SWEEP_SKIP = ("docs/releases", "docs/figma", "docs/renders", "docs/data")
+
+
+def visible(text, path):
+    """What a reader sees: markup carries coordinates that look like versions."""
+    text = re.sub(r'\sd="[^"]*"', " ", text)          # path data, in HTML and in JS
+    return re.sub(r"<[^>]*>", " ", text) if path.endswith(".html") else text
+
+
+def quoted_elsewhere(old, plans):
+    """Every page that still prints the old version once the known labels have moved.
+
+    A bump that knows only some of the shapes a version takes leaves the rest behind,
+    which is how the tools page kept a 2.3 pill while every other label said 2.4.
+    """
+    planned = {page: after for page, _, after, _ in plans}
+    token = re.compile(r"(?<![0-9.])%s(?![0-9.])" % re.escape(old))
+    pages = dict.fromkeys(LABEL_FILES + sorted(str(path.relative_to(ROOT))
+                                                for path in (ROOT / "docs").rglob("*.html")))
+    found = []
+    for page in pages:
+        if page.startswith(SWEEP_SKIP):
+            continue
+        if page in planned:
+            text = planned[page]
+        elif (ROOT / page).exists():
+            text = (ROOT / page).read_text(encoding="utf-8")
+        else:
+            continue
+        for number, line in enumerate(visible(text, page).splitlines(), 1):
+            if token.search(line):
+                found.append("%s:%d  %s" % (page, number, " ".join(line.split())[:90]))
+    return found
+
+
 def show_diffs(plans, keep=14):
     """The lines each file would lose and gain, so the plan can be read, not trusted."""
     print("\nthe edits")
-    for name, before, after, _ in plans:
+    for name, before, after, hits in plans:
+        if not hits:
+            continue
         diff = difflib.unified_diff(before.splitlines(keepends=True),
                                     after.splitlines(keepends=True),
                                     fromfile="a/" + name, tofile="b/" + name, n=0)
@@ -437,14 +480,19 @@ def main():
     print("  build.sh               %d build case(s)" % cases)
 
     pairs = label_pairs(app, old, new, old_code, new_code)
-    plans = []
-    for page in LABEL_FILES:
-        if dry:
-            before, after, hits = planned(page, pairs)
-            if hits:
-                plans.append((page, before, after, hits))
-        else:
-            hits = rewrite(page, pairs, dry=False)
+    plans = [(page, *planned(page, pairs)) for page in LABEL_FILES]
+    # The labels above are the shapes this tool knows. Anything else that still
+    # prints the old version is a label nobody will move, so the bump stops here.
+    leftovers = quoted_elsewhere(old, plans)
+    if leftovers:
+        print("refusing to bump: these still quote %s %s once the labels move"
+              % (app_name, old))
+        for line in leftovers[:12]:
+            print("  " + line)
+        raise SystemExit("teach label_pairs the form, or fix the page, then run again")
+    for page, before, after, hits in plans:
+        if not dry and hits:
+            (ROOT / page).write_text(after, encoding="utf-8")
         if hits:
             print("  %-30s %d label(s)" % (page, hits))
 
@@ -453,7 +501,9 @@ def main():
               % ("tools/release_notes.json", add_note(app, new, args.title, args.note, dry)))
 
     if dry:
-        pages = {PAGE_OF[plan[0]] for plan in plans if plan[0] in PAGE_OF}
+        print("\nthe sweep")
+        print("  nothing else prints %s %s in a form the labels miss" % (app_name, old))
+        pages = {PAGE_OF[plan[0]] for plan in plans if plan[0] in PAGE_OF and plan[3]}
         slugs = {SLUG_OF[page] for page in pages}
         show_diffs(plans)
 
