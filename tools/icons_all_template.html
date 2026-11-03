@@ -411,6 +411,13 @@ __BRANDS__
   } else {
     panes.forEach(function (entry) { hydrate(entry); });
   }
+
+  // The observer reports a section only after the first frame, and a page that opens
+  // with many of them can leave the one on screen on its placeholders for a beat, so
+  // anything already inside the margin is filled now. `done` keeps that idempotent.
+  panes.forEach(function (entry) {
+    if (entry.pane.getBoundingClientRect().top < window.innerHeight + 400) { hydrate(entry); }
+  });
 })();
 </script>
 <script src="__ROOT__assets/site.js" defer></script>
