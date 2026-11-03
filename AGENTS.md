@@ -150,9 +150,11 @@ changes as unverified on device rather than illustrating them.
   `tools/site.json` — there is no deploy CLI in this environment. It reads the history
   first and refuses to bump
   while any note's label is not the catalog version of the commit that added
-  it; `--check-notes` runs that check alone. Never replace version strings by hand — a
-  blanket find-and-replace once relabelled twelve releases as 2.2, and the notes only
-  recovered their real versions by reading the commits again.
+  it; `--check-notes` runs that check alone. `--dry-run` writes nothing and prints
+  the plan instead: the labels, a diff of each file, the artboards and captures
+  that go stale with those pages, and the deploy headroom. Never replace version
+  strings by hand — a blanket find-and-replace once relabelled twelve releases as
+  2.2, and the notes only recovered their real versions by reading the commits again.
 - `tools/catalog.json` is the single source of truth for the apps, the fonts and the
   portfolio. `tools/build_catalog.py` re-measures the APK and the font files, copies
   each TTF from `app/res/font/` into `docs/assets/fonts/`, writes the JSON and then

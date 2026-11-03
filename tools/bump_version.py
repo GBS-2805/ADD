@@ -27,13 +27,18 @@ requestId. Pass --deploy-cmd "<command>" to run a real CLI instead, once one exi
 
 Without --build nothing is compiled, no captures are taken and the size and checksum
 keep their old values, which leaves the shelf failing `build_catalog.py --check` until
-the build runs. --dry-run prints the planned edits and writes nothing.
+the build runs.
+
+--dry-run writes nothing and prints the plan instead: every label it would move, a diff
+of each file it would touch, the artboards and captures that go stale with those pages,
+when the history page learns about the build, and the deploy headroom afterwards.
 
 The notes are never relabelled: a note keeps the version it was written for, and
 every note is checked against the commit that first added it before anything moves.
 """
 
 import argparse
+import difflib
 import hashlib
 import json
 import os
@@ -140,28 +145,110 @@ def digest(path):
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def rewrite(path, pairs, dry):
-    """Replace pairs line by line in a page; the notes file is never in this list."""
-    path = ROOT / path
-    text = path.read_text(encoding="utf-8")
+def planned(path, pairs):
+    """The text a page would carry after the labels move, and how many moved.
+
+    A pair may carry a third item: a word its line has to contain, so a bump to the
+    versionCode cannot walk into the other app's line in the README.
+    """
+    text = (ROOT / path).read_text(encoding="utf-8")
     out, hits = [], 0
     for line in text.splitlines(keepends=True):
-        for old, new in pairs:
+        for pair in pairs:
+            old, new = pair[0], pair[1]
+            if len(pair) > 2 and pair[2] not in line:
+                continue
             if old and old in line:
                 hits += line.count(old)
                 line = line.replace(old, new)
         out.append(line)
+    return text, "".join(out), hits
+
+
+def rewrite(path, pairs, dry):
+    """Replace pairs line by line in a page; the notes file is never in this list."""
+    before, after, hits = planned(path, pairs)
     if not hits:
         return 0
     if not dry:
-        path.write_text("".join(out), encoding="utf-8")
+        (ROOT / path).write_text(after, encoding="utf-8")
     return hits
 
 
 def label_pairs(old, new, old_code, new_code):
+    # The versionCode travels with the icon app's name: Compress keeps its own code,
+    # and in the README the two lines carry the same number, one above the other.
     return [(f"Icons-{old}", f"Icons-{new}"),
             (f"Icons {old}", f"Icons {new}"),
-            (f"versionCode {old_code}", f"versionCode {new_code}")]
+            (f"versionCode {old_code}", f"versionCode {new_code}", "icons")]
+
+
+# A page and the artboards made from it. The exporter writes one board per page per
+# width by position, so a page that moves takes its boards with it; the two pull-outs
+# are states of the index and carry its band, so they go stale with it too.
+PAGE_OF = {"docs/index.html": "/", "docs/icons/index.html": "/icons/",
+           "docs/tools/index.html": "/tools/", "docs/download/index.html": "/download/"}
+SLUG_OF = {"/": "index", "/icons/": "icons", "/tools/": "tools", "/download/": "download"}
+STATES = ("pull-down-desktop", "pull-down-phone", "side-tab-desktop", "side-tab-phone")
+BUDGET = 10485760
+
+
+def human(number):
+    return "%d KB" % round(number / 1024) if number < 1048576 else "%.2f MB" % (number / 1048576)
+
+
+def show_diffs(plans, keep=14):
+    """The lines each file would lose and gain, so the plan can be read, not trusted."""
+    print("\nthe edits")
+    for name, before, after, _ in plans:
+        diff = difflib.unified_diff(before.splitlines(keepends=True),
+                                    after.splitlines(keepends=True),
+                                    fromfile="a/" + name, tofile="b/" + name, n=0)
+        lines = [line.rstrip("\n") for line in diff]
+        for line in lines[:keep + 2]:
+            print("  " + line)
+        if len(lines) > keep + 2:
+            print("  ... %d more line(s) in this diff" % (len(lines) - keep - 2))
+
+
+def stale_boards(slugs):
+    """The artboards made from a page that is changing, and the states of the index."""
+    found = []
+    for board in sorted((ROOT / "figma").glob("[0-9][0-9]-*.svg")):
+        named = re.match(r"[0-9]{2}-(.+)-(desktop|phone)\.svg$", board.name)
+        if named and named.group(1) in slugs:
+            found.append("figma/" + board.name)
+    if "index" in slugs:
+        for state in STATES:
+            if (ROOT / "figma" / (state + ".svg")).exists():
+                found.append("figma/%s.svg" % state)
+    return found
+
+
+def canvas_note():
+    """The stacked canvas as it stands, for comparing a re-bundle against it."""
+    path = ROOT / "figma/site-figma.svg"
+    if not path.exists():
+        return ""
+    with path.open(encoding="utf-8") as handle:
+        head = handle.read(400)
+    width = re.search(r'width="([0-9.]+)"', head)
+    height = re.search(r'height="([0-9.]+)"', head)
+    if not (width and height):
+        return ""
+    return ", site-figma.svg %s\u00d7%s, %s" % (width.group(1), height.group(1),
+                                                human(path.stat().st_size))
+
+
+def capture_names(pages):
+    """The gallery captures of those pages, matched out of the capture list."""
+    text = (ROOT / "tools/render_pages.js").read_text(encoding="utf-8")
+    shots = re.findall(r'name: "([^"]+)", page: "([^"]*)"', text)
+    return [name for name, page in shots if page in pages]
+
+
+def docs_size():
+    return sum(path.stat().st_size for path in (ROOT / "docs").rglob("*") if path.is_file())
 
 
 def bump_build_sh(old_apk, old, new_apk, new, old_code, new_code, dry):
@@ -184,7 +271,9 @@ def add_note(new, title, note, dry):
     data["notes"].insert(0, {"id": "icons", "version": new, "title": title, "note": note})
     if not dry:
         NOTES.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
-    return "note %s above the newest" % ("inserted" if not dry else "would go")
+    return "note %s \u00b7 %s %s" % (new, title,
+                                    "inserted above the newest" if not dry
+                                    else "would go above the newest")
 
 
 def capture_env():
@@ -332,8 +421,14 @@ def main():
     print("  build.sh               %d build case(s)" % cases)
 
     pairs = label_pairs(old, new, old_code, new_code)
+    plans = []
     for name in LABEL_FILES:
-        hits = rewrite(name, pairs, dry)
+        if dry:
+            before, after, hits = planned(name, pairs)
+            if hits:
+                plans.append((name, before, after, hits))
+        else:
+            hits = rewrite(name, pairs, dry=False)
         if hits:
             print("  %-30s %d label(s)" % (name, hits))
 
@@ -341,10 +436,47 @@ def main():
         print("  %-30s %s" % ("tools/release_notes.json", add_note(new, args.title, args.note, dry)))
 
     if dry:
-        print("dry run: nothing written; %s and %s would be replaced once the APK is built"
-              % (old_size, old_sha[:10]))
-        if captures:
-            print("         and docs/renders/ would be recaptured from the new pages")
+        pages = {PAGE_OF[plan[0]] for plan in plans if plan[0] in PAGE_OF}
+        slugs = {SLUG_OF[page] for page in pages}
+        show_diffs(plans)
+
+        print("\nthe hand-off")
+        stale = stale_boards(slugs)
+        if stale:
+            print("  these quote Icons %s and go stale with the pages:" % old)
+            for board in stale:
+                print("    " + board)
+        else:
+            print("  no artboard quotes Icons %s, so none of them change" % old)
+        boards = len(list((ROOT / "figma").glob("[0-9][0-9]-*.svg")))
+        print("  one export run rewrites all %d boards%s" % (boards, canvas_note()))
+        print("  then figma_bundle.py, then figma_publish.py, in that order")
+
+        print("\nthe history page")
+        history = (ROOT / "docs/releases/index.html").read_text(encoding="utf-8")
+        print("  %d releases now; Icons %s gains its row once the APK is committed,"
+              % (history.count('<div class="rel-top">'), new))
+        print("  because build_releases.py reads the day, size and sha out of git")
+        releases = sorted(board.name for board in (ROOT / "figma").glob("*-releases-*.svg"))
+        if releases:
+            print("  the releases boards gain that row with it: " + ", ".join(releases))
+
+        print("\nthe captures")
+        names = capture_names({page.lstrip("/") for page in pages})
+        print("  the run is retaken in full; these show a page that changes:")
+        for name in names:
+            print("    docs/renders/%s.webp" % name)
+
+        print("\nthe deploy")
+        now = docs_size()
+        print("  docs: %s of 10.0 MiB, %s left - %s"
+              % (human(now), human(abs(BUDGET - now)),
+                 "OVER BUDGET - the host will refuse this deploy" if now > BUDGET else "ok"))
+        print("  docs%s (%s today) is replaced once the APK is built; its bytes are"
+              % (new_apk, old_size))
+        print("  unknown until then, and so is the re-exported artboard weight")
+
+        print("\ndry run: nothing written")
         return 0
 
     if not args.build:
