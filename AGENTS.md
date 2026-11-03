@@ -138,11 +138,17 @@ changes as unverified on device rather than illustrating them.
 
 ## Project shape
 
-- `docs/` is the deployed static site (Sites manifest `manifest.json`, assets from `docs`).
-  **The host caps a deploy at 10 MiB for the whole folder** and refuses an oversize one
-  with `invalid_type`, an error that never mentions size -- so the budget is the first
-  thing to check when a deploy fails for no visible reason. `python3 tools/figma_publish.py`
-  prints the headroom on every run. Captures ship as lossless WebP (`tools/to_webp.py`,
+- `docs/` is the deployed static site, live at **https://artbase-olive.vercel.app**
+  (Vercel project `artbase`). Deploy with `python3 tools/deploy_vercel.py`: it uploads
+  `docs/`, checks every route on the new host, and only then rewrites the origin in
+  `tools/site.json` and the two app constants, so a failed deploy leaves the repo
+  pointing at the host that still serves. The token is the `VERCEL_TOKEN` secret, read
+  from the environment and never an argument. Vercel has no per-deploy size cap.
+  Sites (`manifest.json`, `tools/site.json`) remains a fallback and **caps a deploy at
+  10 MiB for the whole folder**, refusing an oversize one with `invalid_type`, an error
+  that never mentions size -- so if a Sites deploy fails for no visible reason, check
+  the budget first. `python3 tools/figma_publish.py` prints the headroom on every
+  run. Captures ship as lossless WebP (`tools/to_webp.py`,
   wired into `tools/render_pages.js`): same pixels, a third of the bytes. The one canvas
   keeps each artwork payload once in `<defs>` and paints instances with `<use>`.
 - The shelf is eleven pages, each a folder with an `index.html`: the root index, then
@@ -165,8 +171,9 @@ changes as unverified on device rather than illustrating them.
   re-measures size and checksum and rebuilds the catalogs. Then it serves `docs/` and reruns
   `tools/render_pages.js`, so the gallery is captured from the pages that quote the new
   build; `--skip-captures` leaves it alone. `--deploy` ends by running `--deploy-cmd`
-  if given, otherwise printing the `sites_deploy` request with a fresh requestId from
-  `tools/site.json` — there is no deploy CLI in this environment. It reads the history
+  if given — for a Vercel release, `--deploy-cmd "python3 tools/deploy_vercel.py"` —
+  otherwise printing the `sites_deploy` request with a fresh requestId from
+  `tools/site.json`. It reads the history
   first and refuses to bump
   while any note's label is not the catalog version of the commit that added
   it; `--check-notes` runs that check alone. `--dry-run` writes nothing and prints

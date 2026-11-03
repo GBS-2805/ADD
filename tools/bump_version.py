@@ -24,9 +24,11 @@ quote the new build rather than the ones before it. Playwright and the browser l
 come from tools/render_env.py; the environment is checked before anything is written,
 so a machine without them stops the release instead of leaving it half done.
 
---deploy ends with the deployment. This machine has no deploy CLI, so the Sites tool
-does the upload: the script prints the exact request to give it, with a fresh
-requestId. Pass --deploy-cmd "<command>" to run a real CLI instead, once one exists.
+--deploy ends with the deployment. Without --deploy-cmd the Sites tool does the
+upload: the script prints the exact request to give it, with a fresh requestId. Pass
+--deploy-cmd "<command>" to run a real CLI instead; the site lives on Vercel, so a
+release deploys with --deploy-cmd "python3 tools/deploy_vercel.py", which also checks
+the new host and moves the old origin out of the repo.
 
 Without --build nothing is compiled, no captures are taken and the size and checksum
 keep their old values, which leaves the shelf failing `build_catalog.py --check` until

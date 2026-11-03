@@ -157,7 +157,8 @@ tools/fetch_icons.py                               both icon pages + both catalo
 tools/icons_hub_template.html                      the Icons app landing page
 tools/icons_brand_template.html                    the per-brand preview page
 tools/render_pages.js                              captures every page and writes the gallery
-manifest.json, worker.js                           Sites deployment
+tools/deploy_vercel.py                             deploys docs/ to Vercel, verifies it, moves the links
+manifest.json, worker.js                           Sites deployment (fallback host)
 ```
 
 ## Build
