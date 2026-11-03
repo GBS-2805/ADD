@@ -72,7 +72,7 @@
 <text x="231" y="1723.64" fill="#d9d9d9" font-family="Poppins" font-size="13" font-weight="400" xml:space="preserve">Open</text>
 <rect x="20" y="1797.08" width="350" height="1" fill="#d9d9d9" fill-opacity="0.26"/>
 <text x="20" y="1871.08" fill="#d9d9d9" font-family="Poppins" font-size="30" font-weight="400" letter-spacing="-0.45" xml:space="preserve">Compress</text>
-<text x="20" y="1903.58" fill="#d9d9d9" fill-opacity="0.64" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">Android app · 2.0 · 272,592 bytes</text>
+<text x="20" y="1903.58" fill="#d9d9d9" fill-opacity="0.64" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">Android app · 2.1 · 272,592 bytes</text>
 <text x="20" y="1954.67" fill="#d9d9d9" font-family="Poppins" font-size="16" font-weight="500" xml:space="preserve">What I built</text>
 <text x="20" y="1983.06" fill="#d9d9d9" font-family="Poppins" font-size="16" font-weight="400" xml:space="preserve">The whole app: picker flow, preview pipeline,</text>
 <text x="20" y="2009.45" fill="#d9d9d9" font-family="Poppins" font-size="16" font-weight="400" xml:space="preserve">encoder retry loop, queue management,</text>
