@@ -28,6 +28,7 @@ const PAGES = [
   { slug: "icons-all", url: "/icons/all/", label: "Icons · All brands" },
   { slug: "icons-lineicons", url: "/icons/lineicons/", label: "Icons · Lineicons" },
   { slug: "icons-coolicons", url: "/icons/coolicons/", label: "Icons · Coolicons" },
+  { slug: "icons-streamline", url: "/icons/streamline/", label: "Icons · Streamline" },
   { slug: "fonts", url: "/fonts/", label: "Fonts" },
   { slug: "tools", url: "/tools/", label: "Tools" },
   { slug: "portfolio", url: "/portfolio/", label: "Portfolio" },
@@ -43,8 +44,8 @@ const WIDTHS = [
 // The two pull-outs are states of a page rather than pages of their own, so they
 // are captured after the grid and numbered past its last artboard.
 const STATES = [
-  { slug: "index-menu", url: "/", label: "Index · pull-down", open: "#menuBtn", n: 21, nPhone: 23 },
-  { slug: "index-drawer", url: "/", label: "Index · side tab", open: "#burger", n: 22, nPhone: 24 },
+  { slug: "index-menu", url: "/", label: "Index · pull-down", open: "#menuBtn", n: 23, nPhone: 25 },
+  { slug: "index-drawer", url: "/", label: "Index · side tab", open: "#burger", n: 24, nPhone: 26 },
 ];
 
 // A file that only names Poppins renders in whatever sans the viewer happens to

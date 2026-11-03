@@ -18,7 +18,7 @@
       "title": "Icons",
       "href": "/icons/",
       "data": "/data/icons.json",
-      "count": 3876,
+      "count": 4373,
       "sets": [
         {
           "id": "Coolicons",
@@ -45,12 +45,34 @@
           "data": "/data/phosphor.json"
         },
         {
-          "id": "Plump Solid",
-          "source": "Streamline, via Iconify",
+          "id": "Streamline",
+          "source": "webalys-hq/streamline-vectors",
           "licence": "CC BY 4.0",
-          "style": "solid",
-          "count": 500,
-          "data": "/data/plump.json"
+          "style": "Line",
+          "count": 997,
+          "data": "/data/streamline-line.json",
+          "styles": [
+            {
+              "name": "Duo",
+              "count": 997,
+              "data": "/data/streamline-duo.json"
+            },
+            {
+              "name": "Flat",
+              "count": 997,
+              "data": "/data/streamline-flat.json"
+            },
+            {
+              "name": "Line",
+              "count": 997,
+              "data": "/data/streamline-line.json"
+            },
+            {
+              "name": "Solid",
+              "count": 997,
+              "data": "/data/streamline-solid.json"
+            }
+          ]
         }
       ]
     },

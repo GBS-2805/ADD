@@ -35,6 +35,7 @@ import pathlib
 import re
 import sys
 import time
+import tarfile
 import urllib.error
 import urllib.request
 from concurrent.futures import ThreadPoolExecutor
@@ -48,22 +49,34 @@ APK = ROOT / "docs/Icons-1.2.apk"
 DATA_LINE = ROOT / "docs/data/icons.json"
 DATA_COOL = ROOT / "docs/data/coolicons.json"
 DATA_PHOS = ROOT / "docs/data/phosphor.json"
-DATA_PLUMP = ROOT / "docs/data/plump.json"
+DATA_STREAMLINE = {slug: ROOT / ("docs/data/streamline-%s.json" % slug)
+                   for slug in ("line", "duo", "solid", "flat")}
 # The two Figma sets have no repository to fetch from: they are exported by hand
 # into these folders, and the brand is skipped until its folder has SVGs in it.
 DATA_GEO1 = ROOT / "docs/data/geometric-shapes-1.json"
 DATA_GEO2 = ROOT / "docs/data/geometric-shapes-2.json"
 TREE_CACHE = pathlib.Path("/tmp/coolicons-tree.json")
 
-# Streamline's free Plump set is published to Iconify as a single JSON file: 1,499
-# icons, of which the 500 ending in "-solid" are the Solid style its Figma file
-# names. Taking the whole file and filtering beats 500 requests, and Iconify carries
-# the licence with the artwork (CC BY 4.0, Streamline). The paid Pro packs are not
-# in it.
-PLUMP_JSON = ("https://raw.githubusercontent.com/iconify/icon-sets/master"
-              "/json/streamline-plump.json")
-PLUMP_CACHE = pathlib.Path("/tmp/streamline-plump.json")
-PLUMP_GRID = 48
+# Streamline's free Core set comes from the vendor's own repository as one folder
+# per style: core/line, core/duo, core/solid, core/flat, each holding the same
+# drawings under category folders. Line and Solid are drawn in black, so they are
+# recoloured to currentColor like the other monochrome sets; Duo and Flat carry the
+# vendor's palette, and that palette is the style, so those keep it. CC BY 4.0.
+# One tarball carries both the file list and the bytes: the repository is far past
+# the anonymous GitHub listing quota, and 5,000 raw requests are slower than one
+# archive. Only core/<style>/<category>/<icon>.svg is read out of it.
+STREAMLINE_TARBALL = ("https://codeload.github.com/webalys-hq/streamline-vectors"
+                      "/tar.gz/refs/heads/main")
+STREAMLINE_ARCHIVE = pathlib.Path("/tmp/streamline-vectors.tar.gz")
+STREAMLINE_STYLES = [
+    {"slug": "line", "name": "Line", "mode": "stroke", "colour": False, "tune": True,
+     "default": True},
+    {"slug": "duo", "name": "Duo", "mode": "fill", "colour": True, "tune": False},
+    {"slug": "solid", "name": "Solid", "mode": "fill", "colour": False, "tune": False},
+    {"slug": "flat", "name": "Flat", "mode": "fill", "colour": True, "tune": False},
+]
+STREAMLINE_STYLE_FILES = [dict(style, data=DATA_STREAMLINE[style["slug"]])
+                          for style in STREAMLINE_STYLES]
 
 LINE_TREE = "https://data.jsdelivr.com/v1/packages/gh/LineiconsHQ/Lineicons@main"
 LINE_URL = ("https://cdn.jsdelivr.net/gh/LineiconsHQ/Lineicons@main"
@@ -136,10 +149,11 @@ BRANDS = [
      "style": "regular weight, outline", "data": DATA_PHOS, "names": "phosphor",
      "cats": "phosphor", "licence": "MIT",
      "note": "Phosphor's regular weight, whole: __COUNT__ outline icons drawn on a 256 px grid, the weight its own site calls the default."},
-    {"slug": "plump", "name": "Plump Solid", "source": "Streamline, via Iconify",
-     "style": "solid", "data": DATA_PLUMP, "names": "plump",
-     "cats": None, "licence": "CC BY 4.0",
-     "note": "__COUNT__ filled icons from Streamline's free Plump set, the Solid style its Figma file names, drawn on a 48 px grid."},
+    {"slug": "streamline", "name": "Streamline", "source": "webalys-hq/streamline-vectors",
+     "style": "Line, Duo, Solid and Flat", "data": DATA_STREAMLINE["line"],
+     "names": "streamline", "cats": "streamline", "licence": "CC BY 4.0",
+     "styles": STREAMLINE_STYLE_FILES,
+     "note": "__COUNT__ icons in four styles -- Line, Duo, Solid and Flat -- on a 14 px grid, with the vendor's own categories."},
 ]
 
 
@@ -234,39 +248,66 @@ def phos_categories():
     return found, [name for name in label.values() if name in used]
 
 
-def plump_icons():
-    """Plump's Solid style, read out of Iconify's JSON mirror of the free set."""
-    if PLUMP_CACHE.exists():
-        raw = PLUMP_CACHE.read_text(encoding="utf-8")
-    else:
-        for attempt in range(3):
-            try:
-                raw = urllib.request.urlopen(PLUMP_JSON, timeout=60).read().decode("utf-8")
-                break
-            except Exception as error:
-                print("plump set failed (%s), retrying" % error, file=sys.stderr)
-                time.sleep(2 * (attempt + 1))
-        else:
-            raise SystemExit("could not fetch Plump; nothing written")
-        PLUMP_CACHE.write_text(raw, encoding="utf-8")
+def streamline_archive():
+    """The repository tarball, downloaded once and kept for the run."""
+    if STREAMLINE_ARCHIVE.exists() and STREAMLINE_ARCHIVE.stat().st_size > 1024:
+        return STREAMLINE_ARCHIVE
+    for attempt in range(3):
+        try:
+            request = urllib.request.Request(STREAMLINE_TARBALL,
+                                             headers={"User-Agent": "compress-site"})
+            with urllib.request.urlopen(request, timeout=300) as response:
+                STREAMLINE_ARCHIVE.write_bytes(response.read())
+            return STREAMLINE_ARCHIVE
+        except Exception as error:
+            print("streamline archive failed (%s), retrying" % error, file=sys.stderr)
+            time.sleep(3 * (attempt + 1))
+    raise SystemExit("could not download Streamline; nothing written")
 
-    grid = PLUMP_GRID
+
+def streamline_sources():
+    """style -> {name: (category folder, raw SVG text)}, read out of the tarball."""
+    tree = {style["slug"]: {} for style in STREAMLINE_STYLES}
+    with tarfile.open(streamline_archive(), "r:gz") as archive:
+        for member in archive:
+            if not member.isfile():
+                continue
+            parts = member.name.split("/")
+            if len(parts) != 5 or parts[1] != "core" or parts[2] not in tree:
+                continue
+            _, _, style, folder, filename = parts
+            if not filename.endswith(".svg"):
+                continue
+            handle = archive.extractfile(member)
+            if handle is None:
+                continue
+            tree[style][filename[:-4]] = (folder, handle.read().decode("utf-8", "replace"))
+    for style, found in tree.items():
+        if not found:
+            raise SystemExit("Streamline %s came back empty; nothing written" % style)
+    return tree
+
+
+def streamline_label(folder):
+    """The vendor's folder name as a category the picker can show."""
+    return " ".join(word.capitalize() for word in folder.replace("-", " ").split())
+
+
+def streamline_icons(style, sources):
+    """One style: the same Core drawings, in its own ink or its own palette."""
+    found = sources.get(style["slug"]) or {}
+    if not found:
+        raise SystemExit("Streamline %s came back empty; nothing written" % style["name"])
+
     icons, missing = [], []
-    for key, entry in sorted(json.loads(raw).get("icons", {}).items()):
-        if not key.endswith("-solid"):
-            continue
-        name = key[:-len("-solid")]
-        wrapped = ('<svg xmlns="http://www.w3.org/2000/svg" width="%d" height="%d" '
-                   'viewBox="0 0 %d %d">%s</svg>'
-                   % (grid, grid, grid, grid, entry.get("body", "")))
-        prepared = prepare(wrapped)
+    for name, (folder, raw) in sorted(found.items()):
+        prepared = prepare(raw, keep_colour=style["colour"])
         if prepared is None:
             missing.append(name)
             continue
         attrs, body = prepared
-        icons.append({"name": name, "attrs": attrs, "body": body})
-    if not icons:
-        raise SystemExit("Plump Solid came back empty; nothing written")
+        icons.append({"name": name, "attrs": attrs, "body": body,
+                      "cat": streamline_label(folder)})
     icons.sort(key=lambda item: item["name"])
     return icons, missing
 
@@ -426,8 +467,8 @@ def fetch(url):
     return None
 
 
-def prepare(raw):
-    """Returns (root attributes, body) with every hard-coded colour removed."""
+def prepare(raw, keep_colour=False):
+    """Returns (root attributes, body), recoloured unless the set owns its palette."""
     head = re.search(r"<svg([^>]*)>", raw, re.S)
     inner = re.search(r"<svg[^>]*>(.*)</svg>", raw, re.S)
     if not head or not inner:
@@ -437,7 +478,12 @@ def prepare(raw):
         found = re.search(r'%s="([^"]*)"' % key, head.group(1))
         return found.group(1) if found else default
 
-    body = COLOR.sub(r'\1="currentColor"', inner.group(1))
+    body = re.sub(r"<desc>.*?</desc>", "", inner.group(1), flags=re.S)
+    # Ids are copied with every inline glyph and nothing refers to them, so they are
+    # dropped rather than shipped thousands of times.
+    body = re.sub(r'\sid="[^"]*"', "", body)
+    if not keep_colour:
+        body = COLOR.sub(r'\1="currentColor"', body)
     body = re.sub(r"\s*\n\s*", "", body.strip())
     if not re.search(r"<(path|circle|rect|line|polyline|polygon|ellipse)\b", body):
         return None  # nothing to draw
@@ -445,6 +491,12 @@ def prepare(raw):
     parts = ['width="%s"' % attr("width", "24"),
              'height="%s"' % attr("height", "24"),
              'viewBox="%s"' % attr("viewBox", "0 0 24 24")]
+    # A set that keeps its palette gets the root's own fill="none" and nothing else:
+    # the preview never tunes those, so the colours reach the page as authored.
+    if keep_colour:
+        if 'fill="none"' in head.group(1):
+            parts.append('fill="none"')
+        return " ".join(parts), body
     # Lineicons draws with filled paths, Coolicons with strokes. Take the mode
     # from the body so neither set comes out as a solid blob.
     if 'fill="currentColor"' in body:
@@ -505,8 +557,8 @@ def collect(brand):
         return download(cool_names(), COOL_URL)
     if brand["names"] == "phosphor":
         return download(phos_names(), PHOS_URL)
-    if brand["names"] == "plump":
-        return plump_icons()
+    if brand["names"] == "streamline":
+        raise SystemExit("Streamline is fetched style by style, not through collect()")
     raise SystemExit("no source for %s" % brand["name"])
 
 
@@ -539,6 +591,13 @@ def brands():
             continue
         payload = json.loads(brand["data"].read_text(encoding="utf-8"))
         entry = dict(brand)
+        if brand.get("styles"):
+            entry["styles"] = [
+                dict(style, count=(json.loads(style["data"].read_text(encoding="utf-8"))["count"]
+                                   if style["data"].exists() else 0))
+                for style in brand["styles"]]
+        if brand.get("styles"):
+            payload = dict(payload, style=brand["style"])
         entry.update({
             "count": payload["count"],
             "cats": category_list(payload["icons"], payload.get("cat_order")),
@@ -682,6 +741,23 @@ def licence_line(entries):
 
 
 
+def data_rows(brand):
+    """One row per catalog: a style is its own file, and says so."""
+    styles = brand.get("styles") or [dict(brand, name=brand["name"] + "", data=brand["data"])]
+    if brand.get("styles"):
+        rows = []
+        for style in brand["styles"]:
+            rows.append(
+                '      <li><b><a href="__ROOT__data/%s">/data/%s</a></b>'
+                '<span>%s %s %s icons with their markup.</span></li>'
+                % (style["data"].name, style["data"].name, fmt(style["count"]),
+                   brand["name"], style["name"]))
+        return "\n".join(rows)
+    return ('      <li><b><a href="__ROOT__data/%s">/data/%s</a></b>'
+            '<span>%s %s icons with their markup.</span></li>'
+            % (brand["data"].name, brand["data"].name, fmt(brand["count"]), brand["name"]))
+
+
 def write_hub(entries):
     total = sum(brand["count"] for brand in entries)
     page = HUB_TEMPLATE.read_text(encoding="utf-8")
@@ -689,11 +765,7 @@ def write_hub(entries):
     licences = licence_line(entries)
     names = [brand["name"] for brand in entries]
     setlist = names[0] if len(names) == 1 else ", ".join(names[:-1]) + " and " + names[-1]
-    rows = "\n".join(
-        '      <li><b><a href="__ROOT__data/%s">/data/%s</a></b>'
-        '<span>%s %s icons with their markup.</span></li>'
-        % (brand["data"].name, brand["data"].name, fmt(brand["count"]), brand["name"])
-        for brand in entries)
+    rows = "\n".join(data_rows(brand) for brand in entries)
     others = [(brand["name"], brand["licence"]) for brand in entries
               if brand["licence"].upper() != "MIT"]
     tokens = {
@@ -738,6 +810,11 @@ def write_brand(brand, entries):
         "__DATAFILE__": brand["file"],
         "__BRANDS__": menu("../../", brand["slug"]),
         "__CATS__": json.dumps(brand["cats"]),
+        "__STYLES__": json.dumps([{"slug": style["slug"], "name": style["name"],
+                                   "data": "../../data/" + style["data"].name,
+                                   "mode": style["mode"], "colour": style["colour"],
+                                   "tune": style.get("tune", True)}
+                                  for style in brand.get("styles", [])]),
     }
     for token, value in tokens.items():
         page = page.replace(token, value)
@@ -763,7 +840,11 @@ def main():
         # build.sh stages exactly this list into the app, so a brand added here cannot
         # leave the bundle short a catalog or a sheet.
         for brand in BRANDS:
-            print(brand["data"].name)
+            if brand.get("styles"):
+                for style in brand["styles"]:
+                    print(style["data"].name)
+            else:
+                print(brand["data"].name)
             print(brand["slug"] + "-sheet.json")
         return 0
 
@@ -788,6 +869,35 @@ def main():
         generated = datetime.date.today().isoformat()
         for brand in BRANDS:
             if wanted and brand["slug"] not in wanted:
+                continue
+            if brand.get("styles"):
+                sources = streamline_sources()
+                for style in brand["styles"]:
+                    icons, missing = streamline_icons(style, sources)
+                    if not icons:
+                        print("no icons for %s %s; left as it was"
+                              % (brand["name"], style["name"]), file=sys.stderr)
+                        continue
+                    payload = {
+                        "generated": generated,
+                        "set": brand["name"],
+                        "brand": brand["slug"],
+                        "style": style["name"],
+                        "mode": style["mode"],
+                        "colour": style["colour"],
+                        "tune": style.get("tune", True),
+                        "source": brand["source"],
+                        "licence": brand["licence"],
+                        "cat_order": sorted({icon["cat"] for icon in icons if icon.get("cat")}),
+                        "count": len(icons),
+                        "missing": missing,
+                        "icons": icons,
+                    }
+                    if style.get("default"):
+                        payload["default"] = True
+                    write_catalog(style["data"], payload)
+                    print("%-16s %-6s %4d icons (missing %d)"
+                          % (brand["name"], style["name"], len(icons), len(missing)))
                 continue
             icons, missing = collect(brand)
             if not icons:

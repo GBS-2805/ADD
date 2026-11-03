@@ -236,21 +236,32 @@ changes as unverified on device rather than illustrating them.
   `tools/icons_all_template.html` (the all-brands sheet at `docs/icons/all/`).
   Edit the templates and regenerate with `python3 tools/fetch_icons.py --pages-only`,
   never the output. Each page is ~27 KB: it loads its brand's catalog at run time
-  instead of inlining glyphs. The Icons bundle stages one catalog and one sheet per brand -- `icons.json`
-  and `coolicons.json` for the brand pages, `lineicons-sheet.json` and
-  `coolicons-sheet.json` for the all-brands sheet, which fetches the sheets  rather than the full catalogs. Miss one and that page renders empty sections inside the
-  app while still perfect on the site, which is what the 2.5 build shipped and the next
-    release fixed. That list is derived from the brand table (`--data-files`), so `build.sh` runs
-    `tools/check_bundle.py` over the staged pages and fails the build if a
-    reference any of them makes does not resolve inside the bundle.
+  The Icons bundle stages every catalog and every sheet the pages can ask for --
+  `--data-files` is that list -- because a brand page fetches its catalog (one per
+  style for Streamline) and the all-brands sheet fetches the sheets rather than the
+  full catalogs. Miss one and that page renders empty sections inside the app while
+  still perfect on the site, which is what the 2.5 build shipped and the next release
+  fixed. `build.sh` runs `tools/check_bundle.py` over the staged pages and fails the
+  build if a reference any of them makes does not resolve inside the bundle.
 - Brands are declared in one table in `tools/fetch_icons.py`: slug, display name,
   source, licence and where its catalog lives. Lineicons, Coolicons, Phosphor and
-  Plump Solid are all fetched: Phosphor's regular weight from its npm package, and
-  Plump's Solid style from Iconify's JSON mirror of Streamline's free set -- the 500
-  names ending `-solid`, CC BY 4.0; the 999 outline drawings and the paid Pro packs
-  are not taken. A brand whose catalog is missing is skipped rather than failing the
-  run, and a brand with no repository can instead be read from exported SVGs in
+  Streamline are all fetched: Phosphor's regular weight from its npm package, and
+  Streamline's free Core set from `webalys-hq/streamline-vectors`, whose tarball
+  carries `core/line`, `core/duo`, `core/solid` and `core/flat` -- 997 drawings each,
+  CC BY 4.0, with the vendor's own category folders. The paid Pro packs are not
+  taken. A brand whose catalog is missing is skipped rather than failing the run, and
+  a brand with no repository can instead be read from exported SVGs in
   `icon-src/<slug>/`.
+- A style is not a brand. Streamline publishes one catalog per style, fetched on
+  demand by the page's Style toggle and kept for the visit. `brand` and `default` in
+  those catalogs let `build_catalog.icon_sets()` count the set once (997, not 3,988),
+  and `--data-files` stages all four for the app. Line and Solid are recoloured to
+  `currentColor`; Duo and Flat keep Streamline's palette, because that palette is
+  what makes them different styles. Palette glyphs and Solid carry `tune: false`,
+  render with `data-mode="plain"` so no CSS stroke lands on them, and hide the weight
+  row. Switching style keeps the previewed name and the collected icons by name,
+  drops the ones that style does not have, says how many went, and names the zip
+  after the style.
 - The left pull-down of all three icon pages opens with All, linking to
   `/icons/all/`: twelve glyphs per brand, one from every category — the first name in
   the catalog for that category. Categories are matched across sets on a plain key
@@ -278,11 +289,11 @@ changes as unverified on device rather than illustrating them.
   the chosen weight onto each element (`tune()` in the template), not onto a parent.
   Setting it in CSS on the svg looks correct and does nothing.
   The weights are chosen on that 24-unit grid, so `tune()` scales the stroke to the
-  glyph's own viewBox first: Phosphor draws on 256 and Plump on 48, where a 24-unit
-  stroke is invisible and the weight control looks dead. Scale in that one function,
+  glyph's own viewBox first: Phosphor draws on 256 and Streamline's Core set on 14,
+  where one number cannot describe both and the weight control would look dead. Scale in that one function,
   which the preview, the thumbnails and the raster export all go through.
-- Three of the four sets carry their vendor's own categories (Plump publishes
-  none, so its page filters by name only): `fetch_icons.py --categories`
+- Every set but the two Figma exports carries its vendor's own categories now --
+  Streamline's are its folder names: `fetch_icons.py --categories`
   merges Coolicons' `icons/data/index.json`, Lineicons' public search index and
   Phosphor's `IconCategory` (its own `phosphor-icons/core` repo: `src/types.ts` for the
   names and order, `src/icons.ts` per icon) into the catalogs as `cat`, keeps each

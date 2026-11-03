@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta name="theme-color" content="#3f4e96" />
 <link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml" />
-<title>Plump Solid — 500 icons, preview and variants</title>
-<meta name="description" content="Plump Solid: 500 solid icons, CC BY 4.0. Pick an icon, set its weight, size and surface in a live preview, then copy the SVG. Offline, no account." />
+<title>Streamline — 997 icons, preview and variants</title>
+<meta name="description" content="Streamline: 997 Line, Duo, Solid and Flat icons, CC BY 4.0. Pick an icon, set its weight, size and surface in a live preview, then copy the SVG. Offline, no account." />
 <link rel="stylesheet" href="../../assets/site.css" />
 <style>
   /* page-only: the preview tab, its variant controls and the collapsible set */
@@ -432,6 +432,7 @@
     .grid-wrap { max-height: min(62vh, 460px); }
     .set-panel { margin-top: 32px; }
   }
+  .ctl-row[hidden] { display: none; }
 </style>
 </head>
 <body>
@@ -465,11 +466,11 @@
 </header>
 
 <nav class="menu" id="menu" data-open="false" aria-label="Icon brands">
-  <a href="../../icons/all/">All<span>3,876</span></a>
+  <a href="../../icons/all/">All<span>4,373</span></a>
   <a href="../../icons/lineicons/">Lineicons<span>606</span></a>
   <a href="../../icons/coolicons/">Coolicons<span>1,258</span></a>
   <a href="../../icons/phosphor/">Phosphor<span>1,512</span></a>
-  <a href="../../icons/plump/" aria-current="page">Plump Solid<span>500</span></a>
+  <a href="../../icons/streamline/" aria-current="page">Streamline<span>997</span></a>
 </nav>
 
 <div class="scrim" id="scrim" data-open="false"></div>
@@ -482,16 +483,16 @@
   <a href="../../portfolio/">Portfolio<span>3 projects</span></a>
   <a href="../../renders/">Renders<span>gallery</span></a>
   <a href="../../releases/">Releases<span>history</span></a>
-  <p class="drawer-note">Plump Solid · 500 icons, solid, CC BY 4.0. The app reads the same catalog this page renders.</p>
+  <p class="drawer-note">Streamline · 997 icons, Line, Duo, Solid and Flat, CC BY 4.0. The app reads the same catalog this page renders.</p>
 </aside>
 
 <main>
   <header class="page-head">
-    <h1>Plump Solid</h1>
-    <p class="lede"><b>500 icons</b>, every one of them whole and free. Pick one below, then set its weight, size and background — the preview changes as you press, and the copy button hands you the SVG.</p>
+    <h1>Streamline</h1>
+    <p class="lede"><b>997 icons</b>, every one of them whole and free. Pick one below, then set its weight, size and background — the preview changes as you press, and the copy button hands you the SVG.</p>
     <p class="meta">
-      <span>500 icons</span>
-      <span>solid</span>
+      <span>997 icons</span>
+      <span>Line, Duo, Solid and Flat</span>
       <span>CC BY 4.0</span>
       <span>No Pro tier</span>
     </p>
@@ -505,7 +506,7 @@
 
     <div class="stage-body" id="pane-preview" role="tabpanel" aria-labelledby="tab-preview" data-active="true">
       <div class="preview">
-        <div class="preview-box" id="stageGlyph" data-mode="fill" data-surface="black" aria-hidden="true"></div>
+        <div class="preview-box" id="stageGlyph" data-mode="stroke" data-surface="black" aria-hidden="true"></div>
         <div class="preview-meta">
           <p class="name" id="selName" aria-live="polite">Loading…</p>
           <p class="file" id="selFile"></p>
@@ -515,7 +516,7 @@
 
       <div class="controls">
         <div class="ctl-head">
-          <span class="mini" id="mini" data-mode="fill" aria-hidden="true"></span>
+          <span class="mini" id="mini" data-mode="stroke" aria-hidden="true"></span>
           <p>Preview</p>
           <button class="copy-btn" id="copyBtn" type="button">
             <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M10 13C11.3807 14.3807 13.6193 14.3807 15 13L18 10C19.3807 8.61929 19.3807 6.38071 18 5C16.6193 3.61929 14.3807 3.61929 13 5L11 7M14 11C12.6193 9.61929 10.3807 9.61929 9 11L6 14C4.61929 15.3807 4.61929 17.6193 6 19C7.38071 20.3807 9.61929 20.3807 11 19L13 17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -523,7 +524,12 @@
           </button>
         </div>
 
-        <div class="ctl-row" role="group" aria-label="Line weight">
+        <div class="ctl-row" id="styleRow" role="group" aria-label="Icon style" hidden>
+          <span class="ctl-label">Style</span>
+          <div class="segs" id="styleSegs"></div>
+        </div>
+
+        <div class="ctl-row" id="weightRow" role="group" aria-label="Line weight">
           <span class="ctl-label">Weight</span>
           <div class="segs" id="weights">
             <button class="seg" type="button" data-weight="1" aria-pressed="false">1</button>
@@ -601,7 +607,7 @@
 
     <button class="panel-toggle" id="panelToggle" type="button" aria-expanded="false" aria-controls="panel">
       <span>
-        <b>Plump Solid · all 500 icons</b>
+        <b>Streamline · all 997 icons</b>
         <span class="panel-sub">Opens into a scrolling sheet — tap to preview, double-tap to collect for export</span>
       </span>
       <svg class="chev" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M8 13L12 17L16 13M8 7L12 11L16 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -611,7 +617,7 @@
       <div class="panel-bar">
         <div class="search-wrap">
           <svg class="search-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 10C3 13.86599 6.13401 17 10 17C13.86599 17 17 13.86599 17 10C17 6.13401 13.86599 3 10 3C6.13401 3 3 6.13401 3 10ZM15 15L21 21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          <input id="search" type="search" placeholder="Filter Plump Solid by name…" aria-label="Filter icons by name" autocomplete="off" />
+          <input id="search" type="search" placeholder="Filter Streamline by name…" aria-label="Filter icons by name" autocomplete="off" />
         </div>
         <div class="cat-wrap" id="catWrap" hidden>
           <button class="cat-btn" id="catBtn" type="button" aria-expanded="false" aria-haspopup="listbox" aria-controls="catMenu">
@@ -620,29 +626,30 @@
           </button>
           <div class="cat-menu" id="catMenu" role="listbox" aria-label="Icon category" hidden></div>
         </div>
-        <p class="count" id="count">500</p>
+        <p class="count" id="count">997</p>
         <button class="add-all" id="addAllBtn" type="button">Add all</button>
       </div>
       <div class="grid-wrap"><div class="grid" id="grid"></div></div>
-      <p class="empty" id="empty" hidden>No icon in Plump Solid matches that name in that category.</p>
+      <p class="empty" id="empty" hidden>No icon in Streamline matches that name in that category.</p>
       <div class="panel-foot">
-        <span>Streamline, via Iconify · CC BY 4.0</span>
-        <a href="../../data/plump.json"><code>/data/plump.json</code></a>
+        <span>webalys-hq/streamline-vectors · CC BY 4.0</span>
+        <a href="../../data/streamline-line.json"><code>/data/streamline-line.json</code></a>
       </div>
     </div>
   </section>
 </main>
 
 <footer>
-  <p>Plump Solid is a whole free set from <code>Streamline, via Iconify</code>, CC BY 4.0 licensed: 500 icons, solid. The paid icons sold on the vendor's site are neither included nor copied.</p>
+  <p>Streamline is a whole free set from <code>webalys-hq/streamline-vectors</code>, CC BY 4.0 licensed: 997 icons, Line, Duo, Solid and Flat. The paid icons sold on the vendor's site are neither included nor copied.</p>
   <p><a href="../../icons/">Icons</a> · <a href="../../">Index</a> · <a href="../../fonts/">Fonts</a> · <a href="../../download/">Download</a></p>
 </footer>
 
 <script>
 (function () {
-  var DATA = "../../data/plump.json";
-  var MODE = "fill";
-  var BRAND = "Plump Solid";
+  var DATA = "../../data/streamline-line.json";
+  var MODE = "stroke";
+  var BRAND = "Streamline";
+  var STYLES = [{"slug": "line", "name": "Line", "data": "../../data/streamline-line.json", "mode": "stroke", "colour": false, "tune": true}, {"slug": "duo", "name": "Duo", "data": "../../data/streamline-duo.json", "mode": "fill", "colour": true, "tune": false}, {"slug": "solid", "name": "Solid", "data": "../../data/streamline-solid.json", "mode": "fill", "colour": false, "tune": false}, {"slug": "flat", "name": "Flat", "data": "../../data/streamline-flat.json", "mode": "fill", "colour": true, "tune": false}];
 
   var box = document.getElementById("stageGlyph");
   var mini = document.getElementById("mini");
@@ -671,11 +678,14 @@
   var bulkBtn = document.getElementById("bulkBtn");
   var visibleItems = [];
   var tabs = Array.prototype.slice.call(document.querySelectorAll(".stage-tab"));
-  var CATS = [];
+  var CATS = [{"name": "Artificial Intelligence", "count": 19}, {"name": "Computer Devices", "count": 120}, {"name": "Culture", "count": 27}, {"name": "Entertainment", "count": 69}, {"name": "Food Drink", "count": 32}, {"name": "Health", "count": 43}, {"name": "Images Photography", "count": 23}, {"name": "Interface Essential", "count": 295}, {"name": "Mail", "count": 48}, {"name": "Map Travel", "count": 72}, {"name": "Money Shopping", "count": 108}, {"name": "Nature Ecology", "count": 38}, {"name": "Phone", "count": 26}, {"name": "Programming", "count": 49}, {"name": "Shipping", "count": 14}, {"name": "Work Education", "count": 14}];
   var catWrap = document.getElementById("catWrap");
   var catBtn = document.getElementById("catBtn");
   var catMenu = document.getElementById("catMenu");
   var catLabel = document.getElementById("catLabel");
+  var styleRow = document.getElementById("styleRow");
+  var styleSegs = document.getElementById("styleSegs");
+  var weightRow = document.getElementById("weightRow");
   var selCount = document.getElementById("selCount");
   var selStrip = document.getElementById("selStrip");
   var selRemove = document.getElementById("selRemove");
@@ -695,8 +705,9 @@
   var exportSize = 512;
   var built = false;
   var cat = "";
-  var SLUG = "plump";
+  var SLUG = "streamline";
   var CAT_KEY = "icons:cat:" + SLUG;
+  var STYLE_KEY = "icons:style:" + SLUG;
   var savedCat = "";
   try { savedCat = window.localStorage.getItem(CAT_KEY) || ""; } catch (error) { savedCat = ""; }
 
@@ -775,15 +786,19 @@
     box.innerHTML = svg;
     mini.innerHTML = svg;
     box.style.setProperty("--size", size + "px");
-    var w = MODE === "stroke" ? weight : FILL_WEIGHT[weight];
-    var miniW = MODE === "stroke" ? weight : String(Number(weight) - 0.6);
-    box.style.setProperty("--w", w);
-    mini.style.setProperty("--w", miniW);
-    tune(box.querySelector("svg"), w, MODE !== "stroke");
-    tune(mini.querySelector("svg"), miniW, MODE !== "stroke");
+    // Duo and Flat carry the vendor's palette. Writing a weight or currentColor onto
+    // them would flatten the very thing that tells the styles apart.
+    if (TUNED && !COLOUR) {
+      var w = MODE === "stroke" ? weight : FILL_WEIGHT[weight];
+      var miniW = MODE === "stroke" ? weight : String(Number(weight) - 0.6);
+      box.style.setProperty("--w", w);
+      mini.style.setProperty("--w", miniW);
+      tune(box.querySelector("svg"), w, MODE !== "stroke");
+      tune(mini.querySelector("svg"), miniW, MODE !== "stroke");
+    }
     box.setAttribute("data-surface", surface);
     nameEl.textContent = selected.name;
-    fileEl.textContent = selected.name + ".svg · " + BRAND + " · " + MODE;
+    fileEl.textContent = selected.name + ".svg · " + BRAND + " · " + (STYLE ? STYLE.name : MODE);
     snippet.value = svg;
     queueEstimate();
   }
@@ -796,6 +811,14 @@
       cards[i].setAttribute("aria-pressed", cards[i] === card ? "true" : "false");
     }
   }
+
+  // A brand can carry the same drawings in several styles (Streamline does). The
+  // catalog in hand is the current style's; the others are fetched the first time
+  // the toggle asks for them and then kept for the visit.
+  var STYLE = null;
+  var COLOUR = false;
+  var TUNED = true;
+  var catalogs = {};
 
   var chosen = [];
   var chosenSet = {};
@@ -830,6 +853,107 @@
   // page opens, so the button reads "Nothing to export" until a double-tap or Add all
   // puts something in it -- and Remove all really does leave nothing behind.
   function exportList() { return chosen; }
+
+  function styleBySlug(slug) {
+    for (var i = 0; i < STYLES.length; i++) {
+      if (STYLES[i].slug === slug) { return STYLES[i]; }
+    }
+    return null;
+  }
+
+  // The current style decides how a glyph is painted and whether weight applies.
+  function applyStyle(entry) {
+    STYLE = entry;
+    MODE = entry.mode;
+    COLOUR = !!entry.colour;
+    TUNED = entry.tune !== false;
+    // "plain" has no rule in the page's CSS: the glyph paints itself, which is what
+    // a palette style and a solid shape both need.
+    box.setAttribute("data-mode", TUNED ? MODE : "plain");
+    mini.setAttribute("data-mode", TUNED ? MODE : "plain");
+    weightRow.hidden = !TUNED || MODE !== "stroke";
+  }
+
+  function markStyleSegs() {
+    Array.prototype.forEach.call(styleSegs.children, function (button) {
+      var on = STYLE && button.getAttribute("data-style") === STYLE.slug;
+      button.setAttribute("aria-pressed", on ? "true" : "false");
+    });
+  }
+
+  function renderStyles() {
+    if (STYLES.length < 2) { return; }
+    var frag = document.createDocumentFragment();
+    STYLES.forEach(function (entry) {
+      var button = document.createElement("button");
+      button.type = "button";
+      button.className = "seg";
+      button.setAttribute("data-style", entry.slug);
+      button.textContent = entry.name;
+      button.addEventListener("click", function () { switchStyle(entry.slug); });
+      frag.append(button);
+    });
+    styleSegs.textContent = "";
+    styleSegs.append(frag);
+    styleRow.hidden = false;
+    markStyleSegs();
+  }
+
+  function loadCatalog(url) {
+    if (catalogs[url]) { return Promise.resolve(catalogs[url]); }
+    return fetch(url, { cache: "no-cache" })
+      .then(function (response) {
+        if (!response.ok) { throw new Error(url + " returned " + response.status); }
+        return response.json();
+      })
+      .then(function (payload) { catalogs[url] = payload; return payload; });
+  }
+
+  function catsFor(payload) {
+    var counts = {}, order = payload.cat_order || [];
+    (payload.icons || []).forEach(function (item) {
+      if (item.cat) { counts[item.cat] = (counts[item.cat] || 0) + 1; }
+    });
+    var names = order.filter(function (name) { return counts[name]; });
+    Object.keys(counts).sort().forEach(function (name) {
+      if (names.indexOf(name) === -1) { names.push(name); }
+    });
+    return names.map(function (name) { return { name: name, count: counts[name] }; });
+  }
+
+  // The same drawings in another style: keep the previewed name and the collected
+  // ones where that style has them, drop the rest, and say how many went.
+  function switchStyle(slug) {
+    var entry = styleBySlug(slug);
+    if (!entry || (STYLE && entry.slug === STYLE.slug)) { return; }
+    var keepName = selected ? selected.name : "";
+    var names = chosen.map(function (item) { return item.name; });
+    announce("Loading " + entry.name + "…");
+    loadCatalog(entry.data).then(function (payload) {
+      var next = payload.icons || [];
+      if (!next.length) { throw new Error("the catalog is empty"); }
+      var byName = {};
+      next.forEach(function (item) { byName[item.name] = item; });
+      applyStyle(entry);
+      items = next;
+      CATS = catsFor(payload);
+      chosen = names.map(function (name) { return byName[name]; }).filter(Boolean);
+      chosenSet = {};
+      chosen.forEach(function (item) { chosenSet[item.name] = true; });
+      bulkFilled = false;
+      selected = byName[keepName] || next[0];
+      store(STYLE_KEY, entry.slug);
+      markStyleSegs();
+      renderCats();
+      renderGrid();
+      paint();
+      announce(entry.name + " · " + next.length.toLocaleString() + " icons"
+        + (names.length > chosen.length
+          ? " · " + (names.length - chosen.length) + " dropped, not in this style" : ""));
+    }).catch(function (error) {
+      announce(entry.name + " did not load: " + error.message);
+    });
+  }
 
   function labelExport() {
     var list = exportList();
@@ -1160,8 +1284,10 @@
       var node = host.querySelector("svg");
       node.setAttribute("width", String(exportSize));
       node.setAttribute("height", String(exportSize));
-      node.setAttribute("style", "color:" + (surface === "white" ? "#000000" : "#ffffff"));
-      tune(node, weight, MODE !== "stroke");
+      if (TUNED && !COLOUR) {
+        node.setAttribute("style", "color:" + (surface === "white" ? "#000000" : "#ffffff"));
+        tune(node, weight, MODE !== "stroke");
+      }
       var svg = new XMLSerializer().serializeToString(node);
       var blob = new Blob([svg], { type: "image/svg+xml;charset=utf-8" });
       var url = URL.createObjectURL(blob);
@@ -1399,7 +1525,7 @@
 
   function zipName() {
     var query = search.value.trim().toLowerCase();
-    var base = bulkFilled && cat ? cat : "selection";
+    var base = (STYLE ? STYLE.slug + "-" : "") + (bulkFilled && cat ? cat : "selection");
     var slug = base.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
     return BRAND.toLowerCase() + "-" + slug + "-" + format + ".zip";
   }
@@ -1541,14 +1667,16 @@
     applySurface(recall(SURFACE_KEY));
   })();
 
-  fetch(DATA, { cache: "no-cache" })
-    .then(function (response) {
-      if (!response.ok) { throw new Error(DATA + " returned " + response.status); }
-      return response.json();
-    })
+  var initial = STYLES.length ? (styleBySlug(recall(STYLE_KEY)) || STYLES[0]) : null;
+  if (initial) { applyStyle(initial); }
+  renderStyles();
+  var initialData = initial ? initial.data : DATA;
+
+  loadCatalog(initialData)
     .then(function (payload) {
       items = payload.icons || [];
       if (!items.length) { throw new Error("the catalog is empty"); }
+      CATS = catsFor(payload);
       if (savedCat) {
         var known = CATS.some(function (entry) { return entry.name === savedCat; });
         if (known) { cat = savedCat; catLabel.textContent = savedCat; }

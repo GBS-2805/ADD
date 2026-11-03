@@ -39,6 +39,7 @@ ROUTES = [
     ("/icons/all/", "text/html"),
     ("/icons/coolicons/", "text/html"),
     ("/icons/lineicons/", "text/html"),
+    ("/icons/streamline/", "text/html"),
     ("/fonts/", "text/html"),
     ("/portfolio/", "text/html"),
     ("/download/", "text/html"),

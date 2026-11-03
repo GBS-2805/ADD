@@ -90,8 +90,13 @@ def measure(catalog):
 
 
 def icon_sets():
-    """Every brand catalog on disk, with the totals the pages have to quote."""
-    sets, total = [], 0
+    """Every brand catalog on disk, with the totals the pages have to quote.
+
+    A brand may publish several style catalogs. They are variants of one set, so
+    the brand is counted once -- from the catalog marked default -- and the others
+    travel with it as styles instead of inflating the total.
+    """
+    groups = {}
     files = sorted(path for path in DATA.glob("*.json")
                           if not path.stem.endswith("-sheet")
                           and path.stem not in ("index", "tools", "fonts", "portfolio"))
@@ -99,10 +104,19 @@ def icon_sets():
         if not path.exists():
             fail("no %s yet; run tools/fetch_icons.py first" % path.relative_to(ROOT))
         payload = json.loads(path.read_text(encoding="utf-8"))
-        total += payload["count"]
-        sets.append({"id": payload.get("set", path.stem), "source": payload.get("source"),
-                     "licence": payload.get("licence"), "style": payload.get("style"),
-                     "count": payload["count"], "data": "/data/" + path.name})
+        groups.setdefault(payload.get("brand") or path.stem, []).append((path, payload))
+
+    sets, total = [], 0
+    for key, items in groups.items():
+        path, primary = next(((p, d) for p, d in items if d.get("default")), items[0])
+        total += primary["count"]
+        entry = {"id": primary.get("set", key), "source": primary.get("source"),
+                 "licence": primary.get("licence"), "style": primary.get("style"),
+                 "count": primary["count"], "data": "/data/" + path.name}
+        if len(items) > 1:
+            entry["styles"] = [{"name": d.get("style", p.stem), "count": d["count"],
+                                "data": "/data/" + p.name} for p, d in items]
+        sets.append(entry)
     return total, sets
 
 
