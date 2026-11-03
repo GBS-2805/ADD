@@ -26,6 +26,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 SITE = ROOT / "tools/site.json"
+CATALOG = ROOT / "tools/catalog.json"
 PROJECT = "artbase"          # created on first deploy if the account has no project by this name
 CLI = ("npx", "-y", "vercel@latest")
 
@@ -49,7 +50,6 @@ ROUTES = [
     ("/data/icons.json", "application/json"),
     ("/renders/page-tools.webp", "image/webp"),
     ("/figma/site-figma.svg", "image/svg+xml"),
-    ("/Compress-2.0.apk", "android.package-archive"),
 ]
 
 # Text files that can hold the origin. The generated trees are skipped: they are
@@ -111,17 +111,30 @@ def deploy():
     print(out.rstrip())
     if proc.returncode != 0:
         sys.exit(f"deploy failed (exit {proc.returncode}); nothing was rewritten")
-    urls = re.findall(r"https://[a-z0-9-]+(?:\.[a-z0-9-]+)*\.vercel\.app", out)
+    # Prefer the production alias: the per-deployment host changes on every upload,
+    # and the alias is the address the repo should hold.
+    alias = re.findall(r"Aliased\s+(https://\S+)", out)
+    urls = alias or re.findall(r"https://[a-z0-9-]+(?:\.[a-z0-9-]+)*\.vercel\.app", out)
     if not urls:
         sys.exit("deploy succeeded but printed no *.vercel.app URL; pass --links-only URL once "
                  "the production domain is known")
-    return "https://" + urls[-1].split("://", 1)[1]
+    return origin_of(urls[-1])
+
+
+def apk_routes():
+    """The APKs the catalog ships, read from it rather than spelled out here.
+
+    A hard-coded release filename goes stale the moment the next build ships, and
+    the check then fails on a file that is supposed to be gone.
+    """
+    shipped = json.loads(CATALOG.read_text(encoding="utf-8")).get("tools", [])
+    return [(tool["apk"], "android.package-archive") for tool in shipped if tool.get("apk")]
 
 
 def verify(origin):
     """GET every route; a 200 with the wrong type is still a failure."""
     problems = []
-    for route, wanted in ROUTES:
+    for route, wanted in ROUTES + apk_routes():
         request = urllib.request.Request(origin + route, headers={"User-Agent": "deploy-check"})
         try:
             with urllib.request.urlopen(request, timeout=30) as response:
@@ -170,8 +183,9 @@ def main():
         return
 
     new = origin_of(args.links_only) if args.links_only else deploy()
-    if new == old:
-        sys.exit("the new host is the current host; nothing to do")
+    # A redeploy to the host the repo already names is the normal case, not an
+    # error: the upload still has to be verified, it just changes no link.
+    same = new == old
 
     print(f"\nverifying {new}")
     problems = verify(new)
@@ -180,6 +194,9 @@ def main():
         for problem in problems:
             print("  FAIL " + problem)
         sys.exit(1)
+    if same:
+        print("\nthe links already point at this host; nothing rewritten")
+        return
 
     changed = rewrite(old, new)
     apps = [name for name, _, _ in changed if name.endswith(".java")]
