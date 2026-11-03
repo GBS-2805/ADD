@@ -120,6 +120,12 @@ changes as unverified on device rather than illustrating them.
 ## Project shape
 
 - `docs/` is the deployed static site (Sites manifest `manifest.json`, assets from `docs`).
+  **The host caps a deploy at 10 MiB for the whole folder** and refuses an oversize one
+  with `invalid_type`, an error that never mentions size -- so the budget is the first
+  thing to check when a deploy fails for no visible reason. `python3 tools/figma_publish.py`
+  prints the headroom on every run. Captures ship as lossless WebP (`tools/to_webp.py`,
+  wired into `tools/render_pages.js`): same pixels, a third of the bytes. The one canvas
+  keeps each artwork payload once in `<defs>` and paints instances with `<use>`.
 - The shelf is ten pages, each a folder with an `index.html`: the root index, then
   `tools/`, `icons/` and its two brand folders plus the all-brands sheet at
   `icons/all/`, `fonts/`, `portfolio/`, `download/` and `renders/`. They share
