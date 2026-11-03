@@ -16,9 +16,9 @@
 <text x="40" y="365.52" fill="#d9d9d9" font-family="Poppins" font-size="20" font-weight="400" xml:space="preserve">them, and both are signed with the same key so one</text>
 <text x="40" y="396.52" fill="#d9d9d9" font-family="Poppins" font-size="20" font-weight="400" xml:space="preserve">can hand you to the other.</text>
 <text x="40" y="441.52" fill="#d9d9d9" fill-opacity="0.64" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">2 apps</text>
-<text x="112" y="441.52" fill="#d9d9d9" fill-opacity="0.64" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">Icons 2.3 shipping</text>
-<text x="260" y="441.52" fill="#d9d9d9" fill-opacity="0.64" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">Compress 1.9 shipping</text>
-<text x="440" y="441.52" fill="#d9d9d9" fill-opacity="0.64" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">No third-party libraries</text>
+<text x="112" y="441.52" fill="#d9d9d9" fill-opacity="0.64" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">Icons 2.4 shipping</text>
+<text x="262" y="441.52" fill="#d9d9d9" fill-opacity="0.64" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">Compress 1.9 shipping</text>
+<text x="442" y="441.52" fill="#d9d9d9" fill-opacity="0.64" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">No third-party libraries</text>
 <rect x="40" y="488.61" width="1220" height="1" fill="#d9d9d9" fill-opacity="0.26"/>
 <text x="40" y="582.61" fill="#d9d9d9" font-family="Poppins" font-size="30" font-weight="400" letter-spacing="-0.45" xml:space="preserve">The two</text>
 <text x="40" y="615.11" fill="#d9d9d9" fill-opacity="0.64" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">One for icons, one for photos</text>
@@ -198,7 +198,7 @@
 <text x="413" y="4098.69" fill="#d9d9d9" font-family="Poppins" font-size="17" font-weight="400" xml:space="preserve">: each build with the day it went out, the size of the APK that shipped with it, and the note that</text>
 <text x="225" y="4126.73" fill="#d9d9d9" font-family="Poppins" font-size="17" font-weight="400" xml:space="preserve">was written for it — read back out of the repository's own history rather than repeated here.</text>
 <rect x="0" y="4237.78" width="1300" height="1" fill="#d9d9d9" fill-opacity="0.26"/>
-<text x="40" y="4282.78" fill="#d9d9d9" fill-opacity="0.64" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">Icons 2.3 · Compress 1.9</text>
+<text x="40" y="4282.78" fill="#d9d9d9" fill-opacity="0.64" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">Icons 2.4 · Compress 1.9</text>
 <text x="969" y="4282.78" fill="#d9d9d9" fill-opacity="0.64" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">Index</text>
 <text x="1006" y="4282.78" fill="#d9d9d9" fill-opacity="0.64" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">·</text>
 <text x="1017" y="4282.78" fill="#d9d9d9" fill-opacity="0.64" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">Download</text>
