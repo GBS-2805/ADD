@@ -29,6 +29,28 @@ RENAME = {
 STATE_NUMBERS = {"19", "20", "21", "22"}
 BUNDLE = "site-figma.svg"
 
+# The exporter writes every image twice: the payload under plain `href` and again
+# under `xlink:href`. One copy paints the picture and the other is dead weight --
+# just over a megabyte across the served artboards. Drop the redundant attribute,
+# but only when the two are byte-identical, so the picture cannot change.
+IMAGE_TAG = re.compile(r"<image\b[^>]*?/>")
+ATTRIBUTE = re.compile(r'([\w:-]+)="([^"]*)"')
+
+
+def one_payload(text):
+    keep = "xlink:href" if "xmlns:xlink" in text[:800] else "href"
+    drop = "href" if keep == "xlink:href" else "xlink:href"
+
+    def strip(match):
+        tag = match.group(0)
+        hrefs = {k: v for k, v in ATTRIBUTE.findall(tag) if k.endswith("href")}
+        if len(hrefs) < 2 or len(set(hrefs.values())) != 1:
+            return tag
+        return re.sub(r'\s+%s="[^"]*"' % re.escape(drop), "", tag, count=1)
+
+    return IMAGE_TAG.sub(strip, text)
+
+
 def describe(path):
     head = path.read_text(errors="replace")[:2500]
     title = re.search(r"<title>(.*?)</title>", head)
@@ -125,7 +147,10 @@ def main():
     for name in dropped:
         (DST / name).unlink()
     for name, artboard in wanted.items():
-        shutil.copyfile(artboard, DST / name)
+        if name == BUNDLE:
+            shutil.copyfile(artboard, DST / name)
+        else:
+            (DST / name).write_text(one_payload(artboard.read_text()))
 
     (DST / "index.html").write_text(listing(list(wanted)))
     total = sum(p.stat().st_size for p in DST.glob("*.svg"))
