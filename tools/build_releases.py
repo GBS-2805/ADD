@@ -116,22 +116,34 @@ def rows(items, written, live):
     return "\n".join(out)
 
 
+def swap(block, old, new, what):
+    """Replace one piece of another page's copy, or stop.
+
+    These are literal matches against a page this tool does not own, so a rename there
+    would otherwise leave the releases band saying the download page's words, or
+    describing the download page instead of the history. One match is the contract.
+    """
+    count = block.count(old)
+    if count != 1:
+        raise SystemExit("build_releases: expected one %s in the download page, found %d; "
+                         "the releases band would ship the wrong copy" % (what, count))
+    return block.replace(old, new, 1)
+
+
 def chrome():
     """The band and both panels, taken from a page that already carries them."""
     text = DOWNLOAD.read_text(encoding="utf-8")
     block = text[text.index('<header class="bar">'):text.index("</aside>") + len("</aside>")]
-    block = block.replace('<a class="page-name" href="../">Download</a>',
-                          '<a class="page-name" href="../">Releases</a>')
-    block = block.replace(' aria-current="page"', "")
-    row = '<a href="../releases/">Releases<span>history</span></a>'
-    if row not in block:
-        raise SystemExit("build_releases: the download page has no Releases row yet")
-    block = block.replace(row, '<a href="../releases/" aria-current="page">Releases'
-                               '<span>history</span></a>')
-    block = block.replace("Compress \u00b7 a design shelf: two free icon brands, Poppins, "
-                          "one palette, and two offline apps built from them.",
-                          "Every build this shelf has shipped, read back out of its own history.")
-    return block
+    block = swap(block, '<a class="page-name" href="../">Download</a>',
+                 '<a class="page-name" href="../">Releases</a>', "page name")
+    block = swap(block, ' aria-current="page"', "", "current row marker")
+    block = swap(block, '<a href="../releases/">Releases<span>history</span></a>',
+                 '<a href="../releases/" aria-current="page">Releases<span>history</span></a>',
+                 "Releases row")
+    return swap(block, "Compress \u00b7 a design shelf: two free icon brands, Poppins, "
+                       "one palette, and two offline apps built from them.",
+                "Every build this shelf has shipped, read back out of its own history.",
+                "drawer note")
 
 
 def kicker(items):

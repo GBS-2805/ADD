@@ -84,14 +84,27 @@ def link_files(origin):
     return hits
 
 
+def replace_origin(text, old, new):
+    """Swap the origin wherever it stands alone, and count what moved.
+
+    A plain substring replace would also rewrite a longer host that merely begins with
+    it -- a subdomain, or a domain name that starts with the rented one -- and would
+    leave the rest of the address pointing at nothing.
+    """
+    edge = re.compile(r"(?<![A-Za-z0-9.\-])" + re.escape(old) + r"(?![A-Za-z0-9.\-])")
+    return edge.subn(new, text)
+
+
 def rewrite(old, new):
     """Swap the origin inside each link file, keeping whatever trailing slash it had."""
     changed = []
     for path in link_files(old):
         text = path.read_text(encoding="utf-8")
-        after = text.replace(old, new)
-        if after == text:
-            continue
+        after, hits = replace_origin(text, old, new)
+        if not hits:
+            raise SystemExit("deploy: %s mentions %s only inside a longer address, so no "
+                             "link there moved; fix that file before switching hosts"
+                             % (path.relative_to(ROOT).as_posix(), old))
         before_lines = [line for line in text.splitlines() if old in line]
         after_lines = [line for line in after.splitlines() if new in line]
         path.write_text(after, encoding="utf-8")
