@@ -114,9 +114,7 @@ a { color: inherit; }
 .who { display: flex; align-items: center; gap: 26px; }
 .who-lines { text-align: right; width: 182px; }
 .who-lines p { margin: 0; font-size: 17px; line-height: 24.5px; }
-.who-lines .narrow,
-.who-lines .phone { display: none; }
-.who-lines.keep p.phone { display: none; }
+.who-lines .narrow { display: none; }
 .burger {
   display: flex;
   align-items: center;
@@ -410,8 +408,7 @@ footer a:hover { text-decoration: underline; }
   .who-lines .wide { display: none; }
   .who-lines .narrow { display: block; }
   .who-lines { width: auto; }
-  .who-lines.keep p.big { display: none; }
-  .who-lines.keep p.phone { display: block; font-size: 14px; }
+  .who-lines.keep p.big { font-size: clamp(9.5px, calc((50vw - 83px) / 10.21), 14px); letter-spacing: 0; }
   .burger { width: 36px; height: 36px; margin-right: -6px; }
   .burger svg { width: 24px; height: 24px; }
   .menu { padding-bottom: 6px; }
@@ -433,4 +430,13 @@ footer a:hover { text-decoration: underline; }
   .specs { grid-template-columns: 1fr; }
   .specs div { padding-right: 0; border-right: 0; border-top: 1px solid var(--rule); }
   .specs div:first-child { border-top: 0; }
+}
+
+/* Below 340px the centred mark leaves under 100px: the long descriptor cannot hold
+   its line, so the list of what the shelf holds stays and the descriptor goes. */
+@media (max-width: 340px) {
+  :root { --pad: 12px; }
+  .mark, .mark svg { width: 28px; height: 28px; }
+  .who-lines.keep p:first-child { display: none; }
+  .who-lines.keep p.big { font-size: 9px; }
 }
