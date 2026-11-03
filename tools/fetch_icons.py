@@ -651,6 +651,7 @@ def write_all(entries):
         "__ROOT__": "../../",
         "__TOTAL__": fmt(total),
         "__SETS__": json.dumps(sets),
+        "__LICENCES__": licence_line(entries),
         "__BRANDS__": menu("../../", "all"),
     }
     for token, value in tokens.items():
@@ -661,10 +662,24 @@ def write_all(entries):
     print("page: %-28s %9d bytes" % (out.relative_to(ROOT), out.stat().st_size))
 
 
+def licence_line(entries):
+    """One sentence for the licences the sets carry, MIT being the default."""
+    others = [(brand["name"], brand["licence"]) for brand in entries
+              if brand["licence"].upper() != "MIT"]
+    if not others:
+        return "Every set is MIT."
+    if len(others) == 1:
+        return "Every set is MIT except %s, which is %s." % others[0]
+    listed = ", ".join("%s (%s)" % pair for pair in others[:-1])
+    return "Every set is MIT except %s and %s (%s)." % (listed, others[-1][0], others[-1][1])
+
+
+
 def write_hub(entries):
     total = sum(brand["count"] for brand in entries)
     page = HUB_TEMPLATE.read_text(encoding="utf-8")
     version, apk = release()
+    licences = licence_line(entries)
     names = [brand["name"] for brand in entries]
     setlist = names[0] if len(names) == 1 else ", ".join(names[:-1]) + " and " + names[-1]
     rows = "\n".join(
@@ -674,14 +689,6 @@ def write_hub(entries):
         for brand in entries)
     others = [(brand["name"], brand["licence"]) for brand in entries
               if brand["licence"].upper() != "MIT"]
-    if not others:
-        licences = "Every set is MIT."
-    elif len(others) == 1:
-        licences = "Every set is MIT except %s, which is %s." % others[0]
-    else:
-        listed = ", ".join("%s (%s)" % pair for pair in others[:-1])
-        licences = "Every set is MIT except %s and %s (%s)." % (
-            listed, others[-1][0], others[-1][1])
     tokens = {
         "__ROOT__": "../",
         "__VERSION__": version,
