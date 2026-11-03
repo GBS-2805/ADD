@@ -2,6 +2,12 @@
   "notes": [
     {
       "id": "icons",
+      "version": "2.10",
+      "title": "Phosphor and Plump Solid",
+      "note": "Two more brands on the shelf: Phosphor's 1,512 regular outline icons and Streamline's 500 Plump Solid glyphs, both in the app off the same catalogs."
+    },
+    {
+      "id": "icons",
       "version": "2.9",
       "title": "Keeping step with the site",
       "note": "Carries the pages the site serves today, so the app and the shelf read the same; no behaviour of its own changes."

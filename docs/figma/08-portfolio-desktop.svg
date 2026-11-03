@@ -51,7 +51,7 @@
 <rect x="447.33" y="1010.38" width="406.33" height="1" fill="#d9d9d9" fill-opacity="0.26"/>
 <text x="469.33" y="799.55" fill-opacity="0.64" font-size="12" font-weight="500" letter-spacing="1.2" xml:space="preserve">WEB TOOL · 2026</text>
 <text x="469.33" y="834.34" font-size="22" letter-spacing="-0.22" xml:space="preserve">Icons browser</text>
-<text x="469.33" y="866.94" font-size="15" xml:space="preserve">All 1,864 icons from two free sets in one</text>
+<text x="469.33" y="866.94" font-size="15" xml:space="preserve">All 3,876 icons from four free sets in one</text>
 <text x="469.33" y="890.19" font-size="15" xml:space="preserve">filterable grid, one tap each to copy the SVG,</text>
 <text x="469.33" y="913.44" font-size="15" xml:space="preserve">with a textarea fallback when the clipboard is</text>
 <text x="469.33" y="936.69" font-size="15" xml:space="preserve">blocked.</text>
@@ -84,7 +84,7 @@
 <text x="225" y="1429.16" font-size="17" xml:space="preserve">Platform APIs only — no image library, no analytics, no SDK. The APK is under 300 KB because of it.</text>
 <rect x="40" y="1516.2" width="1220" height="1" fill="#d9d9d9" fill-opacity="0.26"/>
 <text x="40" y="1610.2" font-size="30" letter-spacing="-0.45" xml:space="preserve">Icons browser</text>
-<text x="40" y="1642.7" fill-opacity="0.64" font-size="14" xml:space="preserve">Web tool · 1,864 icons · two sets</text>
+<text x="40" y="1642.7" fill-opacity="0.64" font-size="14" xml:space="preserve">Web tool · 3,876 icons · four sets</text>
 <text x="40" y="1695.8" font-size="17" font-weight="500" xml:space="preserve">What I built</text>
 <text x="225" y="1695.8" font-size="17" xml:space="preserve">The fetch pipeline that pulls every free icon, recolours it to</text>
 <rect x="734" y="1676.8" width="120" height="26" fill="#000000" fill-opacity="0.16"/>

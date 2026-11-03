@@ -89,9 +89,12 @@ def measure(catalog):
 
 
 def icon_sets():
-    """Both free sets, with the totals the pages have to quote."""
+    """Every brand catalog on disk, with the totals the pages have to quote."""
     sets, total = [], 0
-    for path in (ICONS, COOLICONS):
+    files = sorted(path for path in DATA.glob("*.json")
+                          if not path.stem.endswith("-sheet")
+                          and path.stem not in ("index", "tools", "fonts", "portfolio"))
+    for path in files:
         if not path.exists():
             fail("no %s yet; run tools/fetch_icons.py first" % path.relative_to(ROOT))
         payload = json.loads(path.read_text(encoding="utf-8"))

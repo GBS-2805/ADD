@@ -53,7 +53,7 @@
 <rect x="21" y="1502.25" width="349" height="1" fill="#d9d9d9" fill-opacity="0.26"/>
 <text x="43" y="1291.42" fill-opacity="0.64" font-size="12" font-weight="500" letter-spacing="1.2" xml:space="preserve">WEB TOOL · 2026</text>
 <text x="43" y="1326.22" font-size="22" letter-spacing="-0.22" xml:space="preserve">Icons browser</text>
-<text x="43" y="1358.81" font-size="15" xml:space="preserve">All 1,864 icons from two free sets in one</text>
+<text x="43" y="1358.81" font-size="15" xml:space="preserve">All 3,876 icons from four free sets in one</text>
 <text x="43" y="1382.06" font-size="15" xml:space="preserve">filterable grid, one tap each to copy the</text>
 <text x="43" y="1405.31" font-size="15" xml:space="preserve">SVG, with a textarea fallback when the</text>
 <text x="43" y="1428.56" font-size="15" xml:space="preserve">clipboard is blocked.</text>
@@ -93,7 +93,7 @@
 <text x="20" y="2392.14" font-size="16" xml:space="preserve">because of it.</text>
 <rect x="20" y="2459.53" width="350" height="1" fill="#d9d9d9" fill-opacity="0.26"/>
 <text x="20" y="2533.53" font-size="30" letter-spacing="-0.45" xml:space="preserve">Icons browser</text>
-<text x="20" y="2566.03" fill-opacity="0.64" font-size="14" xml:space="preserve">Web tool · 1,864 icons · two sets</text>
+<text x="20" y="2566.03" fill-opacity="0.64" font-size="14" xml:space="preserve">Web tool · 3,876 icons · four sets</text>
 <text x="20" y="2617.13" font-size="16" font-weight="500" xml:space="preserve">What I built</text>
 <text x="20" y="2645.52" font-size="16" xml:space="preserve">The fetch pipeline that pulls every free icon,</text>
 <text x="20" y="2671.91" font-size="16" xml:space="preserve">recolours it to</text>

@@ -18,7 +18,7 @@
 <text x="20" y="322.47" font-size="18" xml:space="preserve">same key so one can hand you to the</text>
 <text x="20" y="350.36" font-size="18" xml:space="preserve">other.</text>
 <text x="20" y="394.25" fill-opacity="0.64" font-size="14" xml:space="preserve">2 apps</text>
-<text x="92" y="394.25" fill-opacity="0.64" font-size="14" xml:space="preserve">Icons 2.9 shipping</text>
+<text x="92" y="394.25" fill-opacity="0.64" font-size="14" xml:space="preserve">Icons 2.10 shipping</text>
 <text x="20" y="425.34" fill-opacity="0.64" font-size="14" xml:space="preserve">Compress 2.1 shipping</text>
 <text x="199" y="425.34" fill-opacity="0.64" font-size="14" xml:space="preserve">No third-party libraries</text>
 <rect x="20" y="460.44" width="350" height="1" fill="#d9d9d9" fill-opacity="0.26"/>
@@ -34,14 +34,14 @@
 <text x="43" y="729.67" font-size="15" xml:space="preserve">icon, set its weight, size and background</text>
 <text x="43" y="752.92" font-size="15" xml:space="preserve">in a live preview, open the whole set in a</text>
 <text x="43" y="776.17" font-size="15" xml:space="preserve">scrolling sheet, copy the SVG.</text>
-<rect x="43" y="806.42" width="40.31" height="26.14" fill="#d9d9d9"/>
-<rect x="43" y="806.42" width="40.31" height="1" fill="#d9d9d9"/>
-<rect x="82.31" y="806.42" width="1" height="26.14" fill="#d9d9d9"/>
-<rect x="43" y="831.56" width="40.31" height="1" fill="#d9d9d9"/>
+<rect x="43" y="806.42" width="45.41" height="26.14" fill="#d9d9d9"/>
+<rect x="43" y="806.42" width="45.41" height="1" fill="#d9d9d9"/>
+<rect x="87.41" y="806.42" width="1" height="26.14" fill="#d9d9d9"/>
+<rect x="43" y="831.56" width="45.41" height="1" fill="#d9d9d9"/>
 <rect x="43" y="806.42" width="1" height="26.14" fill="#d9d9d9"/>
-<text x="53" y="823.42" fill="#000000" font-size="11" font-weight="500" letter-spacing="1.1" xml:space="preserve">2.9</text>
-<text x="206.31" y="823.42" font-size="13" xml:space="preserve"> →</text>
-<text x="93.31" y="823.42" font-size="13" xml:space="preserve">Read the detail</text>
+<text x="53" y="823.42" fill="#000000" font-size="11" font-weight="500" letter-spacing="1.1" xml:space="preserve">2.10</text>
+<text x="211.41" y="823.42" font-size="13" xml:space="preserve"> →</text>
+<text x="98.41" y="823.42" font-size="13" xml:space="preserve">Read the detail</text>
 <rect x="369" y="855.56" width="1" height="254.53" fill="#d9d9d9" fill-opacity="0.26"/>
 <rect x="21" y="1109.09" width="349" height="1" fill="#d9d9d9" fill-opacity="0.26"/>
 <text x="43" y="893.56" fill-opacity="0.64" font-size="12" font-weight="500" letter-spacing="1.2" xml:space="preserve">ANDROID APP · COMPRESS</text>
@@ -60,13 +60,13 @@
 <text x="90.31" y="1077.95" font-size="13" xml:space="preserve">Read the detail</text>
 <rect x="20" y="1154.09" width="350" height="1" fill="#d9d9d9" fill-opacity="0.26"/>
 <text x="20" y="1228.09" font-size="30" letter-spacing="-0.45" xml:space="preserve">Icons</text>
-<text x="20" y="1260.59" fill-opacity="0.64" font-size="14" xml:space="preserve">1.0 · app.offline.icons · 575,091 bytes</text>
+<text x="20" y="1260.59" fill-opacity="0.64" font-size="14" xml:space="preserve">1.0 · app.offline.icons · 1,017,926 bytes</text>
 <rect x="20" y="1327.69" width="350" height="54" fill="#d9d9d9"/>
 <image x="117.5" y="1344.69" width="20" height="20" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADwAAAA8CAYAAAA6/NlyAAAC00lEQVR4AeyaW0oDMRSGq0sQb6DiFRehIOIafBUfVFyGugxRd+EKvDzqo0/i5UFXIej/qQOdIW2TNMl02sg5TXJycvL/+cfSGWa8NWJ/mfCwC54VzgoP2QnkSzqBoBPa4/Df6aubzlIrPCtqT/KLf6c/o34yS014V8zaCdInpnAaS0140kBryhCLFkpNOBoR28KZsO1JNTUvK9xU5Wxxj5rCrUzY9tJoal5WuKnK2eLOCtueVFPzssJNVc4Wd1bY9qSamhdS4WkdwqWcxzemG31NOVnoer+bhyR8r4oHch7QPapdlvvaihY+yIt61NawfwtF+FhQ1uSFLahzK1+UuxprbrRoXl7YujqQV9OfhSJsQjGnIMpAQF0rI5c1rLVa4JoUivC5Nn6RVw3gdwpCRE1XW9JsJ7LUvtJ83xaKMEB29PEhrxqXJkQg/V2d1JgYcxwMB6RQyahJ7VLQdxCS8LtAbMkBqKZkEIGQ6YtsVZkcCDnqloxa1KR2acJv0Ar+AIBLb1NgAKqmZCi9X4r8DfbUdCJLLWoqJYyFVLhAhBoANZEucnq1rKUGtXrlOs3HIAwAgHIpfjJwdNawlhqOS3unxyLMzlyKG+qglhorI5c1rLVa4JoUkzBYUAm1UI1xNyeHXNZ0y+trLjZhwKEWqqEeY5MzRw65pvlgsRSEAYtqfAlBjHG7E2OOnPZ4lH4qwoCH0DadihNjrhKOM0xJGAbP+uBOiJ+J3ErSJ6ZwGktNGFav+uAW8kgtfTXprA7C6dgZdsqEDYcyVCFfhXm/iv/DU51GHc7eYND2buZDuP1dqxNtV4fzoNDrHS8fwrxXxftV4lqrgQEsTiB8CDttEDl5zKm+kn0IX2vdl7xuAwNYnHD4EH7TDjyS5YfDmfp1OHuDASyCYG8+hKnOb19+GtbxDc2e7A0GsDi5L2GnTQYpORMeJDViYMkKxzjVQao5cgr/AAAA///eVkthAAAABklEQVQDADLTknkJIfEtAAAAAElFTkSuQmCC"/>
 <text x="149.5" y="1360.66" fill="#000000" font-size="17" xml:space="preserve">Download APK</text>
 <text x="20" y="1417.69" fill-opacity="0.64" font-size="14" xml:space="preserve">Android 8.0+ · all ABIs</text>
 <text x="190" y="1417.69" fill-opacity="0.64" font-size="14" xml:space="preserve">No permissions at all</text>
-<text x="20" y="1448.78" fill-opacity="0.64" font-size="14" xml:space="preserve">Version code 20</text>
+<text x="20" y="1448.78" fill-opacity="0.64" font-size="14" xml:space="preserve">Version code 21</text>
 <text x="20" y="1493.88" fill-opacity="0.64" font-size="16" xml:space="preserve">The browser you can use here without</text>
 <text x="20" y="1519.47" fill-opacity="0.64" font-size="16" xml:space="preserve">installing is</text>
 <text x="108" y="1519.47" fill-opacity="0.64" font-size="16" text-decoration="underline" xml:space="preserve">/icons/</text>
@@ -240,7 +240,7 @@
 <text x="20" y="6079.81" font-size="16" xml:space="preserve">repository's own history rather than</text>
 <text x="20" y="6106.2" font-size="16" xml:space="preserve">repeated here.</text>
 <rect x="0" y="6197.59" width="390" height="1" fill="#d9d9d9" fill-opacity="0.26"/>
-<text x="20" y="6242.59" fill-opacity="0.64" font-size="14" xml:space="preserve">Icons 2.9 · Compress 2.1</text>
+<text x="20" y="6242.59" fill-opacity="0.64" font-size="14" xml:space="preserve">Icons 2.10 · Compress 2.1</text>
 <text x="20" y="6277.69" fill-opacity="0.64" font-size="14" xml:space="preserve">Index</text>
 <text x="57" y="6277.69" fill-opacity="0.64" font-size="14" xml:space="preserve">·</text>
 <text x="68" y="6277.69" fill-opacity="0.64" font-size="14" xml:space="preserve">Download</text>
