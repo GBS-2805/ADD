@@ -2,6 +2,12 @@
   "notes": [
     {
       "id": "icons",
+      "version": "2.9",
+      "title": "Keeping step with the site",
+      "note": "Carries the pages the site serves today, so the app and the shelf read the same; no behaviour of its own changes."
+    },
+    {
+      "id": "icons",
       "version": "2.8",
       "title": "Both lines on a phone",
       "note": "The app carries the band as the site draws it, with the descriptor and the tool list on a phone."
