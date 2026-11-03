@@ -234,11 +234,6 @@ need a version bump to carry the new host. `AGENTS.md` has the full sequence.
 
 ## Not yet done
 
-- **The all-brands page is empty inside the Icons app.** It fetches
-  `data/lineicons-sheet.json` and `data/coolicons-sheet.json`, and `build.sh` stages only
-  `icons.json` and `coolicons.json`, so in the APK its sections render with no glyphs.
-  The site is unaffected, and the failure is silent because the page treats a failed
-  fetch as “no data”. The fix is those two files in `stage_icons_assets`, then a build.
 - **Icons has not been run on a device.** The bundle, the manifest and the signing
   are verified; the WebView surface, the clipboard bridge and the private origin are
   reviewed code, not observed behaviour. Compress has never been exercised on a

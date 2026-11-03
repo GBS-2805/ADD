@@ -15,7 +15,7 @@ each page in Chromium at the real viewport and translates what it measures.
 | `07-tools-desktop.svg` | Tools | 1300×4421 |
 | `08-portfolio-desktop.svg` | Portfolio | 1300×2931 |
 | `09-download-desktop.svg` | Download | 1300×2734 |
-| `10-releases-desktop.svg` | Releases | 1300×5704 |
+| `10-releases-desktop.svg` | Releases | 1300×5846 |
 | `11-index-phone.svg` | Index | 390×3297 |
 | `12-icons-phone.svg` | Icons | 390×3716 |
 | `13-icons-all-phone.svg` | Icons · All brands | 390×1449 |
@@ -25,7 +25,7 @@ each page in Chromium at the real viewport and translates what it measures.
 | `17-tools-phone.svg` | Tools | 390×6329 |
 | `18-portfolio-phone.svg` | Portfolio | 390×4470 |
 | `19-download-phone.svg` | Download | 390×3861 |
-| `20-releases-phone.svg` | Releases | 390×7194 |
+| `20-releases-phone.svg` | Releases | 390×7398 |
 | `21-index-menu-desktop.svg` | Index · pull-down | 1300×2326 |
 | `22-index-drawer-desktop.svg` | Index · side tab | 1300×2069 |
 | `23-index-menu-phone.svg` | Index · pull-down | 390×3524 |
@@ -36,7 +36,7 @@ the whole page, not just the fold.
 
 ## The whole set on one canvas
 
-`site-figma.svg` is all twenty-four artboards on one 1910×46015 canvas, desktop
+`site-figma.svg` is all twenty-four artboards on one 1910×46219 canvas, desktop
 down the left column and phone down the right, each labelled with its file name.
 Open that file to look at the set — a browser or the desktop app's file panel
 renders it, where a zip can only be downloaded. One drag puts everything into

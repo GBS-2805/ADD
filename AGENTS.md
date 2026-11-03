@@ -219,11 +219,11 @@ changes as unverified on device rather than illustrating them.
   `tools/icons_all_template.html` (the all-brands sheet at `docs/icons/all/`).
   Edit the templates and regenerate with `python3 tools/fetch_icons.py --pages-only`,
   never the output. Each page is ~27 KB: it loads its brand's catalog at run time
-  instead of inlining glyphs. The Icons bundle stages `icons.json` and `coolicons.json`
-  and nothing else, so the all-brands sheet -- which fetches `lineicons-sheet.json` and
-  `coolicons-sheet.json` -- has no data inside the APK and renders empty sections there,
-  while the site is unaffected. Adding those two files to `stage_icons_assets` in
-  `build.sh` is the whole fix; it needs a build and a re-capture to ship.
+  instead of inlining glyphs. The Icons bundle stages all four JSONs -- `icons.json`
+  and `coolicons.json` for the brand pages, `lineicons-sheet.json` and
+  `coolicons-sheet.json` for the all-brands sheet, which fetches the sheets rather
+  than the full catalogs. Miss one and that page renders empty sections inside the
+  app while still perfect on the site, which is what 2.5 shipped and 2.6 fixed.
 - The left pull-down of all three icon pages opens with All, linking to
   `/icons/all/`: twelve glyphs per brand, one from every category — the first name in
   the catalog for that category. Categories are matched across sets on a plain key
