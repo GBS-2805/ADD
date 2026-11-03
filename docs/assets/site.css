@@ -385,6 +385,8 @@ footer a:hover { text-decoration: underline; }
 
 @media (max-width: 900px) {
   .who-lines p + p { display: none; }
+  /* The index band carries both of its lines at every width. */
+  .who-lines.keep p + p { display: block; }
   .specs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .specs div:nth-child(2n) { border-right: 0; }
   .specs div:nth-child(n+3) { border-top: 1px solid var(--rule); }
@@ -405,6 +407,8 @@ footer a:hover { text-decoration: underline; }
      sit on top of it, so the narrow label takes over. */
   .who-lines .wide { display: none; }
   .who-lines .narrow { display: block; }
+  .who-lines.keep p:first-child { display: none; }
+  .who-lines.keep p { font-size: 11px; }
   .burger { width: 36px; height: 36px; margin-right: -6px; }
   .burger svg { width: 24px; height: 24px; }
   .menu { padding-bottom: 6px; }
