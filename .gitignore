@@ -5,3 +5,4 @@ dist/
 # Python caches from the tools/ renderers
 __pycache__/
 *.pyc
+.vercel
