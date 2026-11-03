@@ -87,7 +87,7 @@ or handed to someone else. Folder ids live in `tools/site.json` under `drive`; r
 them from there rather than searching Drive by name, which also finds unrelated
 `renders` folders.
 
-- **`figma/`** holds the 25 files (24 artboards plus `site-figma.svg`) and only the
+- **`figma/`** holds the current 27 files (26 artboards plus `site-figma.svg`) and only the
   current generation. Upload the new set, then delete every file in the folder that
   is not in it -- old artboards go to Drive's trash, not into an `old/` folder.
   Nested `old/` folders are how three generations once piled up there.
