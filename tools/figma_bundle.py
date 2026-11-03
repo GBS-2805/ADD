@@ -17,6 +17,9 @@ import re
 import sys
 import xml.etree.ElementTree as ET
 
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+from check_figma import check as figma_problems  # noqa: E402 - local tool
+
 # Written without a prefix: ElementTree otherwise emits <ns0:defs> for every
 # element it re-serialises, which bloats the canvas and hides the font blocks.
 ET.register_namespace("", "http://www.w3.org/2000/svg")
@@ -117,6 +120,10 @@ def main(src="figma"):
         return block if kept[0] == 1 else ""
 
     out = re.sub(r"<style[^>]*>.*?</style>", first_faces, out, flags=re.S)
+
+    issues = figma_problems(src)
+    if issues:
+        sys.exit("\n".join(["the canvas would not import:"] + issues))
 
     path = os.path.join(src, OUT)
     with open(path, "w") as fh:

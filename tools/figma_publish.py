@@ -18,6 +18,7 @@ import sys
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 from hash_assets import pin  # noqa: E402 - the tools directory is on the path above
+from check_figma import check as figma_problems  # noqa: E402 - same directory
 
 SRC = pathlib.Path("figma")
 DST = pathlib.Path("docs/figma")
@@ -174,6 +175,10 @@ def main():
     bundle = SRC / BUNDLE
     if not bundle.exists():
         sys.exit("figma/%s is missing - run tools/figma_bundle.py" % BUNDLE)
+
+    issues = figma_problems(str(SRC))
+    if issues:
+        sys.exit("\n".join(["refusing to publish a hand-off Figma cannot import:"] + issues))
 
     DST.mkdir(parents=True, exist_ok=True)
     wanted = {}

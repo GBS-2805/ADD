@@ -274,7 +274,9 @@ changes as unverified on device rather than illustrating them.
   only names the family renders in the viewer's fallback sans. `figma/` stays the
   source. Re-run the
   exporter after a visual change, then the bundle and the publish step; never edit
-  the SVGs. The exporter fails quietly -- the previous files simply stay -- so both
+  the SVGs. `tools/check_figma.py` gates all three: it fails when a text run lacks its
+  own family, size or fill, or when a file paints a mark with `<use>`, because Figma
+  imports neither and the artboard arrives as bare blocks. The exporter fails quietly -- the previous files simply stay -- so both
   the bundler and the publisher stop when the newest page is newer than the newest
   artboard, which is the one signal that the export did not run.
 - `artifacts/` is scratch: captures in progress, Figma probes, old shots. Nothing

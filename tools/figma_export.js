@@ -20,6 +20,7 @@
  */
 const fs = require("fs");
 const path = require("path");
+const { spawnSync } = require("child_process");
 const { chromium } = require("playwright");
 
 const PAGES = [
@@ -514,6 +515,16 @@ async function capture() {
     for (const e of errors) console.log("  " + e);
   } else {
     console.log("\nno console errors");
+  }
+
+  // A file that only looks right in a browser is not a hand-off: Figma drops runs
+  // that inherit their type and marks painted through <use>. Audit what was written.
+  const audit = spawnSync("python3", [path.join(__dirname, "check_figma.py"), outDir], {
+    stdio: "inherit",
+  });
+  if (audit.status !== 0) {
+    console.log("export: the Figma check failed");
+    process.exit(1);
   }
 
   if (preview) {
