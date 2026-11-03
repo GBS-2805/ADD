@@ -178,27 +178,58 @@
 
 <script>
 (function () {
+  var KEY = "fonts:preview";
   var text = document.getElementById("tryText");
   var size = document.getElementById("trySize");
   var sizeOut = document.getElementById("trySizeOut");
   var out = document.getElementById("tryOut");
   var buttons = Array.prototype.slice.call(document.querySelectorAll(".try-weight"));
-  var weight = 400;
+  var weight = "400";
   function paint() {
     out.textContent = text.value.trim() || "Poppins";
     out.style.fontWeight = weight;
     out.style.fontSize = size.value + "px";
     sizeOut.textContent = size.value + " px";
   }
-  text.addEventListener("input", paint);
-  size.addEventListener("input", paint);
+  function setWeight(value) {
+    weight = String(value);
+    buttons.forEach(function (button) {
+      button.setAttribute("aria-pressed", button.getAttribute("data-weight") === weight ? "true" : "false");
+    });
+  }
+  function remember() {
+    try {
+      localStorage.setItem(KEY, JSON.stringify({ text: text.value, size: Number(size.value), weight: Number(weight) }));
+    } catch (error) {
+      /* private mode or a blocked store: the preview still works, it just forgets */
+    }
+  }
+  function restore() {
+    var saved = null;
+    try {
+      saved = JSON.parse(localStorage.getItem(KEY) || "null");
+    } catch (error) {
+      saved = null;
+    }
+    if (!saved) { return; }
+    if (typeof saved.text === "string" && saved.text.length <= 80) { text.value = saved.text; }
+    var px = Number(saved.size);
+    if (px >= 16 && px <= 120) { size.value = String(Math.round(px)); }
+    var wanted = String(saved.weight);
+    if (buttons.some(function (button) { return button.getAttribute("data-weight") === wanted; })) {
+      setWeight(wanted);
+    }
+  }
+  text.addEventListener("input", function () { paint(); remember(); });
+  size.addEventListener("input", function () { paint(); remember(); });
   buttons.forEach(function (button) {
     button.addEventListener("click", function () {
-      weight = button.getAttribute("data-weight");
-      buttons.forEach(function (other) { other.setAttribute("aria-pressed", other === button ? "true" : "false"); });
+      setWeight(button.getAttribute("data-weight"));
       paint();
+      remember();
     });
   });
+  restore();
   paint();
 })();
 </script>
