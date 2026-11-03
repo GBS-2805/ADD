@@ -773,6 +773,8 @@ def write_hub(entries):
         "__VERSION__": version,
         "__LICENCES__": licences,
         "__SETLIST__": setlist,
+        "__BRANDCOUNT_CAP__": {1: "One", 2: "Two", 3: "Three", 4: "Four",
+                           5: "Five", 6: "Six"}.get(len(entries), str(len(entries))),
         "__BRANDCOUNT__": {1: "one", 2: "two", 3: "three", 4: "four",
                           5: "five", 6: "six"}.get(len(entries), str(len(entries))),
         "__DATALIST__": rows,

@@ -126,9 +126,11 @@ def write(path, payload):
     print("wrote %-28s %8d bytes" % (path.relative_to(ROOT), size(path)))
 
 
+# The two icon pages are written by fetch_icons.py from tokens (__TOTAL__,
+# __BRANDCOUNT__) and carry a count per brand in prose. Rewriting "N icons" there
+# replaced each brand's own number with the shelf total, so they are left out.
 COUNT_PAGES = ["docs/index.html", "docs/tools/index.html", "docs/portfolio/index.html",
-               "docs/download/index.html", "docs/fonts/index.html",
-               "docs/icons/index.html", "docs/icons/all/index.html"]
+               "docs/download/index.html", "docs/fonts/index.html"]
 BRAND_WORDS = {1: "one", 2: "two", 3: "three", 4: "four", 5: "five", 6: "six",
                7: "seven", 8: "eight", 9: "nine", 10: "ten"}
 
