@@ -199,7 +199,9 @@ changes as unverified on device rather than illustrating them.
   out of git by `tools/build_releases.py` rather than typed into a table. The notes
   come from `tools/release_notes.json`, their only copy -- the tools page links here
   instead of keeping a second list. Regenerate with `python3 tools/build_releases.py`
-  (a version bump runs it at the end); never edit the output.
+  -- a version bump runs it before it finishes and a deploy runs it before it
+  uploads, because a page read out of git can only carry a build once that build
+  is committed -- and never edit the output.
 - `figma/` is the design hand-off: one SVG artboard per page per width, written by
   `tools/figma_export.js` from the pages as Chromium lays them out (text on real
   baselines, a rect per box fragment, ellipsised labels, the CSS-generated arrows
