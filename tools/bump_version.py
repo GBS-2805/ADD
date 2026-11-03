@@ -4,6 +4,9 @@
     python3 tools/bump_version.py 2.4 --title "All brands in the app" \\
         --note "One sentence for the release list." --build --deploy
 
+--app chooses the tool, `icons` (the default) or `compress`, and everything below
+follows from it: the catalog entry, the build case, the labels and the note's app.
+
 In order, it moves:
 
   * tools/catalog.json            version, versionCode, APK name
@@ -100,7 +103,7 @@ def keyed(version):
     return tuple(int(part) for part in version.split("."))
 
 
-def report_notes():
+def report_notes(extra=None):
     """Check each note against its app's version at the commit that first added it.
 
     A note written after its build went out cannot be verified this way -- the
@@ -111,12 +114,13 @@ def report_notes():
     if not (ROOT / ".git").exists():
         print("release notes: no git history to check against")
         return 0
-    entries = notes()
-    problems = late = 0
+    entries = ([extra] if extra else []) + notes()
+    problems = late = unverified = 0
     for entry in entries:
         label, title = entry["version"], entry["title"]
         version, where = shipped_with(title, entry["id"])
         if version is None:
+            unverified += 1
             print("  note %s %s \u00b7 %s: %s, unverified" % (entry["id"], label, title, where))
         elif version == label:
             continue
@@ -133,7 +137,9 @@ def report_notes():
               "added them does not ship" % problems)
     else:
         print("release notes: %d notes, %d checked against the build they shipped in, "
-              "%d written after it" % (len(entries), len(entries) - late, late))
+              "%d written after it%s"
+              % (len(entries), len(entries) - late - unverified, late,
+                 "" if not unverified else ", %d not in the history yet" % unverified))
     return problems
 
 
@@ -175,12 +181,13 @@ def rewrite(path, pairs, dry):
     return hits
 
 
-def label_pairs(old, new, old_code, new_code):
-    # The versionCode travels with the icon app's name: Compress keeps its own code,
-    # and in the README the two lines carry the same number, one above the other.
-    return [(f"Icons-{old}", f"Icons-{new}"),
-            (f"Icons {old}", f"Icons {new}"),
-            (f"versionCode {old_code}", f"versionCode {new_code}", "icons")]
+def label_pairs(app, old, new, old_code, new_code):
+    # The versionCode travels with the app's own name: the two apps keep separate
+    # codes, and in the README their lines carry the numbers one above the other.
+    name = APPS[app]
+    return [(f"{name}-{old}", f"{name}-{new}"),
+            (f"{name} {old}", f"{name} {new}"),
+            (f"versionCode {old_code}", f"versionCode {new_code}", name.lower())]
 
 
 # A page and the artboards made from it. The exporter writes one board per page per
@@ -191,6 +198,7 @@ PAGE_OF = {"docs/index.html": "/", "docs/icons/index.html": "/icons/",
 SLUG_OF = {"/": "index", "/icons/": "icons", "/tools/": "tools", "/download/": "download"}
 STATES = ("pull-down-desktop", "pull-down-phone", "side-tab-desktop", "side-tab-phone")
 BUDGET = 10485760
+APPS = {"icons": "Icons", "compress": "Compress"}
 
 
 def human(number):
@@ -263,12 +271,12 @@ def bump_build_sh(old_apk, old, new_apk, new, old_code, new_code, dry):
     return count
 
 
-def add_note(new, title, note, dry):
+def add_note(app, new, title, note, dry):
     data = json.loads(NOTES.read_text(encoding="utf-8"))
     for entry in data["notes"]:
-        if entry["id"] == "icons" and entry["version"] == new and entry["title"] == title:
+        if entry["id"] == app and entry["version"] == new and entry["title"] == title:
             return "already there"
-    data["notes"].insert(0, {"id": "icons", "version": new, "title": title, "note": note})
+    data["notes"].insert(0, {"id": app, "version": new, "title": title, "note": note})
     if not dry:
         NOTES.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     return "note %s \u00b7 %s %s" % (new, title,
@@ -372,6 +380,8 @@ def main():
                         help="a deploy CLI to run instead of printing the Sites request")
     parser.add_argument("--check-notes", action="store_true",
                         help="only verify the release notes against the history, change nothing")
+    parser.add_argument("--app", choices=sorted(APPS), default="icons",
+                        help="which tool to move (default: icons)")
     parser.add_argument("--dry-run", action="store_true", help="print the edits, write nothing")
     args = parser.parse_args()
 
@@ -395,23 +405,24 @@ def main():
     captures = args.build and not args.skip_captures
     toolchain = capture_preflight() if captures else None
 
+    app, app_name = args.app, APPS[args.app]
     catalog = json.loads(CATALOG.read_text(encoding="utf-8"))
-    icons = next(tool for tool in catalog["tools"] if tool["id"] == "icons")
-    old, old_code = icons["version"], int(icons["version_code"])
+    tool = next(item for item in catalog["tools"] if item["id"] == app)
+    old, old_code = tool["version"], int(tool["version_code"])
     if new == old:
         raise SystemExit("the catalog is already at %s" % old)
     new_code = old_code + 1
-    old_apk, new_apk = icons["apk"], "/Icons-%s.apk" % new
+    old_apk, new_apk = tool["apk"], "/%s-%s.apk" % (app_name, new)
     old_file = ROOT / "docs" / old_apk.lstrip("/")
     if not old_file.exists():
         raise SystemExit("the shipped APK %s is missing" % old_file.relative_to(ROOT))
     old_size, old_sha = fmt(old_file.stat().st_size), digest(old_file)
 
     dry = args.dry_run
-    print("Icons %s (versionCode %d) -> %s (versionCode %d), %s -> %s"
-          % (old, old_code, new, new_code, old_apk, new_apk))
+    print("%s %s (versionCode %d) -> %s (versionCode %d), %s -> %s"
+          % (app_name, old, old_code, new, new_code, old_apk, new_apk))
 
-    icons.update({"version": new, "version_code": new_code, "apk": new_apk})
+    tool.update({"version": new, "version_code": new_code, "apk": new_apk})
     if not dry:
         CATALOG.write_text(json.dumps(catalog, indent=2, ensure_ascii=False) + "\n",
                            encoding="utf-8")
@@ -420,20 +431,21 @@ def main():
     cases = bump_build_sh(old_apk, old, new_apk, new, old_code, new_code, dry)
     print("  build.sh               %d build case(s)" % cases)
 
-    pairs = label_pairs(old, new, old_code, new_code)
+    pairs = label_pairs(app, old, new, old_code, new_code)
     plans = []
-    for name in LABEL_FILES:
+    for page in LABEL_FILES:
         if dry:
-            before, after, hits = planned(name, pairs)
+            before, after, hits = planned(page, pairs)
             if hits:
-                plans.append((name, before, after, hits))
+                plans.append((page, before, after, hits))
         else:
-            hits = rewrite(name, pairs, dry=False)
+            hits = rewrite(page, pairs, dry=False)
         if hits:
-            print("  %-30s %d label(s)" % (name, hits))
+            print("  %-30s %d label(s)" % (page, hits))
 
     if args.title:
-        print("  %-30s %s" % ("tools/release_notes.json", add_note(new, args.title, args.note, dry)))
+        print("  %-30s %s"
+              % ("tools/release_notes.json", add_note(app, new, args.title, args.note, dry)))
 
     if dry:
         pages = {PAGE_OF[plan[0]] for plan in plans if plan[0] in PAGE_OF}
@@ -443,19 +455,19 @@ def main():
         print("\nthe hand-off")
         stale = stale_boards(slugs)
         if stale:
-            print("  these quote Icons %s and go stale with the pages:" % old)
+            print("  these quote %s %s and go stale with the pages:" % (app_name, old))
             for board in stale:
                 print("    " + board)
         else:
-            print("  no artboard quotes Icons %s, so none of them change" % old)
+            print("  no artboard quotes %s %s, so none of them change" % (app_name, old))
         boards = len(list((ROOT / "figma").glob("[0-9][0-9]-*.svg")))
         print("  one export run rewrites all %d boards%s" % (boards, canvas_note()))
         print("  then figma_bundle.py, then figma_publish.py, in that order")
 
         print("\nthe history page")
         history = (ROOT / "docs/releases/index.html").read_text(encoding="utf-8")
-        print("  %d releases now; Icons %s gains its row once the APK is committed,"
-              % (history.count('<div class="rel-top">'), new))
+        print("  %d releases now; %s %s gains its row once the APK is committed,"
+              % (history.count('<div class="rel-top">'), app_name, new))
         print("  because build_releases.py reads the day, size and sha out of git")
         releases = sorted(board.name for board in (ROOT / "figma").glob("*-releases-*.svg"))
         if releases:
@@ -466,6 +478,10 @@ def main():
         print("  the run is retaken in full; these show a page that changes:")
         for name in names:
             print("    docs/renders/%s.webp" % name)
+
+        if args.title:
+            print("\nthe notes, with this one added")
+            report_notes({"id": app, "version": new, "title": args.title, "note": args.note})
 
         print("\nthe deploy")
         now = docs_size()
@@ -480,14 +496,15 @@ def main():
         return 0
 
     if not args.build:
-        print("next: ./build.sh icons, then copy dist/Icons-%s.apk into docs/, delete\n"
+        print("next: ./build.sh %s, then copy dist/%s-%s.apk into docs/, delete\n"
               "      docs%s, and patch %s and %s into the pages\n"
-              "      (or run this again with --build)" % (new, old_apk, old_size, old_sha[:10]))
+              "      (or run this again with --build)"
+              % (app, app_name, new, old_apk, old_size, old_sha[:10]))
         return 0
 
     print("building...")
-    subprocess.run([str(BUILD), "icons"], cwd=ROOT, check=True)
-    built = ROOT / "dist" / ("Icons-%s.apk" % new)
+    subprocess.run([str(BUILD), app], cwd=ROOT, check=True)
+    built = ROOT / "dist" / ("%s-%s.apk" % (app_name, new))
     if not built.exists():
         raise SystemExit("build.sh finished without %s" % built.relative_to(ROOT))
 
@@ -525,7 +542,7 @@ def main():
             print("        Sites tool. Give it this request:")
             print(json.dumps(deploy_request(), indent=2))
 
-    print("Icons %s is in docs/ and the shelf agrees with it" % new)
+    print("%s %s is in docs/ and the shelf agrees with it" % (app_name, new))
     return 0
 
 
