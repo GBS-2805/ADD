@@ -16,6 +16,9 @@ import re
 import shutil
 import sys
 
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+from hash_assets import pin  # noqa: E402 - the tools directory is on the path above
+
 SRC = pathlib.Path("figma")
 DST = pathlib.Path("docs/figma")
 
@@ -198,7 +201,7 @@ def main():
         else:
             (DST / name).write_text(one_payload(artboard.read_text()))
 
-    (DST / "index.html").write_text(listing(list(wanted)))
+    (DST / "index.html").write_text(pin(listing(list(wanted))))
     total = sum(p.stat().st_size for p in DST.glob("*.svg"))
     print("docs/figma: %d files, %.1f MB, listing written%s" % (
         len(wanted), total / 1e6, (", dropped " + ", ".join(dropped)) if dropped else ""))

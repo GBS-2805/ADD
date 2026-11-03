@@ -1,6 +1,6 @@
 {
   "origin": "https://artbase-olive.vercel.app",
-  "count": 14,
+  "count": 15,
   "pages": [
     {
       "path": "/download/",
@@ -92,6 +92,13 @@
       "description": "33 screenshots of the shelf, captured in headless Chromium: the index at its fold, both pull-downs, the two apps, the icon brand pages with their previews and open sets, fonts, portfolio and download, at 1300 wide and 390 on a phone.",
       "heading": "Renders",
       "section": "renders"
+    },
+    {
+      "path": "/search/",
+      "title": "Search — every page on the shelf",
+      "description": "Search every page of the shelf by title, section or words from its lede.",
+      "heading": "Search",
+      "section": "search"
     },
     {
       "path": "/tools/",

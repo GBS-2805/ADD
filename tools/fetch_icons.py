@@ -44,6 +44,9 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 HUB_TEMPLATE = ROOT / "tools/icons_hub_template.html"
 BRAND_TEMPLATE = ROOT / "tools/icons_brand_template.html"
 ALL_TEMPLATE = ROOT / "tools/icons_all_template.html"
+sys.path.insert(0, str(ROOT / "tools"))
+from hash_assets import pin  # noqa: E402 - the tools directory is on the path above
+
 OUT_HUB = ROOT / "docs/icons/index.html"
 APK = ROOT / "docs/Icons-1.2.apk"
 DATA_LINE = ROOT / "docs/data/icons.json"
@@ -724,7 +727,7 @@ def write_all(entries):
         page = page.replace(token, value)
     out = ROOT / "docs/icons/all/index.html"
     out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_text(page, encoding="utf-8")
+    out.write_text(pin(page), encoding="utf-8")
     print("page: %-28s %9d bytes" % (out.relative_to(ROOT), out.stat().st_size))
 
 
@@ -790,7 +793,7 @@ def write_hub(entries):
     # so the bundle links stay absolute-free.
     page = page.replace("__ROOT__", "../")
     OUT_HUB.parent.mkdir(parents=True, exist_ok=True)
-    OUT_HUB.write_text(page, encoding="utf-8")
+    OUT_HUB.write_text(pin(page), encoding="utf-8")
     print("page: %-28s %9d bytes" % (OUT_HUB.relative_to(ROOT), OUT_HUB.stat().st_size))
 
 
@@ -822,7 +825,7 @@ def write_brand(brand, entries):
         page = page.replace(token, value)
     out = ROOT / "docs/icons" / brand["slug"] / "index.html"
     out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_text(page, encoding="utf-8")
+    out.write_text(pin(page), encoding="utf-8")
     print("page: %-28s %9d bytes" % (out.relative_to(ROOT), out.stat().st_size))
 
 

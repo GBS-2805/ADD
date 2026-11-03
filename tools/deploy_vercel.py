@@ -123,10 +123,21 @@ def refresh_history():
 
 
 
+def assets_current():
+    """Stop when a page still names the previous CSS or JS."""
+    done = subprocess.run([sys.executable, str(ROOT / "tools/hash_assets.py"), "--check"],
+                          cwd=ROOT, capture_output=True, text=True)
+    if done.returncode != 0:
+        sys.exit("docs/ does not point at the current asset names; run "
+                 "python3 tools/hash_assets.py and commit it first:\n"
+                 + (done.stdout or done.stderr).strip())
+
+
 def deploy():
     if not os.environ.get("VERCEL_TOKEN"):
         sys.exit("VERCEL_TOKEN is not set. Add it in this project under Settings -> "
                  "Secrets, then run again; --check works without it.")
+    assets_current()
     refresh_history()
     cmd = [*CLI, "deploy", "docs", "--prod", "--yes",
            "--project", PROJECT, "--create-if-missing"]

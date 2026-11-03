@@ -24,6 +24,9 @@ import subprocess
 import sys
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT / "tools"))
+from hash_assets import pin  # noqa: E402 - the tools directory is on the path above
+
 CATALOG = ROOT / "tools/catalog.json"
 NOTES = ROOT / "tools/release_notes.json"
 DOWNLOAD = ROOT / "docs/download/index.html"
@@ -188,7 +191,7 @@ def main():
         raise SystemExit("build_releases: %s was never filled" % left.group(0))
 
     OUT.parent.mkdir(parents=True, exist_ok=True)
-    OUT.write_text(page, encoding="utf-8")
+    OUT.write_text(pin(page), encoding="utf-8")
     print("wrote %-32s %6d bytes" % (OUT.relative_to(ROOT), OUT.stat().st_size))
     for label, items in (("Icons", icons), ("Compress", compress)):
         noted = sum(1 for r in items if written.get((r["id"], r["version"])))

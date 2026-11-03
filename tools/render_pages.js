@@ -7,6 +7,16 @@ const fs = require("fs");
 const path = require("path");
 const { execFileSync } = require("child_process");
 
+// The shared assets carry a content hash, so the gallery has to name the copy the
+// pages load rather than the source file (see tools/hash_assets.py).
+const assetNames = (() => {
+  try {
+    return JSON.parse(fs.readFileSync(path.join(__dirname, "..", "docs", "data", "assets.json"), "utf8")).files;
+  } catch (error) {
+    return {};
+  }
+})();
+
 const base = process.argv[2] || "http://127.0.0.1:8765/";
 const out = process.argv[3] || "artifacts";
 const gallery = process.argv[4] || "docs/renders";
@@ -342,6 +352,8 @@ const escape = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/
 </html>
 `.replace(/__COUNT__/g, String(shots.length + extras.length));
 
-  fs.writeFileSync(path.join(gallery, "index.html"), page);
+  const pinned = page.replace(/\.\.\/assets\/(site\.(?:css|js))/g,
+    (match, name) => "../assets/" + (assetNames[name] || name));
+  fs.writeFileSync(path.join(gallery, "index.html"), pinned);
   console.log(`gallery: ${shots.length + extras.length} figures, ${shots.length} captured + ${extras.length} extra`);
 })().catch((e) => { console.error("FAIL:", e.message); process.exit(1); });

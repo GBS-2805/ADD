@@ -97,8 +97,10 @@ python3 tools/fetch_icons.py                # fetch every set, write data + page
 python3 tools/fetch_icons.py --pages-only   # rewrite the pages from the catalogs
 python3 tools/build_catalog.py              # measure, write the catalogs, check the pages
 python3 tools/build_catalog.py --check      # check only
-python3 tools/build_site.py                 # pages.json, sitemap.xml, robots.txt
-python3 tools/build_site.py --check         # fail when those three are stale
+python3 tools/build_site.py                 # pages.json, sitemap.xml, robots.txt, search page
+python3 tools/build_site.py --check         # fail when any of them is stale
+python3 tools/hash_assets.py                # after editing site.css or site.js
+python3 tools/hash_assets.py --check        # fail when a page names an old asset
 ```
 
 ## What Icons does
@@ -165,7 +167,8 @@ tools/fetch_icons.py                               both icon pages + both catalo
 tools/icons_hub_template.html                      the Icons app landing page
 tools/icons_brand_template.html                    the per-brand preview page
 tools/render_pages.js                              captures every page and writes the gallery
-tools/build_site.py                                page manifest, sitemap, robots from the pages
+tools/build_site.py                                page manifest, sitemap, robots, search page
+tools/hash_assets.py                               hashed copies of the CSS and JS every page names
 tools/deploy_vercel.py                             deploys docs/ to Vercel, verifies it, moves the links
 manifest.json, worker.js                           Sites deployment (fallback host)
 ```

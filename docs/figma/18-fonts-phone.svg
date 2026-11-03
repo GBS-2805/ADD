@@ -104,14 +104,14 @@
 <text x="20" y="2203.38" font-size="30" letter-spacing="-0.45" xml:space="preserve">How it is wired</text>
 <text x="20" y="2235.88" fill-opacity="0.64" font-size="14" xml:space="preserve">Two families, no network</text>
 <text x="20" y="2286.97" font-size="16" font-weight="500" xml:space="preserve">Site</text>
-<rect x="20" y="2297.36" width="128" height="25" fill="#131513" fill-opacity="0.06"/>
-<text x="26" y="2315.36" font-size="16" xml:space="preserve">assets/site.css</text>
-<text x="152" y="2315.36" font-size="16" xml:space="preserve">sets the site's own Poppins</text>
-<text x="20" y="2341.75" font-size="16" xml:space="preserve">faces; this page declares every downloaded</text>
-<text x="20" y="2368.14" font-size="16" xml:space="preserve">style from</text>
-<rect x="105" y="2350.14" width="140" height="25" fill="#131513" fill-opacity="0.06"/>
-<text x="111" y="2368.14" font-size="16" xml:space="preserve">/data/fonts.json</text>
-<text x="245" y="2368.14" font-size="16" xml:space="preserve">.</text>
+<rect x="20" y="2297.36" width="222" height="25" fill="#131513" fill-opacity="0.06"/>
+<text x="26" y="2315.36" font-size="16" xml:space="preserve">assets/site.43f1097dd4.css</text>
+<text x="246" y="2315.36" font-size="16" xml:space="preserve">sets the site's</text>
+<text x="20" y="2341.75" font-size="16" xml:space="preserve">own Poppins faces; this page declares every</text>
+<text x="20" y="2368.14" font-size="16" xml:space="preserve">downloaded style from</text>
+<rect x="206" y="2350.14" width="140" height="25" fill="#131513" fill-opacity="0.06"/>
+<text x="212" y="2368.14" font-size="16" xml:space="preserve">/data/fonts.json</text>
+<text x="346" y="2368.14" font-size="16" xml:space="preserve">.</text>
 <rect x="20" y="2391.53" width="350" height="1" fill="#131513" fill-opacity="0.22"/>
 <text x="20" y="2425.53" font-size="16" font-weight="500" xml:space="preserve">App</text>
 <rect x="20" y="2435.92" width="283" height="25" fill="#131513" fill-opacity="0.06"/>
