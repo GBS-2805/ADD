@@ -139,16 +139,16 @@ HTML
 
 case "${1:-all}" in
     compress)
-        build_app app Compress Compress-2.0.apk 11 2.0
+        build_app app Compress Compress-2.1.apk 12 2.1
         ;;
     icons)
         stage_icons_assets
-        build_app icons-app Icons Icons-2.4.apk 15 2.4
+        build_app icons-app Icons Icons-2.5.apk 16 2.5
         ;;
     all)
-        build_app app Compress Compress-2.0.apk 11 2.0
+        build_app app Compress Compress-2.1.apk 12 2.1
         stage_icons_assets
-        build_app icons-app Icons Icons-2.4.apk 15 2.4
+        build_app icons-app Icons Icons-2.5.apk 16 2.5
         ;;
     *)
         echo "usage: $0 [all|compress|icons]" >&2

@@ -6,10 +6,10 @@
       "name": "Compress",
       "kind": "Android app",
       "status": "released",
-      "version": "2.0",
-      "version_code": 11,
+      "version": "2.1",
+      "version_code": 12,
       "package": "app.offline.compress",
-      "apk": "/Compress-2.0.apk",
+      "apk": "/Compress-2.1.apk",
       "min_android": "8.0 (API 26)",
       "summary": "Pick photos, preview the settings with a before/after slider, then compress. Fully offline: the app has no internet permission at all.",
       "features": [
@@ -32,17 +32,17 @@
         }
       ],
       "bytes": 272592,
-      "sha256": "258d62dd7c6cb7b0df26fa4b23461b1e2aaa3d8b9d6523afb316116239289c21"
+      "sha256": "ad38f3f56622adbfa90359d820b25926c31afb12b41a9bf206e05fde3f711468"
     },
     {
       "id": "icons",
       "name": "Icons",
       "kind": "Android app",
       "status": "released",
-      "version": "2.4",
-      "version_code": 15,
+      "version": "2.5",
+      "version_code": 16,
       "package": "app.offline.icons",
-      "apk": "/Icons-2.4.apk",
+      "apk": "/Icons-2.5.apk",
       "min_android": "8.0 (API 26)",
       "summary": "Both free icon brands on the phone: 1,864 glyphs, a preview with weight, size and surface, and the whole set behind one toggle. Bundled offline with no permissions at all.",
       "features": [
@@ -73,7 +73,7 @@
         }
       ],
       "bytes": 538063,
-      "sha256": "962a98f89fdd73e977f92f2a6a891a49162c0db6a4852a9be7c70d6fbec5ffb3"
+      "sha256": "0aaf6029b198ff154b99c32d3f6b7c312f92e002a60132b21f4d3f238f39754a"
     }
   ]
 }

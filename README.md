@@ -11,14 +11,14 @@ the pages.
 
 ## Status
 
-- **Icons 2.4** — APK [`dist/Icons-2.4.apk`](dist/Icons-2.4.apk)
-  (538,063 bytes, signed v1+v2), published as `docs/Icons-2.4.apk`. Package
-  `app.offline.icons` · minSdk 26 · targetSdk 35 · versionCode 15. The whole browser
+- **Icons 2.5** — APK [`dist/Icons-2.5.apk`](dist/Icons-2.5.apk)
+  (538,063 bytes, signed v1+v2), published as `docs/Icons-2.5.apk`. Package
+  `app.offline.icons` · minSdk 26 · targetSdk 35 · versionCode 16. The whole browser
   — both brands, 1,864 glyphs, the stylesheet and Poppins — is bundled in the APK
   and served to a WebView from a private origin.
-- **Compress 2.0** — APK [`dist/Compress-2.0.apk`](dist/Compress-2.0.apk)
+- **Compress 2.1** — APK [`dist/Compress-2.1.apk`](dist/Compress-2.1.apk)
   (272,592 bytes, signed v1+v2, round adaptive icon), published as
-  `docs/Compress-2.0.apk`. Package `app.offline.compress` · versionCode 11.
+  `docs/Compress-2.1.apk`. Package `app.offline.compress` · versionCode 12.
 - **Icons browser** — live at `docs/icons/`: two free brands, 606 Lineicons and
   1,258 Coolicons, each on its own page with a preview, variant controls and the
   set folded into a scrolling sheet. Copy-on-tap, no account.
@@ -173,7 +173,7 @@ export ANDROID_SDK_ROOT=$HOME/android-sdk   # needs build-tools;35.0.0 + platfor
 ./build.sh compress   # Compress only
 ```
 
-Output: `dist/Compress-2.0.apk` and `dist/Icons-2.4.apk`. Copy them to `docs/` and
+Output: `dist/Compress-2.1.apk` and `dist/Icons-2.5.apk`. Copy them to `docs/` and
 re-run `python3 tools/build_catalog.py` so the pages, the JSON and the checksums move
 together. Signing uses `$HOME/tools/compress-keystore.jks` (created on first build,
 password `android`); both apps share it, so they update side by side. Replace it with

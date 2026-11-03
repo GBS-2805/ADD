@@ -2,6 +2,18 @@
   "notes": [
     {
       "id": "compress",
+      "version": "2.1",
+      "title": "New address",
+      "note": "Opens the site at its new home on Vercel."
+    },
+    {
+      "id": "icons",
+      "version": "2.5",
+      "title": "New address",
+      "note": "Opens the site at its new home on Vercel."
+    },
+    {
+      "id": "compress",
       "version": "2.0",
       "title": "Share photos into it",
       "note": "Compress now appears in Android's own share sheet, so a photo or a batch comes straight from a gallery or camera app into the queue instead of being picked again."
