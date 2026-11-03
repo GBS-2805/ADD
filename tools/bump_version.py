@@ -80,26 +80,39 @@ def git(*args):
     return subprocess.run(["git", *args], cwd=ROOT, capture_output=True, text=True)
 
 
-def shipped_with(title, app="icons"):
-    """The app's version in the commit that first added a note, and its short sha."""
-    # The notes lived on the tools page until they moved to the file, so both paths
-    # are searched: the commit that first added a sentence is where it shipped.
+def shipped_with(title, app="icons", label=None):
+    """The app's version at the commit that added a note, and that commit short.
+
+    Every commit that ever changed how often the sentence appears is a candidate: the
+    notes file, and the tools page that carried them before the file existed. The
+    first candidate whose catalog already ships the note's own version is the commit
+    that added it, which is what lets a sentence that also runs as page copy -- the
+    band's "Art Design Database", say -- skip the commit that merely printed the copy.
+    """
     found = git("log", "--reverse", "--format=%H", "-S", title, "--",
                 "docs/tools/index.html", "tools/release_notes.json")
     if found.returncode != 0:
         return None, "git could not read the history"
-    if not found.stdout.strip():
+    shas = found.stdout.split()
+    if not shas:
         return None, "no commit adds it yet"
-    sha = found.stdout.split()[0]
-    catalog = git("show", "%s:tools/catalog.json" % sha)
-    if catalog.returncode != 0:
-        return None, "no catalog at " + sha[:8]
-    try:
-        version = next(tool["version"] for tool in json.loads(catalog.stdout)["tools"]
-                       if tool["id"] == app)
-    except Exception:
-        return None, "catalog unreadable at " + sha[:8]
-    return version, sha[:8]
+    first = None
+    for sha in shas:
+        catalog = git("show", "%s:tools/catalog.json" % sha)
+        if catalog.returncode != 0:
+            continue
+        try:
+            version = next(tool["version"] for tool in json.loads(catalog.stdout)["tools"]
+                           if tool["id"] == app)
+        except Exception:
+            continue
+        if first is None:
+            first = (version, sha[:8])
+        if label is None or version == label:
+            return version, sha[:8]
+    if first is None:
+        return None, "no catalog at " + shas[0][:8]
+    return first
 
 
 def keyed(version):
@@ -121,7 +134,7 @@ def report_notes(extra=None):
     problems = late = unverified = 0
     for entry in entries:
         label, title = entry["version"], entry["title"]
-        version, where = shipped_with(title, entry["id"])
+        version, where = shipped_with(title, entry["id"], label)
         if version is None:
             unverified += 1
             print("  note %s %s \u00b7 %s: %s, unverified" % (entry["id"], label, title, where))
