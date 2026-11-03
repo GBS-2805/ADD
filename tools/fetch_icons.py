@@ -19,7 +19,8 @@ colour, and keeps its own viewBox. Three pages come out of two templates:
 
 Each brand page loads its own catalog at run time instead of inlining icons, so
 the pages stay small and the files the phone app reads are the files the pages
-render.
+render. The all-brands sheet is the exception: it draws one glyph per category,
+so it downloads `docs/data/<brand>-sheet.json`, that subset and nothing else.
 
     python3 tools/fetch_icons.py                # fetch both sets, write data + pages
     python3 tools/fetch_icons.py --pages-only   # rewrite the pages from the catalogs
@@ -79,6 +80,11 @@ CAT_ORDER = ["System", "Arrow", "Navigation", "Edit", "File", "Communication",
              "Food", "Health", "Science", "Sports & Games", "Faces", "Zodiac", "Brands"]
 
 COLOR = re.compile(r'(fill|stroke)="#[0-9a-fA-F]{3,8}"')
+
+# The all-brands sheet shows one icon per category, twelve per set. It ships
+# that subset as its own small file rather than downloading both full catalogs
+# to draw 24 glyphs.
+CAP = 12
 
 # slug, display name, vendor repository, how the style is described, catalog.
 BRANDS = [
@@ -370,11 +376,72 @@ def brand_cards(entries):
     return "\n      ".join(cards)
 
 
+def sheet_key(name):
+    """The sheet's own category key: case, plural, punctuation and & folded away."""
+    text = str(name).lower().replace("&", " and ")
+    text = re.sub(r"\s+", " ", re.sub(r"[^a-z0-9 ]+", " ", text)).strip()
+    return text[:-1] if text.endswith("s") else text
+
+
+def sheet_categories(icons, order):
+    """Every category name the set carries, in the order the sheet lays rows out.
+
+    Mirrors the page's `categories()` exactly -- the vendor's order first, then
+    anything it did not list in the order the catalog introduces it -- so a sheet
+    built from a subset still notes the same number of categories as one built
+    from the whole catalog.
+    """
+    present, listed = {}, []
+    for icon in icons:
+        name = icon.get("cat")
+        if name and name not in present:
+            present[name] = True
+            listed.append(name)
+    vendor = [name for name in (order or []) if name in present]
+    return vendor + [name for name in listed if name not in vendor]
+
+
+def sheet_icons(icons):
+    """One icon per category, plus the set's first CAP icons for the top-up.
+
+    The page picks the first icon of a category out of what it downloaded, so the
+    subset that keeps its picks identical is the first icon of each category by
+    catalog order. A set with fewer than twelve categories tops itself up from the
+    start of its catalog, which is why the first CAP icons travel too.
+    """
+    first = {}
+    for index, icon in enumerate(icons):
+        key = sheet_key(icon.get("cat") or "")
+        if key and key not in first:
+            first[key] = index
+    keep = sorted(set(range(min(CAP, len(icons)))) | set(first.values()))
+    return [icons[index] for index in keep]
+
+
+def write_sheets(entries):
+    """The all-brands sheet's own data: a glyph per category, not either catalog."""
+    for brand in entries:
+        payload = json.loads(brand["data"].read_text(encoding="utf-8"))
+        glyphs = sheet_icons(payload["icons"])
+        sheet = {
+            "set": payload.get("set", brand["name"]),
+            "count": payload["count"],
+            "cat_order": payload.get("cat_order", []),
+            "cats": sheet_categories(payload["icons"], payload.get("cat_order")),
+            "icons": glyphs,
+        }
+        path = ROOT / "docs/data" / (brand["slug"] + "-sheet.json")
+        write_catalog(path, sheet)
+        print("sheet: %-28s %3d of %4d glyphs, %3d categories"
+              % (path.name, len(glyphs), payload["count"], len(sheet["cats"])))
+
+
 def write_all(entries):
     total = sum(brand["count"] for brand in entries)
     page = ALL_TEMPLATE.read_text(encoding="utf-8")
     sets = [{"slug": brand["slug"], "name": brand["name"], "count": brand["count"],
-             "cats": len(brand["cats"]), "data": "../../data/" + brand["data"].name}
+             "cats": len(brand["cats"]),
+             "data": "../../data/" + brand["slug"] + "-sheet.json"}
             for brand in entries]
     tokens = {
         "__ROOT__": "../../",
@@ -520,6 +587,7 @@ def main():
     write_hub(entries)
     for brand in entries:
         write_brand(brand, entries)
+    write_sheets(entries)
     write_all(entries)
     print("brands: %s | total %d icons"
           % (", ".join("%s %d" % (b["name"], b["count"]) for b in entries),

@@ -158,7 +158,7 @@
 
 <script>
 (function () {
-  var SETS = [{"slug": "lineicons", "name": "Lineicons", "count": 606, "cats": 51, "data": "../../data/icons.json"}, {"slug": "coolicons", "name": "Coolicons", "count": 1258, "cats": 30, "data": "../../data/coolicons.json"}];
+  var SETS = [{"slug": "lineicons", "name": "Lineicons", "count": 606, "cats": 51, "data": "../../data/lineicons-sheet.json"}, {"slug": "coolicons", "name": "Coolicons", "count": 1258, "cats": 30, "data": "../../data/coolicons-sheet.json"}];
   var CAP = 12;
   var sheetHost = document.getElementById("sheets");
 
@@ -174,8 +174,10 @@
     return s.charAt(s.length - 1) === "s" ? s.slice(0, -1) : s;
   }
 
-  // The vendor's own category order, minus any category with no icon behind it.
+  // The sheet ships its category list, in the vendor's order, so a subset of the
+  // catalog still notes every category the set has. A full catalog derives it.
   function categories(payload) {
+    if (payload.cats) { return payload.cats; }
     var present = {}, list = [];
     payload.icons.forEach(function (item) {
       if (item.cat && !present[item.cat]) { present[item.cat] = true; list.push(item.cat); }

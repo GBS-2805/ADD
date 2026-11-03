@@ -172,8 +172,10 @@ __BRANDS__
     return s.charAt(s.length - 1) === "s" ? s.slice(0, -1) : s;
   }
 
-  // The vendor's own category order, minus any category with no icon behind it.
+  // The sheet ships its category list, in the vendor's order, so a subset of the
+  // catalog still notes every category the set has. A full catalog derives it.
   function categories(payload) {
+    if (payload.cats) { return payload.cats; }
     var present = {}, list = [];
     payload.icons.forEach(function (item) {
       if (item.cat && !present[item.cat]) { present[item.cat] = true; list.push(item.cat); }

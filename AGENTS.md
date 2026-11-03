@@ -135,7 +135,10 @@ changes as unverified on device rather than illustrating them.
   burger on the right pulls out a side tab with three (download, portfolio,
   renders). `site.js` owns both toggles, and Escape or the scrim closes them.
 - `docs/data/` is generated and public on purpose: the site doubles as the database
-  behind the apps. `icons.json` and `coolicons.json` come from `tools/fetch_icons.py`; `index.json`,
+  behind the apps. `icons.json` and `coolicons.json` come from `tools/fetch_icons.py`, which
+  also writes `<brand>-sheet.json` for the all-brands page: a glyph per category plus the
+  set's category list, so that page fetches ~90 KB instead of both full catalogs (1.67 MB);
+  `index.json`,
   `tools.json`, `fonts.json` and `portfolio.json` come from `tools/build_catalog.py`.
 - Releases go through `python3 tools/bump_version.py <version> --title "…" --note "…"
   --build`: it moves the catalog, both build cases, every live version label and the
