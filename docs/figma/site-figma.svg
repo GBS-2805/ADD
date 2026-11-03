@@ -1284,11 +1284,11 @@
 <rect xmlns="http://www.w3.org/2000/svg" x="40" y="741.69" width="1" height="101.19" fill="#d9d9d9" fill-opacity="0.26" />
 <text xmlns="http://www.w3.org/2000/svg" x="61" y="808.69" font-size="48" letter-spacing="-0.96" xml:space="preserve">Art Design Database</text>
 <text xmlns="http://www.w3.org/2000/svg" x="40" y="879.53" fill-opacity="0.64" font-size="13" letter-spacing="0.52" xml:space="preserve">SIZE</text>
-<rect xmlns="http://www.w3.org/2000/svg" x="84.09" y="867.25" width="400.31" height="16" fill="#ffffff" />
-<rect xmlns="http://www.w3.org/2000/svg" x="500.41" y="858.88" width="39.59" height="1" fill="#d9d9d9" fill-opacity="0.26" />
+<rect xmlns="http://www.w3.org/2000/svg" x="84.09" y="867.25" width="384.11" height="16" fill="#ffffff" />
+<rect xmlns="http://www.w3.org/2000/svg" x="484.2" y="858.88" width="55.8" height="1" fill="#d9d9d9" fill-opacity="0.26" />
 <rect xmlns="http://www.w3.org/2000/svg" x="539" y="858.88" width="1" height="32.75" fill="#d9d9d9" fill-opacity="0.26" />
-<rect xmlns="http://www.w3.org/2000/svg" x="500.41" y="890.63" width="39.59" height="1" fill="#d9d9d9" fill-opacity="0.26" />
-<rect xmlns="http://www.w3.org/2000/svg" x="500.41" y="858.88" width="1" height="32.75" fill="#d9d9d9" fill-opacity="0.26" />
+<rect xmlns="http://www.w3.org/2000/svg" x="484.2" y="890.63" width="55.8" height="1" fill="#d9d9d9" fill-opacity="0.26" />
+<rect xmlns="http://www.w3.org/2000/svg" x="484.2" y="858.88" width="1" height="32.75" fill="#d9d9d9" fill-opacity="0.26" />
 <text xmlns="http://www.w3.org/2000/svg" x="545" y="879.88" fill-opacity="0.64" font-size="13" xml:space="preserve">px</text>
 <text xmlns="http://www.w3.org/2000/svg" x="40" y="929.63" fill-opacity="0.64" font-size="16" xml:space="preserve">The same woff2 this page already loaded — no image, no extra request. Each</text>
 <text xmlns="http://www.w3.org/2000/svg" x="40" y="955.22" fill-opacity="0.64" font-size="16" xml:space="preserve">card below sets the weight here.</text>
@@ -5658,11 +5658,11 @@
 <text xmlns="http://www.w3.org/2000/svg" x="41" y="786.81" font-size="48" letter-spacing="-0.96" xml:space="preserve">Art Design</text>
 <text xmlns="http://www.w3.org/2000/svg" x="41" y="842" font-size="48" letter-spacing="-0.96" xml:space="preserve">Database</text>
 <text xmlns="http://www.w3.org/2000/svg" x="20" y="912.84" fill-opacity="0.64" font-size="13" letter-spacing="0.52" xml:space="preserve">SIZE</text>
-<rect xmlns="http://www.w3.org/2000/svg" x="64.09" y="900.56" width="230.31" height="16" fill="#ffffff" />
-<rect xmlns="http://www.w3.org/2000/svg" x="310.41" y="892.19" width="39.59" height="1" fill="#d9d9d9" fill-opacity="0.26" />
+<rect xmlns="http://www.w3.org/2000/svg" x="64.09" y="900.56" width="214.11" height="16" fill="#ffffff" />
+<rect xmlns="http://www.w3.org/2000/svg" x="294.2" y="892.19" width="55.8" height="1" fill="#d9d9d9" fill-opacity="0.26" />
 <rect xmlns="http://www.w3.org/2000/svg" x="349" y="892.19" width="1" height="32.75" fill="#d9d9d9" fill-opacity="0.26" />
-<rect xmlns="http://www.w3.org/2000/svg" x="310.41" y="923.94" width="39.59" height="1" fill="#d9d9d9" fill-opacity="0.26" />
-<rect xmlns="http://www.w3.org/2000/svg" x="310.41" y="892.19" width="1" height="32.75" fill="#d9d9d9" fill-opacity="0.26" />
+<rect xmlns="http://www.w3.org/2000/svg" x="294.2" y="923.94" width="55.8" height="1" fill="#d9d9d9" fill-opacity="0.26" />
+<rect xmlns="http://www.w3.org/2000/svg" x="294.2" y="892.19" width="1" height="32.75" fill="#d9d9d9" fill-opacity="0.26" />
 <text xmlns="http://www.w3.org/2000/svg" x="355" y="913.19" fill-opacity="0.64" font-size="13" xml:space="preserve">px</text>
 <text xmlns="http://www.w3.org/2000/svg" x="20" y="962.94" fill-opacity="0.64" font-size="16" xml:space="preserve">The same woff2 this page already loaded —</text>
 <text xmlns="http://www.w3.org/2000/svg" x="20" y="988.53" fill-opacity="0.64" font-size="16" xml:space="preserve">no image, no extra request. Each card below</text>

@@ -36,11 +36,11 @@
 <text x="41" y="786.81" font-size="48" letter-spacing="-0.96" xml:space="preserve">Art Design</text>
 <text x="41" y="842" font-size="48" letter-spacing="-0.96" xml:space="preserve">Database</text>
 <text x="20" y="912.84" fill-opacity="0.64" font-size="13" letter-spacing="0.52" xml:space="preserve">SIZE</text>
-<rect x="64.09" y="900.56" width="230.31" height="16" fill="#ffffff"/>
-<rect x="310.41" y="892.19" width="39.59" height="1" fill="#d9d9d9" fill-opacity="0.26"/>
+<rect x="64.09" y="900.56" width="214.11" height="16" fill="#ffffff"/>
+<rect x="294.2" y="892.19" width="55.8" height="1" fill="#d9d9d9" fill-opacity="0.26"/>
 <rect x="349" y="892.19" width="1" height="32.75" fill="#d9d9d9" fill-opacity="0.26"/>
-<rect x="310.41" y="923.94" width="39.59" height="1" fill="#d9d9d9" fill-opacity="0.26"/>
-<rect x="310.41" y="892.19" width="1" height="32.75" fill="#d9d9d9" fill-opacity="0.26"/>
+<rect x="294.2" y="923.94" width="55.8" height="1" fill="#d9d9d9" fill-opacity="0.26"/>
+<rect x="294.2" y="892.19" width="1" height="32.75" fill="#d9d9d9" fill-opacity="0.26"/>
 <text x="355" y="913.19" fill-opacity="0.64" font-size="13" xml:space="preserve">px</text>
 <text x="20" y="962.94" fill-opacity="0.64" font-size="16" xml:space="preserve">The same woff2 this page already loaded —</text>
 <text x="20" y="988.53" fill-opacity="0.64" font-size="16" xml:space="preserve">no image, no extra request. Each card below</text>

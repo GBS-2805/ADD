@@ -25,8 +25,10 @@
   .trysize { display: flex; align-items: center; gap: 14px; max-width: 520px; margin: 16px 0 0; font-size: 13px; letter-spacing: .04em; text-transform: uppercase; color: var(--on-dim); }
   .trysize input { flex: 1; accent-color: var(--band); }
   .trypx { display: inline-flex; align-items: baseline; gap: 5px; text-transform: none; letter-spacing: 0; }
-  .trypx input { width: 4.4ch; font: inherit; font-size: 15px; text-align: right; padding: 3px 5px;
-    color: var(--on); background: transparent; border: 1px solid var(--rule); }
+  .trypx input { width: 6.2ch; font: inherit; font-size: 15px; text-align: right; padding: 3px 6px;
+    color: var(--on); background: transparent; border: 1px solid var(--rule);
+    appearance: textfield; -moz-appearance: textfield; }
+  .trypx input::-webkit-outer-spin-button, .trypx input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
   .trypx input:focus-visible { outline: 2px solid var(--band); outline-offset: 2px; }
   .try-reset { margin-left: auto; font: inherit; font-size: 13px; letter-spacing: .04em;
     text-transform: uppercase; padding: 4px 10px; color: var(--on-dim); background: transparent;
