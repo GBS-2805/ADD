@@ -18,7 +18,7 @@ the pages.
   and served to a WebView from a private origin.
 - **Compress 2.0** — APK [`dist/Compress-2.0.apk`](dist/Compress-2.0.apk)
   (272,592 bytes, signed v1+v2, round adaptive icon), published as
-  `docs/Compress-2.0.apk`. Package `app.offline.compress` · versionCode 14.
+  `docs/Compress-2.0.apk`. Package `app.offline.compress` · versionCode 11.
 - **Icons browser** — live at `docs/icons/`: two free brands, 606 Lineicons and
   1,258 Coolicons, each on its own page with a preview, variant controls and the
   set folded into a scrolling sheet. Copy-on-tap, no account.

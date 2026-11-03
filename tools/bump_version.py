@@ -182,10 +182,17 @@ def rewrite(path, pairs, dry):
     return hits
 
 
-def label_pairs(app, old, new, old_code, new_code):
+def label_pairs(app, old, new, old_code, new_code, clash=False):
     # The versionCode travels with the app's own name: the two apps keep separate
     # codes, and in the README their lines carry the numbers one above the other.
+    # Only when both apps happen to share a code does the line have to say which.
     name = APPS[app]
+    if clash:
+        codes = [(f"version code {old_code}", f"version code {new_code}", name.lower()),
+                 (f"Version code {old_code}", f"Version code {new_code}", name.lower())]
+    else:
+        codes = [(f"version code {old_code}", f"version code {new_code}"),
+                 (f"Version code {old_code}", f"Version code {new_code}")]
     return [(f"{name}-{old}", f"{name}-{new}"),
             (f"{name} {old}", f"{name} {new}"),
             # The tools page prints a bare version in a pill, and the download page
@@ -194,9 +201,7 @@ def label_pairs(app, old, new, old_code, new_code):
             (f'class="pill live">app {old}<', f'class="pill live">app {new}<'),
             (f"{old} \u00b7 app.offline.{app} \u00b7", f"{new} \u00b7 app.offline.{app} \u00b7"),
             (f"Android app \u00b7 {old} \u00b7", f"Android app \u00b7 {new} \u00b7"),
-            (f"versionCode {old_code}", f"versionCode {new_code}", name.lower()),
-            (f"version code {old_code}", f"version code {new_code}", name.lower()),
-            (f"Version code {old_code}", f"Version code {new_code}", name.lower())]
+            (f"versionCode {old_code}", f"versionCode {new_code}", name.lower())] + codes
 
 
 # A page and the artboards made from it. The exporter writes one board per page per
@@ -225,14 +230,19 @@ def visible(text, path):
     return re.sub(r"<[^>]*>", " ", text) if path.endswith(".html") else text
 
 
-def quoted_elsewhere(old, plans):
+def quoted_elsewhere(old, old_code, plans, codes=None):
     """Every page that still prints the old version once the known labels have moved.
 
     A bump that knows only some of the shapes a version takes leaves the rest behind,
     which is how the tools page kept a 2.3 pill while every other label said 2.4.
     """
     planned = {page: after for page, _, after, _ in plans}
-    token = re.compile(r"(?<![0-9.])%s(?![0-9.])" % re.escape(old))
+    # A letter or digit against the number means it is part of a word rather than a
+    # label: libatk-bridge2.0-0t64 is a package, not a version of this app.
+    token = re.compile(r"(?<![0-9A-Za-z.])%s(?![0-9A-Za-z])" % re.escape(old))
+    # The code is a live label too, and it is spelled several ways, so it is matched
+    # as a phrase rather than as a number that could be anything.
+    code = re.compile(r"version\s*code\s*%d\b" % old_code, re.IGNORECASE)
     pages = dict.fromkeys(LABEL_FILES + sorted(str(path.relative_to(ROOT))
                                                 for path in (ROOT / "docs").rglob("*.html")))
     found = []
@@ -246,7 +256,15 @@ def quoted_elsewhere(old, plans):
         else:
             continue
         for number, line in enumerate(visible(text, page).splitlines(), 1):
-            if token.search(line):
+            stated = [int(value) for value in
+                      re.findall(r"version\s*code\s*(\d+)", line, re.IGNORECASE)]
+            # A code no app ships, or one printed beside an app that ships another,
+            # is wrong even when it is not the code this bump is moving.
+            wrong = codes is not None and (
+                any(value not in codes.values() for value in stated)
+                or any(value != codes[app_id] for app_id, shipped in codes.items()
+                       if APPS[app_id].lower() in line.lower() for value in stated))
+            if token.search(line) or code.search(line) or wrong:
                 found.append("%s:%d  %s" % (page, number, " ".join(line.split())[:90]))
     return found
 
@@ -479,11 +497,14 @@ def main():
     cases = bump_build_sh(old_apk, old, new_apk, new, old_code, new_code, dry)
     print("  build.sh               %d build case(s)" % cases)
 
-    pairs = label_pairs(app, old, new, old_code, new_code)
+    clash = any(int(other["version_code"]) == old_code
+                for other in catalog["tools"] if other["id"] != app)
+    pairs = label_pairs(app, old, new, old_code, new_code, clash)
     plans = [(page, *planned(page, pairs)) for page in LABEL_FILES]
     # The labels above are the shapes this tool knows. Anything else that still
     # prints the old version is a label nobody will move, so the bump stops here.
-    leftovers = quoted_elsewhere(old, plans)
+    codes = {item["id"]: int(item["version_code"]) for item in catalog["tools"]}
+    leftovers = quoted_elsewhere(old, old_code, plans, codes)
     if leftovers:
         print("refusing to bump: these still quote %s %s once the labels move"
               % (app_name, old))
