@@ -718,7 +718,7 @@ __BRANDS__
     if (!svg) { return; }
     // Weight is chosen on the 24-unit grid the shelf draws at, so a set on a larger
     // grid needs the same *visual* width, not the same number: Phosphor draws on 256
-    // and Plump on 48, where a 24-unit stroke is invisible. Scale once, here, so the
+    // and Streamline's Core set on 14, where a 24-unit stroke would swamp the icon. Scale once, here, so the
     // preview, the thumbs and the exported raster all agree.
     var view = (svg.getAttribute("viewBox") || "").trim().split(/[\s,]+/);
     var side = view.length === 4 ? Number(view[2]) : 0;
