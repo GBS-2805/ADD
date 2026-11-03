@@ -80,6 +80,29 @@ def git(*args):
     return subprocess.run(["git", *args], cwd=ROOT, capture_output=True, text=True)
 
 
+def regenerate_history():
+    """Rebuild docs/releases from git, and return the line the tool printed."""
+    done = subprocess.run([sys.executable, str(ROOT / "tools/build_releases.py")],
+                          cwd=ROOT, capture_output=True, text=True)
+    if done.returncode != 0:
+        raise SystemExit("the history page did not regenerate: "
+                         + (done.stderr or done.stdout).strip())
+    return (done.stdout.strip().splitlines() or ["releases page"])[0]
+
+
+def commit_all(message):
+    """Stage the whole tree and commit it, returning the short sha of the commit."""
+    def run(*args):
+        return subprocess.run(["git", *args], cwd=ROOT, capture_output=True, text=True)
+    staged = run("add", "-A")
+    if staged.returncode != 0:
+        raise SystemExit("git add failed: " + (staged.stderr or staged.stdout).strip())
+    made = run("commit", "-m", message)
+    if made.returncode != 0:
+        raise SystemExit("git commit failed: " + (made.stderr or made.stdout).strip())
+    return run("rev-parse", "--short", "HEAD").stdout.strip()
+
+
 def shipped_with(title, app="icons", label=None):
     """The app's version at the commit that added a note, and that commit short.
 
@@ -501,6 +524,9 @@ def main():
                         help="build and sign the APK, copy it into docs/ and re-measure it")
     parser.add_argument("--skip-captures", action="store_true",
                         help="leave docs/renders/ alone even when building")
+    parser.add_argument("--commit", action="store_true",
+                        help="commit the release, then commit the history page "
+                             "that names it, so a deploy has nothing stale")
     parser.add_argument("--deploy", action="store_true",
                         help="end with the deployment request, or run --deploy-cmd")
     parser.add_argument("--deploy-cmd",
@@ -670,14 +696,24 @@ def main():
         print("captures skipped: docs/renders/ still shows %s" % old)
 
     # The history page is written from git, so it gains the row for this build only
-    # once the build is committed. Regenerating here keeps every earlier release in
-    # step, and the deploy refreshes it again as soon as the commit exists.
-    history = subprocess.run([sys.executable, str(ROOT / "tools/build_releases.py")],
-                             cwd=ROOT, capture_output=True, text=True)
-    if history.returncode != 0:
-        raise SystemExit("the history page did not regenerate: "
-                         + (history.stderr or history.stdout).strip())
-    print("  " + (history.stdout.strip().splitlines() or ["releases page"])[0])
+    # once the build is committed.
+    print("  " + regenerate_history())
+
+    if args.commit:
+        # A row records the commit that shipped the APK, so that commit has to exist
+        # before the row can: one commit for the release, a second for the page that
+        # now names it. Asking for both here is what keeps a deploy from stopping.
+        release = commit_all("%s %s%s" % (app_name, new,
+                                          (": " + args.title) if args.title else ""))
+        print("  committed release                  %s" % release)
+        page = ROOT / "docs/releases/index.html"
+        before = page.read_bytes()
+        print("  " + regenerate_history())
+        if page.read_bytes() != before:
+            print("  committed history page             %s"
+                  % commit_all("History: %s %s" % (app_name, new)))
+        else:
+            print("  the history page needed no commit of its own")
 
     if args.deploy:
         if args.deploy_cmd:
