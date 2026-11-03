@@ -48,7 +48,7 @@
 <rect x="395" y="794.89" width="170" height="1" fill="#d9d9d9" fill-opacity="0.26"/>
 <rect x="395" y="739.89" width="1" height="56" fill="#d9d9d9" fill-opacity="0.26"/>
 <image x="424" y="757.89" width="20" height="20" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADwAAAA8CAYAAAA6/NlyAAADH0lEQVR4AexaW44SQRTlvQCjjgnjCwiwBfkw6hr8NX4IcRmOyzDgKtyBOv7ppzwCTZTgEvjgETyHpBNSU93T1VRV01CTe6erbt269546RdNUOpc5sz8H+NQJdww7hk9sBdyWNk3obDa7MxwO21S2TecT41tleDqdPlgsFr9RRJfKtud5F2hbE6uAl8vlayDbB3ixWq1og9mOWAUMSHehotwTDSb7tgGbxBIptgMcaZlS7OQYTjF5kUo/N4YzDnCkfZFiJ8dwismLVLpjONIypdjJMZxi8iKV7hiOtEwpdtLG8Hg8vo9zqh60C5X90FdaJt3x/OTaAG82m2sEfQdtQ38NBoOnuMaS0WhUQbyfmLyLt91uGRvdw0ULYBT4HqXUoL48zGaz3yaTySPfEPXKOQD4Ff6X0J0gVh0LSPC7/iH/tAAOKKC8Xq9/EEDA+A0zfTkHA2WoEdECuF6vf0J1HlQUgr7GUexjcUDs9/v9JyFgvWaz+VmcE6evBTATF4vFV7jOoaJc4ijWB70VB9HfktlcLvcdbRmz80Kh8BJjWkQb4Eql8gefteeoSga6DNAEJLuRVUOYnTNmtVr9i7gaJKP3AABb2wMbLVQmA82b0FuMifIGhiBmW4yJcW2ijWG/IrIRAtp3u+3KbdxirNscVce1A2YBLJRbEV8v/9hXUc7hXMZQmRfV1whgJudWxI3sGdqy7Q2zVOacw7nSUQ1GY4BZG1kiW2SN/TClD305J8zv0DGjgFkc2SJraIcxbZxZ5N+JccDMQtZCbmTGblDMLaoVwExK0Pl8/gXb+0obx/ZtJtvWABNErVYb47NaQZuPiT22aUPfmlgFTFR4Jp42Go02tMM2bTbVOmCb4GS5HGDZqpySLRbDfL8K51Z81+oK1yS0zRriEKEMWHjX6gOSJqHduO94KQOWvGsFzIlIrHe8lAEnAi04aTZ4SDICkzJgPBd/wQPDGnMTFdbAWlSLUAbMo5xSqcQj2Q6SfUxIO6yBtSC/kigDZnQmwpNSD3qVkPZYA2tR1ViAVZMck78DfExsmKjFMWxiVY8p5tkx/B8AAP//abG2eAAAAAZJREFUAwD0+52IIXuJ6gAAAABJRU5ErkJggg=="/>
-<text x="456" y="773.86" font-size="17" xml:space="preserve">Icons 2.18</text>
+<text x="456" y="773.86" font-size="17" xml:space="preserve">Icons 2.19</text>
 <text x="40" y="831.89" fill-opacity="0.64" font-size="14" xml:space="preserve">Android 8.0+</text>
 <text x="153" y="831.89" fill-opacity="0.64" font-size="14" xml:space="preserve">No internet permission</text>
 <text x="337" y="831.89" fill-opacity="0.64" font-size="14" xml:space="preserve">Signed, no store</text>
@@ -71,7 +71,7 @@
 <rect x="136.81" y="1268.22" width="1" height="26.14" fill="#d9d9d9"/>
 <rect x="63" y="1293.36" width="74.81" height="1" fill="#d9d9d9"/>
 <rect x="63" y="1268.22" width="1" height="26.14" fill="#d9d9d9"/>
-<text x="73" y="1285.22" fill="#000000" font-size="11" font-weight="500" letter-spacing="1.1" xml:space="preserve">APP 2.18</text>
+<text x="73" y="1285.22" fill="#000000" font-size="11" font-weight="500" letter-spacing="1.1" xml:space="preserve">APP 2.19</text>
 <text x="248.81" y="1285.22" font-size="13" xml:space="preserve"> →</text>
 <text x="147.81" y="1285.22" font-size="13" xml:space="preserve">Browse icons</text>
 <rect x="649.5" y="1039.58" width="1" height="277.78" fill="#d9d9d9" fill-opacity="0.26"/>
@@ -108,7 +108,7 @@
 <rect x="40" y="1381.36" width="1220" height="1" fill="#d9d9d9" fill-opacity="0.26"/>
 <text x="40" y="1475.36" font-size="30" letter-spacing="-0.45" xml:space="preserve">The apps</text>
 <text x="40" y="1507.86" fill-opacity="0.64" font-size="14" xml:space="preserve">Standalone, signed, no update server</text>
-<text x="40" y="1560.95" font-size="17" font-weight="500" xml:space="preserve">Icons 2.18</text>
+<text x="40" y="1560.95" font-size="17" font-weight="500" xml:space="preserve">Icons 2.19</text>
 <text x="225" y="1560.95" font-size="17" xml:space="preserve">1,841,488 bytes · 4,373 icons in four brands · offline browser, no permissions.</text>
 <text x="875" y="1560.95" font-size="17" text-decoration="underline" xml:space="preserve">APK</text>
 <text x="906" y="1560.95" font-size="17" xml:space="preserve">·</text>
@@ -146,7 +146,7 @@
 <text x="40" y="2113.86" fill-opacity="0.64" font-size="16" xml:space="preserve">and the band's geometry comes from the Figma frame that started this: a</text>
 <text x="40" y="2139.45" fill-opacity="0.64" font-size="16" xml:space="preserve">96px band, a 45px mark, 26px page name, 17px lines.</text>
 <rect x="0" y="2235.05" width="1300" height="1" fill="#d9d9d9" fill-opacity="0.26"/>
-<text x="40" y="2280.05" fill-opacity="0.64" font-size="14" xml:space="preserve">Icons 2.18 · Compress 2.1 · app.offline.icons / app.offline.compress</text>
+<text x="40" y="2280.05" fill-opacity="0.64" font-size="14" xml:space="preserve">Icons 2.19 · Compress 2.1 · app.offline.icons / app.offline.compress</text>
 <text x="950" y="2280.05" fill-opacity="0.64" font-size="14" xml:space="preserve">Download</text>
 <text x="1019" y="2280.05" fill-opacity="0.64" font-size="14" xml:space="preserve">·</text>
 <text x="1030" y="2280.05" fill-opacity="0.64" font-size="14" xml:space="preserve">Renders</text>
