@@ -9,7 +9,7 @@ In order, it moves:
   * tools/catalog.json            version, versionCode, APK name
   * build.sh                      both the `icons` and `all` build cases
   * every live version label      the shelf pages, README, AGENTS, the capture list
-  * the release notes             one new entry at the top, above the newest
+  * tools/release_notes.json      one new note at the top, above the newest
 
 With --build it then runs build.sh, copies the signed APK into docs/, deletes the
 previous one, re-measures its size and SHA-256, writes those into the same pages and
@@ -29,8 +29,8 @@ Without --build nothing is compiled, no captures are taken and the size and chec
 keep their old values, which leaves the shelf failing `build_catalog.py --check` until
 the build runs. --dry-run prints the planned edits and writes nothing.
 
-The release-note list is never rewritten: a note keeps the version it was written
-for, and the history is checked before anything moves.
+The notes are never relabelled: a note keeps the version it was written for, and
+every note is checked against the commit that first added it before anything moves.
 """
 
 import argparse
@@ -50,28 +50,31 @@ import uuid
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 CATALOG = ROOT / "tools/catalog.json"
 BUILD = ROOT / "build.sh"
-NOTES = ROOT / "docs/tools/index.html"
+NOTES = ROOT / "tools/release_notes.json"
 SITE = ROOT / "tools/site.json"
 LABEL_FILES = ["docs/index.html", "docs/download/index.html", "docs/icons/index.html",
                "docs/tools/index.html", "README.md", "AGENTS.md", "tools/render_pages.js"]
 
-# A release-note line carries its own version and must never be bumped.
-NOTE_LINE = re.compile(r"<li><b>Icons [0-9.]+ \u00b7 ")
-NOTE_RE = re.compile(r"<li><b>Icons ([0-9.]+) \u00b7 ([^<]+)</b>")
+# A note carries its own version and must never be bumped, so the notes live in a
+# file of their own instead of beside the labels a bump walks over.
 VERSION = re.compile(r"^[0-9]+(\.[0-9]+)*$")
 
 
-def notes_on_page():
-    return NOTE_RE.findall(NOTES.read_text(encoding="utf-8"))
+def notes():
+    """Every release note, newest first, as the one file keeps them."""
+    return json.loads(NOTES.read_text(encoding="utf-8"))["notes"]
 
 
 def git(*args):
     return subprocess.run(["git", *args], cwd=ROOT, capture_output=True, text=True)
 
 
-def shipped_with(title):
-    """The Icons version in the commit that first added a note, and its short sha."""
-    found = git("log", "--reverse", "--format=%H", "-S", title, "--", "docs/tools/index.html")
+def shipped_with(title, app="icons"):
+    """The app's version in the commit that first added a note, and its short sha."""
+    # The notes lived on the tools page until they moved to the file, so both paths
+    # are searched: the commit that first added a sentence is where it shipped.
+    found = git("log", "--reverse", "--format=%H", "-S", title, "--",
+                "docs/tools/index.html", "tools/release_notes.json")
     if found.returncode != 0:
         return None, "git could not read the history"
     if not found.stdout.strip():
@@ -82,30 +85,50 @@ def shipped_with(title):
         return None, "no catalog at " + sha[:8]
     try:
         version = next(tool["version"] for tool in json.loads(catalog.stdout)["tools"]
-                       if tool["id"] == "icons")
+                       if tool["id"] == app)
     except Exception:
         return None, "catalog unreadable at " + sha[:8]
     return version, sha[:8]
 
 
+def keyed(version):
+    return tuple(int(part) for part in version.split("."))
+
+
 def report_notes():
-    """Print every note whose label is not the version it shipped in; return how many."""
+    """Check each note against its app's version at the commit that first added it.
+
+    A note written after its build went out cannot be verified this way -- the
+    Compress notes all arrived with the site itself, when that app was already at
+    1.9 -- so it is reported as written later rather than as a mistake. A label
+    newer than the catalog at that commit is a broken history and stops a bump.
+    """
     if not (ROOT / ".git").exists():
         print("release notes: no git history to check against")
         return 0
-    notes = notes_on_page()
-    problems = 0
-    for label, title in notes:
-        version, where = shipped_with(title)
+    entries = notes()
+    problems = late = 0
+    for entry in entries:
+        label, title = entry["version"], entry["title"]
+        version, where = shipped_with(title, entry["id"])
         if version is None:
-            print("  note %s \u00b7 %s: %s, unverified" % (label, title, where))
-        elif version != label:
+            print("  note %s %s \u00b7 %s: %s, unverified" % (entry["id"], label, title, where))
+        elif version == label:
+            continue
+        elif keyed(version) > keyed(label):
+            late += 1
+            print("  note %s %s \u00b7 %s: added when %s was %s (%s), not checked"
+                  % (entry["id"], label, title, entry["id"], version, where))
+        else:
             problems += 1
-            print("  note %s \u00b7 %s shipped in %s (%s)" % (label, title, version, where))
+            print("  note %s %s \u00b7 %s shipped in %s (%s)"
+                  % (entry["id"], label, title, version, where))
     if problems:
-        print("release notes: %d note(s) disagree with the version they shipped in" % problems)
+        print("release notes: %d note(s) are labelled with a version the commit that "
+              "added them does not ship" % problems)
     else:
-        print("release notes: %d notes, each label matches the version it shipped in" % len(notes))
+        print("release notes: %d notes, %d checked against the build they shipped in, "
+              "%d written after it" % (len(entries), len(entries) - late, late))
     return problems
 
 
@@ -118,14 +141,11 @@ def digest(path):
 
 
 def rewrite(path, pairs, dry):
-    """Replace pairs line by line, skipping release-note lines."""
+    """Replace pairs line by line in a page; the notes file is never in this list."""
     path = ROOT / path
     text = path.read_text(encoding="utf-8")
     out, hits = [], 0
     for line in text.splitlines(keepends=True):
-        if NOTE_LINE.search(line):
-            out.append(line)
-            continue
         for old, new in pairs:
             if old and old in line:
                 hits += line.count(old)
@@ -157,17 +177,13 @@ def bump_build_sh(old_apk, old, new_apk, new, old_code, new_code, dry):
 
 
 def add_note(new, title, note, dry):
-    text = NOTES.read_text(encoding="utf-8")
-    if "<li><b>Icons %s \u00b7 %s</b>" % (new, title) in text:
-        return "already there"
-    marker = NOTE_LINE.search(text)
-    if not marker:
-        raise SystemExit("no release-note list found in docs/tools/index.html")
-    line_start = text.rfind("\n", 0, marker.start()) + 1
-    indent = text[line_start:marker.start()]
-    entry = "%s<li><b>Icons %s \u00b7 %s</b><span>%s</span></li>\n" % (indent, new, title, note)
+    data = json.loads(NOTES.read_text(encoding="utf-8"))
+    for entry in data["notes"]:
+        if entry["id"] == "icons" and entry["version"] == new and entry["title"] == title:
+            return "already there"
+    data["notes"].insert(0, {"id": "icons", "version": new, "title": title, "note": note})
     if not dry:
-        NOTES.write_text(text[:line_start] + entry + text[line_start:], encoding="utf-8")
+        NOTES.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     return "note %s above the newest" % ("inserted" if not dry else "would go")
 
 
@@ -322,7 +338,7 @@ def main():
             print("  %-30s %d label(s)" % (name, hits))
 
     if args.title:
-        print("  %-30s %s" % ("docs/tools/index.html", add_note(new, args.title, args.note, dry)))
+        print("  %-30s %s" % ("tools/release_notes.json", add_note(new, args.title, args.note, dry)))
 
     if dry:
         print("dry run: nothing written; %s and %s would be replaced once the APK is built"

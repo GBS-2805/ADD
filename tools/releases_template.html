@@ -63,7 +63,7 @@ __COMPRESS_ROWS__
     <ul class="rows">
       <li><b>The list</b><span>It walks the commits that changed <code>tools/catalog.json</code> and records each version it finds there, so a version this history never shipped cannot appear on the page.</span></li>
       <li><b>The size</b><span><code>git cat-file -s</code> on the APK blob at that commit: the bytes that actually went out, not a rebuild measured today.</span></li>
-      <li><b>The notes</b><span>Titles and sentences come from the list on the <a href="../tools/">tools page</a>, where each note is checked against the version whose commit first added it.</span></li>
+      <li><b>The notes</b><span>Titles and sentences are kept in <code>tools/release_notes.json</code>, one entry per app and version, and each is checked against the commit that first added it. This page is their only home: the <a href="../tools/">tools page</a> links here instead of repeating them.</span></li>
       <li><b>Keeping up</b><span><code>python3 tools/build_releases.py</code> writes this page, and <code>tools/bump_version.py</code> runs it at the end of every release, so the history here cannot fall behind the shelf.</span></li>
     </ul>
   </section>

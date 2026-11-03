@@ -1,6 +1,6 @@
 # Figma file for the site
 
-Twenty-two artboards: one per page per width, plus each pull-out open, as SVG
+Twenty-four artboards: one per page per width, plus each pull-out open, as SVG
 that Figma imports as editable layers. Nothing here is drawn by hand: `tools/figma_export.js` opens
 each page in Chromium at the real viewport and translates what it measures.
 
@@ -12,33 +12,35 @@ each page in Chromium at the real viewport and translates what it measures.
 | `04-icons-lineicons-desktop.svg` | Icons · Lineicons | 1300×1417 |
 | `05-icons-coolicons-desktop.svg` | Icons · Coolicons | 1300×1417 |
 | `06-fonts-desktop.svg` | Fonts | 1300×2063 |
-| `07-tools-desktop.svg` | Tools | 1300×5967 |
+| `07-tools-desktop.svg` | Tools | 1300×4334 |
 | `08-portfolio-desktop.svg` | Portfolio | 1300×2931 |
 | `09-download-desktop.svg` | Download | 1300×2734 |
-| `10-index-phone.svg` | Index | 390×3297 |
-| `11-icons-phone.svg` | Icons | 390×3716 |
-| `12-icons-all-phone.svg` | Icons · All brands | 390×1449 |
-| `13-icons-lineicons-phone.svg` | Icons · Lineicons | 390×1625 |
-| `14-icons-coolicons-phone.svg` | Icons · Coolicons | 390×1594 |
-| `15-fonts-phone.svg` | Fonts | 390×2899 |
-| `16-tools-phone.svg` | Tools | 390×9654 |
-| `17-portfolio-phone.svg` | Portfolio | 390×4470 |
-| `18-download-phone.svg` | Download | 390×3861 |
-| `19-index-menu-desktop.svg` | Index · pull-down | 1300×2326 |
-| `20-index-drawer-desktop.svg` | Index · side tab | 1300×2069 |
-| `21-index-menu-phone.svg` | Index · pull-down | 390×3524 |
-| `22-index-drawer-phone.svg` | Index · side tab | 390×3297 |
+| `10-releases-desktop.svg` | Releases | 1300×5163 |
+| `11-index-phone.svg` | Index | 390×3297 |
+| `12-icons-phone.svg` | Icons | 390×3716 |
+| `13-icons-all-phone.svg` | Icons · All brands | 390×1449 |
+| `14-icons-lineicons-phone.svg` | Icons · Lineicons | 390×1625 |
+| `15-icons-coolicons-phone.svg` | Icons · Coolicons | 390×1594 |
+| `16-fonts-phone.svg` | Fonts | 390×2899 |
+| `17-tools-phone.svg` | Tools | 390×6190 |
+| `18-portfolio-phone.svg` | Portfolio | 390×4470 |
+| `19-download-phone.svg` | Download | 390×3861 |
+| `20-releases-phone.svg` | Releases | 390×6510 |
+| `21-index-menu-desktop.svg` | Index · pull-down | 1300×2326 |
+| `22-index-drawer-desktop.svg` | Index · side tab | 1300×2069 |
+| `23-index-menu-phone.svg` | Index · pull-down | 390×3524 |
+| `24-index-drawer-phone.svg` | Index · side tab | 390×3297 |
 
 Heights are the full scroll height of the page at that width, so an artboard is
 the whole page, not just the fold.
 
 ## The whole set on one canvas
 
-`site-figma.svg` is all twenty-two artboards on one 1910×41926 canvas, desktop
+`site-figma.svg` is all twenty-four artboards on one 1910×45192 canvas, desktop
 down the left column and phone down the right, each labelled with its file name.
 Open that file to look at the set — a browser or the desktop app's file panel
 renders it, where a zip can only be downloaded. One drag puts everything into
-Figma at once; it is stacked from the twenty-two files by
+Figma at once; it is stacked from the twenty-four files by
 `tools/figma_bundle.py`, so it never needs editing by hand.
 
 ## Importing
@@ -64,7 +66,7 @@ base64 woff2, about 32 KB a file, because an SVG that only names the family rend
 in whatever sans the viewer has. Open any of these in a browser — here, from
 `/figma/` on the site, or from a phone's download — and the type is the site's.
 That is what sets the hand-off's cost: with the faces in, the whole site sits about
-124 KB under the host's 10 MiB deploy ceiling, so `tools/figma_publish.py` prints
+2.98 MB under the host's 10 MiB deploy ceiling, so `tools/figma_publish.py` prints
 the headroom on every run and anything new has to fit inside it. Figma does not read `@font-face` from an SVG, so it still asks to enable the
 Google font once on import.
 
@@ -75,7 +77,7 @@ Google font once on import.
 - The 45px mark, the chrome glyphs and every icon in a sheet are embedded PNGs
   taken from the page's own `<svg>` elements at 3× — accurate, but not vector.
   The source glyphs are in `docs/data/icons.json` if you want them as vectors.
-- The header band is exported closed on every page. Artboards 19–22 carry the two
+- The header band is exported closed on every page. Artboards 21–24 carry the two
   pull-outs open — the left accordion (`index-menu`) and the right side tab
   (`index-drawer`), at both widths — because they are the site's navigation.
   Every file in this folder is also served from `/figma/` on the site (see
@@ -103,7 +105,7 @@ compared with the pages they came from.
 
 `python3 tools/figma_publish.py` mirrors this folder into `docs/figma/`, which the
 site does serve, so the hand-off is at `/figma/` on the deployed host:
-`/figma/01-index-desktop.svg` and so on for the twenty-two artboards, plus
+`/figma/01-index-desktop.svg` and so on for the twenty-four artboards, plus
 `/figma/site-figma.svg` for the whole canvas. Page artboards keep their numbers;
 on the site the four pull-outs are served under the plain name the links use
 (`pull-down-desktop.svg`, `side-tab-phone.svg` and so on), so the numbered copies

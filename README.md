@@ -37,12 +37,12 @@ are copied into `docs/`.
 
 ## The shelf
 
-Nine pages, one stylesheet, no framework:
+Eleven pages, one stylesheet, no framework:
 
 | Page | What it is |
 | --- | --- |
 | `docs/index.html` | Index: the material, both apps, the palette, the JSON list |
-| `docs/tools/` | Both apps in detail, install steps, release notes |
+| `docs/tools/` | Both apps in detail, install steps, a link to the release notes |
 | `docs/icons/` | Icons app landing: download, the two brands, what the app does |
 | `docs/icons/lineicons/` | Lineicons: preview tab, variants, the set (generated) |
 | `docs/icons/coolicons/` | Coolicons: preview tab, variants, the set (generated) |
@@ -50,13 +50,14 @@ Nine pages, one stylesheet, no framework:
 | `docs/portfolio/` | Three projects, what I built in each, constraints |
 | `docs/download/` | Both APKs, sizes, SHA-256, install steps |
 | `docs/renders/` | Gallery of captures, nothing drawn by hand |
+| `docs/releases/` | Every build, with the day, the APK size and the note written for it |
 
 Pages share `docs/assets/site.css` — palette, band, menus and type — plus
 `docs/assets/site.js` for both menus. The band is frame 6-27's geometry with the page
 name on the left inside a 40px tap target, the mark centred, and two lines plus the
 burger on the right. The chevron opens a four-row pull-down (index, icons, fonts,
-tools); the burger pulls out a right-hand side tab (download, portfolio, renders)
-over a scrim. On the icon pages that left pull-down lists the **brands** instead, and
+tools); the burger pulls out a right-hand side tab (download, portfolio, renders,
+releases) On the icon pages that left pull-down lists the **brands** instead, and
 each brand row is a link to its page. The glyphs in that chrome are Coolicons line
 icons. Pages carry only their own small `<style>` for page-specific pieces.
 
@@ -147,9 +148,11 @@ icons-app/src/app/offline/icons/MainActivity.java  WebView, asset origin, clipbo
 icons-app/res/                                      one theme, one vector launcher icon
 icons-app/assets/                                   staged at build time from docs/ (not committed)
 build.sh                                           SDK-tools build: ./build.sh [all|compress|icons]
-docs/                                              the nine-page static shelf + data/
+docs/                                              the eleven-page static shelf + data/
 tools/catalog.json                                 apps, fonts, portfolio (one source)
 tools/build_catalog.py                             measures the shipped files, writes data/
+tools/build_releases.py                            writes the releases page from git history
+tools/release_notes.json                           the release notes: one copy, newest first
 tools/fetch_icons.py                               both icon pages + both catalogs
 tools/icons_hub_template.html                      the Icons app landing page
 tools/icons_brand_template.html                    the per-brand preview page

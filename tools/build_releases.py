@@ -7,8 +7,9 @@ For every app in tools/catalog.json it walks the commits that changed the
 catalog and records each version it saw: the day that version first appeared,
 the commit that shipped it, and the size of the APK blob at that commit, read
 with `git cat-file -s` instead of from a page or a note. Release-note titles and
-sentences come from the list on docs/tools/index.html, which bump_version.py
-already keeps honest against the same history.
+sentences come from tools/release_notes.json -- the only copy, which the tools page
+links to rather than repeating -- and bump_version.py checks each one against the
+commit that first added it.
 
 The chrome -- band, pull-down and side tab -- is spliced from
 docs/download/index.html so this page cannot drift from the rest of the shelf,
@@ -24,13 +25,12 @@ import sys
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 CATALOG = ROOT / "tools/catalog.json"
-NOTES = ROOT / "docs/tools/index.html"
+NOTES = ROOT / "tools/release_notes.json"
 DOWNLOAD = ROOT / "docs/download/index.html"
 TEMPLATE = ROOT / "tools/releases_template.html"
 OUT = ROOT / "docs/releases/index.html"
 
 APK = re.compile(r"^docs/(Icons|Compress)-([0-9][0-9.]*)\.apk$")
-NOTE = re.compile(r"<li><b>(Icons )?([0-9][0-9.]*) \u00b7 (.+?)</b><span>(.+?)</span></li>", re.S)
 MONTHS = ("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
 
 
@@ -88,11 +88,11 @@ def releases():
 
 
 def notes():
-    """The tools page's release notes, grouped by the app and version they shipped in."""
+    """The release notes, grouped by the app and version they shipped in."""
     grouped = {}
-    for icons, version, title, sentence in NOTE.findall(NOTES.read_text(encoding="utf-8")):
-        app = "icons" if icons else "compress"
-        grouped.setdefault((app, version), []).append((title, sentence))
+    for entry in json.loads(NOTES.read_text(encoding="utf-8"))["notes"]:
+        grouped.setdefault((entry["id"], entry["version"]), []).append(
+            (entry["title"], entry["note"]))
     return grouped
 
 

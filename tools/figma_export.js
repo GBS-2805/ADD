@@ -32,6 +32,7 @@ const PAGES = [
   { slug: "tools", url: "/tools/", label: "Tools" },
   { slug: "portfolio", url: "/portfolio/", label: "Portfolio" },
   { slug: "download", url: "/download/", label: "Download" },
+  { slug: "releases", url: "/releases/", label: "Releases" },
 ];
 
 const WIDTHS = [
@@ -42,8 +43,8 @@ const WIDTHS = [
 // The two pull-outs are states of a page rather than pages of their own, so they
 // are captured after the grid and numbered past its last artboard.
 const STATES = [
-  { slug: "index-menu", url: "/", label: "Index · pull-down", open: "#menuBtn", n: 19, nPhone: 21 },
-  { slug: "index-drawer", url: "/", label: "Index · side tab", open: "#burger", n: 20, nPhone: 22 },
+  { slug: "index-menu", url: "/", label: "Index · pull-down", open: "#menuBtn", n: 21, nPhone: 23 },
+  { slug: "index-drawer", url: "/", label: "Index · side tab", open: "#burger", n: 22, nPhone: 24 },
 ];
 
 // A file that only names Poppins renders in whatever sans the viewer happens to

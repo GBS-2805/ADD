@@ -126,14 +126,14 @@ changes as unverified on device rather than illustrating them.
   prints the headroom on every run. Captures ship as lossless WebP (`tools/to_webp.py`,
   wired into `tools/render_pages.js`): same pixels, a third of the bytes. The one canvas
   keeps each artwork payload once in `<defs>` and paints instances with `<use>`.
-- The shelf is ten pages, each a folder with an `index.html`: the root index, then
+- The shelf is eleven pages, each a folder with an `index.html`: the root index, then
   `tools/`, `icons/` and its two brand folders plus the all-brands sheet at
-  `icons/all/`, `fonts/`, `portfolio/`, `download/` and `renders/`. They share
+  `icons/all/`, `fonts/`, `portfolio/`, `download/`, `renders/` and `releases/`. They share
   `assets/site.css` and `assets/site.js`; no page has its own copy of the palette.
   The page name sits on the left of the band beside a chevron control that opens a
   pull-down accordion with four destinations (index, icons, fonts, tools); the
-  burger on the right pulls out a side tab with three (download, portfolio,
-  renders). `site.js` owns both toggles, and Escape or the scrim closes them.
+  burger on the right pulls out a side tab with four (download, portfolio,
+  renders, releases). `site.js` owns both toggles, and Escape or the scrim closes them.
 - `docs/data/` is generated and public on purpose: the site doubles as the database
   behind the apps. `icons.json` and `coolicons.json` come from `tools/fetch_icons.py`, which
   also writes `<brand>-sheet.json` for the all-brands page: a glyph per category plus the
@@ -141,9 +141,9 @@ changes as unverified on device rather than illustrating them.
   `index.json`,
   `tools.json`, `fonts.json` and `portfolio.json` come from `tools/build_catalog.py`.
 - Releases go through `python3 tools/bump_version.py <version> --title "…" --note "…"
-  --build`: it moves the catalog, both build cases, every live version label and the
-  release-note list, then builds, copies the APK into `docs/`, re-measures size and
-  checksum and rebuilds the catalogs. Then it serves `docs/` and reruns
+  --build`: it moves the catalog, both build cases and every live version label, adds
+  the new note to `tools/release_notes.json`, then builds, copies the APK into `docs/`,
+  re-measures size and checksum and rebuilds the catalogs. Then it serves `docs/` and reruns
   `tools/render_pages.js`, so the gallery is captured from the pages that quote the new
   build; `--skip-captures` leaves it alone. `--deploy` ends by running `--deploy-cmd`
   if given, otherwise printing the `sites_deploy` request with a fresh requestId from
@@ -160,6 +160,12 @@ changes as unverified on device rather than illustrating them.
   change to a version number or a shipped file.
 - `docs/renders/` is the gallery page plus the captures it lists. The page shows
   only files named in `index.html`, so the folder must hold exactly those.
+- `docs/releases/` is the history page: every build the repository has shipped, with
+  the day it went out, the size of the APK blob at that commit and its short sha, read
+  out of git by `tools/build_releases.py` rather than typed into a table. The notes
+  come from `tools/release_notes.json`, their only copy -- the tools page links here
+  instead of keeping a second list. Regenerate with `python3 tools/build_releases.py`
+  (a version bump runs it at the end); never edit the output.
 - `figma/` is the design hand-off: one SVG artboard per page per width, written by
   `tools/figma_export.js` from the pages as Chromium lays them out (text on real
   baselines, a rect per box fragment, ellipsised labels, the CSS-generated arrows

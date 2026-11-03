@@ -21,13 +21,17 @@ DST = pathlib.Path("docs/figma")
 
 # The navigation states are referred to by what they are, not by their number.
 RENAME = {
-    "19-index-menu-desktop.svg": "pull-down-desktop.svg",
-    "20-index-drawer-desktop.svg": "side-tab-desktop.svg",
-    "21-index-menu-phone.svg": "pull-down-phone.svg",
-    "22-index-drawer-phone.svg": "side-tab-phone.svg",
+    "21-index-menu-desktop.svg": "pull-down-desktop.svg",
+    "22-index-drawer-desktop.svg": "side-tab-desktop.svg",
+    "23-index-menu-phone.svg": "pull-down-phone.svg",
+    "24-index-drawer-phone.svg": "side-tab-phone.svg",
 }
-STATE_NUMBERS = {"19", "20", "21", "22"}
+STATE_NUMBERS = {"21", "22", "23", "24"}
 BUNDLE = "site-figma.svg"
+
+# The listing counts the run in words, so it has to be told what the run has.
+WORDS = {19: "Nineteen", 20: "Twenty", 21: "Twenty-one", 22: "Twenty-two",
+         23: "Twenty-three", 24: "Twenty-four", 25: "Twenty-five", 26: "Twenty-six"}
 
 # The exporter writes every image twice: the payload under plain `href` and again
 # under `xlink:href`. One copy paints the picture and the other is dead weight --
@@ -71,6 +75,8 @@ def human(n):
 
 def listing(names):
     facts = {n: describe(DST / n) + (human((DST / n).stat().st_size),) for n in names}
+    count = len([n for n in names if n.endswith(".svg") and n != BUNDLE])
+    lede = "%s artboards of this site, and the whole set on one canvas." % WORDS.get(count, count)
 
     def item(name):
         title, dims, size = facts[name]
@@ -123,13 +129,13 @@ def listing(names):
 <body>
 <main>
   <h1>Figma hand-off</h1>
-  <p class="lede">Twenty-two artboards of this site, and the whole set on one canvas.</p>
+  <p class="lede">%s</p>
   <p class="note">Each file is the page as Chromium laid it out — text on real baselines, a rect per box, PNG copies of the marks. Poppins 400/500/600 is embedded in every file, so each one renders in the site's type wherever it is opened, not in the viewer's fallback sans. Drag one into a Figma document to get editable layers; enable the Poppins family once there and run Frame selection to lock the artboard's size.</p>
   %s<p class="back"><a href="../">← Back to the site</a></p>
 </main>
 </body>
 </html>
-""" % body
+""" % (lede, body)
 
 
 def main():
