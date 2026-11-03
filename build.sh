@@ -133,15 +133,28 @@ stage_icons_assets() {
     local www="$ROOT/icons-app/assets/www"
     echo "== Icons: staging the browser out of docs/ =="
     rm -rf "$ROOT/icons-app/assets"
-    mkdir -p "$www/icons" "$www/assets/fonts" "$www/data"
+    mkdir -p "$www/icons" "$www/assets/fonts" "$www/data" "$www/search"
     cp "$ROOT/docs/icons/index.html" "$www/icons/"
     for dir in "$ROOT"/docs/icons/*/; do cp -r "$dir" "$www/icons/"; done
-    cp "$ROOT/docs/assets/site.css" "$ROOT/docs/assets/site.js" \
+    # Pages name the hashed copies, so stage what they ask for, not the sources.
+    cp "$ROOT"/docs/assets/site*.css "$ROOT"/docs/assets/site*.js \
        "$ROOT/docs/assets/favicon.svg" "$www/assets/"
     cp "$ROOT"/docs/assets/fonts/*.woff2 "$www/assets/fonts/"
-    for name in $(cd "$ROOT" && python3 tools/fetch_icons.py --data-files); do
-        [ -f "$ROOT/docs/data/$name" ] && cp "$ROOT/docs/data/$name" "$www/data/"
-    done
+    # data/ is staged whole: the catalogs, their glyph chunks, the sheets and the
+    # page index the search box reads all live under the same root.
+    cp -r "$ROOT/docs/data/." "$www/data/"
+    cp "$ROOT/docs/search/index.html" "$www/search/"
+    # The search page indexes the whole site; the app carries only the icons
+    # pages. Stage an index trimmed to what the bundle has: a hit that opens a
+    # 404 offline is worse than a shorter list. pages.json trimmed, nothing else.
+    python3 - "$ROOT/docs/data/pages.json" "$www/data/pages.json" <<'PY'
+import json, sys
+src, dst = sys.argv[1], sys.argv[2]
+payload = json.load(open(src, encoding="utf-8"))
+pages = [page for page in payload["pages"] if page["path"].startswith("/icons")]
+json.dump(dict(payload, pages=pages), open(dst, "w", encoding="utf-8"), ensure_ascii=False)
+print("bundle index: %d of %d pages" % (len(pages), len(payload["pages"])))
+PY
     # The site root is not bundled; a page that asks for "/" gets the browser.
     cat > "$www/index.html" <<'HTML'
 <!doctype html><meta charset="utf-8"><meta http-equiv="refresh" content="0;url=icons/">
@@ -154,6 +167,10 @@ HTML
 }
 
 case "${1:-all}" in
+    stage)
+        # Stage only: no JDK or SDK needed, which is how the bundle harness runs.
+        stage_icons_assets
+        ;;
     compress)
         build_app app Compress Compress-2.1.apk 12 2.1
         ;;

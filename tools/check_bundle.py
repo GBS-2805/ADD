@@ -13,6 +13,7 @@ This reads the references out of the staged pages and resolves each one inside t
 bundle. Anything that points above the bundle root is left alone -- a page is
 allowed to name the site for what the app deliberately does not carry.
 """
+import json
 import pathlib
 import re
 import sys
@@ -41,6 +42,18 @@ def main(argv):
             checked += 1
             if not target.exists():
                 missing.append("%s -> %s" % (page.relative_to(root), ref))
+
+    # A chunked catalog names its glyph files from inside JSON, so the reference
+    # scan above cannot see them; a missing chunk would render an empty sheet.
+    for data in sorted(root.rglob("*.json")):
+        try:
+            payload = json.loads(data.read_text(errors="replace"))
+        except ValueError:
+            continue
+        for name in (payload.get("chunks") or []) if isinstance(payload, dict) else []:
+            checked += 1
+            if not (data.parent / name).exists():
+                missing.append("%s -> %s" % (data.relative_to(root), name))
 
     if missing:
         print("bundle check: %d of %d references resolve" % (checked - len(missing), checked))

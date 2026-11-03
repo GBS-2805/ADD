@@ -99,6 +99,19 @@ def measure(catalog):
     return catalog
 
 
+def load(path):
+    """A catalog index with its markup chunks merged back in.
+
+    fetch_icons.py writes each catalog as a names-first index plus chunks under
+    data/<stem>/: the index alone carries the counts, the merged form the glyphs.
+    """
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    for name in payload.get("chunks") or []:
+        part = json.loads((path.parent / name).read_text(encoding="utf-8"))
+        payload.setdefault("icons", []).extend(part.get("icons", []))
+    return payload
+
+
 def icon_sets():
     """Every brand catalog on disk, with the totals the pages have to quote.
 
@@ -109,11 +122,14 @@ def icon_sets():
     groups = {}
     files = sorted(path for path in DATA.glob("*.json")
                           if not path.stem.endswith("-sheet")
-                          and path.stem not in ("index", "tools", "fonts", "portfolio"))
+                          and path.stem not in ("index", "tools", "fonts", "portfolio",
+                                 "pages", "assets"))
     for path in files:
         if not path.exists():
             fail("no %s yet; run tools/fetch_icons.py first" % path.relative_to(ROOT))
-        payload = json.loads(path.read_text(encoding="utf-8"))
+        payload = load(path)
+        if "count" not in payload:
+            continue
         groups.setdefault(payload.get("brand") or path.stem, []).append((path, payload))
 
     sets, total = [], 0
@@ -212,11 +228,14 @@ def category_sizes():
     """Category tallies from the catalogs, so a caption like "102 icons" is legal."""
     sizes = set()
     for path in DATA.glob("*.json"):
-        if path.stem.endswith("-sheet") or path.stem in ("index", "tools", "fonts", "portfolio"):
+        if path.stem.endswith("-sheet") or path.stem in ("index", "tools", "fonts",
+                                                         "portfolio", "pages", "assets"):
             continue
         try:
-            payload = json.loads(path.read_text(encoding="utf-8"))
+            payload = load(path)
         except ValueError:
+            continue
+        if "count" not in payload:
             continue
         tally = {}
         for glyph in payload.get("icons", []):

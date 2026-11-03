@@ -139,105 +139,11 @@ def robots():
 
 
 def search_page():
-    """One box over pages.json, so the shelf stays findable as it grows."""
+    """One box and a section filter over pages.json, so the shelf stays findable."""
     assets = hash_assets.current()
-    return """<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<meta name="theme-color" content="#00d7a0" />
-<meta name="description" content="Search every page of the shelf by title, section or words from its lede." />
-<title>Search — every page on the shelf</title>
-<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml" />
-<link rel="stylesheet" href="../assets/%(css)s" />
-<script src="../assets/%(js)s" defer></script>
-<style>
-  main { padding: 52px 40px 64px; max-width: 880px; }
-  h1 { margin: 0 0 8px; font-size: 40px; font-weight: 400; line-height: 1.15; letter-spacing: -.02em; }
-  .lede { margin: 0 0 28px; }
-  .box { display: flex; gap: 12px; align-items: center; border-bottom: 1px solid var(--on); padding: 6px 0 12px; }
-  .box input { flex: 1; min-width: 0; font: inherit; font-size: 22px; color: var(--on); background: transparent; border: 0; outline: none; }
-  .box input::placeholder { color: var(--on-dim); }
-  .box kbd { font: inherit; font-size: 12px; padding: 3px 7px; color: var(--on-dim); border: 1px solid var(--rule); }
-  .count { margin: 16px 0 10px; font-size: 13px; color: var(--on-dim); }
-  ul { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--rule); }
-  li { border-bottom: 1px solid var(--rule); }
-  li a { display: block; padding: 16px 2px; text-decoration: none; }
-  li a:hover { background: var(--tint); }
-  li b { display: block; font-size: 19px; font-weight: 500; }
-  li span { display: block; margin-top: 4px; font-size: 14px; line-height: 1.5; color: var(--on-dim); }
-  .none { margin: 22px 0 0; color: var(--on-dim); }
-  .back { margin: 38px 0 0; font-size: 15px; }
-  @media (max-width: 700px) { main { padding: 32px 20px 48px; } h1 { font-size: 30px; } .box input { font-size: 19px; } }
-</style>
-</head>
-<body>
-<main>
-  <h1>Search</h1>
-  <p class="lede">Every page on the shelf, by name, section or the words in its lede.</p>
-  <div class="box">
-    <input id="q" type="search" placeholder="Try “icons”, “palette”, “release”…" aria-label="Search pages" autocomplete="off" autofocus />
-    <kbd>/</kbd>
-  </div>
-  <p class="count" id="count">Reading the index…</p>
-  <ul id="hits"></ul>
-  <p class="none" id="none" hidden>Nothing on the shelf matches that.</p>
-  <p class="back"><a href="../">← Back to the site</a></p>
-</main>
-<script>
-(function () {
-  var input = document.getElementById("q");
-  var list = document.getElementById("hits");
-  var count = document.getElementById("count");
-  var none = document.getElementById("none");
-  var pages = [];
-
-  function render() {
-    var words = input.value.trim().toLowerCase().split(/\\s+/).filter(Boolean);
-    var hits = pages.filter(function (page) {
-      var hay = (page.title + " " + page.heading + " " + page.section + " " + page.description).toLowerCase();
-      return words.every(function (word) { return hay.indexOf(word) !== -1; });
-    });
-    list.innerHTML = "";
-    hits.forEach(function (page) {
-      var li = document.createElement("li");
-      var link = document.createElement("a");
-      link.href = "../" + page.path.replace(/^\\//, "");
-      var title = document.createElement("b");
-      title.textContent = page.title;
-      var note = document.createElement("span");
-      note.textContent = page.description || page.path;
-      link.appendChild(title);
-      link.appendChild(note);
-      li.appendChild(link);
-      list.appendChild(li);
-    });
-    count.textContent = hits.length + (hits.length === 1 ? " page" : " pages") +
-      (words.length ? " matching “" + input.value.trim() + "”" : " on the shelf");
-    none.hidden = hits.length > 0;
-  }
-
-  fetch("../data/pages.json")
-    .then(function (response) { return response.json(); })
-    .then(function (data) { pages = data.pages; render(); })
-    .catch(function () {
-      count.textContent = "The index did not load.";
-      none.hidden = true;
-    });
-
-  input.addEventListener("input", render);
-  document.addEventListener("keydown", function (event) {
-    if (event.key === "/" && document.activeElement !== input) {
-      event.preventDefault();
-      input.focus();
-    }
-  });
-})();
-</script>
-</body>
-</html>
-""" % {"css": assets["site.css"], "js": assets["site.js"]}
+    template = (ROOT / "tools/search_template.html").read_text(encoding="utf-8")
+    return (template.replace("__CSS__", assets["site.css"])
+                    .replace("__JS__", assets["site.js"]))
 
 
 def outputs():

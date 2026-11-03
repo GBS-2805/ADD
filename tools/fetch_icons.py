@@ -534,10 +534,81 @@ def download(names, template):
     return out, missing
 
 
-def write_catalog(path, payload):
+CHUNK = 200
+
+
+def write_plain(path, payload):
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False) + "\n", encoding="utf-8")
     print("data: %-28s %9d bytes" % (path.relative_to(ROOT), path.stat().st_size))
+
+
+def write_catalog(path, payload):
+    """Write one catalog as a names-first index plus markup chunks.
+
+    The index carries the totals, the category counts and one glyph, so a page can
+    paint its counts and preview before the markup arrives; the glyphs follow in
+    chunks of CHUNK under `data/<stem>/`. A 1.4 MB catalog no longer has to arrive
+    as one response, and an unchanged chunk stays cached when another changes.
+    """
+    path.parent.mkdir(parents=True, exist_ok=True)
+    icons = payload.get("icons", [])
+    index = {key: value for key, value in payload.items() if key != "icons"}
+    index["count"] = len(icons)
+    index["first"] = icons[0] if icons else None
+
+    counts, order = {}, payload.get("cat_order", [])
+    for item in icons:
+        if item.get("cat"):
+            counts[item["cat"]] = counts.get(item["cat"], 0) + 1
+    named = [name for name in order if counts.get(name)]
+    named += sorted(name for name in counts if name not in named)
+    index["cats"] = [{"name": name, "count": counts[name]} for name in named]
+
+    folder = path.parent / path.stem
+    folder.mkdir(parents=True, exist_ok=True)
+    chunks, keep = [], set()
+    for number, start in enumerate(range(0, len(icons), CHUNK), 1):
+        name = "%d.json" % number
+        (folder / name).write_text(
+            json.dumps({"icons": icons[start:start + CHUNK]}, ensure_ascii=False) + "\n",
+            encoding="utf-8")
+        chunks.append(path.stem + "/" + name)
+        keep.add(name)
+    for old in folder.glob("*.json"):
+        if old.name not in keep:
+            old.unlink()
+    index["chunks"] = chunks
+    path.write_text(json.dumps(index, ensure_ascii=False) + "\n", encoding="utf-8")
+    print("data: %-28s %9d bytes, %d chunk(s)"
+          % (path.relative_to(ROOT), path.stat().st_size, len(chunks)))
+
+
+def load_catalog(path):
+    """A catalog's full payload: the index, with its chunks merged back in."""
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    chunks = payload.get("chunks") or []
+    if chunks:
+        icons = []
+        for name in chunks:
+            icons.extend(json.loads((path.parent / name).read_text(encoding="utf-8")).get("icons", []))
+        payload["icons"] = icons
+    return payload
+
+
+def rechunk():
+    """Rewrite every full catalog on disk in the chunked shape, without refetching."""
+    skip = {"index", "tools", "fonts", "portfolio", "pages", "assets"}
+    done = 0
+    for path in sorted((ROOT / "docs/data").glob("*.json")):
+        if path.stem.endswith("-sheet") or path.stem in skip:
+            continue
+        payload = json.loads(path.read_text(encoding="utf-8"))
+        if "icons" not in payload:
+            continue
+        write_catalog(path, payload)
+        done += 1
+    print("rechunked %d catalogs" % done)
 
 
 def fmt(number):
@@ -592,7 +663,7 @@ def brands():
             print("skipping %s: no %s yet"
                   % (brand["name"], brand["data"].relative_to(ROOT)), file=sys.stderr)
             continue
-        payload = json.loads(brand["data"].read_text(encoding="utf-8"))
+        payload = load_catalog(brand["data"])
         entry = dict(brand)
         if brand.get("styles"):
             entry["styles"] = [
@@ -688,7 +759,7 @@ def sheet_icons(icons):
 def write_sheets(entries):
     """The all-brands sheet's own data: a glyph per category, not either catalog."""
     for brand in entries:
-        payload = json.loads(brand["data"].read_text(encoding="utf-8"))
+        payload = load_catalog(brand["data"])
         glyphs = sheet_icons(payload["icons"])
         sheet = {
             "set": payload.get("set", brand["name"]),
@@ -698,7 +769,7 @@ def write_sheets(entries):
             "icons": glyphs,
         }
         path = ROOT / "docs/data" / (brand["slug"] + "-sheet.json")
-        write_catalog(path, sheet)
+        write_plain(path, sheet)
         print("sheet: %-28s %3d of %4d glyphs, %3d categories"
               % (path.name, len(glyphs), payload["count"], len(sheet["cats"])))
 
@@ -831,6 +902,8 @@ def write_brand(brand, entries):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--rechunk", action="store_true",
+                        help="rewrite the catalogs on disk in the chunked shape, no network")
     parser.add_argument("--pages-only", action="store_true",
                         help="regenerate the pages from the catalogs already on disk")
     parser.add_argument("--categories", action="store_true",
@@ -840,6 +913,10 @@ def main():
     parser.add_argument("--refresh", metavar="SLUGS",
                         help="fetch only these brands (comma separated); the rest keep their catalogs")
     args = parser.parse_args()
+
+    if args.rechunk:
+        rechunk()
+        return
 
     if args.data_files:
         # build.sh stages exactly this list into the app, so a brand added here cannot
@@ -857,7 +934,7 @@ def main():
         for brand in BRANDS:
             if not brand.get("cats") or not brand["data"].exists():
                 continue
-            payload = json.loads(brand["data"].read_text(encoding="utf-8"))
+            payload = load_catalog(brand["data"])
             mapping, order = categories_for(brand)
             merged = 0
             for icon in payload["icons"]:

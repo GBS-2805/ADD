@@ -50,7 +50,9 @@ const BASE = (process.argv[2] || "http://127.0.0.1:8870").replace(/\/$/, "");
   const statuses = {};
   const routes = new Set([...shape.menu, "/icons/", "/icons/coolicons/", "/icons/lineicons/", "/icons/phosphor/", "/icons/streamline/",
     "/data/lineicons-sheet.json", "/data/coolicons-sheet.json", "/data/phosphor-sheet.json", "/data/streamline-sheet.json",
-    "/data/streamline-line.json", "/data/streamline-duo.json", "/data/streamline-solid.json", "/data/streamline-flat.json"]);
+    "/data/streamline-line.json", "/data/streamline-duo.json", "/data/streamline-solid.json", "/data/streamline-flat.json",
+    "/search/", "/data/pages.json", "/data/icons.json", "/data/icons/1.json", "/data/icons/4.json",
+    "/data/coolicons/1.json", "/data/phosphor/1.json", "/data/streamline-line/1.json"]);
   for (const href of routes) {
     statuses[href] = (await page.request.get(BASE + href)).status();
   }
@@ -64,11 +66,45 @@ const BASE = (process.argv[2] || "http://127.0.0.1:8870").replace(/\/$/, "");
   });
   statuses["coolicons All -> " + allHref] = allHref ? (await page.request.get(BASE + allHref)).status() : 0;
 
+  // The bundle carries the search page too: it reads the staged page index and
+  // filters by section. Drive it the way a thumb would -- chip, word, arrow keys.
+  const search = { chips: [], total: 0, filtered: 0, arrows: false, escaped: false, opened: null, openedStatus: 0 };
+  await page.goto(BASE + "/search/", { waitUntil: "networkidle" });
+  await page.waitForFunction(() => document.querySelectorAll("#chips button").length > 1, { timeout: 20000 });
+  search.total = await page.evaluate(() => document.querySelectorAll("#hits li").length);
+  const chips = await page.evaluate(() => Array.from(document.querySelectorAll("#chips button")).map((button) => ({
+    label: button.firstChild.textContent.trim(),
+    n: Number(button.querySelector("span").textContent),
+  })));
+  for (let i = 1; i < chips.length; i++) {
+    await page.click(`#chips button:nth-child(${i + 1})`);
+    const hits = await page.evaluate(() => document.querySelectorAll("#hits li").length);
+    search.chips.push(chips[i].label + ":" + (hits === chips[i].n ? hits : hits + "!=" + chips[i].n));
+  }
+  await page.click("#chips button:nth-child(1)");
+  await page.fill("#q", "icons");
+  search.filtered = await page.evaluate(() => document.querySelectorAll("#hits li").length);
+  await page.press("#q", "ArrowDown");
+  await page.press("#q", "ArrowDown");
+  search.arrows = await page.evaluate(() => document.querySelectorAll('#hits a[data-active="true"]').length) === 1;
+  await page.press("#q", "Escape");
+  search.escaped = await page.evaluate((all) => document.querySelector("#q").value === ""
+    && document.querySelectorAll("#hits li").length === all, chips[0].n);
+  await page.fill("#q", "icons");
+  await page.press("#q", "ArrowDown");
+  await Promise.all([page.waitForNavigation(), page.press("#q", "Enter")]);
+  search.opened = new URL(page.url()).pathname;
+  search.openedStatus = (await page.request.get(BASE + search.opened)).status();
+  const searchOk = search.total > 0 && search.chips.length >= 1
+    && search.chips.every((entry) => !entry.includes("!="))
+    && search.filtered > 0 && search.filtered <= search.total
+    && search.arrows && search.openedStatus === 200;
+
   const sectionsOk = shape.sections.length === 4 && shape.sections.every((s) => s.cells === 12 && s.svgs === 12);
   const linksOk = Object.values(statuses).every((code) => code === 200);
-  const ok = sectionsOk && linksOk && shape.fonts && errors.length === 0;
+  const ok = sectionsOk && linksOk && shape.fonts && searchOk && errors.length === 0;
 
-  console.log(JSON.stringify({ sections: shape.sections, fonts: shape.fonts, statuses, errors, ok }, null, 2));
+  console.log(JSON.stringify({ sections: shape.sections, fonts: shape.fonts, statuses, search, errors, ok }, null, 2));
   console.log(ok ? "bundle: OK" : "bundle: FAILED");
   await browser.close();
   process.exit(ok ? 0 : 1);

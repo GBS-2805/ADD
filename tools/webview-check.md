@@ -14,10 +14,12 @@ files and driving them in a browser proves what the app loads.
 
 - `docs/icons/index.html`, and the folders `lineicons/`, `coolicons/`, `all/`;
 - `docs/assets/site.css`, `site.js`, `favicon.svg`, and `assets/fonts/*.woff2`;
-- `docs/data/icons.json` and `coolicons.json`;
+- `docs/data/` whole: the names-first catalogs, their `data/<stem>/` glyph chunks,
+  the `-sheet.json` subsets, and the page index the search box reads;
+- `docs/search/index.html`, with that index trimmed to the pages the app carries;
 - a redirect `index.html` pointing at `icons/`.
 
-Fifteen files, tracked in this repository, so a release commit carries them. Never
+About 8 MB, tracked in this repository, so a release commit carries it. Never
 hand-edit that tree: it is rewritten on every build.
 
 ## 2. Serve it the way the WebView does
@@ -38,9 +40,12 @@ which only resolves to `/data/coolicons.json` from that root.
 section into view, because each one fetches its sheet only as it nears the viewport
 -- counting before the scroll leaves the last brand reading as twelve reserved cells
 with no glyphs. It then requires twelve glyphs in each of the four sections and
-checks every menu link, every brand page, every staged sheet and all four Streamline
-catalogs. A missing file, an unloaded Poppins, a failed request or any console error
-fails the run.
+checks every menu link, every brand page, every staged sheet, all four Streamline
+catalogs and one chunk from each catalog. It then drives `/search/` the way a thumb
+would: every section chip has to return the count it advertises, a word has to narrow
+the list, ArrowDown has to highlight exactly one hit, Escape has to clear both the
+word and the chip, and Enter has to open a page that exists in the bundle. A missing
+file, an unloaded Poppins, a failed request or any console error fails the run.
 
 A good run, from 2.19 (the shipped build):
 
@@ -48,7 +53,9 @@ A good run, from 2.19 (the shipped build):
     poppins loaded: true
     /icons/all/ 200   /icons/lineicons/ 200   /icons/coolicons/ 200   /icons/phosphor/ 200
     /icons/streamline/ 200   /data/streamline-sheet.json 200   /data/streamline-flat.json 200
+    /search/ 200   /data/pages.json 200   /data/icons/1.json 200   /data/coolicons/1.json 200
     coolicons All -> /icons/all/ 200
+    search: chips [Icons:6], 6 hits, arrows true, escape true, Enter -> /icons/all/ 200
     console errors: none
     bundle: OK
 

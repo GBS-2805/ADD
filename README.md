@@ -95,6 +95,7 @@ quotes a stale version, size or checksum. Nothing on the shelf is typed twice.
 ```bash
 python3 tools/fetch_icons.py                # fetch every set, write data + pages
 python3 tools/fetch_icons.py --pages-only   # rewrite the pages from the catalogs
+python3 tools/fetch_icons.py --rechunk      # rewrite the catalogs in chunks, no network
 python3 tools/build_catalog.py              # measure, write the catalogs, check the pages
 python3 tools/build_catalog.py --check      # check only
 python3 tools/build_site.py                 # pages.json, sitemap.xml, robots.txt, search page
@@ -157,17 +158,18 @@ icons-app/AndroidManifest.xml                      Icons manifest (no permission
 icons-app/src/app/offline/icons/MainActivity.java  WebView, asset origin, clipboard bridge
 icons-app/res/                                      one theme, one vector launcher icon
 icons-app/assets/                                   staged at build time from docs/ (not committed)
-build.sh                                           SDK-tools build: ./build.sh [all|compress|icons]
+build.sh                                           SDK-tools build: ./build.sh [all|stage|compress|icons]
 docs/                                              the eleven-page static shelf + data/
 tools/catalog.json                                 apps, fonts, portfolio (one source)
 tools/build_catalog.py                             measures the shipped files, writes data/
 tools/build_releases.py                            writes the releases page from git history
 tools/release_notes.json                           the release notes: one copy, newest first
-tools/fetch_icons.py                               both icon pages + both catalogs
+tools/fetch_icons.py                               the icon pages + the chunked catalogs
 tools/icons_hub_template.html                      the Icons app landing page
 tools/icons_brand_template.html                    the per-brand preview page
 tools/render_pages.js                              captures every page and writes the gallery
 tools/build_site.py                                page manifest, sitemap, robots, search page
+tools/search_template.html                         the search page: section chips, arrow keys
 tools/hash_assets.py                               hashed copies of the CSS and JS every page names
 tools/deploy_vercel.py                             deploys docs/ to Vercel, verifies it, moves the links
 manifest.json, worker.js                           Sites deployment (fallback host)
@@ -181,6 +183,7 @@ No Gradle, no AndroidX, no downloads beyond the SDK itself.
 export JAVA_HOME=/path/to/jdk17
 export ANDROID_SDK_ROOT=$HOME/android-sdk   # needs build-tools;35.0.0 + platforms;android-35
 ./build.sh            # both APKs
+./build.sh stage      # the browser bundle only: no JDK or SDK needed
 ./build.sh icons      # Icons only: stages docs/ into icons-app/assets, then builds
 ./build.sh compress   # Compress only
 ```

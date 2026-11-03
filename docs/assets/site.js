@@ -49,7 +49,7 @@
   }
 
   // A route to /search/ from the side tab on every page, without editing each page.
-  // The bundle has no search page, so the app does not get the link.
+  // The bundle carries the page too, so the app keeps the link.
   function rootPrefix() {
     var script = document.currentScript || document.querySelector('script[src*="assets/site"]');
     var src = script ? script.getAttribute("src") || "" : "";
@@ -57,7 +57,7 @@
     return cut > -1 ? src.slice(0, cut) : "";
   }
   var drawerNote = drawer.querySelector(".drawer-note");
-  if (drawerNote && !document.getElementById("searchLink") && !window.IconsApp) {
+  if (drawerNote && !document.getElementById("searchLink")) {
     var searchLink = document.createElement("a");
     searchLink.id = "searchLink";
     searchLink.href = rootPrefix() + "search/";

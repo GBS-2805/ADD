@@ -936,14 +936,34 @@ __BRANDS__
     markStyleSegs();
   }
 
-  function loadCatalog(url) {
+  // The catalog is a names-first index plus glyph chunks. The index already
+  // carries counts, categories and one glyph, so `onIndex` paints the page before
+  // any markup arrives; the chunks then stream in parallel and fill the sheet.
+  function loadCatalog(url, onIndex) {
     if (catalogs[url]) { return Promise.resolve(catalogs[url]); }
-    return fetch(url, { cache: "no-cache" })
+    var base = url.replace(/[^/]*$/, "");
+    return fetch(url, { cache: "default" })
       .then(function (response) {
         if (!response.ok) { throw new Error(url + " returned " + response.status); }
         return response.json();
       })
-      .then(function (payload) { catalogs[url] = payload; return payload; });
+      .then(function (payload) {
+        if (onIndex) { onIndex(payload); }
+        var chunks = payload.chunks || [];
+        if (!chunks.length) { catalogs[url] = payload; return payload; }
+        return Promise.all(chunks.map(function (name) {
+          return fetch(base + name, { cache: "default" }).then(function (response) {
+            if (!response.ok) { throw new Error(name + " returned " + response.status); }
+            return response.json();
+          });
+        })).then(function (parts) {
+          var icons = [];
+          parts.forEach(function (part) { icons = icons.concat(part.icons || []); });
+          payload.icons = icons;
+          catalogs[url] = payload;
+          return payload;
+        });
+      });
   }
 
   function catsFor(payload) {
@@ -1800,12 +1820,18 @@ __BRANDS__
   renderStyles();
   var initialData = initial ? initial.data : DATA;
 
-  loadCatalog(initialData)
+  loadCatalog(initialData, function (index) {
+    // Paint what the index knows: the total and one real glyph, not a placeholder.
+    if (index.first) { select(index.first, null); }
+    if (index.count) { countEl.textContent = index.count.toLocaleString(); }
+    if (index.cats && index.cats.length) { CATS = index.cats; }
+    announce("Loading " + (index.count || 0).toLocaleString() + " icons…");
+  })
     .then(function (payload) {
       currentPayload = payload;
       items = displayed(payload.icons || []);
       if (!items.length) { throw new Error("the catalog is empty"); }
-      CATS = catsFor(payload);
+      CATS =      catsFor(payload);
       if (savedCat) {
         var known = CATS.some(function (entry) { return entry.name === savedCat; });
         if (known) { cat = savedCat; catLabel.textContent = savedCat; }
