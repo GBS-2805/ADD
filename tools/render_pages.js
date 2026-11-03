@@ -231,9 +231,10 @@ const escape = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/
   </a>
 
   <div class="who">
-    <div class="who-lines">
-      <p>Compress</p>
-      <p>__COUNT__ captures</p>
+    <div class="who-lines keep">
+      <p class="big">Art Design Database</p>
+      <p class="big">Icons • Fonts • Tools</p>
+      <p class="phone">Art • Tools</p>
     </div>
     <button class="burger" id="burger" type="button" aria-expanded="false" aria-controls="drawer" aria-label="Open side tab">
       <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 7H19M5 12H19M5 17H19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
