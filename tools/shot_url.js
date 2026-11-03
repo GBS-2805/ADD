@@ -1,6 +1,6 @@
 // Load a URL in headless Chromium and screenshot it, reporting console errors.
 //   node tools/shot_url.js <url> <out.png> [width] [height] [waitMs]
-const path = "/tmp/pwshot/node_modules/playwright";
+const path = "playwright";   // resolved through NODE_PATH, like render_pages.js
 const { chromium } = require(path);
 
 (async () => {

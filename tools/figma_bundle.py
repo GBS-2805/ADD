@@ -10,6 +10,7 @@ artboards down the right, each labelled with its file name above it.
 """
 import glob
 import os
+import pathlib
 import re
 import sys
 import xml.etree.ElementTree as ET
@@ -40,7 +41,34 @@ def artboard(path):
     return float(root.get("width")), float(root.get("height")), body
 
 
+# Pages whose export can go stale. The listing and the gallery are written by this
+# toolchain or by the capture run, not by the exporter, so they are not evidence.
+EXCLUDED = ("figma", "renders")
+SLACK = 2.0   # a page and the bake that read it can share a timestamp
+
+
+def stale_export(src="figma"):
+    """Stop when the export is older than the pages it is supposed to translate.
+
+    A failed export leaves the previous artboards in place, and the bundler and the
+    publisher then republish them as if they were current -- the run looks clean and
+    the hand-off silently lags behind the site by a release.
+    """
+    pages = [p for p in glob.glob("docs/**/index.html", recursive=True)
+             if not set(pathlib.PurePath(p).parts) & set(EXCLUDED)]
+    boards = glob.glob(os.path.join(src, "[0-9][0-9]-*.svg"))
+    if not pages or not boards:
+        return
+    page = max(pages, key=os.path.getmtime)
+    board = max(boards, key=os.path.getmtime)
+    if os.path.getmtime(page) > os.path.getmtime(board) + SLACK:
+        sys.exit("the export is older than the page it comes from:\n  %s is newer than %s\n"
+                 "run tools/figma_export.js before bundling, or the hand-off ships the "
+                 "previous release" % (page, board))
+
+
 def main(src="figma"):
+    stale_export(src)
     files = sorted(
         f for f in glob.glob(os.path.join(src, "*.svg")) if os.path.basename(f) != OUT
     )

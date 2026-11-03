@@ -138,7 +138,28 @@ def listing(names):
 """ % (lede, body)
 
 
+def stale_export():
+    """Refuse to publish artboards older than the pages they were measured from.
+
+    The export failing is quiet: the old files stay, the bundle rebuilds them and this
+    step serves them, so the site carries a hand-off from the release before while
+    every command reported success.
+    """
+    pages = [p for p in pathlib.Path("docs").rglob("index.html")
+             if p.parts[1] not in ("figma", "renders")]
+    boards = list(SRC.glob("[0-9][0-9]-*.svg"))
+    if not pages or not boards:
+        return
+    page = max(pages, key=lambda p: p.stat().st_mtime)
+    board = max(boards, key=lambda p: p.stat().st_mtime)
+    if page.stat().st_mtime > board.stat().st_mtime + 2:
+        sys.exit("figma/: %s is older than %s\n"
+                 "run tools/figma_export.js and tools/figma_bundle.py first; publishing "
+                 "now would serve the previous release's artboards" % (board, page))
+
+
 def main():
+    stale_export()
     exports = sorted(SRC.glob("[0-9][0-9]-*.svg"))
     if not exports:
         sys.exit("no artboards in figma/ - run tools/figma_export.js first")

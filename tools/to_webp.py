@@ -23,19 +23,26 @@ def main(argv):
     src, dst = pathlib.Path(argv[1]), pathlib.Path(argv[2])
     dst.mkdir(parents=True, exist_ok=True)
     smaller = 0
+    made, missing = [], []
     for name in argv[3:]:
         png = src / (name + ".png")
         if not png.exists():
             png = dst / (name + ".png")
         if not png.exists():
-            print("  no png for %s, skipped" % name)
+            # The gallery lists what was asked for, so a capture with no PNG becomes a
+            # broken figure on the site. Counting it as converted is how that ships.
+            missing.append(name)
             continue
         out = dst / (name + ".webp")
         Image.open(png).convert("RGB").save(out, "WEBP", lossless=True, method=6)
         smaller += png.stat().st_size - out.stat().st_size
+        made.append(name)
         if png.parent == dst:
             png.unlink()
-    print("webp: %d captures, %d bytes smaller" % (len(argv) - 3, smaller))
+    print("webp: %d of %d captures, %d bytes smaller" % (len(made), len(argv) - 3, smaller))
+    if missing:
+        print("  no PNG for: %s" % ", ".join(missing))
+        sys.exit("to_webp: %d capture(s) never reached the browser's output" % len(missing))
 
 
 if __name__ == "__main__":
