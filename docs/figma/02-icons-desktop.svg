@@ -19,13 +19,13 @@
 <text x="40" y="365.52" font-size="20" xml:space="preserve">surface you need, then copy the SVG. The app ships</text>
 <text x="40" y="396.52" font-size="20" xml:space="preserve">this page and its two catalogs inside the APK, so it</text>
 <text x="40" y="427.52" font-size="20" xml:space="preserve">works with the radio off.</text>
-<rect x="40" y="470.52" width="260" height="56" fill="#d9d9d9"/>
+<rect x="40" y="470.52" width="261" height="56" fill="#d9d9d9"/>
 <image x="68" y="488.52" width="20" height="20" xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADwAAAA8CAYAAAA6/NlyAAAC00lEQVR4AeyaW0oDMRSGq0sQb6DiFRehIOIafBUfVFyGugxRd+EKvDzqo0/i5UFXIej/qQOdIW2TNMl02sg5TXJycvL/+cfSGWa8NWJ/mfCwC54VzgoP2QnkSzqBoBPa4/Df6aubzlIrPCtqT/KLf6c/o34yS014V8zaCdInpnAaS0140kBryhCLFkpNOBoR28KZsO1JNTUvK9xU5Wxxj5rCrUzY9tJoal5WuKnK2eLOCtueVFPzssJNVc4Wd1bY9qSamhdS4WkdwqWcxzemG31NOVnoer+bhyR8r4oHch7QPapdlvvaihY+yIt61NawfwtF+FhQ1uSFLahzK1+UuxprbrRoXl7YujqQV9OfhSJsQjGnIMpAQF0rI5c1rLVa4JoUivC5Nn6RVw3gdwpCRE1XW9JsJ7LUvtJ83xaKMEB29PEhrxqXJkQg/V2d1JgYcxwMB6RQyahJ7VLQdxCS8LtAbMkBqKZkEIGQ6YtsVZkcCDnqloxa1KR2acJv0Ar+AIBLb1NgAKqmZCi9X4r8DfbUdCJLLWoqJYyFVLhAhBoANZEucnq1rKUGtXrlOs3HIAwAgHIpfjJwdNawlhqOS3unxyLMzlyKG+qglhorI5c1rLVa4JoUkzBYUAm1UI1xNyeHXNZ0y+trLjZhwKEWqqEeY5MzRw65pvlgsRSEAYtqfAlBjHG7E2OOnPZ4lH4qwoCH0DadihNjrhKOM0xJGAbP+uBOiJ+J3ErSJ6ZwGktNGFav+uAW8kgtfTXprA7C6dgZdsqEDYcyVCFfhXm/iv/DU51GHc7eYND2buZDuP1dqxNtV4fzoNDrHS8fwrxXxftV4lqrgQEsTiB8CDttEDl5zKm+kn0IX2vdl7xuAwNYnHD4EH7TDjyS5YfDmfp1OHuDASyCYG8+hKnOb19+GtbxDc2e7A0GsDi5L2GnTQYpORMeJDViYMkKxzjVQao5cgr/AAAA///eVkthAAAABklEQVQDADLTknkJIfEtAAAAAElFTkSuQmCC"/>
-<text x="100" y="504.48" fill="#000000" font-size="17" xml:space="preserve">Download Icons 2.13</text>
-<text x="40" y="562.52" fill-opacity="0.64" font-size="14" xml:space="preserve">Icons 2.13</text>
-<text x="130" y="562.52" fill-opacity="0.64" font-size="14" xml:space="preserve">Android 8.0+</text>
-<text x="243" y="562.52" fill-opacity="0.64" font-size="14" xml:space="preserve">No internet permission</text>
-<text x="427" y="562.52" fill-opacity="0.64" font-size="14" xml:space="preserve">Signed, no store</text>
+<text x="100" y="504.48" fill="#000000" font-size="17" xml:space="preserve">Download Icons 2.14</text>
+<text x="40" y="562.52" fill-opacity="0.64" font-size="14" xml:space="preserve">Icons 2.14</text>
+<text x="132" y="562.52" fill-opacity="0.64" font-size="14" xml:space="preserve">Android 8.0+</text>
+<text x="245" y="562.52" fill-opacity="0.64" font-size="14" xml:space="preserve">No internet permission</text>
+<text x="429" y="562.52" fill-opacity="0.64" font-size="14" xml:space="preserve">Signed, no store</text>
 <rect x="40" y="609.61" width="1220" height="1" fill="#d9d9d9" fill-opacity="0.26"/>
 <text x="40" y="703.61" font-size="30" letter-spacing="-0.45" xml:space="preserve">Brands</text>
 <text x="40" y="736.11" fill-opacity="0.64" font-size="14" xml:space="preserve">Every set taken whole — nothing sampled, nothing Pro</text>
@@ -121,8 +121,8 @@
 <text x="40" y="2377.61" fill-opacity="0.64" font-size="14" xml:space="preserve">Three taps and a warning to dismiss</text>
 <text x="40" y="2429" fill-opacity="0.64" font-size="14" xml:space="preserve">01</text>
 <text x="73" y="2430.7" font-size="17" xml:space="preserve">Tap</text>
-<text x="111" y="2430.7" font-size="17" font-weight="700" xml:space="preserve">Download Icons 2.13</text>
-<text x="286" y="2430.7" font-size="17" xml:space="preserve">and let it finish.</text>
+<text x="111" y="2430.7" font-size="17" font-weight="700" xml:space="preserve">Download Icons 2.14</text>
+<text x="287" y="2430.7" font-size="17" xml:space="preserve">and let it finish.</text>
 <rect x="40" y="2453.75" width="1220" height="1" fill="#d9d9d9" fill-opacity="0.26"/>
 <text x="40" y="2487.05" fill-opacity="0.64" font-size="14" xml:space="preserve">02</text>
 <text x="77" y="2489.75" font-size="17" xml:space="preserve">Open it, allow installs from this source, then tap</text>
@@ -137,7 +137,7 @@
 <text x="40" y="2632.84" fill-opacity="0.64" font-size="14" xml:space="preserve">Updates keep your place in the browser. Both apps are signed with the same</text>
 <text x="40" y="2655.94" fill-opacity="0.64" font-size="14" xml:space="preserve">key, so they install and update side by side.</text>
 <rect x="0" y="2765.03" width="1300" height="1" fill="#d9d9d9" fill-opacity="0.26"/>
-<text x="40" y="2824.03" fill-opacity="0.64" font-size="14" xml:space="preserve">Icons 2.13 · app.offline.icons · Lineicons, Coolicons, Phosphor and Plump Solid. Every set is MIT except Plump Solid, which is CC BY 4.0. The paid icons sold on the vendors' sites</text>
+<text x="40" y="2824.03" fill-opacity="0.64" font-size="14" xml:space="preserve">Icons 2.14 · app.offline.icons · Lineicons, Coolicons, Phosphor and Plump Solid. Every set is MIT except Plump Solid, which is CC BY 4.0. The paid icons sold on the vendors' sites</text>
 <text x="40" y="2847.13" fill-opacity="0.64" font-size="14" xml:space="preserve">are neither included nor copied.</text>
 <text x="40" y="2910.22" fill-opacity="0.64" font-size="14" xml:space="preserve">Index</text>
 <text x="77" y="2910.22" fill-opacity="0.64" font-size="14" xml:space="preserve">·</text>

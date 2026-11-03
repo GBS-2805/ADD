@@ -2,6 +2,12 @@
   "notes": [
     {
       "id": "icons",
+      "version": "2.14",
+      "title": "Nothing selected by default",
+      "note": "Export packs only what the selection holds: nothing is selected when the page opens, so it reads Nothing to export, and Remove all now really leaves nothing behind."
+    },
+    {
+      "id": "icons",
       "version": "2.13",
       "title": "Sheets on approach",
       "note": "The all-brands page fetches each brand's sheet only as its section comes into view, and keeps it for the tab, so a revisit fetches none of them."
