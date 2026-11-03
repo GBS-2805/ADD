@@ -358,7 +358,8 @@ changes as unverified on device rather than illustrating them.
   an Open on the web button; the `WebViewClient` hands any http(s) link to the browser.
   The fallback is built in Java, so it is not in the staged bundle: drive it with
   `tools/webview-fallback-check.js`, which reassembles it from `classes.dex` and fails
-  unless the copy and both links render.
+  unless the copy and both links render. `build.sh` runs it after signing every Icons
+  APK, and falls back to its `--static` mode when Playwright is absent.
 - Compress's palette has one source of truth: `app/res/values/colors.xml` (Icons has
   its own in `icons-app/res/values/styles.xml`). Names are kept from the old theme on
   purpose, so a rename touches every drawable, layout and Java file that references

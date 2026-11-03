@@ -116,6 +116,19 @@ build_app() {
     ls -lh "$OUT/$apk"
 }
 
+check_fallback() {
+    local apk="$1"
+    echo "== Icons: the unbundled-page fallback =="
+    # Built in Java, so it is not a file in assets/www. Render the shipped dex
+    # strings when the toolchain is here; otherwise still refuse a stale copy.
+    if node -e 'require("playwright")' >/dev/null 2>&1; then
+        node "$ROOT/tools/webview-fallback-check.js" "$apk" "$ROOT/artifacts/fallback-offline.png"
+    else
+        echo "  Playwright is not installed; checking the shipped strings without a render."
+        node "$ROOT/tools/webview-fallback-check.js" --static "$apk"
+    fi
+}
+
 stage_icons_assets() {
     local www="$ROOT/icons-app/assets/www"
     echo "== Icons: staging the browser out of docs/ =="
@@ -147,11 +160,13 @@ case "${1:-all}" in
     icons)
         stage_icons_assets
         build_app icons-app Icons Icons-2.19.apk 30 2.19
+        check_fallback "$OUT/Icons-2.19.apk"
         ;;
     all)
         build_app app Compress Compress-2.1.apk 12 2.1
         stage_icons_assets
         build_app icons-app Icons Icons-2.19.apk 30 2.19
+        check_fallback "$OUT/Icons-2.19.apk"
         ;;
     *)
         echo "usage: $0 [all|compress|icons]" >&2

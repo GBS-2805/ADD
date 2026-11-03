@@ -13,8 +13,11 @@ const path = require("path");
 const { chromium } = require("playwright");
 
 const root = path.join(__dirname, "..");
-const apk = process.argv[2] || path.join(root, "docs", "Icons-2.19.apk");
-const shot = process.argv[3] || path.join(root, "artifacts", "fallback-offline.png");
+const args = process.argv.slice(2);
+const staticOnly = args.includes("--static");
+const positional = args.filter((a) => a !== "--static");
+const apk = positional[0] || path.join(root, "docs", "Icons-2.19.apk");
+const shot = positional[1] || path.join(root, "artifacts", "fallback-offline.png");
 
 const dex = execFileSync("unzip", ["-p", apk, "classes.dex"], { maxBuffer: 96 * 1024 * 1024 });
 // Dex strings are NUL-terminated runs of UTF-8. latin1 keeps the bytes one-to-one,
@@ -41,6 +44,18 @@ const checks = {
   bytes: page.length,
 };
 
+const staticOk = checks.saysEveryBrand && checks.noBothBrands
+  && checks.heading === "That page lives on the site" && checks.addresses === 2
+  && page.includes(">Open on the web</a>") && page.includes('href="/icons/index.html"');
+
+if (staticOnly) {
+  // Builds without the render toolchain still refuse a stale fallback; they just
+  // cannot prove the layout.
+  console.log(JSON.stringify(checks, null, 2));
+  console.log(staticOk ? "fallback: OK (static check, not rendered)" : "fallback: FAILED");
+  process.exit(staticOk ? 0 : 1);
+}
+
 (async () => {
   const browser = await chromium.launch({ args: ["--no-sandbox"] });
   const tab = await browser.newPage({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2 });
@@ -65,7 +80,7 @@ const checks = {
   await tab.screenshot({ path: shot, fullPage: true });
   await browser.close();
   checks.screenshot = path.relative(root, shot);
-  const ok = checks.saysEveryBrand && checks.noBothBrands && checks.rendered.title === "That page lives on the site"
+  const ok = staticOk && checks.rendered.title === "That page lives on the site"
     && checks.rendered.links.length === 2 && checks.addresses === 2 && errors.length === 0 && !checks.rendered.overflowX;
   console.log(JSON.stringify(checks, null, 2));
   console.log(ok ? "fallback: OK" : "fallback: FAILED");

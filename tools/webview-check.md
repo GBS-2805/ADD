@@ -107,9 +107,13 @@ loads that document in Chromium at 390x844:
 
     node tools/webview-fallback-check.js docs/Icons-2.19.apk artifacts/fallback-offline.png
 
-It prints the heading, both links, the background, the font and any console error,
-saves the screenshot, and exits non-zero unless the page says "every brand, their
-catalogs", carries no "both brands", renders both links and does not scroll sideways.
+`build.sh` runs it after signing every Icons APK, so a release whose fallback went
+stale fails instead of shipping. It prints the heading, both links, the background,
+the font and any console error, saves the screenshot, and exits non-zero unless the
+page says "every brand, their catalogs", carries no "both brands", renders both
+links and does not scroll sideways. Without Playwright the build uses `--static`,
+which checks the same shipped strings and links but cannot prove the layout -- it
+still fails a stale copy.
 A good run:
 
     "title": "That page lives on the site",
