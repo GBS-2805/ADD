@@ -134,11 +134,12 @@ stage_icons_assets() {
     # The site root is not bundled; a page that asks for "/" gets the browser.
     cat > "$www/index.html" <<'HTML'
 <!doctype html><meta charset="utf-8"><meta http-equiv="refresh" content="0;url=icons/">
-<title>Icons</title>      HTML
-      # The staging list above is written by hand, and a page that asks for a file it
-      # does not carry still renders -- minus its content. Refuse to build one.
-      python3 "$ROOT/tools/check_bundle.py" "$www"
-      du -sh "$www"
+<title>Icons</title>
+HTML
+    # The staging list above is written by hand, and a page that asks for a file it
+    # does not carry still renders -- minus its content. Refuse to build one.
+    python3 "$ROOT/tools/check_bundle.py" "$www"
+    du -sh "$www"
 }
 
 case "${1:-all}" in
