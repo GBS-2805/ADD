@@ -31,7 +31,8 @@
   .trypx input::-webkit-outer-spin-button, .trypx input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
   .trypx input:focus-visible { outline: 2px solid var(--band); outline-offset: 2px; }
   .trycss { display: flex; align-items: center; gap: 12px; margin: 14px 0 0; flex-wrap: wrap; max-width: 640px; }
-  .trycss code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; color: var(--on-dim); overflow-wrap: anywhere; }
+  .trycss code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; line-height: 1.5;
+    color: var(--on-dim); overflow-wrap: anywhere; white-space: pre-wrap; }
   .try-copy { margin-left: auto; font: inherit; font-size: 13px; letter-spacing: .04em; text-transform: uppercase;
     padding: 5px 10px; color: var(--on); background: transparent; border: 1px solid var(--rule); cursor: pointer; }
   .try-copy:hover { border-color: var(--on-dim); }
@@ -119,7 +120,9 @@
       <p id="tryOut" style="font-weight:400;font-size:48px">Art Design Database</p>
     </div>
     <div class="trycss">
-      <code id="tryRule">font-family: "Poppins", sans-serif; font-weight: 400; font-size: 48px;</code>
+      <code id="tryRule">font-family: "Poppins", sans-serif;
+font-weight: 400;
+font-size: 48px;</code>
       <button type="button" class="try-copy" id="tryCopy">Copy CSS</button>
     </div>
     <div class="trysize">
@@ -222,7 +225,7 @@
     out.style.fontWeight = weight;
     out.style.fontSize = size.value + "px";
     if (document.activeElement !== num) { num.value = size.value; }
-    rule.textContent = 'font-family: "Poppins", sans-serif; font-weight: ' + weight + "; font-size: " + size.value + "px;";
+    rule.textContent = 'font-family: "Poppins", sans-serif;\nfont-weight: ' + weight + ";\nfont-size: " + size.value + "px;";
     reset.hidden = !changed();
   }
   function setWeight(value) {
