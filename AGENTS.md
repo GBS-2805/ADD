@@ -239,13 +239,13 @@ changes as unverified on device rather than illustrating them.
     `tools/check_bundle.py` over the staged pages and fails the build if a
     reference any of them makes does not resolve inside the bundle.
 - Brands are declared in one table in `tools/fetch_icons.py`: slug, display name,
-  source, licence and where its catalog lives. Lineicons, Coolicons and Phosphor
-  are fetched (Phosphor's regular weight, 1,512 outline icons, from its npm
-  package); Ziia's two Geometric Shapes sets have no public source and are read
-  from exported SVGs in `icon-src/geometric-shapes-1/` and `-2/`, each brand
-  appearing as soon as its folder holds files. A brand with no catalog yet is
-  skipped rather than failing the run, so the pages stay whole while one is still
-  being exported.
+  source, licence and where its catalog lives. Lineicons, Coolicons, Phosphor and
+  Plump Solid are all fetched: Phosphor's regular weight from its npm package, and
+  Plump's Solid style from Iconify's JSON mirror of Streamline's free set -- the 500
+  names ending `-solid`, CC BY 4.0; the 999 outline drawings and the paid Pro packs
+  are not taken. A brand whose catalog is missing is skipped rather than failing the
+  run, and a brand with no repository can instead be read from exported SVGs in
+  `icon-src/<slug>/`.
 - The left pull-down of all three icon pages opens with All, linking to
   `/icons/all/`: twelve glyphs per brand, one from every category — the first name in
   the catalog for that category. Categories are matched across sets on a plain key
@@ -264,7 +264,8 @@ changes as unverified on device rather than illustrating them.
   attribute beats a value inherited from the `<svg>`. The preview therefore writes
   the chosen weight onto each element (`tune()` in the template), not onto a parent.
   Setting it in CSS on the svg looks correct and does nothing.
-- All three sets carry their vendor's own categories: `fetch_icons.py --categories`
+- Three of the four sets carry their vendor's own categories (Plump publishes
+  none, so its page filters by name only): `fetch_icons.py --categories`
   merges Coolicons' `icons/data/index.json`, Lineicons' public search index and
   Phosphor's `IconCategory` (its own `phosphor-icons/core` repo: `src/types.ts` for the
   names and order, `src/icons.ts` per icon) into the catalogs as `cat`, keeps each

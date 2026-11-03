@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#3f4e96" />
 <link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml" />
 <title>All brands — one icon per category, twelve from each set</title>
-<meta name="description" content="Every free icon brand on one page, twelve icons each, starting with the categories they share. 3,376 icons in all, with the whole catalog one page away." />
+<meta name="description" content="Every free icon brand on one page, twelve icons each, starting with the categories they share. 3,876 icons in all, with the whole catalog one page away." />
 <link rel="stylesheet" href="../../assets/site.css" />
 <style>
   /* page-only: every brand is a section under the one before it, each with its
@@ -118,10 +118,11 @@
 </header>
 
 <nav class="menu" id="menu" data-open="false" aria-label="Icon brands">
-  <a href="../../icons/all/" aria-current="page">All<span>3,376</span></a>
+  <a href="../../icons/all/" aria-current="page">All<span>3,876</span></a>
   <a href="../../icons/lineicons/">Lineicons<span>606</span></a>
   <a href="../../icons/coolicons/">Coolicons<span>1,258</span></a>
   <a href="../../icons/phosphor/">Phosphor<span>1,512</span></a>
+  <a href="../../icons/plump/">Plump Solid<span>500</span></a>
 </nav>
 
 <div class="scrim" id="scrim" data-open="false"></div>
@@ -134,7 +135,7 @@
   <a href="../../portfolio/">Portfolio<span>3 projects</span></a>
   <a href="../../renders/">Renders<span>gallery</span></a>
   <a href="../../releases/">Releases<span>history</span></a>
-  <p class="drawer-note">All brands · an icon from each category, 3,376 in all.</p>
+  <p class="drawer-note">All brands · an icon from each category, 3,876 in all.</p>
 </aside>
 
 <main>
@@ -151,13 +152,13 @@
 </main>
 
 <footer>
-  <p>All brands · 3,376 icons, both sets MIT. The paid icons sold on either vendor's site are neither included nor copied.</p>
+  <p>All brands · 3,876 icons, both sets MIT. The paid icons sold on either vendor's site are neither included nor copied.</p>
   <p><a href="../../icons/">Icons</a> · <a href="../../">Index</a> · <a href="../../tools/">Tools</a> · <a href="../../download/">Download</a></p>
 </footer>
 
 <script>
 (function () {
-  var SETS = [{"slug": "lineicons", "name": "Lineicons", "count": 606, "cats": 51, "data": "../../data/lineicons-sheet.json"}, {"slug": "coolicons", "name": "Coolicons", "count": 1258, "cats": 30, "data": "../../data/coolicons-sheet.json"}, {"slug": "phosphor", "name": "Phosphor", "count": 1512, "cats": 18, "data": "../../data/phosphor-sheet.json"}];
+  var SETS = [{"slug": "lineicons", "name": "Lineicons", "count": 606, "cats": 51, "data": "../../data/lineicons-sheet.json"}, {"slug": "coolicons", "name": "Coolicons", "count": 1258, "cats": 30, "data": "../../data/coolicons-sheet.json"}, {"slug": "phosphor", "name": "Phosphor", "count": 1512, "cats": 18, "data": "../../data/phosphor-sheet.json"}, {"slug": "plump", "name": "Plump Solid", "count": 500, "cats": 0, "data": "../../data/plump-sheet.json"}];
   var CAP = 12;
   var sheetHost = document.getElementById("sheets");
 
@@ -202,7 +203,9 @@
     results.forEach(function (result) {
       if (!result.payload) { return; }
       var map = {};
-      categories(result.payload).forEach(function (name, place) {
+      var names = categories(result.payload);
+        if (!names.length) { return; }   // no list to match on: it neither shares nor blocks
+        names.forEach(function (name, place) {
         var k = key(name);
         map[k] = name;
         totals[k] = (totals[k] || 0) + place;
@@ -221,8 +224,9 @@
   // the start of its catalog until the sheet is full.
   function choose(payload, shared) {
     var first = firstOf(payload), all = categories(payload), picks = [], used = {};
-    shared.forEach(function (k) {
-      if (first[k] && picks.length < CAP) { picks.push(first[k]); used[k] = true; }
+    var applied = 0;
+      shared.forEach(function (k) {
+      if (first[k] && picks.length < CAP) { picks.push(first[k]); used[k] = true; applied++; }
     });
     all.forEach(function (name) {
       var k = key(name);
@@ -233,11 +237,14 @@
     for (var i = 0; i < payload.icons.length && picks.length < CAP; i++) {
       if (picks.indexOf(payload.icons[i]) === -1) { picks.push(payload.icons[i]); }
     }
-    return { picks: picks, cats: all.length, shared: shared.length };
+    return { picks: picks, cats: all.length, shared: applied };
   }
 
   function note(chosen) {
-    var own = chosen.picks.length - Math.min(chosen.shared, chosen.picks.length);
+    if (!chosen.cats) {
+        return chosen.picks.length + " icons from the start of its catalog; this set publishes no categories";
+      }
+      var own = chosen.picks.length - Math.min(chosen.shared, chosen.picks.length);
     if (chosen.shared && own > 0) {
       return chosen.shared + " shared categories, then " + own + " of its " + chosen.cats;
     }

@@ -47,11 +47,22 @@ APK = ROOT / "docs/Icons-1.2.apk"
 DATA_LINE = ROOT / "docs/data/icons.json"
 DATA_COOL = ROOT / "docs/data/coolicons.json"
 DATA_PHOS = ROOT / "docs/data/phosphor.json"
+DATA_PLUMP = ROOT / "docs/data/plump.json"
 # The two Figma sets have no repository to fetch from: they are exported by hand
 # into these folders, and the brand is skipped until its folder has SVGs in it.
 DATA_GEO1 = ROOT / "docs/data/geometric-shapes-1.json"
 DATA_GEO2 = ROOT / "docs/data/geometric-shapes-2.json"
 TREE_CACHE = pathlib.Path("/tmp/coolicons-tree.json")
+
+# Streamline's free Plump set is published to Iconify as a single JSON file: 1,499
+# icons, of which the 500 ending in "-solid" are the Solid style its Figma file
+# names. Taking the whole file and filtering beats 500 requests, and Iconify carries
+# the licence with the artwork (CC BY 4.0, Streamline). The paid Pro packs are not
+# in it.
+PLUMP_JSON = ("https://raw.githubusercontent.com/iconify/icon-sets/master"
+              "/json/streamline-plump.json")
+PLUMP_CACHE = pathlib.Path("/tmp/streamline-plump.json")
+PLUMP_GRID = 48
 
 LINE_TREE = "https://data.jsdelivr.com/v1/packages/gh/LineiconsHQ/Lineicons@main"
 LINE_URL = ("https://cdn.jsdelivr.net/gh/LineiconsHQ/Lineicons@main"
@@ -124,16 +135,10 @@ BRANDS = [
      "style": "regular weight, outline", "data": DATA_PHOS, "names": "phosphor",
      "cats": "phosphor", "licence": "MIT",
      "note": "Phosphor's regular weight, whole: __COUNT__ outline icons drawn on a 256 px grid, the weight its own site calls the default."},
-    {"slug": "geometric-shapes-1", "name": "Geometric Shapes", "source": "Ziia, Figma community",
-     "style": "set 1", "data": DATA_GEO1, "names": "geometric-shapes-1",
-     "dir": ROOT / "icon-src/geometric-shapes-1", "cats": None,
-     "licence": "Fig" + "ma community",
-     "note": "__COUNT__ shapes from Ziia's Geometric Shapes set, exported from Figma and drawn as strokes."},
-    {"slug": "geometric-shapes-2", "name": "Geometric Shapes 2", "source": "Ziia, Figma community",
-     "style": "set 2", "data": DATA_GEO2, "names": "geometric-shapes-2",
-     "dir": ROOT / "icon-src/geometric-shapes-2", "cats": None,
-     "licence": "Fig" + "ma community",
-     "note": "The second version of Ziia's Geometric Shapes, __COUNT__ shapes alongside the first."},
+    {"slug": "plump", "name": "Plump Solid", "source": "Streamline, via Iconify",
+     "style": "solid", "data": DATA_PLUMP, "names": "plump",
+     "cats": None, "licence": "CC BY 4.0",
+     "note": "__COUNT__ filled icons from Streamline's free Plump set, the Solid style its Figma file names, drawn on a 48 px grid."},
 ]
 
 
@@ -226,6 +231,43 @@ def phos_categories():
             found[name] = label[keys[0]]
     used = set(found.values())
     return found, [name for name in label.values() if name in used]
+
+
+def plump_icons():
+    """Plump's Solid style, read out of Iconify's JSON mirror of the free set."""
+    if PLUMP_CACHE.exists():
+        raw = PLUMP_CACHE.read_text(encoding="utf-8")
+    else:
+        for attempt in range(3):
+            try:
+                raw = urllib.request.urlopen(PLUMP_JSON, timeout=60).read().decode("utf-8")
+                break
+            except Exception as error:
+                print("plump set failed (%s), retrying" % error, file=sys.stderr)
+                time.sleep(2 * (attempt + 1))
+        else:
+            raise SystemExit("could not fetch Plump; nothing written")
+        PLUMP_CACHE.write_text(raw, encoding="utf-8")
+
+    grid = PLUMP_GRID
+    icons, missing = [], []
+    for key, entry in sorted(json.loads(raw).get("icons", {}).items()):
+        if not key.endswith("-solid"):
+            continue
+        name = key[:-len("-solid")]
+        wrapped = ('<svg xmlns="http://www.w3.org/2000/svg" width="%d" height="%d" '
+                   'viewBox="0 0 %d %d">%s</svg>'
+                   % (grid, grid, grid, grid, entry.get("body", "")))
+        prepared = prepare(wrapped)
+        if prepared is None:
+            missing.append(name)
+            continue
+        attrs, body = prepared
+        icons.append({"name": name, "attrs": attrs, "body": body})
+    if not icons:
+        raise SystemExit("Plump Solid came back empty; nothing written")
+    icons.sort(key=lambda item: item["name"])
+    return icons, missing
 
 
 def local_names(folder):
@@ -462,6 +504,8 @@ def collect(brand):
         return download(cool_names(), COOL_URL)
     if brand["names"] == "phosphor":
         return download(phos_names(), PHOS_URL)
+    if brand["names"] == "plump":
+        return plump_icons()
     raise SystemExit("no source for %s" % brand["name"])
 
 
@@ -628,9 +672,20 @@ def write_hub(entries):
         '<span>%s %s icons with their markup.</span></li>'
         % (brand["data"].name, brand["data"].name, fmt(brand["count"]), brand["name"])
         for brand in entries)
+    others = [(brand["name"], brand["licence"]) for brand in entries
+              if brand["licence"].upper() != "MIT"]
+    if not others:
+        licences = "Every set is MIT."
+    elif len(others) == 1:
+        licences = "Every set is MIT except %s, which is %s." % others[0]
+    else:
+        listed = ", ".join("%s (%s)" % pair for pair in others[:-1])
+        licences = "Every set is MIT except %s and %s (%s)." % (
+            listed, others[-1][0], others[-1][1])
     tokens = {
         "__ROOT__": "../",
         "__VERSION__": version,
+        "__LICENCES__": licences,
         "__SETLIST__": setlist,
         "__DATALIST__": rows,
         "__APK__": apk,
