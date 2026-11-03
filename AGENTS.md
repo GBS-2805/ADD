@@ -73,6 +73,25 @@ The person reading this works from a phone. Deliver renders like this, every tim
 6. Verify before sending: the gallery returns 200, every listed image loads with a
    real `naturalWidth`, and no capture is missing from the page.
 
+## Artifacts are also kept in Drive
+
+Every release refreshes two copies in Google Drive, under **ArtBase** — `figma/` and
+`renders/`. The site keeps serving both; Drive is where they are opened from a phone
+or handed to someone else. Folder ids live in `tools/site.json` under `drive`; read
+them from there rather than searching Drive by name, which also finds unrelated
+`renders` folders.
+
+- **`figma/`** holds the 25 files (24 artboards plus `site-figma.svg`). Nothing is
+  overwritten: clear `figma/old`, move last release's current files into it, then
+  upload the new set. `old` is one generation deep, so an overwritten artboard is
+  recoverable but two releases back is not.
+- **`renders/`** is replaced in place. Upload the new captures, then delete every
+  file that is not in the new set. There is no render history on purpose: a
+  screenshot of a page that has since changed is worse than no screenshot.
+- Upload from the published site (`/figma/<name>`, `/renders/<name>`) with
+  `GOOGLEDRIVE_UPLOAD_FROM_URL`, so the bytes are the same ones the pages serve, and
+  check the returned size against the file on disk.
+
 ## Local render setup (no root, no system Chrome)
 
 This VM has bare Chromium deps and zero fonts. `python3 tools/render_env.py` builds
