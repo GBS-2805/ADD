@@ -139,8 +139,10 @@ changes as unverified on device rather than illustrating them.
 ## Project shape
 
 - `docs/` is the deployed static site, live at **https://artbase-olive.vercel.app**
-  (Vercel project `artbase`). Deploy with `python3 tools/deploy_vercel.py`: it uploads
-  `docs/`, checks every route on the new host, and only then rewrites the origin in
+  (Vercel project `artbase`; the address is rented, not owned, so see **The address is
+  rented, not owned** at the end of this file). Deploy with
+  `python3 tools/deploy_vercel.py`: it uploads `docs/`, checks every route on the new
+  host, and only then rewrites the origin in
   `tools/site.json` and the two app constants, so a failed deploy leaves the repo
   pointing at the host that still serves. The token is the `VERCEL_TOKEN` secret, read
   from the environment and never an argument. Vercel has no per-deploy size cap.
@@ -287,3 +289,31 @@ changes as unverified on device rather than illustrating them.
   its own in `icons-app/res/values/styles.xml`). Names are kept from the old theme on
   purpose, so a rename touches every drawable, layout and Java file that references
   them.
+
+## The address is rented, not owned
+
+`https://artbase-olive.vercel.app` is a subdomain of `vercel.app`, so the name is the
+host's, not the project's. Nothing about it is paid for: hosting, the certificate and
+every route cost nothing and renew themselves. Two consequences:
+
+- **Do not rename the Vercel project.** The slug `artbase` is what sets the subdomain,
+  and both shipped APKs carry the current host in `classes.dex`, so a rename points
+  every installed copy at a host that no longer answers. Rename the display name
+  instead, which changes nothing.
+- **Any domain ever bought here is a yearly rental.** A registry takes the name back
+  when it lapses; `.com` and `.dev` were both around $12-13/year when this was written,
+  and subdomains of a domain already owned are free. Buying is optional: nothing above
+  expires or degrades without one.
+
+When a domain does exist, the move is already scripted and needs no new tooling:
+
+1. Attach it -- `npx vercel domains add <domain> <project>`, or buy it in the Vercel
+   dashboard, which wires its own DNS. At another registrar, an apex `A 76.76.21.21`
+   plus `CNAME www -> cname.vercel-dns.com`. Vercel keeps the `*.vercel.app` address
+   serving alongside it, so nothing breaks while DNS propagates.
+2. Once it resolves, `python3 tools/deploy_vercel.py --links-only https://<domain>`.
+   It verifies every route on the new host *before* rewriting `tools/site.json`, both
+   app constants and this file, so a wrong name changes nothing.
+3. The APKs still embed the `vercel.app` host. Repointing them at the new one needs a
+   version bump (`tools/bump_version.py ... --build`) and a re-capture, because the
+   version labels are visible ink.

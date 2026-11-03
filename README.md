@@ -206,6 +206,28 @@ permanent "Application Not Responding" state and every screenshot comes back as 
 flat black frame. Earlier versions of this README shipped screens drawn from the
 layout's `dp` values; those were removed along with the renderer that produced them.
 
+## The address is rented, not owned
+
+The site is live at `https://artbase-olive.vercel.app`, a subdomain of `vercel.app`.
+That name is the host's, not this project's: free, auto-renewing, served over a
+certificate Vercel manages, and therefore not something that can be sold, lost to a
+missed renewal or transferred. The trade-off is that it is not yours either — renaming
+the Vercel project changes the subdomain, and both apps have the current one compiled
+in, so the slug stays as it is.
+
+A domain of this project's own would cost roughly $12–13 a year and would be a rental,
+not a purchase: the registry reclaims the name if a renewal is missed. Nothing on the
+site needs one — hosting, HTTPS and any subdomain of a domain already owned are free.
+If one is ever bought, moving is one command:
+
+```bash
+python3 tools/deploy_vercel.py --links-only https://your-domain.example
+```
+
+It verifies every route on the new host before rewriting `tools/site.json`, both app
+constants and the docs, so a name that does not answer changes nothing. The APKs then
+need a version bump to carry the new host. `AGENTS.md` has the full sequence.
+
 ## Not yet done
 
 - **Icons has not been run on a device.** The bundle, the manifest and the signing
