@@ -265,6 +265,14 @@ changes as unverified on device rather than illustrating them.
   down, so a brand reads as one row. Do not widen the cells, raise the cap or bring
   back a one-brand-at-a-time control without rechecking that a section still fits with
   no sideways scroll.
+- `/icons/all/` carries each sheet's category list inline (`__SETS__`), so the shared
+  rows are known before any sheet arrives and every section can load its own sheet
+  when it comes within 400px of the viewport (`IntersectionObserver`, one sheet per
+  brand). Each fetched sheet is kept in `sessionStorage` under
+  `icons:sheet:<rev>:<slug>`, where the revision hashes the sheet files, so a repeat
+  visit in the same tab fetches none of them and a release misses the cache once.
+  A section reserves its twelve cells while waiting, so scrolling never jumps. Do not
+  reintroduce `cache: "no-store"` or a `Promise.all` over every sheet.
 - Every vendor glyph carries its own `stroke-width` attribute, and a presentation
   attribute beats a value inherited from the `<svg>`. The preview therefore writes
   the chosen weight onto each element (`tune()` in the template), not onto a parent.

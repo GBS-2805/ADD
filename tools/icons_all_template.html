@@ -155,6 +155,7 @@ __BRANDS__
 <script>
 (function () {
   var SETS = __SETS__;
+  var REV = "__REV__";
   var CAP = 12;
   var sheetHost = document.getElementById("sheets");
 
@@ -193,15 +194,16 @@ __BRANDS__
 
   // The categories every set carries, in one order for all of them: the average of
   // each vendor's own position, so the sheets line up row for row when they are read
-  // down the page. A set missing one of them simply has fewer shared rows.
-  function sharedKeys(results) {
+  // down the page. The lists travel with the page, which is why the sheets themselves
+  // can wait until their section is near the viewport. A set missing one of them
+  // simply has fewer shared rows.
+  function sharedKeys(sets) {
     var maps = [], totals = {};
-    results.forEach(function (result) {
-      if (!result.payload) { return; }
+    sets.forEach(function (set) {
+      var names = set.cats || [];
+      if (!names.length) { return; }   // no list to match on: it neither shares nor blocks
       var map = {};
-      var names = categories(result.payload);
-        if (!names.length) { return; }   // no list to match on: it neither shares nor blocks
-        names.forEach(function (name, place) {
+      names.forEach(function (name, place) {
         var k = key(name);
         map[k] = name;
         totals[k] = (totals[k] || 0) + place;
@@ -302,20 +304,113 @@ __BRANDS__
     return pane;
   }
 
-  Promise.all(SETS.map(function (set) {
-    return fetch(set.data, { cache: "no-store" })
+  var SHARED = sharedKeys(SETS);
+  var CACHE_PREFIX = "icons:sheet:" + REV + ":";
+  var loaded = {};
+
+  // A sheet is ~33 KB of JSON and changes only when the set does, so it is kept for
+  // the session under a key carrying the sheets' revision: a new release misses the
+  // cache once, a revisit inside the same tab fetches nothing.
+  function readCache(slug) {
+    try {
+      var text = window.sessionStorage.getItem(CACHE_PREFIX + slug);
+      return text ? JSON.parse(text) : null;
+    } catch (err) { return null; }
+  }
+
+  function writeCache(slug, text) {
+    try { window.sessionStorage.setItem(CACHE_PREFIX + slug, text); } catch (err) {}
+  }
+
+  function loadSheet(set) {
+    if (loaded[set.slug]) { return loaded[set.slug]; }
+    var cached = readCache(set.slug);
+    if (cached) {
+      loaded[set.slug] = Promise.resolve(cached);
+      return loaded[set.slug];
+    }
+    loaded[set.slug] = fetch(set.data, { cache: "default" })
       .then(function (response) {
         if (!response.ok) { throw new Error("HTTP " + response.status); }
-        return response.json();
+        return response.text();
       })
-      .then(function (payload) { return { set: set, payload: payload }; })
-      .catch(function () { return { set: set, payload: null }; });
-  })).then(function (results) {
-    var shared = sharedKeys(results);
-    results.forEach(function (result) {
-      sheetHost.append(buildSheet(result.set, result.payload, shared));
-    });
+      .then(function (text) {
+        writeCache(set.slug, text);
+        return JSON.parse(text);
+      })
+      .catch(function () { return null; });
+    return loaded[set.slug];
+  }
+
+  // The section reserves its own height while the sheet is on its way, so a fast
+  // scroll does not jump the page around.
+  function placeholder(set) {
+    var pane = document.createElement("div");
+    pane.className = "sheet-body";
+    pane.id = "pane-" + set.slug;
+    var head = document.createElement("h3");
+    head.className = "brand-name";
+    head.append(document.createTextNode(set.name));
+    var headCount = document.createElement("span");
+    headCount.textContent = set.count.toLocaleString() + " icons";
+    head.append(headCount);
+    var line = document.createElement("p");
+    line.className = "sheet-note";
+    line.textContent = "Reading the sheet\u2026";
+    var sheet = document.createElement("div");
+    sheet.className = "sheet";
+    for (var i = 0; i < CAP; i++) {
+      var cell = document.createElement("div");
+      cell.className = "cell";
+      var glyph = document.createElement("span");
+      glyph.className = "glyph";
+      var name = document.createElement("span");
+      name.className = "name";
+      name.textContent = "\u00a0";
+      var cat = document.createElement("span");
+      cat.className = "cat";
+      cat.textContent = "\u00a0";
+      cell.append(glyph, name, cat);
+      sheet.append(cell);
+    }
+    var more = document.createElement("p");
+    more.className = "sheet-link";
+    var link = document.createElement("a");
+    link.href = "../" + set.slug + "/";
+    link.textContent = "All " + set.count.toLocaleString() + " " + set.name + " icons \u2192";
+    more.append(link);
+    pane.append(head, line, sheet, more);
+    return pane;
+  }
+
+  var panes = SETS.map(function (set) {
+    var pane = placeholder(set);
+    sheetHost.append(pane);
+    return { set: set, pane: pane, done: false };
   });
+
+  function hydrate(entry) {
+    if (entry.done) { return; }
+    entry.done = true;
+    loadSheet(entry.set).then(function (payload) {
+      var filled = buildSheet(entry.set, payload, SHARED);
+      if (entry.pane.parentNode) { entry.pane.replaceWith(filled); }
+    });
+  }
+
+  if ("IntersectionObserver" in window) {
+    var io = new IntersectionObserver(function (records) {
+      records.forEach(function (record) {
+        if (!record.isIntersecting) { return; }
+        io.unobserve(record.target);
+        var entry = panes.filter(function (pane) { return pane.pane === record.target; })[0];
+        if (entry) { hydrate(entry); }
+      });
+    }, { rootMargin: "400px 0px" });
+    panes.forEach(function (entry) { io.observe(entry.pane); });
+  } else {
+    panes.forEach(function (entry) { hydrate(entry); });
+  }
 })();
 </script>
 <script src="__ROOT__assets/site.js" defer></script>

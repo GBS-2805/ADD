@@ -29,6 +29,7 @@ so it downloads `docs/data/<brand>-sheet.json`, that subset and nothing else.
 
 import argparse
 import datetime
+import hashlib
 import json
 import pathlib
 import re
@@ -643,13 +644,19 @@ def write_sheets(entries):
 def write_all(entries):
     total = sum(brand["count"] for brand in entries)
     page = ALL_TEMPLATE.read_text(encoding="utf-8")
-    sets = [{"slug": brand["slug"], "name": brand["name"], "count": brand["count"],
-             "cats": len(brand["cats"]),
-             "data": "../../data/" + brand["slug"] + "-sheet.json"}
-            for brand in entries]
+    sets, digest = [], hashlib.sha1()
+    for brand in entries:
+        path = ROOT / "docs/data" / (brand["slug"] + "-sheet.json")
+        raw = path.read_bytes() if path.exists() else b""
+        digest.update(raw)
+        cats = json.loads(raw.decode("utf-8")).get("cats", []) if raw else []
+        sets.append({"slug": brand["slug"], "name": brand["name"], "count": brand["count"],
+                     "cats": cats,
+                     "data": "../../data/" + brand["slug"] + "-sheet.json"})
     tokens = {
         "__ROOT__": "../../",
         "__TOTAL__": fmt(total),
+        "__REV__": digest.hexdigest()[:10],
         "__SETS__": json.dumps(sets),
         "__LICENCES__": licence_line(entries),
         "__BRANDS__": menu("../../", "all"),
