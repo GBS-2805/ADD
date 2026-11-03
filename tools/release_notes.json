@@ -2,6 +2,12 @@
   "notes": [
     {
       "id": "icons",
+      "version": "2.17",
+      "title": "Every brand, its own count",
+      "note": "Each brand card on the Icons landing states its own total again instead of the shelf total, and the page says four free sets rather than two."
+    },
+    {
+      "id": "icons",
       "version": "2.16",
       "title": "Ink you choose",
       "note": "A Colour row under Background sets the ink: Auto, white, black, indigo, green, red or any custom colour. Duo and Flat are tinted rather than flattened, so their two tones survive the choice."
