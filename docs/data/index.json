@@ -103,10 +103,10 @@
     {
       "id": "icons",
       "name": "Icons",
-      "version": "2.17",
-      "apk": "/Icons-2.17.apk",
+      "version": "2.18",
+      "apk": "/Icons-2.18.apk",
       "bytes": 1841488,
-      "sha256": "17968d172158e52d9c6d17004376725a3777647f0886984ac7f0e8861b1af80b"
+      "sha256": "69a42d9f666d0e2520a412b31987eeda6949eeca0be9c5abc3a1febcd931d0ac"
     }
   ]
 }

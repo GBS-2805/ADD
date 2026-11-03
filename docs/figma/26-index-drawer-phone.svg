@@ -27,15 +27,15 @@
 <rect x="90" y="320.38" width="280" height="1" fill="#000000" fill-opacity="0.14"/>
 <text x="90" y="296.03" fill="#000000" font-size="19" xml:space="preserve">Releases</text>
 <text x="323" y="296.03" fill="#000000" fill-opacity="0.5" font-size="14" xml:space="preserve">history</text>
-<text x="90" y="767.5" fill="#000000" fill-opacity="0.5" font-size="13" xml:space="preserve">Compress · a design shelf: two free icon</text>
+<text x="90" y="767.5" fill="#000000" fill-opacity="0.5" font-size="13" xml:space="preserve">Compress · a design shelf: four free icon</text>
 <text x="90" y="787" fill="#000000" fill-opacity="0.5" font-size="13" xml:space="preserve">brands, Poppins, one palette, and two</text>
 <text x="90" y="806.5" fill="#000000" fill-opacity="0.5" font-size="13" xml:space="preserve">offline apps built from them.</text>
 <text x="20" y="159" font-size="46" letter-spacing="-1.61" xml:space="preserve">A design shelf.</text>
 <text x="20" y="210.91" font-size="18" xml:space="preserve">The material this site is made of, in</text>
 <text x="20" y="238.8" font-size="18" xml:space="preserve">one place:</text>
 <text x="20" y="292.69" font-size="18" xml:space="preserve">Icons:</text>
-<rect x="76" y="272.69" width="64" height="27.19" fill="#d9d9d9"/>
-<text x="84" y="292.69" fill="#000000" font-size="18" xml:space="preserve">3,876</text>
+<rect x="76" y="272.69" width="65" height="27.19" fill="#d9d9d9"/>
+<text x="84" y="292.69" fill="#000000" font-size="18" xml:space="preserve">4,373</text>
 <text x="20" y="329.88" font-size="18" xml:space="preserve">Fonts:</text>
 <rect x="77" y="309.88" width="27" height="27.19" fill="#d9d9d9"/>
 <text x="85" y="329.88" fill="#000000" font-size="18" xml:space="preserve">3</text>
@@ -55,8 +55,8 @@
 <rect x="369" y="540.25" width="1" height="54" fill="#d9d9d9" fill-opacity="0.26"/>
 <rect x="20" y="593.25" width="350" height="1" fill="#d9d9d9" fill-opacity="0.26"/>
 <rect x="20" y="540.25" width="1" height="54" fill="#d9d9d9" fill-opacity="0.26"/>
-<image x="139.5" y="557.25" width="20" height="20" xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADwAAAA8CAYAAAA6/NlyAAADH0lEQVR4AexaW44SQRTlvQCjjgnjCwiwBfkw6hr8NX4IcRmOyzDgKtyBOv7ppzwCTZTgEvjgETyHpBNSU93T1VRV01CTe6erbt269546RdNUOpc5sz8H+NQJdww7hk9sBdyWNk3obDa7MxwO21S2TecT41tleDqdPlgsFr9RRJfKtud5F2hbE6uAl8vlayDbB3ixWq1og9mOWAUMSHehotwTDSb7tgGbxBIptgMcaZlS7OQYTjF5kUo/N4YzDnCkfZFiJ8dwismLVLpjONIypdjJMZxi8iKV7hiOtEwpdtLG8Hg8vo9zqh60C5X90FdaJt3x/OTaAG82m2sEfQdtQ38NBoOnuMaS0WhUQbyfmLyLt91uGRvdw0ULYBT4HqXUoL48zGaz3yaTySPfEPXKOQD4Ff6X0J0gVh0LSPC7/iH/tAAOKKC8Xq9/EEDA+A0zfTkHA2WoEdECuF6vf0J1HlQUgr7GUexjcUDs9/v9JyFgvWaz+VmcE6evBTATF4vFV7jOoaJc4ijWB70VB9HfktlcLvcdbRmz80Kh8BJjWkQb4Eql8gefteeoSga6DNAEJLuRVUOYnTNmtVr9i7gaJKP3AABb2wMbLVQmA82b0FuMifIGhiBmW4yJcW2ijWG/IrIRAtp3u+3KbdxirNscVce1A2YBLJRbEV8v/9hXUc7hXMZQmRfV1whgJudWxI3sGdqy7Q2zVOacw7nSUQ1GY4BZG1kiW2SN/TClD305J8zv0DGjgFkc2SJraIcxbZxZ5N+JccDMQtZCbmTGblDMLaoVwExK0Pl8/gXb+0obx/ZtJtvWABNErVYb47NaQZuPiT22aUPfmlgFTFR4Jp42Go02tMM2bTbVOmCb4GS5HGDZqpySLRbDfL8K51Z81+oK1yS0zRriEKEMWHjX6gOSJqHduO94KQOWvGsFzIlIrHe8lAEnAi04aTZ4SDICkzJgPBd/wQPDGnMTFdbAWlSLUAbMo5xSqcQj2Q6SfUxIO6yBtSC/kigDZnQmwpNSD3qVkPZYA2tR1ViAVZMck78DfExsmKjFMWxiVY8p5tkx/B8AAP//abG2eAAAAAZJREFUAwD0+52IIXuJ6gAAAABJRU5ErkJggg=="/>
-<text x="171.5" y="573.22" font-size="17" xml:space="preserve">Icons 2.17</text>
+<image x="139" y="557.25" width="20" height="20" xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADwAAAA8CAYAAAA6/NlyAAADH0lEQVR4AexaW44SQRTlvQCjjgnjCwiwBfkw6hr8NX4IcRmOyzDgKtyBOv7ppzwCTZTgEvjgETyHpBNSU93T1VRV01CTe6erbt269546RdNUOpc5sz8H+NQJdww7hk9sBdyWNk3obDa7MxwO21S2TecT41tleDqdPlgsFr9RRJfKtud5F2hbE6uAl8vlayDbB3ixWq1og9mOWAUMSHehotwTDSb7tgGbxBIptgMcaZlS7OQYTjF5kUo/N4YzDnCkfZFiJ8dwismLVLpjONIypdjJMZxi8iKV7hiOtEwpdtLG8Hg8vo9zqh60C5X90FdaJt3x/OTaAG82m2sEfQdtQ38NBoOnuMaS0WhUQbyfmLyLt91uGRvdw0ULYBT4HqXUoL48zGaz3yaTySPfEPXKOQD4Ff6X0J0gVh0LSPC7/iH/tAAOKKC8Xq9/EEDA+A0zfTkHA2WoEdECuF6vf0J1HlQUgr7GUexjcUDs9/v9JyFgvWaz+VmcE6evBTATF4vFV7jOoaJc4ijWB70VB9HfktlcLvcdbRmz80Kh8BJjWkQb4Eql8gefteeoSga6DNAEJLuRVUOYnTNmtVr9i7gaJKP3AABb2wMbLVQmA82b0FuMifIGhiBmW4yJcW2ijWG/IrIRAtp3u+3KbdxirNscVce1A2YBLJRbEV8v/9hXUc7hXMZQmRfV1whgJudWxI3sGdqy7Q2zVOacw7nSUQ1GY4BZG1kiW2SN/TClD305J8zv0DGjgFkc2SJraIcxbZxZ5N+JccDMQtZCbmTGblDMLaoVwExK0Pl8/gXb+0obx/ZtJtvWABNErVYb47NaQZuPiT22aUPfmlgFTFR4Jp42Go02tMM2bTbVOmCb4GS5HGDZqpySLRbDfL8K51Z81+oK1yS0zRriEKEMWHjX6gOSJqHduO94KQOWvGsFzIlIrHe8lAEnAi04aTZ4SDICkzJgPBd/wQPDGnMTFdbAWlSLUAbMo5xSqcQj2Q6SfUxIO6yBtSC/kigDZnQmwpNSD3qVkPZYA2tR1ViAVZMck78DfExsmKjFMWxiVY8p5tkx/B8AAP//abG2eAAAAAZJREFUAwD0+52IIXuJ6gAAAABJRU5ErkJggg=="/>
+<text x="171" y="573.22" font-size="17" xml:space="preserve">Icons 2.18</text>
 <text x="20" y="630.25" fill-opacity="0.64" font-size="14" xml:space="preserve">Android 8.0+</text>
 <text x="133" y="630.25" fill-opacity="0.64" font-size="14" xml:space="preserve">No internet permission</text>
 <text x="20" y="661.34" fill-opacity="0.64" font-size="14" xml:space="preserve">Signed, no store</text>
@@ -67,18 +67,18 @@
 <rect x="20" y="836.03" width="1" height="958.52" fill="#d9d9d9" fill-opacity="0.26"/>
 <rect x="369" y="837.03" width="1" height="254.53" fill="#d9d9d9" fill-opacity="0.26"/>
 <rect x="21" y="1090.56" width="349" height="1" fill="#d9d9d9" fill-opacity="0.26"/>
-<text x="43" y="875.03" fill-opacity="0.64" font-size="12" font-weight="500" letter-spacing="1.2" xml:space="preserve">ICONS · FOUR BRANDS · 3,876</text>
+<text x="43" y="875.03" fill-opacity="0.64" font-size="12" font-weight="500" letter-spacing="1.2" xml:space="preserve">ICONS · FOUR BRANDS · 4,373</text>
 <text x="43" y="909.83" font-size="22" letter-spacing="-0.22" xml:space="preserve">Icons</text>
-<text x="43" y="942.42" font-size="15" xml:space="preserve">Lineicons and Coolicons, whole: 606 +</text>
-<text x="43" y="965.67" font-size="15" xml:space="preserve">4,373 icons, a preview with weight, size</text>
-<text x="43" y="988.92" font-size="15" xml:space="preserve">and background, and the whole set</text>
-<text x="43" y="1012.17" font-size="15" xml:space="preserve">behind one toggle.</text>
+<text x="43" y="942.42" font-size="15" xml:space="preserve">Lineicons, Coolicons, Phosphor and</text>
+<text x="43" y="965.67" font-size="15" xml:space="preserve">Streamline, whole: 4,373 icons, a preview</text>
+<text x="43" y="988.92" font-size="15" xml:space="preserve">with weight, size and background, and</text>
+<text x="43" y="1012.17" font-size="15" xml:space="preserve">the whole set behind one toggle.</text>
 <rect x="43" y="1042.42" width="74.81" height="26.14" fill="#d9d9d9"/>
 <rect x="43" y="1042.42" width="74.81" height="1" fill="#d9d9d9"/>
 <rect x="116.81" y="1042.42" width="1" height="26.14" fill="#d9d9d9"/>
 <rect x="43" y="1067.56" width="74.81" height="1" fill="#d9d9d9"/>
 <rect x="43" y="1042.42" width="1" height="26.14" fill="#d9d9d9"/>
-<text x="53" y="1059.42" fill="#000000" font-size="11" font-weight="500" letter-spacing="1.1" xml:space="preserve">APP 2.17</text>
+<text x="53" y="1059.42" fill="#000000" font-size="11" font-weight="500" letter-spacing="1.1" xml:space="preserve">APP 2.18</text>
 <text x="228.81" y="1059.42" font-size="13" xml:space="preserve"> →</text>
 <text x="127.81" y="1059.42" font-size="13" xml:space="preserve">Browse icons</text>
 <rect x="369" y="1091.56" width="1" height="226.58" fill="#d9d9d9" fill-opacity="0.26"/>
@@ -112,7 +112,7 @@
 <rect x="20" y="1838.55" width="350" height="1" fill="#d9d9d9" fill-opacity="0.26"/>
 <text x="20" y="1912.55" font-size="30" letter-spacing="-0.45" xml:space="preserve">The apps</text>
 <text x="20" y="1945.05" fill-opacity="0.64" font-size="14" xml:space="preserve">Standalone, signed, no update server</text>
-<text x="20" y="1996.14" font-size="16" font-weight="500" xml:space="preserve">Icons 2.17</text>
+<text x="20" y="1996.14" font-size="16" font-weight="500" xml:space="preserve">Icons 2.18</text>
 <text x="20" y="2024.53" font-size="16" xml:space="preserve">1,841,488 bytes · 4,373 icons in four brands ·</text>
 <text x="20" y="2050.92" font-size="16" xml:space="preserve">offline browser, no permissions.</text>
 <text x="271" y="2050.92" font-size="16" text-decoration="underline" xml:space="preserve">APK</text>
@@ -154,7 +154,7 @@
 <text x="20" y="3041.98" fill-opacity="0.64" font-size="16" xml:space="preserve">96px band, a 45px mark, 26px page name,</text>
 <text x="20" y="3067.58" fill-opacity="0.64" font-size="16" xml:space="preserve">17px lines.</text>
 <rect x="0" y="3143.17" width="390" height="1" fill="#d9d9d9" fill-opacity="0.26"/>
-<text x="20" y="3188.17" fill-opacity="0.64" font-size="14" xml:space="preserve">Icons 2.17 · Compress 2.1 · app.offline.icons /</text>
+<text x="20" y="3188.17" fill-opacity="0.64" font-size="14" xml:space="preserve">Icons 2.18 · Compress 2.1 · app.offline.icons /</text>
 <text x="20" y="3211.27" fill-opacity="0.64" font-size="14" xml:space="preserve">app.offline.compress</text>
 <text x="20" y="3246.36" fill-opacity="0.64" font-size="14" xml:space="preserve">Download</text>
 <text x="89" y="3246.36" fill-opacity="0.64" font-size="14" xml:space="preserve">·</text>

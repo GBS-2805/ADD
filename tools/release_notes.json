@@ -2,6 +2,12 @@
   "notes": [
     {
       "id": "icons",
+      "version": "2.18",
+      "title": "One number, audited",
+      "note": "Every icon count on the site is now read back against the catalogs: the landing page, the drawers and the gallery menu quote 4,373, and a count the catalogs do not hold fails the build."
+    },
+    {
+      "id": "icons",
       "version": "2.17",
       "title": "Every brand, its own count",
       "note": "Each brand card on the Icons landing states its own total again instead of the shelf total, and the page says four free sets rather than two."
