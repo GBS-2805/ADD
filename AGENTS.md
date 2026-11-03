@@ -227,7 +227,8 @@ changes as unverified on device rather than illustrating them.
   instead of inlining glyphs. The Icons bundle stages all four JSONs -- `icons.json`
   and `coolicons.json` for the brand pages, `lineicons-sheet.json` and
   `coolicons-sheet.json` for the all-brands sheet, which fetches the sheets  rather than the full catalogs. Miss one and that page renders empty sections inside the
-  app while still perfect on the site, which is what 2.5 shipped and 2.6 fixed. The
+  app while still perfect on the site, which is what the 2.5 build shipped and the next
+    release fixed. The
   staging list is written by hand, so `build.sh` runs `tools/check_bundle.py` over the
   staged pages and fails the build if a reference any of them makes does not resolve
   inside the bundle.
