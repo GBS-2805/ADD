@@ -19,19 +19,22 @@ import sys
 SRC = pathlib.Path("figma")
 DST = pathlib.Path("docs/figma")
 
-# The navigation states are referred to by what they are, not by their number.
-RENAME = {
-    "21-index-menu-desktop.svg": "pull-down-desktop.svg",
-    "22-index-drawer-desktop.svg": "side-tab-desktop.svg",
-    "23-index-menu-phone.svg": "pull-down-phone.svg",
-    "24-index-drawer-phone.svg": "side-tab-phone.svg",
-}
-STATE_NUMBERS = {"21", "22", "23", "24"}
+# The navigation states are referred to by what they are, not by their number. The
+# export renumbers as pages come and go, and a map keyed to "21-index-menu-…" stops
+# matching the moment it does: the four states then drop out of the listing and are
+# served under their numbers. Match the role, never the prefix.
+RENAME = [
+    (re.compile(r"^\d+-index-menu-desktop\.svg$"), "pull-down-desktop.svg"),
+    (re.compile(r"^\d+-index-drawer-desktop\.svg$"), "side-tab-desktop.svg"),
+    (re.compile(r"^\d+-index-menu-phone\.svg$"), "pull-down-phone.svg"),
+    (re.compile(r"^\d+-index-drawer-phone\.svg$"), "side-tab-phone.svg"),
+]
 BUNDLE = "site-figma.svg"
 
 # The listing counts the run in words, so it has to be told what the run has.
 WORDS = {19: "Nineteen", 20: "Twenty", 21: "Twenty-one", 22: "Twenty-two",
-         23: "Twenty-three", 24: "Twenty-four", 25: "Twenty-five", 26: "Twenty-six"}
+         23: "Twenty-three", 24: "Twenty-four", 25: "Twenty-five", 26: "Twenty-six",
+         27: "Twenty-seven"}
 
 # The exporter writes every image twice: the payload under plain `href` and again
 # under `xlink:href`. One copy paints the picture and the other is dead weight --
@@ -88,7 +91,7 @@ def listing(names):
             return ""
         return "<h2>%s</h2>\n  <ul>\n    %s\n  </ul>\n  " % (prefix, "\n    ".join(item(n) for n in names_))
 
-    pages = sorted(n for n in names if re.match(r"\d\d-", n) and n.split("-")[0] not in STATE_NUMBERS)
+    pages = sorted(n for n in names if re.match(r"\d\d-", n))
     states = sorted(n for n in names if n.startswith(("pull-down-", "side-tab-")))
     desktop = [n for n in pages if n.endswith("-desktop.svg")]
     phone = [n for n in pages if n.endswith("-phone.svg")]
@@ -175,7 +178,15 @@ def main():
         # One name per artboard. Serving the four pull-outs under their number as well
         # as their plain name cost 181 KB of byte-identical copies, and now that every
         # file carries its own fonts there is no room for two of the same artboard.
-        wanted[RENAME.get(artboard.name, artboard.name)] = artboard
+        name = artboard.name
+        for pattern, plain in RENAME:
+            if pattern.match(name):
+                name = plain
+                break
+        if name in wanted:
+            sys.exit("two artboards would be served as %s: %s and %s"
+                     % (name, wanted[name].name, artboard.name))
+        wanted[name] = artboard
     wanted[BUNDLE] = bundle
 
     dropped = sorted(p.name for p in DST.glob("*.svg") if p.name not in wanted)
