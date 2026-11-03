@@ -312,13 +312,16 @@ changes as unverified on device rather than illustrating them.
 - The preview exports SVG through the clipboard, or a PNG/WEBP/JPG at the chosen size
   (32 to 1024px) rendered on the chosen background: the site downloads it, the app
   writes it to Pictures/Icons through MediaStore (no permission on Android 10+).
-- The Export button under those rows zips every glyph the sheet currently shows, in
-  the chosen format and size, as a stored zip written byte by byte in the page; in the
-  app the same bytes reach a second bridge method and land in Downloads/Icons.
+- The Export button zips exactly what the selection holds -- nothing on load, so it
+  reads "Nothing to export" until something is collected with a double-tap or Add
+  all -- in the chosen format and size, as a stored zip written byte by byte in the
+  page; in the app the same bytes reach a second bridge method and land in
+  Downloads/Icons. Remove all empties the export with it, because nothing falls
+  back to the sheet's view; do not reintroduce such a fallback.
 - Double-tapping a glyph in the sheet collects it into the selection tab above the
   sheet, which shows the collected glyphs, Remove selected (the previewed one) and
   Remove all. Add all in the sheet's bar collects exactly what the filter and category
-  show. While a selection exists Export packs it instead of the sheet's view; changing
+  show. Remove all clears the export with it; changing
   category clears a selection that Add all filled, so each category exports by itself.
 - A line under the preview estimates the zip: an exact SVG total, or four glyphs
   sampled across the list and scaled for a raster, with the icon count and export size.

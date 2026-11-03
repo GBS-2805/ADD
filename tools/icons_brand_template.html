@@ -569,7 +569,7 @@ __BRANDS__
           </div>
         </div>
 
-        <button class="bulk-btn" id="bulkBtn" type="button">Export the set</button>
+        <button class="bulk-btn" id="bulkBtn" type="button" disabled>Nothing to export</button>
 
         <p class="status" id="status" aria-live="polite">Reading the catalog…</p>
       </div>
@@ -822,8 +822,10 @@ __BRANDS__
     bulkFilled = false;
   }
 
-  // With nothing collected the export is what the sheet shows, exactly as before.
-  function exportList() { return chosen.length ? chosen : visibleItems; }
+  // The selection is the only thing an export packs. Nothing is collected when the
+  // page opens, so the button reads "Nothing to export" until a double-tap or Add all
+  // puts something in it -- and Remove all really does leave nothing behind.
+  function exportList() { return chosen; }
 
   function labelExport() {
     var list = exportList();
@@ -943,7 +945,7 @@ __BRANDS__
     estimateEl.textContent = "Estimate: " + count.toLocaleString() + (count === 1 ? " icon" : " icons")
       + " · about " + fmtBytes(bytes) + " zipped · " + format.toUpperCase()
       + (format === "svg" ? "" : " at " + exportSize + " px")
-      + " · " + (chosen.length ? "the selection" : "what the sheet shows");
+      + " · the selection";
   }
 
   // The zip is written here, so its size is the sum of the files it will hold.
@@ -953,7 +955,7 @@ __BRANDS__
     var list = exportList();
     var token = ++estimateToken;
     if (!list || !list.length) {
-      estimateEl.textContent = "Nothing in the sheet to export yet.";
+      estimateEl.textContent = "Nothing selected yet \u2014 double-tap an icon or press Add all.";
       return;
     }
     if (format === "svg") {
@@ -1393,7 +1395,7 @@ __BRANDS__
 
   function zipName() {
     var query = search.value.trim().toLowerCase();
-    var base = chosen.length ? (bulkFilled && cat ? cat : "selection") : (query || cat || "all");
+    var base = bulkFilled && cat ? cat : "selection";
     var slug = base.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
     return BRAND.toLowerCase() + "-" + slug + "-" + format + ".zip";
   }
