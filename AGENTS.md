@@ -30,7 +30,7 @@ that text changed.
 - Save under `artifacts/`, one file per page the change touches. The names the
   gallery already uses are `page-home-light`, `page-home-full`, `page-menu`, `page-drawer`, `page-tools`,
   `page-icons`, `page-icons-brand`, `page-icons-panel`, `page-icons-variants`,
-  `page-fonts`, `page-portfolio`, `page-download`, `phone-home-light`,
+  `page-fonts`, `page-portfolio`, `page-download`, `phone-fonts`, `phone-home-light`,
   `phone-home-full`, `phone-menu`, `phone-drawer`, `phone-icons`,
   `phone-icons-brand` and `logo-light`.. There is one palette, so there are no dark variants; the `-light`
   suffix on some of them is history, not a variant.

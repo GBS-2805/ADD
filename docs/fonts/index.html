@@ -17,6 +17,19 @@
   }
   .card .tag a { color: var(--on); }
   .card .tag a + a { margin-left: 10px; }
+  .trybar { display: grid; grid-template-columns: minmax(0, 1fr) minmax(180px, 260px); gap: 18px; align-items: end; margin: 0 0 16px; }
+  .trybar label { display: grid; gap: 7px; font-size: 13px; letter-spacing: .04em; text-transform: uppercase; color: var(--on-dim); }
+  .trybar input[type="text"] { font: inherit; font-size: 17px; letter-spacing: 0; text-transform: none; color: var(--on); background: transparent; border: 0; border-bottom: 1px solid var(--rule); padding: 9px 0; }
+  .trybar input[type="text"]:focus-visible { outline: 2px solid var(--band); outline-offset: 2px; }
+  .trybar input[type="range"] { width: 100%; accent-color: var(--band); }
+  .trybar output { font-size: 13px; letter-spacing: .04em; text-transform: none; color: var(--on-dim); }
+  .tryweights { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 18px; }
+  .tryweights button { font: inherit; font-size: 14px; padding: 9px 14px; color: var(--on); background: transparent; border: 1px solid var(--rule); cursor: pointer; }
+  .tryweights button[aria-pressed="true"] { color: var(--ink); background: var(--band); border-color: var(--band); }
+  .tryweights button:focus-visible { outline: 2px solid var(--band); outline-offset: -3px; }
+  .trystage { border: 1px solid var(--rule); padding: 22px 20px; overflow: hidden; }
+  .trystage p { margin: 0; line-height: 1.15; letter-spacing: -.02em; overflow-wrap: anywhere; }
+  @media (max-width: 700px) { .trybar { grid-template-columns: 1fr; } .trystage { padding: 18px 14px; } }
 </style>
 </head>
 <body>
@@ -121,6 +134,29 @@
   </section>
 
   <section>
+    <h2>Set your own</h2>
+    <p class="kicker">Type a line, pick a weight, drag the size</p>
+    <div class="trybar">
+      <label for="tryText">Text
+        <input id="tryText" type="text" value="Art Design Database" maxlength="80" autocomplete="off" spellcheck="false" />
+      </label>
+      <label for="trySize">Size
+        <input id="trySize" type="range" min="16" max="120" step="1" value="64" />
+        <output id="trySizeOut" for="trySize">64 px</output>
+      </label>
+    </div>
+    <div class="tryweights" role="group" aria-label="Weight">
+      <button type="button" data-weight="400" aria-pressed="true">Regular 400</button>
+      <button type="button" data-weight="500" aria-pressed="false">Medium 500</button>
+      <button type="button" data-weight="600" aria-pressed="false">SemiBold 600</button>
+    </div>
+    <div class="trystage" id="tryStage">
+      <p id="tryOut" style="font-weight:400;font-size:64px">Art Design Database</p>
+    </div>
+    <p class="fine">The preview is the same woff2 this page already loaded — no image, no extra request. At 64px the three weights are far enough apart to pick a pairing by eye.</p>
+  </section>
+
+  <section>
     <h2>How it is wired</h2>
     <p class="kicker">Three declarations, no network</p>
     <ul class="rows">
@@ -145,6 +181,32 @@
   <span><a href="../">Index</a> · <a href="../icons/">Icons</a> · <a href="../download/">Download</a></span>
 </footer>
 
+<script>
+(function () {
+  var text = document.getElementById("tryText");
+  var size = document.getElementById("trySize");
+  var sizeOut = document.getElementById("trySizeOut");
+  var out = document.getElementById("tryOut");
+  var weights = Array.prototype.slice.call(document.querySelectorAll(".tryweights button"));
+  var weight = 400;
+  function paint() {
+    out.textContent = text.value.trim() || "Poppins";
+    out.style.fontWeight = weight;
+    out.style.fontSize = size.value + "px";
+    sizeOut.textContent = size.value + " px";
+  }
+  text.addEventListener("input", paint);
+  size.addEventListener("input", paint);
+  weights.forEach(function (button) {
+    button.addEventListener("click", function () {
+      weight = button.getAttribute("data-weight");
+      weights.forEach(function (other) { other.setAttribute("aria-pressed", other === button ? "true" : "false"); });
+      paint();
+    });
+  });
+  paint();
+})();
+</script>
 <script src="../assets/site.js" defer></script>
 </body>
 </html>
