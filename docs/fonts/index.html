@@ -24,7 +24,10 @@
   .trystage p { margin: 0; line-height: 1.15; letter-spacing: -.02em; overflow-wrap: break-word; }
   .trysize { display: flex; align-items: center; gap: 14px; max-width: 520px; margin: 16px 0 0; font-size: 13px; letter-spacing: .04em; text-transform: uppercase; color: var(--on-dim); }
   .trysize input { flex: 1; accent-color: var(--band); }
-  .trysize output { text-transform: none; letter-spacing: .04em; }
+  .trypx { display: inline-flex; align-items: baseline; gap: 5px; text-transform: none; letter-spacing: 0; }
+  .trypx input { width: 4.4ch; font: inherit; font-size: 15px; text-align: right; padding: 3px 5px;
+    color: var(--on); background: transparent; border: 1px solid var(--rule); }
+  .trypx input:focus-visible { outline: 2px solid var(--band); outline-offset: 2px; }
   .try-reset { margin-left: auto; font: inherit; font-size: 13px; letter-spacing: .04em;
     text-transform: uppercase; padding: 4px 10px; color: var(--on-dim); background: transparent;
     border: 1px solid var(--rule); cursor: pointer; }
@@ -110,8 +113,9 @@
     <div class="trysize">
       <label for="trySize">Size</label>
       <input id="trySize" type="range" min="16" max="120" step="1" value="48" />
-      <output id="trySizeOut" for="trySize">48 px</output>
-      <button type="button" class="try-reset" id="tryReset">Reset</button>
+      <span class="trypx"><input id="trySizeNum" type="number" min="16" max="120" step="1" value="48"
+        inputmode="numeric" aria-label="Size in pixels" /> px</span>
+      <button type="button" class="try-reset" id="tryReset" hidden>Reset</button>
     </div>
     <p class="fine">The same woff2 this page already loaded — no image, no extra request. Each card below sets the weight here.</p>
   </section>
@@ -187,15 +191,24 @@
   var KEY = "fonts:preview";
   var text = document.getElementById("tryText");
   var size = document.getElementById("trySize");
-  var sizeOut = document.getElementById("trySizeOut");
+  var num = document.getElementById("trySizeNum");
   var out = document.getElementById("tryOut");
+  var reset = document.getElementById("tryReset");
   var buttons = Array.prototype.slice.call(document.querySelectorAll(".try-weight"));
   var weight = "400";
+  var MIN = 16, MAX = 120;
+  var DEFAULTS;
+
+  function clamp(px) { return Math.min(MAX, Math.max(MIN, px)); }
+  function changed() {
+    return text.value !== DEFAULTS.text || size.value !== DEFAULTS.size || weight !== DEFAULTS.weight;
+  }
   function paint() {
     out.textContent = text.value.trim() || "Poppins";
     out.style.fontWeight = weight;
     out.style.fontSize = size.value + "px";
-    sizeOut.textContent = size.value + " px";
+    if (document.activeElement !== num) { num.value = size.value; }
+    reset.hidden = !changed();
   }
   function setWeight(value) {
     weight = String(value);
@@ -220,23 +233,35 @@
     if (!saved) { return; }
     if (typeof saved.text === "string" && saved.text.length <= 80) { text.value = saved.text; }
     var px = Number(saved.size);
-    if (px >= 16 && px <= 120) { size.value = String(Math.round(px)); }
+    if (px >= MIN && px <= MAX) { size.value = String(Math.round(px)); }
     var wanted = String(saved.weight);
     if (buttons.some(function (button) { return button.getAttribute("data-weight") === wanted; })) {
       setWeight(wanted);
     }
   }
+
   var initial = buttons.filter(function (button) {
     return button.getAttribute("aria-pressed") === "true";
   })[0];
-  var DEFAULTS = {
+  DEFAULTS = {
     text: text.defaultValue,
     size: size.defaultValue,
     weight: initial ? initial.getAttribute("data-weight") : "400"
   };
-  document.getElementById("tryReset").addEventListener("click", function () {
+
+  function typed() {
+    if (num.value === "") { return; }
+    var px = Number(num.value);
+    if (!isFinite(px)) { return; }
+    size.value = String(clamp(Math.round(px)));
+    paint();
+    remember();
+  }
+
+  reset.addEventListener("click", function () {
     text.value = DEFAULTS.text;
     size.value = DEFAULTS.size;
+    num.value = size.value;
     setWeight(DEFAULTS.weight);
     paint();
     try {
@@ -247,6 +272,9 @@
   });
   text.addEventListener("input", function () { paint(); remember(); });
   size.addEventListener("input", function () { paint(); remember(); });
+  num.addEventListener("input", typed);
+  num.addEventListener("change", function () { typed(); num.value = size.value; });
+  num.addEventListener("blur", function () { num.value = size.value; });
   buttons.forEach(function (button) {
     button.addEventListener("click", function () {
       setWeight(button.getAttribute("data-weight"));
