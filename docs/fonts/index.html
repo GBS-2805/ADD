@@ -30,6 +30,12 @@
     appearance: textfield; -moz-appearance: textfield; }
   .trypx input::-webkit-outer-spin-button, .trypx input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
   .trypx input:focus-visible { outline: 2px solid var(--band); outline-offset: 2px; }
+  .trycss { display: flex; align-items: center; gap: 12px; margin: 14px 0 0; flex-wrap: wrap; max-width: 640px; }
+  .trycss code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; color: var(--on-dim); overflow-wrap: anywhere; }
+  .try-copy { margin-left: auto; font: inherit; font-size: 13px; letter-spacing: .04em; text-transform: uppercase;
+    padding: 5px 10px; color: var(--on); background: transparent; border: 1px solid var(--rule); cursor: pointer; }
+  .try-copy:hover { border-color: var(--on-dim); }
+  .try-copy:focus-visible { outline: 2px solid var(--band); outline-offset: -3px; }
   .try-reset { margin-left: auto; font: inherit; font-size: 13px; letter-spacing: .04em;
     text-transform: uppercase; padding: 4px 10px; color: var(--on-dim); background: transparent;
     border: 1px solid var(--rule); cursor: pointer; }
@@ -111,6 +117,10 @@
     </label>
     <div class="trystage" id="tryStage">
       <p id="tryOut" style="font-weight:400;font-size:48px">Art Design Database</p>
+    </div>
+    <div class="trycss">
+      <code id="tryRule">font-family: "Poppins", sans-serif; font-weight: 400; font-size: 48px;</code>
+      <button type="button" class="try-copy" id="tryCopy">Copy CSS</button>
     </div>
     <div class="trysize">
       <label for="trySize">Size</label>
@@ -196,6 +206,8 @@
   var num = document.getElementById("trySizeNum");
   var out = document.getElementById("tryOut");
   var reset = document.getElementById("tryReset");
+  var rule = document.getElementById("tryRule");
+  var copy = document.getElementById("tryCopy");
   var buttons = Array.prototype.slice.call(document.querySelectorAll(".try-weight"));
   var weight = "400";
   var MIN = 16, MAX = 120;
@@ -210,6 +222,7 @@
     out.style.fontWeight = weight;
     out.style.fontSize = size.value + "px";
     if (document.activeElement !== num) { num.value = size.value; }
+    rule.textContent = 'font-family: "Poppins", sans-serif; font-weight: ' + weight + "; font-size: " + size.value + "px;";
     reset.hidden = !changed();
   }
   function setWeight(value) {
@@ -260,6 +273,28 @@
     remember();
   }
 
+  function copied(ok) {
+    copy.textContent = ok ? "Copied" : "Select the rule";
+    setTimeout(function () { copy.textContent = "Copy CSS"; }, 1600);
+  }
+  copy.addEventListener("click", function () {
+    var value = rule.textContent;
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(value).then(function () { copied(true); }, function () { copied(false); });
+      return;
+    }
+    var area = document.createElement("textarea");
+    area.value = value;
+    area.setAttribute("readonly", "");
+    area.style.position = "fixed";
+    area.style.opacity = "0";
+    document.body.appendChild(area);
+    area.select();
+    var ok = false;
+    try { ok = document.execCommand("copy"); } catch (error) { ok = false; }
+    document.body.removeChild(area);
+    copied(ok);
+  });
   reset.addEventListener("click", function () {
     text.value = DEFAULTS.text;
     size.value = DEFAULTS.size;
