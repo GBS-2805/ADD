@@ -2,6 +2,12 @@
   "notes": [
     {
       "id": "icons",
+      "version": "2.12",
+      "title": "Four brands everywhere",
+      "note": "The count caught up across the shelf: tools, portfolio, download and the all-brands sheet now say 3,876 icons in four brands, and that sheet derives its licence line from the brand table instead of claiming both its sets are MIT."
+    },
+    {
+      "id": "icons",
       "version": "2.11",
       "title": "Weight on every grid",
       "note": "The preview's weight now reaches every set: Phosphor (256-unit grid) and Plump Solid (48) scale the stroke to their own units, so 1 to 2.5 finally changes them."
