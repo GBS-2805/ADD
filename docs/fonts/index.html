@@ -25,6 +25,11 @@
   .trysize { display: flex; align-items: center; gap: 14px; max-width: 520px; margin: 16px 0 0; font-size: 13px; letter-spacing: .04em; text-transform: uppercase; color: var(--on-dim); }
   .trysize input { flex: 1; accent-color: var(--band); }
   .trysize output { text-transform: none; letter-spacing: .04em; }
+  .try-reset { margin-left: auto; font: inherit; font-size: 13px; letter-spacing: .04em;
+    text-transform: uppercase; padding: 4px 10px; color: var(--on-dim); background: transparent;
+    border: 1px solid var(--rule); cursor: pointer; }
+  .try-reset:hover { color: var(--on); border-color: var(--on-dim); }
+  .try-reset:focus-visible { outline: 2px solid var(--band); outline-offset: -3px; }
   .try-weight { align-self: flex-start; font: inherit; font-size: 13px; margin: 0 0 14px; padding: 7px 12px; color: var(--on); background: transparent; border: 1px solid var(--rule); cursor: pointer; }
   .try-weight[aria-pressed="true"] { color: var(--ink); background: var(--band); border-color: var(--band); }
   .try-weight:focus-visible { outline: 2px solid var(--band); outline-offset: -3px; }
@@ -106,6 +111,7 @@
       <label for="trySize">Size</label>
       <input id="trySize" type="range" min="16" max="120" step="1" value="48" />
       <output id="trySizeOut" for="trySize">48 px</output>
+      <button type="button" class="try-reset" id="tryReset">Reset</button>
     </div>
     <p class="fine">The same woff2 this page already loaded — no image, no extra request. Each card below sets the weight here.</p>
   </section>
@@ -220,6 +226,25 @@
       setWeight(wanted);
     }
   }
+  var initial = buttons.filter(function (button) {
+    return button.getAttribute("aria-pressed") === "true";
+  })[0];
+  var DEFAULTS = {
+    text: text.defaultValue,
+    size: size.defaultValue,
+    weight: initial ? initial.getAttribute("data-weight") : "400"
+  };
+  document.getElementById("tryReset").addEventListener("click", function () {
+    text.value = DEFAULTS.text;
+    size.value = DEFAULTS.size;
+    setWeight(DEFAULTS.weight);
+    paint();
+    try {
+      localStorage.removeItem(KEY);
+    } catch (error) {
+      /* nothing was stored */
+    }
+  });
   text.addEventListener("input", function () { paint(); remember(); });
   size.addEventListener("input", function () { paint(); remember(); });
   buttons.forEach(function (button) {
