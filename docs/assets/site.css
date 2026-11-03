@@ -112,9 +112,10 @@ a { color: inherit; }
 }
 .mark svg { display: block; width: 45px; height: 45px; }
 .who { display: flex; align-items: center; gap: 26px; }
-.who-lines { text-align: right; }
+.who-lines { text-align: right; width: 182px; }
 .who-lines p { margin: 0; font-size: 17px; line-height: 24.5px; }
-.who-lines .narrow { display: none; }
+.who-lines .narrow,
+.who-lines .phone { display: none; }
 .burger {
   display: flex;
   align-items: center;
@@ -407,8 +408,9 @@ footer a:hover { text-decoration: underline; }
      sit on top of it, so the narrow label takes over. */
   .who-lines .wide { display: none; }
   .who-lines .narrow { display: block; }
-  .who-lines.keep p:first-child { display: none; }
-  .who-lines.keep p { font-size: 11px; }
+  .who-lines { width: auto; }
+  .who-lines.keep p { display: none; }
+  .who-lines.keep p.phone { display: block; font-size: 14px; }
   .burger { width: 36px; height: 36px; margin-right: -6px; }
   .burger svg { width: 24px; height: 24px; }
   .menu { padding-bottom: 6px; }
