@@ -123,7 +123,7 @@ Screenshots are of a local server over `docs/` (`python3 -m http.server`), viewp
 in one run and prints console errors; it needs the toolchain from
 `tools/render_env.py`.
 
-The site has two modes over one palette: a green band (`#00d7a0`) in both, an off-black
+The site has two modes over one palette: a green band (`#0fbf92`) in both, an off-black
 page (`#131513`) with cream type (`#f2eee3`) in dark, and cream with off-black in light.
 A new visitor follows `prefers-color-scheme`; `site.js` swaps `data-theme` on `<html>`
 for the toggle it injects into the band and remembers the choice under `site:theme`,
@@ -378,6 +378,9 @@ changes as unverified on device rather than illustrating them.
 - The WebView sits in a frame padded by the window insets. Target 35 draws edge to
   edge, so without that the band hides under the status bar and, on a Flip 7, under
   the camera cutout.
+- The preview pane is the black stage itself: the glyph is centred large and the
+  name, file and hint stack against its bottom-right corner. The pane carries the
+  surface choice, so White repaints the whole stage rather than a tile on it.
 - The preview exports SVG through the clipboard, or a PNG/WEBP/JPG at the chosen size
   (32 to 1024px) rendered on the chosen background: the site downloads it, the app
   writes it to Pictures/Icons through MediaStore (no permission on Android 10+).

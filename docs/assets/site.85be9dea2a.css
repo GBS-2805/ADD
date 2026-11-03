@@ -42,7 +42,7 @@ html[data-theme="light"] {
 }
 
 :root {
-  --green: #00d7a0;            /* the band, in both modes            */
+  --green: #0fbf92;            /* the band, in both modes            */
   --coal: #131513;             /* off-black                          */
   --cream: #f2eee3;            /* off-white                          */
   --band: var(--green);
@@ -55,7 +55,7 @@ html[data-theme="light"] {
   --band-ink: #0f120f;         /* words on the green                 */
   --band-dim: rgba(15, 18, 15, .62);
   --band-line: rgba(15, 18, 15, .22);
-  --band-hover: #17e6ad;
+  --band-hover: #12e2ad;
   --pad: 40px;
   --band-h: 96px;
 }
