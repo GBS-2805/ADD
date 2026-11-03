@@ -669,6 +669,16 @@ def main():
     else:
         print("captures skipped: docs/renders/ still shows %s" % old)
 
+    # The history page is written from git, so it gains the row for this build only
+    # once the build is committed. Regenerating here keeps every earlier release in
+    # step, and the deploy refreshes it again as soon as the commit exists.
+    history = subprocess.run([sys.executable, str(ROOT / "tools/build_releases.py")],
+                             cwd=ROOT, capture_output=True, text=True)
+    if history.returncode != 0:
+        raise SystemExit("the history page did not regenerate: "
+                         + (history.stderr or history.stdout).strip())
+    print("  " + (history.stdout.strip().splitlines() or ["releases page"])[0])
+
     if args.deploy:
         if args.deploy_cmd:
             print("deploying with: %s" % args.deploy_cmd)

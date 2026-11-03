@@ -112,10 +112,30 @@ def rewrite(old, new):
     return changed
 
 
+def refresh_history():
+    """Regenerate the history page from git before the upload.
+
+    The page is written out of git, so the only moment it can carry the newest build is
+    after that build is committed -- and a deploy is the step that follows a commit. A
+    page that was behind git is rewritten here rather than shipped one release short,
+    and the caller is told to commit it.
+    """
+    page = ROOT / "docs/releases/index.html"
+    before = page.read_bytes() if page.exists() else b""
+    done = subprocess.run([sys.executable, str(ROOT / "tools/build_releases.py")],
+                          cwd=ROOT, capture_output=True, text=True)
+    if done.returncode != 0:
+        sys.exit("the history page did not regenerate: " + (done.stderr or done.stdout).strip())
+    print("  " + done.stdout.strip().splitlines()[0])
+    if page.read_bytes() != before:
+        print("  the history page was behind git and was rewritten; commit it")
+
+
 def deploy():
     if not os.environ.get("VERCEL_TOKEN"):
         sys.exit("VERCEL_TOKEN is not set. Add it in this project under Settings -> "
                  "Secrets, then run again; --check works without it.")
+    refresh_history()
     cmd = [*CLI, "deploy", "docs", "--prod", "--yes",
            "--project", PROJECT, "--create-if-missing"]
     print("$ " + " ".join(cmd), flush=True)
