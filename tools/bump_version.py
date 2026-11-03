@@ -187,7 +187,12 @@ def label_pairs(app, old, new, old_code, new_code):
     name = APPS[app]
     return [(f"{name}-{old}", f"{name}-{new}"),
             (f"{name} {old}", f"{name} {new}"),
-            (f"versionCode {old_code}", f"versionCode {new_code}", name.lower())]
+            # The tools page prints a bare version in a pill, and the download page
+            # spells the code with a space; neither carries the app's name.
+            (f'class="pill live">{old}<', f'class="pill live">{new}<'),
+            (f'class="pill live">app {old}<', f'class="pill live">app {new}<'),
+            (f"versionCode {old_code}", f"versionCode {new_code}", name.lower()),
+            (f"version code {old_code}", f"version code {new_code}", name.lower())]
 
 
 # A page and the artboards made from it. The exporter writes one board per page per
