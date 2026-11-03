@@ -32,70 +32,35 @@ which only resolves to `/data/coolicons.json` from that root.
     export NODE_PATH=/tmp/pwshot/node_modules PLAYWRIGHT_BROWSERS_PATH=/tmp/pw
     export LD_LIBRARY_PATH=/tmp/rootfs/usr/lib/x86_64-linux-gnu:/tmp/rootfs/lib/x86_64-linux-gnu
     export FONTCONFIG_FILE=/tmp/rootfs/fonts.conf
-    node /tmp/bundle-check.js http://127.0.0.1:8870
+    node tools/webview-bundle-check.js http://127.0.0.1:8870
 
-The harness:
+`tools/webview-bundle-check.js` opens `/icons/all/` at 390x844 and scrolls every
+section into view, because each one fetches its sheet only as it nears the viewport
+-- counting before the scroll leaves the last brand reading as twelve reserved cells
+with no glyphs. It then requires twelve glyphs in each of the four sections and
+checks every menu link, every brand page, every staged sheet and all four Streamline
+catalogs. A missing file, an unloaded Poppins, a failed request or any console error
+fails the run.
 
-```js
-const { chromium } = require('playwright');
-const BASE = process.argv[2];
-(async () => {
-  const browser = await chromium.launch();
-  const errors = [];
-  const page = await browser.newPage();
-  page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
-  page.on('pageerror', e => errors.push('pageerror ' + e.message));
-  await page.goto(BASE + '/icons/all/', { waitUntil: 'networkidle' });
-  await page.waitForFunction(() => document.querySelectorAll('.cell').length >= 20, { timeout: 15000 });
-  const shape = await page.evaluate(() => ({
-    sections: Array.from(document.querySelectorAll('.sheet-body')).map(p => {
-      const name = p.querySelector('.brand-name');
-      return {
-        brand: name ? name.textContent.trim().split(/\s+/)[0] : '?',
-        cells: p.querySelectorAll('.cell').length,
-        cats: new Set(Array.from(p.querySelectorAll('.cell .cat')).map(c => c.textContent)).size,
-      };
-    }),
-    menu: Array.from(document.querySelectorAll('#menu a'))
-      .map(a => new URL(a.getAttribute('href'), location.href).pathname),
-    fonts: document.fonts.check('17px Poppins'),
-  }));
-  console.log(JSON.stringify(shape));
-  for (const href of shape.menu) console.log(href, (await page.request.get(BASE + href)).status());
-  for (const p of ['/icons/', '/icons/coolicons/', '/icons/lineicons/', '/data/coolicons.json'])
-    console.log(p, (await page.request.get(BASE + p)).status());
-  await page.goto(BASE + '/icons/coolicons/', { waitUntil: 'networkidle' });
-  await page.click('#menuBtn');
-  await page.waitForTimeout(280);
-  const all = await page.evaluate(() => Array.from(document.querySelectorAll('#menu a'))
-    .find(a => a.textContent.trim().startsWith('All')).href);
-  console.log('coolicons All ->', new URL(all).pathname, (await page.request.get(all)).status());
-  console.log('console errors:', errors.length ? errors : 'none');
-  await browser.close();
-})();
-```
+A good run, from 2.19 (the shipped build):
 
-A good run, from 2.6 (the shipped build):
-
-    sections [{"brand":"Lineicons606","cells":12,"svgs":12,"cats":12},{"brand":"Coolicons1,258","cells":12,"svgs":12,"cats":12}]
+    sections: 4 brands, 12 cells each (Lineicons, Coolicons, Phosphor, Streamline)
     poppins loaded: true
-    /icons/all/ 200   /icons/lineicons/ 200   /icons/coolicons/ 200
-    /data/lineicons-sheet.json 200   /data/coolicons-sheet.json 200
-    console errors: none
-
-Two sections of twelve cells each -- `fetch_icons.py` caps the sheet at `CAP = 12`
-glyphs per brand, one from each category the two sets share. The two `-sheet.json`
-lines are the ones that matter most: the page fetches those, not the full catalogs, and
-before 2.6 the bundle carried only the catalogs, so this page rendered empty sections
-inside the app while looking perfect on the site.
-    /icons/all/ 200   /icons/lineicons/ 200   /icons/coolicons/ 200
-    /icons/ 200   /data/coolicons.json 200
+    /icons/all/ 200   /icons/lineicons/ 200   /icons/coolicons/ 200   /icons/phosphor/ 200
+    /icons/streamline/ 200   /data/streamline-sheet.json 200   /data/streamline-flat.json 200
     coolicons All -> /icons/all/ 200
     console errors: none
+    bundle: OK
+
+Four sections of twelve cells each -- `fetch_icons.py` caps the sheet at `CAP = 12`
+glyphs per brand, one from each category the sets share. The `-sheet.json` lines
+matter most: a brand page and the all-brands sheet fetch those, not the full
+catalogs, and before 2.6 the bundle carried only the catalogs, so that page
+rendered empty sections inside the app while looking perfect on the site.
 
 And check the artifact itself:
 
-    python3 -c "import zipfile;n=zipfile.ZipFile('docs/Icons-2.6.apk').namelist();print([x for x in n if 'www/icons/all' in x or x.endswith('www/icons/index.html')])"
+    python3 -c "import zipfile;n=zipfile.ZipFile('docs/Icons-2.19.apk').namelist();print([x for x in n if 'www/icons/all' in x or x.endswith('www/icons/index.html')])"
 
 ## 4. The unbundled-page fallback
 
@@ -143,8 +108,8 @@ For those, the honest options are a phone: install the APK, screenshot, and trea
 PNGs as device captures; or a machine with KVM and `adb screencap`.
 
 Last run against the bundle: **Icons 2.19, versionCode 30, 1,841,488 bytes**, sha
-`090e2f246d…`, on 2026-11-03 — the bundle run quoted above, plus the fallback harness
-(`fallback: OK`, both links, no console errors). The line is a record of one build,
-not a standing claim about the current APK; move it whenever the bundle is re-run.
-bundle changes and the harness is re-run; it is a record of one build, not a standing
-claim about the current APK.
+`090e2f246d…`, on 2026-11-03. The bundle harness scrolled all four sections in and
+found twelve glyphs each (Lineicons, Coolicons, Phosphor, Streamline), every menu
+link and every staged catalog at 200, Poppins loaded, no failed request and no
+console error; the fallback harness reported `fallback: OK` with both links. The
+line records one build, not a standing claim about the current APK.
