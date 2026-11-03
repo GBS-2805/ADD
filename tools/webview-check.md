@@ -97,6 +97,30 @@ And check the artifact itself:
 
     python3 -c "import zipfile;n=zipfile.ZipFile('docs/Icons-2.6.apk').namelist();print([x for x in n if 'www/icons/all' in x or x.endswith('www/icons/index.html')])"
 
+## 4. The unbundled-page fallback
+
+A page the bundle does not carry is answered by `MainActivity.fallbackFor`, which
+builds its HTML in Java -- so serving `www` returns a plain 404 and never shows it.
+`tools/webview-fallback-check.js` reads the finished strings out of the shipped
+`classes.dex`, joins them around a sample address exactly as the client does, and
+loads that document in Chromium at 390x844:
+
+    node tools/webview-fallback-check.js docs/Icons-2.19.apk artifacts/fallback-offline.png
+
+It prints the heading, both links, the background, the font and any console error,
+saves the screenshot, and exits non-zero unless the page says "every brand, their
+catalogs", carries no "both brands", renders both links and does not scroll sideways.
+A good run:
+
+    "title": "That page lives on the site",
+    "links": [ ".../download/", "/icons/index.html" ],
+    "background": "rgb(63, 78, 150)", "font": "Poppins", "overflowX": false,
+    "consoleErrors": [], "fallback: OK"
+
+This proves the shipped copy renders and its two links resolve; which asset maps to
+which site path inside the WebViewClient, and the clipboard/MediaStore bridge, still
+need a device.
+
 ## What this proves, and what it does not
 
 Proves: the exact HTML, CSS, JS and JSON the APK ships load and work offline — the tabs
@@ -114,7 +138,9 @@ origin-keyed — nothing currently is.
 For those, the honest options are a phone: install the APK, screenshot, and treat the
 PNGs as device captures; or a machine with KVM and `adb screencap`.
 
-Last run against the bundle: **Icons 2.6, versionCode 17, 570,995 bytes**, sha
-`74ee2c891a…`, on 2026-11-03 — the run quoted above. Move this line whenever the
+Last run against the bundle: **Icons 2.19, versionCode 30, 1,841,488 bytes**, sha
+`090e2f246d…`, on 2026-11-03 — the bundle run quoted above, plus the fallback harness
+(`fallback: OK`, both links, no console errors). The line is a record of one build,
+not a standing claim about the current APK; move it whenever the bundle is re-run.
 bundle changes and the harness is re-run; it is a record of one build, not a standing
 claim about the current APK.
