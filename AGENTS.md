@@ -40,8 +40,11 @@ that text changed.
   overflow problem, fix the page and re-render; never ship a screenshot of a bug.
 - Report console errors seen while capturing. A render that only proves HTTP 200
   is not a render.
-- Standalone artwork (SVG marks, icons) is additionally rendered with
-  `@resvg/resvg-js` so the asset itself is verifiable apart from the page.
+- Standalone artwork (SVG marks, icons) was rendered apart from the page with
+  `@resvg/resvg-js`, which is not part of the current toolchain. The one such
+  capture, `logo-light`, is therefore kept rather than re-shot: the run fails if its
+  published file is missing, because the gallery lists it, and re-render the mark by
+  hand if `assets/logo.svg` changes.
 - Only then copy into `docs/renders/`, add it to `docs/renders/index.html`, and
   deploy -- the gallery only shows files listed there.
 

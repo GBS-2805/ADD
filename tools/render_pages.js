@@ -134,8 +134,18 @@ const escape = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/
   // which is what keeps the whole site inside the host's 10 MiB deploy budget.
   execFileSync("python3", [
     path.join(__dirname, "to_webp.py"), out, gallery,
-    ...[...shots, ...extras].map((s) => s.name),
+    ...shots.map((s) => s.name),
   ], { stdio: "inherit" });
+  // The extras are not shot by this run: the mark was rendered once by resvg, which
+  // is not in this toolchain. Its published file is kept -- and its absence would be a
+  // gallery entry pointing at nothing, so that fails here rather than on the page.
+  for (const s of extras) {
+    const file = path.join(gallery, `${s.name}.webp`);
+    if (!fs.existsSync(file)) {
+      throw new Error(`${s.name} has no published webp, but the gallery lists it`);
+    }
+    console.log(`  kept: ${s.name} (${fs.statSync(file).size} B, not re-rendered by this run)`);
+  }
   const kept = new Set([...shots, ...extras].map((s) => `${s.name}.webp`));
   for (const file of fs.readdirSync(gallery)) {
     if (/\.(png|webp)$/.test(file) && !kept.has(file)) {
