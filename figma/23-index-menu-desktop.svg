@@ -19,7 +19,7 @@
 <text x="1181" y="196.34" fill="#000000" fill-opacity="0.5" font-size="14" xml:space="preserve">4,373 icons</text>
 <rect x="40" y="220.69" width="1220" height="1" fill="#000000" fill-opacity="0.14"/>
 <text x="40" y="258.69" fill="#000000" font-size="19" xml:space="preserve">Fonts</text>
-<text x="1208" y="258.69" fill="#000000" fill-opacity="0.5" font-size="14" xml:space="preserve">3 faces</text>
+<text x="1193" y="258.69" fill="#000000" fill-opacity="0.5" font-size="14" xml:space="preserve">2 families</text>
 <rect x="40" y="283.03" width="1220" height="1" fill="#000000" fill-opacity="0.14"/>
 <text x="40" y="321.03" fill="#000000" font-size="19" xml:space="preserve">Tools</text>
 <text x="1214" y="321.03" fill="#000000" fill-opacity="0.5" font-size="14" xml:space="preserve">2 apps</text>
@@ -76,7 +76,7 @@
 <text x="147.81" y="1285.22" font-size="13" xml:space="preserve">Browse icons</text>
 <rect x="649.5" y="1039.58" width="1" height="277.78" fill="#d9d9d9" fill-opacity="0.26"/>
 <rect x="345.75" y="1316.36" width="304.75" height="1" fill="#d9d9d9" fill-opacity="0.26"/>
-<text x="367.75" y="1077.58" fill-opacity="0.64" font-size="12" font-weight="500" letter-spacing="1.2" xml:space="preserve">FONTS · 3 FACES</text>
+<text x="367.75" y="1077.58" fill-opacity="0.64" font-size="12" font-weight="500" letter-spacing="1.2" xml:space="preserve">FONTS · 2 FAMILIES</text>
 <text x="367.75" y="1112.38" font-size="22" letter-spacing="-0.22" xml:space="preserve">Fonts</text>
 <text x="367.75" y="1144.97" font-size="15" xml:space="preserve">Poppins 400, 500 and 600 — woff2</text>
 <text x="367.75" y="1168.22" font-size="15" xml:space="preserve">for the site, TTF for the apps,</text>

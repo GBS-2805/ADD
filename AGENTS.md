@@ -208,6 +208,16 @@ changes as unverified on device rather than illustrating them.
   each TTF from `app/res/font/` into `docs/assets/fonts/`, writes the JSON and then
   fails if any page still quotes a stale version, size or checksum. Run it after any
   change to a version number or a shipped file.
+- `tools/fetch_fonts.py` is the only thing that talks to Google Fonts: it resolves
+  Poppins (100-900 with italics) and Redaction 50 (regular, italic, bold) to a latin
+  woff2 and a plain TTF, writes them under `docs/assets/fonts/`, and rewrites the
+  `fonts` block of `tools/catalog.json` as families of styles. The three Poppins
+  styles the apps bundle keep an `app_res` path, and `build_catalog.py` still copies
+  those from `app/res/font/`, so the download cannot drift from the APK. The fonts
+  page fetches `/data/fonts.json` and shows one family sheet at a time behind a
+  family picker; a row's Try button sets the preview and `fonts:preview` remembers
+  the choice. Font sizes are generated into the catalog rather than quoted in HTML,
+  so `build_catalog.py` checks that page for its catalog link and picker instead.
 - `docs/renders/` is the gallery page plus the captures it lists. The page shows
   only files named in `index.html`, so the folder must hold exactly those.
 - `docs/releases/` is the history page: every build the repository has shipped, with

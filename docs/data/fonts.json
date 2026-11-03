@@ -1,38 +1,229 @@
 {
   "generated": "2026-11-03",
-  "fonts": [
+  "styles": 21,
+  "families": [
     {
       "family": "Poppins",
-      "weight": 400,
-      "name": "Regular",
-      "woff2": "/assets/fonts/poppins-400.woff2",
-      "ttf": "/assets/fonts/poppins-400.ttf",
-      "app_res": "app/res/font/poppins_regular.ttf",
-      "use": "Body text, ledes, section copy and every label on this site.",
-      "woff2_bytes": 7900,
-      "ttf_bytes": 160316
+      "slug": "poppins",
+      "kind": "Sans serif",
+      "licence": "SIL Open Font License 1.1",
+      "source": "Google Fonts",
+      "note": "The three faces the apps bundle are byte-for-byte copies of app/res/font/.",
+      "styles": [
+        {
+          "name": "Thin",
+          "weight": 100,
+          "style": "normal",
+          "woff2": "/assets/fonts/poppins-100.woff2",
+          "ttf": "/assets/fonts/poppins-100.ttf",
+          "woff2_bytes": 7484,
+          "ttf_bytes": 157916
+        },
+        {
+          "name": "Thin Italic",
+          "weight": 100,
+          "style": "italic",
+          "woff2": "/assets/fonts/poppins-100-italic.woff2",
+          "ttf": "/assets/fonts/poppins-100-italic.ttf",
+          "woff2_bytes": 8404,
+          "ttf_bytes": 183088
+        },
+        {
+          "name": "ExtraLight",
+          "weight": 200,
+          "style": "normal",
+          "woff2": "/assets/fonts/poppins-200.woff2",
+          "ttf": "/assets/fonts/poppins-200.ttf",
+          "woff2_bytes": 7932,
+          "ttf_bytes": 157716
+        },
+        {
+          "name": "ExtraLight Italic",
+          "weight": 200,
+          "style": "italic",
+          "woff2": "/assets/fonts/poppins-200-italic.woff2",
+          "ttf": "/assets/fonts/poppins-200-italic.ttf",
+          "woff2_bytes": 8720,
+          "ttf_bytes": 182224
+        },
+        {
+          "name": "Light",
+          "weight": 300,
+          "style": "normal",
+          "woff2": "/assets/fonts/poppins-300.woff2",
+          "ttf": "/assets/fonts/poppins-300.ttf",
+          "woff2_bytes": 7840,
+          "ttf_bytes": 156188
+        },
+        {
+          "name": "Light Italic",
+          "weight": 300,
+          "style": "italic",
+          "woff2": "/assets/fonts/poppins-300-italic.woff2",
+          "ttf": "/assets/fonts/poppins-300-italic.ttf",
+          "woff2_bytes": 8712,
+          "ttf_bytes": 180524
+        },
+        {
+          "name": "Regular",
+          "weight": 400,
+          "style": "normal",
+          "woff2": "/assets/fonts/poppins-400.woff2",
+          "ttf": "/assets/fonts/poppins-400.ttf",
+          "app_res": "app/res/font/poppins_regular.ttf",
+          "use": "Body text, ledes and every label on this site.",
+          "woff2_bytes": 7900,
+          "ttf_bytes": 160316
+        },
+        {
+          "name": "Regular Italic",
+          "weight": 400,
+          "style": "italic",
+          "woff2": "/assets/fonts/poppins-400-italic.woff2",
+          "ttf": "/assets/fonts/poppins-400-italic.ttf",
+          "woff2_bytes": 8668,
+          "ttf_bytes": 178112
+        },
+        {
+          "name": "Medium",
+          "weight": 500,
+          "style": "normal",
+          "woff2": "/assets/fonts/poppins-500.woff2",
+          "ttf": "/assets/fonts/poppins-500.ttf",
+          "app_res": "app/res/font/poppins_medium.ttf",
+          "use": "Row labels, icon names and the tab strip.",
+          "woff2_bytes": 7740,
+          "ttf_bytes": 158576
+        },
+        {
+          "name": "Medium Italic",
+          "weight": 500,
+          "style": "italic",
+          "woff2": "/assets/fonts/poppins-500-italic.woff2",
+          "ttf": "/assets/fonts/poppins-500-italic.ttf",
+          "woff2_bytes": 8504,
+          "ttf_bytes": 176504
+        },
+        {
+          "name": "SemiBold",
+          "weight": 600,
+          "style": "normal",
+          "woff2": "/assets/fonts/poppins-600.woff2",
+          "ttf": "/assets/fonts/poppins-600.ttf",
+          "app_res": "app/res/font/poppins_semibold.ttf",
+          "use": "Titles and the one number that matters on a screen.",
+          "woff2_bytes": 7992,
+          "ttf_bytes": 157312
+        },
+        {
+          "name": "SemiBold Italic",
+          "weight": 600,
+          "style": "italic",
+          "woff2": "/assets/fonts/poppins-600-italic.woff2",
+          "ttf": "/assets/fonts/poppins-600-italic.ttf",
+          "woff2_bytes": 8724,
+          "ttf_bytes": 174628
+        },
+        {
+          "name": "Bold",
+          "weight": 700,
+          "style": "normal",
+          "woff2": "/assets/fonts/poppins-700.woff2",
+          "ttf": "/assets/fonts/poppins-700.ttf",
+          "woff2_bytes": 7816,
+          "ttf_bytes": 150292
+        },
+        {
+          "name": "Bold Italic",
+          "weight": 700,
+          "style": "italic",
+          "woff2": "/assets/fonts/poppins-700-italic.woff2",
+          "ttf": "/assets/fonts/poppins-700-italic.ttf",
+          "woff2_bytes": 8596,
+          "ttf_bytes": 172720
+        },
+        {
+          "name": "ExtraBold",
+          "weight": 800,
+          "style": "normal",
+          "woff2": "/assets/fonts/poppins-800.woff2",
+          "ttf": "/assets/fonts/poppins-800.ttf",
+          "woff2_bytes": 7824,
+          "ttf_bytes": 149072
+        },
+        {
+          "name": "ExtraBold Italic",
+          "weight": 800,
+          "style": "italic",
+          "woff2": "/assets/fonts/poppins-800-italic.woff2",
+          "ttf": "/assets/fonts/poppins-800-italic.ttf",
+          "woff2_bytes": 8680,
+          "ttf_bytes": 169984
+        },
+        {
+          "name": "Black",
+          "weight": 900,
+          "style": "normal",
+          "woff2": "/assets/fonts/poppins-900.woff2",
+          "ttf": "/assets/fonts/poppins-900.ttf",
+          "woff2_bytes": 7632,
+          "ttf_bytes": 147708
+        },
+        {
+          "name": "Black Italic",
+          "weight": 900,
+          "style": "italic",
+          "woff2": "/assets/fonts/poppins-900-italic.woff2",
+          "ttf": "/assets/fonts/poppins-900-italic.ttf",
+          "woff2_bytes": 8488,
+          "ttf_bytes": 167692
+        }
+      ],
+      "fallback": "sans-serif",
+      "styles_count": 18,
+      "woff2_bytes": 147656,
+      "ttf_bytes": 2980572
     },
     {
-      "family": "Poppins",
-      "weight": 500,
-      "name": "Medium",
-      "woff2": "/assets/fonts/poppins-500.woff2",
-      "ttf": "/assets/fonts/poppins-500.ttf",
-      "app_res": "app/res/font/poppins_medium.ttf",
-      "use": "Icon names, row labels and the small caps in the tab strip.",
-      "woff2_bytes": 7740,
-      "ttf_bytes": 158576
-    },
-    {
-      "family": "Poppins",
-      "weight": 600,
-      "name": "SemiBold",
-      "woff2": "/assets/fonts/poppins-600.woff2",
-      "ttf": "/assets/fonts/poppins-600.ttf",
-      "app_res": "app/res/font/poppins_semibold.ttf",
-      "use": "App titles and the one number that matters on each screen.",
-      "woff2_bytes": 7992,
-      "ttf_bytes": 157312
+      "family": "Redaction 50",
+      "slug": "redaction-50",
+      "kind": "Display serif",
+      "licence": "SIL Open Font License 1.1",
+      "source": "Google Fonts",
+      "note": "One of Redaction's six optical sizes, cut for display.",
+      "styles": [
+        {
+          "name": "Italic",
+          "weight": 400,
+          "style": "italic",
+          "woff2": "/assets/fonts/redaction-50-400-italic.woff2",
+          "ttf": "/assets/fonts/redaction-50-400-italic.ttf",
+          "woff2_bytes": 7516,
+          "ttf_bytes": 40772
+        },
+        {
+          "name": "Regular",
+          "weight": 400,
+          "style": "normal",
+          "woff2": "/assets/fonts/redaction-50-400.woff2",
+          "ttf": "/assets/fonts/redaction-50-400.ttf",
+          "woff2_bytes": 7064,
+          "ttf_bytes": 36656
+        },
+        {
+          "name": "Bold",
+          "weight": 700,
+          "style": "normal",
+          "woff2": "/assets/fonts/redaction-50-700.woff2",
+          "ttf": "/assets/fonts/redaction-50-700.ttf",
+          "woff2_bytes": 7112,
+          "ttf_bytes": 37276
+        }
+      ],
+      "fallback": "serif",
+      "styles_count": 3,
+      "woff2_bytes": 21692,
+      "ttf_bytes": 114704
     }
   ]
 }

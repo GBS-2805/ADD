@@ -3,20 +3,12 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Fonts — Poppins, the three faces</title>
-<meta name="description" content="Poppins 400, 500 and 600 as served by this site and bundled in the apps: woff2 for the web, TTF for Android, sizes listed, free to download under the SIL Open Font License." />
+<title>Fonts — Poppins and Redaction 50, one sheet per family</title>
+<meta name="description" content="Poppins and Redaction 50 as served by this site: every weight and italic, woff2 for the web and TTF for Android, with sizes listed and free to download under the SIL Open Font License." />
 <meta name="theme-color" content="#3f4e96" />
 <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml" />
 <link rel="stylesheet" href="../assets/site.css" />
 <style>
-  .specimen {
-    margin: 4px 0 6px;
-    font-size: clamp(28px, 3.6vw, 42px);
-    line-height: 1.15;
-    letter-spacing: -.02em;
-  }
-  .card .tag a { color: var(--on); }
-  .card .tag a + a { margin-left: 10px; }
   .trytext { display: grid; gap: 7px; max-width: 520px; font-size: 13px; letter-spacing: .04em; text-transform: uppercase; color: var(--on-dim); }
   .trytext input { font: inherit; font-size: 17px; letter-spacing: 0; text-transform: none; color: var(--on); background: transparent; border: 0; border-bottom: 1px solid var(--rule); padding: 9px 0; }
   .trytext input:focus-visible { outline: 2px solid var(--band); outline-offset: 2px; }
@@ -30,10 +22,12 @@
     appearance: textfield; -moz-appearance: textfield; }
   .trypx input::-webkit-outer-spin-button, .trypx input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
   .trypx input:focus-visible { outline: 2px solid var(--band); outline-offset: 2px; }
-  .trycss { display: flex; align-items: center; gap: 12px; margin: 14px 0 0; flex-wrap: wrap; max-width: 640px; }
-  .trycss code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; line-height: 1.5;
-    color: var(--on-dim); overflow-wrap: anywhere; white-space: pre-wrap; }
-  .try-copy { margin-left: auto; font: inherit; font-size: 13px; letter-spacing: .04em; text-transform: uppercase;
+  /* The rule is a block and the button sits under it, so neither can land on the
+     size row at any width. */
+  .trycss { margin: 14px 0 0; max-width: 640px; }
+  .trycss code { display: block; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px;
+    line-height: 1.5; color: var(--on-dim); overflow-wrap: anywhere; white-space: pre-wrap; }
+  .try-copy { margin: 10px 0 0; font: inherit; font-size: 13px; letter-spacing: .04em; text-transform: uppercase;
     padding: 5px 10px; color: var(--on); background: transparent; border: 1px solid var(--rule); cursor: pointer; }
   .try-copy:hover { border-color: var(--on-dim); }
   .try-copy:focus-visible { outline: 2px solid var(--band); outline-offset: -3px; }
@@ -42,9 +36,34 @@
     border: 1px solid var(--rule); cursor: pointer; }
   .try-reset:hover { color: var(--on); border-color: var(--on-dim); }
   .try-reset:focus-visible { outline: 2px solid var(--band); outline-offset: -3px; }
-  .try-weight { align-self: flex-start; font: inherit; font-size: 13px; margin: 0 0 14px; padding: 7px 12px; color: var(--on); background: transparent; border: 1px solid var(--rule); cursor: pointer; }
-  .try-weight[aria-pressed="true"] { color: var(--ink); background: var(--band); border-color: var(--band); }
-  .try-weight:focus-visible { outline: 2px solid var(--band); outline-offset: -3px; }
+
+  .familybar { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin: 20px 0 0;
+    font-size: 13px; letter-spacing: .04em; text-transform: uppercase; color: var(--on-dim); }
+  .familybar select { font: inherit; font-size: 16px; letter-spacing: 0; text-transform: none;
+    padding: 9px 38px 9px 12px; color: var(--on); background-color: transparent;
+    border: 1px solid var(--rule); border-radius: 0; cursor: pointer;
+    appearance: none; -webkit-appearance: none;
+    background-image: linear-gradient(45deg, transparent 50%, var(--on-dim) 50%),
+      linear-gradient(135deg, var(--on-dim) 50%, transparent 50%);
+    background-position: calc(100% - 17px) 50%, calc(100% - 12px) 50%;
+    background-size: 5px 5px, 5px 5px; background-repeat: no-repeat; }
+  .familybar select:focus-visible { outline: 2px solid var(--band); outline-offset: 2px; }
+  .familybar select option { color: #000; background: #d9d9d9; }
+
+  .sheet { margin-top: 22px; border-top: 1px solid var(--rule); }
+  .face { display: grid; gap: 9px; padding: 24px 0 22px; border-bottom: 1px solid var(--rule); }
+  .face-top { display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap; }
+  .face-top h3 { margin: 0; font-size: 22px; font-weight: 400; line-height: 1.2; letter-spacing: -.01em; }
+  .face .kind { font-size: 12px; font-weight: 500; letter-spacing: .1em; text-transform: uppercase; color: var(--on-dim); }
+  .specimen { margin: 2px 0 4px; font-size: clamp(28px, 3.4vw, 40px); line-height: 1.2; letter-spacing: -.01em; }
+  .face-use { margin: 0; font-size: 15px; line-height: 1.55; }
+  .face-foot { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; font-size: 13px; color: var(--on-dim); }
+  .face-foot a { color: var(--on); }
+  .face-foot a:hover { text-decoration: underline; }
+  .try-style { margin-left: auto; font: inherit; font-size: 13px; letter-spacing: .04em; text-transform: uppercase;
+    padding: 6px 12px; color: var(--on); background: transparent; border: 1px solid var(--rule); cursor: pointer; }
+  .try-style[aria-pressed="true"] { color: var(--ink); background: var(--band); border-color: var(--band); }
+  .try-style:focus-visible { outline: 2px solid var(--band); outline-offset: -3px; }
 </style>
 </head>
 <body>
@@ -80,7 +99,7 @@
 <nav class="menu" id="menu" data-open="false" aria-label="Sections">
   <a href="../">Index<span>shelf</span></a>
   <a href="../icons/">Icons<span>4,373 icons</span></a>
-  <a href="../fonts/" aria-current="page">Fonts<span>3 faces</span></a>
+  <a href="../fonts/" aria-current="page">Fonts<span>2 families</span></a>
   <a href="../tools/">Tools<span>2 apps</span></a>
 </nav>
 
@@ -101,23 +120,23 @@
 <main>
   <header class="page-head">
     <h1>Fonts</h1>
-    <p class="lede">Everything here is set in <b>Poppins</b>. The site serves its own copies — no Google Fonts request, no third-party host in the page — and the same three binaries are below to download.</p>
+    <p class="lede">Everything here is set in <b>Poppins</b>, with <b>Redaction 50</b> alongside for display. The site serves its own copies — no Google Fonts request, no third-party host in the page — and every binary is below to download.</p>
     <p class="meta">
-      <span>3 weights</span>
-      <span>woff2 23,632 bytes total</span>
-      <span>TTF 476,204 bytes total</span>
+      <span id="fontFamilies">2 families</span>
+      <span id="fontStyles">21 styles</span>
+      <span id="fontBytes">woff2 … total</span>
       <span>SIL Open Font License 1.1</span>
     </p>
   </header>
 
   <section id="try">
     <h2>Try it</h2>
-    <p class="kicker">Type a line, drag a size, then try a weight from the cards below</p>
+    <p class="kicker">Type a line, drag a size, then try any face in a family sheet below</p>
     <label class="trytext" for="tryText">Text
       <input id="tryText" type="text" value="Art Design Database" maxlength="80" autocomplete="off" spellcheck="false" />
     </label>
     <div class="trystage" id="tryStage">
-      <p id="tryOut" style="font-weight:400;font-size:48px">Art Design Database</p>
+      <p id="tryOut" style="font-family:'Poppins';font-weight:400;font-size:48px">Art Design Database</p>
     </div>
     <div class="trycss">
       <code id="tryRule">font-family: "Poppins", sans-serif;
@@ -132,58 +151,31 @@ font-size: 48px;</code>
         inputmode="numeric" aria-label="Size in pixels" /> px</span>
       <button type="button" class="try-reset" id="tryReset" hidden>Reset</button>
     </div>
-    <p class="fine">The same woff2 this page already loaded — no image, no extra request. Each card below sets the weight here.</p>
+    <p class="fine">The same woff2 these pages already loaded — no image, no extra request, no Google Fonts. A sheet's Try button sets the preview here.</p>
   </section>
 
   <section>
-    <h2>The three faces</h2>
-    <p class="kicker">One family, three jobs</p>
-    <div class="cards">
-      <div class="card">
-        <span class="kind">Poppins · 400</span>
-        <h3>Regular</h3>
-        <p class="specimen" style="font-weight:400">Offline, no account.</p>
-        <button type="button" class="try-weight" data-weight="400" aria-pressed="true">Try Regular</button>
-        <p>Body text, ledes and every label here. In the app it ships as <code>poppins_regular.ttf</code>.</p>
-        <span class="tag">woff2 7,900 bytes · ttf 160,316 bytes<br />
-          <a href="../assets/fonts/poppins-400.woff2" download>woff2</a>
-          <a href="../assets/fonts/poppins-400.ttf" download>ttf</a>
-        </span>
-      </div>
-      <div class="card">
-        <span class="kind">Poppins · 500</span>
-        <h3>Medium</h3>
-        <p class="specimen" style="font-weight:500">Offline, no account.</p>
-        <button type="button" class="try-weight" data-weight="500" aria-pressed="false">Try Medium</button>
-        <p>Bold labels in rows, icon names, the tab strip. In the app: <code>poppins_medium.ttf</code>.</p>
-        <span class="tag">woff2 7,740 bytes · ttf 158,576 bytes<br />
-          <a href="../assets/fonts/poppins-500.woff2" download>woff2</a>
-          <a href="../assets/fonts/poppins-500.ttf" download>ttf</a>
-        </span>
-      </div>
-      <div class="card">
-        <span class="kind">Poppins · 600</span>
-        <h3>SemiBold</h3>
-        <p class="specimen" style="font-weight:600">Offline, no account.</p>
-        <button type="button" class="try-weight" data-weight="600" aria-pressed="false">Try SemiBold</button>
-        <p>App titles and the one number that matters on a screen. In the app: <code>poppins_semibold.ttf</code>.</p>
-        <span class="tag">woff2 7,992 bytes · ttf 157,312 bytes<br />
-          <a href="../assets/fonts/poppins-600.woff2" download>woff2</a>
-          <a href="../assets/fonts/poppins-600.ttf" download>ttf</a>
-        </span>
-      </div>
+    <h2>Font families</h2>
+    <p class="kicker">One sheet per family — pick a family, then try any face in it</p>
+    <div class="familybar">
+      <label for="familyPick">Family</label>
+      <select id="familyPick" aria-label="Font family">
+        <option>Poppins</option>
+      </select>
     </div>
-    <p class="fine">Each TTF here is a byte-for-byte copy of the file the app bundles in <code>app/res/font/</code> — <code>tools/build_catalog.py</code> copies it on every run, so the download cannot fall behind the app.</p>
+    <p class="kicker" id="familyNote" style="margin:14px 0 0">Loading the family sheet…</p>
+    <div class="sheet" id="sheet"></div>
+    <p class="fine">Each sheet lists one family's faces. The three Poppins faces the apps bundle are byte-for-byte copies from <code>app/res/font/</code>; the rest are fetched once by <code>tools/fetch_fonts.py</code> and served from this site.</p>
   </section>
 
   <section>
     <h2>How it is wired</h2>
-    <p class="kicker">Three declarations, no network</p>
+    <p class="kicker">Two families, no network</p>
     <ul class="rows">
-      <li><b>Site</b><span><code>assets/site.css</code> declares the three faces once; every page links that one stylesheet.</span></li>
+      <li><b>Site</b><span><code>assets/site.css</code> sets the site's own Poppins faces; this page declares every downloaded style from <code>/data/fonts.json</code>.</span></li>
       <li><b>App</b><span><code>app/res/font/poppins_regular.ttf</code>, <code>_medium</code> and <code>_semibold</code>, referenced from the layouts.</span></li>
       <li><b>Downloads</b><span>woff2 for the web at <code>/assets/fonts/</code>, TTF beside it for Android and desktop.</span></li>
-      <li><b>JSON</b><span><code>/data/fonts.json</code> lists each face, its weight, both paths and both sizes.</span></li>
+      <li><b>JSON</b><span><code>/data/fonts.json</code> lists each family, its faces, both paths and both measured sizes.</span></li>
     </ul>
     <p class="fine">A face looks like this in CSS:</p>
     <p class="fine"><code>@font-face { font-family: "Poppins"; src: url("fonts/poppins-400.woff2") format("woff2"); font-weight: 400; font-display: swap; }</code></p>
@@ -192,18 +184,19 @@ font-size: 48px;</code>
   <section>
     <h2>Licence</h2>
     <p class="kicker">SIL Open Font License 1.1</p>
-    <p class="kicker" style="max-width:66ch; margin-bottom:0">Poppins is free for personal and commercial use, including bundling it in an app and serving it from a site. The licence travels with the font: keep the OFL text with any copy you redistribute, and do not sell the font on its own. The icon set being browsable here is a separate licence — MIT, on the <a href="../icons/">icons page</a>.</p>
+    <p class="kicker" style="max-width:66ch; margin-bottom:0">Poppins and Redaction 50 are free for personal and commercial use, including bundling them in an app and serving them from a site. The licence travels with the font: keep the OFL text with any copy you redistribute, and do not sell the font on its own. The icon set being browsable here is a separate licence — MIT, on the <a href="../icons/">icons page</a>.</p>
   </section>
 </main>
 
 <footer>
-  <span>Poppins 400 · 500 · 600 · SIL OFL 1.1</span>
+  <span>Poppins · Redaction 50 · SIL OFL 1.1</span>
   <span><a href="../">Index</a> · <a href="../icons/">Icons</a> · <a href="../download/">Download</a></span>
 </footer>
 
 <script>
 (function () {
   var KEY = "fonts:preview";
+  var MIN = 16, MAX = 120;
   var text = document.getElementById("tryText");
   var size = document.getElementById("trySize");
   var num = document.getElementById("trySizeNum");
@@ -211,36 +204,125 @@ font-size: 48px;</code>
   var reset = document.getElementById("tryReset");
   var rule = document.getElementById("tryRule");
   var copy = document.getElementById("tryCopy");
-  var buttons = Array.prototype.slice.call(document.querySelectorAll(".try-weight"));
-  var weight = "400";
-  var MIN = 16, MAX = 120;
-  var DEFAULTS;
+  var pick = document.getElementById("familyPick");
+  var sheet = document.getElementById("sheet");
+  var note = document.getElementById("familyNote");
+  var familiesOut = document.getElementById("fontFamilies");
+  var stylesOut = document.getElementById("fontStyles");
+  var bytesOut = document.getElementById("fontBytes");
 
-  function clamp(px) { return Math.min(MAX, Math.max(MIN, px)); }
-  function changed() {
-    return text.value !== DEFAULTS.text || size.value !== DEFAULTS.size || weight !== DEFAULTS.weight;
+  var data = [];
+  var state = { family: "Poppins", weight: 400, style: "normal", size: 48 };
+  var DEFAULTS = {
+    family: "Poppins", weight: 400, style: "normal",
+    text: text.defaultValue, size: size.defaultValue
+  };
+
+  function family(name) {
+    return data.filter(function (item) { return item.family === name; })[0];
   }
+  function face(fam, weight, style) {
+    if (!fam) { return null; }
+    return fam.styles.filter(function (item) {
+      return item.weight === weight && item.style === style;
+    })[0];
+  }
+  function clamp(px) { return Math.min(MAX, Math.max(MIN, px)); }
+  function bytes(value) { return value.toLocaleString("en-US"); }
+
+  function changed() {
+    return text.value !== DEFAULTS.text || size.value !== DEFAULTS.size ||
+      state.family !== DEFAULTS.family || state.weight !== Number(DEFAULTS.weight) ||
+      state.style !== DEFAULTS.style;
+  }
+
+  function injectFaces() {
+    var css = "";
+    data.forEach(function (fam) {
+      fam.styles.forEach(function (item) {
+        css += '@font-face{font-family:"' + fam.family + '";src:url("' + item.woff2 +
+          '") format("woff2");font-weight:' + item.weight + ";font-style:" + item.style +
+          ";font-display:swap}";
+      });
+    });
+    var tag = document.createElement("style");
+    tag.textContent = css;
+    document.head.appendChild(tag);
+  }
+
+  function fillPicker() {
+    pick.innerHTML = "";
+    data.forEach(function (fam) {
+      var option = document.createElement("option");
+      option.value = fam.family;
+      option.textContent = fam.family;
+      pick.appendChild(option);
+    });
+    pick.value = state.family;
+  }
+
+  function render() {
+    var fam = family(state.family) || data[0];
+    if (!fam) { return; }
+    state.family = fam.family;
+    pick.value = fam.family;
+    note.textContent = fam.kind + " · " + fam.styles.length + " styles · " + fam.licence;
+    sheet.innerHTML = fam.styles.map(function (item) {
+      var active = item.weight === state.weight && item.style === state.style;
+      return '<article class="face">' +
+        '<div class="face-top"><span class="kind">' + fam.family + " · " + item.weight +
+          (item.style === "italic" ? " italic" : "") + "</span><h3>" + item.name + "</h3></div>" +
+        '<p class="specimen" style="font-family:\'' + fam.family + "';font-weight:" + item.weight +
+          ";font-style:" + item.style + '">Offline, no account.</p>' +
+        (item.use ? '<p class="face-use">' + item.use + "</p>" : "") +
+        '<div class="face-foot"><span class="tag">woff2 ' + bytes(item.woff2_bytes) +
+          " bytes · ttf " + bytes(item.ttf_bytes) + " bytes</span>" +
+        '<a href="' + item.woff2 + '" download>woff2</a>' +
+        '<a href="' + item.ttf + '" download>ttf</a>' +
+        '<button type="button" class="try-style" data-family="' + fam.family +
+          '" data-weight="' + item.weight + '" data-style="' + item.style +
+          '" aria-pressed="' + active + '">Try ' + item.name + "</button></div></article>";
+    }).join("");
+  }
+
   function paint() {
+    var fam = family(state.family) || data[0];
+    if (!fam) { return; }
+    var fallback = fam.fallback || "sans-serif";
     out.textContent = text.value.trim() || "Poppins";
-    out.style.fontWeight = weight;
+    out.style.fontFamily = '"' + fam.family + '"';
+    out.style.fontWeight = state.weight;
+    out.style.fontStyle = state.style;
     out.style.fontSize = size.value + "px";
     if (document.activeElement !== num) { num.value = size.value; }
-    rule.textContent = 'font-family: "Poppins", sans-serif;\nfont-weight: ' + weight + ";\nfont-size: " + size.value + "px;";
+    var lines = ['font-family: "' + fam.family + '", ' + fallback + ";",
+                 "font-weight: " + state.weight + ";"];
+    if (state.style === "italic") { lines.push("font-style: italic;"); }
+    lines.push("font-size: " + size.value + "px;");
+    rule.textContent = lines.join("\n");
     reset.hidden = !changed();
   }
-  function setWeight(value) {
-    weight = String(value);
-    buttons.forEach(function (button) {
-      button.setAttribute("aria-pressed", button.getAttribute("data-weight") === weight ? "true" : "false");
-    });
+
+  function stats() {
+    if (!data.length) { return; }
+    var styles = data.reduce(function (n, fam) { return n + fam.styles.length; }, 0);
+    var woff2 = data.reduce(function (n, fam) { return n + fam.woff2_bytes; }, 0);
+    familiesOut.textContent = data.length + " families";
+    stylesOut.textContent = styles + " styles";
+    bytesOut.textContent = "woff2 " + bytes(woff2) + " bytes total";
   }
+
   function remember() {
     try {
-      localStorage.setItem(KEY, JSON.stringify({ text: text.value, size: Number(size.value), weight: Number(weight) }));
+      localStorage.setItem(KEY, JSON.stringify({
+        text: text.value, size: Number(size.value),
+        family: state.family, weight: Number(state.weight), style: state.style
+      }));
     } catch (error) {
       /* private mode or a blocked store: the preview still works, it just forgets */
     }
   }
+
   function restore() {
     var saved = null;
     try {
@@ -252,20 +334,24 @@ font-size: 48px;</code>
     if (typeof saved.text === "string" && saved.text.length <= 80) { text.value = saved.text; }
     var px = Number(saved.size);
     if (px >= MIN && px <= MAX) { size.value = String(Math.round(px)); }
-    var wanted = String(saved.weight);
-    if (buttons.some(function (button) { return button.getAttribute("data-weight") === wanted; })) {
-      setWeight(wanted);
+    var fam = family(String(saved.family));
+    if (fam && face(fam, Number(saved.weight), String(saved.style))) {
+      state.family = fam.family;
+      state.weight = Number(saved.weight);
+      state.style = String(saved.style);
     }
   }
 
-  var initial = buttons.filter(function (button) {
-    return button.getAttribute("aria-pressed") === "true";
-  })[0];
-  DEFAULTS = {
-    text: text.defaultValue,
-    size: size.defaultValue,
-    weight: initial ? initial.getAttribute("data-weight") : "400"
-  };
+  function applyFamily(name) {
+    var fam = family(name);
+    if (!fam) { return; }
+    state.family = fam.family;
+    if (!face(fam, state.weight, state.style)) {
+      var regular = face(fam, 400, "normal") || fam.styles[0];
+      state.weight = regular.weight;
+      state.style = regular.style;
+    }
+  }
 
   function typed() {
     if (num.value === "") { return; }
@@ -298,11 +384,33 @@ font-size: 48px;</code>
     document.body.removeChild(area);
     copied(ok);
   });
+
+  pick.addEventListener("change", function () {
+    applyFamily(pick.value);
+    render();
+    paint();
+    remember();
+  });
+
+  sheet.addEventListener("click", function (event) {
+    var button = event.target.closest(".try-style");
+    if (!button) { return; }
+    state.family = button.getAttribute("data-family");
+    state.weight = Number(button.getAttribute("data-weight"));
+    state.style = button.getAttribute("data-style");
+    render();
+    paint();
+    remember();
+  });
+
   reset.addEventListener("click", function () {
     text.value = DEFAULTS.text;
     size.value = DEFAULTS.size;
     num.value = size.value;
-    setWeight(DEFAULTS.weight);
+    state.family = DEFAULTS.family;
+    state.weight = Number(DEFAULTS.weight);
+    state.style = DEFAULTS.style;
+    render();
     paint();
     try {
       localStorage.removeItem(KEY);
@@ -310,20 +418,28 @@ font-size: 48px;</code>
       /* nothing was stored */
     }
   });
+
   text.addEventListener("input", function () { paint(); remember(); });
   size.addEventListener("input", function () { paint(); remember(); });
   num.addEventListener("input", typed);
   num.addEventListener("change", function () { typed(); num.value = size.value; });
   num.addEventListener("blur", function () { num.value = size.value; });
-  buttons.forEach(function (button) {
-    button.addEventListener("click", function () {
-      setWeight(button.getAttribute("data-weight"));
+
+  fetch("../data/fonts.json")
+    .then(function (response) { return response.json(); })
+    .then(function (payload) {
+      data = payload.families || [];
+      injectFaces();
+      fillPicker();
+      stats();
+      restore();
+      render();
       paint();
-      remember();
+    })
+    .catch(function () {
+      note.textContent = "The family catalog did not load; the preview still works.";
+      paint();
     });
-  });
-  restore();
-  paint();
 })();
 </script>
 <script src="../assets/site.js" defer></script>

@@ -276,7 +276,7 @@ const escape = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/
 <nav class="menu" id="menu" data-open="false" aria-label="Sections">
   <a href="../">Index<span>shelf</span></a>
   <a href="../icons/">Icons<span>${iconTotal} icons</span></a>
-  <a href="../fonts/">Fonts<span>3 faces</span></a>
+  <a href="../fonts/">Fonts<span>2 families</span></a>
   <a href="../tools/">Tools<span>2 apps</span></a>
 </nav>
 

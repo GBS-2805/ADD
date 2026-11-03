@@ -79,30 +79,178 @@
   "fonts": [
     {
       "family": "Poppins",
-      "weight": 400,
-      "name": "Regular",
-      "woff2": "/assets/fonts/poppins-400.woff2",
-      "ttf": "/assets/fonts/poppins-400.ttf",
-      "app_res": "app/res/font/poppins_regular.ttf",
-      "use": "Body text, ledes, section copy and every label on this site."
+      "slug": "poppins",
+      "kind": "Sans serif",
+      "licence": "SIL Open Font License 1.1",
+      "source": "Google Fonts",
+      "note": "The three faces the apps bundle are byte-for-byte copies of app/res/font/.",
+      "styles": [
+        {
+          "name": "Thin",
+          "weight": 100,
+          "style": "normal",
+          "woff2": "/assets/fonts/poppins-100.woff2",
+          "ttf": "/assets/fonts/poppins-100.ttf"
+        },
+        {
+          "name": "Thin Italic",
+          "weight": 100,
+          "style": "italic",
+          "woff2": "/assets/fonts/poppins-100-italic.woff2",
+          "ttf": "/assets/fonts/poppins-100-italic.ttf"
+        },
+        {
+          "name": "ExtraLight",
+          "weight": 200,
+          "style": "normal",
+          "woff2": "/assets/fonts/poppins-200.woff2",
+          "ttf": "/assets/fonts/poppins-200.ttf"
+        },
+        {
+          "name": "ExtraLight Italic",
+          "weight": 200,
+          "style": "italic",
+          "woff2": "/assets/fonts/poppins-200-italic.woff2",
+          "ttf": "/assets/fonts/poppins-200-italic.ttf"
+        },
+        {
+          "name": "Light",
+          "weight": 300,
+          "style": "normal",
+          "woff2": "/assets/fonts/poppins-300.woff2",
+          "ttf": "/assets/fonts/poppins-300.ttf"
+        },
+        {
+          "name": "Light Italic",
+          "weight": 300,
+          "style": "italic",
+          "woff2": "/assets/fonts/poppins-300-italic.woff2",
+          "ttf": "/assets/fonts/poppins-300-italic.ttf"
+        },
+        {
+          "name": "Regular",
+          "weight": 400,
+          "style": "normal",
+          "woff2": "/assets/fonts/poppins-400.woff2",
+          "ttf": "/assets/fonts/poppins-400.ttf",
+          "app_res": "app/res/font/poppins_regular.ttf",
+          "use": "Body text, ledes and every label on this site."
+        },
+        {
+          "name": "Regular Italic",
+          "weight": 400,
+          "style": "italic",
+          "woff2": "/assets/fonts/poppins-400-italic.woff2",
+          "ttf": "/assets/fonts/poppins-400-italic.ttf"
+        },
+        {
+          "name": "Medium",
+          "weight": 500,
+          "style": "normal",
+          "woff2": "/assets/fonts/poppins-500.woff2",
+          "ttf": "/assets/fonts/poppins-500.ttf",
+          "app_res": "app/res/font/poppins_medium.ttf",
+          "use": "Row labels, icon names and the tab strip."
+        },
+        {
+          "name": "Medium Italic",
+          "weight": 500,
+          "style": "italic",
+          "woff2": "/assets/fonts/poppins-500-italic.woff2",
+          "ttf": "/assets/fonts/poppins-500-italic.ttf"
+        },
+        {
+          "name": "SemiBold",
+          "weight": 600,
+          "style": "normal",
+          "woff2": "/assets/fonts/poppins-600.woff2",
+          "ttf": "/assets/fonts/poppins-600.ttf",
+          "app_res": "app/res/font/poppins_semibold.ttf",
+          "use": "Titles and the one number that matters on a screen."
+        },
+        {
+          "name": "SemiBold Italic",
+          "weight": 600,
+          "style": "italic",
+          "woff2": "/assets/fonts/poppins-600-italic.woff2",
+          "ttf": "/assets/fonts/poppins-600-italic.ttf"
+        },
+        {
+          "name": "Bold",
+          "weight": 700,
+          "style": "normal",
+          "woff2": "/assets/fonts/poppins-700.woff2",
+          "ttf": "/assets/fonts/poppins-700.ttf"
+        },
+        {
+          "name": "Bold Italic",
+          "weight": 700,
+          "style": "italic",
+          "woff2": "/assets/fonts/poppins-700-italic.woff2",
+          "ttf": "/assets/fonts/poppins-700-italic.ttf"
+        },
+        {
+          "name": "ExtraBold",
+          "weight": 800,
+          "style": "normal",
+          "woff2": "/assets/fonts/poppins-800.woff2",
+          "ttf": "/assets/fonts/poppins-800.ttf"
+        },
+        {
+          "name": "ExtraBold Italic",
+          "weight": 800,
+          "style": "italic",
+          "woff2": "/assets/fonts/poppins-800-italic.woff2",
+          "ttf": "/assets/fonts/poppins-800-italic.ttf"
+        },
+        {
+          "name": "Black",
+          "weight": 900,
+          "style": "normal",
+          "woff2": "/assets/fonts/poppins-900.woff2",
+          "ttf": "/assets/fonts/poppins-900.ttf"
+        },
+        {
+          "name": "Black Italic",
+          "weight": 900,
+          "style": "italic",
+          "woff2": "/assets/fonts/poppins-900-italic.woff2",
+          "ttf": "/assets/fonts/poppins-900-italic.ttf"
+        }
+      ],
+      "fallback": "sans-serif"
     },
     {
-      "family": "Poppins",
-      "weight": 500,
-      "name": "Medium",
-      "woff2": "/assets/fonts/poppins-500.woff2",
-      "ttf": "/assets/fonts/poppins-500.ttf",
-      "app_res": "app/res/font/poppins_medium.ttf",
-      "use": "Icon names, row labels and the small caps in the tab strip."
-    },
-    {
-      "family": "Poppins",
-      "weight": 600,
-      "name": "SemiBold",
-      "woff2": "/assets/fonts/poppins-600.woff2",
-      "ttf": "/assets/fonts/poppins-600.ttf",
-      "app_res": "app/res/font/poppins_semibold.ttf",
-      "use": "App titles and the one number that matters on each screen."
+      "family": "Redaction 50",
+      "slug": "redaction-50",
+      "kind": "Display serif",
+      "licence": "SIL Open Font License 1.1",
+      "source": "Google Fonts",
+      "note": "One of Redaction's six optical sizes, cut for display.",
+      "styles": [
+        {
+          "name": "Italic",
+          "weight": 400,
+          "style": "italic",
+          "woff2": "/assets/fonts/redaction-50-400-italic.woff2",
+          "ttf": "/assets/fonts/redaction-50-400-italic.ttf"
+        },
+        {
+          "name": "Regular",
+          "weight": 400,
+          "style": "normal",
+          "woff2": "/assets/fonts/redaction-50-400.woff2",
+          "ttf": "/assets/fonts/redaction-50-400.ttf"
+        },
+        {
+          "name": "Bold",
+          "weight": 700,
+          "style": "normal",
+          "woff2": "/assets/fonts/redaction-50-700.woff2",
+          "ttf": "/assets/fonts/redaction-50-700.ttf"
+        }
+      ],
+      "fallback": "serif"
     }
   ],
   "portfolio": [

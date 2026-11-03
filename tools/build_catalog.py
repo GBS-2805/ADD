@@ -55,16 +55,22 @@ def digest(path):
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def copy_face(face):
-    """Keep the downloadable TTF byte-identical to the one the app bundles."""
-    source = ROOT / face["app_res"]
-    target = DOCS / face["ttf"].lstrip("/")
+def copy_face(style):
+    """Keep an app-bundled TTF byte-identical to the one the app ships.
+
+    Most styles are fetched from Google Fonts and have no app_res; the three the
+    apps bundle do, and those files must never be replaced by a download.
+    """
+    if not style.get("app_res"):
+        return
+    source = ROOT / style["app_res"]
+    target = DOCS / style["ttf"].lstrip("/")
     if not source.exists():
-        fail("missing app font %s" % face["app_res"])
+        fail("missing app font %s" % style["app_res"])
     target.parent.mkdir(parents=True, exist_ok=True)
     if not target.exists() or target.read_bytes() != source.read_bytes():
         shutil.copyfile(source, target)
-        print("copied %s -> %s" % (face["app_res"], face["ttf"]))
+        print("copied %s -> %s" % (style["app_res"], style["ttf"]))
 
 
 def measure(catalog):
@@ -79,13 +85,17 @@ def measure(catalog):
             fail("missing apk %s" % apk)
         app["bytes"] = size(path)
         app["sha256"] = digest(path)
-    for face in catalog["fonts"]:
-        copy_face(face)
-        for key in ("woff2", "ttf"):
-            path = DOCS / face[key].lstrip("/")
-            if not path.exists():
-                fail("missing font %s" % face[key])
-            face[key + "_bytes"] = size(path)
+    for family in catalog["fonts"]:
+        for style in family["styles"]:
+            copy_face(style)
+            for key in ("woff2", "ttf"):
+                path = DOCS / style[key].lstrip("/")
+                if not path.exists():
+                    fail("missing font %s" % style[key])
+                style[key + "_bytes"] = size(path)
+        family["styles_count"] = len(family["styles"])
+        family["woff2_bytes"] = sum(style["woff2_bytes"] for style in family["styles"])
+        family["ttf_bytes"] = sum(style["ttf_bytes"] for style in family["styles"])
     return catalog
 
 
@@ -171,6 +181,7 @@ def refresh_counts(total, brands):
 
 def build(catalog, count, sets):
     generated = datetime.date.today().isoformat()
+    font_styles = sum(family["styles_count"] for family in catalog["fonts"])
     index = {
         "generated": generated,
         "site": catalog["site"],
@@ -180,7 +191,7 @@ def build(catalog, count, sets):
             {"id": "icons", "title": "Icons", "href": "/icons/", "data": "/data/icons.json",
              "count": count, "sets": sets},
             {"id": "fonts", "title": "Fonts", "href": "/fonts/", "data": "/data/fonts.json",
-             "count": len(catalog["fonts"])},
+             "count": font_styles},
             {"id": "portfolio", "title": "Portfolio", "href": "/portfolio/",
              "data": "/data/portfolio.json", "count": len(catalog["portfolio"])},
         ],
@@ -192,7 +203,8 @@ def build(catalog, count, sets):
     }
     write(DATA / "index.json", index)
     write(DATA / "tools.json", {"generated": generated, "tools": catalog["tools"]})
-    write(DATA / "fonts.json", {"generated": generated, "fonts": catalog["fonts"]})
+    write(DATA / "fonts.json", {"generated": generated, "styles": font_styles,
+                                "families": catalog["fonts"]})
     write(DATA / "portfolio.json", {"generated": generated, "entries": catalog["portfolio"]})
 
 
@@ -280,13 +292,16 @@ def check(catalog, count):
         if app["sha256"] not in text["download"]:
             problems.append("download: SHA-256 out of date")
 
-    for face in catalog["fonts"]:
-        for key in ("woff2", "ttf"):
-            name = face[key].split("/")[-1]
-            if name not in text["fonts"]:
-                problems.append("fonts: no link to %s" % name)
-            if "{:,}".format(face[key + "_bytes"]) not in text["fonts"]:
-                problems.append("fonts: size for %s is out of date" % name)
+    # The fonts page renders its sheets from /data/fonts.json, so its sizes are
+    # never typed into HTML; check the page still reads that catalog and keeps
+    # the family picker the sheet is driven by.
+    if "data/fonts.json" not in text["fonts"]:
+        problems.append("fonts: no link to /data/fonts.json")
+    if 'id="familyPick"' not in text["fonts"]:
+        problems.append("fonts: the family picker is missing")
+    for family in catalog["fonts"]:
+        if not family.get("styles"):
+            problems.append("fonts: %s has no styles" % family["family"])
 
     if "{:,}".format(count) not in text["index"]:
         problems.append("index: icon count %s is missing" % "{:,}".format(count))
@@ -308,8 +323,9 @@ def main():
         build(catalog, count, sets)
 
     released = [app["name"] for app in catalog["tools"] if app.get("apk")]
-    print("catalog: %d tools (%s shipping), %d fonts, %d projects, %d icons in %d sets"
-          % (len(catalog["tools"]), ", ".join(released), len(catalog["fonts"]),
+    font_styles = sum(len(family["styles"]) for family in catalog["fonts"])
+    print("catalog: %d tools (%s shipping), %d font families / %d styles, %d projects, %d icons in %d sets"
+          % (len(catalog["tools"]), ", ".join(released), len(catalog["fonts"]), font_styles,
              len(catalog["portfolio"]), count, len(sets)))
 
     problems = check(catalog, count) + audit(count, sets)
