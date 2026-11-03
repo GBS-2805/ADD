@@ -2,6 +2,12 @@
   "notes": [
     {
       "id": "icons",
+      "version": "2.15",
+      "title": "Four styles, one brand",
+      "note": "Plump Solid becomes Streamline: 997 icons in Line, Duo, Solid and Flat on one page, switched by a Style row, with Duo and Flat keeping the vendor's own palette."
+    },
+    {
+      "id": "icons",
       "version": "2.14",
       "title": "Nothing selected by default",
       "note": "Export packs only what the selection holds: nothing is selected when the page opens, so it reads Nothing to export, and Remove all now really leaves nothing behind."
