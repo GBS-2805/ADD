@@ -1,9 +1,9 @@
-# Compress — two offline Android tools and the design shelf they sit on
+# ADD — one offline Android app and the design shelf it sits on
 
-Two small Android apps that work with no network at all, plus the static site that
-is both their documentation and their database. The photo app's manifest and the
-icon app's manifest both declare **no `INTERNET` permission**, so they physically
-cannot upload anything or phone home.
+One small Android app that works with no network at all — icons, fonts and batch
+photo compression behind one pull-down — plus the static site that is both its
+documentation and its database. The manifest declares **no `INTERNET` permission**,
+so it physically cannot upload anything or phone home.
 
 The site is a general design shelf: `docs/` carries the icons, the fonts, the work
 and the downloads, all served from one palette and all published as JSON alongside
@@ -11,48 +11,49 @@ the pages.
 
 ## Status
 
-- **Icons 2.20** — APK [`dist/Icons-2.20.apk`](dist/Icons-2.20.apk)
-  (2,064,041 bytes, signed v1+v2), published as `docs/Icons-2.20.apk`. Package
-  `app.offline.icons` · minSdk 26 · targetSdk 35 · versionCode 31. The whole browser
-  — all four brands, 4,373 glyphs, the stylesheet and Poppins — is bundled in the APK
-  and served to a WebView from a private origin.
-- **Compress 2.3** — APK [`dist/Compress-2.3.apk`](dist/Compress-2.3.apk)
-  (285,012 bytes, signed v1+v2, round adaptive icon), published as
-  `docs/Compress-2.3.apk`. Package `app.offline.compress` · versionCode 14.
+- **ADD 3.0** — APK [`dist/ADD-3.0.apk`](dist/ADD-3.0.apk) (2 MB, signed v1+v2),
+  published as `docs/ADD-3.0.apk`. Package `app.offline.compress` — the merge kept
+  the id so installed copies update in place — minSdk 26 · targetSdk 35 ·
+  versionCode 32. One package, three tools: the whole icon browser (all four brands,
+  4,373 glyphs, the stylesheet and Poppins) and the fonts page ride inside it, served
+  to a WebView from a private origin, and the compressor is native.
 - **Icons browser** — live at `docs/icons/`: four free brands — 606 Lineicons,
   1,258 Coolicons, 1,512 Phosphor and 997 Streamline — each on its own page with a preview, variant controls and the
   set folded into a scrolling sheet. Copy-on-tap, no account.
-- Theme: **one palette**, taken from the Figma frame `6-27` — an indigo field
-  (`#3F4E96`), a light band (`#D9D9D9`) that also fills every call to action, black
-  ink on the band, light text on the field, and hairline rules where the old theme
-  used border-plus-shadow cards. Surfaces are flat: `shadow` is fully transparent.
+- Theme: **three palettes over two modes** — green (`#0fbf92` band), Moss and Navy —
+  each in a dark page (`#131513` with cream type) and a light one. A new visitor opens
+  dark. Surfaces are flat: `shadow` is fully transparent.
 - Type: Poppins, self-hosted. The site serves woff2 from `docs/assets/fonts/`; both
-  apps bundle Poppins (Compress as `res/font/`, Icons inside the web bundle).
-- **No dark mode**, on the site or in either app. `res/values-night` is deleted and
-  the header toggle is gone from the layout and the Java. `ThemePrefs` remains only
-  to force night mode off in the system UI.
+  app bundles Poppins (the compressor from `res/font/`, the web tools inside the
+  bundle).
+- **Dark and light**, on the site and in the app, remembered under `site:theme`. The
+  compressor reads the same choice: `ThemePrefs` stores the palette pair and
+  `applyTheme()` sets it before `setContentView()`.
 
-`dist/` keeps every older build as history; only the current APKs are copied into
+`dist/` keeps every older build as history; only the current APK is copied into
 `docs/`.
 
 ## The shelf
 
-Twelve pages, one stylesheet, no framework:
+Fifteen pages, one stylesheet, no framework:
 
 | Page | What it is |
 | --- | --- |
-| `docs/index.html` | Index: the material, both apps, the palette, the JSON list |
-| `docs/tools/` | Both apps in detail, install steps, a link to the release notes |
-| `docs/icons/` | Icons app landing: download, the four brands, what the app does |
+| `docs/index.html` | Index: the material, the app, the palette, the JSON list |
+| `docs/tools/` | The three tools in detail, install steps, a link to the release notes |
+| `docs/icons/` | Icons landing: download, the four brands, what the tool does |
 | `docs/icons/lineicons/` | Lineicons: preview tab, variants, the set (generated) |
 | `docs/icons/coolicons/` | Coolicons: preview tab, variants, the set (generated) |
+| `docs/icons/phosphor/` | Phosphor: preview tab, variants, the set (generated) |
+| `docs/icons/streamline/` | Streamline: preview tab, four styles, the set (generated) |
 | `docs/icons/all/` | All brands: one section per brand, twelve glyphs each (generated) |
 | `docs/fonts/` | Poppins 400/500/600, specimens, woff2 and TTF downloads |
 | `docs/portfolio/` | Three projects, what I built in each, constraints |
-| `docs/download/` | Both APKs, sizes, SHA-256, install steps |
+| `docs/download/` | The APK, its size, SHA-256, install steps |
 | `docs/renders/` | Gallery of captures, nothing drawn by hand |
 | `docs/releases/` | Every build, with the day, the APK size and the note written for it |
 | `docs/figma/` | The design hand-off, listed so every artboard downloads from a phone |
+| `docs/search/` | Search over every page (generated) |
 
 Pages share `docs/assets/site.css` — palette, band, menus and type — plus
 `docs/assets/site.js` for both menus. The band is frame 6-27's geometry with the page
@@ -78,7 +79,7 @@ The site is also the database the apps read, so the same numbers go to both:
 
 ```
 docs/data/index.json       the four catalogs, their pages, their counts, the downloads
-docs/data/tools.json       both apps: version, package, APK path, bytes, SHA-256
+docs/data/tools.json       the app: version, package, APK path, bytes, SHA-256
 docs/data/icons.json       all 606 Lineicons glyphs with their markup
 docs/data/coolicons.json   all 1,258 Coolicons glyphs (the Icons app's database)
 docs/data/fonts.json       each Poppins face: weight, woff2 path, TTF path, sizes
@@ -106,9 +107,9 @@ python3 tools/hash_assets.py --check        # fail when a page names an old asse
 
 ## What Icons does
 
-- **Four brands, each whole**: 606 Lineicons, 1,258 Coolicons, 1,512 Phosphor and 500
-    Plump Solid, generated from the
-  vendors' repositories and recoloured to `currentColor`.
+- **Four brands, each whole**: 606 Lineicons, 1,258 Coolicons, 1,512 Phosphor and 997
+  Streamline, generated from the vendors' repositories and recoloured to
+  `currentColor`; Duo and Flat keep the vendor's own palette.
 - **A live preview**: the selected glyph in its own tab, with weight (1 → 2.5), size
   (32 → 96) and surface (field or band) applied in the preview only.
 - **Categories**: the sets whose vendor publishes one filter by its own taxonomy, beside the
@@ -154,12 +155,13 @@ app/src/app/offline/compress/SelectionStore.java   keeps the picked set across a
 app/src/app/offline/compress/ThemePrefs.java       forces night mode off (one palette)
 app/res/                                           27 resources: 3 layouts, 14 drawables,
                                                    Poppins, one values/ (no values-night)
-icons-app/AndroidManifest.xml                      Icons manifest (no permissions at all)
-icons-app/src/app/offline/icons/MainActivity.java  WebView, asset origin, clipboard bridge
-icons-app/res/                                      one theme, one vector launcher icon
-icons-app/assets/                                   staged at build time from docs/ (not committed)
-build.sh                                           SDK-tools build: ./build.sh [all|stage|compress|icons]
-docs/                                              the eleven-page static shelf + data/
+app/src/app/offline/compress/ShelfActivity.java     WebView tool surface (icons or fonts page)
+app/src/app/offline/compress/Palette.java           three palettes, one entry each
+app/src/app/offline/compress/ThemePrefs.java        stores the palette and theme pair
+app/assets/www/                                     staged at build time from docs/ (not committed)
+build.sh                                           SDK-tools build: ./build.sh [add|stage]
+docs/                                              the fifteen-page static shelf + data/
+icons-app/                                         retired pre-merge WebView app; nothing builds it
 tools/catalog.json                                 apps, fonts, portfolio (one source)
 tools/build_catalog.py                             measures the shipped files, writes data/
 tools/build_releases.py                            writes the releases page from git history
@@ -182,16 +184,14 @@ No Gradle, no AndroidX, no downloads beyond the SDK itself.
 ```bash
 export JAVA_HOME=/path/to/jdk17
 export ANDROID_SDK_ROOT=$HOME/android-sdk   # needs build-tools;35.0.0 + platforms;android-35
-./build.sh            # both APKs
-./build.sh stage      # the browser bundle only: no JDK or SDK needed
-./build.sh icons      # Icons only: stages docs/ into icons-app/assets, then builds
-./build.sh compress   # Compress only
+./build.sh            # ADD: stages the web bundle, then builds and signs
+./build.sh stage      # the web bundle only: no JDK or SDK needed
 ```
 
-Output: `dist/Compress-2.3.apk` and `dist/Icons-2.20.apk`. Copy them to `docs/` and
+Output: `dist/ADD-3.0.apk`. Copy it to `docs/` and
 re-run `python3 tools/build_catalog.py` so the pages, the JSON and the checksums move
 together. Signing uses `$HOME/tools/compress-keystore.jks` (created on first build,
-password `android`); both apps share it, so they update side by side. Replace it with
+password `android`). Replace it with
 your own key for anything beyond personal sideloading.
 
 ## Screenshots: captures only
@@ -213,10 +213,9 @@ Coolicons preview, the open set and a variant, fonts, portfolio and download at
 1300×900, then the index, its two menus and both icon pages at 390×844 — and prints
 console errors and horizontal overflow.
 
-**Neither Android app can be captured on this machine**, so the gallery shows no app
+**The Android app cannot be captured on this machine**, so the gallery shows no app
 screens. `/dev/kvm` exists but the account here is not in the `kvm` group and `sudo`
-is blocked by `no_new_privs`, so the emulator falls back to software emulation; there
-it boots, installs and starts the apps fine, but Android's `system_server` sits in a
+is blocked by `no_new_privs`, so the emulator falls back to software emulation;there it boots, installs and starts the app fine, but Android's `system_server` sits in a
 permanent "Application Not Responding" state and every screenshot comes back as a
 flat black frame. Earlier versions of this README shipped screens drawn from the
 layout's `dp` values; those were removed along with the renderer that produced them.
@@ -227,7 +226,7 @@ The site is live at `https://artbase-olive.vercel.app`, a subdomain of `vercel.a
 That name is the host's, not this project's: free, auto-renewing, served over a
 certificate Vercel manages, and therefore not something that can be sold, lost to a
 missed renewal or transferred. The trade-off is that it is not yours either — renaming
-the Vercel project changes the subdomain, and both apps have the current one compiled
+the Vercel project changes the subdomain, and the app has the current one compiled
 in, so the slug stays as it is.
 
 A domain of this project's own would cost roughly $12–13 a year and would be a rental,
@@ -239,19 +238,18 @@ If one is ever bought, moving is one command:
 python3 tools/deploy_vercel.py --links-only https://your-domain.example
 ```
 
-It verifies every route on the new host before rewriting `tools/site.json`, both app
-constants and the docs, so a name that does not answer changes nothing. The APKs then
-need a version bump to carry the new host. `AGENTS.md` has the full sequence.
+It verifies every route on the new host before rewriting `tools/site.json`, the app
+constant and the docs, so a name that does not answer changes nothing. The APK then
+needs a version bump to carry the new host. `AGENTS.md` has the full sequence.
 
 ## Not yet done
 
-- **Icons has not been run on a device.** The bundle, the manifest and the signing
-  are verified; the WebView surface, the clipboard bridge and the private origin are
-  reviewed code, not observed behaviour. Compress has never been exercised on a
-  physical device either: verified resource/link compilation, javac type checking,
-  dex packaging, zipalign, v1+v2 signature verification, `resources.arsc` stored
-  uncompressed for targetSdk 30+ installs, and a byte-exact download from the
-  published page.
+- **ADD has not been run on a device.** The bundle, the manifest and the signing are
+  verified; the WebView surface (`ShelfActivity`), the platform bridge and the private
+  origin are reviewed code, not observed behaviour. Verified instead: resource/link
+  compilation, javac type checking, dex packaging, zipalign, v1+v2 signature
+  verification, `resources.arsc` stored uncompressed for targetSdk 30+ installs, and a
+  byte-exact download from the published page.
 - The restyle itself is unconfirmed on hardware: colours, Poppins metrics and the
   hairline spacing have only been checked as resource values and layouts.
 - HEIC input depends on the device decoder (`BitmapFactory`); output is JPEG/WebP.

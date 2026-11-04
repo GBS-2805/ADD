@@ -128,6 +128,23 @@ The person reading this works from a phone. Deliver renders like this, every tim
 6. Verify before sending: the gallery returns 200, every listed image loads with a
    real `naturalWidth`, and no capture is missing from the page.
 
+### When a copy change is still a visual one
+
+The exemption above is about changes a reader cannot see. Copy that sits *inside* an
+existing capture is different: a button label, a figure caption, a kicker, a release
+row is ink in the WebP, so changing it makes the shipped capture wrong even when
+nothing about the layout moved. Re-shoot the set in that case, and re-export the
+artboards with it -- both are transcriptions of the page's own text, which is why a
+merge that only reworded pages still left every board and every shot stale.
+
+Two traps in that run:
+
+- the base URL must end in a slash. `render_pages.js` builds `base + page`, so a bare
+  base produces `http://127.0.0.1:8792tools/` and the navigation fails.
+- `to_webp.py` writes the `.webp` files straight into `docs/renders/`. Do not copy the
+  PNGs out of `artifacts/renders/` into that folder: it leaves orphans the gallery
+  never lists, and the gallery is the authority on what ships.
+
 ## Artifacts are also kept in Drive
 
 Every release refreshes two copies in Google Drive, under **ArtBase** — `figma/` and
@@ -146,6 +163,15 @@ them from there rather than searching Drive by name, which also finds unrelated
 - Upload from the published site (`/figma/<name>`, `/renders/<name>`) with
   `GOOGLEDRIVE_UPLOAD_FROM_URL`, so the bytes are the same ones the pages serve, and
   check the returned size against the file on disk.
+- There is no way to replace a file in place with the tools available here:
+  `GOOGLEDRIVE_UPLOAD_UPDATE_FILE` takes staged bytes (`s3key`), and nothing in this
+  environment stages a local file, while `UPLOAD_FROM_URL` only creates -- so a
+  same-named upload lands beside the old file as a duplicate. The sequence that works
+  is: list the folder with `GOOGLEDRIVE_FIND_FILE` (`folder_id` from
+  `tools/site.json`), upload the current set from the published URLs, then
+  `GOOGLEDRIVE_TRASH_FILE` every id that was there before. Trash, not delete: it is
+  recoverable. That is 54 calls for the two folders at eight per batch, so run it as
+  one sweep after the verdict rather than half-way.
 
 ## Local render setup (no root, no system Chrome)
 
@@ -186,7 +212,7 @@ tab rather than the band; a phone drops the descriptor for `ADD` over
 `Art • Design • Database` --
 while the glyphs themselves are Coolicons line icons (MIT), which is why every
 page loads `assets/site.js`. Page-specific rules live in a small `<style>` on the page. `docs/icons/index.html` is
-generated on the same system out of the two icon templates.
+generated on the same system out of the three icon templates.
 
 Three palettes ride over those two modes: green (the original band, `#0fbf92`), and the
 two sets from the hand-off — Moss (`#005043` band, `#0e2a24` page, `#e7ddce` words,
@@ -216,6 +242,12 @@ changes as unverified on device rather than illustrating them.
 
 ## Project shape
 
+There is one app. `tools/catalog.json` holds a single tool entry, `build.sh` has a
+single `add` case, `bump_version.py` has a single version stream (`APPS = {"add":
+"ADD"}`), and the site says "app", not "apps", everywhere outside `docs/releases/`,
+where the notes keep the history they shipped with. Icons, Fonts and Compress are
+tools *inside* that app, not apps of their own.
+
 - `docs/` is the deployed static site, live at **https://artbase-olive.vercel.app**
   (Vercel project `artbase`; the address is rented, not owned, so see **The address is
   rented, not owned** at the end of this file). Deploy with
@@ -236,10 +268,11 @@ changes as unverified on device rather than illustrating them.
   16,000px phone page takes the lossy one. The one canvas
   inlines every mark instead of painting it through `<use>`, which Figma does not
   import: a shared payload came back as a gap in every artboard.
-- The shelf is twelve pages, each a folder with an `index.html`: the root index, then
-  `tools/`, `icons/` and its two brand folders plus the all-brands sheet at
-  `icons/all/`, `fonts/`, `portfolio/`, `download/`, `renders/`, `figma/` (written by
-  `figma_publish.py`) and `releases/`. They share
+- The shelf is fifteen pages, each a folder with an `index.html`: the root index,
+  then `tools/`, `icons/` and its four brand folders (`icons/lineicons/`,
+  `icons/coolicons/`, `icons/phosphor/`, `icons/streamline/`) plus the all-brands
+  sheet at `icons/all/`, `fonts/`, `portfolio/`, `download/`, `renders/`, `figma/`
+  (written by `figma_publish.py`), `releases/` and the generated `search/`. They share
   `assets/site.css` and `assets/site.js`; no page has its own copy of the palette.
   The page name sits on the left of the band beside a chevron control that opens a
   pull-down accordion with four destinations (index, icons, fonts, tools); the
@@ -274,7 +307,8 @@ changes as unverified on device rather than illustrating them.
   merges the chunks back for anything that needs the whole set (the sheets), and
   `check_bundle.py` follows the `chunks` list inside the staged JSON.
 - Releases go through `python3 tools/bump_version.py <version> --title "…" --note "…"
-  --build`: it moves the catalog, both build cases and every live version label, adds
+  --build`: it moves the catalog's one entry, the `add` build case and every live
+  version label, adds
   the new note to `tools/release_notes.json`, then builds, copies the APK into `docs/`,
   re-measures size and checksum and rebuilds the catalogs. Then it serves `docs/` and reruns
   `tools/render_pages.js`, so the gallery is captured from the pages that quote the new
@@ -300,6 +334,15 @@ changes as unverified on device rather than illustrating them.
   The two icon pages are not in `COUNT_PAGES`: `fetch_icons.py` writes them from
   tokens and states each brand's own count in prose, so the rewrite would replace
   those numbers with the shelf total.
+- A size a reader sees is rounded, never exact: whole MB above a mebibyte, whole KB
+  above a kilobyte, plain bytes below that, and no decimals (`2 MB`, `278 KB`,
+  `512 bytes`). The rule lives once per language: `human_bytes()` in
+  `build_catalog.py`, whose check then looks for that same string in the pages;
+  `human()` in `build_releases.py`; whole-number MB in `bump_version.py` and
+  `figma_publish.py`; a rounding `bytes()` in the fonts page and `fmtBytes()` in the
+  icon templates. The exact count stays in `tools/catalog.json` and `docs/data/`,
+  which are the app's data and the checksum's input, not labels. Never hand-type a
+  size into a page -- the catalog check fails when the rounded string is missing.
 - `tools/catalog.json` is the single source of truth for the apps, the fonts and the
   portfolio. `tools/build_catalog.py` re-measures the APK and the font files, copies
   each TTF from `app/res/font/` into `docs/assets/fonts/`, writes the JSON and then
@@ -442,15 +485,19 @@ changes as unverified on device rather than illustrating them.
   them, so dots stay solid at every weight; the file itself is never touched.
 - APK builds go through `build.sh` into `dist/`; released APKs are committed inside
   `docs/`. `dist/` keeps older builds as history, `docs/` ships only the current one.
-  `./build.sh` builds both, `./build.sh icons` or `./build.sh compress` builds one.
-  The Icons build stages its web bundle out of `docs/` into `icons-app/assets/`, which
-  is generated and not committed: one copy of every glyph, not two.
-- The Icons app is a WebView over that bundle, served from `https://icons.local` by a
-  `WebViewClient` reading `assets/www`, with a `JavascriptInterface` bridge for copy
-  and for saving a raster. It declares no permissions at all, so a page cannot reach
-  the network even if one asked.
+  `./build.sh` builds ADD, and `./build.sh stage` only stages its web bundle -- which
+  is how the bundle can be checked here without a device. `stage_shelf_assets()`
+  writes it into `app/assets/www` (generated, not committed) and runs
+  `tools/check_bundle.py` over it, so a build fails when a staged page names a file
+  the bundle does not carry. `icons-app/` is the pre-merge WebView-only source;
+  nothing builds it any more, and its `assets/` is a leftover.
+- ADD is one package: the native compressor (`MainActivity`, `CompareActivity`) and a
+  WebView (`ShelfActivity`) over that same bundle, served from `https://icons.local`
+  by a `WebViewClient` reading `assets/www`, with the `IconsApp` bridge for copy and
+  for saving a raster. It declares no permissions at all, so a page cannot reach the
+  network even if one asked.
 - The bundle can be checked without a device, which is the only way to verify an app
-  change here: serve `icons-app/assets/www` and drive it in Playwright, as
+  change here: serve `app/assets/www` and drive it in Playwright, as
   `tools/webview-check.md` describes. It proves the shipped files, not the window —
   insets, the clipboard and MediaStore bridge, and back handling stay unverified.
 - The WebView sits in a frame padded by the window insets. Target 35 draws edge to
@@ -519,7 +566,7 @@ host's, not the project's. Nothing about it is paid for: hosting, the certificat
 every route cost nothing and renew themselves. Two consequences:
 
 - **Do not rename the Vercel project.** The slug `artbase` is what sets the subdomain,
-  and both shipped APKs carry the current host in `classes.dex`, so a rename points
+  and the shipped APK carries the current host in `classes.dex`, so a rename points
   every installed copy at a host that no longer answers. Rename the display name
   instead, which changes nothing.
 - **Any domain ever bought here is a yearly rental.** A registry takes the name back
