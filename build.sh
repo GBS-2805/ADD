@@ -121,11 +121,24 @@ check_fallback() {
     echo "== Icons: the unbundled-page fallback =="
     # Built in Java, so it is not a file in assets/www. Render the shipped dex
     # strings when the toolchain is here; otherwise still refuse a stale copy.
-    if node -e 'require("playwright")' >/dev/null 2>&1; then
-        node "$ROOT/tools/webview-fallback-check.js" "$apk" "$ROOT/artifacts/fallback-offline.png"
+    #
+    # That toolchain sits outside node's own lookup path -- the module in /tmp/pwshot,
+    # the browsers in /tmp/pw, their libs unrooted into /tmp/rootfs by
+    # tools/render_env.py -- and nothing exports it for a bare ./build.sh. Without it
+    # the check dies on "Cannot find module 'playwright'", which reads as a broken
+    # package rather than an unexported path, so hand it the same environment the
+    # capture run uses. A value already exported still wins.
+    local env_args=(
+        "NODE_PATH=${NODE_PATH:-/tmp/pwshot/node_modules}"
+        "PLAYWRIGHT_BROWSERS_PATH=${PLAYWRIGHT_BROWSERS_PATH:-/tmp/pw}"
+        "LD_LIBRARY_PATH=${LD_LIBRARY_PATH:-/tmp/rootfs/usr/lib/x86_64-linux-gnu:/tmp/rootfs/lib/x86_64-linux-gnu}"
+        "FONTCONFIG_FILE=${FONTCONFIG_FILE:-/tmp/rootfs/fonts.conf}"
+    )
+    if env "${env_args[@]}" node -e 'require("playwright")' >/dev/null 2>&1; then
+        env "${env_args[@]}" node "$ROOT/tools/webview-fallback-check.js" "$apk" "$ROOT/artifacts/fallback-offline.png"
     else
         echo "  Playwright is not installed; checking the shipped strings without a render."
-        node "$ROOT/tools/webview-fallback-check.js" --static "$apk"
+        env "${env_args[@]}" node "$ROOT/tools/webview-fallback-check.js" --static "$apk"
     fi
 }
 

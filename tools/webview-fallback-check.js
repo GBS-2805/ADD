@@ -7,10 +7,14 @@
 // headless Chromium -- the shipped bytes, not a copy of the source.
 //
 //   node tools/webview-fallback-check.js [apk] [screenshot]
+//   node tools/webview-fallback-check.js --static [apk]
+//
+// Playwright is loaded only where the page is actually rendered, so --static still
+// works on a machine without the toolchain -- which is the whole point of the fallback
+// build.sh takes when the module is absent.
 const { execFileSync } = require("child_process");
 const fs = require("fs");
 const path = require("path");
-const { chromium } = require("playwright");
 
 const root = path.join(__dirname, "..");
 const args = process.argv.slice(2);
@@ -57,6 +61,7 @@ if (staticOnly) {
 }
 
 (async () => {
+  const { chromium } = require("playwright");
   const browser = await chromium.launch({ args: ["--no-sandbox"] });
   const tab = await browser.newPage({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2 });
   const errors = [];
