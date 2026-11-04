@@ -81,8 +81,8 @@
     },
     {
       "path": "/releases/",
-      "title": "Releases — 42 builds, with the date and size of each",
-      "description": "Every build this shelf has shipped: 42 releases with the day and the APK size, read out of git.",
+      "title": "Releases — 43 builds, with the date and size of each",
+      "description": "Every build this shelf has shipped: 43 releases with the day and the APK size, read out of git.",
       "heading": "Releases",
       "section": "releases"
     },
