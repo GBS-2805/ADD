@@ -1,6 +1,12 @@
 {
   "notes": [
     {
+      "id": "compress",
+      "version": "2.2",
+      "title": "One-line notes",
+      "note": "The preview note says what the slider does in one sentence."
+    },
+    {
       "id": "icons",
       "version": "2.20",
       "title": "Three palettes in the app",

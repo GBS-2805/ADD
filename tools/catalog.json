@@ -10,10 +10,10 @@
       "name": "Compress",
       "kind": "Android app",
       "status": "released",
-      "version": "2.1",
-      "version_code": 12,
+      "version": "2.2",
+      "version_code": 13,
       "package": "app.offline.compress",
-      "apk": "/Compress-2.1.apk",
+      "apk": "/Compress-2.2.apk",
       "min_android": "8.0 (API 26)",
       "summary": "Pick photos, check the before/after preview, compress. Offline, with no internet permission.",
       "features": [
