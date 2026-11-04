@@ -51,6 +51,20 @@ def size(path):
     return path.stat().st_size
 
 
+def human_bytes(number):
+    """A size a reader can scan: whole MB, whole KB, then bytes. No decimals.
+
+    The catalogs keep the exact count -- the JSON is the app's data and a checksum
+    needs the last byte -- but a page only has to be readable, and 2,348,788 bytes
+    spelled out is noise where 2 MB is the fact.
+    """
+    if number >= 1048576:
+        return "%d MB" % round(number / 1048576)
+    if number >= 1024:
+        return "%d KB" % round(number / 1024)
+    return "%d bytes" % number
+
+
 def digest(path):
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
@@ -306,8 +320,8 @@ def check(catalog, count):
             if app["version"] not in text[key]:
                 problems.append("%s: version %s is missing" % (key, app["version"]))
         for key in ("index", "download"):
-            if "{:,}".format(app["bytes"]) not in text[key]:
-                problems.append("%s: size %s is missing" % (key, "{:,}".format(app["bytes"])))
+            if human_bytes(app["bytes"]) not in text[key]:
+                problems.append("%s: size %s is missing" % (key, human_bytes(app["bytes"])))
         if app["sha256"] not in text["download"]:
             problems.append("download: SHA-256 out of date")
 

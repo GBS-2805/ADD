@@ -230,7 +230,13 @@ font-size: 48px;</code>
     return face(fam, 400, "normal") || fam.styles[0];
   }
   function clamp(px) { return Math.min(MAX, Math.max(MIN, px)); }
-  function bytes(value) { return value.toLocaleString("en-US"); }
+  // Whole MB, whole KB, then bytes: a font file reads better as 18 KB than as
+  // 18,432 bytes, and never as a decimal.
+  function bytes(value) {
+    if (value >= 1048576) { return Math.round(value / 1048576) + " MB"; }
+    if (value >= 1024) { return Math.round(value / 1024) + " KB"; }
+    return value + " bytes";
+  }
 
   function changed() {
     return text.value !== DEFAULTS.text || size.value !== DEFAULTS.size ||
@@ -258,7 +264,7 @@ font-size: 48px;</code>
     var woff2 = data.reduce(function (n, fam) { return n + fam.woff2_bytes; }, 0);
     familiesOut.textContent = data.length + " families";
     stylesOut.textContent = styles + " styles";
-    bytesOut.textContent = "woff2 " + bytes(woff2) + " bytes total";
+    bytesOut.textContent = "woff2 " + bytes(woff2) + " total";
   }
 
   function faceMarkup(fam, item) {
@@ -269,7 +275,7 @@ font-size: 48px;</code>
         ";font-style:" + item.style + '">Offline, no account.</p>' +
       (item.use ? '<p class="face-use">' + item.use + "</p>" : "") +
       '<div class="face-foot"><span class="tag">woff2 ' + bytes(item.woff2_bytes) +
-        " bytes · ttf " + bytes(item.ttf_bytes) + " bytes</span>" +
+        " · ttf " + bytes(item.ttf_bytes) + "</span>" +
       '<a href="' + item.woff2 + '" download>woff2</a>' +
       '<a href="' + item.ttf + '" download>ttf</a>' +
       '<button type="button" class="try-style" data-family="' + fam.family +

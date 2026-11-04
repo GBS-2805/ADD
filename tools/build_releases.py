@@ -51,6 +51,15 @@ def fmt(number):
     return "{:,}".format(number)
 
 
+def human(number):
+    """A size a reader can scan: whole MB, whole KB, then bytes. No decimals."""
+    if number >= 1048576:
+        return "%d MB" % round(number / 1048576)
+    if number >= 1024:
+        return "%d KB" % round(number / 1024)
+    return "%d bytes" % number
+
+
 def releases():
     """Every APK this repository shipped, with the commit and the size that shipped it."""
     history = git("log", "--reverse", "-M", "--name-status",
@@ -111,11 +120,11 @@ def rows(items, written, live):
             body = '\n          <p class="rel-none">No release note was written for this build.</p>'
         out.append("      <li>\n"
                    '        <div class="rel-top"><b>%s</b>%s'
-                   '<span class="rel-meta"><span>%s</span><span>%s bytes</span>'
+                   '<span class="rel-meta"><span>%s</span><span>%s</span>'
                    '<code class="sha">%s</code></span></div>%s\n'
                    "      </li>"
                    % (record["version"], live_pill, day(record["date"]),
-                      fmt(record["bytes"]), record["sha"], body))
+                      human(record["bytes"]), record["sha"], body))
     return "\n".join(out)
 
 
@@ -153,8 +162,8 @@ def kicker(items):
     if not items:
         return "Nothing yet"
     sizes = [record["bytes"] for record in items]
-    return "%d releases, newest first \u00b7 %s to %s bytes" % (
-        len(items), fmt(min(sizes)), fmt(max(sizes)))
+    return "%d releases, newest first \u00b7 %s to %s" % (
+        len(items), human(min(sizes)), human(max(sizes)))
 
 
 def main():
@@ -191,9 +200,9 @@ def main():
     OUT.write_text(pin(page), encoding="utf-8")
     print("wrote %-32s %6d bytes" % (OUT.relative_to(ROOT), OUT.stat().st_size))
     noted = sum(1 for r in everything if written.get((r["id"], r["version"])))
-    print("  %2d releases, %2d with a note, %s to %s bytes" % (
+    print("  %2d releases, %2d with a note, %s to %s" % (
         len(everything), noted,
-        fmt(min(r["bytes"] for r in everything)), fmt(max(r["bytes"] for r in everything))))
+        human(min(r["bytes"] for r in everything)), human(max(r["bytes"] for r in everything))))
     return 0
 
 

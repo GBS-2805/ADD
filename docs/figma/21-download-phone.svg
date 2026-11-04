@@ -34,7 +34,7 @@
 <rect x="20" y="657.45" width="350" height="1" fill="#f2eee3" fill-opacity="0.22"/>
 <rect x="20" y="1114.2" width="350" height="1" fill="#f2eee3" fill-opacity="0.22"/>
 <text x="20" y="697.45" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="13" font-weight="400" xml:space="preserve">File size</text>
-<text x="20" y="731.89" fill="#f2eee3" font-family="Poppins" font-size="20" font-weight="400" xml:space="preserve">2,348,788 bytes</text>
+<text x="20" y="731.89" fill="#f2eee3" font-family="Poppins" font-size="20" font-weight="400" xml:space="preserve">2 MB</text>
 <rect x="20" y="764.89" width="350" height="1" fill="#f2eee3" fill-opacity="0.22"/>
 <text x="44" y="804.89" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="13" font-weight="400" xml:space="preserve">Minimum Android</text>
 <text x="44" y="839.33" fill="#f2eee3" font-family="Poppins" font-size="20" font-weight="400" xml:space="preserve">8.0 / API 26</text>
@@ -102,13 +102,13 @@
 <text x="20" y="2354.88" fill="#f2eee3" font-family="Poppins" font-size="30" font-weight="400" letter-spacing="-0.45" xml:space="preserve">Checksums</text>
 <text x="20" y="2387.38" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">Measured from the files on this site</text>
 <text x="20" y="2438.47" fill="#f2eee3" font-family="Poppins" font-size="16" font-weight="500" xml:space="preserve">ADD-3.0.apk</text>
-<text x="20" y="2466.86" fill="#f2eee3" font-family="Poppins" font-size="16" font-weight="400" xml:space="preserve">2,348,788 bytes · SHA-256</text>
-<rect x="228" y="2448.86" width="135" height="25" fill="#f2eee3" fill-opacity="0.07"/>
-<rect x="20" y="2475.25" width="350" height="25" fill="#f2eee3" fill-opacity="0.07"/>
-<rect x="20" y="2501.64" width="110" height="25" fill="#f2eee3" fill-opacity="0.07"/>
-<text x="234" y="2466.86" fill="#f2eee3" font-family="Poppins" font-size="16" font-weight="400" xml:space="preserve">237aa0132598a9</text>
-<text x="20" y="2493.25" fill="#f2eee3" font-family="Poppins" font-size="16" font-weight="400" xml:space="preserve">cc9b01fde1e6b2186cce77c235581e8a12f0af0</text>
-<text x="20" y="2519.64" fill="#f2eee3" font-family="Poppins" font-size="16" font-weight="400" xml:space="preserve">bcd1b80223e</text>
+<text x="20" y="2466.86" fill="#f2eee3" font-family="Poppins" font-size="16" font-weight="400" xml:space="preserve">2 MB · SHA-256</text>
+<rect x="141" y="2448.86" width="221" height="25" fill="#f2eee3" fill-opacity="0.07"/>
+<rect x="20" y="2475.25" width="349" height="25" fill="#f2eee3" fill-opacity="0.07"/>
+<rect x="20" y="2501.64" width="25" height="25" fill="#f2eee3" fill-opacity="0.07"/>
+<text x="147" y="2466.86" fill="#f2eee3" font-family="Poppins" font-size="16" font-weight="400" xml:space="preserve">237aa0132598a9cc9b01fde1</text>
+<text x="20" y="2493.25" fill="#f2eee3" font-family="Poppins" font-size="16" font-weight="400" xml:space="preserve">e6b2186cce77c235581e8a12f0af0bcd1b8022</text>
+<text x="20" y="2519.64" fill="#f2eee3" font-family="Poppins" font-size="16" font-weight="400" xml:space="preserve">3e</text>
 <text x="20" y="2581.03" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="16" font-weight="400" xml:space="preserve">The same figures are published as JSON at</text>
 <text x="20" y="2606.63" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="16" font-weight="400" xml:space="preserve">/data/tools.json</text>
 <text x="146" y="2606.63" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="16" font-weight="400" xml:space="preserve">, so a script can check a</text>

@@ -77,7 +77,7 @@ def describe(path):
 
 
 def human(n):
-    return "%.0f KB" % (n / 1024) if n < 1048576 else "%.2f MB" % (n / 1048576)
+    return "%.0f KB" % (n / 1024) if n < 1048576 else "%.0f MB" % (n / 1048576)
 
 
 def listing(names):
@@ -208,7 +208,7 @@ def main():
 
     (DST / "index.html").write_text(pin(listing(list(wanted))))
     total = sum(p.stat().st_size for p in DST.glob("*.svg"))
-    print("docs/figma: %d files, %.1f MB, listing written%s" % (
+    print("docs/figma: %d files, %.0f MB, listing written%s" % (
         len(wanted), total / 1e6, (", dropped " + ", ".join(dropped)) if dropped else ""))
 
     budget = 10485760

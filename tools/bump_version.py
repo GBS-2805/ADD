@@ -309,7 +309,7 @@ APPS = {"add": "ADD"}
 
 
 def human(number):
-    return "%d KB" % round(number / 1024) if number < 1048576 else "%.2f MB" % (number / 1048576)
+    return "%d KB" % round(number / 1024) if number < 1048576 else "%.0f MB" % (number / 1048576)
 
 
 # Pages whose text is generated elsewhere, or is a list of every version the shelf has

@@ -21,8 +21,8 @@
 <text x="40" y="365.52" fill="#f2eee3" font-family="Poppins" font-size="20" font-weight="400" xml:space="preserve">to download.</text>
 <text x="40" y="410.52" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">2 families</text>
 <text x="133" y="410.52" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">21 styles</text>
-<text x="215" y="410.52" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">woff2 169,348 bytes total</text>
-<text x="417" y="410.52" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">SIL Open Font License 1.1</text>
+<text x="215" y="410.52" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">woff2 165 KB total</text>
+<text x="363" y="410.52" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">SIL Open Font License 1.1</text>
 <rect x="40" y="457.61" width="1220" height="1" fill="#f2eee3" fill-opacity="0.22"/>
 <text x="40" y="551.61" fill="#f2eee3" font-family="Poppins" font-size="30" font-weight="400" letter-spacing="-0.45" xml:space="preserve">Try it</text>
 <text x="40" y="584.11" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">Type a line, drag a size, then try any face in a family sheet below</text>
@@ -63,9 +63,9 @@
 <rect x="88.09" y="1325.94" width="1" height="46.39" fill="#f2eee3" fill-opacity="0.22"/>
 <text x="40" y="1430.33" fill="#f2eee3" font-family="Poppins" font-size="40" font-weight="400" letter-spacing="-0.4" xml:space="preserve">Offline, no account.</text>
 <text x="40" y="1470.33" fill="#f2eee3" font-family="Poppins" font-size="15" font-weight="400" xml:space="preserve">Body text, ledes and every label on this site.</text>
-<text x="40" y="1507.58" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="13" font-weight="400" xml:space="preserve">woff2 7,900 bytes · ttf 160,316 bytes</text>
-<text x="272" y="1507.58" fill="#f2eee3" font-family="Poppins" font-size="13" font-weight="400" text-decoration="underline" xml:space="preserve">woff2</text>
-<text x="322" y="1507.58" fill="#f2eee3" font-family="Poppins" font-size="13" font-weight="400" text-decoration="underline" xml:space="preserve">ttf</text>
+<text x="40" y="1507.58" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="13" font-weight="400" xml:space="preserve">woff2 8 KB · ttf 157 KB</text>
+<text x="182" y="1507.58" fill="#f2eee3" font-family="Poppins" font-size="13" font-weight="400" text-decoration="underline" xml:space="preserve">woff2</text>
+<text x="232" y="1507.58" fill="#f2eee3" font-family="Poppins" font-size="13" font-weight="400" text-decoration="underline" xml:space="preserve">ttf</text>
 <rect x="1147.27" y="1485.58" width="112.73" height="35.44" fill="#0fbf92"/>
 <rect x="1147.27" y="1485.58" width="112.73" height="1" fill="#0fbf92"/>
 <rect x="1259" y="1485.58" width="1" height="35.44" fill="#0fbf92"/>
@@ -81,9 +81,9 @@
 <rect x="88.09" y="1668.59" width="184" height="1" fill="#f2eee3" fill-opacity="0.22"/>
 <rect x="88.09" y="1623.2" width="1" height="46.39" fill="#f2eee3" fill-opacity="0.22"/>
 <text x="40" y="1725.59" fill="#f2eee3" font-family="Poppins" font-size="40" font-weight="400" letter-spacing="-0.4" xml:space="preserve">Offline, no account.</text>
-<text x="40" y="1772.59" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="13" font-weight="400" xml:space="preserve">woff2 7,064 bytes · ttf 36,656 bytes</text>
-<text x="273" y="1772.59" fill="#f2eee3" font-family="Poppins" font-size="13" font-weight="400" text-decoration="underline" xml:space="preserve">woff2</text>
-<text x="323" y="1772.59" fill="#f2eee3" font-family="Poppins" font-size="13" font-weight="400" text-decoration="underline" xml:space="preserve">ttf</text>
+<text x="40" y="1772.59" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="13" font-weight="400" xml:space="preserve">woff2 7 KB · ttf 36 KB</text>
+<text x="178" y="1772.59" fill="#f2eee3" font-family="Poppins" font-size="13" font-weight="400" text-decoration="underline" xml:space="preserve">woff2</text>
+<text x="228" y="1772.59" fill="#f2eee3" font-family="Poppins" font-size="13" font-weight="400" text-decoration="underline" xml:space="preserve">ttf</text>
 <rect x="1147.27" y="1750.59" width="112.73" height="1" fill="#f2eee3" fill-opacity="0.22"/>
 <rect x="1259" y="1750.59" width="1" height="35.44" fill="#f2eee3" fill-opacity="0.22"/>
 <rect x="1147.27" y="1785.03" width="112.73" height="1" fill="#f2eee3" fill-opacity="0.22"/>
