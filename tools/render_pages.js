@@ -86,6 +86,13 @@ const escape = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/
     page.on("pageerror", (e) => errors.push(`${s.name}: pageerror ${String(e.message).slice(0, 140)}`));
     await page.goto(base + s.page, { waitUntil: "networkidle", timeout: 45000 });
     await page.evaluate(() => document.fonts.ready);
+    // A brand page prints "Loading N icons…" until its catalog has parsed, about a
+    // second in, and only then swaps in the selection hint. Shooting inside that
+    // window put a loading line in four gallery shots, so wait for the swap.
+    await page.waitForFunction(() => {
+      const el = document.querySelector("#status") || document.querySelector(".status");
+      return !el || !/^\s*loading\b/i.test(el.textContent || "");
+    }, null, { timeout: 20000 }).catch(() => {});
     if (s.open) {
       await page.click(s.open);
       await page.waitForTimeout(320);
