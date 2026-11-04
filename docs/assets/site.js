@@ -12,8 +12,9 @@
       var value = localStorage.getItem(THEME_KEY);
       if (value === "light" || value === "dark") return value;
     } catch (error) { /* blocked store: fall through to the system */ }
-    return window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches
-      ? "light" : "dark";
+    // Dark is the default now: a first visit opens on the off-black page whatever
+    // the system asks for, and only a saved choice turns it over.
+    return "dark";
   }
   function applyTheme(theme) {
     document.documentElement.setAttribute("data-theme", theme);
@@ -73,7 +74,7 @@
     burger.setAttribute("aria-label", open ? "Close side tab" : "Open side tab");
     if (scrim) scrim.setAttribute("data-open", open ? "true" : "false");
     document.body.classList.toggle("drawer-open", open);
-    if (open) setMenu(false);
+    if (open) setMenu(false); else persistLook();
   }
 
   // A route to /search/ from the side tab on every page, without editing each page.
@@ -93,8 +94,10 @@
     drawer.insertBefore(searchLink, drawerNote);
   }
 
-  // The theme control lives in the side tab now, under its links: the band keeps
-  // only the page name, the mark and the burger at every width.
+  // The look controls are one row at the foot of the tab: the three palette chips
+  // with the light/dark switch at the end of them. The switch carries no word of its
+  // own -- the sun or the moon says what it does -- and both choices are written to
+  // the store when the tab closes, so closing it never drops one.
   var controls = document.getElementById("drawerControls");
   if (!controls) {
     controls = document.createElement("div");
@@ -102,19 +105,14 @@
     controls.className = "drawer-controls";
     drawer.appendChild(controls);
   }
-  if (!document.getElementById("themeBtn")) {
-    var themeBtn = document.createElement("button");
-    themeBtn.type = "button";
-    themeBtn.id = "themeBtn";
-    themeBtn.className = "drawer-theme";
-    themeBtn.innerHTML = '<span>Theme</span><span class="ico"></span>';
-    controls.appendChild(themeBtn);
-    applyTheme(document.documentElement.getAttribute("data-theme") || storedTheme());
-    themeBtn.addEventListener("click", function () {
-      var next = document.documentElement.getAttribute("data-theme") === "light" ? "dark" : "light";
-      try { localStorage.setItem(THEME_KEY, next); } catch (error) { /* forget it */ }
-      applyTheme(next);
-    });
+
+  function persistLook() {
+    var theme = document.documentElement.getAttribute("data-theme");
+    var palette = document.documentElement.getAttribute("data-palette");
+    try {
+      if (theme === "light" || theme === "dark") localStorage.setItem(THEME_KEY, theme);
+      if (palette) localStorage.setItem(PALETTE_KEY, palette);
+    } catch (error) { /* blocked store: the page keeps the live choice */ }
   }
 
   if (!document.getElementById("palRow")) {
@@ -135,13 +133,25 @@
       dot.style.background = palette.word;
       chip.appendChild(dot);
       chip.addEventListener("click", function () {
-        try { localStorage.setItem(PALETTE_KEY, palette.id); } catch (error) { /* forget it */ }
         applyPalette(palette.id);
+        persistLook();
       });
       palRow.appendChild(chip);
     });
-    applyPalette(document.documentElement.getAttribute("data-palette") || storedPalette());
+
+    var themeBtn = document.createElement("button");
+    themeBtn.type = "button";
+    themeBtn.id = "themeBtn";
+    themeBtn.className = "pal-theme";
+    themeBtn.innerHTML = '<span class="ico"></span>';
+    themeBtn.addEventListener("click", function () {
+      applyTheme(document.documentElement.getAttribute("data-theme") === "light" ? "dark" : "light");
+      persistLook();
+    });
+    palRow.appendChild(themeBtn);
   }
+  applyTheme(document.documentElement.getAttribute("data-theme") || storedTheme());
+  applyPalette(document.documentElement.getAttribute("data-palette") || storedPalette());
 
   // A phone has no room for the two-line descriptor, so the band carries the short
   // name over the long one instead. Injected here, so every page gets both.

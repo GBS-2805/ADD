@@ -72,15 +72,30 @@ const extras = [];
 const escape = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;");
 
 (async () => {
+  // The gallery follows the page's own default now, which is dark: nothing is seeded
+  // unless a review asks for a mode (RENDERS_THEME=light|dark) or for a handful of
+  // shots (RENDERS_ONLY=a,b).
+  const REQUESTED = process.env.RENDERS_THEME;
+  const THEME = REQUESTED === "light" || REQUESTED === "dark" ? REQUESTED : "";
+  const ONLY = (process.env.RENDERS_ONLY || "").split(",").map((n) => n.trim()).filter(Boolean);
+  const active = ONLY.length ? shots.filter((s) => ONLY.includes(s.name)) : shots;
   const browser = await chromium.launch({ args: ["--no-sandbox", "--disable-dev-shm-usage"] });
   const errors = [];
-  for (const s of shots) {
+  for (const s of active) {
     const page = await browser.newPage({
       viewport: { width: s.w, height: s.h },
       deviceScaleFactor: 2,
     });
     page.on("console", (m) => { if (m.type() === "error") errors.push(`${s.name}: ${m.text().slice(0, 140)}`); });
     page.on("pageerror", (e) => errors.push(`${s.name}: pageerror ${String(e.message).slice(0, 140)}`));
+    // A pinned mode is seeded before the page loads, so the page, the toggle's icon and
+    // its label all agree -- repainting the attribute after load left the sun on a light
+    // page. With no pin the shot is the page's own default, which is dark.
+    if (THEME) {
+      await page.addInitScript((theme) => {
+        try { localStorage.setItem("site:theme", theme); } catch (error) { /* blocked store */ }
+      }, THEME);
+    }
     await page.goto(base + s.page, { waitUntil: "networkidle", timeout: 45000 });
     await page.evaluate(() => document.fonts.ready);
     // A brand page prints "Loading N icons…" until its catalog has parsed, about a

@@ -29,9 +29,9 @@ that text changed.
   seconds, and prints console errors and horizontal overflow.
 - Save under `artifacts/`, one file per page the change touches. The `shots` array in
   `tools/render_pages.js` is the authority on names: the gallery is generated from it,
-  so a capture exists only if it is listed there. The gallery holds the light mode
-  only, so there are no dark variants; the `-light` suffix on some of them is history,
-  not a variant. One capture per page per width: a full-height shot already contains
+  so a capture exists only if it is listed there. The gallery follows the page's own
+  mode, which is dark, so there are no light/dark twins; the `-light` suffix on some of
+  them is history, not a variant, and `RENDERS_THEME=light` shoots the other mode. One capture per page per width: a full-height shot already contains
   its fold, and a phone shot of a 10,000 px page is taken at the fold rather than
   stitched, because the stitched one cost a third of the gallery's weight.
 - Cover every page the change touches, plus mobile width when the change is
@@ -174,9 +174,10 @@ in one run and prints console errors; it needs the toolchain from
 
 The site has two modes over one palette: a green band (`#0fbf92`) in both, an off-black
 page (`#131513`) with cream type (`#f2eee3`) in dark, and cream with off-black in light.
-A new visitor follows `prefers-color-scheme`; `site.js` swaps `data-theme` on `<html>`
-for the toggle it injects into the side tab and remembers the choice under `site:theme`,
-so generated pages inherit both. Every page links one stylesheet, `docs/assets/site.css`: it carries the
+A new visitor opens on the dark page: dark is the default, not a lookup of what the
+system asks for. `site.js` swaps `data-theme` on `<html>` for the sun/moon switch it
+injects into the palette row of the side tab and remembers the choice under
+`site:theme`, so generated pages inherit both. Every page links one stylesheet, `docs/assets/site.css`: it carries the
 `@font-face` block, the band, the pull-down menu and the shared type, and its
 `url()` paths are relative to that file so pages at any depth can use it. The band
 keeps frame 6-27's measured geometry -- 26px page name on the left inside a 40px
@@ -191,8 +192,9 @@ Three palettes ride over those two modes: green (the original band, `#0fbf92`), 
 two sets from the hand-off — Moss (`#005043` band, `#0e2a24` page, `#e7ddce` words,
 `#d6e381` accent) and Navy (`#242d55` band, `#1c1d2f` page, `#a1b0c3` words, `#72b6b4`
 accent). `site.js` swaps `data-palette` on `<html>` and remembers the choice under
-`site:palette`; the three chips sit at the foot of the side tab, under the note and beside
-the theme toggle. The band holds in both themes and only the page turns over, so a palette
+`site:palette`; the three chips sit at the foot of the side tab, under the note, with the
+light/dark switch as the last chip in that row rather than a labelled row of its own.
+Closing the tab writes both choices to the store, so neither is lost by dismissing it. The band holds in both themes and only the page turns over, so a palette
 is its block of values in `site.css` plus one entry in the `PALETTES` list in `site.js`.
 
 The fourth colour of each set is that palette's accent, and it does two jobs: it fills the
