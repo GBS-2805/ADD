@@ -32,7 +32,7 @@
 <rect x="1013" y="492.61" width="85" height="1" fill="#131513" fill-opacity="0.22"/>
 <rect x="1013" y="455.61" width="1" height="38" fill="#131513" fill-opacity="0.22"/>
 <text x="1030" y="479.06" fill="#131513" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">Markup</text>
-<rect x="1108" y="455.61" width="127" height="38" fill="#0fbf92"/>
+<rect x="1108" y="455.61" width="127" height="38" fill="#0fbf92" rx="8"/>
 <image x="1124" y="466.11" width="17" height="17" href="data:image/png;base64,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"/>
 <text x="1150" y="479.06" fill="#f2eee3" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">Copy SVG</text>
 <text x="650.56" y="532.25" fill="#131513" fill-opacity="0.64" font-family="Poppins" font-size="12" font-weight="400" letter-spacing="0.96" xml:space="preserve">WEIGHT</text>
@@ -70,61 +70,62 @@
 <rect x="1000.28" y="618.8" width="1" height="39.09" fill="#131513" fill-opacity="0.22"/>
 <text x="865.92" y="642.8" fill="#f2eee3" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">Black</text>
 <text x="1097.14" y="642.8" fill="#131513" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">White</text>
-<text x="650.56" y="691.98" fill="#131513" fill-opacity="0.64" font-family="Poppins" font-size="12" font-weight="400" letter-spacing="0.96" xml:space="preserve">COLOUR</text>
-<rect x="766.56" y="674.89" width="50" height="1" fill="#131513" fill-opacity="0.22"/>
-<rect x="815.56" y="674.89" width="1" height="26" fill="#131513" fill-opacity="0.22"/>
-<rect x="766.56" y="699.89" width="50" height="1" fill="#131513" fill-opacity="0.22"/>
-<rect x="766.56" y="674.89" width="1" height="26" fill="#131513" fill-opacity="0.22"/>
-<text x="777.56" y="691.89" fill="#131513" font-family="Poppins" font-size="12" font-weight="400" xml:space="preserve">Auto</text>
-<rect x="824.56" y="674.89" width="26" height="26" fill="#ffffff" rx="50"/>
-<rect x="824.56" y="674.89" width="26" height="1" fill="#131513" fill-opacity="0.22"/>
-<rect x="849.56" y="674.89" width="1" height="26" fill="#131513" fill-opacity="0.22"/>
-<rect x="824.56" y="699.89" width="26" height="1" fill="#131513" fill-opacity="0.22"/>
-<rect x="824.56" y="674.89" width="1" height="26" fill="#131513" fill-opacity="0.22"/>
-<rect x="858.56" y="674.89" width="26" height="26" fill="#000000" rx="50"/>
-<rect x="858.56" y="674.89" width="26" height="1" fill="#131513" fill-opacity="0.22"/>
-<rect x="883.56" y="674.89" width="1" height="26" fill="#131513" fill-opacity="0.22"/>
-<rect x="858.56" y="699.89" width="26" height="1" fill="#131513" fill-opacity="0.22"/>
-<rect x="858.56" y="674.89" width="1" height="26" fill="#131513" fill-opacity="0.22"/>
-<rect x="892.56" y="674.89" width="26" height="26" fill="#4147d5" rx="50"/>
-<rect x="892.56" y="674.89" width="26" height="1" fill="#131513" fill-opacity="0.22"/>
-<rect x="917.56" y="674.89" width="1" height="26" fill="#131513" fill-opacity="0.22"/>
-<rect x="892.56" y="699.89" width="26" height="1" fill="#131513" fill-opacity="0.22"/>
-<rect x="892.56" y="674.89" width="1" height="26" fill="#131513" fill-opacity="0.22"/>
-<rect x="926.56" y="674.89" width="26" height="26" fill="#0e9f6e" rx="50"/>
-<rect x="926.56" y="674.89" width="26" height="1" fill="#131513" fill-opacity="0.22"/>
-<rect x="951.56" y="674.89" width="1" height="26" fill="#131513" fill-opacity="0.22"/>
-<rect x="926.56" y="699.89" width="26" height="1" fill="#131513" fill-opacity="0.22"/>
-<rect x="926.56" y="674.89" width="1" height="26" fill="#131513" fill-opacity="0.22"/>
-<rect x="960.56" y="674.89" width="26" height="26" fill="#e02424" rx="50"/>
-<rect x="960.56" y="674.89" width="26" height="1" fill="#131513" fill-opacity="0.22"/>
-<rect x="985.56" y="674.89" width="1" height="26" fill="#131513" fill-opacity="0.22"/>
-<rect x="960.56" y="699.89" width="26" height="1" fill="#131513" fill-opacity="0.22"/>
-<rect x="960.56" y="674.89" width="1" height="26" fill="#131513" fill-opacity="0.22"/>
-<rect x="994.56" y="672.89" width="30" height="1" fill="#131513" fill-opacity="0.22"/>
-<rect x="1023.56" y="672.89" width="1" height="30" fill="#131513" fill-opacity="0.22"/>
-<rect x="994.56" y="701.89" width="30" height="1" fill="#131513" fill-opacity="0.22"/>
-<rect x="994.56" y="672.89" width="1" height="30" fill="#131513" fill-opacity="0.22"/>
-<text x="650.56" y="743.36" fill="#131513" fill-opacity="0.64" font-family="Poppins" font-size="12" font-weight="400" letter-spacing="0.96" xml:space="preserve">FORMAT</text>
-<rect x="766.56" y="716.89" width="468.44" height="1" fill="#131513" fill-opacity="0.22"/>
-<rect x="1234" y="716.89" width="1" height="44.75" fill="#131513" fill-opacity="0.22"/>
-<rect x="766.56" y="760.64" width="468.44" height="1" fill="#131513" fill-opacity="0.22"/>
-<rect x="766.56" y="716.89" width="1" height="44.75" fill="#131513" fill-opacity="0.22"/>
-<text x="781.56" y="743.89" fill="#131513" font-family="Poppins" font-size="15" font-weight="400" xml:space="preserve">SVG</text>
-<image x="1202" y="730.27" width="18" height="18" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADYAAAA2CAYAAACMRWrdAAACOUlEQVR4AexU207CQBCdlcibMVb4Bo3GxGcv4RO8fKgxfoHEyw8oJrz45pOUSnhEGOc0tqmkxbrd0mKGdNJldm7nnN2u0T/9KbBVE1YVU8VqwoAexZoIkXsMVSw3VTUJVMVqIkTuMVSx3FTVJFAVq4kQucdQxXJTVZPA1VZsAYkKLIscz/P2vJbXE3veaG3sZMX95ndVJ+pTVLGGWTNXxpg9sf11s35vAy7MaVBXaoR1mtS8lgELzVYoeXN7s0OGYpUMmZaAexD292WwXA9ikYPcOMHQ7lZ76yj+b7EoBGzkj7pM/JrsKwNuU4NuQxWSGynrMEZiw5zkPlM/eA8ek66/rgsBk2ZT/uRzZv6QdfzIoK2mad5Bjdg5t8AeYhCb3GJin2d8Kb6ZmPVTFBgFQfBEMzoRcMHcFO0s5SKlJL4tFj8CajDhyfFwOHyJnZaLwsDQVwbpCbjTeXBQQ+7Pjw8KQMGHPeRG9g3qZDwY9yNfkbcTYBggD7hlgcI8zoChGMDxlDucceey7hRNqeNKKcwBcwoMBRfeOaLS7hR6J805MBSHcml3DnuRub5TUd3oXQowFAe4tGOJPQHll3H8UDuy0oChQdqxFFDOPunokWWlAkNTKGfYHBDTjdi1mZlD1x8K9Jm30oGhoe/7b/7APxO7wBq+sm0pwMoGkVZfgaWxshyfXRdVzI636rJUseq4t+usitnxVl2WKlYd93adVTE73qrLUsWq496usypmx1t1WapYddzbdf4CAAD//44WfxUAAAAGSURBVAMADrfmba2LvUcAAAAASUVORK5CYII="/>
-<text x="650.56" y="802.11" fill="#131513" fill-opacity="0.64" font-family="Poppins" font-size="12" font-weight="400" letter-spacing="0.96" xml:space="preserve">EXPORT</text>
-<rect x="766.56" y="775.64" width="468.44" height="1" fill="#131513" fill-opacity="0.22"/>
-<rect x="1234" y="775.64" width="1" height="44.75" fill="#131513" fill-opacity="0.22"/>
-<rect x="766.56" y="819.39" width="468.44" height="1" fill="#131513" fill-opacity="0.22"/>
-<rect x="766.56" y="775.64" width="1" height="44.75" fill="#131513" fill-opacity="0.22"/>
-<text x="781.56" y="802.64" fill="#131513" font-family="Poppins" font-size="15" font-weight="400" xml:space="preserve">512 px</text>
-<image x="1202" y="789.02" width="18" height="18" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADYAAAA2CAYAAACMRWrdAAACOUlEQVR4AexU207CQBCdlcibMVb4Bo3GxGcv4RO8fKgxfoHEyw8oJrz45pOUSnhEGOc0tqmkxbrd0mKGdNJldm7nnN2u0T/9KbBVE1YVU8VqwoAexZoIkXsMVSw3VTUJVMVqIkTuMVSx3FTVJFAVq4kQucdQxXJTVZPA1VZsAYkKLIscz/P2vJbXE3veaG3sZMX95ndVJ+pTVLGGWTNXxpg9sf11s35vAy7MaVBXaoR1mtS8lgELzVYoeXN7s0OGYpUMmZaAexD292WwXA9ikYPcOMHQ7lZ76yj+b7EoBGzkj7pM/JrsKwNuU4NuQxWSGynrMEZiw5zkPlM/eA8ek66/rgsBk2ZT/uRzZv6QdfzIoK2mad5Bjdg5t8AeYhCb3GJin2d8Kb6ZmPVTFBgFQfBEMzoRcMHcFO0s5SKlJL4tFj8CajDhyfFwOHyJnZaLwsDQVwbpCbjTeXBQQ+7Pjw8KQMGHPeRG9g3qZDwY9yNfkbcTYBggD7hlgcI8zoChGMDxlDucceey7hRNqeNKKcwBcwoMBRfeOaLS7hR6J805MBSHcml3DnuRub5TUd3oXQowFAe4tGOJPQHll3H8UDuy0oChQdqxFFDOPunokWWlAkNTKGfYHBDTjdi1mZlD1x8K9Jm30oGhoe/7b/7APxO7wBq+sm0pwMoGkVZfgaWxshyfXRdVzI636rJUseq4t+usitnxVl2WKlYd93adVTE73qrLUsWq496usypmx1t1WapYddzbdf4CAAD//44WfxUAAAAGSURBVAMADrfmba2LvUcAAAAASUVORK5CYII="/>
-<rect x="650.56" y="846.39" width="584.44" height="1" fill="#131513" fill-opacity="0.22"/>
-<rect x="1234" y="846.39" width="1" height="47.09" fill="#131513" fill-opacity="0.22"/>
-<rect x="650.56" y="892.48" width="584.44" height="1" fill="#131513" fill-opacity="0.22"/>
-<rect x="650.56" y="846.39" width="1" height="47.09" fill="#131513" fill-opacity="0.22"/>
-<text x="881.78" y="874.39" fill="#131513" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">Nothing to export</text>
-<text x="650.56" y="922.48" fill="#131513" fill-opacity="0.64" font-family="Poppins" font-size="13" font-weight="400" xml:space="preserve">Loading 1,258 icons…</text>
+<text x="650.56" y="689.98" fill="#131513" fill-opacity="0.64" font-family="Poppins" font-size="12" font-weight="400" letter-spacing="0.96" xml:space="preserve">COLOUR</text>
+<rect x="766.56" y="672.89" width="26" height="1" fill="#131513" fill-opacity="0.22"/>
+<rect x="791.56" y="672.89" width="1" height="26" fill="#131513" fill-opacity="0.22"/>
+<rect x="766.56" y="697.89" width="26" height="1" fill="#131513" fill-opacity="0.22"/>
+<rect x="766.56" y="672.89" width="1" height="26" fill="#131513" fill-opacity="0.22"/>
+<text x="775.56" y="689.89" fill="#131513" font-family="Poppins" font-size="12" font-weight="500" xml:space="preserve">A</text>
+<rect x="800.56" y="672.89" width="26" height="26" fill="#ffffff" rx="50"/>
+<rect x="800.56" y="672.89" width="26" height="1" fill="#131513" fill-opacity="0.22"/>
+<rect x="825.56" y="672.89" width="1" height="26" fill="#131513" fill-opacity="0.22"/>
+<rect x="800.56" y="697.89" width="26" height="1" fill="#131513" fill-opacity="0.22"/>
+<rect x="800.56" y="672.89" width="1" height="26" fill="#131513" fill-opacity="0.22"/>
+<rect x="834.56" y="672.89" width="26" height="26" fill="#000000" rx="50"/>
+<rect x="834.56" y="672.89" width="26" height="1" fill="#131513" fill-opacity="0.22"/>
+<rect x="859.56" y="672.89" width="1" height="26" fill="#131513" fill-opacity="0.22"/>
+<rect x="834.56" y="697.89" width="26" height="1" fill="#131513" fill-opacity="0.22"/>
+<rect x="834.56" y="672.89" width="1" height="26" fill="#131513" fill-opacity="0.22"/>
+<rect x="868.56" y="672.89" width="26" height="26" fill="#4147d5" rx="50"/>
+<rect x="868.56" y="672.89" width="26" height="1" fill="#131513" fill-opacity="0.22"/>
+<rect x="893.56" y="672.89" width="1" height="26" fill="#131513" fill-opacity="0.22"/>
+<rect x="868.56" y="697.89" width="26" height="1" fill="#131513" fill-opacity="0.22"/>
+<rect x="868.56" y="672.89" width="1" height="26" fill="#131513" fill-opacity="0.22"/>
+<rect x="902.56" y="672.89" width="26" height="26" fill="#0e9f6e" rx="50"/>
+<rect x="902.56" y="672.89" width="26" height="1" fill="#131513" fill-opacity="0.22"/>
+<rect x="927.56" y="672.89" width="1" height="26" fill="#131513" fill-opacity="0.22"/>
+<rect x="902.56" y="697.89" width="26" height="1" fill="#131513" fill-opacity="0.22"/>
+<rect x="902.56" y="672.89" width="1" height="26" fill="#131513" fill-opacity="0.22"/>
+<rect x="936.56" y="672.89" width="26" height="26" fill="#e02424" rx="50"/>
+<rect x="936.56" y="672.89" width="26" height="1" fill="#131513" fill-opacity="0.22"/>
+<rect x="961.56" y="672.89" width="1" height="26" fill="#131513" fill-opacity="0.22"/>
+<rect x="936.56" y="697.89" width="26" height="1" fill="#131513" fill-opacity="0.22"/>
+<rect x="936.56" y="672.89" width="1" height="26" fill="#131513" fill-opacity="0.22"/>
+<rect x="970.56" y="672.89" width="26" height="1" fill="#131513" fill-opacity="0.22"/>
+<rect x="995.56" y="672.89" width="1" height="26" fill="#131513" fill-opacity="0.22"/>
+<rect x="970.56" y="697.89" width="26" height="1" fill="#131513" fill-opacity="0.22"/>
+<rect x="970.56" y="672.89" width="1" height="26" fill="#131513" fill-opacity="0.22"/>
+<text x="978.56" y="689.89" fill="#131513" font-family="Poppins" font-size="12" font-weight="500" xml:space="preserve">M</text>
+<text x="650.56" y="739.36" fill="#131513" fill-opacity="0.64" font-family="Poppins" font-size="12" font-weight="400" letter-spacing="0.96" xml:space="preserve">FORMAT</text>
+<rect x="766.56" y="712.89" width="468.44" height="1" fill="#131513" fill-opacity="0.22"/>
+<rect x="1234" y="712.89" width="1" height="44.75" fill="#131513" fill-opacity="0.22"/>
+<rect x="766.56" y="756.64" width="468.44" height="1" fill="#131513" fill-opacity="0.22"/>
+<rect x="766.56" y="712.89" width="1" height="44.75" fill="#131513" fill-opacity="0.22"/>
+<text x="781.56" y="739.89" fill="#131513" font-family="Poppins" font-size="15" font-weight="400" xml:space="preserve">SVG</text>
+<image x="1202" y="726.27" width="18" height="18" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADYAAAA2CAYAAACMRWrdAAACOUlEQVR4AexU207CQBCdlcibMVb4Bo3GxGcv4RO8fKgxfoHEyw8oJrz45pOUSnhEGOc0tqmkxbrd0mKGdNJldm7nnN2u0T/9KbBVE1YVU8VqwoAexZoIkXsMVSw3VTUJVMVqIkTuMVSx3FTVJFAVq4kQucdQxXJTVZPA1VZsAYkKLIscz/P2vJbXE3veaG3sZMX95ndVJ+pTVLGGWTNXxpg9sf11s35vAy7MaVBXaoR1mtS8lgELzVYoeXN7s0OGYpUMmZaAexD292WwXA9ikYPcOMHQ7lZ76yj+b7EoBGzkj7pM/JrsKwNuU4NuQxWSGynrMEZiw5zkPlM/eA8ek66/rgsBk2ZT/uRzZv6QdfzIoK2mad5Bjdg5t8AeYhCb3GJin2d8Kb6ZmPVTFBgFQfBEMzoRcMHcFO0s5SKlJL4tFj8CajDhyfFwOHyJnZaLwsDQVwbpCbjTeXBQQ+7Pjw8KQMGHPeRG9g3qZDwY9yNfkbcTYBggD7hlgcI8zoChGMDxlDucceey7hRNqeNKKcwBcwoMBRfeOaLS7hR6J805MBSHcml3DnuRub5TUd3oXQowFAe4tGOJPQHll3H8UDuy0oChQdqxFFDOPunokWWlAkNTKGfYHBDTjdi1mZlD1x8K9Jm30oGhoe/7b/7APxO7wBq+sm0pwMoGkVZfgaWxshyfXRdVzI636rJUseq4t+usitnxVl2WKlYd93adVTE73qrLUsWq496usypmx1t1WapYddzbdf4CAAD//44WfxUAAAAGSURBVAMADrfmba2LvUcAAAAASUVORK5CYII="/>
+<text x="650.56" y="798.11" fill="#131513" fill-opacity="0.64" font-family="Poppins" font-size="12" font-weight="400" letter-spacing="0.96" xml:space="preserve">EXPORT</text>
+<rect x="766.56" y="771.64" width="468.44" height="1" fill="#131513" fill-opacity="0.22"/>
+<rect x="1234" y="771.64" width="1" height="44.75" fill="#131513" fill-opacity="0.22"/>
+<rect x="766.56" y="815.39" width="468.44" height="1" fill="#131513" fill-opacity="0.22"/>
+<rect x="766.56" y="771.64" width="1" height="44.75" fill="#131513" fill-opacity="0.22"/>
+<text x="781.56" y="798.64" fill="#131513" font-family="Poppins" font-size="15" font-weight="400" xml:space="preserve">512 px</text>
+<image x="1202" y="785.02" width="18" height="18" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADYAAAA2CAYAAACMRWrdAAACOUlEQVR4AexU207CQBCdlcibMVb4Bo3GxGcv4RO8fKgxfoHEyw8oJrz45pOUSnhEGOc0tqmkxbrd0mKGdNJldm7nnN2u0T/9KbBVE1YVU8VqwoAexZoIkXsMVSw3VTUJVMVqIkTuMVSx3FTVJFAVq4kQucdQxXJTVZPA1VZsAYkKLIscz/P2vJbXE3veaG3sZMX95ndVJ+pTVLGGWTNXxpg9sf11s35vAy7MaVBXaoR1mtS8lgELzVYoeXN7s0OGYpUMmZaAexD292WwXA9ikYPcOMHQ7lZ76yj+b7EoBGzkj7pM/JrsKwNuU4NuQxWSGynrMEZiw5zkPlM/eA8ek66/rgsBk2ZT/uRzZv6QdfzIoK2mad5Bjdg5t8AeYhCb3GJin2d8Kb6ZmPVTFBgFQfBEMzoRcMHcFO0s5SKlJL4tFj8CajDhyfFwOHyJnZaLwsDQVwbpCbjTeXBQQ+7Pjw8KQMGHPeRG9g3qZDwY9yNfkbcTYBggD7hlgcI8zoChGMDxlDucceey7hRNqeNKKcwBcwoMBRfeOaLS7hR6J805MBSHcml3DnuRub5TUd3oXQowFAe4tGOJPQHll3H8UDuy0oChQdqxFFDOPunokWWlAkNTKGfYHBDTjdi1mZlD1x8K9Jm30oGhoe/7b/7APxO7wBq+sm0pwMoGkVZfgaWxshyfXRdVzI636rJUseq4t+usitnxVl2WKlYd93adVTE73qrLUsWq496usypmx1t1WapYddzbdf4CAAD//44WfxUAAAAGSURBVAMADrfmba2LvUcAAAAASUVORK5CYII="/>
+<rect x="650.56" y="842.39" width="584.44" height="1" fill="#131513" fill-opacity="0.22"/>
+<rect x="1234" y="842.39" width="1" height="47.09" fill="#131513" fill-opacity="0.22"/>
+<rect x="650.56" y="888.48" width="584.44" height="1" fill="#131513" fill-opacity="0.22"/>
+<rect x="650.56" y="842.39" width="1" height="47.09" fill="#131513" fill-opacity="0.22"/>
+<text x="881.78" y="870.39" fill="#131513" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">Nothing to export</text>
+<text x="650.56" y="918.48" fill="#131513" fill-opacity="0.64" font-family="Poppins" font-size="13" font-weight="400" xml:space="preserve">Loading 1,258 icons…</text>
 <rect x="40" y="1046.61" width="1220" height="1" fill="#131513" fill-opacity="0.22"/>
 <rect x="1259" y="1046.61" width="1" height="98.88" fill="#131513" fill-opacity="0.22"/>
 <rect x="40" y="1046.61" width="1" height="98.88" fill="#131513" fill-opacity="0.22"/>
