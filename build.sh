@@ -176,13 +176,13 @@ case "${1:-all}" in
         ;;
     icons)
         stage_icons_assets
-        build_app icons-app Icons Icons-2.19.apk 30 2.19
+        build_app icons-app Icons Icons-2.20.apk 31 2.20
         check_fallback "$OUT/Icons-2.19.apk"
         ;;
     all)
         build_app app Compress Compress-2.1.apk 12 2.1
         stage_icons_assets
-        build_app icons-app Icons Icons-2.19.apk 30 2.19
+        build_app icons-app Icons Icons-2.20.apk 31 2.20
         check_fallback "$OUT/Icons-2.19.apk"
         ;;
     *)

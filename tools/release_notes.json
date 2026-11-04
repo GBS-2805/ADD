@@ -2,6 +2,12 @@
   "notes": [
     {
       "id": "icons",
+      "version": "2.20",
+      "title": "Three palettes in the app",
+      "note": "The side tab carries Moss and Navy beside green, with the theme toggle moved to its foot."
+    },
+    {
+      "id": "icons",
       "version": "2.19",
       "title": "Every brand, uncounted",
       "note": "The page the Icons app shows for a site page it does not bundle no longer says \"both brands\", so the app's copy cannot fall behind the shelf."

@@ -38,7 +38,7 @@ const shots = [
   { name: "page-home-full", page: "", w: 1300, h: 900, full: true, title: "Index, full height", caption: "The material, both apps and the palette." },
   { name: "page-menu", page: "", w: 1300, h: 900, open: "#menuBtn", title: "Left pull-down", caption: "Index, icons, fonts and tools, one row each." },
   { name: "page-drawer", page: "", w: 1300, h: 900, open: "#burger", title: "Right side tab", caption: "Download, portfolio and renders over the scrim." },
-  { name: "page-tools", page: "tools/", w: 1300, h: 900, title: "Tools", caption: "Both apps, Icons 2.19 first, each with its own APK." },
+  { name: "page-tools", page: "tools/", w: 1300, h: 900, title: "Tools", caption: "Both apps, Icons 2.20 first, each with its own APK." },
   { name: "page-icons", page: "icons/", w: 1300, h: 900, title: "Icons app page", caption: "The icon brand landing: download, brands, what the app does." },
   { name: "page-icons-brand", page: "icons/coolicons/", w: 1300, h: 900, title: "Coolicons · preview", caption: "The preview tab with weight, size and background beside it." },
   { name: "page-icons-panel", page: "icons/coolicons/", w: 1300, h: 900, panel: true, scroll: "panel", title: "Coolicons · the set", caption: "All 1,258 icons behind one toggle, scrolling in their own sheet." },

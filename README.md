@@ -11,9 +11,9 @@ the pages.
 
 ## Status
 
-- **Icons 2.19** — APK [`dist/Icons-2.19.apk`](dist/Icons-2.19.apk)
-  (1,841,488 bytes, signed v1+v2), published as `docs/Icons-2.19.apk`. Package
-  `app.offline.icons` · minSdk 26 · targetSdk 35 · versionCode 30. The whole browser
+- **Icons 2.20** — APK [`dist/Icons-2.20.apk`](dist/Icons-2.20.apk)
+  (2,064,041 bytes, signed v1+v2), published as `docs/Icons-2.20.apk`. Package
+  `app.offline.icons` · minSdk 26 · targetSdk 35 · versionCode 31. The whole browser
   — all four brands, 4,373 glyphs, the stylesheet and Poppins — is bundled in the APK
   and served to a WebView from a private origin.
 - **Compress 2.1** — APK [`dist/Compress-2.1.apk`](dist/Compress-2.1.apk)
@@ -188,7 +188,7 @@ export ANDROID_SDK_ROOT=$HOME/android-sdk   # needs build-tools;35.0.0 + platfor
 ./build.sh compress   # Compress only
 ```
 
-Output: `dist/Compress-2.1.apk` and `dist/Icons-2.19.apk`. Copy them to `docs/` and
+Output: `dist/Compress-2.1.apk` and `dist/Icons-2.20.apk`. Copy them to `docs/` and
 re-run `python3 tools/build_catalog.py` so the pages, the JSON and the checksums move
 together. Signing uses `$HOME/tools/compress-keystore.jks` (created on first build,
 password `android`); both apps share it, so they update side by side. Replace it with
