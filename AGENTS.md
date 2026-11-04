@@ -493,7 +493,10 @@ changes as unverified on device rather than illustrating them.
   The fallback is built in Java, so it is not in the staged bundle: drive it with
   `tools/webview-fallback-check.js`, which reassembles it from `classes.dex` and fails
   unless the copy and both links render. `build.sh` runs it after signing every Icons
-  APK, and falls back to its `--static` mode when Playwright is absent.
+  APK, and falls back to its `--static` mode when Playwright is absent. Neither mode
+  needs the capture environment exported by hand: `build.sh` hands the check
+  `NODE_PATH`, `PLAYWRIGHT_BROWSERS_PATH`, `LD_LIBRARY_PATH` and `FONTCONFIG_FILE`
+  itself, and a value already exported still wins.
 - Compress's palette has one source of truth: `app/res/values/colors.xml` (Icons has
   its own in `icons-app/res/values/styles.xml`). Names are kept from the old theme on
   purpose, so a rename touches every drawable, layout and Java file that references
