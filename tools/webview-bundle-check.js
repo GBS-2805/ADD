@@ -1,6 +1,6 @@
 // Drive the staged Icons web bundle the way the WebView loads it.
 //
-//   python3 -m http.server 8870 --directory icons-app/assets/www
+//   python3 -m http.server 8870 --directory app/assets/www
 //   node tools/webview-bundle-check.js http://127.0.0.1:8870
 //
 // Proves the shipped HTML, CSS, JS and JSON work offline: every brand section

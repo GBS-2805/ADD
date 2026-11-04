@@ -1,4 +1,4 @@
-# Checking the Icons WebView bundle without a device
+# Checking the app's WebView bundle without a device
 
 The app cannot be screencapped on this VM: `/dev/kvm` is unusable for this account, the
 emulator falls back to TCG, `system_server` sits in a permanent ANR and every screencap
@@ -8,23 +8,23 @@ files and driving them in a browser proves what the app loads.
 
 ## 1. Stage the bundle
 
-    ./build.sh icons
+    ./build.sh stage
 
-`stage_icons_assets` rebuilds `icons-app/assets/www` from scratch:
+`stage_shelf_assets` rebuilds `app/assets/www` from scratch:
 
-- `docs/icons/index.html`, and the folders `lineicons/`, `coolicons/`, `all/`;
+- `docs/icons/index.html` with its brand folders and `all/`, plus `docs/fonts/index.html`;
 - `docs/assets/site.css`, `site.js`, `favicon.svg`, and `assets/fonts/*.woff2`;
 - `docs/data/` whole: the names-first catalogs, their `data/<stem>/` glyph chunks,
   the `-sheet.json` subsets, and the page index the search box reads;
 - `docs/search/index.html`, with that index trimmed to the pages the app carries;
 - a redirect `index.html` pointing at `icons/`.
 
-About 8 MB, tracked in this repository, so a release commit carries it. Never
+About 8 MB, generated on every build and never committed. Never
 hand-edit that tree: it is rewritten on every build.
 
 ## 2. Serve it the way the WebView does
 
-    python3 -m http.server 8870 --directory icons-app/assets/www
+    python3 -m http.server 8870 --directory app/assets/www
 
 The document root must be `www`, not its parent. Pages fetch `../../data/coolicons.json`,
 which only resolves to `/data/coolicons.json` from that root.
@@ -67,7 +67,7 @@ rendered empty sections inside the app while looking perfect on the site.
 
 And check the artifact itself:
 
-    python3 -c "import zipfile;n=zipfile.ZipFile('docs/Icons-2.20.apk').namelist();print([x for x in n if 'www/icons/all' in x or x.endswith('www/icons/index.html')])"
+    python3 -c "import zipfile;n=zipfile.ZipFile('docs/ADD-3.0.apk').namelist();print([x for x in n if 'www/icons/all' in x or x.endswith('www/icons/index.html')])"
 
 ## 4. The unbundled-page fallback
 
@@ -77,9 +77,9 @@ builds its HTML in Java -- so serving `www` returns a plain 404 and never shows 
 `classes.dex`, joins them around a sample address exactly as the client does, and
 loads that document in Chromium at 390x844:
 
-    node tools/webview-fallback-check.js docs/Icons-2.20.apk artifacts/fallback-offline.png
+    node tools/webview-fallback-check.js docs/ADD-3.0.apk artifacts/fallback-offline.png
 
-`build.sh` runs it after signing every Icons APK, so a release whose fallback went
+`build.sh` runs it after signing ADD, so a release whose fallback went
 stale fails instead of shipping. It prints the heading, both links, the background,
 the font and any console error, saves the screenshot, and exits non-zero unless the
 page says "every brand, their catalogs", carries no "both brands", renders both

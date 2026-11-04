@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Fail when the Icons bundle is missing a file one of its pages fetches.
 
-    python3 tools/check_bundle.py [icons-app/assets/www]
+    python3 tools/check_bundle.py [app/assets/www]
 
 The app is a WebView over a staged copy of `docs/`, and the staging list in
 `build.sh` is written by hand. A page whose JSON never got staged still loads and
@@ -24,9 +24,9 @@ REF = re.compile(r"""["']((?:\.\./|\./)*)([\w-]+(?:/[\w.-]+)*\.(?:json|css|js|wo
 
 
 def main(argv):
-    root = pathlib.Path(argv[1] if len(argv) > 1 else "icons-app/assets/www")
+    root = pathlib.Path(argv[1] if len(argv) > 1 else "app/assets/www")
     if not root.is_dir():
-        sys.exit("%s is not staged: run ./build.sh icons first" % root)
+        sys.exit("%s is not staged: run ./build.sh stage first" % root)
     root = root.resolve()
     pages = sorted(p for p in root.rglob("*.html"))
     if not pages:

@@ -141,42 +141,6 @@ check_fallback() {
     fi
 }
 
-stage_icons_assets() {
-    local www="$ROOT/icons-app/assets/www"
-    echo "== Icons: staging the browser out of docs/ =="
-    rm -rf "$ROOT/icons-app/assets"
-    mkdir -p "$www/icons" "$www/assets/fonts" "$www/data" "$www/search"
-    cp "$ROOT/docs/icons/index.html" "$www/icons/"
-    for dir in "$ROOT"/docs/icons/*/; do cp -r "$dir" "$www/icons/"; done
-    # Pages name the hashed copies, so stage what they ask for, not the sources.
-    cp "$ROOT"/docs/assets/site*.css "$ROOT"/docs/assets/site*.js \
-       "$ROOT/docs/assets/favicon.svg" "$www/assets/"
-    cp "$ROOT"/docs/assets/fonts/*.woff2 "$www/assets/fonts/"
-    # data/ is staged whole: the catalogs, their glyph chunks, the sheets and the
-    # page index the search box reads all live under the same root.
-    cp -r "$ROOT/docs/data/." "$www/data/"
-    cp "$ROOT/docs/search/index.html" "$www/search/"
-    # The search page indexes the whole site; the app carries only the icons
-    # pages. Stage an index trimmed to what the bundle has: a hit that opens a
-    # 404 offline is worse than a shorter list. pages.json trimmed, nothing else.
-    python3 - "$ROOT/docs/data/pages.json" "$www/data/pages.json" <<'PY'
-import json, sys
-src, dst = sys.argv[1], sys.argv[2]
-payload = json.load(open(src, encoding="utf-8"))
-pages = [page for page in payload["pages"] if page["path"].startswith("/icons")]
-json.dump(dict(payload, pages=pages), open(dst, "w", encoding="utf-8"), ensure_ascii=False)
-print("bundle index: %d of %d pages" % (len(pages), len(payload["pages"])))
-PY
-    # The site root is not bundled; a page that asks for "/" gets the browser.
-    cat > "$www/index.html" <<'HTML'
-<!doctype html><meta charset="utf-8"><meta http-equiv="refresh" content="0;url=icons/">
-<title>Icons</title>
-HTML
-    # The staging list above is written by hand, and a page that asks for a file it
-    # does not carry still renders -- minus its content. Refuse to build one.
-    python3 "$ROOT/tools/check_bundle.py" "$www"
-    du -sh "$www"
-}
 
 # The unified app: the shelf's web tools (icons, fonts) staged out of docs/ into the
 # one package that also carries the native compressor. Same rule as the Icons build --

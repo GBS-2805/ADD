@@ -489,8 +489,8 @@ tools *inside* that app, not apps of their own.
   is how the bundle can be checked here without a device. `stage_shelf_assets()`
   writes it into `app/assets/www` (generated, not committed) and runs
   `tools/check_bundle.py` over it, so a build fails when a staged page names a file
-  the bundle does not carry. `icons-app/` is the pre-merge WebView-only source;
-  nothing builds it any more, and its `assets/` is a leftover.
+  the bundle does not carry. There is no second app tree to keep in step: the
+  pre-merge WebView-only source is gone, and ADD's `app/` is the only Android source.
 - ADD is one package: the native compressor (`MainActivity`, `CompareActivity`) and a
   WebView (`ShelfActivity`) over that same bundle, served from `https://icons.local`
   by a `WebViewClient` reading `assets/www`, with the `IconsApp` bridge for copy and

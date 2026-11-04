@@ -161,7 +161,6 @@ app/src/app/offline/compress/ThemePrefs.java        stores the palette and theme
 app/assets/www/                                     staged at build time from docs/ (not committed)
 build.sh                                           SDK-tools build: ./build.sh [add|stage]
 docs/                                              the fifteen-page static shelf + data/
-icons-app/                                         retired pre-merge WebView app; nothing builds it
 tools/catalog.json                                 apps, fonts, portfolio (one source)
 tools/build_catalog.py                             measures the shipped files, writes data/
 tools/build_releases.py                            writes the releases page from git history
