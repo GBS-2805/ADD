@@ -26,6 +26,33 @@
   }
   applyTheme(storedTheme());
 
+  // The palette rides beside the theme: same three keys, same store, and the
+  // colour choice survives a reload the way the light/dark one does.
+  var PALETTE_KEY = "site:palette";
+  var PALETTES = [
+    { id: "green", label: "Green", band: "#0fbf92", word: "#0f120f" },
+    { id: "moss", label: "Moss", band: "#005043", word: "#e7ddce" },
+    { id: "navy", label: "Navy", band: "#242d55", word: "#a1b0c3" }
+  ];
+  function storedPalette() {
+    try {
+      var saved = localStorage.getItem(PALETTE_KEY);
+      for (var i = 0; i < PALETTES.length; i++) if (PALETTES[i].id === saved) return saved;
+    } catch (error) { /* blocked store: fall through to green */ }
+    return "green";
+  }
+  function applyPalette(id) {
+    document.documentElement.setAttribute("data-palette", id);
+    var row = document.getElementById("palRow");
+    if (!row) return;
+    var chips = row.querySelectorAll(".pal");
+    for (var i = 0; i < chips.length; i++) {
+      chips[i].setAttribute("aria-pressed",
+        chips[i].getAttribute("data-palette") === id ? "true" : "false");
+    }
+  }
+  applyPalette(storedPalette());
+
   var menu = document.getElementById("menu");
   var menuBtn = document.getElementById("menuBtn");
   var drawer = document.getElementById("drawer");
@@ -68,20 +95,52 @@
 
   // The theme control lives in the side tab now, under its links: the band keeps
   // only the page name, the mark and the burger at every width.
+  var controls = document.getElementById("drawerControls");
+  if (!controls) {
+    controls = document.createElement("div");
+    controls.id = "drawerControls";
+    controls.className = "drawer-controls";
+    drawer.appendChild(controls);
+  }
   if (!document.getElementById("themeBtn")) {
     var themeBtn = document.createElement("button");
     themeBtn.type = "button";
     themeBtn.id = "themeBtn";
     themeBtn.className = "drawer-theme";
     themeBtn.innerHTML = '<span>Theme</span><span class="ico"></span>';
-    if (drawerNote) drawer.insertBefore(themeBtn, drawerNote);
-    else drawer.appendChild(themeBtn);
+    controls.appendChild(themeBtn);
     applyTheme(document.documentElement.getAttribute("data-theme") || storedTheme());
     themeBtn.addEventListener("click", function () {
       var next = document.documentElement.getAttribute("data-theme") === "light" ? "dark" : "light";
       try { localStorage.setItem(THEME_KEY, next); } catch (error) { /* forget it */ }
       applyTheme(next);
     });
+  }
+
+  if (!document.getElementById("palRow")) {
+    var paletteRow = document.createElement("div");
+    paletteRow.className = "drawer-palette";
+    paletteRow.innerHTML = '<span>Palette</span><span class="pal-row" id="palRow" role="group" aria-label="Palette"></span>';
+    controls.appendChild(paletteRow);
+    var palRow = paletteRow.querySelector(".pal-row");
+    PALETTES.forEach(function (palette) {
+      var chip = document.createElement("button");
+      chip.type = "button";
+      chip.className = "pal";
+      chip.setAttribute("data-palette", palette.id);
+      chip.setAttribute("aria-label", palette.label + " palette");
+      chip.title = palette.label;
+      chip.style.background = palette.band;
+      var dot = document.createElement("i");
+      dot.style.background = palette.word;
+      chip.appendChild(dot);
+      chip.addEventListener("click", function () {
+        try { localStorage.setItem(PALETTE_KEY, palette.id); } catch (error) { /* forget it */ }
+        applyPalette(palette.id);
+      });
+      palRow.appendChild(chip);
+    });
+    applyPalette(document.documentElement.getAttribute("data-palette") || storedPalette());
   }
 
   // A phone has no room for the two-line descriptor, so the band carries the short

@@ -72,8 +72,28 @@ with a real URL -- *before* the commit, the deploy and the Drive refresh. Then s
 wait for a thumbs up or down. Do not ship a UI change and show it afterwards: by then
 the only useful answer left is "revert it".
 
-A shot sitting under `artifacts/` is not that picture. It does not resolve on a
-phone, so it never counts as showing anything.
+A shot sitting under `artifacts/` is not that picture, and neither is a
+workspace-relative markdown link to one. It does not resolve on a phone, so it never
+counts as showing anything. This has already failed twice: the reader was sent
+`artifacts/incoming/*.png` links for a palette change and could see none of them.
+
+So a review ships its pictures from a public host, the same way a release does:
+
+    # captures for the verdict go in artifacts/shots/, with a plain index.html beside them
+    npx -y vercel@latest deploy artifacts/shots --prod --yes --project artbase-shots \
+        --create-if-missing --token "$VERCEL_TOKEN"
+
+That serves them at `https://artbase-shots.vercel.app/<file>.png`, with an index at `/`,
+openable on a phone with no sign-in. `artifacts/shots/` is rebuilt per review, so it never
+accumulates. Send, in this order and never as bare URLs:
+
+1. `[Open the site](https://artbase-review.vercel.app/)` -- the working build;
+2. `[See the screens](https://artbase-shots.vercel.app/)` -- the shot index;
+3. one labelled link per screen, the phone width among them
+   (`[Phone side tab, 390 px](https://artbase-shots.vercel.app/phone-drawer-moss.png)`).
+
+Check each shot URL with curl for 200 and an `image/png` content type before sending;
+a link that was never fetched is how the artifact paths slipped through.
 
 Put the review build somewhere the reader can open without a sign-in, and send that
 link. A throwaway project's *production* URL is public, while its previews are not:
@@ -105,7 +125,8 @@ The person reading this works from a phone. Deliver renders like this, every tim
 4. **Never** paste a bare `https://...` URL as the only way in: long URLs wrap
    mid-address and a phone will not linkify them.
 5. **Never** rely on workspace-relative paths (`artifacts/x.png`) or inline
-   `![](...)` embeds built from them — neither resolves outside the desktop app.
+   `![](...)` embeds built from them — neither resolves outside the desktop app. This
+   holds for review shots as much as for shipped renders.
 6. Verify before sending: the gallery returns 200, every listed image loads with a
    real `naturalWidth`, and no capture is missing from the page.
 
@@ -167,6 +188,22 @@ tab rather than the band; a phone drops the descriptor for `ADD` over
 while the glyphs themselves are Coolicons line icons (MIT), which is why every
 page loads `assets/site.js`. Page-specific rules live in a small `<style>` on the page. `docs/icons/index.html` is
 generated on the same system out of the two icon templates.
+
+Three palettes ride over those two modes: green (the original band, `#0fbf92`), and the
+two sets from the hand-off — Moss (`#005043` band, `#0e2a24` page, `#e7ddce` words,
+`#d6e381` accent) and Navy (`#242d55` band, `#1c1d2f` page, `#a1b0c3` words, `#72b6b4`
+accent). `site.js` swaps `data-palette` on `<html>` and remembers the choice under
+`site:palette`; the three chips sit at the foot of the side tab, under the note and beside
+the theme toggle. The band holds in both themes and only the page turns over, so a palette
+is its block of values in `site.css` plus one entry in the `PALETTES` list in `site.js`.
+
+The fourth colour of each set is that palette's accent, and it does two jobs: it fills the
+count chips and the live pills (`--accent`, with `--accent-ink` on top, because the accent
+is light and the band ink on it measures 1.03:1), and it colours the two small labels on
+the band (`MORE` and `Palette`, `--label`). Green has no accent of its own -- its band is
+the accent -- so its labels keep the near-black band ink while Moss and Navy get their
+lime and teal. Never spend the accent on body copy or on link words: it sits at 1.03:1
+against the palette's band words and would read as a second, competing ink.
 
 ### The app cannot be captured here
 

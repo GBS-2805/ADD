@@ -30,32 +30,108 @@
 }
 
 
-/* Light mode: the page and the logo swap places; the band stays green. */
+/* Three palettes. Green is the original: a bright band with near-black words on
+   it. Moss and Navy are the two sets from the hand-off, four colours each - the
+   page, the band, the words that sit on that band, and an accent. The band holds
+   in both themes; only the page turns over. */
+:root,
+html[data-palette="green"] {
+  --pal-band: #0fbf92;
+  --pal-band-ink: #0f120f;
+  --pal-band-dim: rgba(15, 18, 15, .62);
+  --pal-band-line: rgba(15, 18, 15, .22);
+  --pal-band-hover: #12e2ad;
+  --pal-accent: #0fbf92;
+  --pal-accent-ink: #0f120f;
+  --pal-label: #0f120f;   /* green has no accent of its own */
+  --pal-page: #131513;
+  --pal-ink: #131513;
+  --pal-on: #f2eee3;
+  --pal-on-dim: rgba(242, 238, 227, .62);
+  --pal-rule: rgba(242, 238, 227, .22);
+  --pal-tint: rgba(242, 238, 227, .07);
+  --pal-page-light: #f2eee3;
+  --pal-ink-light: #f2eee3;
+  --pal-on-light: #131513;
+  --pal-on-light-dim: rgba(19, 21, 19, .64);
+  --pal-rule-light: rgba(19, 21, 19, .22);
+  --pal-tint-light: rgba(19, 21, 19, .06);
+}
+
+/* Moss - #005043 band, #0e2a24 page, #e7ddce words, #d6e381 accent. */
+html[data-palette="moss"] {
+  --pal-band: #005043;
+  --pal-band-ink: #e7ddce;
+  --pal-band-dim: rgba(231, 221, 206, .64);
+  --pal-band-line: rgba(231, 221, 206, .26);
+  --pal-band-hover: #00695a;
+  --pal-accent: #d6e381;
+  --pal-accent-ink: #0e2a24;
+  --pal-label: #d6e381;
+  --pal-page: #0e2a24;
+  --pal-ink: #e7ddce;
+  --pal-on: #e7ddce;
+  --pal-on-dim: rgba(231, 221, 206, .64);
+  --pal-rule: rgba(231, 221, 206, .24);
+  --pal-tint: rgba(231, 221, 206, .07);
+  --pal-page-light: #e7ddce;
+  --pal-ink-light: #e7ddce;
+  --pal-on-light: #0e2a24;
+  --pal-on-light-dim: rgba(14, 42, 36, .64);
+  --pal-rule-light: rgba(14, 42, 36, .22);
+  --pal-tint-light: rgba(14, 42, 36, .06);
+}
+
+/* Navy - #242d55 band, #1c1d2f page, #a1b0c3 words, #72b6b4 accent. */
+html[data-palette="navy"] {
+  --pal-band: #242d55;
+  --pal-band-ink: #a1b0c3;
+  --pal-band-dim: rgba(161, 176, 195, .66);
+  --pal-band-line: rgba(161, 176, 195, .26);
+  --pal-band-hover: #2f3a6b;
+  --pal-accent: #72b6b4;
+  --pal-accent-ink: #1c1d2f;
+  --pal-label: #72b6b4;
+  --pal-page: #1c1d2f;
+  --pal-ink: #a1b0c3;
+  --pal-on: #a1b0c3;
+  --pal-on-dim: rgba(161, 176, 195, .64);
+  --pal-rule: rgba(161, 176, 195, .22);
+  --pal-tint: rgba(161, 176, 195, .08);
+  --pal-page-light: #a1b0c3;
+  --pal-ink-light: #a1b0c3;
+  --pal-on-light: #1c1d2f;
+  --pal-on-light-dim: rgba(28, 29, 47, .66);
+  --pal-rule-light: rgba(28, 29, 47, .22);
+  --pal-tint-light: rgba(28, 29, 47, .07);
+}
+
+/* Light mode: the page and the logo swap places; the band keeps its palette. */
 html[data-theme="light"] {
   color-scheme: light;
-  --page: var(--cream);
-  --ink: var(--cream);
-  --on: var(--coal);
-  --on-dim: rgba(19, 21, 19, .64);
-  --rule: rgba(19, 21, 19, .22);
-  --tint: rgba(19, 21, 19, .06);
+  --page: var(--pal-page-light);
+  --ink: var(--pal-ink-light);
+  --on: var(--pal-on-light);
+  --on-dim: var(--pal-on-light-dim);
+  --rule: var(--pal-rule-light);
+  --tint: var(--pal-tint-light);
 }
 
 :root {
-  --green: #0fbf92;            /* the band, in both modes            */
-  --coal: #131513;             /* off-black                          */
-  --cream: #f2eee3;            /* off-white                          */
-  --band: var(--green);
-  --page: var(--coal);
-  --ink: var(--coal);          /* logo and icons on the band         */
-  --on: var(--cream);
-  --on-dim: rgba(242, 238, 227, .62);
-  --rule: rgba(242, 238, 227, .22);
-  --tint: rgba(242, 238, 227, .07);
-  --band-ink: #0f120f;         /* words on the green                 */
-  --band-dim: rgba(15, 18, 15, .62);
-  --band-line: rgba(15, 18, 15, .22);
-  --band-hover: #12e2ad;
+  --band: var(--pal-band);
+  --page: var(--pal-page);
+  --ink: var(--pal-ink);       /* logo and icons on the band         */
+  --on: var(--pal-on);
+  --on-dim: var(--pal-on-dim);
+  --rule: var(--pal-rule);
+  --tint: var(--pal-tint);
+  --band-ink: var(--pal-band-ink);   /* words on the band            */
+  --band-dim: var(--pal-band-dim);
+  --band-line: var(--pal-band-line);
+  --band-hover: var(--pal-band-hover);
+  --accent: var(--pal-accent);       /* blocks filled with the highlight  */
+  --accent-ink: var(--pal-accent-ink);
+  --label: var(--pal-label);         /* small labels on the band          */
   --pad: 40px;
   --band-h: 96px;
 }
@@ -214,7 +290,7 @@ a { color: inherit; }
   height: var(--band-h);
   border-bottom: 1px solid var(--band-line);
 }
-.drawer-head p { margin: 0; font-size: 14px; font-weight: 500; letter-spacing: .1em; text-transform: uppercase; }
+.drawer-head p { margin: 0; font-size: 14px; font-weight: 500; letter-spacing: .1em; text-transform: uppercase; color: var(--label); }
 .drawer-close { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; margin-right: -8px; }
 .drawer-close svg { width: 24px; height: 24px; }
 .drawer a {
@@ -231,7 +307,7 @@ a { color: inherit; }
 .drawer a:hover { text-decoration: underline; }
 .drawer a[aria-current="page"] { font-weight: 500; }
 .drawer a:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
-.drawer .drawer-note { margin: auto 0 0; font-size: 13px; line-height: 1.5; color: var(--band-dim); }
+.drawer .drawer-note { margin: 18px 0 0; font-size: 13px; line-height: 1.5; color: var(--band-dim); }
 
 /* ---------- page ---------- */
 main { padding: 0 var(--pad); }
@@ -264,7 +340,7 @@ h1 {
   line-height: 1.4;
 }
 .stats li { display: flex; align-items: center; gap: 4px; }
-.stats b { padding: 1px 8px; background: var(--band); color: var(--band-ink); font-weight: 400; }
+.stats b { padding: 1px 8px; background: var(--accent); color: var(--accent-ink); font-weight: 400; }
 .meta {
   display: flex;
   flex-wrap: wrap;
@@ -389,7 +465,7 @@ ol.steps li::before {
   color: var(--on-dim);
   white-space: nowrap;
 }
-.pill.live { background: var(--band); border-color: var(--band); color: var(--band-ink); }
+.pill.live { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
 
 code { padding: 1px 6px; font-family: inherit; background: var(--tint); }
 .hash { word-break: break-all; }
@@ -430,6 +506,38 @@ footer a:hover { text-decoration: underline; }
 .drawer-theme svg { width: 22px; height: 22px; }
 .drawer-theme:hover { text-decoration: underline; }
 .drawer-theme:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+
+/* The look controls sit at the foot of the tab, under the note: the links stay the
+   top of the panel and the switches stay reachable with a thumb. */
+.drawer-controls { flex: none; margin-top: auto; border-top: 1px solid var(--band-line); }
+.drawer-controls .drawer-theme { border-bottom: 1px solid var(--band-line); }
+
+/* Palette chips, one per set: the band colour with the words-on-band dot. The
+   live one is ringed, so the row reads without a second label. */
+.drawer-palette {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 17px 0;
+  font-size: 21px;
+  color: var(--label);
+}
+.pal-row { display: flex; align-items: center; gap: 12px; }
+.pal {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .16);
+}
+.pal i { display: block; width: 9px; height: 9px; border-radius: 50%; }
+.pal[aria-pressed="true"] { outline: 2px solid var(--band-ink); outline-offset: 2px; }
+.pal:focus-visible { outline: 2px solid var(--band-ink); outline-offset: 3px; }
 
 @media (max-width: 900px) {
   .who-lines p + p { display: none; }
