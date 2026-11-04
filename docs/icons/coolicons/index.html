@@ -112,9 +112,10 @@
   .preview-box svg { width: var(--size); height: var(--size); stroke-width: var(--w); }
   .preview-box[data-mode="fill"] svg path { stroke: currentColor; stroke-width: var(--w); stroke-linejoin: round; }
   .preview-meta { min-width: 0; }
-  .preview-meta .name { margin: 0; font-size: 21px; line-height: 1.3; letter-spacing: -.01em; word-break: break-all; }
-  .preview-meta .file { margin: 4px 0 0; font-size: 13px; color: var(--on-dim); word-break: break-all; }
-  .preview-meta .hint { margin: 14px 0 0; font-size: 13px; color: var(--on-dim); max-width: 24ch; }
+  /* The name reads where the file label used to sit, at the label's size: the
+     glyph is the picture, so the words under it are a caption, not a headline. */
+  .preview-meta .name { margin: 0; font-size: 15px; line-height: 1.4; letter-spacing: 0; }
+  .preview-meta .hint { margin: 10px 0 0; font-size: 13px; color: var(--on-dim); max-width: 24ch; }
 
   /* The stage is the pane now, not a tile on it: a black surface the glyph sits
      in the middle of, with the name, file and hint stacked against the
@@ -151,27 +152,11 @@
     max-width: 58%;
     text-align: right;
   }
-  .preview-meta .file,
-  .preview-meta .hint { color: rgba(255, 255, 255, .62); }
-  .preview-meta .hint { margin-left: auto; }
-  .preview[data-surface="white"] .preview-meta .file,
+  .preview-meta .hint { color: rgba(255, 255, 255, .62); margin-left: auto; }
   .preview[data-surface="white"] .preview-meta .hint { color: rgba(0, 0, 0, .62); }
 
   .controls { display: flex; flex-direction: column; gap: 14px; padding: 22px 24px; }
-  .ctl-head { display: flex; align-items: center; gap: 14px; }
-  .mini {
-    flex: none;
-    display: grid;
-    place-items: center;
-    width: 38px;
-    height: 38px;
-    background: var(--band);
-    color: var(--ink);
-    --w: 2;
-  }
-  .mini svg { width: 22px; height: 22px; stroke-width: var(--w); }
-  .mini[data-mode="fill"] svg path { stroke: currentColor; stroke-width: var(--w); stroke-linejoin: round; }
-  .ctl-head p { margin: 0 auto 0 0; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--on-dim); }
+  .ctl-head { display: flex; align-items: center; justify-content: flex-end; }
   .copy-btn {
     appearance: none;
     display: inline-flex;
@@ -501,7 +486,6 @@
   }
   .preview-box[data-surface="black"] { color: var(--glyph, #fff); }
   .preview-box[data-surface="white"] { color: var(--glyph, #000); }
-  .mini { color: var(--glyph, var(--ink)); }
   .icon-card .glyph { color: var(--glyph, inherit); }
   .sel-chip svg { color: var(--glyph, inherit); }
 </style>
@@ -580,15 +564,12 @@
         <div class="preview-box" id="stageGlyph" data-mode="stroke" data-surface="black" aria-hidden="true"></div>
         <div class="preview-meta">
           <p class="name" id="selName" aria-live="polite">Loading…</p>
-          <p class="file" id="selFile"></p>
           <p class="hint">Selected icon. Open the set below to pick another.</p>
         </div>
       </div>
 
       <div class="controls">
         <div class="ctl-head">
-          <span class="mini" id="mini" data-mode="stroke" aria-hidden="true"></span>
-          <p>Preview</p>
           <button class="copy-btn" id="copyBtn" type="button">
             <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M10 13C11.3807 14.3807 13.6193 14.3807 15 13L18 10C19.3807 8.61929 19.3807 6.38071 18 5C16.6193 3.61929 14.3807 3.61929 13 5L11 7M14 11C12.6193 9.61929 10.3807 9.61929 9 11L6 14C4.61929 15.3807 4.61929 17.6193 6 19C7.38071 20.3807 9.61929 20.3807 11 19L13 17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
             <span id="copyLabel">Copy SVG</span>
@@ -736,9 +717,7 @@
   var STYLES = [];
 
   var box = document.getElementById("stageGlyph");
-  var mini = document.getElementById("mini");
   var nameEl = document.getElementById("selName");
-  var fileEl = document.getElementById("selFile");
   var statusEl = document.getElementById("status");
   var grid = document.getElementById("grid");
   var search = document.getElementById("search");
@@ -870,22 +849,18 @@
     if (!selected) { return; }
     var svg = markup(selected);
     box.innerHTML = svg;
-    mini.innerHTML = svg;
     box.style.setProperty("--size", size + "px");
     // Duo and Flat carry the vendor's palette. Writing a weight or currentColor onto
     // them would flatten the very thing that tells the styles apart.
     if (TUNED && !COLOUR) {
       var w = MODE === "stroke" ? weight : FILL_WEIGHT[weight];
-      var miniW = MODE === "stroke" ? weight : String(Number(weight) - 0.6);
       box.style.setProperty("--w", w);
-      mini.style.setProperty("--w", miniW);
       tune(box.querySelector("svg"), w, MODE !== "stroke");
-      tune(mini.querySelector("svg"), miniW, MODE !== "stroke");
     }
     box.setAttribute("data-surface", surface);
     box.closest(".preview").setAttribute("data-surface", surface);
-    nameEl.textContent = selected.name;
-    fileEl.textContent = selected.name + ".svg · " + BRAND + " · " + (STYLE ? STYLE.name : MODE);
+    // The style rides on the name, where the file label used to say it twice.
+    nameEl.textContent = selected.name + (STYLE ? " · " + STYLE.name : "");
     snippet.value = svg;
     queueEstimate();
   }
@@ -963,7 +938,6 @@
     // "plain" has no rule in the page's CSS: the glyph paints itself, which is what
     // a palette style and a solid shape both need.
     box.setAttribute("data-mode", TUNED ? MODE : "plain");
-    mini.setAttribute("data-mode", TUNED ? MODE : "plain");
     weightRow.hidden = !TUNED || MODE !== "stroke";
   }
 
