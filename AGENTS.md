@@ -539,8 +539,8 @@ tools *inside* that app, not apps of their own.
   an Open on the web button; the `WebViewClient` hands any http(s) link to the browser.
   The fallback is built in Java, so it is not in the staged bundle: drive it with
   `tools/webview-fallback-check.js`, which reassembles it from `classes.dex` and fails
-  unless the copy and both links render. `build.sh` runs it after signing every Icons
-  APK, and falls back to its `--static` mode when Playwright is absent. Neither mode
+  unless the copy and both links render. `build.sh` runs it after signing ADD, and
+  falls back to its `--static` mode when Playwright is absent. Neither mode
   needs the capture environment exported by hand: `build.sh` hands the check
   `NODE_PATH`, `PLAYWRIGHT_BROWSERS_PATH`, `LD_LIBRARY_PATH` and `FONTCONFIG_FILE`
   itself, and a value already exported still wins.
