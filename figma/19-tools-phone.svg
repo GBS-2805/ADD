@@ -15,7 +15,7 @@
 <text x="20" y="238.8" fill="#131513" font-family="Poppins" font-size="18" font-weight="400" xml:space="preserve">each, signed with the same key.</text>
 <text x="20" y="282.69" fill="#131513" fill-opacity="0.64" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">2 apps</text>
 <text x="92" y="282.69" fill="#131513" fill-opacity="0.64" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">Icons 2.20 shipping</text>
-<text x="20" y="313.78" fill="#131513" fill-opacity="0.64" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">Compress 2.2 shipping</text>
+<text x="20" y="313.78" fill="#131513" fill-opacity="0.64" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">Compress 2.3 shipping</text>
 <text x="203" y="313.78" fill="#131513" fill-opacity="0.64" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">No third-party libraries</text>
 <rect x="20" y="348.88" width="350" height="1" fill="#131513" fill-opacity="0.22"/>
 <text x="20" y="422.88" fill="#131513" font-family="Poppins" font-size="30" font-weight="400" letter-spacing="-0.45" xml:space="preserve">The two</text>
@@ -51,7 +51,7 @@
 <rect x="82.31" y="949.39" width="1" height="26.14" fill="#0fbf92"/>
 <rect x="43" y="974.53" width="40.31" height="1" fill="#0fbf92"/>
 <rect x="43" y="949.39" width="1" height="26.14" fill="#0fbf92"/>
-<text x="53" y="966.39" fill="#0f120f" font-family="Poppins" font-size="11" font-weight="500" letter-spacing="1.1" xml:space="preserve">2.2</text>
+<text x="53" y="966.39" fill="#0f120f" font-family="Poppins" font-size="11" font-weight="500" letter-spacing="1.1" xml:space="preserve">2.3</text>
 <text x="206.31" y="966.39" fill="#131513" font-family="Poppins" font-size="13" font-weight="400" xml:space="preserve"> →</text>
 <text x="93.31" y="966.39" fill="#131513" font-family="Poppins" font-size="13" font-weight="400" xml:space="preserve">Read the detail</text>
 <rect x="20" y="1042.53" width="350" height="1" fill="#131513" fill-opacity="0.22"/>
@@ -114,13 +114,13 @@
 <text x="20" y="2524.84" fill="#131513" fill-opacity="0.64" font-family="Poppins" font-size="16" font-weight="400" xml:space="preserve">drift from the web.</text>
 <rect x="20" y="2576.44" width="350" height="1" fill="#131513" fill-opacity="0.22"/>
 <text x="20" y="2650.44" fill="#131513" font-family="Poppins" font-size="30" font-weight="400" letter-spacing="-0.45" xml:space="preserve">Compress</text>
-<text x="20" y="2682.94" fill="#131513" fill-opacity="0.64" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">2.2 · app.offline.compress · 272,592 bytes</text>
+<text x="20" y="2682.94" fill="#131513" fill-opacity="0.64" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">2.3 · app.offline.compress · 285,012 bytes</text>
 <rect x="20" y="2750.03" width="350" height="54" fill="#0fbf92"/>
 <image x="117.5" y="2767.03" width="20" height="20" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADwAAAA8CAYAAAA6/NlyAAADTUlEQVR4Aexa3U4TQRSe2YrbpHQXGhUT8A+J7yAXRH0Gb40XlPgY4mMY4Cl8AxXv9NIrg9GkXgJbbroEGL9vEgjdbpuddmbLwjTntGfOnDnnfPNtNt3JBuKGfTzg6064Z9gzfM12wF/SrgmNoqjVbDXbVNqu62Xzl8pwo9G4L26Jn4EItqi04VvINuVyXCrg2u3aaynkBUDa9LkEmM1dKmAhxZ1sA/DdHfA5dJQL2CGQoqk94KI7VdU4z3BVmSva901jWHjARS+NqsZ5hqvKXNG+PcNFd6qqcZ7hqjJXtG/PcNGdqmqcNYZnZ2fvxa14O56Lt5rN5uCDvuEO2c53Xt4a4GAm2EXSdfxZbQe3gh/1uP4E47EkjuNlHP18x2KdT85I5sZwcrECOJ6P30kpVy7akeJBWAu/1OfrDy98BQ29piY+I3wJqgVnX89wyrmuBxN+WQE8pIfFUIbfNIAhAVk3Y7kG/kWoE7ECODlIPgol9nI6JOjd+lz9Uc5cnwsxj4eCRe6j/aOdvgVjDqwAZu1Upa/w24FmZSkMwnPQKjuJsdLMBuFX2HnMdlKRvsScFbEGuHfY+yNOxRq6ygO9CNAENHgjU+LpUGaF6DBn76D3F3ktiBDWALObJEn2wPQq7DzQS1LIt5jrE9zs3sCRz6xKV5kT89bEKmB2RTZGgGZIEe0wB3MVCTaJsQ6YxXWjp2JNCfWPYxPVa7BW5zBZWDDWCWDW5qV4rI6fw867vOHOlQ7XcG3urAWnM8DsTbMEtjRrdIxQHYNYvWZE3KRTTgGzObJF1mCPYto5s6ivxTlgViFrvAnBzgPt7AaFegNSCmBWJWh1ol7Qvqz0ce6yz6VdGmCC6Ha7v9LTdBn2jjgT27Tpw7g0KRUwUfWS3u9kP2knh8kGbfrK1NIBlwkur5YHnLcr18k3FsN8vwonEO2oFW1OQ3XtKGqNQ4Qx4Mald63w9PN+GjrJO17GgHG41veu1Ti7bGMNNnqBvZjmMgZsWsBxvDTKj2BjwPhf/EkpdYK1UxX2wF5MmzAGzKMcFFo5E2cbeML5MA1lbfbAXpwDZgEWwinidne/uzkNZW32wF5M1Zhh0wJXLd4DvmqM2O7HM2x7R69avhvH8H8AAAD//0Rl8NwAAAAGSURBVAMA4sTfiLlxDoMAAAAASUVORK5CYII="/>
 <text x="149.5" y="2783" fill="#0f120f" font-family="Poppins" font-size="17" font-weight="400" xml:space="preserve">Download APK</text>
 <text x="20" y="2840.03" fill="#131513" fill-opacity="0.64" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">Android 8.0+ · arm64 &amp; x86</text>
 <text x="20" y="2871.13" fill="#131513" fill-opacity="0.64" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">No ads · no account</text>
-<text x="186" y="2871.13" fill="#131513" fill-opacity="0.64" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">Version code 13</text>
+<text x="186" y="2871.13" fill="#131513" fill-opacity="0.64" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">Version code 14</text>
 <text x="20" y="2916.22" fill="#131513" fill-opacity="0.64" font-family="Poppins" font-size="16" font-weight="400" xml:space="preserve">Built for a Galaxy Z Flip 7 (Android 16).</text>
 <text x="20" y="2941.81" fill="#131513" fill-opacity="0.64" font-family="Poppins" font-size="16" font-weight="400" xml:space="preserve">Signed, no third-party libraries, adaptive</text>
 <text x="20" y="2967.41" fill="#131513" fill-opacity="0.64" font-family="Poppins" font-size="16" font-weight="400" xml:space="preserve">launcher icon. The checksum is on the</text>
@@ -236,7 +236,7 @@
 <text x="20" y="5968.25" fill="#131513" font-family="Poppins" font-size="16" font-weight="400" xml:space="preserve">repository's own history rather than</text>
 <text x="20" y="5994.64" fill="#131513" font-family="Poppins" font-size="16" font-weight="400" xml:space="preserve">repeated here.</text>
 <rect x="0" y="6086.03" width="390" height="1" fill="#131513" fill-opacity="0.22"/>
-<text x="20" y="6131.03" fill="#131513" fill-opacity="0.64" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">Icons 2.20 · Compress 2.2</text>
+<text x="20" y="6131.03" fill="#131513" fill-opacity="0.64" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">Icons 2.20 · Compress 2.3</text>
 <text x="20" y="6166.13" fill="#131513" fill-opacity="0.64" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">Index</text>
 <text x="57" y="6166.13" fill="#131513" fill-opacity="0.64" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">·</text>
 <text x="68" y="6166.13" fill="#131513" fill-opacity="0.64" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">Download</text>
