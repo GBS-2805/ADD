@@ -121,7 +121,7 @@ def build_families(refresh):
     poppins = {"family": "Poppins", "slug": "poppins", "kind": "Sans serif",
                "fallback": "sans-serif",
                "licence": "SIL Open Font License 1.1", "source": "Google Fonts",
-               "note": "The three faces the apps bundle are byte-for-byte copies of app/res/font/.",
+               "note": "The three faces the app bundles are byte-for-byte copies of app/res/font/.",
                "styles": []}
     for weight in sorted(POPPINS_NAMES):
         for style in ("normal", "italic"):

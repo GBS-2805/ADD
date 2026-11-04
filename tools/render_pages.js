@@ -48,7 +48,7 @@ const shots = [
   { name: "page-all", page: "icons/all/", w: 1300, h: 900, full: true, title: "All brands \u00b7 one per category", caption: "Four brands, the three categorized sheets opening with the same three shared categories." },
   { name: "page-lineicons-categories", page: "icons/lineicons/", w: 1300, h: 900, panel: true, category: "Brands & Logos", scroll: "panel", title: "Lineicons · categories", caption: "The other brand's own 51 categories: Brands & Logos holds 244 of its 606 icons." },
   { name: "page-fonts", page: "fonts/", w: 1300, h: 900, full: true, title: "Fonts", caption: "Poppins 400, 500 and 600 with live specimens, the type-your-own preview and the wiring." },
-  { name: "page-portfolio", page: "portfolio/", w: 1300, h: 900, title: "Portfolio", caption: "The apps, the browser and the site, with what was built in each." },
+  { name: "page-portfolio", page: "portfolio/", w: 1300, h: 900, title: "Portfolio", caption: "The app, the browser and the site, with what was built in each." },
   { name: "page-download", page: "download/", w: 1300, h: 900, title: "Download", caption: "Both APKs, their measured sizes and both SHA-256 hashes." },
   { name: "phone-icons-sheet", page: "icons/coolicons/", w: 390, h: 844, scroll: "sheet", title: "Coolicons · shut sheet", caption: "Shut, the set is one complete row with a closed edge." },
   { name: "phone-lineicons-sheet", page: "icons/lineicons/", w: 390, h: 844, panel: true, category: "Arrows", scroll: "panel", title: "Lineicons · categories on a phone", caption: "The same picker on the other brand, stacked under the name filter at 390 wide." },
@@ -305,7 +305,7 @@ const escape = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/
   <a href="../">Index<span>shelf</span></a>
   <a href="../icons/">Icons<span>${iconTotal} icons</span></a>
   <a href="../fonts/">Fonts<span>2 families</span></a>
-  <a href="../tools/">Tools<span>2 apps</span></a>
+  <a href="../tools/">Tools<span>1 app</span></a>
 </nav>
 
 <div class="scrim" id="scrim" data-open="false"></div>
@@ -314,7 +314,7 @@ const escape = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/
     <p>More</p>
     <button class="drawer-close" id="drawerClose" type="button" aria-label="Close side tab"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 6L18 18M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
   </div>
-  <a href="../download/">Download<span>2 apps</span></a>
+  <a href="../download/">Download<span>1 app</span></a>
   <a href="../portfolio/">Portfolio<span>3 projects</span></a>
   <a href="../renders/" aria-current="page">Renders<span>gallery</span></a>
   <a href="../releases/">Releases<span>history</span></a>
@@ -339,7 +339,7 @@ const escape = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/
     <nav class="gal-filter" id="galFilter" aria-label="Filter captures by page">${chips}</nav>
     <div id="galGroups">${sections}
     </div>
-    <p class="fine">Every image here is a screenshot of a page that ran in a headless browser; nothing is drawn by hand. The Android apps are not in this gallery: the emulator is unusable on this machine (<code>/dev/kvm</code> is closed to this account, so every screencap comes back black), and screens rendered off-device are not published here.</p>
+    <p class="fine">Every image here is a screenshot of a page that ran in a headless browser; nothing is drawn by hand. The Android app is not in this gallery: the emulator is unusable on this machine (<code>/dev/kvm</code> is closed to this account, so every screencap comes back black), and screens rendered off-device are not published here.</p>
   </section>
 </main>
 

@@ -8,7 +8,7 @@
       "kind": "Sans serif",
       "licence": "SIL Open Font License 1.1",
       "source": "Google Fonts",
-      "note": "The three faces the apps bundle are byte-for-byte copies of app/res/font/.",
+      "note": "The three faces the app bundles are byte-for-byte copies of app/res/font/.",
       "styles": [
         {
           "name": "Thin",

@@ -26,7 +26,7 @@
       "title": "This site",
       "kind": "Static site",
       "year": 2026,
-      "summary": "The shelf: catalogs for the tools, icons, fonts and work, all built from the same measurements as the apps and all readable as JSON.",
+      "summary": "The shelf: catalogs for the tools, icons, fonts and work, all built from the same measurements as the app and all readable as JSON.",
       "built": "The measured layout, one shared stylesheet, the JSON builder that re-measures every shipped file, and the render gallery.",
       "stack": "Hand-written HTML and CSS, Python build steps, static hosting",
       "href": "/"

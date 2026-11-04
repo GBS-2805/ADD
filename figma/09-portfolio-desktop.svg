@@ -19,7 +19,7 @@
 <text x="40" y="413.52" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="13" font-weight="400" xml:space="preserve">Projects</text>
 <text x="40" y="447.95" fill="#f2eee3" font-family="Poppins" font-size="20" font-weight="400" xml:space="preserve">3</text>
 <rect x="649" y="374.52" width="1" height="106.44" fill="#f2eee3" fill-opacity="0.22"/>
-<text x="369" y="413.52" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="13" font-weight="400" xml:space="preserve">Apps shipping</text>
+<text x="369" y="413.52" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="13" font-weight="400" xml:space="preserve">App shipping</text>
 <text x="369" y="447.95" fill="#f2eee3" font-family="Poppins" font-size="20" font-weight="400" xml:space="preserve">1</text>
 <rect x="954" y="374.52" width="1" height="106.44" fill="#f2eee3" fill-opacity="0.22"/>
 <text x="674" y="413.52" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="13" font-weight="400" xml:space="preserve">Third-party libraries</text>
@@ -60,7 +60,7 @@
 <text x="875.66" y="772.34" fill="#f2eee3" font-family="Poppins" font-size="22" font-weight="400" letter-spacing="-0.22" xml:space="preserve">This site</text>
 <text x="875.66" y="804.94" fill="#f2eee3" font-family="Poppins" font-size="15" font-weight="400" xml:space="preserve">The shelf: catalogs for the tools, icons, fonts</text>
 <text x="875.66" y="828.19" fill="#f2eee3" font-family="Poppins" font-size="15" font-weight="400" xml:space="preserve">and work, all built from the same</text>
-<text x="875.66" y="851.44" fill="#f2eee3" font-family="Poppins" font-size="15" font-weight="400" xml:space="preserve">measurements as the apps and all readable as</text>
+<text x="875.66" y="851.44" fill="#f2eee3" font-family="Poppins" font-size="15" font-weight="400" xml:space="preserve">measurements as the app and all readable as</text>
 <text x="875.66" y="874.69" fill="#f2eee3" font-family="Poppins" font-size="15" font-weight="400" xml:space="preserve">JSON.</text>
 <text x="875.66" y="919.94" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="13" font-weight="400" xml:space="preserve">Hand-written HTML and CSS ·</text>
 <text x="1114.66" y="919.94" fill="#f2eee3" font-family="Poppins" font-size="13" font-weight="400" xml:space="preserve"> →</text>
@@ -109,7 +109,7 @@
 <text x="225" y="2189.77" fill="#f2eee3" font-family="Poppins" font-size="17" font-weight="400" xml:space="preserve">otherwise be retyped: the icon set and the catalogs.</text>
 <rect x="40" y="2212.81" width="1220" height="1" fill="#f2eee3" fill-opacity="0.22"/>
 <text x="40" y="2248.81" fill="#f2eee3" font-family="Poppins" font-size="17" font-weight="500" xml:space="preserve">Why it is a database</text>
-<text x="237" y="2248.81" fill="#f2eee3" font-family="Poppins" font-size="17" font-weight="400" xml:space="preserve">Because the apps need the same facts the pages state. One catalog file feeds both, and the build fails if a page</text>
+<text x="237" y="2248.81" fill="#f2eee3" font-family="Poppins" font-size="17" font-weight="400" xml:space="preserve">Because the app needs the same facts the pages state. One catalog file feeds both, and the build fails if a page</text>
 <text x="237" y="2276.86" fill="#f2eee3" font-family="Poppins" font-size="17" font-weight="400" xml:space="preserve">quotes a stale size.</text>
 <rect x="40" y="2363.91" width="1220" height="1" fill="#f2eee3" fill-opacity="0.22"/>
 <text x="40" y="2457.91" fill="#f2eee3" font-family="Poppins" font-size="30" font-weight="400" letter-spacing="-0.45" xml:space="preserve">How I work</text>
