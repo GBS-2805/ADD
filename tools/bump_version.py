@@ -346,7 +346,10 @@ def quoted_elsewhere(old, old_code, plans, codes=None):
     planned = {page: after for page, _, after, _ in plans}
     # A letter or digit against the number means it is part of a word rather than a
     # label: libatk-bridge2.0-0t64 is a package, not a version of this app.
-    token = re.compile(r"(?<![0-9A-Za-z.])%s(?![0-9A-Za-z])" % re.escape(old))
+    # A three-part version names a dependency, not an app: the Phosphor page prints
+    # `phosphor-icons/core 2.1.1`, and reading that as Compress 2.1 refused a bump.
+    # A label is followed by a space or punctuation, never by another number.
+    token = re.compile(r"(?<![0-9A-Za-z.])%s(?![0-9A-Za-z]|\.[0-9])" % re.escape(old))
     # The code is a live label too, and it is spelled several ways, so it is matched
     # as a phrase rather than as a number that could be anything.
     code = re.compile(r"version\s*code\s*%d\b" % old_code, re.IGNORECASE)
