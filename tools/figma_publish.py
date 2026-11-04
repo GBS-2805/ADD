@@ -83,7 +83,7 @@ def human(n):
 def listing(names):
     facts = {n: describe(DST / n) + (human((DST / n).stat().st_size),) for n in names}
     count = len([n for n in names if n.endswith(".svg") and n != BUNDLE])
-    lede = "%s artboards of this site, and the whole set on one canvas." % WORDS.get(count, count)
+    lede = "%s artboards of this site, and the desktop set on one canvas." % WORDS.get(count, count)
 
     def item(name):
         title, dims, size = facts[name]
@@ -103,7 +103,7 @@ def listing(names):
         group("Pages, desktop", desktop)
         + group("Pages, phone", phone)
         + group("Navigation, open", states)
-        + group("The whole set on one canvas", [BUNDLE] if BUNDLE in names else [])
+        + group("The desktop set on one canvas", [BUNDLE] if BUNDLE in names else [])
     )
     return """<!DOCTYPE html>
 <html lang="en">

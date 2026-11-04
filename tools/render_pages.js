@@ -34,13 +34,12 @@ const iconTotal = (() => {
 })();
 
 const shots = [
-  { name: "page-home-light", page: "", w: 1300, h: 900, title: "Index", caption: "The landing page at its fold: the material, then two downloads." },
   { name: "page-home-full", page: "", w: 1300, h: 900, full: true, title: "Index, full height", caption: "The material, both apps and the palette." },
   { name: "page-menu", page: "", w: 1300, h: 900, open: "#menuBtn", title: "Left pull-down", caption: "Index, icons, fonts and tools, one row each." },
   { name: "page-drawer", page: "", w: 1300, h: 900, open: "#burger", title: "Right side tab", caption: "Download, portfolio and renders over the scrim." },
   { name: "page-tools", page: "tools/", w: 1300, h: 900, title: "Tools", caption: "Both apps, Icons 2.20 first, each with its own APK." },
   { name: "page-icons", page: "icons/", w: 1300, h: 900, title: "Icons app page", caption: "The icon brand landing: download, brands, what the app does." },
-  { name: "page-icons-brand", page: "icons/coolicons/", w: 1300, h: 900, title: "Coolicons · preview", caption: "The preview tab with weight, size and background beside it." },
+  { name: "page-icons-brand", page: "icons/coolicons/", w: 1300, h: 900, title: "Coolicons · preview", caption: "The stage is the preview: weight, surface and export size beside it." },
   { name: "page-icons-panel", page: "icons/coolicons/", w: 1300, h: 900, panel: true, scroll: "panel", title: "Coolicons · the set", caption: "All 1,258 icons behind one toggle, scrolling in their own sheet." },
   { name: "page-icons-variants", page: "icons/coolicons/", w: 1300, h: 900, panel: true, pick: 6, weight: "2.5", surface: "white", title: "Coolicons · variants", caption: "Heaviest line on the white tile: the same file, repainted live." },
   { name: "page-icons-streamline", page: "icons/streamline/", w: 1300, h: 900, panel: true, scroll: "stage", title: "Streamline \u00b7 four styles", caption: "One brand, four styles: Line selected, with the Style row above the preview and the set opened below." },
@@ -53,7 +52,6 @@ const shots = [
   { name: "page-download", page: "download/", w: 1300, h: 900, title: "Download", caption: "Both APKs, their measured sizes and both SHA-256 hashes." },
   { name: "phone-icons-sheet", page: "icons/coolicons/", w: 390, h: 844, scroll: "sheet", title: "Coolicons · shut sheet", caption: "Shut, the set is one complete row with a closed edge." },
   { name: "phone-lineicons-sheet", page: "icons/lineicons/", w: 390, h: 844, panel: true, category: "Arrows", scroll: "panel", title: "Lineicons · categories on a phone", caption: "The same picker on the other brand, stacked under the name filter at 390 wide." },
-  { name: "phone-home-light", page: "", w: 390, h: 844, title: "Index on a phone", caption: "390×844: the band, the lede and both downloads." },
   { name: "phone-home-full", page: "", w: 390, h: 844, full: true, title: "Index, phone, full height", caption: "The whole landing page at phone width." },
   { name: "phone-menu", page: "", w: 390, h: 844, open: "#menuBtn", title: "Phone pull-down", caption: "Four rows under the band, counts on the right." },
   { name: "phone-drawer", page: "", w: 390, h: 844, open: "#burger", title: "Phone side tab", caption: "The tab takes 86% of the width so the page stays behind it." },
@@ -62,15 +60,14 @@ const shots = [
   { name: "phone-icons-streamline", page: "icons/streamline/", w: 390, h: 844, panel: true, pick: 2, style: "flat", scroll: "stage", title: "Streamline on a phone", caption: "Four style buttons above the preview; the set opens below." },
   { name: "phone-all", page: "icons/all/", w: 390, h: 844, full: true, title: "All brands on a phone", caption: "Four sheets stacked at 390 wide, four across." },
   { name: "phone-fonts", page: "fonts/", w: 390, h: 844, full: true, title: "Fonts on a phone", caption: "The three faces and the type-your-own preview stacked at 390 wide." },
-  { name: "phone-all-coolicons", page: "icons/all/", w: 390, h: 844, scroll: "pane-coolicons", title: "All brands \u00b7 the second brand", caption: "Coolicons, one scroll under Lineicons." },
   { name: "page-releases", page: "releases/", w: 1300, h: 900, title: "Releases", caption: "Every build the shelf has shipped, newest first, with the day, the size and the note." },
-  { name: "phone-releases", page: "releases/", w: 390, h: 844, full: true, title: "Releases on a phone", caption: "The same history at 390 wide." },
+  { name: "phone-releases", page: "releases/", w: 390, h: 844, title: "Releases on a phone", caption: "The newest builds at 390 wide: the fold of a history that runs to 7,398 px." },
 ];
 
-// Rendered apart from a page, so the gallery names it but the loop does not shoot it.
-const extras = [
-  { name: "logo-light", title: "The mark", caption: "The 45px logo at 4×, straight from assets/logo.svg." },
-];
+// Nothing is rendered apart from a page any more: the mark that used to sit here is
+// already in the band of every capture. The list stays so a future standalone image
+// has somewhere to go.
+const extras = [];
 
 const escape = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;");
 
@@ -185,9 +182,8 @@ const escape = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/
     path.join(__dirname, "to_webp.py"), out, gallery,
     ...shots.map((s) => s.name),
   ], { stdio: "inherit" });
-  // The extras are not shot by this run: the mark was rendered once by resvg, which
-  // is not in this toolchain. Its published file is kept -- and its absence would be a
-  // gallery entry pointing at nothing, so that fails here rather than on the page.
+  // The extras are not shot by this run, so a listed file is kept only if it is
+  // already published -- an entry pointing at nothing fails here, not on the page.
   for (const s of extras) {
     const file = path.join(gallery, `${s.name}.webp`);
     if (!fs.existsSync(file)) {
@@ -209,7 +205,7 @@ const escape = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/
   const all = [...shots, ...extras];
   const groups = [];
   for (const s of all) {
-    const label = s.name === "logo-light" ? "The mark" : (GROUP_OF[s.page] || s.page || "Other");
+    const label = GROUP_OF[s.page] || s.page || "Other";
     let group = groups.find((g) => g.name === label);
     if (!group) { group = { name: label, shots: [] }; groups.push(group); }
     group.shots.push(s);
@@ -328,7 +324,7 @@ const escape = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/
     <nav class="gal-filter" id="galFilter" aria-label="Filter captures by page">${chips}</nav>
     <div id="galGroups">${sections}
     </div>
-    <p class="fine">The Android apps cannot be captured on this machine: <code>/dev/kvm</code> is unusable for this account, so the emulator runs under software emulation and every screencap comes back black. The gallery therefore carries no app screenshots rather than a drawing of one.</p>
+    <p class="fine">Every image here is a screenshot of a page that ran in a headless browser; nothing is drawn by hand. The Android apps are not in this gallery: the emulator is unusable on this machine (<code>/dev/kvm</code> is closed to this account, so every screencap comes back black), and screens rendered off-device are not published here.</p>
   </section>
 </main>
 

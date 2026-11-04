@@ -1,6 +1,6 @@
 # Figma file for the site
 
-Twenty-four artboards: one per page per width, plus each pull-out open, as SVG
+Twenty-six artboards: one per page per width, plus each pull-out open at both widths, as SVG
 that Figma imports as editable layers. Nothing here is drawn by hand: `tools/figma_export.js` opens
 each page in Chromium at the real viewport and translates what it measures.
 
@@ -36,12 +36,13 @@ the whole page, not just the fold.
 
 ## The whole set on one canvas
 
-`site-figma.svg` is all twenty-four artboards on one 1910×46219 canvas, desktop
-down the left column and phone down the right, each labelled with its file name.
-Open that file to look at the set — a browser or the desktop app's file panel
-renders it, where a zip can only be downloaded. One drag puts everything into
-Figma at once; it is stacked from the twenty-four files by
-`tools/figma_bundle.py`, so it never needs editing by hand.
+`site-figma.svg` is the thirteen desktop artboards on one canvas, one full-height
+column, each labelled with its file name. Open that file to look at the set — a
+browser or the desktop app's file panel renders it, where a zip can only be
+downloaded. One drag puts the desktop shelf into Figma at once; it is stacked from
+the `-desktop.svg` files by `tools/figma_bundle.py`, so it never needs editing by
+hand. The phone artboards stay in this folder as their own files: they are the half
+that made the canvas slow to open, and they are still one drag away.
 
 ## Importing
 
@@ -79,7 +80,7 @@ Google font once on import.
 - The 45px mark, the chrome glyphs and every icon in a sheet are embedded PNGs
   taken from the page's own `<svg>` elements at 3× — accurate, but not vector.
   The source glyphs are in `docs/data/icons.json` if you want them as vectors.
-- The header band is exported closed on every page. Artboards 21–24 carry the two
+- The header band is exported closed on every page. Artboards 23–26 carry the two
   pull-outs open — the left accordion (`index-menu`) and the right side tab
   (`index-drawer`), at both widths — because they are the site's navigation.
   Every file in this folder is also served from `/figma/` on the site (see
@@ -107,7 +108,7 @@ compared with the pages they came from.
 
 `python3 tools/figma_publish.py` mirrors this folder into `docs/figma/`, which the
 site does serve, so the hand-off is at `/figma/` on the deployed host:
-`/figma/01-index-desktop.svg` and so on for the twenty-four artboards, plus
+`/figma/01-index-desktop.svg` and so on for the twenty-six artboards, plus
 `/figma/site-figma.svg` for the whole canvas. Page artboards keep their numbers;
 on the site the four pull-outs are served under the plain name the links use
 (`pull-down-desktop.svg`, `side-tab-phone.svg` and so on), so the numbered copies

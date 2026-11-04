@@ -27,24 +27,22 @@ that text changed.
   download at desktop
   width, then the index, its left menu and download at 390x844 -- in about ten
   seconds, and prints console errors and horizontal overflow.
-- Save under `artifacts/`, one file per page the change touches. The names the
-  gallery already uses are `page-home-light`, `page-home-full`, `page-menu`, `page-drawer`, `page-tools`,
-  `page-icons`, `page-icons-brand`, `page-icons-panel`, `page-icons-variants`,
-  `page-fonts`, `page-portfolio`, `page-download`, `phone-fonts`, `phone-home-light`,
-  `phone-home-full`, `phone-menu`, `phone-drawer`, `phone-icons`,
-  `phone-icons-brand` and `logo-light`.. The gallery holds the light mode only, so there are no
-  dark variants; the `-light` suffix on some of them is history, not a variant.
+- Save under `artifacts/`, one file per page the change touches. The `shots` array in
+  `tools/render_pages.js` is the authority on names: the gallery is generated from it,
+  so a capture exists only if it is listed there. The gallery holds the light mode
+  only, so there are no dark variants; the `-light` suffix on some of them is history,
+  not a variant. One capture per page per width: a full-height shot already contains
+  its fold, and a phone shot of a 10,000 px page is taken at the fold rather than
+  stitched, because the stitched one cost a third of the gallery's weight.
 - Cover every page the change touches, plus mobile width when the change is
   responsive.
 - Inspect each render before sending it. If the render shows a layout, colour or
   overflow problem, fix the page and re-render; never ship a screenshot of a bug.
 - Report console errors seen while capturing. A render that only proves HTTP 200
   is not a render.
-- Standalone artwork (SVG marks, icons) was rendered apart from the page with
-  `@resvg/resvg-js`, which is not part of the current toolchain. The one such
-  capture, `logo-light`, is therefore kept rather than re-shot: the run fails if its
-  published file is missing, because the gallery lists it, and re-render the mark by
-  hand if `assets/logo.svg` changes.
+- Nothing is rendered apart from a page any more. The mark had its own capture,
+  `logo-light`, shot once with `@resvg/resvg-js`, which is not in the toolchain; it is
+  retired, because the mark already sits in the band of every capture.
 - Only then copy into `docs/renders/`, add it to `docs/renders/index.html`, and
   deploy -- the gallery only shows files listed there.
 - To look at captures without publishing anything, set `RENDERS_NO_GALLERY=1` on
@@ -334,7 +332,7 @@ changes as unverified on device rather than illustrating them.
   and step numbers). Figma imports it as editable layers, and every text run keeps its own
   `font-family`, `font-size`, `font-weight` and `fill` -- a run that only inherits
   them from the wrapper group imported as an empty layer, leaving just the blocks. `site-figma.svg` stacks
-  all of them on one canvas (`tools/figma_bundle.py`) and is the file to hand over:
+  the desktop artboards on one canvas (`tools/figma_bundle.py`) and is the file to hand over:
   the app's file panel cannot preview a zip. It is a translation of
   the page, never a hand-drawn one. `tools/figma_publish.py` mirrors the exports
   into `docs/figma/`, which the site does serve, so every artboard can be

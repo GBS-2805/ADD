@@ -7,8 +7,10 @@ Eighteen files are awkward to look at; one canvas opens straight in a browser or
 the desktop app's file panel (a zip cannot be previewed) and a single drag puts
 the whole shelf into Figma. The marks are inlined rather than interned into <defs>
 and painted with <use>: that saved half the file, but Figma does not paint <use>
-instances, so a shared payload arrived as a gap in every artboard. Desktop artboards go down the left column, phone
-artboards down the right, each labelled with its file name above it.
+instances, so a shared payload arrived as a gap in every artboard. Only the desktop
+artboards go on the canvas -- one full-height column, each labelled with its file
+name above it -- because the phone half is what made the canvas slow to open; those
+stay in `figma/` as their own files.
 """
 import glob
 import os
@@ -79,8 +81,12 @@ def stale_export(src="figma"):
 
 def main(src="figma"):
     stale_export(src)
+    # Desktop artboards only, and the pull-outs are desktop too: they carry the same
+    # suffix. The phone artboards stay in `figma/` as their own files, so the canvas
+    # opens fast and the set still documents both widths.
     files = sorted(
-        f for f in glob.glob(os.path.join(src, "*.svg")) if os.path.basename(f) != OUT
+        f for f in glob.glob(os.path.join(src, "*.svg"))
+        if os.path.basename(f) != OUT and os.path.basename(f).endswith("-desktop.svg")
     )
     if not files:
         sys.exit(f"no artboards in {src}/ - run tools/figma_export.js first")

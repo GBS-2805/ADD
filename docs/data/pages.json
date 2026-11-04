@@ -4,8 +4,8 @@
   "pages": [
     {
       "path": "/download/",
-      "title": "Download — Icons 2.20 and Compress 2.1, standalone APKs",
-      "description": "Icons 2.20 (2,064,041 bytes) and Compress 2.1 (272,592 bytes): signed APKs, Android 8.0+, SHA-256 listed, no store or account.",
+      "title": "Download — Icons 2.20 and Compress 2.3, standalone APKs",
+      "description": "Icons 2.20 (2,064,041 bytes) and Compress 2.3 (285,012 bytes): signed APKs, Android 8.0+, SHA-256 listed, no store or account.",
       "heading": "Download",
       "section": "download"
     },
@@ -81,15 +81,15 @@
     },
     {
       "path": "/releases/",
-      "title": "Releases — 40 builds, with the date and size of each",
-      "description": "Every build this shelf has shipped: 40 releases with the day and the APK size, read out of git.",
+      "title": "Releases — 42 builds, with the date and size of each",
+      "description": "Every build this shelf has shipped: 42 releases with the day and the APK size, read out of git.",
       "heading": "Releases",
       "section": "releases"
     },
     {
       "path": "/renders/",
-      "title": "Renders — 33 captures of this site",
-      "description": "33 screenshots of the shelf in headless Chromium, at 1300 wide and 390 on a phone.",
+      "title": "Renders — 29 captures of this site",
+      "description": "29 screenshots of the shelf in headless Chromium, at 1300 wide and 390 on a phone.",
       "heading": "Renders",
       "section": "renders"
     },
@@ -102,8 +102,8 @@
     },
     {
       "path": "/tools/",
-      "title": "Tools — Icons 2.20 and Compress 2.1 for Android",
-      "description": "Icons 2.20 bundles the 4,373-icon browser; Compress 2.1 shrinks photos with a before/after preview. Signed APKs, no store.",
+      "title": "Tools — Icons 2.20 and Compress 2.3 for Android",
+      "description": "Icons 2.20 bundles the 4,373-icon browser; Compress 2.3 shrinks photos with a before/after preview. Signed APKs, no store.",
       "heading": "Tool apps",
       "section": "tools"
     }
