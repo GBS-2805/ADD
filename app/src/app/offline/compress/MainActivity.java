@@ -10,12 +10,14 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Insets;
 import android.graphics.Typeface;
+import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Process;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowInsets;
@@ -99,7 +101,7 @@ public class MainActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        ThemePrefs.apply(this);
+        ThemePrefs.applyTheme(this);
         setContentView(R.layout.activity_main);
 
         pickCard = findViewById(R.id.pickCard);
@@ -127,6 +129,7 @@ public class MainActivity extends Activity {
         sizeBar = findViewById(R.id.sizeBar);
 
         applyInsets();
+        setupChrome();
 
         pickCard.setOnClickListener(v -> pickImages());
         compressButton.setOnClickListener(v -> startCompression());
@@ -387,15 +390,146 @@ public class MainActivity extends Activity {
     }
 
     /**
-     * Hands the download page to a browser. The app itself still has no network
+     * Hands a page of the shelf to a browser. The app itself still has no network
      * permission: the intent is resolved by whatever browser is installed.
      */
     private void openSite() {
+        openInBrowser(SITE_URL);
+    }
+
+    private void openSite(String path) {
+        openInBrowser(SITE_URL + path);
+    }
+
+    private void openInBrowser(String url) {
         try {
-            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(SITE_URL)));
+            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
         } catch (ActivityNotFoundException e) {
             Toast.makeText(this, "No browser installed", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    /**
+     * The band, the side panel and the three palette chips.
+     *
+     * Every destination is a page of the shelf, opened in the browser: the app
+     * keeps no network permission of its own.
+     */
+    private void setupChrome() {
+        final View drawer = findViewById(R.id.drawer);
+        final View scrim = findViewById(R.id.scrim);
+
+        findViewById(R.id.burger).setOnClickListener(v -> openDrawer());
+        findViewById(R.id.drawerClose).setOnClickListener(v -> closeDrawer());
+        scrim.setOnClickListener(v -> closeDrawer());
+
+        link(R.id.linkDownload, "download/");
+        link(R.id.linkPortfolio, "portfolio/");
+        link(R.id.linkRenders, "renders/");
+        link(R.id.linkReleases, "releases/");
+
+        TextView theme = findViewById(R.id.themeButton);
+        theme.setText(ThemePrefs.isDark(this) ? "Dark" : "Light");
+        findViewById(R.id.themeRow).setOnClickListener(v -> {
+            ThemePrefs.toggleDark(this);
+            recreate();
+        });
+
+        buildPaletteRow();
+
+        // The panel is off-screen by its own width until it is opened.
+        drawer.setTranslationX(dp(320));
+
+        final int padLeft = drawer.getPaddingLeft();
+        final int padTop = drawer.getPaddingTop();
+        final int padRight = drawer.getPaddingRight();
+        final int padBottom = drawer.getPaddingBottom();
+        drawer.setOnApplyWindowInsetsListener((view, insets) -> {
+            int top;
+            int bottom;
+            if (Build.VERSION.SDK_INT >= 30) {
+                Insets bars = insets.getInsets(
+                        WindowInsets.Type.systemBars() | WindowInsets.Type.displayCutout());
+                top = bars.top;
+                bottom = bars.bottom;
+            } else {
+                top = insets.getSystemWindowInsetTop();
+                bottom = insets.getSystemWindowInsetBottom();
+            }
+            view.setPadding(padLeft, padTop + top, padRight, padBottom + bottom);
+            return insets;
+        });
+        drawer.requestApplyInsets();
+    }
+
+    private void link(int id, final String path) {
+        findViewById(id).setOnClickListener(v -> {
+            closeDrawer();
+            openSite(path);
+        });
+    }
+
+    private void openDrawer() {
+        final View drawer = findViewById(R.id.drawer);
+        final View scrim = findViewById(R.id.scrim);
+        drawer.setVisibility(View.VISIBLE);
+        drawer.animate().translationX(0f).setDuration(180).start();
+        scrim.setVisibility(View.VISIBLE);
+        scrim.animate().alpha(1f).setDuration(180).start();
+    }
+
+    private void closeDrawer() {
+        final View drawer = findViewById(R.id.drawer);
+        final View scrim = findViewById(R.id.scrim);
+        drawer.animate()
+                .translationX(drawer.getWidth() == 0 ? dp(320) : drawer.getWidth())
+                .setDuration(160)
+                .withEndAction(() -> drawer.setVisibility(View.GONE))
+                .start();
+        scrim.animate().alpha(0f).setDuration(160)
+                .withEndAction(() -> scrim.setVisibility(View.GONE))
+                .start();
+    }
+
+    /** The three chips, drawn in their own palette's band with the current one ringed. */
+    private void buildPaletteRow() {
+        LinearLayout row = findViewById(R.id.palRow);
+        row.removeAllViews();
+        String current = ThemePrefs.palette(this);
+        for (int i = 0; i < Palette.IDS.length; i++) {
+            final String id = Palette.IDS[i];
+            View chip = new View(this);
+            LinearLayout.LayoutParams params =
+                    new LinearLayout.LayoutParams(dp(26), dp(26));
+            params.setMarginEnd(dp(8));
+            chip.setLayoutParams(params);
+            chip.setContentDescription(Palette.LABELS[i] + " palette");
+
+            GradientDrawable disc = new GradientDrawable();
+            disc.setShape(GradientDrawable.OVAL);
+            disc.setColor(Palette.BANDS[i]);
+            disc.setStroke(dp(current.equals(id) ? 2 : 1), Palette.WORDS[i]);
+            chip.setBackground(disc);
+
+            chip.setOnClickListener(v -> {
+                ThemePrefs.setPalette(this, id);
+                recreate();
+            });
+            row.addView(chip);
+        }
+    }
+
+    /** A theme attribute as a packed colour. */
+    private int color(int attribute) {
+        TypedValue value = new TypedValue();
+        if (!getTheme().resolveAttribute(attribute, value, true)) {
+            return 0xffffffff;
+        }
+        return value.data;
+    }
+
+    private int dp(int value) {
+        return Math.round(value * getResources().getDisplayMetrics().density);
     }
 
     @Override
@@ -406,7 +540,9 @@ public class MainActivity extends Activity {
     }
 
     private void applyInsets() {
-        final View container = findViewById(R.id.container);
+        // The band now runs to the top of the window, so the insets go on the
+        // whole content column rather than on the padded container inside it.
+        final View container = findViewById(R.id.content);
         final int startPadLeft = container.getPaddingLeft();
         final int startPadTop = container.getPaddingTop();
         final int startPadRight = container.getPaddingRight();
@@ -774,11 +910,11 @@ public class MainActivity extends Activity {
         if (entry.shrank()) {
             badge.setText("-" + entry.savingsPercent() + "%");
             badge.setBackgroundResource(R.drawable.bg_pill);
-            badge.setTextColor(getColor(R.color.badgeInk));
+            badge.setTextColor(color(R.attr.accentInk));
         } else {
             badge.setText("no gain");
             badge.setBackgroundResource(R.drawable.bg_pill_warn);
-            badge.setTextColor(getColor(R.color.warn));
+            badge.setTextColor(color(R.attr.warn));
         }
 
         row.setOnClickListener(v -> openCompare(entry.source, entry));
@@ -796,7 +932,7 @@ public class MainActivity extends Activity {
         row.setText("Could not compress " + label + " · "
                 + (failure.getMessage() == null ? "unknown error" : failure.getMessage()));
         row.setTextSize(12.5f);
-        row.setTextColor(getColor(R.color.warn));
+        row.setTextColor(color(R.attr.warn));
         int pad = Math.round(8 * getResources().getDisplayMetrics().density);
         row.setPadding(pad, pad, pad, pad);
         resultsContainer.addView(row);
@@ -852,7 +988,7 @@ public class MainActivity extends Activity {
 
     private void applySegment(TextView view, boolean selected) {
         view.setBackgroundResource(selected ? R.drawable.bg_seg_selected : 0);
-        view.setTextColor(getColor(selected ? R.color.accentInk : R.color.muted));
+        view.setTextColor(color(selected ? R.attr.accentInk : R.attr.onDim));
         view.setTypeface(null, selected ? Typeface.BOLD : Typeface.NORMAL);
     }
 

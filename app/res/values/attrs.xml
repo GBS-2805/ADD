@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  The app wears the site's palettes. Nothing in a layout or a drawable names a
+  colour resource directly any more: each one asks for one of these attributes,
+  and the theme supplies the value for the palette and mode in force. Adding a
+  palette is a block of colours plus one theme, never a second layout.
+-->
+<resources>
+    <!-- The page and the words on it. -->
+    <attr name="page" format="color" />
+    <attr name="on" format="color" />
+    <attr name="onDim" format="color" />
+    <attr name="rule" format="color" />
+
+    <!-- Surfaces: a card sits on the page, a panel is one step lighter. -->
+    <attr name="card" format="color" />
+    <attr name="panel2" format="color" />
+
+    <!-- The band, which holds its palette in both modes. -->
+    <attr name="band" format="color" />
+    <attr name="bandInk" format="color" />
+    <attr name="bandDim" format="color" />
+    <attr name="bandLine" format="color" />
+
+    <!-- The accent fills chips and pills; the ink on it is never the band ink. -->
+    <attr name="accent" format="color" />
+    <attr name="accentInk" format="color" />
+
+    <!-- The small labels on the band and in the side panel. -->
+    <attr name="label" format="color" />
+
+    <!-- The mark on the band. -->
+    <attr name="ink" format="color" />
+
+    <!-- Functional, not decorative: a warning has to read as a warning. -->
+    <attr name="warn" format="color" />
+    <attr name="warnBg" format="color" />
+
+    <!-- Flat surfaces cast nothing. -->
+    <attr name="shadow" format="color" />
+</resources>

@@ -3,7 +3,7 @@
     android:id="@+id/container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/bg"
+    android:background="?attr/page"
     android:orientation="vertical"
     android:paddingLeft="14dp"
     android:paddingTop="10dp"
@@ -26,7 +26,7 @@
             android:focusable="true"
             android:gravity="center"
             android:text="‹"
-            android:textColor="@color/text"
+            android:textColor="?attr/on"
             android:textSize="26sp"
             android:textStyle="bold" />
 
@@ -38,7 +38,7 @@
             android:layout_weight="1"
             android:ellipsize="middle"
             android:singleLine="true"
-            android:textColor="@color/text"
+            android:textColor="?attr/on"
             android:textSize="16sp"
             android:textStyle="bold" />
     </LinearLayout>
@@ -50,7 +50,7 @@
         android:layout_marginStart="50dp"
         android:layout_marginTop="3dp"
         android:fontFamily="monospace"
-        android:textColor="@color/muted"
+        android:textColor="?attr/onDim"
         android:textSize="10.5sp" />
 
     <FrameLayout
@@ -75,7 +75,7 @@
         android:fontFamily="monospace"
         android:gravity="center"
         android:text="Drag the handle to compare before and after"
-        android:textColor="@color/muted"
+        android:textColor="?attr/onDim"
         android:textSize="10.5sp" />
 
     <TextView
@@ -90,7 +90,7 @@
         android:paddingTop="16dp"
         android:paddingBottom="16dp"
         android:text="SHARE COMPRESSED PHOTO"
-        android:textColor="@color/accentInk"
+        android:textColor="?attr/accentInk"
         android:textSize="14sp"
         android:textStyle="bold" />
 </LinearLayout>

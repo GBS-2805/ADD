@@ -1,28 +1,91 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  The three palettes of the site, one block each, taken from the same values as
+  docs/assets/site.css so the app and the pages cannot drift.
+
+  A palette is: the band, the words on that band, its accent (which fills the
+  count chips and pills), the small labels, and the page with the words that sit
+  on it. The band holds in both modes; only the page turns over, which is why
+  each palette has a dark page set and a light one.
+
+  A card is the page with 7% of the words mixed in, and a panel is 12% - the
+  two tints site.css paints as rgba().
+-->
 <resources>
-    <!-- Palette taken from frame 6-27: a light band on an indigo field.
-         Names are kept from the previous theme so no Java has to change. -->
-    <color name="bg">#3F4E96</color>          <!-- the field -->
-    <color name="band">#D9D9D9</color>       <!-- the band, and every call to action -->
-    <color name="ink">#000000</color>        <!-- text on the band -->
-    <color name="text">#D9D9D9</color>       <!-- text on the field -->
-    <color name="muted">#A7ADC6</color>
-    <color name="hairline">#6772A7</color>
-    <color name="panel">#47569C</color>
-    <color name="panel2">#4D5CA4</color>
 
-    <color name="card">#47569C</color>
-    <color name="card2">#4D5CA4</color>
-    <color name="accent">#D9D9D9</color>
-    <color name="accentInk">#000000</color>
-    <color name="stroke">#6772A7</color>
-    <color name="shadow">#00000000</color>    <!-- flat surfaces: nothing casts -->
-    <color name="iconBg">#D9D9D9</color>
-    <color name="highlight">#D9D9D9</color>
-    <color name="badgeInk">#000000</color>
-    <color name="dropZone">#47569C</color>
+    <!-- Green: the original band, bright with near-black words on it. -->
+    <color name="green_band">#0fbf92</color>
+    <color name="green_band_ink">#0f120f</color>
+    <color name="green_band_dim">#9e0f120f</color>
+    <color name="green_band_line">#380f120f</color>
+    <color name="green_accent">#0fbf92</color>
+    <color name="green_accent_ink">#0f120f</color>
+    <color name="green_label">#0f120f</color>
+    <color name="green_page">#131513</color>
+    <color name="green_on">#f2eee3</color>
+    <color name="green_on_dim">#9ef2eee3</color>
+    <color name="green_rule">#38f2eee3</color>
+    <color name="green_card">#232422</color>
+    <color name="green_panel2">#2e2f2c</color>
+    <color name="green_ink">#131513</color>
+    <color name="green_page_light">#f2eee3</color>
+    <color name="green_on_light">#131513</color>
+    <color name="green_on_dim_light">#a3131513</color>
+    <color name="green_rule_light">#38131513</color>
+    <color name="green_card_light">#e5e1d7</color>
+    <color name="green_panel2_light">#d7d4ca</color>
+    <color name="green_ink_light">#f2eee3</color>
 
-    <!-- The one functional exception: a warning has to read as a warning. -->
-    <color name="warn">#FFC98A</color>
-    <color name="warnBg">#4D5CA4</color>
+    <!-- Moss: #005043 band, #0e2a24 page, #e7ddce words, #d6e381 accent. -->
+    <color name="moss_band">#005043</color>
+    <color name="moss_band_ink">#e7ddce</color>
+    <color name="moss_band_dim">#a3e7ddce</color>
+    <color name="moss_band_line">#42e7ddce</color>
+    <color name="moss_accent">#d6e381</color>
+    <color name="moss_accent_ink">#0e2a24</color>
+    <color name="moss_label">#d6e381</color>
+    <color name="moss_page">#0e2a24</color>
+    <color name="moss_on">#e7ddce</color>
+    <color name="moss_on_dim">#a3e7ddce</color>
+    <color name="moss_rule">#3de7ddce</color>
+    <color name="moss_card">#1d3730</color>
+    <color name="moss_panel2">#284038</color>
+    <color name="moss_ink">#e7ddce</color>
+    <color name="moss_page_light">#e7ddce</color>
+    <color name="moss_on_light">#0e2a24</color>
+    <color name="moss_on_dim_light">#a30e2a24</color>
+    <color name="moss_rule_light">#380e2a24</color>
+    <color name="moss_card_light">#dad2c4</color>
+    <color name="moss_panel2_light">#cdc8ba</color>
+    <color name="moss_ink_light">#0e2a24</color>
+
+    <!-- Navy: #242d55 band, #1c1d2f page, #a1b0c3 words, #72b6b4 accent. -->
+    <color name="navy_band">#242d55</color>
+    <color name="navy_band_ink">#a1b0c3</color>
+    <color name="navy_band_dim">#a8a1b0c3</color>
+    <color name="navy_band_line">#42a1b0c3</color>
+    <color name="navy_accent">#72b6b4</color>
+    <color name="navy_accent_ink">#1c1d2f</color>
+    <color name="navy_label">#72b6b4</color>
+    <color name="navy_page">#1c1d2f</color>
+    <color name="navy_on">#a1b0c3</color>
+    <color name="navy_on_dim">#a3a1b0c3</color>
+    <color name="navy_rule">#38a1b0c3</color>
+    <color name="navy_card">#27293b</color>
+    <color name="navy_panel2">#2c2f41</color>
+    <color name="navy_ink">#a1b0c3</color>
+    <color name="navy_page_light">#a1b0c3</color>
+    <color name="navy_on_light">#1c1d2f</color>
+    <color name="navy_on_dim_light">#a81c1d2f</color>
+    <color name="navy_rule_light">#381c1d2f</color>
+    <color name="navy_card_light">#98a6b9</color>
+    <color name="navy_panel2_light">#919eb1</color>
+    <color name="navy_ink_light">#1c1d2f</color>
+
+    <!-- The one functional exception: the same amber in every palette. -->
+    <color name="warn">#ffc98a</color>
+
+    <!-- The launcher's own disc. The icon is a fixed asset, not a themed surface,
+         so it keeps the colour it shipped with whatever palette is chosen. -->
+    <color name="iconBg">#d9d9d9</color>
 </resources>

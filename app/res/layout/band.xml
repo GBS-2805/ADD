@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  The band, measured like the site's: the page name on the left, the mark
+  centred, the two descriptors and the burger on the right, on the palette's
+  band colour. It holds its palette in both modes.
+-->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="72dp"
+    android:background="?attr/band"
+    android:paddingLeft="14dp"
+    android:paddingRight="8dp">
+
+    <TextView
+        android:id="@+id/bandName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="start|center_vertical"
+        android:fontFamily="@font/poppins_medium"
+        android:letterSpacing="-0.01"
+        android:text="Compress"
+        android:textColor="?attr/bandInk"
+        android:textSize="22sp" />
+
+    <ImageView
+        android:id="@+id/bandMark"
+        android:layout_width="34dp"
+        android:layout_height="34dp"
+        android:layout_gravity="center"
+        android:contentDescription="@null"
+        android:src="@drawable/ic_mark"
+        android:tint="?attr/ink" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end|center_vertical"
+        android:layout_marginEnd="44dp"
+        android:gravity="end"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:includeFontPadding="false"
+            android:text="Art Design Database"
+            android:textColor="?attr/bandDim"
+            android:textSize="10.5sp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="1dp"
+            android:includeFontPadding="false"
+            android:text="Compress • Photos • Tools"
+            android:textColor="?attr/bandDim"
+            android:textSize="10.5sp" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/burger"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_gravity="end|center_vertical"
+        android:clickable="true"
+        android:contentDescription="Open side panel"
+        android:focusable="true"
+        android:gravity="center"
+        android:includeFontPadding="false"
+        android:text="&#9776;"
+        android:textColor="?attr/bandInk"
+        android:textSize="17sp" />
+</FrameLayout>

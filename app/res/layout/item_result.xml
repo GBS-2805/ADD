@@ -34,7 +34,7 @@
             android:layout_height="wrap_content"
             android:ellipsize="middle"
             android:singleLine="true"
-            android:textColor="@color/text"
+            android:textColor="?attr/on"
             android:textSize="13.5sp"
             android:textStyle="bold" />
 
@@ -44,7 +44,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="3dp"
             android:fontFamily="monospace"
-            android:textColor="@color/muted"
+            android:textColor="?attr/onDim"
             android:textSize="10.5sp" />
     </LinearLayout>
 
@@ -58,7 +58,7 @@
         android:paddingTop="4dp"
         android:paddingRight="8dp"
         android:paddingBottom="4dp"
-        android:textColor="@color/badgeInk"
+        android:textColor="?attr/accentInk"
         android:textSize="11.5sp"
         android:textStyle="bold" />
 

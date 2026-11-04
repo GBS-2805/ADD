@@ -40,7 +40,7 @@ public class CompareActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        ThemePrefs.apply(this);
+        ThemePrefs.applyTheme(this);
         setContentView(R.layout.activity_compare);
 
         final ComparisonView comparison = findViewById(R.id.comparison);

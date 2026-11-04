@@ -4,7 +4,7 @@
     android:viewportWidth="120.6"
     android:viewportHeight="123.11">
 
-    <!-- Same artwork as docs/assets/logo.svg; tinted from @color/text by the
+    <!-- Same artwork as docs/assets/logo.svg; tinted from ?attr/on by the
          ImageView that shows it, so it follows the light and dark palettes. -->
     <path
         android:fillColor="#FF2B2926"

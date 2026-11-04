@@ -1,47 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/root"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/bg"
-    android:fillViewport="true"
-    android:scrollbars="none">
+    android:background="?attr/page">
 
-    <LinearLayout
-        android:id="@+id/container"
+    <ScrollView
+        android:id="@+id/root"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:paddingLeft="16dp"
-        android:paddingTop="16dp"
-        android:paddingRight="16dp"
-        android:paddingBottom="24dp">
+        android:layout_height="match_parent"
+        android:fillViewport="true"
+        android:scrollbars="none">
 
         <LinearLayout
+            android:id="@+id/content"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
+            android:orientation="vertical">
 
-            <TextView
-                android:layout_width="0dp"
+            <include layout="@layout/band" />
+
+            <LinearLayout
+                android:id="@+id/container"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:letterSpacing="-0.02"
-                android:text="Compress"
-                android:textColor="@color/text"
-                android:textSize="30sp"
-                android:fontFamily="@font/poppins_semibold" />
-
-        </LinearLayout>
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:text="Batch compress · 100% offline · no uploads"
-            android:textColor="@color/muted"
-            android:textSize="10.5sp" />
+                android:orientation="vertical"
+                android:paddingLeft="16dp"
+                android:paddingTop="16dp"
+                android:paddingRight="16dp"
+                android:paddingBottom="24dp">
 
         <!-- 1. ADD IMAGES -->
         <LinearLayout
@@ -60,7 +46,7 @@
                 android:layout_height="wrap_content"
                 android:letterSpacing="0.01"
                 android:text="1. ADD IMAGES"
-                android:textColor="@color/text"
+                android:textColor="?attr/on"
                 android:textSize="21sp"
                 android:fontFamily="@font/poppins_semibold" />
 
@@ -69,7 +55,7 @@
                 android:layout_height="1dp"
                 android:layout_marginTop="6dp"
                 android:layout_marginBottom="12dp"
-                android:background="@color/hairline" />
+                android:background="?attr/rule" />
 
             <LinearLayout
                 android:id="@+id/pickCard"
@@ -91,7 +77,7 @@
                     android:background="@drawable/bg_plus"
                     android:gravity="center"
                     android:text="+"
-                    android:textColor="@color/text"
+                    android:textColor="?attr/on"
                     android:textSize="22sp"
                     android:fontFamily="@font/poppins_semibold" />
 
@@ -102,7 +88,7 @@
                     android:layout_marginTop="12dp"
                     android:gravity="center"
                     android:text="TAP TO PICK PHOTOS"
-                    android:textColor="@color/text"
+                    android:textColor="?attr/on"
                     android:textSize="15sp"
                     android:fontFamily="@font/poppins_semibold" />
 
@@ -117,7 +103,7 @@
                     android:paddingRight="6dp"
                     android:paddingBottom="2dp"
                     android:text="JPG • PNG • WEBP — up to 40 files"
-                    android:textColor="@color/badgeInk"
+                    android:textColor="?attr/accentInk"
                     android:textSize="10.5sp" />
             </LinearLayout>
 
@@ -151,7 +137,7 @@
                 android:paddingRight="10dp"
                 android:paddingBottom="6dp"
                 android:text="CLEAR ALL"
-                android:textColor="@color/text"
+                android:textColor="?attr/on"
                 android:textSize="11sp"
                 android:fontFamily="@font/poppins_semibold"
                 android:visibility="gone" />
@@ -173,7 +159,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="2. OUTPUT FORMAT"
-                android:textColor="@color/text"
+                android:textColor="?attr/on"
                 android:textSize="21sp"
                 android:fontFamily="@font/poppins_semibold" />
 
@@ -182,7 +168,7 @@
                 android:layout_height="1dp"
                 android:layout_marginTop="6dp"
                 android:layout_marginBottom="12dp"
-                android:background="@color/hairline" />
+                android:background="?attr/rule" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -226,7 +212,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:text="JPEG: widely compatible, great for photos"
-                android:textColor="@color/muted"
+                android:textColor="?attr/onDim"
                 android:textSize="10.5sp" />
         </LinearLayout>
 
@@ -246,7 +232,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="3. COMPRESSION"
-                android:textColor="@color/text"
+                android:textColor="?attr/on"
                 android:textSize="21sp"
                 android:fontFamily="@font/poppins_semibold" />
 
@@ -255,7 +241,7 @@
                 android:layout_height="1dp"
                 android:layout_marginTop="6dp"
                 android:layout_marginBottom="12dp"
-                android:background="@color/hairline" />
+                android:background="?attr/rule" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -269,7 +255,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="Excellent quality"
-                    android:textColor="@color/muted"
+                    android:textColor="?attr/onDim"
                     android:textSize="11sp" />
 
                 <TextView
@@ -277,7 +263,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="78%"
-                    android:textColor="@color/text"
+                    android:textColor="?attr/on"
                     android:textSize="23sp"
                     android:fontFamily="@font/poppins_semibold" />
             </LinearLayout>
@@ -291,9 +277,9 @@
                 android:paddingLeft="0dp"
                 android:paddingRight="0dp"
                 android:progress="33"
-                android:progressBackgroundTint="@color/hairline"
-                android:progressTint="@color/accent"
-                android:thumbTint="@color/accent" />
+                android:progressBackgroundTint="?attr/rule"
+                android:progressTint="?attr/accent"
+                android:thumbTint="?attr/accent" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -305,14 +291,14 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="45% (smallest)"
-                    android:textColor="@color/muted"
+                    android:textColor="?attr/onDim"
                     android:textSize="10sp" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="95% (best)"
-                    android:textColor="@color/muted"
+                    android:textColor="?attr/onDim"
                     android:textSize="10sp" />
             </LinearLayout>
         </LinearLayout>
@@ -333,7 +319,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="4. RESIZE (OPTIONAL)"
-                android:textColor="@color/text"
+                android:textColor="?attr/on"
                 android:textSize="21sp"
                 android:fontFamily="@font/poppins_semibold" />
 
@@ -342,7 +328,7 @@
                 android:layout_height="1dp"
                 android:layout_marginTop="6dp"
                 android:layout_marginBottom="12dp"
-                android:background="@color/hairline" />
+                android:background="?attr/rule" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -355,7 +341,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="LONGEST EDGE"
-                    android:textColor="@color/muted"
+                    android:textColor="?attr/onDim"
                     android:textSize="11sp" />
 
                 <TextView
@@ -363,7 +349,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="2560 px"
-                    android:textColor="@color/text"
+                    android:textColor="?attr/on"
                     android:textSize="23sp"
                     android:fontFamily="@font/poppins_semibold" />
             </LinearLayout>
@@ -377,9 +363,9 @@
                 android:paddingLeft="0dp"
                 android:paddingRight="0dp"
                 android:progress="3"
-                android:progressBackgroundTint="@color/hairline"
-                android:progressTint="@color/accent"
-                android:thumbTint="@color/accent" />
+                android:progressBackgroundTint="?attr/rule"
+                android:progressTint="?attr/accent"
+                android:thumbTint="?attr/accent" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -391,14 +377,14 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="ORIGINAL"
-                    android:textColor="@color/muted"
+                    android:textColor="?attr/onDim"
                     android:textSize="10sp" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="4096 PX"
-                    android:textColor="@color/muted"
+                    android:textColor="?attr/onDim"
                     android:textSize="10sp" />
             </LinearLayout>
         </LinearLayout>
@@ -415,7 +401,7 @@
             android:paddingTop="15dp"
             android:paddingBottom="15dp"
             android:text="PREVIEW BEFORE COMPRESSING"
-            android:textColor="@color/text"
+            android:textColor="?attr/on"
             android:textSize="13.5sp"
             android:fontFamily="@font/poppins_semibold" />
 
@@ -431,7 +417,7 @@
             android:paddingTop="17dp"
             android:paddingBottom="17dp"
             android:text="COMPRESS ALL"
-            android:textColor="@color/accentInk"
+            android:textColor="?attr/accentInk"
             android:textSize="16sp"
             android:fontFamily="@font/poppins_semibold" />
 
@@ -449,7 +435,7 @@
                 style="?android:attr/progressBarStyleSmall"
                 android:layout_width="18dp"
                 android:layout_height="18dp"
-                android:indeterminateTint="@color/accent" />
+                android:indeterminateTint="?attr/accent" />
 
             <TextView
                 android:id="@+id/statusText"
@@ -458,7 +444,7 @@
                 android:layout_marginStart="10dp"
                 android:layout_weight="1"
                 android:text="Preparing…"
-                android:textColor="@color/muted"
+                android:textColor="?attr/onDim"
                 android:textSize="11.5sp" />
         </LinearLayout>
 
@@ -474,7 +460,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:textColor="@color/text"
+                android:textColor="?attr/on"
                 android:textSize="14sp"
                 android:fontFamily="@font/poppins_semibold"
                 android:visibility="gone" />
@@ -491,7 +477,7 @@
                 android:paddingRight="12dp"
                 android:paddingBottom="8dp"
                 android:text="SHARE ALL"
-                android:textColor="@color/text"
+                android:textColor="?attr/on"
                 android:textSize="11sp"
                 android:fontFamily="@font/poppins_semibold"
                 android:visibility="gone" />
@@ -508,7 +494,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="18dp"
             android:lineSpacingExtra="3dp"                android:text="Preview a slider on the first photo, compress, and copies land in Pictures/Compress. Originals stay untouched."
-                android:textColor="@color/muted"
+                android:textColor="?attr/onDim"
                 android:textSize="10.5sp" />
 
         <!-- Brand footer: the mark plus the download page for the other apps. -->
@@ -532,7 +518,7 @@
                 android:contentDescription="@null"
                 android:scaleType="fitCenter"
                 android:src="@drawable/ic_mark"
-                android:tint="@color/text" />
+                android:tint="?attr/on" />
 
             <LinearLayout
                 android:layout_width="0dp"
@@ -545,7 +531,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="MORE APPS"
-                    android:textColor="@color/text"
+                    android:textColor="?attr/on"
                     android:textSize="11sp"
                     android:fontFamily="@font/poppins_semibold" />
 
@@ -554,9 +540,24 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="2dp"
                     android:text="TAP TO OPEN THE WEBSITE →"
-                    android:textColor="@color/muted"
+                    android:textColor="?attr/onDim"
                     android:textSize="10sp" />
             </LinearLayout>
         </LinearLayout>
-    </LinearLayout>
-</ScrollView>
+            </LinearLayout>
+        </LinearLayout>
+    </ScrollView>
+
+    <View
+        android:id="@+id/scrim"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:alpha="0"
+        android:background="#99000000"
+        android:clickable="true"
+        android:focusable="true"
+        android:visibility="gone" />
+
+    <include layout="@layout/drawer" />
+
+</FrameLayout>

@@ -26,7 +26,7 @@
         android:gravity="center"
         android:includeFontPadding="false"
         android:text="×"
-        android:textColor="@color/text"
+        android:textColor="?attr/on"
         android:textSize="13sp"
         android:textStyle="bold" />
 </FrameLayout>

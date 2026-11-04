@@ -497,10 +497,20 @@ changes as unverified on device rather than illustrating them.
   needs the capture environment exported by hand: `build.sh` hands the check
   `NODE_PATH`, `PLAYWRIGHT_BROWSERS_PATH`, `LD_LIBRARY_PATH` and `FONTCONFIG_FILE`
   itself, and a value already exported still wins.
-- Compress's palette has one source of truth: `app/res/values/colors.xml` (Icons has
-  its own in `icons-app/res/values/styles.xml`). Names are kept from the old theme on
-  purpose, so a rename touches every drawable, layout and Java file that references
-  them.
+- Compress wears the same three palettes as the site, plus the band and the side tab.
+  The colours live in one place, `app/res/values/colors.xml`: a block per palette
+  (band, band ink, dim and line, accent and its ink, label, page, words, rule, card)
+  in a dark and a light page set, taken from `docs/assets/site.css` so the two cannot
+  drift. Nothing in a layout or a drawable names a colour resource directly: every
+  one asks for a theme attribute declared in `app/res/values/attrs.xml`, and
+  `app/res/values/styles.xml` maps those attributes across six themes, `AppTheme`
+  (green, dark page), `AppTheme.Light`, `AppTheme.Moss`, `AppTheme.Moss.Light`,
+  `AppTheme.Navy` and `AppTheme.Navy.Light`. `ThemePrefs` stores the pair and
+  `applyTheme()` sets the theme before `setContentView()`. Adding a palette is a block
+  of colours, a theme and one entry each in `Palette.IDS`, `LABELS`, `BANDS` and
+  `WORDS` — never a second layout. The band is `res/layout/band.xml` and the side
+  panel `res/layout/drawer.xml`, both included by `activity_main.xml`; `CompareActivity`
+  inherits the themes and wears the same colours.
 
 ## The address is rented, not owned
 
