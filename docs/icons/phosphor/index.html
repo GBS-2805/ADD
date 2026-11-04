@@ -11,24 +11,6 @@
 <style>
   /* page-only: the preview tab, its variant controls and the collapsible set */
   .stage { margin: 6px 0 0; border: 1px solid var(--rule); }
-  .stage-tabs { display: flex; border-bottom: 1px solid var(--rule); }
-  .stage-tab {
-    appearance: none;
-    padding: 13px 22px;
-    font: inherit;
-    font-size: 13px;
-    font-weight: 500;
-    letter-spacing: .1em;
-    text-transform: uppercase;
-    color: var(--on-dim);
-    background: none;
-    border: 0;
-    border-right: 1px solid var(--rule);
-    border-radius: 0;
-    cursor: pointer;
-  }
-  .stage-tab[aria-selected="true"] { color: var(--ink); background: var(--band); }
-  .stage-tab:focus-visible { outline: 2px solid var(--band); outline-offset: -3px; }
   .stage-body { display: none; }
   .stage-body[data-active="true"] { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.08fr); }
 
@@ -115,7 +97,6 @@
   /* The name reads where the file label used to sit, at the label's size: the
      glyph is the picture, so the words under it are a caption, not a headline. */
   .preview-meta .name { margin: 0; font-size: 15px; line-height: 1.4; letter-spacing: 0; }
-  .preview-meta .hint { margin: 10px 0 0; font-size: 13px; color: var(--on-dim); max-width: 24ch; }
 
   /* The stage is the pane now, not a tile on it: a black surface the glyph sits
      in the middle of, with the name, file and hint stacked against the
@@ -152,11 +133,29 @@
     max-width: 58%;
     text-align: right;
   }
-  .preview-meta .hint { color: rgba(255, 255, 255, .62); margin-left: auto; }
-  .preview[data-surface="white"] .preview-meta .hint { color: rgba(0, 0, 0, .62); }
 
   .controls { display: flex; flex-direction: column; gap: 14px; padding: 22px 24px; }
-  .ctl-head { display: flex; align-items: center; justify-content: flex-end; }
+  .ctl-head { display: flex; align-items: center; justify-content: flex-end; gap: 10px; }
+  /* Markup opens under the stage instead of replacing it, so the icon you are
+     reading is never the thing that disappears. */
+  .markup-btn {
+    appearance: none;
+    display: inline-flex;
+    align-items: center;
+    height: 38px;
+    padding: 0 16px;
+    font: inherit;
+    font-size: 14px;
+    color: var(--on);
+    background: none;
+    border: 1px solid var(--rule);
+    border-radius: 0;
+    cursor: pointer;
+  }
+  .markup-btn:hover { border-color: var(--on); }
+  .markup-btn[aria-expanded="true"] { color: var(--ink); background: var(--band); border-color: var(--band); }
+  .markup-btn:focus-visible { outline: 2px solid var(--band); outline-offset: 2px; }
+  #pane-markup[data-active="true"] { grid-template-columns: 1fr; }
   .copy-btn {
     appearance: none;
     display: inline-flex;
@@ -434,7 +433,6 @@
     .preview { border-right: 0; border-bottom: 1px solid var(--rule); }
   }
   @media (max-width: 700px) {
-    .stage-tab { padding: 11px 16px; font-size: 12px; }
     .preview { padding: 20px; gap: 18px; min-height: 0; }
     /* The stage is the pane, so on a phone it has to keep a height of its own:
        the panel below sets min-height 0 for the old tile layout. */
@@ -445,7 +443,6 @@
     }
     .preview-meta { right: 20px; bottom: 20px; max-width: 62%; }
     .preview-box { width: 104px; height: 104px; }
-    .preview-meta .hint { display: none; }
     .controls { padding: 18px 20px; }
     .ctl-label { width: 104px; }
     .seg { min-width: 0; padding: 8px 2px; font-size: 13px; }
@@ -554,22 +551,17 @@
   </header>
 
   <div class="stage">
-    <div class="stage-tabs" role="tablist" aria-label="Icon detail">
-      <button class="stage-tab" id="tab-preview" type="button" role="tab" aria-selected="true" aria-controls="pane-preview" data-pane="preview">Preview</button>
-      <button class="stage-tab" id="tab-markup" type="button" role="tab" aria-selected="false" aria-controls="pane-markup" data-pane="markup">Markup</button>
-    </div>
-
-    <div class="stage-body" id="pane-preview" role="tabpanel" aria-labelledby="tab-preview" data-active="true">
+    <div class="stage-body" id="pane-preview" data-active="true">
       <div class="preview">
         <div class="preview-box" id="stageGlyph" data-mode="fill" data-surface="black" aria-hidden="true"></div>
         <div class="preview-meta">
           <p class="name" id="selName" aria-live="polite">Loading…</p>
-          <p class="hint">Selected icon. Open the set below to pick another.</p>
         </div>
       </div>
 
       <div class="controls">
         <div class="ctl-head">
+          <button class="markup-btn" id="markupBtn" type="button" aria-expanded="false" aria-controls="pane-markup">Markup</button>
           <button class="copy-btn" id="copyBtn" type="button">
             <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M10 13C11.3807 14.3807 13.6193 14.3807 15 13L18 10C19.3807 8.61929 19.3807 6.38071 18 5C16.6193 3.61929 14.3807 3.61929 13 5L11 7M14 11C12.6193 9.61929 10.3807 9.61929 9 11L6 14C4.61929 15.3807 4.61929 17.6193 6 19C7.38071 20.3807 9.61929 20.3807 11 19L13 17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
             <span id="copyLabel">Copy SVG</span>
@@ -650,7 +642,7 @@
       </div>
     </div>
 
-    <div class="stage-body" id="pane-markup" role="tabpanel" aria-labelledby="tab-markup" data-active="false">
+    <div class="stage-body" id="pane-markup" data-active="false">
       <div class="markup">
         <textarea id="snippet" readonly spellcheck="false" aria-label="SVG markup of the selected icon"></textarea>
         <p>The markup is the file as it ships: a 24×24 <code>viewBox</code>, <code>currentColor</code> so the icon takes the colour of the text around it, and no weight or size baked in — those are the preview's settings, not the file's.</p>
@@ -742,7 +734,6 @@
   var exportMenu = document.getElementById("exportMenu");
   var bulkBtn = document.getElementById("bulkBtn");
   var visibleItems = [];
-  var tabs = Array.prototype.slice.call(document.querySelectorAll(".stage-tab"));
   var CATS = [{"name": "Arrows", "count": 125}, {"name": "Brands", "count": 74}, {"name": "Commerce", "count": 146}, {"name": "Communications", "count": 106}, {"name": "Design", "count": 162}, {"name": "Technology & Development", "count": 61}, {"name": "Editor", "count": 26}, {"name": "Finances", "count": 73}, {"name": "Games", "count": 58}, {"name": "Health & Wellness", "count": 36}, {"name": "Maps & Travel", "count": 102}, {"name": "Media", "count": 94}, {"name": "Nature", "count": 40}, {"name": "Objects", "count": 63}, {"name": "Office", "count": 107}, {"name": "People", "count": 49}, {"name": "System", "count": 172}, {"name": "Weather", "count": 18}];
   var catWrap = document.getElementById("catWrap");
   var catBtn = document.getElementById("catBtn");
@@ -1784,8 +1775,8 @@
       var text = markup(selected);
       snippet.value = text;
       copyText(text).then(function (ok) {
-        announce(ok ? "Copied " + selected.name + ".svg to the clipboard" : "Clipboard blocked — the markup is in the Markup tab");
-        if (!ok) { snippet.focus(); snippet.select(); showTab("markup"); }
+        announce(ok ? "Copied " + selected.name + ".svg to the clipboard" : "Clipboard blocked — the markup is open below");
+        if (!ok) { setMarkup(true); snippet.focus(); snippet.select(); }
         window.setTimeout(paint, 2200);
       });
       return;
@@ -1818,16 +1809,16 @@
     });
   });
 
-  function showTab(name) {
-    tabs.forEach(function (tab) {
-      var active = tab.getAttribute("data-pane") === name;
-      tab.setAttribute("aria-selected", active ? "true" : "false");
-      document.getElementById("pane-" + tab.getAttribute("data-pane")).setAttribute("data-active", active ? "true" : "false");
-    });
+  var markupBtn = document.getElementById("markupBtn");
+  var markupPane = document.getElementById("pane-markup");
+
+  function setMarkup(open) {
+    markupPane.setAttribute("data-active", open ? "true" : "false");
+    markupBtn.setAttribute("aria-expanded", open ? "true" : "false");
   }
 
-  tabs.forEach(function (tab) {
-    tab.addEventListener("click", function () { showTab(tab.getAttribute("data-pane")); });
+  markupBtn.addEventListener("click", function () {
+    setMarkup(markupPane.getAttribute("data-active") !== "true");
   });
 
   if (window.IconsApp) { document.documentElement.classList.add("in-app"); }
