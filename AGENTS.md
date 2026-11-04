@@ -346,8 +346,13 @@ changes as unverified on device rather than illustrating them.
   drops the ones that style does not have, says how many went, and names the zip
   after the style.
 - The Colour row under Background sets the ink: Auto (a circle with an A), white, black,
-  indigo, green and red, and Manual (a circle with an M that opens the system
-  picker) -- seven 26px circles in all -- remembered per brand (`icons:ink:<slug>`). Ink styles take it as
+  indigo, green and red, and Manual (a circle with an M that opens the page's
+  own colour dialog: the same swatches as circles, the current choice ringed, and
+  three panes behind Custom / CMYK / Wheel -- hex, four CMYK fields, and a
+  hue-saturation wheel with a lightness slider -- all ending as one hex string, with
+  Cancel/Set) -- seven 26px circles in all, remembered per
+  brand (`icons:ink:<slug>`). Never hand the choice to the browser's colour dialog:
+  it arrives square, with a "chosen colour" well and a Cancel that cannot be styled. Ink styles take it as
   `currentColor` through `--glyph`, so the preview, the thumbnails, the chips and the
   raster export follow. Duo and Flat are tinted rather than flattened: the darkest tone
   becomes the ink, each lighter tone the same ink at an opacity that keeps their order,

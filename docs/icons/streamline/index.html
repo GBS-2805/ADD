@@ -529,28 +529,160 @@
   }
   .ink[aria-pressed="true"] { outline: 2px solid var(--on); outline-offset: 2px; }
   .ink:focus-visible { outline: 2px solid var(--band); outline-offset: 2px; }
-  /* Manual is a swatch as well: a circle with an M that opens the system picker.
-     The colour input stays in the DOM, where it holds the value, but out of sight. */
+  /* Manual is a swatch as well: a circle with an M that opens the page's own colour
+     dialog. With a custom colour in use the circle takes it and the letter flips to
+     whichever ink reads on top, so the row still shows what is picked. */
   .ink.manual {
     display: grid;
     place-items: center;
     padding: 0;
-    background: transparent;
+    background: var(--sw, transparent);
     font-size: 12px;
     font-weight: 500;
     line-height: 1;
     color: var(--on);
   }
-  #inkPick {
-    position: absolute;
-    left: -9999px;
-    width: 1px;
-    height: 1px;
+
+  /* Our own colour dialog: the site's swatches as circles, the current choice
+     wearing the ring instead of a "chosen colour" well, Custom bottom-left and a
+     hex field behind it. Cancel leaves without touching anything. */
+  .ink-pop {
+    width: min(420px, calc(100% - 32px));
     padding: 0;
-    border: 0;
-    opacity: 0;
+    color: var(--on);
+    background: var(--page, #f2eee3);
+    border: 1px solid var(--rule);
+    border-radius: var(--r);
+    box-shadow: 0 24px 60px rgba(0, 0, 0, .3);
+  }
+  .ink-pop::backdrop { background: rgba(0, 0, 0, .5); }
+  .ink-body { display: grid; gap: 16px; padding: 16px; }
+  .ink-grid { display: flex; flex-wrap: wrap; gap: 10px; }
+  .ink-cell {
+    appearance: none;
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--on);
+    background: var(--c, transparent);
+    border: 1px solid var(--rule);
+    border-radius: 50%;
+    cursor: pointer;
+  }
+  .ink-cell[aria-pressed="true"] { outline: 2px solid var(--on); outline-offset: 3px; }
+  .ink-cell:focus-visible { outline: 2px solid var(--band); outline-offset: 3px; }
+  .ink-foot { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+  .ink-modes { display: flex; flex-wrap: wrap; gap: 6px; }
+  .ink-mode {
+    appearance: none;
+    height: 30px;
+    padding: 0 12px;
+    font: inherit;
+    font-size: 12px;
+    letter-spacing: .04em;
+    color: var(--on);
+    background: none;
+    border: 1px solid var(--rule);
+    border-radius: var(--r-sm);
+    cursor: pointer;
+  }
+  .ink-mode:hover { border-color: var(--on); }
+  .ink-mode[aria-pressed="true"] { background: var(--band); border-color: var(--band); color: var(--ink); }
+  .ink-pane { display: grid; gap: 10px; }
+  .ink-pane[hidden] { display: none; }
+  .ink-hex { display: flex; align-items: center; gap: 6px; min-width: 0; }
+  .ink-hex i { font-style: normal; font-size: 13px; color: var(--on-dim); }
+  .ink-cmyk { display: flex; gap: 8px; }
+  .ink-cmyk label { display: grid; flex: 1 1 0; gap: 4px; min-width: 0; }
+  .ink-cmyk span { font-size: 11px; letter-spacing: .08em; color: var(--on-dim); }
+  .ink-cmyk input {
+    width: 100%;
+    min-width: 0;
+    height: 32px;
+    padding: 0 8px;
+    font: inherit;
+    font-size: 13px;
+    color: var(--on);
+    background: none;
+    border: 1px solid var(--rule);
+    border-radius: var(--r-sm);
+    outline: none;
+    -moz-appearance: textfield;
+  }
+  .ink-cmyk input::-webkit-outer-spin-button,
+  .ink-cmyk input::-webkit-inner-spin-button { appearance: none; margin: 0; }
+  .ink-cmyk input:focus { border-color: var(--on); }
+  .ink-wheel {
+    position: relative;
+    width: 148px;
+    height: 148px;
+    margin: 2px auto;
+    /* No border: --rule is cream in dark mode, so a hairline round saturated colour
+       reads as a white band on the rim. The wheel draws its own edge. */
+    border-radius: 50%;
+    background:
+      radial-gradient(circle closest-side, #fff, rgba(255, 255, 255, 0) 78%),
+      conic-gradient(#ff0000, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff, #ff0000);
+    cursor: crosshair;
+    touch-action: none;
+  }
+  .ink-wheel i {
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    margin: -7px 0 0 -7px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, .45);
     pointer-events: none;
   }
+  .ink-value { display: flex; align-items: center; gap: 10px; font-size: 12px; color: var(--on-dim); }
+  .ink-value input { flex: 1 1 auto; accent-color: var(--band); }
+  .ink-preview {
+    flex: none;
+    width: 26px;
+    height: 26px;
+    border: 1px solid var(--rule);
+    border-radius: 50%;
+    background: var(--sw, transparent);
+  }
+  #inkHex {
+    width: 100%;
+    min-width: 0;
+    height: 34px;
+    padding: 0 10px;
+    font: inherit;
+    font-size: 13px;
+    letter-spacing: .06em;
+    color: var(--on);
+    background: none;
+    border: 1px solid var(--rule);
+    border-radius: var(--r-sm);
+    outline: none;
+  }
+  #inkHex:focus { border-color: var(--on); }
+  #inkHex[aria-invalid="true"] { border-color: #e02424; }
+  .ink-actions { display: flex; gap: 8px; margin-left: auto; }
+  .ink-cancel,
+  .ink-set {
+    appearance: none;
+    height: 34px;
+    padding: 0 14px;
+    font: inherit;
+    font-size: 13px;
+    border-radius: var(--r-sm);
+    cursor: pointer;
+  }
+  .ink-cancel { color: var(--on); background: none; border: 1px solid var(--rule); }
+  .ink-cancel:hover { border-color: var(--on); }
+  .ink-set { color: var(--ink); background: var(--band); border: 0; }
+  .ink-set:hover { background: #ececec; }
+  .ink-set[disabled] { opacity: .45; cursor: default; }
   .preview-box[data-surface="black"] { color: var(--glyph, #fff); }
   .preview-box[data-surface="white"] { color: var(--glyph, #000); }
   .icon-card .glyph { color: var(--glyph, inherit); }
@@ -681,7 +813,6 @@
             <button class="ink" type="button" data-ink="#0e9f6e" style="--sw: #0e9f6e" aria-label="Green" aria-pressed="false"></button>
             <button class="ink" type="button" data-ink="#e02424" style="--sw: #e02424" aria-label="Red" aria-pressed="false"></button>
             <button class="ink manual" id="inkManual" type="button" title="Manual colour — pick your own" aria-label="Manual colour — pick your own">M</button>
-            <input type="color" id="inkPick" aria-label="Custom icon colour" value="#4147d5" tabindex="-1" />
           </div>
         </div>
 
@@ -714,6 +845,55 @@
     </div>
 
   </div>
+
+  <dialog class="ink-pop" id="inkPop" aria-label="Icon colour">
+    <div class="pop-head">
+      <p>Colour</p>
+      <button class="pop-close" id="inkClose" type="button" aria-label="Close colour">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 6L18 18M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+    <div class="ink-body">
+      <div class="ink-grid" id="inkGrid" role="group" aria-label="Colours">
+        <button class="ink-cell" type="button" data-c="" title="Auto — follow the background">A</button>
+        <button class="ink-cell" type="button" data-c="#ffffff" style="--c: #ffffff" aria-label="White"></button>
+        <button class="ink-cell" type="button" data-c="#000000" style="--c: #000000" aria-label="Black"></button>
+        <button class="ink-cell" type="button" data-c="#4147d5" style="--c: #4147d5" aria-label="Indigo"></button>
+        <button class="ink-cell" type="button" data-c="#0e9f6e" style="--c: #0e9f6e" aria-label="Green"></button>
+        <button class="ink-cell" type="button" data-c="#e02424" style="--c: #e02424" aria-label="Red"></button>
+      </div>
+      <div class="ink-modes" role="group" aria-label="Colour mode">
+        <button class="ink-mode" id="inkCustom" type="button" aria-pressed="false">Custom</button>
+        <button class="ink-mode" id="inkCmyk" type="button" aria-pressed="false">CMYK</button>
+        <button class="ink-mode" id="inkWheelBtn" type="button" aria-pressed="false">Wheel</button>
+      </div>
+      <div class="ink-pane" id="inkHexWrap" hidden>
+        <label class="ink-hex">
+          <i>#</i>
+          <input id="inkHex" type="text" maxlength="6" spellcheck="false" autocomplete="off" aria-label="Hex colour, six digits" placeholder="7A3A12" />
+        </label>
+      </div>
+      <div class="ink-pane" id="inkCmykWrap" hidden>
+        <div class="ink-cmyk">
+          <label><span>C</span><input id="inkC" type="number" min="0" max="100" step="1" value="0" aria-label="Cyan, percent" /></label>
+          <label><span>M</span><input id="inkM" type="number" min="0" max="100" step="1" value="0" aria-label="Magenta, percent" /></label>
+          <label><span>Y</span><input id="inkY" type="number" min="0" max="100" step="1" value="0" aria-label="Yellow, percent" /></label>
+          <label><span>K</span><input id="inkK" type="number" min="0" max="100" step="1" value="0" aria-label="Black, percent" /></label>
+        </div>
+      </div>
+      <div class="ink-pane" id="inkWheelWrap" hidden>
+        <div class="ink-wheel" id="inkWheel" role="group" aria-label="Colour wheel"><i id="inkWheelDot"></i></div>
+        <label class="ink-value"><span>Light</span><input id="inkValue" type="range" min="0" max="100" value="80" aria-label="Lightness" /></label>
+      </div>
+      <div class="ink-foot">
+        <span class="ink-preview" id="inkPreview" aria-hidden="true"></span>
+        <div class="ink-actions">
+          <button class="ink-cancel" id="inkCancel" type="button">Cancel</button>
+          <button class="ink-set" id="inkSet" type="button">Set</button>
+        </div>
+      </div>
+    </div>
+  </dialog>
 
   <dialog class="markup-pop" id="markupPop" aria-label="SVG markup">
     <div class="pop-head">
@@ -799,7 +979,6 @@
   var sizes = document.getElementById("sizes");
   var surfaces = document.getElementById("surfaces");
   var inks = document.getElementById("inks");
-  var inkPick = document.getElementById("inkPick");
   var inkManual = document.getElementById("inkManual");
   var formats = document.getElementById("formats");
   var formatWrap = document.getElementById("formatWrap");
@@ -1478,7 +1657,10 @@
       var value = button.getAttribute("data-ink");
       button.setAttribute("aria-pressed", value === ink ? "true" : "false");
     });
-    inkPick.value = ink || "#4147d5";
+    // M carries the colour it stands for, so a custom choice is visible in the row.
+    var custom = ink !== "" && !inks.querySelector('.ink[data-ink="' + ink + '"]');
+    inkManual.style.setProperty("--sw", custom ? ink : "transparent");
+    inkManual.style.color = custom ? readableInk(ink) : "";
   }
 
   function setInk(value, tell) {
@@ -1512,16 +1694,228 @@
     setInk(button.getAttribute("data-ink"), true);
   });
 
-  // M opens the system picker; the hidden input still reports the choice.
-  inkManual.addEventListener("click", function () {
-    if (typeof inkPick.showPicker === "function") {
-      try { inkPick.showPicker(); return; } catch (error) { /* fall through to click */ }
+  // Whichever ink reads on top of a fill: coal on light, cream on dark.
+  function readableInk(hex) {
+    var n = parseInt(hex.slice(1), 16);
+    var lum = (0.2126 * ((n >> 16) & 255) + 0.7152 * ((n >> 8) & 255) + 0.0722 * (n & 255)) / 255;
+    return lum > 0.55 ? "#131513" : "#f2eee3";
+  }
+
+  // ---- the colour dialog: ours, so the swatches are circles, the current choice is
+  // the one wearing the ring, Custom opens a hex field, and Cancel changes nothing.
+  var inkPop = document.getElementById("inkPop");
+  var inkGrid = document.getElementById("inkGrid");
+  var inkCustomBtn = document.getElementById("inkCustom");
+  var inkHexWrap = document.getElementById("inkHexWrap");
+  var inkHex = document.getElementById("inkHex");
+  var inkSet = document.getElementById("inkSet");
+  var pendingInk = "";
+  var inkCmykWrap = document.getElementById("inkCmykWrap");
+  var inkWheelWrap = document.getElementById("inkWheelWrap");
+  var inkCmykBtn = document.getElementById("inkCmyk");
+  var inkWheelBtn = document.getElementById("inkWheelBtn");
+  var inkWheel = document.getElementById("inkWheel");
+  var inkWheelDot = document.getElementById("inkWheelDot");
+  var inkValue = document.getElementById("inkValue");
+  var inkPreview = document.getElementById("inkPreview");
+  var inkC = document.getElementById("inkC");
+  var inkM = document.getElementById("inkM");
+  var inkY = document.getElementById("inkY");
+  var inkK = document.getElementById("inkK");
+  var wheelH = 210, wheelS = .7, wheelV = .8, wheelDragging = false;
+  var mode = "";
+
+  function hex2(r, g, b) {
+    return "#" + [r, g, b].map(function (v) {
+      return ("0" + Math.max(0, Math.min(255, Math.round(v))).toString(16)).slice(-2);
+    }).join("");
+  }
+
+  function hsvHex(h, s, v) {
+    var c = v * s, x = c * (1 - Math.abs((h / 60) % 2 - 1)), m = v - c;
+    var r = 0, g = 0, b = 0;
+    if (h < 60) { r = c; g = x; } else if (h < 120) { r = x; g = c; }
+    else if (h < 180) { g = c; b = x; } else if (h < 240) { g = x; b = c; }
+    else if (h < 300) { r = x; b = c; } else { r = c; b = x; }
+    return hex2((r + m) * 255, (g + m) * 255, (b + m) * 255);
+  }
+
+  function cmykHex(c, m, y, k) {
+    return hex2(255 * (1 - c / 100) * (1 - k / 100),
+                255 * (1 - m / 100) * (1 - k / 100),
+                255 * (1 - y / 100) * (1 - k / 100));
+  }
+
+  function hexHsv(hex) {
+    var n = parseInt(hex.slice(1), 16);
+    var r = ((n >> 16) & 255) / 255, g = ((n >> 8) & 255) / 255, b = (n & 255) / 255;
+    var max = Math.max(r, g, b), min = Math.min(r, g, b), d = max - min;
+    var h = 0;
+    if (d) {
+      if (max === r) { h = 60 * (((g - b) / d) % 6); }
+      else if (max === g) { h = 60 * ((b - r) / d + 2); }
+      else { h = 60 * ((r - g) / d + 4); }
     }
-    inkPick.click();
+    return { h: (h + 360) % 360, s: max ? d / max : 0, v: max };
+  }
+
+  function hexCmyk(hex) {
+    var n = parseInt(hex.slice(1), 16);
+    var r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255;
+    var k = 1 - Math.max(r, g, b) / 255;
+    if (k >= 1) { return { c: 0, m: 0, y: 0, k: 100 }; }
+    return {
+      c: Math.round(100 * (1 - r / 255 - k) / (1 - k)),
+      m: Math.round(100 * (1 - g / 255 - k) / (1 - k)),
+      y: Math.round(100 * (1 - b / 255 - k) / (1 - k)),
+      k: Math.round(k * 100)
+    };
+  }
+
+  function hexValue(text) {
+    var clean = String(text || "").replace(/[^0-9a-f]/gi, "").slice(0, 6);
+    return clean.length === 6 ? "#" + clean.toLowerCase() : "";
+  }
+
+  function markDialog() {
+    Array.prototype.forEach.call(inkGrid.querySelectorAll(".ink-cell"), function (cell) {
+      cell.setAttribute("aria-pressed", cell.getAttribute("data-c") === pendingInk ? "true" : "false");
+    });
+    inkPreview.style.setProperty("--sw", pendingInk || "transparent");
+    var typed = hexValue(inkHex.value) !== "";
+    inkHex.setAttribute("aria-invalid", mode === "hex" && !typed ? "true" : "false");
+    inkSet.disabled = mode === "hex" && !typed;
+  }
+
+  // One pane at a time behind the chips: hex, cmyk, or the wheel. All three end as a
+  // hex string in pendingInk, so the swatches, the ring and Set stay one code path.
+  function setMode(next) {
+    mode = next === "hex" || next === "cmyk" || next === "wheel" ? next : "";
+    inkHexWrap.hidden = mode !== "hex";
+    inkCmykWrap.hidden = mode !== "cmyk";
+    inkWheelWrap.hidden = mode !== "wheel";
+    inkCustomBtn.setAttribute("aria-pressed", mode === "hex" ? "true" : "false");
+    inkCmykBtn.setAttribute("aria-pressed", mode === "cmyk" ? "true" : "false");
+    inkWheelBtn.setAttribute("aria-pressed", mode === "wheel" ? "true" : "false");
+    if (mode === "cmyk") { seedCmyk(); }
+    if (mode === "wheel") { seedWheel(); }
+    markDialog();
+  }
+
+  function seedCmyk() {
+    var c = hexCmyk(pendingInk || "#4147d5");
+    inkC.value = c.c; inkM.value = c.m; inkY.value = c.y; inkK.value = c.k;
+  }
+
+  function seedWheel() {
+    var hsv = hexHsv(pendingInk || "#4147d5");
+    wheelH = hsv.h; wheelS = hsv.s; wheelV = hsv.v;
+    inkValue.value = Math.round(wheelV * 100);
+    paintWheel();
+  }
+
+  function paintWheel() {
+    var angle = wheelH * Math.PI / 180;
+    var reach = wheelS * 50;
+    inkWheelDot.style.left = (50 + Math.cos(angle) * reach) + "%";
+    inkWheelDot.style.top = (50 + Math.sin(angle) * reach) + "%";
+    inkWheelDot.style.background = pendingInk || "#4147d5";
+  }
+
+  function openInk() {
+    pendingInk = ink;
+    inkHex.value = (ink || "#4147d5").slice(1).toUpperCase();
+    // A colour that is not one of the swatches came from a pane, so open on the
+    // field it can be read in rather than a grid that cannot show it.
+    var onSwatch = ink === "" || inkGrid.querySelector('.ink-cell[data-c="' + ink + '"]');
+    setMode(onSwatch ? "" : "hex");
+    if (typeof inkPop.showModal === "function") { inkPop.showModal(); }
+    else { inkPop.setAttribute("open", ""); }
+    inkSet.focus();
+  }
+
+  function closeInk() {
+    if (typeof inkPop.close === "function") { inkPop.close(); }
+    else { inkPop.removeAttribute("open"); }
+  }
+
+  inkManual.addEventListener("click", openInk);
+  document.getElementById("inkClose").addEventListener("click", closeInk);
+  document.getElementById("inkCancel").addEventListener("click", closeInk);
+  inkPop.addEventListener("click", function (event) {
+    if (event.target === inkPop) { closeInk(); }
   });
 
-  inkPick.addEventListener("input", function () {
-    setInk(inkPick.value, true);
+  inkGrid.addEventListener("click", function (event) {
+    var cell = event.target.closest(".ink-cell");
+    if (!cell) { return; }
+    pendingInk = cell.getAttribute("data-c");
+    setMode("");
+  });
+
+  inkCustomBtn.addEventListener("click", function () {
+    setMode(mode === "hex" ? "" : "hex");
+    if (mode === "hex") { inkHex.focus(); inkHex.select(); }
+  });
+  inkCmykBtn.addEventListener("click", function () { setMode(mode === "cmyk" ? "" : "cmyk"); });
+  inkWheelBtn.addEventListener("click", function () { setMode(mode === "wheel" ? "" : "wheel"); });
+
+  inkHex.addEventListener("input", function () {
+    var value = hexValue(inkHex.value);
+    if (value) { pendingInk = value; }
+    markDialog();
+  });
+
+  inkHex.addEventListener("keydown", function (event) {
+    if (event.key === "Enter" && !inkSet.disabled) { event.preventDefault(); inkSet.click(); }
+  });
+
+  function percentOf(input) {
+    return Math.max(0, Math.min(100, parseInt(input.value, 10) || 0));
+  }
+
+  [inkC, inkM, inkY, inkK].forEach(function (input) {
+    input.addEventListener("input", function () {
+      if (mode !== "cmyk") { return; }
+      pendingInk = cmykHex(percentOf(inkC), percentOf(inkM), percentOf(inkY), percentOf(inkK));
+      markDialog();
+    });
+  });
+
+  function pickWheel(event) {
+    var box = inkWheel.getBoundingClientRect();
+    var dx = event.clientX - (box.left + box.width / 2);
+    var dy = event.clientY - (box.top + box.height / 2);
+    wheelH = (Math.atan2(dy, dx) * 180 / Math.PI + 360) % 360;
+    wheelS = Math.min(1, Math.sqrt(dx * dx + dy * dy) / (box.width / 2));
+    pendingInk = hsvHex(wheelH, wheelS, wheelV);
+    markDialog();
+    paintWheel();
+  }
+
+  inkWheel.addEventListener("pointerdown", function (event) {
+    wheelDragging = true;
+    if (inkWheel.setPointerCapture) { inkWheel.setPointerCapture(event.pointerId); }
+    pickWheel(event);
+  });
+  inkWheel.addEventListener("pointermove", function (event) {
+    if (wheelDragging) { pickWheel(event); }
+  });
+  inkWheel.addEventListener("pointerup", function () { wheelDragging = false; });
+  inkWheel.addEventListener("pointercancel", function () { wheelDragging = false; });
+
+  inkValue.addEventListener("input", function () {
+    wheelV = percentOf(inkValue) / 100;
+    if (mode !== "wheel") { return; }
+    pendingInk = hsvHex(wheelH, wheelS, wheelV);
+    markDialog();
+    paintWheel();
+  });
+
+  inkSet.addEventListener("click", function () {
+    if (inkSet.disabled) { return; }
+    setInk(pendingInk, true);
+    closeInk();
   });
 
 
