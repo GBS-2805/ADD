@@ -9,8 +9,11 @@
 <meta name="description" content="Streamline: 997 Line, Duo, Solid and Flat icons, CC BY 4.0. Pick an icon, set its weight, size and surface in a live preview, then copy the SVG. Offline, no account." />
 <link rel="stylesheet" href="../../assets/site.ff3af5db5b.css" />
 <style>
+  /* Corners: one step for boxes and controls, a smaller one for menu rows. */
+  :root { --r: 8px; --r-sm: 5px; }
+
   /* page-only: the preview tab, its variant controls and the collapsible set */
-  .stage { margin: 6px 0 0; border: 1px solid var(--rule); }
+  .stage { margin: 6px 0 0; border: 1px solid var(--rule); border-radius: var(--r); overflow: hidden; }
   .stage-body { display: none; }
   .stage-body[data-active="true"] { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.08fr); }
 
@@ -29,7 +32,7 @@
     color: var(--on);
     background: transparent;
     border: 1px solid var(--rule);
-    border-radius: 0;
+    border-radius: var(--r);
     cursor: pointer;
   }
   .export-btn:hover { background: rgba(217, 217, 217, .08); }
@@ -62,7 +65,7 @@
     color: var(--on);
     background: none;
     border: 0;
-    border-radius: 0;
+    border-radius: var(--r-sm);
     cursor: pointer;
   }
   .export-item .export-n { font-size: 12px; color: var(--on-dim); }
@@ -136,8 +139,8 @@
 
   .controls { display: flex; flex-direction: column; gap: 14px; padding: 22px 24px; }
   .ctl-head { display: flex; align-items: center; justify-content: flex-end; gap: 10px; }
-  /* Markup opens under the stage instead of replacing it, so the icon you are
-     reading is never the thing that disappears. */
+  /* Markup is a pop-up, so the icon you are reading is never the thing that
+     disappears; the button is just the way in. */
   .markup-btn {
     appearance: none;
     display: inline-flex;
@@ -149,13 +152,11 @@
     color: var(--on);
     background: none;
     border: 1px solid var(--rule);
-    border-radius: 0;
+    border-radius: var(--r);
     cursor: pointer;
   }
   .markup-btn:hover { border-color: var(--on); }
-  .markup-btn[aria-expanded="true"] { color: var(--ink); background: var(--band); border-color: var(--band); }
   .markup-btn:focus-visible { outline: 2px solid var(--band); outline-offset: 2px; }
-  #pane-markup[data-active="true"] { grid-template-columns: 1fr; }
   .copy-btn {
     appearance: none;
     display: inline-flex;
@@ -168,7 +169,7 @@
     color: var(--ink);
     background: var(--band);
     border: 0;
-    border-radius: 0;
+    border-radius: var(--r);
     cursor: pointer;
   }
   .copy-btn:hover { background: #ececec; }
@@ -176,7 +177,7 @@
   .copy-btn svg { width: 17px; height: 17px; }
   .ctl-row { display: flex; align-items: center; gap: 12px; }
   .ctl-label { flex: none; width: 104px; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--on-dim); }
-  .segs { display: flex; flex: 1 1 auto; border: 1px solid var(--rule); }
+  .segs { display: flex; flex: 1 1 auto; border: 1px solid var(--rule); border-radius: var(--r); overflow: hidden; }
   .seg {
     appearance: none;
     flex: 1 1 0;
@@ -196,26 +197,69 @@
   .seg:focus-visible { outline: 2px solid var(--band); outline-offset: -3px; }
   .status { margin: 0; font-size: 13px; color: var(--on-dim); min-height: 1.4em; }
 
-  .markup { display: grid; gap: 10px; padding: 22px 24px; }
+  /* Markup is a pop-up, not a pane: open it, copy, get it out of the way. */
+  .markup-pop {
+    width: min(720px, calc(100% - 32px));
+    padding: 0;
+    color: var(--on);
+    background: var(--page, #f2eee3);
+    border: 1px solid var(--rule);
+    border-radius: var(--r);
+    box-shadow: 0 24px 60px rgba(0, 0, 0, .3);
+  }
+  .markup-pop::backdrop { background: rgba(0, 0, 0, .5); }
+  .pop-head { display: flex; align-items: center; gap: 10px; padding: 12px 14px; border-bottom: 1px solid var(--rule); }
+  .pop-head p { margin: 0 auto 0 0; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--on-dim); }
+  .pop-copy {
+    appearance: none;
+    height: 34px;
+    padding: 0 14px;
+    font: inherit;
+    font-size: 14px;
+    color: var(--ink);
+    background: var(--band);
+    border: 0;
+    border-radius: var(--r);
+    cursor: pointer;
+  }
+  .pop-copy:hover { background: #ececec; }
+  .pop-close {
+    appearance: none;
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    color: var(--on);
+    background: none;
+    border: 1px solid var(--rule);
+    border-radius: var(--r);
+    cursor: pointer;
+  }
+  .pop-close:hover { border-color: var(--on); }
+  .pop-copy:focus-visible,
+  .pop-close:focus-visible { outline: 2px solid var(--band); outline-offset: 2px; }
+  .pop-close svg { width: 18px; height: 18px; }
   #snippet {
+    display: block;
     width: 100%;
-    height: 132px;
-    resize: vertical;
-    padding: 12px 14px;
+    height: 190px;
+    resize: none;
+    padding: 14px 16px;
     font-family: "Poppins", sans-serif;
     font-size: 13px;
     line-height: 1.6;
     color: var(--on);
-    background: rgba(0, 0, 0, .2);
-    border: 1px solid var(--rule);
+    background: transparent;
+    border: 0;
+    border-bottom: 1px solid var(--rule);
     border-radius: 0;
     outline: none;
   }
-  #snippet:focus { border-color: var(--on); }
-  .markup p { margin: 0; font-size: 13px; color: var(--on-dim); max-width: 62ch; }
+  .pop-note { margin: 0; padding: 12px 16px 16px; font-size: 13px; color: var(--on-dim); max-width: 62ch; }
 
   /* the selection tab: what the double taps collected, above the sheet */
-  .sel-tab { border: 1px solid var(--rule); border-bottom: 0; }
+  .sel-tab { border: 1px solid var(--rule); border-bottom: 0; border-radius: var(--r) var(--r) 0 0; }
   .sel-head { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 13px 22px; }
   .sel-head p { margin: 0 auto 0 0; font-size: 13px; color: var(--on-dim); }
   .sel-head b { font-size: 14px; font-weight: 500; color: var(--on); }
@@ -228,7 +272,7 @@
     color: var(--on);
     background: transparent;
     border: 1px solid var(--rule);
-    border-radius: 0;
+    border-radius: var(--r);
     cursor: pointer;
   }
   .sel-btn:hover:not([disabled]) { border-color: var(--on); }
@@ -246,7 +290,7 @@
     color: var(--on);
     background: transparent;
     border: 1px solid var(--rule);
-    border-radius: 0;
+    border-radius: var(--r);
     cursor: pointer;
   }
   .sel-chip svg { width: 20px; height: 20px; }
@@ -264,7 +308,7 @@
     color: var(--on);
     background: transparent;
     border: 1px solid var(--rule);
-    border-radius: 0;
+    border-radius: var(--r);
     cursor: pointer;
     white-space: nowrap;
   }
@@ -289,7 +333,7 @@
     color: var(--on);
     background: none;
     border: 1px solid var(--rule);
-    border-radius: 0;
+    border-radius: var(--r);
     cursor: pointer;
   }
   .panel-toggle b { font-size: 19px; font-weight: 400; letter-spacing: -.01em; }
@@ -298,8 +342,9 @@
   .panel-toggle:focus-visible { outline: 2px solid var(--band); outline-offset: -3px; }
   .panel-toggle .chev { flex: none; width: 24px; height: 24px; transition: transform .2s ease; }
   .panel-toggle[aria-expanded="true"] .chev { transform: scaleY(-1); }
+  .panel-toggle[aria-expanded="true"] { border-radius: var(--r) var(--r) 0 0; }
   .panel[data-open="false"] { display: none; }
-  .panel[data-open="true"] { border: 1px solid var(--rule); border-top: 0; animation: panel-in .18s ease both; }
+  .panel[data-open="true"] { border: 1px solid var(--rule); border-top: 0; border-radius: 0 0 var(--r) var(--r); overflow: hidden; animation: panel-in .18s ease both; }
   @keyframes panel-in { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
 
   .panel-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 14px 22px; border-bottom: 1px solid var(--rule); }
@@ -314,7 +359,7 @@
     color: var(--on);
     background: transparent;
     border: 1px solid var(--rule);
-    border-radius: 0;
+    border-radius: var(--r);
     outline: none;
   }
   #search::placeholder { color: var(--on-dim); }
@@ -335,7 +380,7 @@
     color: var(--on);
     background: transparent;
     border: 1px solid var(--rule);
-    border-radius: 0;
+    border-radius: var(--r);
     cursor: pointer;
     white-space: nowrap;
   }
@@ -372,7 +417,7 @@
     color: var(--on);
     background: none;
     border: 0;
-    border-radius: 0;
+    border-radius: var(--r-sm);
     cursor: pointer;
   }
   .cat-item .cat-n { font-size: 12px; color: var(--on-dim); }
@@ -382,7 +427,7 @@
   .cat-item[aria-selected="true"] .cat-n { color: var(--ink); }
   .cat-item:focus-visible { outline: 2px solid var(--band); outline-offset: -3px; }
 
-  .grid-wrap { max-height: min(58vh, 540px); overflow-y: auto; overscroll-behavior: contain; border-top: 0; }
+  .grid-wrap { max-height: min(58vh, 540px); overflow-y: auto; overscroll-behavior: contain; border-top: 0; border-radius: 0 0 var(--r) var(--r); }
   .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(98px, 1fr)); }
   .icon-card {
     appearance: none;
@@ -471,15 +516,40 @@
     width: 26px; height: 26px; padding: 0; border-radius: 50%;
     border: 1px solid var(--rule); background: var(--sw, transparent); cursor: pointer;
   }
+  /* Auto is one swatch among the colours, not a word among dots: a circle with an A. */
   .ink.auto {
-    width: auto; padding: 0 10px; border-radius: 6px; background: transparent;
-    font-size: 12px; color: var(--on);
+    display: grid;
+    place-items: center;
+    padding: 0;
+    background: transparent;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1;
+    color: var(--on);
   }
   .ink[aria-pressed="true"] { outline: 2px solid var(--on); outline-offset: 2px; }
   .ink:focus-visible { outline: 2px solid var(--band); outline-offset: 2px; }
+  /* Manual is a swatch as well: a circle with an M that opens the system picker.
+     The colour input stays in the DOM, where it holds the value, but out of sight. */
+  .ink.manual {
+    display: grid;
+    place-items: center;
+    padding: 0;
+    background: transparent;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1;
+    color: var(--on);
+  }
   #inkPick {
-    width: 30px; height: 30px; padding: 0; border: 1px solid var(--rule);
-    border-radius: 6px; background: transparent; cursor: pointer;
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    border: 0;
+    opacity: 0;
+    pointer-events: none;
   }
   .preview-box[data-surface="black"] { color: var(--glyph, #fff); }
   .preview-box[data-surface="white"] { color: var(--glyph, #000); }
@@ -561,7 +631,7 @@
 
       <div class="controls">
         <div class="ctl-head">
-          <button class="markup-btn" id="markupBtn" type="button" aria-expanded="false" aria-controls="pane-markup">Markup</button>
+          <button class="markup-btn" id="markupBtn" type="button" aria-haspopup="dialog">Markup</button>
           <button class="copy-btn" id="copyBtn" type="button">
             <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M10 13C11.3807 14.3807 13.6193 14.3807 15 13L18 10C19.3807 8.61929 19.3807 6.38071 18 5C16.6193 3.61929 14.3807 3.61929 13 5L11 7M14 11C12.6193 9.61929 10.3807 9.61929 9 11L6 14C4.61929 15.3807 4.61929 17.6193 6 19C7.38071 20.3807 9.61929 20.3807 11 19L13 17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
             <span id="copyLabel">Copy SVG</span>
@@ -604,13 +674,14 @@
         <div class="ctl-row" role="group" aria-label="Icon colour">
           <span class="ctl-label">Colour</span>
           <div class="inks" id="inks">
-            <button class="ink auto" type="button" data-ink="" aria-pressed="true" title="Follow the background">Auto</button>
+            <button class="ink auto" type="button" data-ink="" aria-pressed="true" title="Auto — follow the background" aria-label="Auto — follow the background">A</button>
             <button class="ink" type="button" data-ink="#ffffff" style="--sw: #ffffff" aria-label="White" aria-pressed="false"></button>
             <button class="ink" type="button" data-ink="#000000" style="--sw: #000000" aria-label="Black" aria-pressed="false"></button>
             <button class="ink" type="button" data-ink="#4147d5" style="--sw: #4147d5" aria-label="Indigo" aria-pressed="false"></button>
             <button class="ink" type="button" data-ink="#0e9f6e" style="--sw: #0e9f6e" aria-label="Green" aria-pressed="false"></button>
             <button class="ink" type="button" data-ink="#e02424" style="--sw: #e02424" aria-label="Red" aria-pressed="false"></button>
-            <input type="color" id="inkPick" aria-label="Custom icon colour" value="#4147d5" />
+            <button class="ink manual" id="inkManual" type="button" title="Manual colour — pick your own" aria-label="Manual colour — pick your own">M</button>
+            <input type="color" id="inkPick" aria-label="Custom icon colour" value="#4147d5" tabindex="-1" />
           </div>
         </div>
 
@@ -642,13 +713,19 @@
       </div>
     </div>
 
-    <div class="stage-body" id="pane-markup" data-active="false">
-      <div class="markup">
-        <textarea id="snippet" readonly spellcheck="false" aria-label="SVG markup of the selected icon"></textarea>
-        <p>The markup is the file as it ships: a 24×24 <code>viewBox</code>, <code>currentColor</code> so the icon takes the colour of the text around it, and no weight or size baked in — those are the preview's settings, not the file's.</p>
-      </div>
-    </div>
   </div>
+
+  <dialog class="markup-pop" id="markupPop" aria-label="SVG markup">
+    <div class="pop-head">
+      <p>Markup</p>
+      <button class="pop-copy" id="popCopy" type="button">Copy</button>
+      <button class="pop-close" id="popClose" type="button" aria-label="Close markup">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 6L18 18M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+    <textarea id="snippet" readonly spellcheck="false" aria-label="SVG markup of the selected icon"></textarea>
+    <p class="pop-note">The markup is the file as it ships: a 24×24 <code>viewBox</code>, <code>currentColor</code> so the icon takes the colour of the text around it, and no weight or size baked in — those are the preview's settings, not the file's.</p>
+  </dialog>
 
   <section class="set-panel">
     <div class="sel-tab" id="selTab">
@@ -723,6 +800,7 @@
   var surfaces = document.getElementById("surfaces");
   var inks = document.getElementById("inks");
   var inkPick = document.getElementById("inkPick");
+  var inkManual = document.getElementById("inkManual");
   var formats = document.getElementById("formats");
   var formatWrap = document.getElementById("formatWrap");
   var formatBtn = document.getElementById("formatBtn");
@@ -1430,8 +1508,16 @@
 
   inks.addEventListener("click", function (event) {
     var button = event.target.closest(".ink");
-    if (!button) { return; }
+    if (!button || button === inkManual) { return; }
     setInk(button.getAttribute("data-ink"), true);
+  });
+
+  // M opens the system picker; the hidden input still reports the choice.
+  inkManual.addEventListener("click", function () {
+    if (typeof inkPick.showPicker === "function") {
+      try { inkPick.showPicker(); return; } catch (error) { /* fall through to click */ }
+    }
+    inkPick.click();
   });
 
   inkPick.addEventListener("input", function () {
@@ -1776,7 +1862,7 @@
       snippet.value = text;
       copyText(text).then(function (ok) {
         announce(ok ? "Copied " + selected.name + ".svg to the clipboard" : "Clipboard blocked — the markup is open below");
-        if (!ok) { setMarkup(true); snippet.focus(); snippet.select(); }
+        if (!ok) { openMarkup(); }
         window.setTimeout(paint, 2200);
       });
       return;
@@ -1809,16 +1895,31 @@
     });
   });
 
-  var markupBtn = document.getElementById("markupBtn");
-  var markupPane = document.getElementById("pane-markup");
+  var markupPop = document.getElementById("markupPop");
 
-  function setMarkup(open) {
-    markupPane.setAttribute("data-active", open ? "true" : "false");
-    markupBtn.setAttribute("aria-expanded", open ? "true" : "false");
+  function openMarkup() {
+    if (typeof markupPop.showModal === "function") { markupPop.showModal(); }
+    else { markupPop.setAttribute("open", ""); }
+    snippet.focus();
+    snippet.select();
   }
 
-  markupBtn.addEventListener("click", function () {
-    setMarkup(markupPane.getAttribute("data-active") !== "true");
+  function closeMarkup() {
+    if (typeof markupPop.close === "function") { markupPop.close(); }
+    else { markupPop.removeAttribute("open"); }
+  }
+
+  document.getElementById("markupBtn").addEventListener("click", openMarkup);
+  document.getElementById("popClose").addEventListener("click", closeMarkup);
+  // Escape is the dialog's own; a click on the backdrop lands on the dialog itself.
+  markupPop.addEventListener("click", function (event) {
+    if (event.target === markupPop) { closeMarkup(); }
+  });
+  document.getElementById("popCopy").addEventListener("click", function () {
+    copyText(snippet.value).then(function (ok) {
+      announce(ok ? "Copied " + (selected ? selected.name : "") + ".svg to the clipboard" : "Clipboard blocked — select the markup and copy it by hand");
+      if (ok) { closeMarkup(); } else { snippet.focus(); snippet.select(); }
+    });
   });
 
   if (window.IconsApp) { document.documentElement.classList.add("in-app"); }

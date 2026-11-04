@@ -64,6 +64,36 @@ and its entry from the gallery in the same change; leave no orphan PNGs behind.
 
 ### How renders are sent (learned the hard way)
 
+**A UI change is shown before it ships, and waits for a verdict.** Anything that
+alters layout, spacing, colour, type, an icon, or the presence and position of an
+element is built in its working state, captured, and put in front of the reader with
+something they can open -- the dev-server preview in the Browser panel, or a capture
+with a real URL -- *before* the commit, the deploy and the Drive refresh. Then stop and
+wait for a thumbs up or down. Do not ship a UI change and show it afterwards: by then
+the only useful answer left is "revert it".
+
+A shot sitting under `artifacts/` is not that picture. It does not resolve on a
+phone, so it never counts as showing anything.
+
+Put the review build somewhere the reader can open without a sign-in, and send that
+link. A throwaway project's *production* URL is public, while its previews are not:
+
+    npx -y vercel@latest deploy docs --prod --yes --project artbase-review \
+        --create-if-missing --token "$VERCEL_TOKEN"
+
+That serves the working copy of `docs/` at `https://artbase-review.vercel.app`, leaves
+the real project untouched, and answers 200 to a stranger. Point it at the shipped
+build -- or delete the project -- once the verdict is in, so the review URL never
+lags the site. The two in-app previews are **not** review links: the Freebuff dev
+server answers 403 to anyone not signed in, and a preview deployment of the real
+project redirects 302 to Vercel SSO. The Browser panel preview stays for poking at a
+change interactively. Nothing under `artifacts/` is a delivery at all, since a phone
+cannot resolve it.
+
+Once the verdict is yes, the usual chain runs -- captures into `docs/renders/`, the
+artboards, the deploy, the Drive refresh -- and the reply that delivers it carries the
+site link, the gallery link and labelled links to the captures of every page touched.
+
 The person reading this works from a phone. Deliver renders like this, every time:
 
 1. Lead with **one tappable markdown link to the live site**:
@@ -315,13 +345,17 @@ changes as unverified on device rather than illustrating them.
   row. Switching style keeps the previewed name and the collected icons by name,
   drops the ones that style does not have, says how many went, and names the zip
   after the style.
-- The Colour row under Background sets the ink: Auto, white, black, indigo, green, red
-  and a custom picker, remembered per brand (`icons:ink:<slug>`). Ink styles take it as
+- The Colour row under Background sets the ink: Auto (a circle with an A), white, black,
+  indigo, green and red, and Manual (a circle with an M that opens the system
+  picker) -- seven 26px circles in all -- remembered per brand (`icons:ink:<slug>`). Ink styles take it as
   `currentColor` through `--glyph`, so the preview, the thumbnails, the chips and the
   raster export follow. Duo and Flat are tinted rather than flattened: the darkest tone
   becomes the ink, each lighter tone the same ink at an opacity that keeps their order,
   so the style survives the choice. Auto restores the vendor palette. Never collapse a
-  palette glyph to a single colour -- that turns Duo into Solid.
+  palette glyph to a single colour -- that turns Duo into Solid. Corners come from
+  one scale (`--r: 8px`, `--r-sm: 5px` for rows inside a menu); glyph cells and the
+  segments inside one row stay square, because they share their rules with the box
+  that clips them.
 - The left pull-down of all three icon pages opens with All, linking to
   `/icons/all/`: twelve glyphs per brand, one from every category — the first name in
   the catalog for that category. Categories are matched across sets on a plain key
@@ -380,9 +414,14 @@ changes as unverified on device rather than illustrating them.
 - The WebView sits in a frame padded by the window insets. Target 35 draws edge to
   edge, so without that the band hides under the status bar and, on a Flip 7, under
   the camera cutout.
-- The preview pane is the black stage itself: the glyph is centred large and the
-  name, file and hint stack against its bottom-right corner. The pane carries the
-  surface choice, so White repaints the whole stage rather than a tile on it.
+- The preview pane is the black stage itself: the glyph is centred large and one line
+  against the bottom-right corner reads the name and its style (`add-1 · Duo`) at
+  caption size -- no file label, no hint, no headline. Markup is a button beside Copy SVG
+  that opens the snippet in a modal pop-up -- Copy takes it and dismisses, and the
+  close button, Escape or a click on the backdrop closes it -- so the icon never
+  leaves the screen; there is no Preview tab, because the stage is the preview. The
+  pane carries the surface choice, so White repaints the whole stage rather than a
+  tile on it.
 - The preview exports SVG through the clipboard, or a PNG/WEBP/JPG at the chosen size
   (32 to 1024px) rendered on the chosen background: the site downloads it, the app
   writes it to Pictures/Icons through MediaStore (no permission on Android 10+).
