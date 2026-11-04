@@ -185,7 +185,7 @@ case "${1:-all}" in
         stage_icons_assets
         ;;
     compress)
-        build_app app Compress Compress-2.2.apk 13 2.2
+        build_app app Compress Compress-2.3.apk 14 2.3
         ;;
     icons)
         stage_icons_assets
@@ -193,7 +193,7 @@ case "${1:-all}" in
         check_fallback "$OUT/Icons-2.19.apk"
         ;;
     all)
-        build_app app Compress Compress-2.2.apk 13 2.2
+        build_app app Compress Compress-2.3.apk 14 2.3
         stage_icons_assets
         build_app icons-app Icons Icons-2.20.apk 31 2.20
         check_fallback "$OUT/Icons-2.19.apk"

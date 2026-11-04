@@ -95,10 +95,10 @@
     {
       "id": "compress",
       "name": "Compress",
-      "version": "2.2",
-      "apk": "/Compress-2.2.apk",
-      "bytes": 272592,
-      "sha256": "221a18555ace15b70d42816a7283c5399733d1fbcf999a4386f3def043549651"
+      "version": "2.3",
+      "apk": "/Compress-2.3.apk",
+      "bytes": 285012,
+      "sha256": "8d6a52f1b6d11c3eaaf383b06e139bb908e836701e2683994913808e5a294915"
     },
     {
       "id": "icons",

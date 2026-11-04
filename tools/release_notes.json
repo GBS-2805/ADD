@@ -2,6 +2,12 @@
   "notes": [
     {
       "id": "compress",
+      "version": "2.3",
+      "title": "The site's palettes, band and side panel",
+      "note": "Compress now wears green, Moss and Navy over the site's band, with the side panel that carries the shelf, the theme toggle and the three palette chips."
+    },
+    {
+      "id": "compress",
       "version": "2.2",
       "title": "One-line notes",
       "note": "The preview note says what the slider does in one sentence."

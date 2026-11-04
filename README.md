@@ -16,9 +16,9 @@ the pages.
   `app.offline.icons` · minSdk 26 · targetSdk 35 · versionCode 31. The whole browser
   — all four brands, 4,373 glyphs, the stylesheet and Poppins — is bundled in the APK
   and served to a WebView from a private origin.
-- **Compress 2.2** — APK [`dist/Compress-2.2.apk`](dist/Compress-2.2.apk)
-  (272,592 bytes, signed v1+v2, round adaptive icon), published as
-  `docs/Compress-2.2.apk`. Package `app.offline.compress` · versionCode 13.
+- **Compress 2.3** — APK [`dist/Compress-2.3.apk`](dist/Compress-2.3.apk)
+  (285,012 bytes, signed v1+v2, round adaptive icon), published as
+  `docs/Compress-2.3.apk`. Package `app.offline.compress` · versionCode 14.
 - **Icons browser** — live at `docs/icons/`: four free brands — 606 Lineicons,
   1,258 Coolicons, 1,512 Phosphor and 997 Streamline — each on its own page with a preview, variant controls and the
   set folded into a scrolling sheet. Copy-on-tap, no account.
@@ -188,7 +188,7 @@ export ANDROID_SDK_ROOT=$HOME/android-sdk   # needs build-tools;35.0.0 + platfor
 ./build.sh compress   # Compress only
 ```
 
-Output: `dist/Compress-2.2.apk` and `dist/Icons-2.20.apk`. Copy them to `docs/` and
+Output: `dist/Compress-2.3.apk` and `dist/Icons-2.20.apk`. Copy them to `docs/` and
 re-run `python3 tools/build_catalog.py` so the pages, the JSON and the checksums move
 together. Signing uses `$HOME/tools/compress-keystore.jks` (created on first build,
 password `android`); both apps share it, so they update side by side. Replace it with
