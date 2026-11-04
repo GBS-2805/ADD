@@ -625,13 +625,27 @@
     /* No border: --rule is cream in dark mode, so a hairline round saturated colour
        reads as a white band on the rim. The wheel draws its own edge. */
     border-radius: 50%;
+    /* Hue 0 sits at 3 o'clock, where atan2 puts it, and the white fades linearly to
+       the rim so saturation is the radius. Without both the colour under the pointer
+       is not the colour the maths returns. */
     background:
-      radial-gradient(circle closest-side, #fff, rgba(255, 255, 255, 0) 78%),
-      conic-gradient(#ff0000, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff, #ff0000);
+      radial-gradient(circle closest-side, #fff, rgba(255, 255, 255, 0) 100%),
+      conic-gradient(from 90deg, #ff0000, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff, #ff0000);
+    box-shadow: 0 0 0 1px rgba(19, 21, 19, .14);
     cursor: crosshair;
     touch-action: none;
   }
+  .ink-wheel::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: #000;
+    opacity: var(--darken, 0);
+    pointer-events: none;
+  }
   .ink-wheel i {
+    z-index: 1;
     position: absolute;
     width: 14px;
     height: 14px;
@@ -1815,6 +1829,9 @@
   }
 
   function paintWheel() {
+    // Black at (1 - V) multiplies the wheel by V, which is exactly what hsvHex
+    // returns, so the swatch under the pointer matches the colour it commits.
+    inkWheel.style.setProperty("--darken", String(Math.max(0, Math.min(1, 1 - wheelV))));
     var angle = wheelH * Math.PI / 180;
     var reach = wheelS * 50;
     inkWheelDot.style.left = (50 + Math.cos(angle) * reach) + "%";
