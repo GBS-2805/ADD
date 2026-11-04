@@ -14,6 +14,10 @@ In order, it moves:
   * every live version label      the shelf pages, README, AGENTS, the capture list
   * tools/release_notes.json      one new note at the top, above the newest
 
+The generated icon pages are refetched from their templates once the catalog has
+moved (`fetch_icons.py --pages-only`), because they print the version and the APK's
+file name from tokens. A dry run reports them instead of writing them.
+
 With --build it then runs build.sh, copies the signed APK into docs/, deletes the
 previous one, re-measures its size and SHA-256, writes those into the same pages and
 rebuilds the catalogs.
@@ -23,6 +27,9 @@ tools/render_pages.js against it, so the gallery is recaptured from the pages th
 quote the new build rather than the ones before it. Playwright and the browser libs
 come from tools/render_env.py; the environment is checked before anything is written,
 so a machine without them stops the release instead of leaving it half done.
+
+  Before any of that it runs tools/check_palette.py and refuses to bump while the
+  site and the app disagree about a colour, or a page has a colour of its own.
 
   With --commit it then commits twice: the release, and the history page that names the
   sha of that commit. It refuses to start on a worktree that already has changes, because
@@ -279,6 +286,12 @@ def label_pairs(app, old, new, old_code, new_code, clash=False):
     # codes, and in the README their lines carry the numbers one above the other.
     # Only when both apps happen to share a code does the line have to say which.
     name = APPS[app]
+    # With one app there is no other app's line to confuse, and the README's own
+    # versionCode sentence wraps away from the app's name; with two, the line has to
+    # say which app it means.
+    version_code = ((f"versionCode {old_code}", f"versionCode {new_code}", name.lower())
+                    if len(APPS) > 1 else
+                    (f"versionCode {old_code}", f"versionCode {new_code}"))
     if clash:
         codes = [(f"version code {old_code}", f"version code {new_code}", name.lower()),
                  (f"Version code {old_code}", f"Version code {new_code}", name.lower())]
@@ -291,9 +304,11 @@ def label_pairs(app, old, new, old_code, new_code, clash=False):
             # spells the code with a space; neither carries the app's name.
             (f'class="pill live">{old}<', f'class="pill live">{new}<'),
             (f'class="pill live">app {old}<', f'class="pill live">app {new}<'),
-            (f"{old} \u00b7 app.offline.{app} \u00b7", f"{new} \u00b7 app.offline.{app} \u00b7"),
+            # The tools page's kicker quotes the version against the app's package,
+            # and the merge kept the old compressor id, so the id is not the answer.
+            (f"{old} \u00b7 app.offline.", f"{new} \u00b7 app.offline."),
             (f"Android app \u00b7 {old} \u00b7", f"Android app \u00b7 {new} \u00b7"),
-            (f"versionCode {old_code}", f"versionCode {new_code}", name.lower())] + codes
+            version_code] + codes
 
 
 # A page and the artboards made from it. The exporter writes one board per page per
@@ -490,6 +505,43 @@ def capture_preflight():
     return node, env
 
 
+def regenerate_icons_pages():
+    """Rewrite the generated icon pages from their templates, after the catalog moved.
+
+    The hub prints `Download Icons <version>` and links the APK's file name out of
+    `__VERSION__` and `__APK__`, so a bump leaves it quoting the build before it and
+    the sweep below reads that as a label nobody will fix. Only the generator may
+    write those pages, so the bump runs it rather than patching them by hand.
+    """
+    done = subprocess.run([sys.executable, str(ROOT / "tools/fetch_icons.py"),
+                           "--pages-only"], cwd=ROOT, capture_output=True, text=True)
+    if done.returncode != 0:
+        raise SystemExit("the generated icon pages did not regenerate: "
+                         + (done.stderr or done.stdout).strip()[-500:])
+    return (done.stdout.strip().splitlines() or ["icon pages"])[-1].strip()
+
+
+def palette_preflight():
+    """Refuse a release whose palette no longer holds, on the site or in the app.
+
+    A release quotes new ink on the shelf, in the store listing and on every screen
+    of the app, so a colour that stopped following the palette is a visual
+    regression shipped with a version number on it. The static half is read-only and
+    needs nothing but python, which is why it gates every bump, --dry-run included.
+    """
+    done = subprocess.run([sys.executable, str(ROOT / "tools/check_palette.py")],
+                          cwd=ROOT, capture_output=True, text=True)
+    output = (done.stdout or "") + (done.stderr or "")
+    if done.returncode != 0:
+        problems = [line.rstrip() for line in output.splitlines()
+                    if line.strip() and not line.strip().startswith("contrast ")]
+        raise SystemExit("refusing to bump: the palette check failed\n  "
+                         + "\n  ".join(problems[-8:]))
+    for line in output.splitlines():
+        if line.startswith("palette:"):
+            print("  " + line)
+
+
 def free_port():
     with socket.socket() as sock:
         sock.bind(("127.0.0.1", 0))
@@ -598,6 +650,10 @@ def main():
     if report_notes():
         raise SystemExit("refusing to bump: give those notes their real versions first")
 
+    # The palette, before a single version label moves: the shelf and the app have to
+    # agree about every colour the release will carry.
+    palette_preflight()
+
     captures = args.build and not args.skip_captures
     toolchain = capture_preflight() if captures else None
 
@@ -624,6 +680,11 @@ def main():
                            encoding="utf-8")
     print("  catalog.json           version, versionCode and APK")
 
+    # The icon pages print the version and the APK name from tokens, so the catalog
+    # moving is what makes them stale; the sweep below would read one as a label.
+    if not dry:
+        print("  %-30s %s" % ("docs/icons/", regenerate_icons_pages()))
+
     cases = bump_build_sh(old_apk, old, new_apk, new, old_code, new_code, dry)
     print("  build.sh               %d build case(s)" % cases)
 
@@ -635,12 +696,22 @@ def main():
     # prints the old version is a label nobody will move, so the bump stops here.
     codes = {item["id"]: int(item["version_code"]) for item in catalog["tools"]}
     leftovers = quoted_elsewhere(old, old_code, plans, codes)
+    # The icon pages are generated from templates: a real run has just refreshed the
+    # hub above, while a dry run has written nothing, so it reports them instead of
+    # stopping on a page the real run rewrites from the version it just moved.
+    generated = [line for line in leftovers if line.startswith("docs/icons/")] if dry else []
+    if generated:
+        leftovers = [line for line in leftovers if not line.startswith("docs/icons/")]
     if leftovers:
         print("refusing to bump: these still quote %s %s once the labels move"
               % (app_name, old))
         for line in leftovers[:12]:
             print("  " + line)
         raise SystemExit("teach label_pairs the form, or fix the page, then run again")
+    if generated:
+        print("  %d label(s) in the generated icon pages come from their templates, which "
+              "the\n  bump refetches with fetch_icons.py --pages-only once the catalog moves"
+              % len(generated))
     for page, before, after, hits in plans:
         if not dry and hits:
             (ROOT / page).write_text(after, encoding="utf-8")

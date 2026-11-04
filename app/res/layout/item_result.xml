@@ -72,5 +72,6 @@
         android:contentDescription="Share this photo"
         android:focusable="true"
         android:padding="8dp"
-        android:src="@drawable/ic_share" />
+        android:src="@drawable/ic_share"
+        android:tint="?attr/on" />
 </LinearLayout>

@@ -109,7 +109,9 @@
 <text x="45" y="1750.27" fill="#f2eee3" font-family="Poppins" font-size="20" font-weight="400" xml:space="preserve">#0FBF92</text>
 <rect x="21" y="1783.27" width="348" height="1" fill="#f2eee3" fill-opacity="0.22"/>
 <text x="45" y="1823.27" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="13" font-weight="400" xml:space="preserve">Type · Page</text>
-<text x="45" y="1857.7" fill="#f2eee3" font-family="Poppins" font-size="20" font-weight="400" xml:space="preserve">#131513 / #F2EEE3</text>
+<text x="45" y="1857.7" fill="#f2eee3" font-family="Poppins" font-size="20" font-weight="400" xml:space="preserve">#131513</text>
+<text x="118" y="1857.7" fill="#f2eee3" font-family="Poppins" font-size="20" font-weight="400" xml:space="preserve">/</text>
+<text x="138" y="1857.7" fill="#f2eee3" font-family="Poppins" font-size="20" font-weight="400" xml:space="preserve">#F2EEE3</text>
 <rect x="21" y="1890.7" width="348" height="1" fill="#f2eee3" fill-opacity="0.22"/>
 <text x="45" y="1930.7" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="13" font-weight="400" xml:space="preserve">Font</text>
 <text x="45" y="1965.14" fill="#f2eee3" font-family="Poppins" font-size="20" font-weight="400" xml:space="preserve">Poppins 400 / 500 / 600</text>
@@ -117,8 +119,8 @@
 <text x="45" y="2038.14" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="13" font-weight="400" xml:space="preserve">Accent</text>
 <text x="45" y="2072.58" fill="#f2eee3" font-family="Poppins" font-size="20" font-weight="400" xml:space="preserve">#0FBF92</text>
 <text x="20" y="2144.58" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="16" font-weight="400" xml:space="preserve">Same values in</text>
-<text x="20" y="2170.17" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="16" font-weight="400" xml:space="preserve">docs/assets/site.1ed2cea139.css</text>
-<text x="276" y="2170.17" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="16" font-weight="400" xml:space="preserve">and each</text>
+<text x="20" y="2170.17" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="16" font-weight="400" xml:space="preserve">docs/assets/site.56c11704f3.css</text>
+<text x="275" y="2170.17" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="16" font-weight="400" xml:space="preserve">and each</text>
 <text x="20" y="2195.77" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="16" font-weight="400" xml:space="preserve">app's resources.</text>
 <rect x="0" y="2271.36" width="390" height="1" fill="#f2eee3" fill-opacity="0.22"/>
 <text x="20" y="2316.36" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">ADD 3.0 · app.offline.compress</text>

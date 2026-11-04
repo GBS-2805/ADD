@@ -123,7 +123,7 @@
 <rect x="1234" y="811.39" width="1" height="47.09" fill="#f2eee3" fill-opacity="0.22"/>
 <rect x="650.56" y="857.48" width="584.44" height="1" fill="#f2eee3" fill-opacity="0.22"/>
 <rect x="650.56" y="811.39" width="1" height="47.09" fill="#f2eee3" fill-opacity="0.22"/>
-<text x="881.78" y="839.39" fill="#f2eee3" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">Nothing to export</text>
+<text x="881.78" y="839.39" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">Nothing to export</text>
 <text x="650.56" y="887.48" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="13" font-weight="400" xml:space="preserve">Loading 1,258 icons…</text>
 <rect x="40" y="1015.61" width="1220" height="1" fill="#f2eee3" fill-opacity="0.22"/>
 <rect x="1259" y="1015.61" width="1" height="98.88" fill="#f2eee3" fill-opacity="0.22"/>
@@ -134,12 +134,12 @@
 <rect x="1129" y="1029.61" width="1" height="37.44" fill="#f2eee3" fill-opacity="0.22"/>
 <rect x="988" y="1066.05" width="142" height="1" fill="#f2eee3" fill-opacity="0.22"/>
 <rect x="988" y="1029.61" width="1" height="37.44" fill="#f2eee3" fill-opacity="0.22"/>
-<text x="1001" y="1052.61" fill="#f2eee3" font-family="Poppins" font-size="13" font-weight="400" xml:space="preserve">Remove selected</text>
+<text x="1001" y="1052.61" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="13" font-weight="400" xml:space="preserve">Remove selected</text>
 <rect x="1138" y="1029.61" width="99" height="1" fill="#f2eee3" fill-opacity="0.22"/>
 <rect x="1236" y="1029.61" width="1" height="37.44" fill="#f2eee3" fill-opacity="0.22"/>
 <rect x="1138" y="1066.05" width="99" height="1" fill="#f2eee3" fill-opacity="0.22"/>
 <rect x="1138" y="1029.61" width="1" height="37.44" fill="#f2eee3" fill-opacity="0.22"/>
-<text x="1151" y="1052.61" fill="#f2eee3" font-family="Poppins" font-size="13" font-weight="400" xml:space="preserve">Remove all</text>
+<text x="1151" y="1052.61" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="13" font-weight="400" xml:space="preserve">Remove all</text>
 <text x="63" y="1095.05" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="13" font-weight="400" xml:space="preserve">Double-tap an icon in the sheet to collect it, or press Add all.</text>
 <rect x="40" y="1114.48" width="1220" height="1" fill="#f2eee3" fill-opacity="0.22"/>
 <rect x="1259" y="1114.48" width="1" height="93.78" fill="#f2eee3" fill-opacity="0.22"/>

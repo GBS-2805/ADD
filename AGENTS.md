@@ -256,7 +256,9 @@ tools *inside* that app, not apps of their own.
   capture added to the shelf is checked without being added here -- and only then
   rewrites the origin in
   `tools/site.json` and the two app constants, so a failed deploy leaves the repo
-  pointing at the host that still serves. The token is the `VERCEL_TOKEN` secret, read
+  pointing at the host that still serves. It runs `tools/check_palette.py` before the
+  upload and refuses a palette that drifted, beside its stale-hash and
+  uncommitted-history stops. The token is the `VERCEL_TOKEN` secret, read
   from the environment and never an argument. Vercel has no per-deploy size cap.
   Sites (`manifest.json`, `tools/site.json`) remains a fallback and **caps a deploy at
   10 MiB for the whole folder**, refusing an oversize one with `invalid_type`, an error
@@ -321,7 +323,11 @@ tools *inside* that app, not apps of their own.
   `tools/site.json`. It reads the history
   first and refuses to bump
   while any note's label is not the catalog version of the commit that added
-  it; `--check-notes` runs that check alone. `--dry-run` writes nothing and prints
+  it; `--check-notes` runs that check alone. The palette check runs before any
+  label moves, so a colour that stopped following the palette fails the release
+  itself, not just the build. Once the catalog has moved it refreshes the generated
+  icon pages (`fetch_icons.py --pages-only`), which print the version and the APK's
+  file name from tokens and would otherwise stop the sweep. `--dry-run` writes nothing and prints
   the plan instead: the labels, a diff of each file, the artboards and captures
   that go stale with those pages, and the deploy headroom. Never replace version
   strings by hand — a blanket find-and-replace once relabelled twelve releases as
@@ -551,12 +557,35 @@ tools *inside* that app, not apps of their own.
   one asks for a theme attribute declared in `app/res/values/attrs.xml`, and
   `app/res/values/styles.xml` maps those attributes across six themes, `AppTheme`
   (green, dark page), `AppTheme.Light`, `AppTheme.Moss`, `AppTheme.Moss.Light`,
-  `AppTheme.Navy` and `AppTheme.Navy.Light`. `ThemePrefs` stores the pair and
-  `applyTheme()` sets the theme before `setContentView()`. Adding a palette is a block
+  `AppTheme.Navy` and `AppTheme.Navy.Light`.  `ThemePrefs` stores the pair and `applyTheme()` sets the theme before `setContentView()`. Adding a palette is a block
   of colours, a theme and one entry each in `Palette.IDS`, `LABELS`, `BANDS` and
   `WORDS` — never a second layout. The band is `res/layout/band.xml` and the side
   panel `res/layout/drawer.xml`, both included by `activity_main.xml`; `CompareActivity`
   inherits the themes and wears the same colours.
+- `python3 tools/check_palette.py` guards all of the above, site and app together. It
+  compares every palette block in `site.css` with `colors.xml`, requires all six themes
+  to set every attribute, holds the band in both modes, insists the mark on the band
+  wears the band's ink (it is tinted `?attr/ink`, so a themed `ink` is what keeps it
+  visible), refuses a literal colour in a layout or a `bg_` drawable and a glyph drawn
+  without a tint, and measures contrast — 4.5:1 for words, 3:1 for dim words and the
+  band's labels. `--browser http://127.0.0.1:8799/` adds `tools/check_palette.js`, the
+  half a stylesheet cannot prove: all six combinations are driven and it fails when a
+  pull-down paints anything but the page colour, a selected control leaves the band,
+  a disabled control looks enabled, the status-bar meta or the printed colour codes
+  disagree with the palette, or a colour is identical across all three palettes
+  (the preview stage is the one documented exception). `build.sh` runs the static
+  half before staging, so a drifted palette fails a build without a browser.
+- `python3 tools/check_all.py` is the single verdict: palette, asset hashes, site tree,
+  catalog, Figma structure, Pantone sheet, note dating and the staged bundle, one line
+  each, all of them run so one pass shows everything. `--browser <url>` and
+  `--artboards` add the two gates that need Chromium, and
+  `.github/workflows/checks.yml` runs the browserless set on every push. The APK build
+  stays local: it needs the JDK, the android-35 platform and the keystore.
+- Artboards go stale silently -- a board records nothing about the page it came from,
+  `check_figma.py` only proves it imports, and the bundler's timestamp comparison is
+  satisfied by one late re-export. `python3 tools/check_artboards.py` therefore
+  re-exports the boards into a scratch folder and fails when any file differs from
+  `figma/`; it reads `site-figma.svg` and `pantone.svg` as derived and skips them.
 
 ## The address is rented, not owned
 

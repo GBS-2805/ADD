@@ -70,15 +70,17 @@
 <text x="65" y="1602.14" fill="#f2eee3" font-family="Poppins" font-size="20" font-weight="400" xml:space="preserve">#0FBF92</text>
 <rect x="649" y="1528.7" width="1" height="106.44" fill="#f2eee3" fill-opacity="0.22"/>
 <text x="369.5" y="1567.7" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="13" font-weight="400" xml:space="preserve">Type · Page</text>
-<text x="369.5" y="1602.14" fill="#f2eee3" font-family="Poppins" font-size="20" font-weight="400" xml:space="preserve">#131513 / #F2EEE3</text>
+<text x="369.5" y="1602.14" fill="#f2eee3" font-family="Poppins" font-size="20" font-weight="400" xml:space="preserve">#131513</text>
+<text x="442.5" y="1602.14" fill="#f2eee3" font-family="Poppins" font-size="20" font-weight="400" xml:space="preserve">/</text>
+<text x="462.5" y="1602.14" fill="#f2eee3" font-family="Poppins" font-size="20" font-weight="400" xml:space="preserve">#F2EEE3</text>
 <rect x="953.5" y="1528.7" width="1" height="106.44" fill="#f2eee3" fill-opacity="0.22"/>
 <text x="674" y="1567.7" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="13" font-weight="400" xml:space="preserve">Font</text>
 <text x="674" y="1602.14" fill="#f2eee3" font-family="Poppins" font-size="20" font-weight="400" xml:space="preserve">Poppins 400 / 500 / 600</text>
 <text x="978.5" y="1567.7" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="13" font-weight="400" xml:space="preserve">Accent</text>
 <text x="978.5" y="1602.14" fill="#f2eee3" font-family="Poppins" font-size="20" font-weight="400" xml:space="preserve">#0FBF92</text>
 <text x="40" y="1674.14" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="16" font-weight="400" xml:space="preserve">Same values in</text>
-<text x="160" y="1674.14" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="16" font-weight="400" xml:space="preserve">docs/assets/site.1ed2cea139.css</text>
-<text x="412" y="1674.14" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="16" font-weight="400" xml:space="preserve">and each app's resources.</text>
+<text x="160" y="1674.14" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="16" font-weight="400" xml:space="preserve">docs/assets/site.56c11704f3.css</text>
+<text x="411" y="1674.14" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="16" font-weight="400" xml:space="preserve">and each app's resources.</text>
 <rect x="0" y="1769.73" width="1300" height="1" fill="#f2eee3" fill-opacity="0.22"/>
 <text x="40" y="1814.73" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">ADD 3.0 · app.offline.compress</text>
 <text x="950" y="1814.73" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">Download</text>

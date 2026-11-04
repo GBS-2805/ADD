@@ -7,7 +7,7 @@
 <link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml" />
 <title>Streamline — 997 icons, preview and variants</title>
 <meta name="description" content="Streamline: 997 Line, Duo, Solid and Flat icons, CC BY 4.0. Preview one, set weight, size and surface, copy the SVG." />
-<link rel="stylesheet" href="../../assets/site.1ed2cea139.css" />
+<link rel="stylesheet" href="../../assets/site.56c11704f3.css" />
 <style>
   /* Corners: one step for boxes and controls, a smaller one for menu rows. */
   :root { --r: 8px; --r-sm: 5px; }
@@ -35,7 +35,7 @@
     border-radius: var(--r);
     cursor: pointer;
   }
-  .export-btn:hover { background: rgba(217, 217, 217, .08); }
+  .export-btn:hover { background: var(--tint); }
   .export-btn:focus-visible { outline: 2px solid var(--band); outline-offset: -3px; }
   .export-btn .cat-chev { width: 18px; height: 18px; transition: transform .18s ease; }
   .export-btn[aria-expanded="true"] .cat-chev { transform: scaleY(-1); }
@@ -46,7 +46,9 @@
     left: 0;
     right: 0;
     padding: 6px;
-    background: #35417f;
+    /* The panel rides the palette like the band's pull-down: a page-coloured
+       surface with a rule and a shadow, never a colour of its own. */
+    background: var(--page);
     border: 1px solid var(--rule);
     box-shadow: 0 20px 44px rgba(0, 0, 0, .34);
   }
@@ -78,7 +80,7 @@
   .bulk-btn { display: block; width: 100%; margin: 12px 0 0; font: inherit; font-size: 14px;
     padding: 11px 14px; color: var(--on); background: transparent;
     border: 1px solid var(--rule); cursor: pointer; }
-  .bulk-btn[disabled] { color: var(--mute); border-color: var(--rule); cursor: default; }
+  .bulk-btn[disabled] { color: var(--on-dim); border-color: var(--rule); cursor: default; }
   .bulk-btn:hover { border-color: var(--on); }
   .bulk-btn:focus-visible { outline: 2px solid var(--band); outline-offset: 2px; }
   .preview-box {
@@ -172,7 +174,7 @@
     border-radius: var(--r);
     cursor: pointer;
   }
-  .copy-btn:hover { background: #ececec; }
+  .copy-btn:hover { background: var(--band-hover); }
   .copy-btn:focus-visible { outline: 2px solid var(--band); outline-offset: 2px; }
   .copy-btn svg { width: 17px; height: 17px; }
   .ctl-row { display: flex; align-items: center; gap: 12px; }
@@ -222,7 +224,7 @@
     border-radius: var(--r);
     cursor: pointer;
   }
-  .pop-copy:hover { background: #ececec; }
+  .pop-copy:hover { background: var(--band-hover); }
   .pop-close {
     appearance: none;
     display: grid;
@@ -276,7 +278,7 @@
     cursor: pointer;
   }
   .sel-btn:hover:not([disabled]) { border-color: var(--on); }
-  .sel-btn[disabled] { color: var(--mute); cursor: default; }
+  .sel-btn[disabled] { color: var(--on-dim); cursor: default; }
   .sel-btn:focus-visible { outline: 2px solid var(--band); outline-offset: 2px; }
   .sel-strip { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 0 22px 13px; }
   .sel-hint { margin: 0; font-size: 13px; color: var(--on-dim); }
@@ -313,7 +315,7 @@
     white-space: nowrap;
   }
   .add-all:hover:not([disabled]) { border-color: var(--on); }
-  .add-all[disabled] { color: var(--mute); cursor: default; }
+  .add-all[disabled] { color: var(--on-dim); cursor: default; }
   .add-all:focus-visible { outline: 2px solid var(--band); outline-offset: 2px; }
 
   /* the whole set lives behind one toggle so the page stays quiet */
@@ -384,7 +386,7 @@
     cursor: pointer;
     white-space: nowrap;
   }
-  .cat-btn:hover { background: rgba(217, 217, 217, .08); }
+  .cat-btn:hover { background: var(--tint); }
   .cat-btn:focus-visible { outline: 2px solid var(--band); outline-offset: -3px; }
   .cat-btn .cat-chev { width: 18px; height: 18px; transition: transform .18s ease; }
   .cat-btn[aria-expanded="true"] .cat-chev { transform: scaleY(-1); }
@@ -398,7 +400,7 @@
     max-height: 320px;
     overflow-y: auto;
     padding: 6px;
-    background: #35417f;
+    background: var(--page);
     border: 1px solid var(--rule);
     box-shadow: 0 20px 44px rgba(0, 0, 0, .34);
   }
@@ -449,7 +451,7 @@
     transition: background .09s;
     touch-action: manipulation;
   }
-  .icon-card:hover { background: rgba(217, 217, 217, .08); }
+  .icon-card:hover { background: var(--tint); }
   .icon-card:focus-visible { outline: 2px solid var(--band); outline-offset: -4px; }
   .icon-card[aria-pressed="true"] { background: var(--band); color: var(--ink); }
   .icon-card .glyph { display: grid; place-items: center; width: 30px; height: 30px; }
@@ -695,7 +697,7 @@
   .ink-cancel { color: var(--on); background: none; border: 1px solid var(--rule); }
   .ink-cancel:hover { border-color: var(--on); }
   .ink-set { color: var(--ink); background: var(--band); border: 0; }
-  .ink-set:hover { background: #ececec; }
+  .ink-set:hover { background: var(--band-hover); }
   .ink-set[disabled] { opacity: .45; cursor: default; }
   .preview-box[data-surface="black"] { color: var(--glyph, #fff); }
   .preview-box[data-surface="white"] { color: var(--glyph, #000); }
@@ -2379,6 +2381,6 @@
     });
 })();
 </script>
-<script src="../../assets/site.a45733d10a.js" defer></script>
+<script src="../../assets/site.fa863f703d.js" defer></script>
 </body>
 </html>

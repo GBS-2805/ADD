@@ -27,14 +27,12 @@
     <color name="green_rule">#38f2eee3</color>
     <color name="green_card">#232422</color>
     <color name="green_panel2">#2e2f2c</color>
-    <color name="green_ink">#131513</color>
     <color name="green_page_light">#f2eee3</color>
     <color name="green_on_light">#131513</color>
     <color name="green_on_dim_light">#a3131513</color>
     <color name="green_rule_light">#38131513</color>
     <color name="green_card_light">#e5e1d7</color>
     <color name="green_panel2_light">#d7d4ca</color>
-    <color name="green_ink_light">#f2eee3</color>
 
     <!-- Moss: #005043 band, #0e2a24 page, #e7ddce words, #d6e381 accent. -->
     <color name="moss_band">#005043</color>
@@ -50,14 +48,12 @@
     <color name="moss_rule">#3de7ddce</color>
     <color name="moss_card">#1d3730</color>
     <color name="moss_panel2">#284038</color>
-    <color name="moss_ink">#e7ddce</color>
     <color name="moss_page_light">#e7ddce</color>
     <color name="moss_on_light">#0e2a24</color>
     <color name="moss_on_dim_light">#a30e2a24</color>
     <color name="moss_rule_light">#380e2a24</color>
     <color name="moss_card_light">#dad2c4</color>
     <color name="moss_panel2_light">#cdc8ba</color>
-    <color name="moss_ink_light">#0e2a24</color>
 
     <!-- Navy: #242d55 band, #1c1d2f page, #a1b0c3 words, #72b6b4 accent. -->
     <color name="navy_band">#242d55</color>
@@ -73,14 +69,12 @@
     <color name="navy_rule">#38a1b0c3</color>
     <color name="navy_card">#27293b</color>
     <color name="navy_panel2">#2c2f41</color>
-    <color name="navy_ink">#a1b0c3</color>
     <color name="navy_page_light">#a1b0c3</color>
     <color name="navy_on_light">#1c1d2f</color>
     <color name="navy_on_dim_light">#a81c1d2f</color>
     <color name="navy_rule_light">#381c1d2f</color>
     <color name="navy_card_light">#98a6b9</color>
     <color name="navy_panel2_light">#919eb1</color>
-    <color name="navy_ink_light">#1c1d2f</color>
 
     <!-- The one functional exception: the same amber in every palette. -->
     <color name="warn">#ffc98a</color>

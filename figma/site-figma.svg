@@ -68,15 +68,17 @@
 <text xmlns="http://www.w3.org/2000/svg" x="65" y="1602.14" fill="#f2eee3" font-family="Poppins" font-size="20" font-weight="400" xml:space="preserve">#0FBF92</text>
 <rect xmlns="http://www.w3.org/2000/svg" x="649" y="1528.7" width="1" height="106.44" fill="#f2eee3" fill-opacity="0.22" />
 <text xmlns="http://www.w3.org/2000/svg" x="369.5" y="1567.7" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="13" font-weight="400" xml:space="preserve">Type · Page</text>
-<text xmlns="http://www.w3.org/2000/svg" x="369.5" y="1602.14" fill="#f2eee3" font-family="Poppins" font-size="20" font-weight="400" xml:space="preserve">#131513 / #F2EEE3</text>
+<text xmlns="http://www.w3.org/2000/svg" x="369.5" y="1602.14" fill="#f2eee3" font-family="Poppins" font-size="20" font-weight="400" xml:space="preserve">#131513</text>
+<text xmlns="http://www.w3.org/2000/svg" x="442.5" y="1602.14" fill="#f2eee3" font-family="Poppins" font-size="20" font-weight="400" xml:space="preserve">/</text>
+<text xmlns="http://www.w3.org/2000/svg" x="462.5" y="1602.14" fill="#f2eee3" font-family="Poppins" font-size="20" font-weight="400" xml:space="preserve">#F2EEE3</text>
 <rect xmlns="http://www.w3.org/2000/svg" x="953.5" y="1528.7" width="1" height="106.44" fill="#f2eee3" fill-opacity="0.22" />
 <text xmlns="http://www.w3.org/2000/svg" x="674" y="1567.7" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="13" font-weight="400" xml:space="preserve">Font</text>
 <text xmlns="http://www.w3.org/2000/svg" x="674" y="1602.14" fill="#f2eee3" font-family="Poppins" font-size="20" font-weight="400" xml:space="preserve">Poppins 400 / 500 / 600</text>
 <text xmlns="http://www.w3.org/2000/svg" x="978.5" y="1567.7" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="13" font-weight="400" xml:space="preserve">Accent</text>
 <text xmlns="http://www.w3.org/2000/svg" x="978.5" y="1602.14" fill="#f2eee3" font-family="Poppins" font-size="20" font-weight="400" xml:space="preserve">#0FBF92</text>
 <text xmlns="http://www.w3.org/2000/svg" x="40" y="1674.14" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="16" font-weight="400" xml:space="preserve">Same values in</text>
-<text xmlns="http://www.w3.org/2000/svg" x="160" y="1674.14" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="16" font-weight="400" xml:space="preserve">docs/assets/site.1ed2cea139.css</text>
-<text xmlns="http://www.w3.org/2000/svg" x="412" y="1674.14" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="16" font-weight="400" xml:space="preserve">and each app's resources.</text>
+<text xmlns="http://www.w3.org/2000/svg" x="160" y="1674.14" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="16" font-weight="400" xml:space="preserve">docs/assets/site.56c11704f3.css</text>
+<text xmlns="http://www.w3.org/2000/svg" x="411" y="1674.14" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="16" font-weight="400" xml:space="preserve">and each app's resources.</text>
 <rect xmlns="http://www.w3.org/2000/svg" x="0" y="1769.73" width="1300" height="1" fill="#f2eee3" fill-opacity="0.22" />
 <text xmlns="http://www.w3.org/2000/svg" x="40" y="1814.73" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">ADD 3.0 · app.offline.compress</text>
 <text xmlns="http://www.w3.org/2000/svg" x="950" y="1814.73" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">Download</text>
@@ -224,8 +226,8 @@
 <text xmlns="http://www.w3.org/2000/svg" x="40" y="2685.98" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">Updates keep your place in the browser. The app is signed once, so an update</text>
 <text xmlns="http://www.w3.org/2000/svg" x="40" y="2709.08" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">installs over the last build.</text>
 <rect xmlns="http://www.w3.org/2000/svg" x="0" y="2818.17" width="1300" height="1" fill="#f2eee3" fill-opacity="0.22" />
-<text xmlns="http://www.w3.org/2000/svg" x="40" y="2877.17" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">Icons 3.0 · app.offline.icons · Lineicons, Coolicons, Phosphor and Streamline. Every set is MIT except Streamline, which is CC BY 4.0. The paid icons sold on the vendors' sites are</text>
-<text xmlns="http://www.w3.org/2000/svg" x="40" y="2900.27" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">neither included nor copied.</text>
+<text xmlns="http://www.w3.org/2000/svg" x="40" y="2877.17" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">Icons 3.0 · app.offline.compress · Lineicons, Coolicons, Phosphor and Streamline. Every set is MIT except Streamline, which is CC BY 4.0. The paid icons sold on the vendors'</text>
+<text xmlns="http://www.w3.org/2000/svg" x="40" y="2900.27" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">sites are neither included nor copied.</text>
 <text xmlns="http://www.w3.org/2000/svg" x="40" y="2963.36" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">Index</text>
 <text xmlns="http://www.w3.org/2000/svg" x="77" y="2963.36" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">·</text>
 <text xmlns="http://www.w3.org/2000/svg" x="88" y="2963.36" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">Tools</text>
@@ -654,7 +656,7 @@
 <rect xmlns="http://www.w3.org/2000/svg" x="1234" y="811.39" width="1" height="47.09" fill="#f2eee3" fill-opacity="0.22" />
 <rect xmlns="http://www.w3.org/2000/svg" x="650.56" y="857.48" width="584.44" height="1" fill="#f2eee3" fill-opacity="0.22" />
 <rect xmlns="http://www.w3.org/2000/svg" x="650.56" y="811.39" width="1" height="47.09" fill="#f2eee3" fill-opacity="0.22" />
-<text xmlns="http://www.w3.org/2000/svg" x="881.78" y="839.39" fill="#f2eee3" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">Nothing to export</text>
+<text xmlns="http://www.w3.org/2000/svg" x="881.78" y="839.39" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">Nothing to export</text>
 <text xmlns="http://www.w3.org/2000/svg" x="650.56" y="887.48" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="13" font-weight="400" xml:space="preserve">Loading 606 icons…</text>
 <rect xmlns="http://www.w3.org/2000/svg" x="40" y="1015.61" width="1220" height="1" fill="#f2eee3" fill-opacity="0.22" />
 <rect xmlns="http://www.w3.org/2000/svg" x="1259" y="1015.61" width="1" height="98.88" fill="#f2eee3" fill-opacity="0.22" />
@@ -665,12 +667,12 @@
 <rect xmlns="http://www.w3.org/2000/svg" x="1129" y="1029.61" width="1" height="37.44" fill="#f2eee3" fill-opacity="0.22" />
 <rect xmlns="http://www.w3.org/2000/svg" x="988" y="1066.05" width="142" height="1" fill="#f2eee3" fill-opacity="0.22" />
 <rect xmlns="http://www.w3.org/2000/svg" x="988" y="1029.61" width="1" height="37.44" fill="#f2eee3" fill-opacity="0.22" />
-<text xmlns="http://www.w3.org/2000/svg" x="1001" y="1052.61" fill="#f2eee3" font-family="Poppins" font-size="13" font-weight="400" xml:space="preserve">Remove selected</text>
+<text xmlns="http://www.w3.org/2000/svg" x="1001" y="1052.61" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="13" font-weight="400" xml:space="preserve">Remove selected</text>
 <rect xmlns="http://www.w3.org/2000/svg" x="1138" y="1029.61" width="99" height="1" fill="#f2eee3" fill-opacity="0.22" />
 <rect xmlns="http://www.w3.org/2000/svg" x="1236" y="1029.61" width="1" height="37.44" fill="#f2eee3" fill-opacity="0.22" />
 <rect xmlns="http://www.w3.org/2000/svg" x="1138" y="1066.05" width="99" height="1" fill="#f2eee3" fill-opacity="0.22" />
 <rect xmlns="http://www.w3.org/2000/svg" x="1138" y="1029.61" width="1" height="37.44" fill="#f2eee3" fill-opacity="0.22" />
-<text xmlns="http://www.w3.org/2000/svg" x="1151" y="1052.61" fill="#f2eee3" font-family="Poppins" font-size="13" font-weight="400" xml:space="preserve">Remove all</text>
+<text xmlns="http://www.w3.org/2000/svg" x="1151" y="1052.61" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="13" font-weight="400" xml:space="preserve">Remove all</text>
 <text xmlns="http://www.w3.org/2000/svg" x="63" y="1095.05" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="13" font-weight="400" xml:space="preserve">Double-tap an icon in the sheet to collect it, or press Add all.</text>
 <rect xmlns="http://www.w3.org/2000/svg" x="40" y="1114.48" width="1220" height="1" fill="#f2eee3" fill-opacity="0.22" />
 <rect xmlns="http://www.w3.org/2000/svg" x="1259" y="1114.48" width="1" height="93.78" fill="#f2eee3" fill-opacity="0.22" />
@@ -816,7 +818,7 @@
 <rect xmlns="http://www.w3.org/2000/svg" x="1234" y="811.39" width="1" height="47.09" fill="#f2eee3" fill-opacity="0.22" />
 <rect xmlns="http://www.w3.org/2000/svg" x="650.56" y="857.48" width="584.44" height="1" fill="#f2eee3" fill-opacity="0.22" />
 <rect xmlns="http://www.w3.org/2000/svg" x="650.56" y="811.39" width="1" height="47.09" fill="#f2eee3" fill-opacity="0.22" />
-<text xmlns="http://www.w3.org/2000/svg" x="881.78" y="839.39" fill="#f2eee3" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">Nothing to export</text>
+<text xmlns="http://www.w3.org/2000/svg" x="881.78" y="839.39" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">Nothing to export</text>
 <text xmlns="http://www.w3.org/2000/svg" x="650.56" y="887.48" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="13" font-weight="400" xml:space="preserve">Loading 1,258 icons…</text>
 <rect xmlns="http://www.w3.org/2000/svg" x="40" y="1015.61" width="1220" height="1" fill="#f2eee3" fill-opacity="0.22" />
 <rect xmlns="http://www.w3.org/2000/svg" x="1259" y="1015.61" width="1" height="98.88" fill="#f2eee3" fill-opacity="0.22" />
@@ -827,12 +829,12 @@
 <rect xmlns="http://www.w3.org/2000/svg" x="1129" y="1029.61" width="1" height="37.44" fill="#f2eee3" fill-opacity="0.22" />
 <rect xmlns="http://www.w3.org/2000/svg" x="988" y="1066.05" width="142" height="1" fill="#f2eee3" fill-opacity="0.22" />
 <rect xmlns="http://www.w3.org/2000/svg" x="988" y="1029.61" width="1" height="37.44" fill="#f2eee3" fill-opacity="0.22" />
-<text xmlns="http://www.w3.org/2000/svg" x="1001" y="1052.61" fill="#f2eee3" font-family="Poppins" font-size="13" font-weight="400" xml:space="preserve">Remove selected</text>
+<text xmlns="http://www.w3.org/2000/svg" x="1001" y="1052.61" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="13" font-weight="400" xml:space="preserve">Remove selected</text>
 <rect xmlns="http://www.w3.org/2000/svg" x="1138" y="1029.61" width="99" height="1" fill="#f2eee3" fill-opacity="0.22" />
 <rect xmlns="http://www.w3.org/2000/svg" x="1236" y="1029.61" width="1" height="37.44" fill="#f2eee3" fill-opacity="0.22" />
 <rect xmlns="http://www.w3.org/2000/svg" x="1138" y="1066.05" width="99" height="1" fill="#f2eee3" fill-opacity="0.22" />
 <rect xmlns="http://www.w3.org/2000/svg" x="1138" y="1029.61" width="1" height="37.44" fill="#f2eee3" fill-opacity="0.22" />
-<text xmlns="http://www.w3.org/2000/svg" x="1151" y="1052.61" fill="#f2eee3" font-family="Poppins" font-size="13" font-weight="400" xml:space="preserve">Remove all</text>
+<text xmlns="http://www.w3.org/2000/svg" x="1151" y="1052.61" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="13" font-weight="400" xml:space="preserve">Remove all</text>
 <text xmlns="http://www.w3.org/2000/svg" x="63" y="1095.05" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="13" font-weight="400" xml:space="preserve">Double-tap an icon in the sheet to collect it, or press Add all.</text>
 <rect xmlns="http://www.w3.org/2000/svg" x="40" y="1114.48" width="1220" height="1" fill="#f2eee3" fill-opacity="0.22" />
 <rect xmlns="http://www.w3.org/2000/svg" x="1259" y="1114.48" width="1" height="93.78" fill="#f2eee3" fill-opacity="0.22" />
@@ -991,7 +993,7 @@
 <rect xmlns="http://www.w3.org/2000/svg" x="1234" y="866.48" width="1" height="47.09" fill="#f2eee3" fill-opacity="0.22" />
 <rect xmlns="http://www.w3.org/2000/svg" x="650.56" y="912.58" width="584.44" height="1" fill="#f2eee3" fill-opacity="0.22" />
 <rect xmlns="http://www.w3.org/2000/svg" x="650.56" y="866.48" width="1" height="47.09" fill="#f2eee3" fill-opacity="0.22" />
-<text xmlns="http://www.w3.org/2000/svg" x="881.78" y="894.48" fill="#f2eee3" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">Nothing to export</text>
+<text xmlns="http://www.w3.org/2000/svg" x="881.78" y="894.48" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">Nothing to export</text>
 <text xmlns="http://www.w3.org/2000/svg" x="650.56" y="942.58" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="13" font-weight="400" xml:space="preserve">Loading 997 icons…</text>
 <rect xmlns="http://www.w3.org/2000/svg" x="40" y="1015.61" width="1220" height="1" fill="#f2eee3" fill-opacity="0.22" />
 <rect xmlns="http://www.w3.org/2000/svg" x="1259" y="1015.61" width="1" height="98.88" fill="#f2eee3" fill-opacity="0.22" />
@@ -1002,12 +1004,12 @@
 <rect xmlns="http://www.w3.org/2000/svg" x="1129" y="1029.61" width="1" height="37.44" fill="#f2eee3" fill-opacity="0.22" />
 <rect xmlns="http://www.w3.org/2000/svg" x="988" y="1066.05" width="142" height="1" fill="#f2eee3" fill-opacity="0.22" />
 <rect xmlns="http://www.w3.org/2000/svg" x="988" y="1029.61" width="1" height="37.44" fill="#f2eee3" fill-opacity="0.22" />
-<text xmlns="http://www.w3.org/2000/svg" x="1001" y="1052.61" fill="#f2eee3" font-family="Poppins" font-size="13" font-weight="400" xml:space="preserve">Remove selected</text>
+<text xmlns="http://www.w3.org/2000/svg" x="1001" y="1052.61" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="13" font-weight="400" xml:space="preserve">Remove selected</text>
 <rect xmlns="http://www.w3.org/2000/svg" x="1138" y="1029.61" width="99" height="1" fill="#f2eee3" fill-opacity="0.22" />
 <rect xmlns="http://www.w3.org/2000/svg" x="1236" y="1029.61" width="1" height="37.44" fill="#f2eee3" fill-opacity="0.22" />
 <rect xmlns="http://www.w3.org/2000/svg" x="1138" y="1066.05" width="99" height="1" fill="#f2eee3" fill-opacity="0.22" />
 <rect xmlns="http://www.w3.org/2000/svg" x="1138" y="1029.61" width="1" height="37.44" fill="#f2eee3" fill-opacity="0.22" />
-<text xmlns="http://www.w3.org/2000/svg" x="1151" y="1052.61" fill="#f2eee3" font-family="Poppins" font-size="13" font-weight="400" xml:space="preserve">Remove all</text>
+<text xmlns="http://www.w3.org/2000/svg" x="1151" y="1052.61" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="13" font-weight="400" xml:space="preserve">Remove all</text>
 <text xmlns="http://www.w3.org/2000/svg" x="63" y="1095.05" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="13" font-weight="400" xml:space="preserve">Double-tap an icon in the sheet to collect it, or press Add all.</text>
 <rect xmlns="http://www.w3.org/2000/svg" x="40" y="1114.48" width="1220" height="1" fill="#f2eee3" fill-opacity="0.22" />
 <rect xmlns="http://www.w3.org/2000/svg" x="1259" y="1114.48" width="1" height="93.78" fill="#f2eee3" fill-opacity="0.22" />
@@ -1129,9 +1131,9 @@
 <text xmlns="http://www.w3.org/2000/svg" x="40" y="2039.22" fill="#f2eee3" font-family="Poppins" font-size="30" font-weight="400" letter-spacing="-0.45" xml:space="preserve">How it is wired</text>
 <text xmlns="http://www.w3.org/2000/svg" x="40" y="2071.72" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">Two families, no network</text>
 <text xmlns="http://www.w3.org/2000/svg" x="40" y="2124.81" fill="#f2eee3" font-family="Poppins" font-size="17" font-weight="500" xml:space="preserve">Site</text>
-<rect xmlns="http://www.w3.org/2000/svg" x="225" y="2105.81" width="242" height="26" fill="#f2eee3" fill-opacity="0.07" />
-<text xmlns="http://www.w3.org/2000/svg" x="231" y="2124.81" fill="#f2eee3" font-family="Poppins" font-size="17" font-weight="400" xml:space="preserve">assets/site.1ed2cea139.css</text>
-<text xmlns="http://www.w3.org/2000/svg" x="467" y="2124.81" fill="#f2eee3" font-family="Poppins" font-size="17" font-weight="400" xml:space="preserve">sets the site's own Poppins faces; this page declares every downloaded style from</text>
+<rect xmlns="http://www.w3.org/2000/svg" x="225" y="2105.81" width="236" height="26" fill="#f2eee3" fill-opacity="0.07" />
+<text xmlns="http://www.w3.org/2000/svg" x="231" y="2124.81" fill="#f2eee3" font-family="Poppins" font-size="17" font-weight="400" xml:space="preserve">assets/site.56c11704f3.css</text>
+<text xmlns="http://www.w3.org/2000/svg" x="461" y="2124.81" fill="#f2eee3" font-family="Poppins" font-size="17" font-weight="400" xml:space="preserve">sets the site's own Poppins faces; this page declares every downloaded style from</text>
 <rect xmlns="http://www.w3.org/2000/svg" x="225" y="2133.86" width="154" height="26" fill="#f2eee3" fill-opacity="0.07" />
 <text xmlns="http://www.w3.org/2000/svg" x="231" y="2152.86" fill="#f2eee3" font-family="Poppins" font-size="17" font-weight="400" xml:space="preserve">/data/fonts.json</text>
 <text xmlns="http://www.w3.org/2000/svg" x="379" y="2152.86" fill="#f2eee3" font-family="Poppins" font-size="17" font-weight="400" xml:space="preserve">.</text>
@@ -2154,15 +2156,17 @@
 <text xmlns="http://www.w3.org/2000/svg" x="65" y="1818.14" fill="#f2eee3" font-family="Poppins" font-size="20" font-weight="400" xml:space="preserve">#0FBF92</text>
 <rect xmlns="http://www.w3.org/2000/svg" x="649" y="1744.7" width="1" height="106.44" fill="#f2eee3" fill-opacity="0.22" />
 <text xmlns="http://www.w3.org/2000/svg" x="369.5" y="1783.7" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="13" font-weight="400" xml:space="preserve">Type · Page</text>
-<text xmlns="http://www.w3.org/2000/svg" x="369.5" y="1818.14" fill="#f2eee3" font-family="Poppins" font-size="20" font-weight="400" xml:space="preserve">#131513 / #F2EEE3</text>
+<text xmlns="http://www.w3.org/2000/svg" x="369.5" y="1818.14" fill="#f2eee3" font-family="Poppins" font-size="20" font-weight="400" xml:space="preserve">#131513</text>
+<text xmlns="http://www.w3.org/2000/svg" x="442.5" y="1818.14" fill="#f2eee3" font-family="Poppins" font-size="20" font-weight="400" xml:space="preserve">/</text>
+<text xmlns="http://www.w3.org/2000/svg" x="462.5" y="1818.14" fill="#f2eee3" font-family="Poppins" font-size="20" font-weight="400" xml:space="preserve">#F2EEE3</text>
 <rect xmlns="http://www.w3.org/2000/svg" x="953.5" y="1744.7" width="1" height="106.44" fill="#f2eee3" fill-opacity="0.22" />
 <text xmlns="http://www.w3.org/2000/svg" x="674" y="1783.7" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="13" font-weight="400" xml:space="preserve">Font</text>
 <text xmlns="http://www.w3.org/2000/svg" x="674" y="1818.14" fill="#f2eee3" font-family="Poppins" font-size="20" font-weight="400" xml:space="preserve">Poppins 400 / 500 / 600</text>
 <text xmlns="http://www.w3.org/2000/svg" x="978.5" y="1783.7" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="13" font-weight="400" xml:space="preserve">Accent</text>
 <text xmlns="http://www.w3.org/2000/svg" x="978.5" y="1818.14" fill="#f2eee3" font-family="Poppins" font-size="20" font-weight="400" xml:space="preserve">#0FBF92</text>
 <text xmlns="http://www.w3.org/2000/svg" x="40" y="1890.14" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="16" font-weight="400" xml:space="preserve">Same values in</text>
-<text xmlns="http://www.w3.org/2000/svg" x="160" y="1890.14" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="16" font-weight="400" xml:space="preserve">docs/assets/site.1ed2cea139.css</text>
-<text xmlns="http://www.w3.org/2000/svg" x="412" y="1890.14" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="16" font-weight="400" xml:space="preserve">and each app's resources.</text>
+<text xmlns="http://www.w3.org/2000/svg" x="160" y="1890.14" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="16" font-weight="400" xml:space="preserve">docs/assets/site.56c11704f3.css</text>
+<text xmlns="http://www.w3.org/2000/svg" x="411" y="1890.14" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="16" font-weight="400" xml:space="preserve">and each app's resources.</text>
 <rect xmlns="http://www.w3.org/2000/svg" x="0" y="1985.73" width="1300" height="1" fill="#f2eee3" fill-opacity="0.22" />
 <text xmlns="http://www.w3.org/2000/svg" x="40" y="2030.73" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">ADD 3.0 · app.offline.compress</text>
 <text xmlns="http://www.w3.org/2000/svg" x="950" y="2030.73" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">Download</text>
@@ -2274,15 +2278,17 @@
 <text xmlns="http://www.w3.org/2000/svg" x="65" y="1602.14" fill="#f2eee3" font-family="Poppins" font-size="20" font-weight="400" xml:space="preserve">#0FBF92</text>
 <rect xmlns="http://www.w3.org/2000/svg" x="649" y="1528.7" width="1" height="106.44" fill="#f2eee3" fill-opacity="0.22" />
 <text xmlns="http://www.w3.org/2000/svg" x="369.5" y="1567.7" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="13" font-weight="400" xml:space="preserve">Type · Page</text>
-<text xmlns="http://www.w3.org/2000/svg" x="369.5" y="1602.14" fill="#f2eee3" font-family="Poppins" font-size="20" font-weight="400" xml:space="preserve">#131513 / #F2EEE3</text>
+<text xmlns="http://www.w3.org/2000/svg" x="369.5" y="1602.14" fill="#f2eee3" font-family="Poppins" font-size="20" font-weight="400" xml:space="preserve">#131513</text>
+<text xmlns="http://www.w3.org/2000/svg" x="442.5" y="1602.14" fill="#f2eee3" font-family="Poppins" font-size="20" font-weight="400" xml:space="preserve">/</text>
+<text xmlns="http://www.w3.org/2000/svg" x="462.5" y="1602.14" fill="#f2eee3" font-family="Poppins" font-size="20" font-weight="400" xml:space="preserve">#F2EEE3</text>
 <rect xmlns="http://www.w3.org/2000/svg" x="953.5" y="1528.7" width="1" height="106.44" fill="#f2eee3" fill-opacity="0.22" />
 <text xmlns="http://www.w3.org/2000/svg" x="674" y="1567.7" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="13" font-weight="400" xml:space="preserve">Font</text>
 <text xmlns="http://www.w3.org/2000/svg" x="674" y="1602.14" fill="#f2eee3" font-family="Poppins" font-size="20" font-weight="400" xml:space="preserve">Poppins 400 / 500 / 600</text>
 <text xmlns="http://www.w3.org/2000/svg" x="978.5" y="1567.7" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="13" font-weight="400" xml:space="preserve">Accent</text>
 <text xmlns="http://www.w3.org/2000/svg" x="978.5" y="1602.14" fill="#f2eee3" font-family="Poppins" font-size="20" font-weight="400" xml:space="preserve">#0FBF92</text>
 <text xmlns="http://www.w3.org/2000/svg" x="40" y="1674.14" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="16" font-weight="400" xml:space="preserve">Same values in</text>
-<text xmlns="http://www.w3.org/2000/svg" x="160" y="1674.14" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="16" font-weight="400" xml:space="preserve">docs/assets/site.1ed2cea139.css</text>
-<text xmlns="http://www.w3.org/2000/svg" x="412" y="1674.14" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="16" font-weight="400" xml:space="preserve">and each app's resources.</text>
+<text xmlns="http://www.w3.org/2000/svg" x="160" y="1674.14" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="16" font-weight="400" xml:space="preserve">docs/assets/site.56c11704f3.css</text>
+<text xmlns="http://www.w3.org/2000/svg" x="411" y="1674.14" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="16" font-weight="400" xml:space="preserve">and each app's resources.</text>
 <rect xmlns="http://www.w3.org/2000/svg" x="0" y="1769.73" width="1300" height="1" fill="#f2eee3" fill-opacity="0.22" />
 <text xmlns="http://www.w3.org/2000/svg" x="40" y="1814.73" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">ADD 3.0 · app.offline.compress</text>
 <text xmlns="http://www.w3.org/2000/svg" x="950" y="1814.73" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">Download</text>

@@ -16,7 +16,7 @@
         <item name="accent">@color/green_accent</item>
         <item name="accentInk">@color/green_accent_ink</item>
         <item name="label">@color/green_label</item>
-        <item name="ink">@color/green_ink</item>
+        <item name="ink">@color/green_band_ink</item>
         <item name="warn">@color/warn</item>
         <item name="warnBg">@color/green_card</item>
         <item name="shadow">#00000000</item>
@@ -48,7 +48,7 @@
         <item name="accent">@color/green_accent</item>
         <item name="accentInk">@color/green_accent_ink</item>
         <item name="label">@color/green_label</item>
-        <item name="ink">@color/green_ink_light</item>
+        <item name="ink">@color/green_band_ink</item>
         <item name="warn">@color/warn</item>
         <item name="warnBg">@color/green_card_light</item>
         <item name="shadow">#00000000</item>
@@ -79,7 +79,7 @@
         <item name="accent">@color/moss_accent</item>
         <item name="accentInk">@color/moss_accent_ink</item>
         <item name="label">@color/moss_label</item>
-        <item name="ink">@color/moss_ink</item>
+        <item name="ink">@color/moss_band_ink</item>
         <item name="warn">@color/warn</item>
         <item name="warnBg">@color/moss_card</item>
         <item name="shadow">#00000000</item>
@@ -111,7 +111,7 @@
         <item name="accent">@color/moss_accent</item>
         <item name="accentInk">@color/moss_accent_ink</item>
         <item name="label">@color/moss_label</item>
-        <item name="ink">@color/moss_ink_light</item>
+        <item name="ink">@color/moss_band_ink</item>
         <item name="warn">@color/warn</item>
         <item name="warnBg">@color/moss_card_light</item>
         <item name="shadow">#00000000</item>
@@ -142,7 +142,7 @@
         <item name="accent">@color/navy_accent</item>
         <item name="accentInk">@color/navy_accent_ink</item>
         <item name="label">@color/navy_label</item>
-        <item name="ink">@color/navy_ink</item>
+        <item name="ink">@color/navy_band_ink</item>
         <item name="warn">@color/warn</item>
         <item name="warnBg">@color/navy_card</item>
         <item name="shadow">#00000000</item>
@@ -173,7 +173,7 @@
         <item name="accent">@color/navy_accent</item>
         <item name="accentInk">@color/navy_accent_ink</item>
         <item name="label">@color/navy_label</item>
-        <item name="ink">@color/navy_ink_light</item>
+        <item name="ink">@color/navy_band_ink</item>
         <item name="warn">@color/warn</item>
         <item name="warnBg">@color/navy_card_light</item>
         <item name="shadow">#00000000</item>

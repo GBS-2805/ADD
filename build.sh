@@ -142,6 +142,14 @@ check_fallback() {
 }
 
 
+# The palette, not the build: colours.xml against site.css, all six themes against
+# the attributes, and every layout against the theme. No browser needed, which is why
+# this half runs here; `tools/check_palette.py --browser <url>` adds the rendered one.
+check_palette() {
+    echo "== palette: site and app =="
+    python3 "$ROOT/tools/check_palette.py"
+}
+
 # The unified app: the shelf's web tools (icons, fonts) staged out of docs/ into the
 # one package that also carries the native compressor. Same rule as the Icons build --
 # the pages, their catalogs, the stylesheet and Poppins are copied, never re-authored.
@@ -181,12 +189,14 @@ HTML
 # ADD ships the shelf's web tools and the native compressor in one package.
 case "${1:-add}" in
     add)
+        check_palette
         stage_shelf_assets
         build_app app ADD ADD-3.0.apk 32 3.0
         check_fallback "$OUT/ADD-3.0.apk"
         ;;
     stage)
         # Stage only: no JDK or SDK needed, which is how the bundle harness runs.
+        check_palette
         stage_shelf_assets
         ;;
     *)

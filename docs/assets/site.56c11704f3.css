@@ -110,7 +110,9 @@ html[data-palette="navy"] {
 html[data-theme="light"] {
   color-scheme: light;
   --page: var(--pal-page-light);
-  --ink: var(--pal-ink-light);
+  /* The band does not turn over with the page: it keeps its own words in both modes.
+     Green's light twin is cream, which on the lime band measured 1.5:1. */
+  --ink: var(--pal-band-ink);
   --on: var(--pal-on-light);
   --on-dim: var(--pal-on-light-dim);
   --rule: var(--pal-rule-light);
@@ -189,7 +191,7 @@ a { color: inherit; }
 .menu-btn[aria-expanded="true"] .chev { transform: scaleY(-1); }
 .menu-btn:focus-visible,
 .burger:focus-visible,
-.drawer-close:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+.drawer-close:focus-visible { outline: 2px solid var(--on); outline-offset: 2px; }
 .page-name {
   font-size: 26px;
   line-height: 1;
@@ -255,7 +257,7 @@ a { color: inherit; }
 .menu a span { font-size: 13px; color: var(--on-dim); }
 .menu a:hover { text-decoration: underline; }
 .menu a[aria-current="page"] { font-weight: 500; }
-.menu a:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+.menu a:focus-visible { outline: 2px solid var(--on); outline-offset: 2px; }
 
 /* ---------- right: side pull-out tab, three destinations ---------- */
 .scrim {
@@ -312,7 +314,7 @@ a { color: inherit; }
 .drawer a span { font-size: 13px; color: var(--on-dim); }
 .drawer a:hover { text-decoration: underline; }
 .drawer a[aria-current="page"] { font-weight: 500; }
-.drawer a:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+.drawer a:focus-visible { outline: 2px solid var(--on); outline-offset: 2px; }
 .drawer .drawer-note { margin: 14px 0 0; font-size: 12px; line-height: 1.5; color: var(--on-dim); }
 
 /* ---------- page ---------- */
@@ -373,7 +375,7 @@ h1 {
 .ctas { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 34px; }
 .ctas .cta { margin-top: 0; }
 .cta.ghost { background: none; border: 1px solid var(--rule); color: var(--on); }
-.cta.ghost:hover { background: rgba(217, 217, 217, .08); }
+.cta.ghost:hover { background: var(--tint); }
 section { padding: 64px 0; border-top: 1px solid var(--rule); }
 h2 { margin: 0 0 8px; font-size: 30px; font-weight: 400; line-height: 1.25; letter-spacing: -.015em; }
 h2 .pill { margin-left: 12px; vertical-align: middle; }

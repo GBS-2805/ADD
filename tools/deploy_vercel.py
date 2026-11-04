@@ -133,10 +133,39 @@ def assets_current():
                  + (done.stdout or done.stderr).strip())
 
 
+def palette_problems():
+    """What the palette check says, as the lines worth printing and its verdict."""
+    done = subprocess.run([sys.executable, str(ROOT / "tools/check_palette.py")],
+                          cwd=ROOT, capture_output=True, text=True)
+    output = (done.stdout or "") + (done.stderr or "")
+    verdict = next((line for line in output.splitlines() if line.startswith("palette:")), "")
+    if done.returncode == 0:
+        return [], verdict
+    return [line.rstrip() for line in output.splitlines()
+            if line.strip() and not line.strip().startswith("contrast ")], verdict
+
+
+def palette_current():
+    """Stop when a page or the app has stopped following the palette.
+
+    The upload puts the shelf in front of readers, and the app ships the same colours,
+    so a drifted palette is a visual regression with the live address on it. The check
+    is static and needs only python -- no browser and no token -- which is why it runs
+    before the upload rather than after a reader finds a colour of its own.
+    """
+    problems, verdict = palette_problems()
+    if problems:
+        sys.exit("the palette check failed, so nothing was uploaded:\n  "
+                 + "\n  ".join(problems[-10:])
+                 + "\n  run python3 tools/check_palette.py for the whole report")
+    print("  " + verdict)
+
+
 def deploy():
     if not os.environ.get("VERCEL_TOKEN"):
         sys.exit("VERCEL_TOKEN is not set. Add it in this project under Settings -> "
                  "Secrets, then run again; --check works without it.")
+    palette_current()
     assets_current()
     refresh_history()
     cmd = [*CLI, "deploy", "docs", "--prod", "--yes",
@@ -231,6 +260,9 @@ def main():
     if args.check:
         print(f"\nwould deploy docs/ as project {PROJECT!r}, then check {len(site_routes())} routes "
               f"and rewrite the {len(files)} files above")
+        problems, verdict = palette_problems()
+        print("palette       " + (verdict.replace("palette: ", "", 1) if verdict else
+                                 "FAILED - the deploy would refuse the upload"))
         print("VERCEL_TOKEN is set" if os.environ.get("VERCEL_TOKEN") else
               "VERCEL_TOKEN is not set - deploy would stop here")
         return

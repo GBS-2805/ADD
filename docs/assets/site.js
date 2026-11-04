@@ -42,8 +42,30 @@
     } catch (error) { /* blocked store: fall through to green */ }
     return "green";
   }
+  // A page that prints the palette's codes reads them back out of the stylesheet
+  // instead of carrying a second copy: [data-code="band"] takes --pal-band, so the
+  // values under "The system" follow the chosen palette rather than staying green.
+  function syncCodes() {
+    var slots = document.querySelectorAll("[data-code]");
+    if (!slots.length) return;
+    var live = getComputedStyle(document.documentElement);
+    for (var i = 0; i < slots.length; i++) {
+      var hex = live.getPropertyValue("--pal-" + slots[i].getAttribute("data-code")).trim();
+      if (hex) slots[i].textContent = hex.toUpperCase();
+    }
+  }
+  // A phone paints its status bar from the theme-color meta, which is otherwise stuck
+  // on green whatever palette is live: give it the band the page is actually wearing.
+  function syncBandMeta() {
+    var meta = document.querySelector('meta[name="theme-color"]');
+    if (!meta) return;
+    var band = getComputedStyle(document.documentElement).getPropertyValue("--pal-band").trim();
+    if (band) meta.setAttribute("content", band);
+  }
   function applyPalette(id) {
     document.documentElement.setAttribute("data-palette", id);
+    syncCodes();
+    syncBandMeta();
     var row = document.getElementById("palRow");
     if (!row) return;
     var chips = row.querySelectorAll(".pal");
