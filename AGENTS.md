@@ -153,7 +153,7 @@ or handed to someone else. Folder ids live in `tools/site.json` under `drive`; r
 them from there rather than searching Drive by name, which also finds unrelated
 `renders` folders.
 
-- **`figma/`** holds the current 27 files (26 artboards plus `site-figma.svg`) and only the
+- **`figma/`** holds the current 28 files (26 artboards plus `site-figma.svg` and `pantone.svg`) and only the
   current generation. Upload the new set, then delete every file in the folder that
   is not in it -- old artboards go to Drive's trash, not into an `old/` folder.
   Nested `old/` folders are how three generations once piled up there.
@@ -383,8 +383,7 @@ tools *inside* that app, not apps of their own.
   into `docs/figma/`, which the site does serve, so every artboard can be
   downloaded from a phone at `/figma/<file>`, and writes the listing at `/figma/`.
   Each artboard carries Poppins 400/500/600 as base64 woff2, because a file that
-  only names the family renders in the viewer's fallback sans. `figma/` stays the
-  source. Re-run the
+  only names the family renders in the viewer's fallback sans. `figma/` stays the source. `tools/pantone_sheet.py` writes `figma/pantone.svg`, the colour reference: the nearest Solid Coated chip for every solid colour the three palettes declare, two alternatives for each, and the nearest textile TCX, matched against the vendored `tools/pantone-data.json` by CIEDE2000. It reads `site.css`, so a palette change makes `--check` fail until it is re-run; never hand-edit that sheet. Re-run the
   exporter after a visual change, then the bundle and the publish step; never edit
   the SVGs. `tools/check_figma.py` gates all three: it fails when a text run lacks its
   own family, size or fill, or when a file paints a mark with `<use>`, because Figma

@@ -441,13 +441,13 @@ ol.steps li::before {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   margin-top: 30px;
-  border-top: 1px solid var(--rule);
-  border-bottom: 1px solid var(--rule);
+  border: 1px solid var(--rule);
 }
-/* Four cells, a rule on the right of every one of them -- including the last,
-   which the frame closes the row with -- and a taller cell than the text needs. */
+/* The sheet is closed on all four sides. Only top, bottom and a right rule per cell
+   were drawn, so the left edge sat open against the page; the last cell no longer
+   needs its own right rule once the frame draws it. */
 .specs div { padding: 24px 24px 26px; border-right: 1px solid var(--rule); }
-.specs div:first-child { padding-left: 0; }
+.specs div:last-child { border-right: 0; }
 .specs dt { margin: 0 0 8px; font-size: 13px; color: var(--on-dim); }
 .specs dd { margin: 0; font-size: 20px; line-height: 1.35; }
 

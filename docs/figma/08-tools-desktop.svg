@@ -185,19 +185,20 @@
 <text x="40" y="3713.2" fill="#f2eee3" font-family="Poppins" font-size="30" font-weight="400" letter-spacing="-0.45" xml:space="preserve">Under the hood</text>
 <text x="40" y="3745.7" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">No SDKs, no analytics, no network</text>
 <rect x="40" y="3782.8" width="1220" height="1" fill="#f2eee3" fill-opacity="0.22"/>
+<rect x="1259" y="3782.8" width="1" height="108.44" fill="#f2eee3" fill-opacity="0.22"/>
 <rect x="40" y="3890.23" width="1220" height="1" fill="#f2eee3" fill-opacity="0.22"/>
-<rect x="344" y="3783.8" width="1" height="106.44" fill="#f2eee3" fill-opacity="0.22"/>
-<text x="40" y="3822.8" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="13" font-weight="400" xml:space="preserve">Network permission</text>
-<text x="40" y="3857.23" fill="#f2eee3" font-family="Poppins" font-size="20" font-weight="400" xml:space="preserve">None, in any tool</text>
+<rect x="40" y="3782.8" width="1" height="108.44" fill="#f2eee3" fill-opacity="0.22"/>
+<rect x="344.5" y="3783.8" width="1" height="106.44" fill="#f2eee3" fill-opacity="0.22"/>
+<text x="65" y="3822.8" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="13" font-weight="400" xml:space="preserve">Network permission</text>
+<text x="65" y="3857.23" fill="#f2eee3" font-family="Poppins" font-size="20" font-weight="400" xml:space="preserve">None, in any tool</text>
 <rect x="649" y="3783.8" width="1" height="106.44" fill="#f2eee3" fill-opacity="0.22"/>
-<text x="369" y="3822.8" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="13" font-weight="400" xml:space="preserve">Storage permission</text>
-<text x="369" y="3857.23" fill="#f2eee3" font-family="Poppins" font-size="20" font-weight="400" xml:space="preserve">None (Android 10+)</text>
-<rect x="954" y="3783.8" width="1" height="106.44" fill="#f2eee3" fill-opacity="0.22"/>
+<text x="369.5" y="3822.8" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="13" font-weight="400" xml:space="preserve">Storage permission</text>
+<text x="369.5" y="3857.23" fill="#f2eee3" font-family="Poppins" font-size="20" font-weight="400" xml:space="preserve">None (Android 10+)</text>
+<rect x="953.5" y="3783.8" width="1" height="106.44" fill="#f2eee3" fill-opacity="0.22"/>
 <text x="674" y="3822.8" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="13" font-weight="400" xml:space="preserve">Code</text>
 <text x="674" y="3857.23" fill="#f2eee3" font-family="Poppins" font-size="20" font-weight="400" xml:space="preserve">Platform APIs only</text>
-<rect x="1259" y="3783.8" width="1" height="106.44" fill="#f2eee3" fill-opacity="0.22"/>
-<text x="979" y="3822.8" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="13" font-weight="400" xml:space="preserve">Min Android</text>
-<text x="979" y="3857.23" fill="#f2eee3" font-family="Poppins" font-size="20" font-weight="400" xml:space="preserve">8.0 / API 26</text>
+<text x="978.5" y="3822.8" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="13" font-weight="400" xml:space="preserve">Min Android</text>
+<text x="978.5" y="3857.23" fill="#f2eee3" font-family="Poppins" font-size="20" font-weight="400" xml:space="preserve">8.0 / API 26</text>
 <rect x="40" y="3972.23" width="1220" height="1" fill="#f2eee3" fill-opacity="0.22"/>
 <text x="40" y="4066.23" fill="#f2eee3" font-family="Poppins" font-size="30" font-weight="400" letter-spacing="-0.45" xml:space="preserve">Release notes</text>
 <text x="40" y="4098.73" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">Newest first, with the day and the size</text>

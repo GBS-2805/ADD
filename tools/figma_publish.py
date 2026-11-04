@@ -11,6 +11,7 @@ serving both names duplicated 181 KB the deploy budget does not have.
     python3 tools/figma_publish.py
 """
 import html
+import json
 import pathlib
 import re
 import shutil
@@ -19,6 +20,7 @@ import sys
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 from hash_assets import pin  # noqa: E402 - the tools directory is on the path above
 from check_figma import check as figma_problems  # noqa: E402 - same directory
+from pantone_sheet import DATA, nearest, order_roles, palettes, pretty  # noqa: E402 - same directory
 
 SRC = pathlib.Path("figma")
 DST = pathlib.Path("docs/figma")
@@ -34,6 +36,10 @@ RENAME = [
     (re.compile(r"^\d+-index-drawer-phone\.svg$"), "side-tab-phone.svg"),
 ]
 BUNDLE = "site-figma.svg"
+
+# The Pantone sheet is not an artboard of a page: it is handed over beside them, under
+# its own heading. tools/pantone_sheet.py writes it from the palettes in site.css.
+SHEET = "pantone.svg"
 
 # The listing counts the run in words, so it has to be told what the run has.
 WORDS = {19: "Nineteen", 20: "Twenty", 21: "Twenty-one", 22: "Twenty-two",
@@ -80,10 +86,60 @@ def human(n):
     return "%.0f KB" % (n / 1024) if n < 1048576 else "%.0f MB" % (n / 1048576)
 
 
+def palette_cards():
+    """Every solid colour of the three palettes, built the way the sheet builds them.
+
+    Each row opens with the site's own colour, then the nearest Pantone chip and two
+    alternatives side by side, every one carrying a square of its own colour so the eye
+    reads the colour before the code. No image is involved: the page is built from
+    site.css and tools/pantone-data.json, the same two files figma/pantone.svg is.
+    """
+    data = json.loads(DATA.read_text())
+    coated, tcx = data["coated"], data["tcx"]
+    cards = []
+    for name, roles in palettes():
+        rows = []
+        for hexv, role_list in roles.items():
+            done = order_roles(role_list)
+            picks = nearest(coated, hexv, count=3)
+            twin = nearest(tcx, hexv, count=1)[0][1]
+            cells = []
+            for i, (dist, chip, _) in enumerate(picks):
+                extra = ""
+                if i == 0:
+                    extra = '<em class="tcx">%s %s</em>' % (
+                        html.escape(twin["code"]),
+                        html.escape(twin["name"].replace("-", " ").title()))
+                cells.append(
+                    '<span class="pm"><i style="background:%s"></i>'
+                    '<span class="txt"><b>%s</b><code>%s</code><em>\u0394E %.1f</em>%s</span></span>'
+                    % (html.escape(chip["hex"]), html.escape(pretty(chip["code"])),
+                       chip["hex"].upper(), dist, extra))
+            also = [r.replace("-", " ") for r in done[1:]]
+            note = ('<em class="also">also %s</em>' % html.escape(", ".join(also[:3]))) if also else ""
+            rows.append(
+                '<li><i class="own" style="background:%s"></i>'
+                '<div class="role"><b>%s</b><code>%s</code>%s</div>'
+                '<div class="alts">%s</div></li>'
+                % (html.escape(hexv), html.escape(done[0].replace("-", " ")),
+                   hexv.upper(), note, "".join(cells)))
+        cards.append('<article class="palette"><h3>%s</h3><ul class="swatches">%s</ul></article>'
+                     % (name.title(), "".join(rows)))
+    return ('<section class="palettes">\n  <h2>Palettes</h2>\n'
+            '  <p class="note">Every solid colour the site ships, then its nearest Pantone Solid '
+            'Coated chip and two alternatives, each with a square of its own colour. '
+            '<b>\u0394E00 is how far a chip sits from the colour</b>: 0 is the same colour, under 3 '
+            'cannot be told apart by eye, 3 to 5 is a close but visible step, and over 5 is a '
+            'different shade kept only as a further option. The same table is handed over as '
+            '<a href="pantone.svg">pantone.svg</a>.</p>\n  %s\n</section>\n  '
+            % "".join(cards))
+
+
 def listing(names):
     facts = {n: describe(DST / n) + (human((DST / n).stat().st_size),) for n in names}
-    count = len([n for n in names if n.endswith(".svg") and n != BUNDLE])
-    lede = "%s artboards of this site, and the desktop set on one canvas." % WORDS.get(count, count)
+    count = len([n for n in names if n.endswith(".svg") and n not in (BUNDLE, SHEET)])
+    lede = ("%s sketch artboards of this site, the desktop set on one canvas, and every colour the "
+            "three palettes declare.") % WORDS.get(count, count)
 
     def item(name):
         title, dims, size = facts[name]
@@ -104,6 +160,7 @@ def listing(names):
         + group("Pages, phone", phone)
         + group("Navigation, open", states)
         + group("The desktop set on one canvas", [BUNDLE] if BUNDLE in names else [])
+        + group("Colour reference", [SHEET] if SHEET in names else [])
     )
     return """<!DOCTYPE html>
 <html lang="en">
@@ -111,8 +168,8 @@ def listing(names):
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta name="theme-color" content="#0fbf92" />
-<meta name="description" content="Every page as a Figma-importable artboard, and the whole set on one canvas." />
-<title>Figma hand-off — every artboard of this site</title>
+<meta name="description" content="Every page as a Figma-importable artboard, the whole set on one canvas, and the Pantone match for every palette colour." />
+<title>Design files — every sketch and every palette</title>
 <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml" />
 <link rel="stylesheet" href="../assets/site.css" />
 <script src="../assets/site.js" defer></script>
@@ -128,23 +185,52 @@ def listing(names):
   li a:hover { text-decoration: underline; }
   li span { flex: none; font-size: 13px; color: var(--on-dim); white-space: nowrap; }
   .back { margin: 40px 0 0; font-size: 15px; }
+  .palettes { margin: 46px 0 0; }
+  .palettes h2 { margin-top: 0; }
+  .palette { margin: 24px 0 0; padding-top: 16px; border-top: 1px solid var(--rule); }
+  .palette h3 { margin: 0 0 6px; font-size: 17px; font-weight: 500; }
+  ul.swatches { list-style: none; margin: 0; padding: 0; }
+  ul.swatches li {
+    display: grid; grid-template-columns: 44px minmax(8rem, 1fr) minmax(0, 3fr);
+    gap: 16px; align-items: start; padding: 12px 0; border-bottom: 1px solid var(--rule); font-size: 13px;
+  }
+  ul.swatches .own { display: block; width: 44px; height: 32px; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .18); }
+  ul.swatches .role { display: flex; flex-direction: column; gap: 1px; }
+  ul.swatches .role b { font-size: 14px; font-weight: 500; }
+  ul.swatches .role code { padding: 0; background: none; color: var(--on-dim); }
+  ul.swatches .also { font-style: normal; font-size: 11.5px; color: var(--on-dim); }
+  ul.swatches .alts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+  ul.swatches .pm { display: flex; align-items: flex-start; gap: 8px; min-width: 0; }
+  ul.swatches .pm i { flex: none; width: 14px; height: 14px; margin-top: 3px; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .2); }
+  ul.swatches .pm .txt { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+  ul.swatches .pm b { font-size: 13px; font-weight: 500; line-height: 1.35; overflow-wrap: anywhere; }
+  ul.swatches .pm code { padding: 0; background: none; color: var(--on-dim); font-size: 11px; }
+  ul.swatches .pm em { font-style: normal; font-size: 11px; color: var(--on-dim); }
+  ul.swatches .pm .tcx { font-size: 10.5px; }
+  ul.swatches .role b, ul.swatches .role code { overflow-wrap: anywhere; }
   @media (max-width: 700px) {
     main { padding: 32px 20px 48px; }
     h1 { font-size: 30px; }
     li { flex-wrap: wrap; gap: 2px 14px; }
+    ul.swatches li { grid-template-columns: 30px minmax(0, 1fr); gap: 4px 12px; padding: 12px 0; }
+    ul.swatches .own { width: 30px; height: 30px; }
+    ul.swatches .alts { grid-column: 2; gap: 10px 14px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    ul.swatches .pm b { font-size: 12px; }
+    ul.swatches .pm code { display: none; }
+    ul.swatches .pm .tcx { display: none; }
   }
 </style>
 </head>
 <body>
 <main>
-  <h1>Figma hand-off</h1>
+  <h1>Design files</h1>
   <p class="lede">%s</p>
-  <p class="note">Each file is the page as Chromium laid it out: real text, a rect per box, PNG marks, Poppins embedded. Drag one into Figma for editable layers.</p>
-  %s<p class="back"><a href="../">← Back to the site</a></p>
+  <p class="note">Each artboard is the page as Chromium laid it out: real text, a rect per box, PNG marks, Poppins embedded. Drag one into Figma for editable layers. The palettes below are read from the stylesheet the site actually ships.</p>
+  %s%s<p class="back"><a href="../">← Back to the site</a></p>
 </main>
 </body>
 </html>
-""" % (lede, body)
+""" % (lede, body, palette_cards())
 
 
 def stale_export():
@@ -196,12 +282,15 @@ def main():
                      % (name, wanted[name].name, artboard.name))
         wanted[name] = artboard
     wanted[BUNDLE] = bundle
+    sheet = SRC / SHEET
+    if sheet.exists():
+        wanted[SHEET] = sheet
 
     dropped = sorted(p.name for p in DST.glob("*.svg") if p.name not in wanted)
     for name in dropped:
         (DST / name).unlink()
     for name, artboard in wanted.items():
-        if name == BUNDLE:
+        if name in (BUNDLE, SHEET):
             shutil.copyfile(artboard, DST / name)
         else:
             (DST / name).write_text(one_payload(artboard.read_text()))

@@ -14,19 +14,20 @@
 <text x="40" y="303.52" fill="#f2eee3" font-family="Poppins" font-size="20" font-weight="400" xml:space="preserve">Three things built here: the Compress app, the icon</text>
 <text x="40" y="334.52" fill="#f2eee3" font-family="Poppins" font-size="20" font-weight="400" xml:space="preserve">browser and this site.</text>
 <rect x="40" y="373.52" width="1220" height="1" fill="#f2eee3" fill-opacity="0.22"/>
+<rect x="1259" y="373.52" width="1" height="108.44" fill="#f2eee3" fill-opacity="0.22"/>
 <rect x="40" y="480.95" width="1220" height="1" fill="#f2eee3" fill-opacity="0.22"/>
-<rect x="344" y="374.52" width="1" height="106.44" fill="#f2eee3" fill-opacity="0.22"/>
-<text x="40" y="413.52" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="13" font-weight="400" xml:space="preserve">Projects</text>
-<text x="40" y="447.95" fill="#f2eee3" font-family="Poppins" font-size="20" font-weight="400" xml:space="preserve">3</text>
+<rect x="40" y="373.52" width="1" height="108.44" fill="#f2eee3" fill-opacity="0.22"/>
+<rect x="344.5" y="374.52" width="1" height="106.44" fill="#f2eee3" fill-opacity="0.22"/>
+<text x="65" y="413.52" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="13" font-weight="400" xml:space="preserve">Projects</text>
+<text x="65" y="447.95" fill="#f2eee3" font-family="Poppins" font-size="20" font-weight="400" xml:space="preserve">3</text>
 <rect x="649" y="374.52" width="1" height="106.44" fill="#f2eee3" fill-opacity="0.22"/>
-<text x="369" y="413.52" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="13" font-weight="400" xml:space="preserve">App shipping</text>
-<text x="369" y="447.95" fill="#f2eee3" font-family="Poppins" font-size="20" font-weight="400" xml:space="preserve">1</text>
-<rect x="954" y="374.52" width="1" height="106.44" fill="#f2eee3" fill-opacity="0.22"/>
+<text x="369.5" y="413.52" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="13" font-weight="400" xml:space="preserve">App shipping</text>
+<text x="369.5" y="447.95" fill="#f2eee3" font-family="Poppins" font-size="20" font-weight="400" xml:space="preserve">1</text>
+<rect x="953.5" y="374.52" width="1" height="106.44" fill="#f2eee3" fill-opacity="0.22"/>
 <text x="674" y="413.52" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="13" font-weight="400" xml:space="preserve">Third-party libraries</text>
 <text x="674" y="447.95" fill="#f2eee3" font-family="Poppins" font-size="20" font-weight="400" xml:space="preserve">0</text>
-<rect x="1259" y="374.52" width="1" height="106.44" fill="#f2eee3" fill-opacity="0.22"/>
-<text x="979" y="413.52" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="13" font-weight="400" xml:space="preserve">Year</text>
-<text x="979" y="447.95" fill="#f2eee3" font-family="Poppins" font-size="20" font-weight="400" xml:space="preserve">2026</text>
+<text x="978.5" y="413.52" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="13" font-weight="400" xml:space="preserve">Year</text>
+<text x="978.5" y="447.95" fill="#f2eee3" font-family="Poppins" font-size="20" font-weight="400" xml:space="preserve">2026</text>
 <rect x="40" y="538.95" width="1220" height="1" fill="#f2eee3" fill-opacity="0.22"/>
 <text x="40" y="632.95" fill="#f2eee3" font-family="Poppins" font-size="30" font-weight="400" letter-spacing="-0.45" xml:space="preserve">The work</text>
 <text x="40" y="665.45" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">What each one does, and what I did</text>

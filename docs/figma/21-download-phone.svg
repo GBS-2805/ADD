@@ -32,19 +32,21 @@
 <image x="81" y="590.45" width="20" height="20" xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADwAAAA8CAYAAAA6/NlyAAADTUlEQVR4Aexa3U4TQRSe2YrbpHQXGhUT8A+J7yAXRH0Gb40XlPgY4mMY4Cl8AxXv9NIrg9GkXgJbbroEGL9vEgjdbpuddmbLwjTntGfOnDnnfPNtNt3JBuKGfTzg6064Z9gzfM12wF/SrgmNoqjVbDXbVNqu62Xzl8pwo9G4L26Jn4EItqi04VvINuVyXCrg2u3aaynkBUDa9LkEmM1dKmAhxZ1sA/DdHfA5dJQL2CGQoqk94KI7VdU4z3BVmSva901jWHjARS+NqsZ5hqvKXNG+PcNFd6qqcZ7hqjJXtG/PcNGdqmqcNYZnZ2fvxa14O56Lt5rN5uCDvuEO2c53Xt4a4GAm2EXSdfxZbQe3gh/1uP4E47EkjuNlHP18x2KdT85I5sZwcrECOJ6P30kpVy7akeJBWAu/1OfrDy98BQ29piY+I3wJqgVnX89wyrmuBxN+WQE8pIfFUIbfNIAhAVk3Y7kG/kWoE7ECODlIPgol9nI6JOjd+lz9Uc5cnwsxj4eCRe6j/aOdvgVjDqwAZu1Upa/w24FmZSkMwnPQKjuJsdLMBuFX2HnMdlKRvsScFbEGuHfY+yNOxRq6ygO9CNAENHgjU+LpUGaF6DBn76D3F3ktiBDWALObJEn2wPQq7DzQS1LIt5jrE9zs3sCRz6xKV5kT89bEKmB2RTZGgGZIEe0wB3MVCTaJsQ6YxXWjp2JNCfWPYxPVa7BW5zBZWDDWCWDW5qV4rI6fw867vOHOlQ7XcG3urAWnM8DsTbMEtjRrdIxQHYNYvWZE3KRTTgGzObJF1mCPYto5s6ivxTlgViFrvAnBzgPt7AaFegNSCmBWJWh1ol7Qvqz0ce6yz6VdGmCC6Ha7v9LTdBn2jjgT27Tpw7g0KRUwUfWS3u9kP2knh8kGbfrK1NIBlwkur5YHnLcr18k3FsN8vwonEO2oFW1OQ3XtKGqNQ4Qx4Mald63w9PN+GjrJO17GgHG41veu1Ti7bGMNNnqBvZjmMgZsWsBxvDTKj2BjwPhf/EkpdYK1UxX2wF5MmzAGzKMcFFo5E2cbeML5MA1lbfbAXpwDZgEWwinidne/uzkNZW32wF5M1Zhh0wJXLd4DvmqM2O7HM2x7R69avhvH8H8AAAD//0Rl8NwAAAAGSURBVAMA4sTfiLlxDoMAAAAASUVORK5CYII="/>
 <text x="113" y="606.42" fill="#0f120f" font-family="Poppins" font-size="17" font-weight="400" xml:space="preserve">Download ADD-3.0.apk</text>
 <rect x="20" y="657.45" width="350" height="1" fill="#f2eee3" fill-opacity="0.22"/>
+<rect x="369" y="657.45" width="1" height="457.75" fill="#f2eee3" fill-opacity="0.22"/>
 <rect x="20" y="1114.2" width="350" height="1" fill="#f2eee3" fill-opacity="0.22"/>
-<text x="20" y="697.45" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="13" font-weight="400" xml:space="preserve">File size</text>
-<text x="20" y="731.89" fill="#f2eee3" font-family="Poppins" font-size="20" font-weight="400" xml:space="preserve">2 MB</text>
-<rect x="20" y="764.89" width="350" height="1" fill="#f2eee3" fill-opacity="0.22"/>
-<text x="44" y="804.89" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="13" font-weight="400" xml:space="preserve">Minimum Android</text>
-<text x="44" y="839.33" fill="#f2eee3" font-family="Poppins" font-size="20" font-weight="400" xml:space="preserve">8.0 / API 26</text>
-<rect x="20" y="872.33" width="350" height="1" fill="#f2eee3" fill-opacity="0.22"/>
-<text x="44" y="912.33" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="13" font-weight="400" xml:space="preserve">Bundled</text>
-<text x="44" y="946.77" fill="#f2eee3" font-family="Poppins" font-size="20" font-weight="400" xml:space="preserve">icons, fonts and the</text>
-<text x="44" y="973.77" fill="#f2eee3" font-family="Poppins" font-size="20" font-weight="400" xml:space="preserve">compressor</text>
-<rect x="20" y="1006.77" width="350" height="1" fill="#f2eee3" fill-opacity="0.22"/>
-<text x="44" y="1046.77" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="13" font-weight="400" xml:space="preserve">Updated</text>
-<text x="44" y="1081.2" fill="#f2eee3" font-family="Poppins" font-size="20" font-weight="400" xml:space="preserve">4 Nov 2026</text>
+<rect x="20" y="657.45" width="1" height="457.75" fill="#f2eee3" fill-opacity="0.22"/>
+<text x="45" y="697.45" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="13" font-weight="400" xml:space="preserve">File size</text>
+<text x="45" y="731.89" fill="#f2eee3" font-family="Poppins" font-size="20" font-weight="400" xml:space="preserve">2 MB</text>
+<rect x="21" y="764.89" width="348" height="1" fill="#f2eee3" fill-opacity="0.22"/>
+<text x="45" y="804.89" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="13" font-weight="400" xml:space="preserve">Minimum Android</text>
+<text x="45" y="839.33" fill="#f2eee3" font-family="Poppins" font-size="20" font-weight="400" xml:space="preserve">8.0 / API 26</text>
+<rect x="21" y="872.33" width="348" height="1" fill="#f2eee3" fill-opacity="0.22"/>
+<text x="45" y="912.33" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="13" font-weight="400" xml:space="preserve">Bundled</text>
+<text x="45" y="946.77" fill="#f2eee3" font-family="Poppins" font-size="20" font-weight="400" xml:space="preserve">icons, fonts and the</text>
+<text x="45" y="973.77" fill="#f2eee3" font-family="Poppins" font-size="20" font-weight="400" xml:space="preserve">compressor</text>
+<rect x="21" y="1006.77" width="348" height="1" fill="#f2eee3" fill-opacity="0.22"/>
+<text x="45" y="1046.77" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="13" font-weight="400" xml:space="preserve">Updated</text>
+<text x="45" y="1081.2" fill="#f2eee3" font-family="Poppins" font-size="20" font-weight="400" xml:space="preserve">4 Nov 2026</text>
 <text x="20" y="1153.2" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="16" font-weight="400" xml:space="preserve">One app, not two: the icon browser and the</text>
 <text x="20" y="1178.8" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="16" font-weight="400" xml:space="preserve">fonts page ship inside it as offline web tools,</text>
 <text x="20" y="1204.39" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="16" font-weight="400" xml:space="preserve">and the compressor is native. The icon</text>
