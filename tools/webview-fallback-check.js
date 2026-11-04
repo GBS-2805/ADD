@@ -20,7 +20,7 @@ const root = path.join(__dirname, "..");
 const args = process.argv.slice(2);
 const staticOnly = args.includes("--static");
 const positional = args.filter((a) => a !== "--static");
-const apk = positional[0] || path.join(root, "docs", "Icons-2.19.apk");
+const apk = positional[0] || path.join(root, "docs", "Icons-2.20.apk");
 const shot = positional[1] || path.join(root, "artifacts", "fallback-offline.png");
 
 const dex = execFileSync("unzip", ["-p", apk, "classes.dex"], { maxBuffer: 96 * 1024 * 1024 });

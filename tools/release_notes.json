@@ -1,6 +1,12 @@
 {
   "notes": [
     {
+      "id": "add",
+      "version": "3.0",
+      "title": "One app, three tools",
+      "note": "Icons, Fonts and Compress ship as one package: the shelf's web tools run from a bundle inside the APK, the compressor stays native, and the pull-down lists all three."
+    },
+    {
       "id": "compress",
       "version": "2.3",
       "title": "The site's palettes, band and side panel",

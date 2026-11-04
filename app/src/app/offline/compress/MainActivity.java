@@ -57,6 +57,12 @@ public class MainActivity extends Activity {
     private static final String STATE_DONE_ORIGINAL = "doneOriginal";
     private static final String STATE_DONE_COMPRESSED = "doneCompressed";
 
+    /** Set on the intent before a recreate, so the panel survives a look change. */
+    private static final String EXTRA_DRAWER = "drawerOpen";
+
+    /** Below this width the band's two descriptor lines run under its mark. */
+    private static final int NARROW_BAND = 400;
+
     private static final int[] MAX_DIMENSIONS = {0, 1280, 1920, 2560, 3200, 4096};
     private static final int QUALITY_BASE = 45;
 
@@ -401,6 +407,17 @@ public class MainActivity extends Activity {
         openInBrowser(SITE_URL + path);
     }
 
+    /**
+     * Opens one of the shelf's web tools, which ship inside the APK: no network, no
+     * second app, and the same pages the site serves.
+     */
+    private void openShelf(String tool) {
+        Intent intent = new Intent(this, ShelfActivity.class);
+        intent.putExtra(ShelfActivity.EXTRA_PAGE, tool);
+        startActivity(intent);
+        closeDrawer();
+    }
+
     private void openInBrowser(String url) {
         try {
             startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
@@ -419,21 +436,32 @@ public class MainActivity extends Activity {
         final View drawer = findViewById(R.id.drawer);
         final View scrim = findViewById(R.id.scrim);
 
+        // The site's rule, kept here: the page name opens the panel it names, and the
+        // mark goes to the shelf. Neither is a link to another app screen.
         findViewById(R.id.burger).setOnClickListener(v -> openDrawer());
+        findViewById(R.id.bandName).setOnClickListener(v -> openDrawer());
+        findViewById(R.id.bandMark).setOnClickListener(v -> openSite());
         findViewById(R.id.drawerClose).setOnClickListener(v -> closeDrawer());
         scrim.setOnClickListener(v -> closeDrawer());
+
+        // The pull-down is the tool list: Icons and Fonts are the shelf's web tools and
+        // open offline in their own screen; Compress is this screen, so its row closes
+        // the panel.
+        findViewById(R.id.linkIcons).setOnClickListener(v -> openShelf("icons"));
+        findViewById(R.id.linkFonts).setOnClickListener(v -> openShelf("fonts"));
+        findViewById(R.id.linkCompress).setOnClickListener(v -> closeDrawer());
 
         link(R.id.linkDownload, "download/");
         link(R.id.linkPortfolio, "portfolio/");
         link(R.id.linkRenders, "renders/");
         link(R.id.linkReleases, "releases/");
 
-        TextView theme = findViewById(R.id.themeButton);
-        theme.setText(ThemePrefs.isDark(this) ? "Dark" : "Light");
-        findViewById(R.id.themeRow).setOnClickListener(v -> {
-            ThemePrefs.toggleDark(this);
-            recreate();
-        });
+        // The site drops the band's descriptor on a phone, where the two lines and
+        // the centred mark cannot both fit; the app does the same rather than let
+        // them overlap.
+        if (getResources().getConfiguration().screenWidthDp < NARROW_BAND) {
+            findViewById(R.id.bandDescriptors).setVisibility(View.GONE);
+        }
 
         buildPaletteRow();
 
@@ -460,6 +488,14 @@ public class MainActivity extends Activity {
             return insets;
         });
         drawer.requestApplyInsets();
+
+        // A palette or theme change recreates the activity, and this runs last so the
+        // panel is not pushed off screen after being opened: picking a colour must not
+        // shut the panel it was picked in.
+        if (getIntent().getBooleanExtra(EXTRA_DRAWER, false)) {
+            getIntent().removeExtra(EXTRA_DRAWER);
+            openDrawerNow();
+        }
     }
 
     private void link(int id, final String path) {
@@ -491,32 +527,37 @@ public class MainActivity extends Activity {
                 .start();
     }
 
-    /** The three chips, drawn in their own palette's band with the current one ringed. */
+    /**
+     * The chips and the switch, drawn by PaletteRow: picking either one stores it and
+     * repaints, so the panel shows the choice it just made rather than closing on it.
+     */
     private void buildPaletteRow() {
-        LinearLayout row = findViewById(R.id.palRow);
-        row.removeAllViews();
-        String current = ThemePrefs.palette(this);
-        for (int i = 0; i < Palette.IDS.length; i++) {
-            final String id = Palette.IDS[i];
-            View chip = new View(this);
-            LinearLayout.LayoutParams params =
-                    new LinearLayout.LayoutParams(dp(26), dp(26));
-            params.setMarginEnd(dp(8));
-            chip.setLayoutParams(params);
-            chip.setContentDescription(Palette.LABELS[i] + " palette");
+        PaletteRow.fill(findViewById(R.id.palRow),
+                ThemePrefs.palette(this), ThemePrefs.isDark(this),
+                id -> {
+                    ThemePrefs.setPalette(this, id);
+                    repaintKeepingDrawer();
+                },
+                () -> {
+                    ThemePrefs.toggleDark(this);
+                    repaintKeepingDrawer();
+                });
+    }
 
-            GradientDrawable disc = new GradientDrawable();
-            disc.setShape(GradientDrawable.OVAL);
-            disc.setColor(Palette.BANDS[i]);
-            disc.setStroke(dp(current.equals(id) ? 2 : 1), Palette.WORDS[i]);
-            chip.setBackground(disc);
+    /** Recreate for the new colours, with the panel left open across the rebuild. */
+    private void repaintKeepingDrawer() {
+        getIntent().putExtra(EXTRA_DRAWER, true);
+        recreate();
+    }
 
-            chip.setOnClickListener(v -> {
-                ThemePrefs.setPalette(this, id);
-                recreate();
-            });
-            row.addView(chip);
-        }
+    /** Show the panel fully open, without the slide, for the frame after a recreate. */
+    private void openDrawerNow() {
+        final View drawer = findViewById(R.id.drawer);
+        final View scrim = findViewById(R.id.scrim);
+        drawer.setVisibility(View.VISIBLE);
+        drawer.setTranslationX(0f);
+        scrim.setVisibility(View.VISIBLE);
+        scrim.setAlpha(1f);
     }
 
     /** A theme attribute as a packed colour. */

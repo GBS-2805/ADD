@@ -66,6 +66,8 @@
     menu.setAttribute("data-open", open ? "true" : "false");
     menuBtn.setAttribute("aria-expanded", open ? "true" : "false");
     menuBtn.setAttribute("aria-label", open ? "Close sections" : "Open sections");
+    var name = document.querySelector(".page-name");
+    if (name) name.setAttribute("aria-expanded", open ? "true" : "false");
   }
 
   function setDrawer(open) {
@@ -161,6 +163,25 @@
     phone.className = "who-lines phone";
     phone.innerHTML = '<p class="big">ADD</p><p class="sub">Art &#8226; Design &#8226; Database</p>';
     who.insertBefore(phone, who.firstChild);
+  }
+
+  // The name in the band names the pull-down sitting beside it, so tapping it opens
+  // that instead of walking back to the index. The mark in the middle of the band is
+  // the way home, from any depth; its href is set from the stylesheet's own path so a
+  // page nested two folders deep still reaches the shelf.
+  var markLink = document.querySelector(".bar .mark") || document.querySelector("header .mark");
+  if (markLink) markLink.setAttribute("href", rootPrefix());
+
+  var nameLink = document.querySelector(".page-name");
+  if (nameLink) {
+    nameLink.setAttribute("role", "button");
+    nameLink.setAttribute("aria-controls", "menu");
+    nameLink.addEventListener("click", function (event) {
+      event.preventDefault();
+      var open = menu.getAttribute("data-open") !== "true";
+      setMenu(open);
+      if (open) setDrawer(false);
+    });
   }
 
   menuBtn.addEventListener("click", function () {

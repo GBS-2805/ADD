@@ -10,7 +10,7 @@ follows from it: the catalog entry, the build case, the labels and the note's ap
 In order, it moves:
 
   * tools/catalog.json            version, versionCode, APK name
-  * build.sh                      both the `icons` and `all` build cases
+  * build.sh                      the one `add` build case
   * every live version label      the shelf pages, README, AGENTS, the capture list
   * tools/release_notes.json      one new note at the top, above the newest
 
@@ -304,7 +304,8 @@ PAGE_OF = {"docs/index.html": "/", "docs/icons/index.html": "/icons/",
 SLUG_OF = {"/": "index", "/icons/": "icons", "/tools/": "tools", "/download/": "download"}
 STATES = ("pull-down-desktop", "pull-down-phone", "side-tab-desktop", "side-tab-phone")
 BUDGET = 10485760
-APPS = {"icons": "Icons", "compress": "Compress"}
+# One app. The id is the catalog's, and the name is what the APK is called.
+APPS = {"add": "ADD"}
 
 
 def human(number):
@@ -559,8 +560,8 @@ def main():
                         help="a deploy CLI to run instead of printing the Sites request")
     parser.add_argument("--check-notes", action="store_true",
                         help="only verify the release notes against the history, change nothing")
-    parser.add_argument("--app", choices=sorted(APPS), default="icons",
-                        help="which tool to move (default: icons)")
+    parser.add_argument("--app", choices=sorted(APPS), default="add",
+                        help="which tool to move (only add, since the merge)")
     parser.add_argument("--dry-run", action="store_true", help="print the edits, write nothing")
     args = parser.parse_args()
 

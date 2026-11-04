@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  The side tab, as on the site: four destinations off the shelf, then the theme
-  toggle and the three palette chips at the foot, under the note.
+  The side tab, as on the site: four destinations off the shelf, the note, and the
+  palette chips with the light/dark switch closing that row at the foot of the
+  panel. The spacer before the foot pushes that row to the bottom, so the panel
+  reads as a panel rather than a list with a hole under it, and the switch stays
+  where a hand reaches for it.
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/drawer"
@@ -19,7 +22,7 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="40dp"
         android:gravity="center_vertical"
         android:orientation="horizontal">
 
@@ -50,7 +53,54 @@
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:layout_marginTop="6dp"
+        android:layout_marginTop="4dp"
+        android:background="?attr/rule" />
+
+    <!-- The tools, in the order the site lists them. Compress is the screen behind
+         this panel, so its row closes the panel rather than opening another. -->
+    <TextView
+        android:id="@+id/linkIcons"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?android:attr/selectableItemBackground"
+        android:clickable="true"
+        android:focusable="true"
+        android:paddingTop="13dp"
+        android:paddingBottom="13dp"
+        android:text="Icons"
+        android:textColor="?attr/on"
+        android:textSize="15sp" />
+
+    <TextView
+        android:id="@+id/linkFonts"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?android:attr/selectableItemBackground"
+        android:clickable="true"
+        android:focusable="true"
+        android:paddingTop="13dp"
+        android:paddingBottom="13dp"
+        android:text="Fonts"
+        android:textColor="?attr/on"
+        android:textSize="15sp" />
+
+    <TextView
+        android:id="@+id/linkCompress"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?android:attr/selectableItemBackground"
+        android:clickable="true"
+        android:focusable="true"
+        android:paddingTop="13dp"
+        android:paddingBottom="13dp"
+        android:text="Compress"
+        android:textColor="?attr/on"
+        android:textSize="15sp" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginTop="8dp"
         android:background="?attr/rule" />
 
     <TextView
@@ -109,44 +159,25 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="14dp"
-        android:text="Compress · batch photos offline. The shelf is at the index."
+        android:text="ADD · one app: icons, fonts and batch photo compression, all offline."
         android:textColor="?attr/onDim"
         android:textSize="12sp" />
 
-    <LinearLayout
-        android:id="@+id/themeRow"
+    <!-- Pushes the palette and the switch to the foot, however short the list is. -->
+    <View
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:background="?android:attr/selectableItemBackground"
-        android:clickable="true"
-        android:focusable="true"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:paddingTop="10dp"
-        android:paddingBottom="10dp">
+        android:layout_height="0dp"
+        android:layout_weight="1" />
 
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Theme"
-            android:textColor="?attr/onDim"
-            android:textSize="13sp" />
-
-        <TextView
-            android:id="@+id/themeButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Dark"
-            android:textColor="?attr/on"
-            android:textSize="13sp" />
-    </LinearLayout>
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginBottom="14dp"
+        android:background="?attr/rule" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
         android:gravity="center_vertical"
         android:orientation="horizontal">
 

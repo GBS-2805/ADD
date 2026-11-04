@@ -1,0 +1,2384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="theme-color" content="#0fbf92" />
+<link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml" />
+<title>Streamline — 997 icons, preview and variants</title>
+<meta name="description" content="Streamline: 997 Line, Duo, Solid and Flat icons, CC BY 4.0. Preview one, set weight, size and surface, copy the SVG." />
+<link rel="stylesheet" href="../../assets/site.23ad55050f.css" />
+<style>
+  /* Corners: one step for boxes and controls, a smaller one for menu rows. */
+  :root { --r: 8px; --r-sm: 5px; }
+
+  /* page-only: the preview tab, its variant controls and the collapsible set */
+  .stage { margin: 6px 0 0; border: 1px solid var(--rule); border-radius: var(--r); overflow: hidden; }
+  .stage-body { display: none; }
+  .stage-body[data-active="true"] { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.08fr); }
+
+  .preview { display: flex; align-items: center; gap: 26px; padding: 26px 24px; min-height: 196px; border-right: 1px solid var(--rule); }
+  .export-wrap { position: relative; flex: 1 1 auto; min-width: 0; }
+  .export-btn {
+    appearance: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    width: 100%;
+    padding: 9px 14px;
+    font: inherit;
+    font-size: 15px;
+    color: var(--on);
+    background: transparent;
+    border: 1px solid var(--rule);
+    border-radius: var(--r);
+    cursor: pointer;
+  }
+  .export-btn:hover { background: rgba(217, 217, 217, .08); }
+  .export-btn:focus-visible { outline: 2px solid var(--band); outline-offset: -3px; }
+  .export-btn .cat-chev { width: 18px; height: 18px; transition: transform .18s ease; }
+  .export-btn[aria-expanded="true"] .cat-chev { transform: scaleY(-1); }
+  .export-menu {
+    position: absolute;
+    z-index: 7;
+    top: calc(100% + 6px);
+    left: 0;
+    right: 0;
+    padding: 6px;
+    background: #35417f;
+    border: 1px solid var(--rule);
+    box-shadow: 0 20px 44px rgba(0, 0, 0, .34);
+  }
+  .export-menu[hidden] { display: none; }
+  .export-item {
+    appearance: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    width: 100%;
+    padding: 10px;
+    font: inherit;
+    font-size: 14px;
+    text-align: left;
+    color: var(--on);
+    background: none;
+    border: 0;
+    border-radius: var(--r-sm);
+    cursor: pointer;
+  }
+  .export-item .export-n { font-size: 12px; color: var(--on-dim); }
+  .export-item:hover,
+  .export-item[aria-selected="true"] { background: var(--band); color: var(--ink); }
+  .export-item:hover .export-n,
+  .export-item[aria-selected="true"] .export-n { color: var(--ink); }
+  .export-item:focus-visible { outline: 2px solid var(--band); outline-offset: -3px; }
+
+  .bulk-btn { display: block; width: 100%; margin: 12px 0 0; font: inherit; font-size: 14px;
+    padding: 11px 14px; color: var(--on); background: transparent;
+    border: 1px solid var(--rule); cursor: pointer; }
+  .bulk-btn[disabled] { color: var(--mute); border-color: var(--rule); cursor: default; }
+  .bulk-btn:hover { border-color: var(--on); }
+  .bulk-btn:focus-visible { outline: 2px solid var(--band); outline-offset: 2px; }
+  .preview-box {
+    --w: 2;
+    --size: 64px;
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 132px;
+    height: 132px;
+    background: #000;
+    border: 1px solid var(--rule);
+    color: #fff;
+  }
+  .preview-box[data-surface="white"] { background: #fff; color: #000; border-color: #fff; }
+  .preview-box svg { width: var(--size); height: var(--size); stroke-width: var(--w); }
+  .preview-box[data-mode="fill"] svg path { stroke: currentColor; stroke-width: var(--w); stroke-linejoin: round; }
+  .preview-meta { min-width: 0; }
+  /* The name reads where the file label used to sit, at the label's size: the
+     glyph is the picture, so the words under it are a caption, not a headline. */
+  .preview-meta .name { margin: 0; font-size: 15px; line-height: 1.4; letter-spacing: 0; }
+
+  /* The stage is the pane now, not a tile on it: a black surface the glyph sits
+     in the middle of, with the name, file and hint stacked against the
+     bottom-right corner. The glyph is drawn large on purpose -- the Size row is
+     what the export writes, so the stage shows the mark at 216px (64 x 3.375)
+     rather than 64px, and 96 lands at 324. */
+  .preview {
+    position: relative;
+    display: block;
+    min-height: 572px;
+    padding: 0;
+    background: #000;
+    color: #fff;
+  }
+  .preview[data-surface="white"] { background: #fff; color: #000; }
+  .preview .preview-box {
+    position: absolute;
+    inset: 0;
+    width: auto;
+    height: auto;
+    background: none;
+    border: 0;
+    color: inherit;
+    pointer-events: none;
+  }
+  .preview .preview-box svg {
+    width: calc(var(--size, 64px) * 3.375);
+    height: calc(var(--size, 64px) * 3.375);
+  }
+  .preview-meta {
+    position: absolute;
+    right: 29px;
+    bottom: 50px;
+    max-width: 58%;
+    text-align: right;
+  }
+
+  .controls { display: flex; flex-direction: column; gap: 14px; padding: 22px 24px; }
+  .ctl-head { display: flex; align-items: center; justify-content: flex-end; gap: 10px; }
+  /* Markup is a pop-up, so the icon you are reading is never the thing that
+     disappears; the button is just the way in. */
+  .markup-btn {
+    appearance: none;
+    display: inline-flex;
+    align-items: center;
+    height: 38px;
+    padding: 0 16px;
+    font: inherit;
+    font-size: 14px;
+    color: var(--on);
+    background: none;
+    border: 1px solid var(--rule);
+    border-radius: var(--r);
+    cursor: pointer;
+  }
+  .markup-btn:hover { border-color: var(--on); }
+  .markup-btn:focus-visible { outline: 2px solid var(--band); outline-offset: 2px; }
+  .copy-btn {
+    appearance: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    height: 38px;
+    padding: 0 16px;
+    font: inherit;
+    font-size: 14px;
+    color: var(--ink);
+    background: var(--band);
+    border: 0;
+    border-radius: var(--r);
+    cursor: pointer;
+  }
+  .copy-btn:hover { background: #ececec; }
+  .copy-btn:focus-visible { outline: 2px solid var(--band); outline-offset: 2px; }
+  .copy-btn svg { width: 17px; height: 17px; }
+  .ctl-row { display: flex; align-items: center; gap: 12px; }
+  .ctl-label { flex: none; width: 104px; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--on-dim); }
+  .segs { display: flex; flex: 1 1 auto; border: 1px solid var(--rule); border-radius: var(--r); overflow: hidden; }
+  .seg {
+    appearance: none;
+    flex: 1 1 0;
+    min-width: 46px;
+    padding: 8px 4px;
+    font: inherit;
+    font-size: 14px;
+    color: var(--on);
+    background: none;
+    border: 0;
+    border-right: 1px solid var(--rule);
+    border-radius: 0;
+    cursor: pointer;
+  }
+  .seg:last-child { border-right: 0; }
+  .seg[aria-pressed="true"] { background: var(--band); color: var(--ink); }
+  .seg:focus-visible { outline: 2px solid var(--band); outline-offset: -3px; }
+  .status { margin: 0; font-size: 13px; color: var(--on-dim); min-height: 1.4em; }
+
+  /* Markup is a pop-up, not a pane: open it, copy, get it out of the way. */
+  .markup-pop {
+    width: min(720px, calc(100% - 32px));
+    padding: 0;
+    color: var(--on);
+    background: var(--page, #f2eee3);
+    border: 1px solid var(--rule);
+    border-radius: var(--r);
+    box-shadow: 0 24px 60px rgba(0, 0, 0, .3);
+  }
+  .markup-pop::backdrop { background: rgba(0, 0, 0, .5); }
+  .pop-head { display: flex; align-items: center; gap: 10px; padding: 12px 14px; border-bottom: 1px solid var(--rule); }
+  .pop-head p { margin: 0 auto 0 0; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--on-dim); }
+  .pop-copy {
+    appearance: none;
+    height: 34px;
+    padding: 0 14px;
+    font: inherit;
+    font-size: 14px;
+    color: var(--ink);
+    background: var(--band);
+    border: 0;
+    border-radius: var(--r);
+    cursor: pointer;
+  }
+  .pop-copy:hover { background: #ececec; }
+  .pop-close {
+    appearance: none;
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    color: var(--on);
+    background: none;
+    border: 1px solid var(--rule);
+    border-radius: var(--r);
+    cursor: pointer;
+  }
+  .pop-close:hover { border-color: var(--on); }
+  .pop-copy:focus-visible,
+  .pop-close:focus-visible { outline: 2px solid var(--band); outline-offset: 2px; }
+  .pop-close svg { width: 18px; height: 18px; }
+  #snippet {
+    display: block;
+    width: 100%;
+    height: 190px;
+    resize: none;
+    padding: 14px 16px;
+    font-family: "Poppins", sans-serif;
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--on);
+    background: transparent;
+    border: 0;
+    border-bottom: 1px solid var(--rule);
+    border-radius: 0;
+    outline: none;
+  }
+  .pop-note { margin: 0; padding: 12px 16px 16px; font-size: 13px; color: var(--on-dim); max-width: 62ch; }
+
+  /* the selection tab: what the double taps collected, above the sheet */
+  .sel-tab { border: 1px solid var(--rule); border-bottom: 0; border-radius: var(--r) var(--r) 0 0; }
+  .sel-head { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 13px 22px; }
+  .sel-head p { margin: 0 auto 0 0; font-size: 13px; color: var(--on-dim); }
+  .sel-head b { font-size: 14px; font-weight: 500; color: var(--on); }
+  .sel-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+  .sel-btn {
+    appearance: none;
+    padding: 7px 12px;
+    font: inherit;
+    font-size: 13px;
+    color: var(--on);
+    background: transparent;
+    border: 1px solid var(--rule);
+    border-radius: var(--r);
+    cursor: pointer;
+  }
+  .sel-btn:hover:not([disabled]) { border-color: var(--on); }
+  .sel-btn[disabled] { color: var(--mute); cursor: default; }
+  .sel-btn:focus-visible { outline: 2px solid var(--band); outline-offset: 2px; }
+  .sel-strip { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 0 22px 13px; }
+  .sel-hint { margin: 0; font-size: 13px; color: var(--on-dim); }
+  .sel-chip {
+    appearance: none;
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    color: var(--on);
+    background: transparent;
+    border: 1px solid var(--rule);
+    border-radius: var(--r);
+    cursor: pointer;
+  }
+  .sel-chip svg { width: 20px; height: 20px; }
+  .sel-chip:hover { border-color: var(--on); }
+  .sel-chip:focus-visible { outline: 2px solid var(--band); outline-offset: 2px; }
+  .sel-more { flex: none; font-size: 12px; color: var(--on-dim); white-space: nowrap; }
+
+  .add-all {
+    appearance: none;
+    flex: none;
+    height: 48px;
+    padding: 0 14px;
+    font: inherit;
+    font-size: 14px;
+    color: var(--on);
+    background: transparent;
+    border: 1px solid var(--rule);
+    border-radius: var(--r);
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .add-all:hover:not([disabled]) { border-color: var(--on); }
+  .add-all[disabled] { color: var(--mute); cursor: default; }
+  .add-all:focus-visible { outline: 2px solid var(--band); outline-offset: 2px; }
+
+  /* the whole set lives behind one toggle so the page stays quiet */
+  /* the sheet is a <section>, and sections carry the page's own padding: strip it
+     and let the toggle be a complete rectangle whether the sheet is open or shut */
+  .set-panel { margin: 40px 0 0; padding: 0; border: 0; }
+  .panel-toggle {
+    appearance: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    width: 100%;
+    padding: 18px 22px;
+    font: inherit;
+    text-align: left;
+    color: var(--on);
+    background: none;
+    border: 1px solid var(--rule);
+    border-radius: var(--r);
+    cursor: pointer;
+  }
+  .panel-toggle b { font-size: 19px; font-weight: 400; letter-spacing: -.01em; }
+  .panel-toggle .panel-sub { display: block; margin-top: 3px; font-size: 13px; color: var(--on-dim); }
+  .panel-toggle:hover b { text-decoration: underline; }
+  .panel-toggle:focus-visible { outline: 2px solid var(--band); outline-offset: -3px; }
+  .panel-toggle .chev { flex: none; width: 24px; height: 24px; transition: transform .2s ease; }
+  .panel-toggle[aria-expanded="true"] .chev { transform: scaleY(-1); }
+  .panel-toggle[aria-expanded="true"] { border-radius: var(--r) var(--r) 0 0; }
+  .panel[data-open="false"] { display: none; }
+  .panel[data-open="true"] { border: 1px solid var(--rule); border-top: 0; border-radius: 0 0 var(--r) var(--r); overflow: hidden; animation: panel-in .18s ease both; }
+  @keyframes panel-in { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+
+  .panel-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 14px 22px; border-bottom: 1px solid var(--rule); }
+  .search-wrap { position: relative; flex: 1 1 auto; }
+  .search-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); width: 19px; height: 19px; color: var(--on-dim); pointer-events: none; }
+  #search {
+    width: 100%;
+    height: 48px;
+    padding: 0 14px 0 44px;
+    font: inherit;
+    font-size: 16px;
+    color: var(--on);
+    background: transparent;
+    border: 1px solid var(--rule);
+    border-radius: var(--r);
+    outline: none;
+  }
+  #search::placeholder { color: var(--on-dim); }
+  #search:focus { border-color: var(--on); }
+  .panel-bar .count { flex: none; margin: 0; font-size: 13px; color: var(--on-dim); }
+
+  /* category picker, the way the vendor's own browser does it: one pill, one list */
+  .cat-wrap { position: relative; flex: 0 0 auto; }
+  .cat-btn {
+    appearance: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    height: 48px;
+    padding: 0 14px;
+    font: inherit;
+    font-size: 15px;
+    color: var(--on);
+    background: transparent;
+    border: 1px solid var(--rule);
+    border-radius: var(--r);
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .cat-btn:hover { background: rgba(217, 217, 217, .08); }
+  .cat-btn:focus-visible { outline: 2px solid var(--band); outline-offset: -3px; }
+  .cat-btn .cat-chev { width: 18px; height: 18px; transition: transform .18s ease; }
+  .cat-btn[aria-expanded="true"] .cat-chev { transform: scaleY(-1); }
+  .cat-wrap[hidden] { display: none; }
+  .cat-menu {
+    position: absolute;
+    z-index: 6;
+    top: calc(100% + 6px);
+    left: 0;
+    width: 244px;
+    max-height: 320px;
+    overflow-y: auto;
+    padding: 6px;
+    background: #35417f;
+    border: 1px solid var(--rule);
+    box-shadow: 0 20px 44px rgba(0, 0, 0, .34);
+  }
+  .cat-menu[hidden] { display: none; }
+  .cat-item {
+    appearance: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    width: 100%;
+    padding: 9px 10px;
+    font: inherit;
+    font-size: 14px;
+    text-align: left;
+    color: var(--on);
+    background: none;
+    border: 0;
+    border-radius: var(--r-sm);
+    cursor: pointer;
+  }
+  .cat-item .cat-n { font-size: 12px; color: var(--on-dim); }
+  .cat-item:hover,
+  .cat-item[aria-selected="true"] { background: var(--band); color: var(--ink); }
+  .cat-item:hover .cat-n,
+  .cat-item[aria-selected="true"] .cat-n { color: var(--ink); }
+  .cat-item:focus-visible { outline: 2px solid var(--band); outline-offset: -3px; }
+
+  .grid-wrap { max-height: min(58vh, 540px); overflow-y: auto; overscroll-behavior: contain; border-top: 0; border-radius: 0 0 var(--r) var(--r); }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(98px, 1fr)); }
+  .icon-card {
+    appearance: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    min-height: 96px;
+    padding: 14px 6px 11px;
+    font: inherit;
+    color: var(--on);
+    background: none;
+    border: 0;
+    border-right: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+    border-radius: 0;
+    cursor: pointer;
+    transition: background .09s;
+    touch-action: manipulation;
+  }
+  .icon-card:hover { background: rgba(217, 217, 217, .08); }
+  .icon-card:focus-visible { outline: 2px solid var(--band); outline-offset: -4px; }
+  .icon-card[aria-pressed="true"] { background: var(--band); color: var(--ink); }
+  .icon-card .glyph { display: grid; place-items: center; width: 30px; height: 30px; }
+  .icon-card .glyph svg { width: 30px; height: 30px; }
+  .icon-card .name { font-size: 9px; font-weight: 500; letter-spacing: .06em; text-transform: uppercase; line-height: 1.25; text-align: center; word-break: break-word; color: var(--on-dim); }
+  .icon-card[aria-pressed="true"] .name { color: var(--ink); }
+  .icon-card { position: relative; }
+  .icon-card[data-picked="true"]::after {
+    content: "";
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 7px;
+    height: 7px;
+    background: var(--band);
+  }
+  .icon-card[aria-pressed="true"][data-picked="true"]::after { background: var(--ink); }
+  .empty { margin: 0; padding: 18px 22px; font-size: 14px; color: var(--on-dim); }
+  .panel-foot { display: flex; flex-wrap: wrap; gap: 6px 24px; justify-content: space-between; padding: 13px 22px; border-top: 1px solid var(--rule); font-size: 13px; color: var(--on-dim); }
+  footer p { margin: 0; max-width: 62ch; }
+
+  @media (max-width: 900px) {
+    .stage-body[data-active="true"] { grid-template-columns: 1fr; }
+    .preview { min-height: 380px; }
+    .preview-meta { right: 20px; bottom: 24px; max-width: 70%; }
+    .preview { border-right: 0; border-bottom: 1px solid var(--rule); }
+  }
+  @media (max-width: 700px) {
+    .preview { padding: 20px; gap: 18px; min-height: 0; }
+    /* The stage is the pane, so on a phone it has to keep a height of its own:
+       the panel below sets min-height 0 for the old tile layout. */
+    .preview { padding: 0; min-height: 300px; }
+    .preview .preview-box svg {
+      width: calc(var(--size, 64px) * 2);
+      height: calc(var(--size, 64px) * 2);
+    }
+    .preview-meta { right: 20px; bottom: 20px; max-width: 62%; }
+    .preview-box { width: 104px; height: 104px; }
+    .controls { padding: 18px 20px; }
+    .ctl-label { width: 104px; }
+    .seg { min-width: 0; padding: 8px 2px; font-size: 13px; }
+    .panel-toggle { padding: 15px 18px; }
+    .panel-toggle b { font-size: 17px; }
+    .panel-bar { padding: 12px 18px; gap: 12px; }
+    #search { height: 46px; font-size: 15px; padding: 0 12px 0 40px; }
+    .search-icon { left: 12px; width: 17px; height: 17px; }
+    .panel-bar .search-wrap { flex: 1 1 100%; order: 1; }
+    .panel-bar .cat-wrap { order: 2; }
+    .panel-bar .count { order: 3; margin-left: auto; }
+    .panel-bar .add-all { order: 4; height: 46px; font-size: 13px; }
+    .sel-head { padding: 12px 18px; }
+    .sel-head p { flex: 1 1 100%; }
+    .sel-strip { padding: 0 18px 12px; }
+    .cat-btn { height: 46px; font-size: 14px; }
+    .cat-menu { width: min(244px, calc(100vw - 60px)); }
+    .grid { grid-template-columns: repeat(auto-fill, minmax(88px, 1fr)); }
+    .icon-card { min-height: 88px; }
+    .grid-wrap { max-height: min(62vh, 460px); }
+    .set-panel { margin-top: 32px; }
+  }
+  .ctl-row[hidden] { display: none; }
+  .inks { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+  .ink {
+    width: 26px; height: 26px; padding: 0; border-radius: 50%;
+    border: 1px solid var(--rule); background: var(--sw, transparent); cursor: pointer;
+  }
+  /* Auto is one swatch among the colours, not a word among dots: a circle with an A. */
+  .ink.auto {
+    display: grid;
+    place-items: center;
+    padding: 0;
+    background: transparent;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1;
+    color: var(--on);
+  }
+  .ink[aria-pressed="true"] { outline: 2px solid var(--on); outline-offset: 2px; }
+  .ink:focus-visible { outline: 2px solid var(--band); outline-offset: 2px; }
+  /* Manual is a swatch as well: a circle with an M that opens the page's own colour
+     dialog. With a custom colour in use the circle takes it and the letter flips to
+     whichever ink reads on top, so the row still shows what is picked. */
+  .ink.manual {
+    display: grid;
+    place-items: center;
+    padding: 0;
+    background: var(--sw, transparent);
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1;
+    color: var(--on);
+  }
+
+  /* Our own colour dialog: the site's swatches as circles, the current choice
+     wearing the ring instead of a "chosen colour" well, Custom bottom-left and a
+     hex field behind it. Cancel leaves without touching anything. */
+  .ink-pop {
+    width: min(420px, calc(100% - 32px));
+    padding: 0;
+    color: var(--on);
+    background: var(--page, #f2eee3);
+    border: 1px solid var(--rule);
+    border-radius: var(--r);
+    box-shadow: 0 24px 60px rgba(0, 0, 0, .3);
+  }
+  .ink-pop::backdrop { background: rgba(0, 0, 0, .5); }
+  .ink-body { display: grid; gap: 16px; padding: 16px; }
+  .ink-grid { display: flex; flex-wrap: wrap; gap: 10px; }
+  .ink-cell {
+    appearance: none;
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--on);
+    background: var(--c, transparent);
+    border: 1px solid var(--rule);
+    border-radius: 50%;
+    cursor: pointer;
+  }
+  .ink-cell[aria-pressed="true"] { outline: 2px solid var(--on); outline-offset: 3px; }
+  .ink-cell:focus-visible { outline: 2px solid var(--band); outline-offset: 3px; }
+  .ink-foot { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+  .ink-modes { display: flex; flex-wrap: wrap; gap: 6px; }
+  .ink-mode {
+    appearance: none;
+    height: 30px;
+    padding: 0 12px;
+    font: inherit;
+    font-size: 12px;
+    letter-spacing: .04em;
+    color: var(--on);
+    background: none;
+    border: 1px solid var(--rule);
+    border-radius: var(--r-sm);
+    cursor: pointer;
+  }
+  .ink-mode:hover { border-color: var(--on); }
+  .ink-mode[aria-pressed="true"] { background: var(--band); border-color: var(--band); color: var(--ink); }
+  .ink-pane { display: grid; gap: 10px; }
+  .ink-pane[hidden] { display: none; }
+  .ink-hex { display: flex; align-items: center; gap: 6px; min-width: 0; }
+  .ink-hex i { font-style: normal; font-size: 13px; color: var(--on-dim); }
+  .ink-cmyk { display: flex; gap: 8px; }
+  .ink-cmyk label { display: grid; flex: 1 1 0; gap: 4px; min-width: 0; }
+  .ink-cmyk span { font-size: 11px; letter-spacing: .08em; color: var(--on-dim); }
+  .ink-cmyk input {
+    width: 100%;
+    min-width: 0;
+    height: 32px;
+    padding: 0 8px;
+    font: inherit;
+    font-size: 13px;
+    color: var(--on);
+    background: none;
+    border: 1px solid var(--rule);
+    border-radius: var(--r-sm);
+    outline: none;
+    -moz-appearance: textfield;
+  }
+  .ink-cmyk input::-webkit-outer-spin-button,
+  .ink-cmyk input::-webkit-inner-spin-button { appearance: none; margin: 0; }
+  .ink-cmyk input:focus { border-color: var(--on); }
+  .ink-wheel {
+    position: relative;
+    width: 148px;
+    height: 148px;
+    margin: 2px auto;
+    /* No border: --rule is cream in dark mode, so a hairline round saturated colour
+       reads as a white band on the rim. The wheel draws its own edge. */
+    border-radius: 50%;
+    /* Hue 0 sits at 3 o'clock, where atan2 puts it, and the white fades linearly to
+       the rim so saturation is the radius. Without both the colour under the pointer
+       is not the colour the maths returns. */
+    background:
+      radial-gradient(circle closest-side, #fff, rgba(255, 255, 255, 0) 100%),
+      conic-gradient(from 90deg, #ff0000, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff, #ff0000);
+    box-shadow: 0 0 0 1px rgba(19, 21, 19, .14);
+    cursor: crosshair;
+    touch-action: none;
+  }
+  .ink-wheel::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: #000;
+    opacity: var(--darken, 0);
+    pointer-events: none;
+  }
+  .ink-wheel i {
+    z-index: 1;
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    margin: -7px 0 0 -7px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, .45);
+    pointer-events: none;
+  }
+  .ink-value { display: flex; align-items: center; gap: 10px; font-size: 12px; color: var(--on-dim); }
+  .ink-value input { flex: 1 1 auto; accent-color: var(--band); }
+  .ink-preview {
+    flex: none;
+    width: 26px;
+    height: 26px;
+    border: 1px solid var(--rule);
+    border-radius: 50%;
+    background: var(--sw, transparent);
+  }
+  #inkHex {
+    width: 100%;
+    min-width: 0;
+    height: 34px;
+    padding: 0 10px;
+    font: inherit;
+    font-size: 13px;
+    letter-spacing: .06em;
+    color: var(--on);
+    background: none;
+    border: 1px solid var(--rule);
+    border-radius: var(--r-sm);
+    outline: none;
+  }
+  #inkHex:focus { border-color: var(--on); }
+  #inkHex[aria-invalid="true"] { border-color: #e02424; }
+  .ink-actions { display: flex; gap: 8px; margin-left: auto; }
+  .ink-cancel,
+  .ink-set {
+    appearance: none;
+    height: 34px;
+    padding: 0 14px;
+    font: inherit;
+    font-size: 13px;
+    border-radius: var(--r-sm);
+    cursor: pointer;
+  }
+  .ink-cancel { color: var(--on); background: none; border: 1px solid var(--rule); }
+  .ink-cancel:hover { border-color: var(--on); }
+  .ink-set { color: var(--ink); background: var(--band); border: 0; }
+  .ink-set:hover { background: #ececec; }
+  .ink-set[disabled] { opacity: .45; cursor: default; }
+  .preview-box[data-surface="black"] { color: var(--glyph, #fff); }
+  .preview-box[data-surface="white"] { color: var(--glyph, #000); }
+  .icon-card .glyph { color: var(--glyph, inherit); }
+  .sel-chip svg { color: var(--glyph, inherit); }
+</style>
+</head>
+<body>
+
+<header class="bar">
+  <div class="lead">
+    <button class="menu-btn" id="menuBtn" type="button" aria-expanded="false" aria-controls="menu" aria-label="Open icon brands">
+      <svg class="chev" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M8 13L12 17L16 13M8 7L12 11L16 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+    <a class="page-name" href="../../icons/">Icons</a>
+  </div>
+
+  <a class="mark" href="../../" aria-label="Compress — home">
+    <svg viewBox="0 0 120.6 123.11" role="img" aria-label="Compress logo" fill="currentColor">
+        <path d="m29.58,61.92c.11,1.85.17,3.7.36,5.54.11,1.02-.23,1.23-1.19,1.29-4.47.26-5.38,1.22-5.27,5.67.13,5.14,2.74,9.13,6.27,12.56,1.53,1.49,2.96,1.05,3.89-.88.61-1.27.96-2.64,1.04-4.06.06-1.13.53-1.24,1.41-.69,1.72,1.08,2.92,2.71,4.38,4.07,8.66,8.04,18.38,13.89,30.58,14.51.52.03,1.04-.02,1.56,0,1.36.07,1.57-.53.89-1.58-.36-.56-.82-1.05-1.21-1.58-1.5-2.04-.63-4.17,1.89-4.53,3.34-.47,6.44.69,9.57,1.56,4.15,1.15,8.3,2.3,12.65,1.03,2.54-.74,2.78-1.66.84-3.54-.63-.61-1.41-1.08-2.11-1.63-2.43-1.91-2.63-3.35-.64-5.76,2.51-3.05,6.01-4.22,9.75-4.74,4.81-.67,9.26.31,13.25,3.19,1.39,1.01,1.75,1.97.94,3.7-9.48,20.25-25.12,32.69-47.2,36.28-29.25,4.75-57.41-12.11-67.54-39.86C-8.51,49.01,10.62,11.88,44.98,2.31c31.94-8.9,65.21,8.7,75.4,39.81.46,1.42.23,2.38-.66,3.4-4.28,4.87-9.78,6.13-15.92,5.16-4.99-.79-9.16-3.27-12.65-6.88-1.34-1.38-2.66-2.79-3.87-4.28-13.61-16.78-43.35-15.8-54.84,7.54-2.32,4.71-3.19,9.66-2.85,14.86Z"/>
+        <path d="m80.89,57.02c.88-.09,2.06-.21,3.22.13,1.56.46,1.88,1.6.75,2.8-1.16,1.23-2.59,1.52-4.25,1.33-4.23-.48-5.14.47-4.58,4.78.43,3.35,1.88,6.19,4.52,8.36.99.81,1.67.93,2.18-.62,1.55-4.74,1.61-4.72,6.46-4.56,1.28.04,2.56-.04,3.49-1.05.76-.83,1.38-1.54,2.5-.44,1.07,1.05,1.29,2.15.42,3.35-1.18,1.61-2.84,2.29-4.82,2.23-1.25-.04-2.77-.51-3.68.03-.98.58-.39,2.29-.7,3.49-.75,2.89-2.94,3.94-5.77,2.62-5.71-2.66-10.17-13.01-8.12-18.87.86-2.45,2.86-3.21,5.21-3.41.96-.08,1.92-.11,3.18-.18Z"/>
+        <path d="m52.62,58.41c.19-1.57.26-3.23,1.99-3.92,1.62-.65,2.9.23,3.92,1.33,2.41,2.61,3.79,5.64,2.86,9.26-.6,2.33-2.43,2.97-4.42,1.62-2.92-1.97-3.98-4.98-4.35-8.29Z"/>
+        <path d="m44.97,66.78c-.03,1.9-.18,3.24-1.63,3.9-1.5.68-2.61-.25-3.53-1.19-2.06-2.11-3.15-4.68-2.7-7.66.4-2.62,2.46-3.4,4.53-1.73,2.25,1.82,3.29,4.3,3.33,6.68Z"/>
+      </svg>
+  </a>
+
+  <div class="who">
+    <div class="who-lines keep">
+      <p class="big">Art Design Database</p>
+      <p class="big">Icons • Fonts • Tools</p>
+    </div>
+    <button class="burger" id="burger" type="button" aria-expanded="false" aria-controls="drawer" aria-label="Open side tab">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 7H19M5 12H19M5 17H19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+  </div>
+</header>
+
+<nav class="menu" id="menu" data-open="false" aria-label="Icon brands">
+  <a href="../../icons/all/">All<span>4,373</span></a>
+  <a href="../../icons/lineicons/">Lineicons<span>606</span></a>
+  <a href="../../icons/coolicons/">Coolicons<span>1,258</span></a>
+  <a href="../../icons/phosphor/">Phosphor<span>1,512</span></a>
+  <a href="../../icons/streamline/" aria-current="page">Streamline<span>997</span></a>
+</nav>
+
+<div class="scrim" id="scrim" data-open="false"></div>
+<aside class="drawer" id="drawer" data-open="false" aria-label="More">
+  <div class="drawer-head">
+    <p>More</p>
+    <button class="drawer-close" id="drawerClose" type="button" aria-label="Close side tab"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 6L18 18M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+  </div>
+  <a href="../../download/">Download<span>apps</span></a>
+  <a href="../../portfolio/">Portfolio<span>3 projects</span></a>
+  <a href="../../renders/">Renders<span>gallery</span></a>
+  <a href="../../releases/">Releases<span>history</span></a>
+  <p class="drawer-note">Streamline · 997 icons, Line, Duo, Solid and Flat, CC BY 4.0. The app reads the same catalog this page renders.</p>
+</aside>
+
+<main>
+  <header class="page-head">
+    <h1>Streamline</h1>
+    <p class="lede"><b>997 icons</b>, free. Preview one, then copy the SVG.</p>
+    <p class="meta">
+      <span>997 icons</span>
+      <span>Line, Duo, Solid and Flat</span>
+      <span>CC BY 4.0</span>
+      <span>No Pro tier</span>
+    </p>
+  </header>
+
+  <div class="stage">
+    <div class="stage-body" id="pane-preview" data-active="true">
+      <div class="preview">
+        <div class="preview-box" id="stageGlyph" data-mode="stroke" data-surface="black" aria-hidden="true"></div>
+        <div class="preview-meta">
+          <p class="name" id="selName" aria-live="polite">Loading…</p>
+        </div>
+      </div>
+
+      <div class="controls">
+        <div class="ctl-head">
+          <button class="markup-btn" id="markupBtn" type="button" aria-haspopup="dialog">Markup</button>
+          <button class="copy-btn" id="copyBtn" type="button">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M10 13C11.3807 14.3807 13.6193 14.3807 15 13L18 10C19.3807 8.61929 19.3807 6.38071 18 5C16.6193 3.61929 14.3807 3.61929 13 5L11 7M14 11C12.6193 9.61929 10.3807 9.61929 9 11L6 14C4.61929 15.3807 4.61929 17.6193 6 19C7.38071 20.3807 9.61929 20.3807 11 19L13 17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span id="copyLabel">Copy SVG</span>
+          </button>
+        </div>
+
+        <div class="ctl-row" id="styleRow" role="group" aria-label="Icon style" hidden>
+          <span class="ctl-label">Style</span>
+          <div class="segs" id="styleSegs"></div>
+        </div>
+
+        <div class="ctl-row" id="weightRow" role="group" aria-label="Line weight">
+          <span class="ctl-label">Weight</span>
+          <div class="segs" id="weights">
+            <button class="seg" type="button" data-weight="1" aria-pressed="false">1</button>
+            <button class="seg" type="button" data-weight="1.5" aria-pressed="false">1.5</button>
+            <button class="seg" type="button" data-weight="2" aria-pressed="true">2</button>
+            <button class="seg" type="button" data-weight="2.5" aria-pressed="false">2.5</button>
+          </div>
+        </div>
+
+        <div class="ctl-row" role="group" aria-label="Preview size">
+          <span class="ctl-label">Size</span>
+          <div class="segs" id="sizes">
+            <button class="seg" type="button" data-size="32" aria-pressed="false">32</button>
+            <button class="seg" type="button" data-size="48" aria-pressed="false">48</button>
+            <button class="seg" type="button" data-size="64" aria-pressed="true">64</button>
+            <button class="seg" type="button" data-size="96" aria-pressed="false">96</button>
+          </div>
+        </div>
+
+        <div class="ctl-row" role="group" aria-label="Preview background">
+          <span class="ctl-label">Background</span>
+          <div class="segs" id="surfaces">
+            <button class="seg" type="button" data-surface="black" aria-pressed="true">Black</button>
+            <button class="seg" type="button" data-surface="white" aria-pressed="false">White</button>
+          </div>
+        </div>
+
+        <div class="ctl-row" role="group" aria-label="Icon colour">
+          <span class="ctl-label">Colour</span>
+          <div class="inks" id="inks">
+            <button class="ink auto" type="button" data-ink="" aria-pressed="true" title="Auto — follow the background" aria-label="Auto — follow the background">A</button>
+            <button class="ink" type="button" data-ink="#ffffff" style="--sw: #ffffff" aria-label="White" aria-pressed="false"></button>
+            <button class="ink" type="button" data-ink="#000000" style="--sw: #000000" aria-label="Black" aria-pressed="false"></button>
+            <button class="ink" type="button" data-ink="#4147d5" style="--sw: #4147d5" aria-label="Indigo" aria-pressed="false"></button>
+            <button class="ink" type="button" data-ink="#0e9f6e" style="--sw: #0e9f6e" aria-label="Green" aria-pressed="false"></button>
+            <button class="ink" type="button" data-ink="#e02424" style="--sw: #e02424" aria-label="Red" aria-pressed="false"></button>
+            <button class="ink manual" id="inkManual" type="button" title="Manual colour — pick your own" aria-label="Manual colour — pick your own">M</button>
+          </div>
+        </div>
+
+        <div class="ctl-row" role="group" aria-label="Export format">
+          <span class="ctl-label">Format</span>
+          <div class="export-wrap" id="formatWrap">
+            <button class="export-btn" id="formatBtn" type="button" aria-expanded="false" aria-haspopup="listbox" aria-controls="formats">
+              <span id="formatLabel">SVG</span>
+              <svg class="cat-chev" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M8 10L12 14L16 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <div class="export-menu" id="formats" role="listbox" aria-label="Export format" hidden></div>
+          </div>
+        </div>
+
+        <div class="ctl-row" role="group" aria-label="Export size">
+          <span class="ctl-label">Export</span>
+          <div class="export-wrap" id="exportWrap">
+            <button class="export-btn" id="exportBtn" type="button" aria-expanded="false" aria-haspopup="listbox" aria-controls="exportMenu">
+              <span id="exportLabel">512 px</span>
+              <svg class="cat-chev" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M8 10L12 14L16 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <div class="export-menu" id="exportMenu" role="listbox" aria-label="Export size" hidden></div>
+          </div>
+        </div>
+
+        <button class="bulk-btn" id="bulkBtn" type="button" disabled>Nothing to export</button>
+
+        <p class="status" id="status" aria-live="polite">Reading the catalog…</p>
+      </div>
+    </div>
+
+  </div>
+
+  <dialog class="ink-pop" id="inkPop" aria-label="Icon colour">
+    <div class="pop-head">
+      <p>Colour</p>
+      <button class="pop-close" id="inkClose" type="button" aria-label="Close colour">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 6L18 18M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+    <div class="ink-body">
+      <div class="ink-grid" id="inkGrid" role="group" aria-label="Colours">
+        <button class="ink-cell" type="button" data-c="" title="Auto — follow the background">A</button>
+        <button class="ink-cell" type="button" data-c="#ffffff" style="--c: #ffffff" aria-label="White"></button>
+        <button class="ink-cell" type="button" data-c="#000000" style="--c: #000000" aria-label="Black"></button>
+        <button class="ink-cell" type="button" data-c="#4147d5" style="--c: #4147d5" aria-label="Indigo"></button>
+        <button class="ink-cell" type="button" data-c="#0e9f6e" style="--c: #0e9f6e" aria-label="Green"></button>
+        <button class="ink-cell" type="button" data-c="#e02424" style="--c: #e02424" aria-label="Red"></button>
+      </div>
+      <div class="ink-modes" role="group" aria-label="Colour mode">
+        <button class="ink-mode" id="inkCustom" type="button" aria-pressed="false">Custom</button>
+        <button class="ink-mode" id="inkCmyk" type="button" aria-pressed="false">CMYK</button>
+        <button class="ink-mode" id="inkWheelBtn" type="button" aria-pressed="false">Wheel</button>
+      </div>
+      <div class="ink-pane" id="inkHexWrap" hidden>
+        <label class="ink-hex">
+          <i>#</i>
+          <input id="inkHex" type="text" maxlength="6" spellcheck="false" autocomplete="off" aria-label="Hex colour, six digits" placeholder="7A3A12" />
+        </label>
+      </div>
+      <div class="ink-pane" id="inkCmykWrap" hidden>
+        <div class="ink-cmyk">
+          <label><span>C</span><input id="inkC" type="number" min="0" max="100" step="1" value="0" aria-label="Cyan, percent" /></label>
+          <label><span>M</span><input id="inkM" type="number" min="0" max="100" step="1" value="0" aria-label="Magenta, percent" /></label>
+          <label><span>Y</span><input id="inkY" type="number" min="0" max="100" step="1" value="0" aria-label="Yellow, percent" /></label>
+          <label><span>K</span><input id="inkK" type="number" min="0" max="100" step="1" value="0" aria-label="Black, percent" /></label>
+        </div>
+      </div>
+      <div class="ink-pane" id="inkWheelWrap" hidden>
+        <div class="ink-wheel" id="inkWheel" role="group" aria-label="Colour wheel"><i id="inkWheelDot"></i></div>
+        <label class="ink-value"><span>Light</span><input id="inkValue" type="range" min="0" max="100" value="80" aria-label="Lightness" /></label>
+      </div>
+      <div class="ink-foot">
+        <span class="ink-preview" id="inkPreview" aria-hidden="true"></span>
+        <div class="ink-actions">
+          <button class="ink-cancel" id="inkCancel" type="button">Cancel</button>
+          <button class="ink-set" id="inkSet" type="button">Set</button>
+        </div>
+      </div>
+    </div>
+  </dialog>
+
+  <dialog class="markup-pop" id="markupPop" aria-label="SVG markup">
+    <div class="pop-head">
+      <p>Markup</p>
+      <button class="pop-copy" id="popCopy" type="button">Copy</button>
+      <button class="pop-close" id="popClose" type="button" aria-label="Close markup">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 6L18 18M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+    <textarea id="snippet" readonly spellcheck="false" aria-label="SVG markup of the selected icon"></textarea>
+    <p class="pop-note">The markup is the file as it ships: a 24×24 <code>viewBox</code>, <code>currentColor</code> so the icon takes the colour of the text around it, and no weight or size baked in — those are the preview's settings, not the file's.</p>
+  </dialog>
+
+  <section class="set-panel">
+    <div class="sel-tab" id="selTab">
+      <div class="sel-head">
+        <p><b id="selCount">No icons</b> in the export selection</p>
+        <div class="sel-actions">
+          <button class="sel-btn" id="selRemove" type="button" disabled>Remove selected</button>
+          <button class="sel-btn" id="selClear" type="button" disabled>Remove all</button>
+        </div>
+      </div>
+      <div class="sel-strip" id="selStrip"></div>
+    </div>
+
+    <button class="panel-toggle" id="panelToggle" type="button" aria-expanded="false" aria-controls="panel">
+      <span>
+        <b>Streamline · all 997 icons</b>
+        <span class="panel-sub">Opens into a scrolling sheet — tap to preview, double-tap to collect for export</span>
+      </span>
+      <svg class="chev" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M8 13L12 17L16 13M8 7L12 11L16 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+
+    <div class="panel" id="panel" data-open="false">
+      <div class="panel-bar">
+        <div class="search-wrap">
+          <svg class="search-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 10C3 13.86599 6.13401 17 10 17C13.86599 17 17 13.86599 17 10C17 6.13401 13.86599 3 10 3C6.13401 3 3 6.13401 3 10ZM15 15L21 21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <input id="search" type="search" placeholder="Filter Streamline by name…" aria-label="Filter icons by name" autocomplete="off" />
+        </div>
+        <div class="cat-wrap" id="catWrap" hidden>
+          <button class="cat-btn" id="catBtn" type="button" aria-expanded="false" aria-haspopup="listbox" aria-controls="catMenu">
+            <span id="catLabel">All icons</span>
+            <svg class="cat-chev" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M8 10L12 14L16 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <div class="cat-menu" id="catMenu" role="listbox" aria-label="Icon category" hidden></div>
+        </div>
+        <p class="count" id="count">997</p>
+        <button class="add-all" id="addAllBtn" type="button">Add all</button>
+      </div>
+      <div class="grid-wrap"><div class="grid" id="grid"></div></div>
+      <p class="empty" id="empty" hidden>No icon in Streamline matches that name in that category.</p>
+      <div class="panel-foot">
+        <span>webalys-hq/streamline-vectors · CC BY 4.0</span>
+        <a href="../../data/streamline-line.json"><code>/data/streamline-line.json</code></a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <p>Streamline is a whole free set from <code>webalys-hq/streamline-vectors</code>, CC BY 4.0 licensed: 997 icons, Line, Duo, Solid and Flat. The paid icons sold on the vendor's site are neither included nor copied.</p>
+  <p><a href="../../icons/">Icons</a> · <a href="../../">Index</a> · <a href="../../fonts/">Fonts</a> · <a href="../../download/">Download</a></p>
+</footer>
+
+<script>
+(function () {
+  var DATA = "../../data/streamline-line.json";
+  var MODE = "stroke";
+  var BRAND = "Streamline";
+  var STYLES = [{"slug": "line", "name": "Line", "data": "../../data/streamline-line.json", "mode": "stroke", "colour": false, "tune": true}, {"slug": "duo", "name": "Duo", "data": "../../data/streamline-duo.json", "mode": "fill", "colour": true, "tune": false}, {"slug": "solid", "name": "Solid", "data": "../../data/streamline-solid.json", "mode": "fill", "colour": false, "tune": false}, {"slug": "flat", "name": "Flat", "data": "../../data/streamline-flat.json", "mode": "fill", "colour": true, "tune": false}];
+
+  var box = document.getElementById("stageGlyph");
+  var nameEl = document.getElementById("selName");
+  var statusEl = document.getElementById("status");
+  var grid = document.getElementById("grid");
+  var search = document.getElementById("search");
+  var countEl = document.getElementById("count");
+  var emptyEl = document.getElementById("empty");
+  var snippet = document.getElementById("snippet");
+  var panel = document.getElementById("panel");
+  var panelToggle = document.getElementById("panelToggle");
+  var weights = document.getElementById("weights");
+  var sizes = document.getElementById("sizes");
+  var surfaces = document.getElementById("surfaces");
+  var inks = document.getElementById("inks");
+  var inkManual = document.getElementById("inkManual");
+  var formats = document.getElementById("formats");
+  var formatWrap = document.getElementById("formatWrap");
+  var formatBtn = document.getElementById("formatBtn");
+  var formatLabel = document.getElementById("formatLabel");
+  var copyLabel = document.getElementById("copyLabel");
+  var exportWrap = document.getElementById("exportWrap");
+  var exportBtn = document.getElementById("exportBtn");
+  var exportLabel = document.getElementById("exportLabel");
+  var exportMenu = document.getElementById("exportMenu");
+  var bulkBtn = document.getElementById("bulkBtn");
+  var visibleItems = [];
+  var CATS = [{"name": "Artificial Intelligence", "count": 19}, {"name": "Computer Devices", "count": 120}, {"name": "Culture", "count": 27}, {"name": "Entertainment", "count": 69}, {"name": "Food Drink", "count": 32}, {"name": "Health", "count": 43}, {"name": "Images Photography", "count": 23}, {"name": "Interface Essential", "count": 295}, {"name": "Mail", "count": 48}, {"name": "Map Travel", "count": 72}, {"name": "Money Shopping", "count": 108}, {"name": "Nature Ecology", "count": 38}, {"name": "Phone", "count": 26}, {"name": "Programming", "count": 49}, {"name": "Shipping", "count": 14}, {"name": "Work Education", "count": 14}];
+  var catWrap = document.getElementById("catWrap");
+  var catBtn = document.getElementById("catBtn");
+  var catMenu = document.getElementById("catMenu");
+  var catLabel = document.getElementById("catLabel");
+  var styleRow = document.getElementById("styleRow");
+  var styleSegs = document.getElementById("styleSegs");
+  var weightRow = document.getElementById("weightRow");
+  var selCount = document.getElementById("selCount");
+  var selStrip = document.getElementById("selStrip");
+  var selRemove = document.getElementById("selRemove");
+  var selClear = document.getElementById("selClear");
+  var addAllBtn = document.getElementById("addAllBtn");
+  var estimateEl = statusEl;
+
+  var FILL_WEIGHT = { "1": 0, "1.5": 0.4, "2": 0.8, "2.5": 1.2 };
+  var items = [];
+  var selected = null;
+  var weight = "2";
+  var size = 64;
+  var surface = "black";
+  var format = "svg";
+  var MIME = { svg: "image/svg+xml", png: "image/png", webp: "image/webp", jpg: "image/jpeg" };
+  var EXPORT_SIZES = [32, 64, 128, 256, 512, 1024];
+  var exportSize = 512;
+  var built = false;
+  var cat = "";
+  var SLUG = "streamline";
+  var CAT_KEY = "icons:cat:" + SLUG;
+  var STYLE_KEY = "icons:style:" + SLUG;
+  var savedCat = "";
+  try { savedCat = window.localStorage.getItem(CAT_KEY) || ""; } catch (error) { savedCat = ""; }
+
+  function markup(item) {
+    return '<svg xmlns="http://www.w3.org/2000/svg" ' + item.attrs + ">" + item.body + "</svg>";
+  }
+
+  // Every vendor icon carries its own stroke-width attribute, and a presentation
+  // attribute beats a value inherited from the <svg>. So the preview writes the
+  // chosen weight onto each element instead of trusting the stylesheet.
+  function tune(svg, w, stroke) {
+    if (!svg) { return; }
+    // Weight is chosen on the 24-unit grid the shelf draws at, so a set on a larger
+    // grid needs the same *visual* width, not the same number: Phosphor draws on 256
+    // and Streamline's Core set on 14, where a 24-unit stroke would swamp the icon. Scale once, here, so the
+    // preview, the thumbs and the exported raster all agree.
+    var view = (svg.getAttribute("viewBox") || "").trim().split(/[\s,]+/);
+    var side = view.length === 4 ? Number(view[2]) : 0;
+    if (side > 0) { w = Number(w) * side / 24; }
+    svg.style.setProperty("--w", String(w));
+    svg.setAttribute("stroke-width", String(w));
+    var parts = svg.querySelectorAll("*");
+    for (var i = 0; i < parts.length; i++) {
+      parts[i].setAttribute("stroke-width", String(w));
+      if (stroke) {
+        parts[i].setAttribute("stroke", "currentColor");
+        parts[i].setAttribute("stroke-linejoin", "round");
+        parts[i].setAttribute("stroke-linecap", "round");
+      }
+    }
+    if (!stroke) { solidDots(svg, w); }
+  }
+
+  // A closed subpath no bigger than the stroke turnes inside out: the renderer
+  // draws its outline twice over the middle and leaves a pinhole where the two
+  // edges meet. Coolicons' accessibility icon is one path whose 1-unit head does
+  // this at weight 2 (stroke = diameter exactly) and again at 2.5, which is the
+  // white dot that appeared and vanished as the weight changed. Splitting such a
+  // subpath out and filling it keeps the dot solid at every weight.
+  function splitSubpaths(d) {
+    var out = [], re = /[Mm][^Mm]*/g, m;
+    while ((m = re.exec(d))) { out.push(m[0]); }
+    return out;
+  }
+
+  function solidDots(svg, w) {
+    var list = Array.prototype.slice.call(svg.querySelectorAll("path"));
+    for (var i = 0; i < list.length; i++) {
+      var path = list[i];
+      var parts = splitSubpaths(path.getAttribute("d") || "");
+      if (parts.length < 2) { continue; }
+      var pieces = [], split = false, j, box, piece, closed;
+      for (j = 0; j < parts.length; j++) {
+        piece = path.cloneNode(false);
+        piece.setAttribute("d", parts[j]);
+        svg.appendChild(piece);
+        box = piece.getBBox();
+        svg.removeChild(piece);
+        closed = /[Zz]\s*$/.test(parts[j]);
+        if (closed && Math.min(box.width, box.height) <= w) {
+          piece.setAttribute("fill", "currentColor");
+          split = true;
+        }
+        pieces.push(piece);
+      }
+      if (!split) { continue; }
+      var frag = svg.ownerDocument.createDocumentFragment();
+      for (j = 0; j < pieces.length; j++) { frag.appendChild(pieces[j]); }
+      path.parentNode.replaceChild(frag, path);
+    }
+  }
+
+  function paint() {
+    if (!selected) { return; }
+    var svg = markup(selected);
+    box.innerHTML = svg;
+    box.style.setProperty("--size", size + "px");
+    // Duo and Flat carry the vendor's palette. Writing a weight or currentColor onto
+    // them would flatten the very thing that tells the styles apart.
+    if (TUNED && !COLOUR) {
+      var w = MODE === "stroke" ? weight : FILL_WEIGHT[weight];
+      box.style.setProperty("--w", w);
+      tune(box.querySelector("svg"), w, MODE !== "stroke");
+    }
+    box.setAttribute("data-surface", surface);
+    box.closest(".preview").setAttribute("data-surface", surface);
+    // The style rides on the name, where the file label used to say it twice.
+    nameEl.textContent = selected.name + (STYLE ? " · " + STYLE.name : "");
+    snippet.value = svg;
+    queueEstimate();
+  }
+
+  function select(item, card) {
+    selected = item;
+    paint();
+    var cards = grid.querySelectorAll(".icon-card");
+    for (var i = 0; i < cards.length; i++) {
+      cards[i].setAttribute("aria-pressed", cards[i] === card ? "true" : "false");
+    }
+  }
+
+  // A brand can carry the same drawings in several styles (Streamline does). The
+  // catalog in hand is the current style's; the others are fetched the first time
+  // the toggle asks for them and then kept for the visit.
+  // The chosen ink. Ink styles take it as currentColor; Duo and Flat are tinted
+  // rather than flattened, so their second tone survives as an opacity.
+  var ink = "";
+  var tints = {};
+  var currentPayload = null;
+
+  var STYLE = null;
+  var COLOUR = false;
+  var TUNED = true;
+  var catalogs = {};
+
+  var chosen = [];
+  var chosenSet = {};
+  var bulkFilled = false;
+  var lastTap = { name: "", at: 0 };
+  var estimateTimer = 0;
+  var estimateToken = 0;
+
+  function inSelection(item) { return chosenSet[item.name] === true; }
+
+  function addPick(item) {
+    if (chosenSet[item.name]) { return false; }
+    chosenSet[item.name] = true;
+    chosen.push(item);
+    return true;
+  }
+
+  function dropPick(item) {
+    if (!chosenSet[item.name]) { return false; }
+    delete chosenSet[item.name];
+    chosen = chosen.filter(function (other) { return other.name !== item.name; });
+    return true;
+  }
+
+  function clearPicks() {
+    chosen = [];
+    chosenSet = {};
+    bulkFilled = false;
+  }
+
+  // The selection is the only thing an export packs. Nothing is collected when the
+  // page opens, so the button reads "Nothing to export" until a double-tap or Add all
+  // puts something in it -- and Remove all really does leave nothing behind.
+  function exportList() { return chosen; }
+
+  function styleBySlug(slug) {
+    for (var i = 0; i < STYLES.length; i++) {
+      if (STYLES[i].slug === slug) { return STYLES[i]; }
+    }
+    return null;
+  }
+
+  // The current style decides how a glyph is painted and whether weight applies.
+  function applyStyle(entry) {
+    STYLE = entry;
+    MODE = entry.mode;
+    COLOUR = !!entry.colour;
+    TUNED = entry.tune !== false;
+    // "plain" has no rule in the page's CSS: the glyph paints itself, which is what
+    // a palette style and a solid shape both need.
+    box.setAttribute("data-mode", TUNED ? MODE : "plain");
+    weightRow.hidden = !TUNED || MODE !== "stroke";
+  }
+
+  function markStyleSegs() {
+    Array.prototype.forEach.call(styleSegs.children, function (button) {
+      var on = STYLE && button.getAttribute("data-style") === STYLE.slug;
+      button.setAttribute("aria-pressed", on ? "true" : "false");
+    });
+  }
+
+  function renderStyles() {
+    if (STYLES.length < 2) { return; }
+    var frag = document.createDocumentFragment();
+    STYLES.forEach(function (entry) {
+      var button = document.createElement("button");
+      button.type = "button";
+      button.className = "seg";
+      button.setAttribute("data-style", entry.slug);
+      button.textContent = entry.name;
+      button.addEventListener("click", function () { switchStyle(entry.slug); });
+      frag.append(button);
+    });
+    styleSegs.textContent = "";
+    styleSegs.append(frag);
+    styleRow.hidden = false;
+    markStyleSegs();
+  }
+
+  // The catalog is a names-first index plus glyph chunks. The index already
+  // carries counts, categories and one glyph, so `onIndex` paints the page before
+  // any markup arrives; the chunks then stream in parallel and fill the sheet.
+  function loadCatalog(url, onIndex) {
+    if (catalogs[url]) { return Promise.resolve(catalogs[url]); }
+    var base = url.replace(/[^/]*$/, "");
+    return fetch(url, { cache: "default" })
+      .then(function (response) {
+        if (!response.ok) { throw new Error(url + " returned " + response.status); }
+        return response.json();
+      })
+      .then(function (payload) {
+        if (onIndex) { onIndex(payload); }
+        var chunks = payload.chunks || [];
+        if (!chunks.length) { catalogs[url] = payload; return payload; }
+        return Promise.all(chunks.map(function (name) {
+          return fetch(base + name, { cache: "default" }).then(function (response) {
+            if (!response.ok) { throw new Error(name + " returned " + response.status); }
+            return response.json();
+          });
+        })).then(function (parts) {
+          var icons = [];
+          parts.forEach(function (part) { icons = icons.concat(part.icons || []); });
+          payload.icons = icons;
+          catalogs[url] = payload;
+          return payload;
+        });
+      });
+  }
+
+  function catsFor(payload) {
+    var counts = {}, order = payload.cat_order || [];
+    (payload.icons || []).forEach(function (item) {
+      if (item.cat) { counts[item.cat] = (counts[item.cat] || 0) + 1; }
+    });
+    var names = order.filter(function (name) { return counts[name]; });
+    Object.keys(counts).sort().forEach(function (name) {
+      if (names.indexOf(name) === -1) { names.push(name); }
+    });
+    return names.map(function (name) { return { name: name, count: counts[name] }; });
+  }
+
+  // The same drawings in another style: keep the previewed name and the collected
+  // ones where that style has them, drop the rest, and say how many went.
+  function switchStyle(slug) {
+    var entry = styleBySlug(slug);
+    if (!entry || (STYLE && entry.slug === STYLE.slug)) { return; }
+    var keepName = selected ? selected.name : "";
+    var names = chosen.map(function (item) { return item.name; });
+    announce("Loading " + entry.name + "…");
+    loadCatalog(entry.data).then(function (payload) {
+      var next = payload.icons || [];
+      if (!next.length) { throw new Error("the catalog is empty"); }
+      var byName = {};
+      next.forEach(function (item) { byName[item.name] = item; });
+      applyStyle(entry);
+      currentPayload = payload;
+      items = displayed(next);
+      CATS = catsFor(payload);
+      chosen = names.map(function (name) { return byName[name]; }).filter(Boolean);
+      chosenSet = {};
+      chosen.forEach(function (item) { chosenSet[item.name] = true; });
+      bulkFilled = false;
+      selected = byName[keepName] || next[0];
+      store(STYLE_KEY, entry.slug);
+      markStyleSegs();
+      renderCats();
+      renderGrid();
+      paint();
+      announce(entry.name + " · " + next.length.toLocaleString() + " icons"
+        + (names.length > chosen.length
+          ? " · " + (names.length - chosen.length) + " dropped, not in this style" : ""));
+    }).catch(function (error) {
+      announce(entry.name + " did not load: " + error.message);
+    });
+  }
+
+  function labelExport() {
+    var list = exportList();
+    bulkBtn.textContent = list.length ? "Export " + list.length.toLocaleString() : "Nothing to export";
+    bulkBtn.disabled = !list.length;
+  }
+
+  function markCards() {
+    var cards = grid.querySelectorAll(".icon-card");
+    for (var i = 0; i < cards.length; i++) {
+      cards[i].setAttribute("data-picked", chosenSet[cards[i].getAttribute("data-name")] ? "true" : "false");
+    }
+  }
+
+  function renderSelection() {
+    var n = chosen.length;
+    selCount.textContent = n ? n.toLocaleString() + (n === 1 ? " icon" : " icons") : "No icons";
+    selRemove.disabled = !(selected && inSelection(selected));
+    selClear.disabled = !n;
+    selStrip.textContent = "";
+    if (!n) {
+      var hint = document.createElement("p");
+      hint.className = "sel-hint";
+      hint.textContent = "Double-tap an icon in the sheet to collect it, or press Add all.";
+      selStrip.append(hint);
+    } else {
+      var frag = document.createDocumentFragment();
+      chosen.slice(0, 18).forEach(function (item) {
+        var chip = document.createElement("button");
+        chip.type = "button";
+        chip.className = "sel-chip";
+        chip.title = item.name;
+        chip.setAttribute("aria-label", "Preview " + item.name + " from the selection");
+        chip.innerHTML = markup(item);
+        chip.addEventListener("click", function () { select(item, null); renderSelection(); });
+        frag.append(chip);
+      });
+      selStrip.append(frag);
+      if (n > 18) {
+        var more = document.createElement("span");
+        more.className = "sel-more";
+        more.textContent = "+" + (n - 18).toLocaleString();
+        selStrip.append(more);
+      }
+    }
+    markCards();
+    labelExport();
+    queueEstimate();
+  }
+
+  function togglePick(item) {
+    if (inSelection(item)) {
+      dropPick(item);
+      announce("Removed " + item.name + " · " + chosen.length.toLocaleString() + " in the selection");
+    } else {
+      addPick(item);
+      bulkFilled = false;
+      announce("Added " + item.name + " · " + chosen.length.toLocaleString() + " in the selection");
+    }
+    renderSelection();
+  }
+
+  selRemove.addEventListener("click", function () {
+    if (!selected || !inSelection(selected)) { return; }
+    dropPick(selected);
+    announce("Removed " + selected.name + " · " + chosen.length.toLocaleString() + " in the selection");
+    renderSelection();
+  });
+
+  selClear.addEventListener("click", function () {
+    if (!chosen.length) { return; }
+    var was = chosen.length;
+    clearPicks();
+    announce("Cleared " + was.toLocaleString() + " from the selection");
+    renderSelection();
+  });
+
+  addAllBtn.addEventListener("click", function () {
+    if (!visibleItems.length) { return; }
+    clearPicks();
+    visibleItems.forEach(addPick);
+    bulkFilled = true;
+    announce("Added all " + visibleItems.length.toLocaleString() + " shown icons to the selection");
+    renderSelection();
+  });
+
+  function fmtBytes(n) {
+    if (n < 1024) { return n + " B"; }
+    if (n < 1024 * 1024) { return (n < 10240 ? (n / 1024).toFixed(1) : Math.round(n / 1024)) + " KB"; }
+    return (n / (1024 * 1024)).toFixed(1) + " MB";
+  }
+
+  var announceTimer = 0;
+  var announcing = false;
+
+  function queueEstimate() {
+    window.clearTimeout(estimateTimer);
+    // A message owns the line while it is showing; the estimate must not overwrite
+    // it the moment the selection re-renders.
+    if (announcing) { return; }
+    estimateTimer = window.setTimeout(runEstimate, 240);
+  }
+
+  // One line under Export: the estimate by default, a message while something is
+  // happening, then the estimate again.
+  function announce(text) {
+    window.clearTimeout(announceTimer);
+    estimateEl.textContent = text;
+    announcing = true;
+    announceTimer = window.setTimeout(function () {
+      announcing = false;
+      queueEstimate();
+    }, 3600);
+  }
+
+  function sayEstimate(count, bytes) {
+    estimateEl.textContent = "Estimate: " + count.toLocaleString() + (count === 1 ? " icon" : " icons")
+      + " · about " + fmtBytes(bytes) + " zipped · " + format.toUpperCase()
+      + (format === "svg" ? "" : " at " + exportSize + " px")
+      + " · the selection";
+  }
+
+  // The zip is written here, so its size is the sum of the files it will hold.
+  // SVG is counted exactly; a raster is sampled on four icons spread through the
+  // list, because drawing all 1,258 to measure them is the export itself.
+  function runEstimate() {
+    var list = exportList();
+    var token = ++estimateToken;
+    if (!list || !list.length) {
+      estimateEl.textContent = "Nothing selected yet \u2014 double-tap an icon or press Add all.";
+      return;
+    }
+    if (format === "svg") {
+      var bytes = 0;
+      list.forEach(function (item) { bytes += markup(item).length + item.name.length + 30; });
+      sayEstimate(list.length, bytes);
+      return;
+    }
+    estimateEl.textContent = "Estimating " + list.length.toLocaleString() + " icons…";
+    var mime = MIME[format];
+    var step = Math.max(1, Math.floor(list.length / 4));
+    var samples = [];
+    for (var i = 0; i < list.length && samples.length < 4; i += step) { samples.push(list[i]); }
+    Promise.all(samples.map(function (item) {
+      return rasterFor(item, mime).then(function (url) { return bytesOf(url).length; })
+        .catch(function () { return 0; });
+    })).then(function (sizes) {
+      if (token !== estimateToken) { return; }
+      var good = sizes.filter(function (n) { return n > 0; });
+      if (!good.length) {
+        estimateEl.textContent = list.length.toLocaleString() + " icons · size unknown for " + format.toUpperCase();
+        return;
+      }
+      var avg = good.reduce(function (a, b) { return a + b; }, 0) / good.length;
+      sayEstimate(list.length, Math.round(avg * list.length * 1.03));
+    });
+  }
+
+  function renderGrid() {
+    if (!items.length) { return; }
+    var q = search.value.trim().toLowerCase();
+    var frag = document.createDocumentFragment();
+    var shown = 0;
+    var picked = [];
+    items.forEach(function (item) {
+      if (q && item.name.indexOf(q) === -1) { return; }
+      if (cat && item.cat !== cat) { return; }
+      shown++;
+      picked.push(item);
+      var card = document.createElement("button");
+      card.type = "button";
+      card.className = "icon-card";
+      card.setAttribute("aria-pressed", selected === item ? "true" : "false");
+      card.setAttribute("aria-label", "Preview " + item.name);
+      card.setAttribute("data-name", item.name);
+      card.setAttribute("data-picked", inSelection(item) ? "true" : "false");
+      var glyph = document.createElement("span");
+      glyph.className = "glyph";
+      glyph.innerHTML = markup(item);
+      var label = document.createElement("span");
+      label.className = "name";
+      label.textContent = item.name;
+      card.append(glyph, label);
+      // A second press inside the window collects the icon; the sheet's own
+      // press stays a preview, so a slow reader sees no change.
+      card.addEventListener("click", function () {
+        select(item, card);
+        var now = Date.now();
+        if (lastTap.name === item.name && now - lastTap.at < 460) {
+          lastTap = { name: "", at: 0 };
+          togglePick(item);
+          return;
+        }
+        lastTap = { name: item.name, at: now };
+      });
+      card.addEventListener("dblclick", function (event) { event.preventDefault(); });
+      frag.append(card);
+    });
+    grid.textContent = "";
+    grid.append(frag);
+    visibleItems = picked;
+    addAllBtn.textContent = shown ? "Add all " + shown.toLocaleString() : "Add all";
+    addAllBtn.disabled = !shown;
+    countEl.textContent = (q || cat) ? shown.toLocaleString() + " / " + items.length.toLocaleString() : items.length.toLocaleString();
+    emptyEl.hidden = shown !== 0;
+    built = true;
+    renderSelection();
+  }
+
+  function closeCats() {
+    catMenu.hidden = true;
+    catBtn.setAttribute("aria-expanded", "false");
+  }
+
+  function chooseCat(name) {
+    cat = name;
+    catLabel.textContent = name || "All icons";
+    try {
+      if (name) { window.localStorage.setItem(CAT_KEY, name); }
+      else { window.localStorage.removeItem(CAT_KEY); }
+    } catch (error) { /* private mode: the page still filters, it just forgets */ }
+    Array.prototype.forEach.call(catMenu.children, function (item, index) {
+      item.setAttribute("aria-selected", (index === 0 ? "" : CATS[index - 1].name) === cat ? "true" : "false");
+    });
+    // Add all filled the selection from the category that was showing; a new
+    // category starts clean so each one can be exported by itself.
+    if (bulkFilled) { clearPicks(); }
+    closeCats();
+    renderGrid();
+  }
+
+  function renderCats() {
+    if (!CATS.length) { catWrap.hidden = true; return; }
+    catWrap.hidden = false;
+    var frag = document.createDocumentFragment();
+    var all = [{ name: "", count: items.length }].concat(CATS);
+    all.forEach(function (entry) {
+      var btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "cat-item";
+      btn.setAttribute("role", "option");
+      btn.setAttribute("aria-selected", entry.name === cat ? "true" : "false");
+      var label = document.createElement("span");
+      label.className = "cat-label";
+      label.textContent = entry.name || "All icons";
+      var num = document.createElement("span");
+      num.className = "cat-n";
+      num.textContent = entry.count.toLocaleString();
+      btn.append(label, num);
+      btn.addEventListener("click", function () { chooseCat(entry.name); });
+      frag.append(btn);
+    });
+    catMenu.textContent = "";
+    catMenu.append(frag);
+  }
+
+  catBtn.addEventListener("click", function () {
+    var open = catMenu.hidden;
+    catMenu.hidden = !open;
+    catBtn.setAttribute("aria-expanded", open ? "true" : "false");
+  });
+
+  document.addEventListener("click", function (event) {
+    if (!catWrap.contains(event.target)) { closeCats(); }
+  });
+
+  document.addEventListener("keydown", function (event) {
+    if (event.key === "Escape") { closeCats(); closeExports(); closeFormats(); }
+  });
+
+  function setPanel(open) {
+    panel.setAttribute("data-open", open ? "true" : "false");
+    panelToggle.setAttribute("aria-expanded", open ? "true" : "false");
+    if (open && !built) { renderGrid(); }
+  }
+
+  panelToggle.addEventListener("click", function () {
+    setPanel(panel.getAttribute("data-open") !== "true");
+  });
+
+  search.addEventListener("input", renderGrid);
+
+  weights.addEventListener("click", function (event) {
+    var btn = event.target.closest(".seg");
+    if (!btn) { return; }
+    weight = btn.getAttribute("data-weight");
+    Array.prototype.forEach.call(weights.children, function (other) {
+      other.setAttribute("aria-pressed", other === btn ? "true" : "false");
+    });
+    paint();
+    queueEstimate();
+  });
+
+  sizes.addEventListener("click", function (event) {
+    var btn = event.target.closest(".seg");
+    if (!btn) { return; }
+    size = Number(btn.getAttribute("data-size"));
+    Array.prototype.forEach.call(sizes.children, function (other) {
+      other.setAttribute("aria-pressed", other === btn ? "true" : "false");
+    });
+    paint();
+  });
+
+  function applySurface(value) {
+    if (value !== "black" && value !== "white") { return; }
+    surface = value;
+    markGroup(surfaces, surfaces.querySelector('[data-surface="' + value + '"]'));
+    store(SURFACE_KEY, value);
+    paint();
+    queueEstimate();
+  }
+
+  surfaces.addEventListener("click", function (event) {
+    var btn = event.target.closest(".seg");
+    if (!btn) { return; }
+    applySurface(btn.getAttribute("data-surface"));
+  });
+
+  function luminance(hex) {
+    var h = hex.replace("#", "");
+    if (h.length === 3) { h = h.split("").map(function (c) { return c + c; }).join(""); }
+    var parts = [0, 2, 4].map(function (at) {
+      var v = parseInt(h.substr(at, 2), 16) / 255;
+      return v <= 0.04045 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+    });
+    return 0.2126 * parts[0] + 0.7152 * parts[1] + 0.0722 * parts[2];
+  }
+
+  // A palette glyph cannot take currentColor wholesale: every tone would become one
+  // flat shape and Duo would stop looking like Duo. The darkest tone becomes the ink,
+  // each lighter one the same ink at an opacity that keeps their order.
+  function tinted(item) {
+    var seen = {};
+    item.body.replace(/(fill|stroke)="(#[0-9a-fA-F]{3,8})"/g, function (m, prop, hex) {
+      seen[hex.toLowerCase()] = true;
+      return m;
+    });
+    var tones = Object.keys(seen).sort(function (a, b) { return luminance(a) - luminance(b); });
+    var darkest = tones[0] || "";
+    var body = item.body.replace(/(fill|stroke)="(#[0-9a-fA-F]{3,8})"/g, function (m, prop, hex) {
+      if (hex.toLowerCase() === darkest) { return prop + '="currentColor"'; }
+      var key = prop === "fill" ? "fill-opacity" : "stroke-opacity";
+      var alpha = Math.round((0.10 + 0.45 * luminance(hex)) * 100) / 100;
+      return prop + '="currentColor" ' + key + '="' + alpha + '"';
+    });
+    return { name: item.name, cat: item.cat, attrs: item.attrs, body: body };
+  }
+
+  function displayed(list) {
+    if (!COLOUR || !ink) { return list; }
+    var key = (STYLE ? STYLE.slug : "") + ink;
+    if (!tints[key]) {
+      tints[key] = list.map(tinted);
+    }
+    return tints[key];
+  }
+
+  function applyInkColour() {
+    if (ink) { document.documentElement.style.setProperty("--glyph", ink); }
+    else { document.documentElement.style.removeProperty("--glyph"); }
+  }
+
+  function markInks() {
+    Array.prototype.forEach.call(inks.querySelectorAll(".ink"), function (button) {
+      var value = button.getAttribute("data-ink");
+      button.setAttribute("aria-pressed", value === ink ? "true" : "false");
+    });
+    // M carries the colour it stands for, so a custom choice is visible in the row.
+    var custom = ink !== "" && !inks.querySelector('.ink[data-ink="' + ink + '"]');
+    inkManual.style.setProperty("--sw", custom ? ink : "transparent");
+    inkManual.style.color = custom ? readableInk(ink) : "";
+  }
+
+  function setInk(value, tell) {
+    ink = /^#[0-9a-fA-F]{6}$/.test(value || "") ? value.toLowerCase() : "";
+    store(INK_KEY, ink);
+    applyInkColour();
+    markInks();
+    if (COLOUR && currentPayload) {
+      var keepName = selected ? selected.name : "";
+      var names = chosen.map(function (item) { return item.name; });
+      items = displayed(currentPayload.icons || []);
+      var byName = {};
+      items.forEach(function (item) { byName[item.name] = item; });
+      chosen = names.map(function (name) { return byName[name]; }).filter(Boolean);
+      chosenSet = {};
+      chosen.forEach(function (item) { chosenSet[item.name] = true; });
+      selected = byName[keepName] || items[0];
+      renderGrid();
+      paint();
+    } else {
+      paint();
+    }
+    if (tell) {
+      announce(ink ? "Icons drawn in " + ink.toUpperCase() : "Icons follow the background");
+    }
+  }
+
+  inks.addEventListener("click", function (event) {
+    var button = event.target.closest(".ink");
+    if (!button || button === inkManual) { return; }
+    setInk(button.getAttribute("data-ink"), true);
+  });
+
+  // Whichever ink reads on top of a fill: coal on light, cream on dark.
+  function readableInk(hex) {
+    var n = parseInt(hex.slice(1), 16);
+    var lum = (0.2126 * ((n >> 16) & 255) + 0.7152 * ((n >> 8) & 255) + 0.0722 * (n & 255)) / 255;
+    return lum > 0.55 ? "#131513" : "#f2eee3";
+  }
+
+  // ---- the colour dialog: ours, so the swatches are circles, the current choice is
+  // the one wearing the ring, Custom opens a hex field, and Cancel changes nothing.
+  var inkPop = document.getElementById("inkPop");
+  var inkGrid = document.getElementById("inkGrid");
+  var inkCustomBtn = document.getElementById("inkCustom");
+  var inkHexWrap = document.getElementById("inkHexWrap");
+  var inkHex = document.getElementById("inkHex");
+  var inkSet = document.getElementById("inkSet");
+  var pendingInk = "";
+  var inkCmykWrap = document.getElementById("inkCmykWrap");
+  var inkWheelWrap = document.getElementById("inkWheelWrap");
+  var inkCmykBtn = document.getElementById("inkCmyk");
+  var inkWheelBtn = document.getElementById("inkWheelBtn");
+  var inkWheel = document.getElementById("inkWheel");
+  var inkWheelDot = document.getElementById("inkWheelDot");
+  var inkValue = document.getElementById("inkValue");
+  var inkPreview = document.getElementById("inkPreview");
+  var inkC = document.getElementById("inkC");
+  var inkM = document.getElementById("inkM");
+  var inkY = document.getElementById("inkY");
+  var inkK = document.getElementById("inkK");
+  var wheelH = 210, wheelS = .7, wheelV = .8, wheelDragging = false;
+  var mode = "";
+
+  function hex2(r, g, b) {
+    return "#" + [r, g, b].map(function (v) {
+      return ("0" + Math.max(0, Math.min(255, Math.round(v))).toString(16)).slice(-2);
+    }).join("");
+  }
+
+  function hsvHex(h, s, v) {
+    var c = v * s, x = c * (1 - Math.abs((h / 60) % 2 - 1)), m = v - c;
+    var r = 0, g = 0, b = 0;
+    if (h < 60) { r = c; g = x; } else if (h < 120) { r = x; g = c; }
+    else if (h < 180) { g = c; b = x; } else if (h < 240) { g = x; b = c; }
+    else if (h < 300) { r = x; b = c; } else { r = c; b = x; }
+    return hex2((r + m) * 255, (g + m) * 255, (b + m) * 255);
+  }
+
+  function cmykHex(c, m, y, k) {
+    return hex2(255 * (1 - c / 100) * (1 - k / 100),
+                255 * (1 - m / 100) * (1 - k / 100),
+                255 * (1 - y / 100) * (1 - k / 100));
+  }
+
+  function hexHsv(hex) {
+    var n = parseInt(hex.slice(1), 16);
+    var r = ((n >> 16) & 255) / 255, g = ((n >> 8) & 255) / 255, b = (n & 255) / 255;
+    var max = Math.max(r, g, b), min = Math.min(r, g, b), d = max - min;
+    var h = 0;
+    if (d) {
+      if (max === r) { h = 60 * (((g - b) / d) % 6); }
+      else if (max === g) { h = 60 * ((b - r) / d + 2); }
+      else { h = 60 * ((r - g) / d + 4); }
+    }
+    return { h: (h + 360) % 360, s: max ? d / max : 0, v: max };
+  }
+
+  function hexCmyk(hex) {
+    var n = parseInt(hex.slice(1), 16);
+    var r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255;
+    var k = 1 - Math.max(r, g, b) / 255;
+    if (k >= 1) { return { c: 0, m: 0, y: 0, k: 100 }; }
+    return {
+      c: Math.round(100 * (1 - r / 255 - k) / (1 - k)),
+      m: Math.round(100 * (1 - g / 255 - k) / (1 - k)),
+      y: Math.round(100 * (1 - b / 255 - k) / (1 - k)),
+      k: Math.round(k * 100)
+    };
+  }
+
+  function hexValue(text) {
+    var clean = String(text || "").replace(/[^0-9a-f]/gi, "").slice(0, 6);
+    return clean.length === 6 ? "#" + clean.toLowerCase() : "";
+  }
+
+  function markDialog() {
+    Array.prototype.forEach.call(inkGrid.querySelectorAll(".ink-cell"), function (cell) {
+      cell.setAttribute("aria-pressed", cell.getAttribute("data-c") === pendingInk ? "true" : "false");
+    });
+    inkPreview.style.setProperty("--sw", pendingInk || "transparent");
+    var typed = hexValue(inkHex.value) !== "";
+    inkHex.setAttribute("aria-invalid", mode === "hex" && !typed ? "true" : "false");
+    inkSet.disabled = mode === "hex" && !typed;
+  }
+
+  // One pane at a time behind the chips: hex, cmyk, or the wheel. All three end as a
+  // hex string in pendingInk, so the swatches, the ring and Set stay one code path.
+  function setMode(next) {
+    mode = next === "hex" || next === "cmyk" || next === "wheel" ? next : "";
+    inkHexWrap.hidden = mode !== "hex";
+    inkCmykWrap.hidden = mode !== "cmyk";
+    inkWheelWrap.hidden = mode !== "wheel";
+    inkCustomBtn.setAttribute("aria-pressed", mode === "hex" ? "true" : "false");
+    inkCmykBtn.setAttribute("aria-pressed", mode === "cmyk" ? "true" : "false");
+    inkWheelBtn.setAttribute("aria-pressed", mode === "wheel" ? "true" : "false");
+    if (mode === "cmyk") { seedCmyk(); }
+    if (mode === "wheel") { seedWheel(); }
+    markDialog();
+  }
+
+  function seedCmyk() {
+    var c = hexCmyk(pendingInk || "#4147d5");
+    inkC.value = c.c; inkM.value = c.m; inkY.value = c.y; inkK.value = c.k;
+  }
+
+  function seedWheel() {
+    var hsv = hexHsv(pendingInk || "#4147d5");
+    wheelH = hsv.h; wheelS = hsv.s; wheelV = hsv.v;
+    inkValue.value = Math.round(wheelV * 100);
+    paintWheel();
+  }
+
+  function paintWheel() {
+    // Black at (1 - V) multiplies the wheel by V, which is exactly what hsvHex
+    // returns, so the swatch under the pointer matches the colour it commits.
+    inkWheel.style.setProperty("--darken", String(Math.max(0, Math.min(1, 1 - wheelV))));
+    var angle = wheelH * Math.PI / 180;
+    var reach = wheelS * 50;
+    inkWheelDot.style.left = (50 + Math.cos(angle) * reach) + "%";
+    inkWheelDot.style.top = (50 + Math.sin(angle) * reach) + "%";
+    inkWheelDot.style.background = pendingInk || "#4147d5";
+  }
+
+  function openInk() {
+    pendingInk = ink;
+    inkHex.value = (ink || "#4147d5").slice(1).toUpperCase();
+    // A colour that is not one of the swatches came from a pane, so open on the
+    // field it can be read in rather than a grid that cannot show it.
+    var onSwatch = ink === "" || inkGrid.querySelector('.ink-cell[data-c="' + ink + '"]');
+    setMode(onSwatch ? "" : "hex");
+    if (typeof inkPop.showModal === "function") { inkPop.showModal(); }
+    else { inkPop.setAttribute("open", ""); }
+    inkSet.focus();
+  }
+
+  function closeInk() {
+    if (typeof inkPop.close === "function") { inkPop.close(); }
+    else { inkPop.removeAttribute("open"); }
+  }
+
+  inkManual.addEventListener("click", openInk);
+  document.getElementById("inkClose").addEventListener("click", closeInk);
+  document.getElementById("inkCancel").addEventListener("click", closeInk);
+  inkPop.addEventListener("click", function (event) {
+    if (event.target === inkPop) { closeInk(); }
+  });
+
+  inkGrid.addEventListener("click", function (event) {
+    var cell = event.target.closest(".ink-cell");
+    if (!cell) { return; }
+    pendingInk = cell.getAttribute("data-c");
+    setMode("");
+  });
+
+  inkCustomBtn.addEventListener("click", function () {
+    setMode(mode === "hex" ? "" : "hex");
+    if (mode === "hex") { inkHex.focus(); inkHex.select(); }
+  });
+  inkCmykBtn.addEventListener("click", function () { setMode(mode === "cmyk" ? "" : "cmyk"); });
+  inkWheelBtn.addEventListener("click", function () { setMode(mode === "wheel" ? "" : "wheel"); });
+
+  inkHex.addEventListener("input", function () {
+    var value = hexValue(inkHex.value);
+    if (value) { pendingInk = value; }
+    markDialog();
+  });
+
+  inkHex.addEventListener("keydown", function (event) {
+    if (event.key === "Enter" && !inkSet.disabled) { event.preventDefault(); inkSet.click(); }
+  });
+
+  function percentOf(input) {
+    return Math.max(0, Math.min(100, parseInt(input.value, 10) || 0));
+  }
+
+  [inkC, inkM, inkY, inkK].forEach(function (input) {
+    input.addEventListener("input", function () {
+      if (mode !== "cmyk") { return; }
+      pendingInk = cmykHex(percentOf(inkC), percentOf(inkM), percentOf(inkY), percentOf(inkK));
+      markDialog();
+    });
+  });
+
+  function pickWheel(event) {
+    var box = inkWheel.getBoundingClientRect();
+    var dx = event.clientX - (box.left + box.width / 2);
+    var dy = event.clientY - (box.top + box.height / 2);
+    wheelH = (Math.atan2(dy, dx) * 180 / Math.PI + 360) % 360;
+    wheelS = Math.min(1, Math.sqrt(dx * dx + dy * dy) / (box.width / 2));
+    pendingInk = hsvHex(wheelH, wheelS, wheelV);
+    markDialog();
+    paintWheel();
+  }
+
+  inkWheel.addEventListener("pointerdown", function (event) {
+    wheelDragging = true;
+    if (inkWheel.setPointerCapture) { inkWheel.setPointerCapture(event.pointerId); }
+    pickWheel(event);
+  });
+  inkWheel.addEventListener("pointermove", function (event) {
+    if (wheelDragging) { pickWheel(event); }
+  });
+  inkWheel.addEventListener("pointerup", function () { wheelDragging = false; });
+  inkWheel.addEventListener("pointercancel", function () { wheelDragging = false; });
+
+  inkValue.addEventListener("input", function () {
+    wheelV = percentOf(inkValue) / 100;
+    if (mode !== "wheel") { return; }
+    pendingInk = hsvHex(wheelH, wheelS, wheelV);
+    markDialog();
+    paintWheel();
+  });
+
+  inkSet.addEventListener("click", function () {
+    if (inkSet.disabled) { return; }
+    setInk(pendingInk, true);
+    closeInk();
+  });
+
+
+
+  // A PNG, WEBP or JPG is drawn from the same tuned icon at the chosen export size
+  // on the chosen background: the app saves it to Pictures/Icons through its bridge,
+  // the site downloads it and puts a PNG on the clipboard as well.
+  function rasterFor(item, mime) {
+    return new Promise(function (resolve, reject) {
+      var host = document.createElement("div");
+      host.innerHTML = markup(item);
+      var node = host.querySelector("svg");
+      node.setAttribute("width", String(exportSize));
+      node.setAttribute("height", String(exportSize));
+      node.setAttribute("style", "color:"
+        + (ink || (surface === "white" ? "#000000" : "#ffffff")));
+      if (TUNED && !COLOUR) {
+        tune(node, weight, MODE !== "stroke");
+      }
+      var svg = new XMLSerializer().serializeToString(node);
+      var blob = new Blob([svg], { type: "image/svg+xml;charset=utf-8" });
+      var url = URL.createObjectURL(blob);
+      var image = new Image();
+      image.onload = function () {
+        var canvas = document.createElement("canvas");
+        canvas.width = exportSize;
+        canvas.height = exportSize;
+        var ctx = canvas.getContext("2d");
+        ctx.fillStyle = surface === "white" ? "#ffffff" : "#000000";
+        ctx.fillRect(0, 0, exportSize, exportSize);
+        ctx.drawImage(image, 0, 0, exportSize, exportSize);
+        URL.revokeObjectURL(url);
+        resolve(canvas.toDataURL(mime, 0.92));
+      };
+      image.onerror = function () {
+        URL.revokeObjectURL(url);
+        reject(new Error("the icon did not draw"));
+      };
+      image.src = url;
+    });
+  }
+
+  function copyText(text) {
+    if (window.IconsApp && window.IconsApp.copy) {
+      window.IconsApp.copy(text);
+      return Promise.resolve(true);
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      return navigator.clipboard.writeText(text).then(function () { return true; }).catch(function () { return legacy(text); });
+    }
+    return Promise.resolve(legacy(text));
+  }
+
+  function legacy(text) {
+    var area = document.createElement("textarea");
+    area.value = text;
+    area.setAttribute("readonly", "");
+    area.style.position = "fixed";
+    area.style.top = "-1000px";
+    document.body.append(area);
+    area.select();
+    var ok = false;
+    try { ok = document.execCommand("copy"); } catch (err) { ok = false; }
+    area.remove();
+    return ok;
+  }
+
+  var FORMAT_KEY = "icons:format:" + SLUG;
+  var SIZE_KEY = "icons:export:" + SLUG;
+  var SURFACE_KEY = "icons:surface:" + SLUG;
+  var INK_KEY = "icons:ink:" + SLUG;
+
+  function store(key, value) {
+    try {
+      if (value) { window.localStorage.setItem(key, value); }
+      else { window.localStorage.removeItem(key); }
+    } catch (error) { /* private mode: the page still works, it just forgets */ }
+  }
+
+  function recall(key) {
+    try { return window.localStorage.getItem(key) || ""; } catch (error) { return ""; }
+  }
+
+  function markGroup(group, chosen) {
+    Array.prototype.forEach.call(group.children, function (other) {
+      other.setAttribute("aria-pressed", other === chosen ? "true" : "false");
+    });
+  }
+
+  var FORMATS = ["svg", "png", "webp", "jpg"];
+
+  function markFormats() {
+    Array.prototype.forEach.call(formats.children, function (item) {
+      item.setAttribute("aria-selected", item.getAttribute("data-format") === format ? "true" : "false");
+    });
+    formatLabel.textContent = format.toUpperCase();
+  }
+
+  function applyFormat(value) {
+    if (!MIME[value]) { return; }
+    format = value;
+    markFormats();
+    copyLabel.textContent = "Copy " + format.toUpperCase();
+    store(FORMAT_KEY, format);
+    queueEstimate();
+  }
+
+  function closeFormats() {
+    formats.hidden = true;
+    formatBtn.setAttribute("aria-expanded", "false");
+  }
+
+  function renderFormats() {
+    var frag = document.createDocumentFragment();
+    FORMATS.forEach(function (value) {
+      var item = document.createElement("button");
+      item.type = "button";
+      item.className = "export-item";
+      item.setAttribute("role", "option");
+      item.setAttribute("data-format", value);
+      item.textContent = value.toUpperCase();
+      item.addEventListener("click", function () {
+        applyFormat(value);
+        announce(format === "svg"
+          ? "Copy hands over the SVG file"
+          : "Copy saves a " + exportSize + "px " + format.toUpperCase() + " tile on the " + surface + " background");
+        closeFormats();
+      });
+      frag.append(item);
+    });
+    formats.textContent = "";
+    formats.append(frag);
+    markFormats();
+  }
+
+  formatBtn.addEventListener("click", function () {
+    var open = formats.hidden;
+    if (open) { closeExports(); }
+    formats.hidden = !open;
+    formatBtn.setAttribute("aria-expanded", open ? "true" : "false");
+  });
+
+  document.addEventListener("click", function (event) {
+    if (!formatWrap.contains(event.target)) { closeFormats(); }
+  });
+
+  function markExports() {
+    Array.prototype.forEach.call(exportMenu.children, function (item) {
+      item.setAttribute("aria-selected",
+        Number(item.getAttribute("data-export")) === exportSize ? "true" : "false");
+    });
+    exportLabel.textContent = exportSize + " px";
+  }
+
+  function applyExportSize(value, announce) {
+    exportSize = value;
+    markExports();
+    store(SIZE_KEY, String(value));
+    queueEstimate();
+    if (announce) {
+      announce("Exports and the bulk zip are " + exportSize + "px now");
+    }
+  }
+
+  function closeExports() {
+    exportMenu.hidden = true;
+    exportBtn.setAttribute("aria-expanded", "false");
+  }
+
+  function renderExports() {
+    var frag = document.createDocumentFragment();
+    EXPORT_SIZES.forEach(function (value) {
+      var item = document.createElement("button");
+      item.type = "button";
+      item.className = "export-item";
+      item.setAttribute("role", "option");
+      item.setAttribute("data-export", String(value));
+      item.textContent = value + " px";
+      item.addEventListener("click", function () {
+        applyExportSize(value, true);
+        closeExports();
+      });
+      frag.append(item);
+    });
+    exportMenu.textContent = "";
+    exportMenu.append(frag);
+    markExports();
+  }
+
+  exportBtn.addEventListener("click", function () {
+    var open = exportMenu.hidden;
+    if (open) { closeFormats(); }
+    exportMenu.hidden = !open;
+    exportBtn.setAttribute("aria-expanded", open ? "true" : "false");
+  });
+
+  document.addEventListener("click", function (event) {
+    if (!exportWrap.contains(event.target)) { closeExports(); }
+  });
+
+  var CRC = (function () {
+    var table = new Uint32Array(256);
+    for (var n = 0; n < 256; n++) {
+      var c = n;
+      for (var k = 0; k < 8; k++) { c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; }
+      table[n] = c >>> 0;
+    }
+    return table;
+  })();
+
+  function crc32(bytes) {
+    var c = 0xFFFFFFFF;
+    for (var i = 0; i < bytes.length; i++) { c = CRC[(c ^ bytes[i]) & 0xFF] ^ (c >>> 8); }
+    return (c ^ 0xFFFFFFFF) >>> 0;
+  }
+
+  function bytesOf(dataUrl) {
+    var binary = atob(dataUrl.split(",")[1]);
+    var out = new Uint8Array(binary.length);
+    for (var i = 0; i < binary.length; i++) { out[i] = binary.charCodeAt(i); }
+    return out;
+  }
+
+  // A stored (uncompressed) zip: these are already-compressed images, and hand
+  // writing deflate would buy nothing. Everything is little endian and unsigned.
+  function zipBytes(files) {
+    function u16(n) { return [n & 255, (n >>> 8) & 255]; }
+    function u32(n) { return [n & 255, (n >>> 8) & 255, (n >>> 16) & 255, (n >>> 24) & 255]; }
+    var encoder = new TextEncoder();
+    var parts = [], directory = [], offset = 0;
+    files.forEach(function (file) {
+      var name = encoder.encode(file.name);
+      var crc = crc32(file.bytes);
+      var head = [].concat([0x50, 0x4b, 0x03, 0x04], u16(20), u16(0), u16(0), u16(0), u16(0),
+        u32(crc), u32(file.bytes.length), u32(file.bytes.length), u16(name.length), u16(0));
+      parts.push(new Uint8Array(head), name, file.bytes);
+      directory.push({ name: name, crc: crc, size: file.bytes.length, offset: offset });
+      offset += head.length + name.length + file.bytes.length;
+    });
+    var start = offset;
+    directory.forEach(function (entry) {
+      var head = [].concat([0x50, 0x4b, 0x01, 0x02], u16(20), u16(20), u16(0), u16(0), u16(0), u16(0),
+        u32(entry.crc), u32(entry.size), u32(entry.size), u16(entry.name.length), u16(0), u16(0),
+        u16(0), u16(0), u32(0), u32(entry.offset));
+      parts.push(new Uint8Array(head), entry.name);
+      offset += head.length + entry.name.length;
+    });
+    parts.push(new Uint8Array([].concat([0x50, 0x4b, 0x05, 0x06], u16(0), u16(0),
+      u16(directory.length), u16(directory.length), u32(offset - start), u32(start), u16(0))));
+    var total = parts.reduce(function (n, part) { return n + part.length; }, 0);
+    var out = new Uint8Array(total), at = 0;
+    parts.forEach(function (part) { out.set(part, at); at += part.length; });
+    return out;
+  }
+
+  function zipName() {
+    var query = search.value.trim().toLowerCase();
+    var base = (STYLE ? STYLE.slug + "-" : "") + (bulkFilled && cat ? cat : "selection");
+    var slug = base.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+    return BRAND.toLowerCase() + "-" + slug + "-" + format + ".zip";
+  }
+
+  function base64Of(bytes) {
+    var binary = "";
+    for (var i = 0; i < bytes.length; i += 4096) {
+      binary += String.fromCharCode.apply(null, bytes.subarray(i, i + 4096));
+    }
+    return btoa(binary);
+  }
+
+  function bulkExport() {
+    var list = exportList().slice();
+    if (!list.length) { return; }
+    var mime = MIME[format];
+    var files = [], index = 0;
+    bulkBtn.disabled = true;
+    announce("Packing 0/" + list.length + "…");
+    function next() {
+      if (index >= list.length) { finish(); return; }
+      var item = list[index];
+      announce("Packing " + (index + 1) + "/" + list.length + " · " + item.name);
+      if (format === "svg") {
+        files.push({ name: item.name + ".svg", bytes: new TextEncoder().encode(markup(item)) });
+        index += 1;
+        window.setTimeout(next, 0);
+        return;
+      }
+      rasterFor(item, mime).then(function (dataUrl) {
+        files.push({ name: item.name + "." + format, bytes: bytesOf(dataUrl) });
+      }).catch(function () {
+        // an icon that will not draw is left out rather than failing the whole zip
+      }).then(function () { index += 1; window.setTimeout(next, 0); });
+    }
+    function finish() {
+      var blob = zipBytes(files);
+      var name = zipName();
+      if (window.IconsApp && window.IconsApp.saveFile) {
+        window.IconsApp.saveFile("data:application/zip;base64," + base64Of(blob), "application/zip", name);
+        announce("Saved " + name + " · " + files.length + " files");
+        window.setTimeout(paint, 4000);
+      } else {
+        var url = URL.createObjectURL(new Blob([blob], { type: "application/zip" }));
+        var link = document.createElement("a");
+        link.href = url;
+        link.download = name;
+        document.body.append(link);
+        link.click();
+        link.remove();
+        window.setTimeout(function () { URL.revokeObjectURL(url); }, 6000);
+        announce("Downloaded " + name + " · " + files.length + " files");
+      }
+      bulkBtn.disabled = false;
+    }
+    next();
+  }
+
+  bulkBtn.addEventListener("click", bulkExport);
+
+  // A raster belongs on the clipboard too, so it can be pasted straight into a
+  // design tool. The clipboard only takes PNG, so a WEBP or JPG is redrawn as one.
+  function copyPng(dataUrl, mime) {
+    if (!navigator.clipboard || !navigator.clipboard.write || !window.ClipboardItem) {
+      return Promise.resolve(false);
+    }
+    var png = mime === "image/png" ? Promise.resolve(dataUrl) : rasterFor(selected, "image/png");
+    return png.then(function (pngData) {
+      var bytes = bytesOf(pngData);
+      return navigator.clipboard.write([
+        new ClipboardItem({ "image/png": new Blob([bytes], { type: "image/png" }) })
+      ]);
+    }).then(function () { return true; }).catch(function () { return false; });
+  }
+
+  document.getElementById("copyBtn").addEventListener("click", function () {
+    if (!selected) { return; }
+    if (format === "svg") {
+      var text = markup(selected);
+      snippet.value = text;
+      copyText(text).then(function (ok) {
+        announce(ok ? "Copied " + selected.name + ".svg to the clipboard" : "Clipboard blocked — the markup is open below");
+        if (!ok) { openMarkup(); }
+        window.setTimeout(paint, 2200);
+      });
+      return;
+    }
+    var mime = MIME[format];
+    var name = selected.name + "." + format;
+    announce("Drawing " + name + "…");
+    rasterFor(selected, mime).then(function (dataUrl) {
+      if (window.IconsApp && window.IconsApp.saveImage) {
+        window.IconsApp.saveImage(dataUrl, mime, name);
+        announce("Saved " + name + " · " + exportSize + "px · " + surface);
+        return;
+      }
+      var link = document.createElement("a");
+      link.href = dataUrl;
+      link.download = name;
+      document.body.append(link);
+      link.click();
+      link.remove();
+      announce("Downloaded " + name + " · " + exportSize + "px · " + surface);
+      copyPng(dataUrl, mime).then(function (copied) {
+        if (copied) {
+          announce("Downloaded " + name + " · " + exportSize + "px · " + surface
+            + " · PNG on the clipboard");
+        }
+        window.setTimeout(paint, 4200);
+      });
+    }).catch(function (error) {
+      announce("Could not export: " + error.message);
+    });
+  });
+
+  var markupPop = document.getElementById("markupPop");
+
+  function openMarkup() {
+    if (typeof markupPop.showModal === "function") { markupPop.showModal(); }
+    else { markupPop.setAttribute("open", ""); }
+    snippet.focus();
+    snippet.select();
+  }
+
+  function closeMarkup() {
+    if (typeof markupPop.close === "function") { markupPop.close(); }
+    else { markupPop.removeAttribute("open"); }
+  }
+
+  document.getElementById("markupBtn").addEventListener("click", openMarkup);
+  document.getElementById("popClose").addEventListener("click", closeMarkup);
+  // Escape is the dialog's own; a click on the backdrop lands on the dialog itself.
+  markupPop.addEventListener("click", function (event) {
+    if (event.target === markupPop) { closeMarkup(); }
+  });
+  document.getElementById("popCopy").addEventListener("click", function () {
+    copyText(snippet.value).then(function (ok) {
+      announce(ok ? "Copied " + (selected ? selected.name : "") + ".svg to the clipboard" : "Clipboard blocked — select the markup and copy it by hand");
+      if (ok) { closeMarkup(); } else { snippet.focus(); snippet.select(); }
+    });
+  });
+
+  if (window.IconsApp) { document.documentElement.classList.add("in-app"); }
+
+  (function restoreExport() {
+    renderFormats();
+    renderExports();
+    var savedFormat = recall(FORMAT_KEY);
+    if (MIME[savedFormat]) { applyFormat(savedFormat); }
+    var savedSize = Number(recall(SIZE_KEY));
+    if (savedSize && EXPORT_SIZES.indexOf(savedSize) !== -1) {
+      applyExportSize(savedSize, false);
+    }
+    applySurface(recall(SURFACE_KEY));
+    setInk(recall(INK_KEY), false);
+  })();
+
+  var initial = STYLES.length ? (styleBySlug(recall(STYLE_KEY)) || STYLES[0]) : null;
+  if (initial) { applyStyle(initial); }
+  renderStyles();
+  var initialData = initial ? initial.data : DATA;
+
+  loadCatalog(initialData, function (index) {
+    // Paint what the index knows: the total and one real glyph, not a placeholder.
+    if (index.first) { select(index.first, null); }
+    if (index.count) { countEl.textContent = index.count.toLocaleString(); }
+    if (index.cats && index.cats.length) { CATS = index.cats; }
+    announce("Loading " + (index.count || 0).toLocaleString() + " icons…");
+  })
+    .then(function (payload) {
+      currentPayload = payload;
+      items = displayed(payload.icons || []);
+      if (!items.length) { throw new Error("the catalog is empty"); }
+      CATS =      catsFor(payload);
+      if (savedCat) {
+        var known = CATS.some(function (entry) { return entry.name === savedCat; });
+        if (known) { cat = savedCat; catLabel.textContent = savedCat; }
+      }
+      renderCats();
+      select(items[0], null);
+      renderGrid();
+    })
+    .catch(function (error) {
+      nameEl.textContent = "The catalog did not load";
+      announce(error.message);
+    });
+})();
+</script>
+<script src="../../assets/site.a45733d10a.js" defer></script>
+</body>
+</html>

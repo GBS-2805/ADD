@@ -1,13 +1,12 @@
 #!/usr/bin/env bash
 # Builds the offline Android APKs with the raw SDK tools (no Gradle).
 #
-#   ./build.sh            # both apps
-#   ./build.sh compress   # Compress only
-#   ./build.sh icons      # Icons only
+#   ./build.sh            # the ADD app
+#   ./build.sh stage      # stage the web bundle only
 #
-# The Icons app is a WebView over the site's icon browser, so its assets are
-# staged out of docs/ at build time: the pages, the two catalogs, the stylesheet
-# and the Poppins woff2. There is no second copy of any glyph.
+# ADD is one package: a native compressor plus a WebView over the site's web tools,
+# so the icons and fonts pages are staged out of docs/ at build time -- the pages,
+# their catalogs, the stylesheet and Poppins. There is no second copy of any glyph.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")" && pwd)"
@@ -179,27 +178,55 @@ HTML
     du -sh "$www"
 }
 
-case "${1:-all}" in
+# The unified app: the shelf's web tools (icons, fonts) staged out of docs/ into the
+# one package that also carries the native compressor. Same rule as the Icons build --
+# the pages, their catalogs, the stylesheet and Poppins are copied, never re-authored.
+stage_shelf_assets() {
+    local www="$ROOT/app/assets/www"
+    echo "== ADD: staging the shelf out of docs/ =="
+    rm -rf "$ROOT/app/assets"
+    mkdir -p "$www/icons" "$www/fonts" "$www/assets/fonts" "$www/data" "$www/search"
+    cp "$ROOT/docs/icons/index.html" "$www/icons/"
+    for dir in "$ROOT"/docs/icons/*/; do cp -r "$dir" "$www/icons/"; done
+    cp "$ROOT/docs/fonts/index.html" "$www/fonts/"
+    cp "$ROOT"/docs/assets/site*.css "$ROOT"/docs/assets/site*.js \
+       "$ROOT/docs/assets/favicon.svg" "$www/assets/"
+    cp "$ROOT"/docs/assets/fonts/*.woff2 "$www/assets/fonts/"
+    cp -r "$ROOT/docs/data/." "$www/data/"
+    cp "$ROOT/docs/search/index.html" "$www/search/"
+    # Trim the search index to the pages the bundle carries: a hit that opens a 404
+    # offline is worse than a shorter list.
+    python3 - "$ROOT/docs/data/pages.json" "$www/data/pages.json" <<'PY'
+import json, sys
+src, dst = sys.argv[1], sys.argv[2]
+payload = json.load(open(src, encoding="utf-8"))
+pages = [p for p in payload["pages"]
+         if p["path"].startswith("/icons") or p["path"].startswith("/fonts")]
+json.dump(dict(payload, pages=pages), open(dst, "w", encoding="utf-8"), ensure_ascii=False)
+print("bundle index: %d of %d pages" % (len(pages), len(payload["pages"])))
+PY
+    cat > "$www/index.html" <<'HTML'
+<!doctype html><meta charset="utf-8"><meta http-equiv="refresh" content="0;url=icons/">
+<title>ADD</title>
+HTML
+    python3 "$ROOT/tools/check_bundle.py" "$www"
+    du -sh "$www"
+}
+
+# One app, one case. The old `compress` and `icons` cases are gone with the merge:
+# ADD ships the shelf's web tools and the native compressor in one package.
+case "${1:-add}" in
+    add)
+        stage_shelf_assets
+        build_app app ADD ADD-3.0.apk 32 3.0
+        check_fallback "$OUT/ADD-3.0.apk"
+        ;;
     stage)
         # Stage only: no JDK or SDK needed, which is how the bundle harness runs.
-        stage_icons_assets
-        ;;
-    compress)
-        build_app app Compress Compress-2.3.apk 14 2.3
-        ;;
-    icons)
-        stage_icons_assets
-        build_app icons-app Icons Icons-2.20.apk 31 2.20
-        check_fallback "$OUT/Icons-2.19.apk"
-        ;;
-    all)
-        build_app app Compress Compress-2.3.apk 14 2.3
-        stage_icons_assets
-        build_app icons-app Icons Icons-2.20.apk 31 2.20
-        check_fallback "$OUT/Icons-2.19.apk"
+        stage_shelf_assets
         ;;
     *)
-        echo "usage: $0 [all|compress|icons]" >&2
+        echo "usage: $0 [add|stage]" >&2
         exit 2
         ;;
 esac

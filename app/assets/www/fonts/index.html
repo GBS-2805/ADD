@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Fonts — Poppins and Redaction 50, one sheet per family</title>
+<meta name="description" content="Poppins and Redaction 50: woff2 and TTF, every weight and italic, free under the SIL Open Font License." />
+<meta name="theme-color" content="#0fbf92" />
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml" />
+<link rel="stylesheet" href="../assets/site.23ad55050f.css" />
+<style>
+  .trytext { display: grid; gap: 7px; max-width: 520px; font-size: 13px; letter-spacing: .04em; text-transform: uppercase; color: var(--on-dim); }
+  .trytext input { font: inherit; font-size: 17px; letter-spacing: 0; text-transform: none; color: var(--on); background: transparent; border: 0; border-bottom: 1px solid var(--rule); padding: 9px 0; }
+  .trytext input:focus-visible { outline: 2px solid var(--band); outline-offset: 2px; }
+  .trystage { margin: 18px 0 0; border: 1px solid var(--rule); padding: 22px 20px; overflow: hidden; }
+  .trystage p { margin: 0; line-height: 1.15; letter-spacing: -.02em; overflow-wrap: break-word; }
+  .trysize { display: flex; align-items: center; gap: 14px; max-width: 520px; margin: 16px 0 0; font-size: 13px; letter-spacing: .04em; text-transform: uppercase; color: var(--on-dim); }
+  .trysize input { flex: 1; accent-color: var(--band); }
+  .trypx { display: inline-flex; align-items: baseline; gap: 5px; text-transform: none; letter-spacing: 0; }
+  .trypx input { width: 6.2ch; font: inherit; font-size: 15px; text-align: right; padding: 3px 6px;
+    color: var(--on); background: transparent; border: 1px solid var(--rule);
+    appearance: textfield; -moz-appearance: textfield; }
+  .trypx input::-webkit-outer-spin-button, .trypx input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  .trypx input:focus-visible { outline: 2px solid var(--band); outline-offset: 2px; }
+  /* The rule is a block and the button sits under it, so neither can land on the
+     size row at any width. */
+  .trycss { margin: 14px 0 0; max-width: 640px; }
+  .trycss code { display: block; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px;
+    line-height: 1.5; color: var(--on-dim); overflow-wrap: anywhere; white-space: pre-wrap; }
+  .try-copy { margin: 10px 0 0; font: inherit; font-size: 13px; letter-spacing: .04em; text-transform: uppercase;
+    padding: 5px 10px; color: var(--on); background: transparent; border: 1px solid var(--rule); cursor: pointer; }
+  .try-copy:hover { border-color: var(--on-dim); }
+  .try-copy:focus-visible { outline: 2px solid var(--band); outline-offset: -3px; }
+  .try-reset { margin-left: auto; font: inherit; font-size: 13px; letter-spacing: .04em;
+    text-transform: uppercase; padding: 4px 10px; color: var(--on-dim); background: transparent;
+    border: 1px solid var(--rule); cursor: pointer; }
+  .try-reset:hover { color: var(--on); border-color: var(--on-dim); }
+  .try-reset:focus-visible { outline: 2px solid var(--band); outline-offset: -3px; }
+
+  .familybar { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin: 20px 0 0;
+    font-size: 13px; letter-spacing: .04em; text-transform: uppercase; color: var(--on-dim); }
+  .familybar select { font: inherit; font-size: 16px; letter-spacing: 0; text-transform: none;
+    padding: 9px 38px 9px 12px; color: var(--on); background-color: transparent;
+    border: 1px solid var(--rule); border-radius: 0; cursor: pointer;
+    appearance: none; -webkit-appearance: none;
+    background-image: linear-gradient(45deg, transparent 50%, var(--on-dim) 50%),
+      linear-gradient(135deg, var(--on-dim) 50%, transparent 50%);
+    background-position: calc(100% - 17px) 50%, calc(100% - 12px) 50%;
+    background-size: 5px 5px, 5px 5px; background-repeat: no-repeat; }
+  .familybar select:focus-visible { outline: 2px solid var(--band); outline-offset: 2px; }
+  .familybar select option { color: var(--on); background: var(--page); }
+
+  .families { margin-top: 22px; }
+  .family { padding: 26px 0 24px; border-top: 1px solid var(--rule); }
+  .family-head { display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap; }
+  .family-head h3 { margin: 0; font-size: 26px; font-weight: 400; line-height: 1.2; letter-spacing: -.01em; }
+  .family-head .kind { font-size: 12px; font-weight: 500; letter-spacing: .1em; text-transform: uppercase; color: var(--on-dim); }
+  .face { display: grid; gap: 9px; padding: 18px 0 0; }
+  .face-top { display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap; }
+  .face-top h3 { margin: 0; font-size: 22px; font-weight: 400; line-height: 1.2; letter-spacing: -.01em; }
+  .face .kind { font-size: 12px; font-weight: 500; letter-spacing: .1em; text-transform: uppercase; color: var(--on-dim); }
+  .specimen { margin: 2px 0 4px; font-size: clamp(28px, 3.4vw, 40px); line-height: 1.2; letter-spacing: -.01em; }
+  .face-use { margin: 0; font-size: 15px; line-height: 1.55; }
+  .face-foot { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; font-size: 13px; color: var(--on-dim); }
+  .face-foot a { color: var(--on); }
+  .face-foot a:hover { text-decoration: underline; }
+  .try-style { margin-left: auto; font: inherit; font-size: 13px; letter-spacing: .04em; text-transform: uppercase;
+    padding: 6px 12px; color: var(--on); background: transparent; border: 1px solid var(--rule); cursor: pointer; }
+  .try-style[aria-pressed="true"] { color: var(--ink); background: var(--band); border-color: var(--band); }
+  .try-style:focus-visible { outline: 2px solid var(--band); outline-offset: -3px; }
+</style>
+</head>
+<body>
+
+<header class="bar">
+  <div class="lead">
+    <button class="menu-btn" id="menuBtn" type="button" aria-expanded="false" aria-controls="menu" aria-label="Open sections">
+      <svg class="chev" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M8 13L12 17L16 13M8 7L12 11L16 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+    <a class="page-name" href="../">Fonts</a>
+  </div>
+
+  <a class="mark" href="../" aria-label="Compress — home">
+    <svg viewBox="0 0 120.6 123.11" role="img" aria-label="Compress logo" fill="currentColor">
+        <path d="m29.58,61.92c.11,1.85.17,3.7.36,5.54.11,1.02-.23,1.23-1.19,1.29-4.47.26-5.38,1.22-5.27,5.67.13,5.14,2.74,9.13,6.27,12.56,1.53,1.49,2.96,1.05,3.89-.88.61-1.27.96-2.64,1.04-4.06.06-1.13.53-1.24,1.41-.69,1.72,1.08,2.92,2.71,4.38,4.07,8.66,8.04,18.38,13.89,30.58,14.51.52.03,1.04-.02,1.56,0,1.36.07,1.57-.53.89-1.58-.36-.56-.82-1.05-1.21-1.58-1.5-2.04-.63-4.17,1.89-4.53,3.34-.47,6.44.69,9.57,1.56,4.15,1.15,8.3,2.3,12.65,1.03,2.54-.74,2.78-1.66.84-3.54-.63-.61-1.41-1.08-2.11-1.63-2.43-1.91-2.63-3.35-.64-5.76,2.51-3.05,6.01-4.22,9.75-4.74,4.81-.67,9.26.31,13.25,3.19,1.39,1.01,1.75,1.97.94,3.7-9.48,20.25-25.12,32.69-47.2,36.28-29.25,4.75-57.41-12.11-67.54-39.86C-8.51,49.01,10.62,11.88,44.98,2.31c31.94-8.9,65.21,8.7,75.4,39.81.46,1.42.23,2.38-.66,3.4-4.28,4.87-9.78,6.13-15.92,5.16-4.99-.79-9.16-3.27-12.65-6.88-1.34-1.38-2.66-2.79-3.87-4.28-13.61-16.78-43.35-15.8-54.84,7.54-2.32,4.71-3.19,9.66-2.85,14.86Z"/>
+        <path d="m80.89,57.02c.88-.09,2.06-.21,3.22.13,1.56.46,1.88,1.6.75,2.8-1.16,1.23-2.59,1.52-4.25,1.33-4.23-.48-5.14.47-4.58,4.78.43,3.35,1.88,6.19,4.52,8.36.99.81,1.67.93,2.18-.62,1.55-4.74,1.61-4.72,6.46-4.56,1.28.04,2.56-.04,3.49-1.05.76-.83,1.38-1.54,2.5-.44,1.07,1.05,1.29,2.15.42,3.35-1.18,1.61-2.84,2.29-4.82,2.23-1.25-.04-2.77-.51-3.68.03-.98.58-.39,2.29-.7,3.49-.75,2.89-2.94,3.94-5.77,2.62-5.71-2.66-10.17-13.01-8.12-18.87.86-2.45,2.86-3.21,5.21-3.41.96-.08,1.92-.11,3.18-.18Z"/>
+        <path d="m52.62,58.41c.19-1.57.26-3.23,1.99-3.92,1.62-.65,2.9.23,3.92,1.33,2.41,2.61,3.79,5.64,2.86,9.26-.6,2.33-2.43,2.97-4.42,1.62-2.92-1.97-3.98-4.98-4.35-8.29Z"/>
+        <path d="m44.97,66.78c-.03,1.9-.18,3.24-1.63,3.9-1.5.68-2.61-.25-3.53-1.19-2.06-2.11-3.15-4.68-2.7-7.66.4-2.62,2.46-3.4,4.53-1.73,2.25,1.82,3.29,4.3,3.33,6.68Z"/>
+      </svg>
+  </a>
+
+  <div class="who">
+    <div class="who-lines keep">
+      <p class="big">Art Design Database</p>
+      <p class="big">Icons • Fonts • Tools</p>
+    </div>
+    <button class="burger" id="burger" type="button" aria-expanded="false" aria-controls="drawer" aria-label="Open side tab">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 7H19M5 12H19M5 17H19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+  </div>
+</header>
+
+<nav class="menu" id="menu" data-open="false" aria-label="Sections">
+  <a href="../">Index<span>shelf</span></a>
+  <a href="../icons/">Icons<span>4,373 icons</span></a>
+  <a href="../fonts/" aria-current="page">Fonts<span>2 families</span></a>
+  <a href="../tools/">Tools<span>2 apps</span></a>
+</nav>
+
+<div class="scrim" id="scrim" data-open="false"></div>
+<aside class="drawer" id="drawer" data-open="false" aria-label="More">
+  <div class="drawer-head">
+    <p>More</p>
+    <button class="drawer-close" id="drawerClose" type="button" aria-label="Close side tab"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 6L18 18M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+  </div>
+  <a href="../download/">Download<span>2 apps</span></a>
+  <a href="../portfolio/">Portfolio<span>3 projects</span></a>
+  <a href="../renders/">Renders<span>gallery</span></a>
+  <a href="../releases/">Releases<span>history</span></a>
+  <p class="drawer-note">Compress · offline Android tools, the icons they use and the fonts they are set in.</p>
+</aside>
+
+
+<main>
+  <header class="page-head">
+    <h1>Fonts</h1>
+    <p class="lede"><b>Poppins</b> and <b>Redaction 50</b>, served from this site — no Google Fonts request — with every weight and italic to download.</p>
+    <p class="meta">
+      <span id="fontFamilies">2 families</span>
+      <span id="fontStyles">21 styles</span>
+      <span id="fontBytes">woff2 … total</span>
+      <span>SIL Open Font License 1.1</span>
+    </p>
+  </header>
+
+  <section id="try">
+    <h2>Try it</h2>
+    <p class="kicker">Type a line, drag a size, then try any face in a family sheet below</p>
+    <label class="trytext" for="tryText">Text
+      <input id="tryText" type="text" value="Art Design Database" maxlength="80" autocomplete="off" spellcheck="false" />
+    </label>
+    <div class="trystage" id="tryStage">
+      <p id="tryOut" style="font-family:'Poppins';font-weight:400;font-size:48px">Art Design Database</p>
+    </div>
+    <div class="trycss">
+      <code id="tryRule">font-family: "Poppins", sans-serif;
+font-weight: 400;
+font-size: 48px;</code>
+      <button type="button" class="try-copy" id="tryCopy">Copy CSS</button>
+    </div>
+    <div class="trysize">
+      <label for="trySize">Size</label>
+      <input id="trySize" type="range" min="16" max="120" step="1" value="48" />
+      <span class="trypx"><input id="trySizeNum" type="number" min="16" max="120" step="1" value="48"
+        inputmode="numeric" aria-label="Size in pixels" /> px</span>
+      <button type="button" class="try-reset" id="tryReset" hidden>Reset</button>
+    </div>
+    <p class="fine">No image, no extra request. A sheet's Try button sets the preview here.</p>
+  </section>
+
+  <section>
+    <h2>Font families</h2>
+    <p class="kicker">One sheet per family — each pull-down picks the face its sheet shows</p>
+    <div class="families" id="families">
+      <p class="fine" id="familyStatus">Loading the families…</p>
+    </div>
+    <p class="fine">The three app Poppins faces are copied from <code>app/res/font/</code>; the rest come from <code>tools/fetch_fonts.py</code>.</p>
+  </section>
+
+  <section>
+    <h2>How it is wired</h2>
+    <p class="kicker">Two families, no network</p>
+    <ul class="rows">
+      <li><b>Site</b><span><code>assets/site.23ad55050f.css</code> sets the site's own Poppins faces; this page declares every downloaded style from <code>/data/fonts.json</code>.</span></li>
+      <li><b>App</b><span><code>app/res/font/poppins_regular.ttf</code>, <code>_medium</code> and <code>_semibold</code>, referenced from the layouts.</span></li>
+      <li><b>Downloads</b><span>woff2 for the web at <code>/assets/fonts/</code>, TTF beside it for Android and desktop.</span></li>
+      <li><b>JSON</b><span><code>/data/fonts.json</code> lists each family, its faces, both paths and both measured sizes.</span></li>
+    </ul>
+    <p class="fine">A face looks like this in CSS:</p>
+    <p class="fine"><code>@font-face { font-family: "Poppins"; src: url("/assets/fonts/poppins-400.woff2") format("woff2"); font-weight: 400; font-display: swap; }</code></p>
+  </section>
+
+  <section>
+    <h2>Licence</h2>
+    <p class="kicker">SIL Open Font License 1.1</p>
+    <p class="kicker" style="max-width:66ch; margin-bottom:0">Both families are SIL OFL 1.1: free to use and bundle. Keep the licence with any copy and do not sell the font on its own. The icons are MIT, on the <a href="../icons/">icons page</a>.</p>
+  </section>
+</main>
+
+<footer>
+  <span>Poppins · Redaction 50 · SIL OFL 1.1</span>
+  <span><a href="../">Index</a> · <a href="../icons/">Icons</a> · <a href="../download/">Download</a></span>
+</footer>
+
+<script>
+(function () {
+  var KEY = "fonts:preview";
+  var MIN = 16, MAX = 120;
+  var text = document.getElementById("tryText");
+  var size = document.getElementById("trySize");
+  var num = document.getElementById("trySizeNum");
+  var out = document.getElementById("tryOut");
+  var reset = document.getElementById("tryReset");
+  var rule = document.getElementById("tryRule");
+  var copy = document.getElementById("tryCopy");
+  var familiesEl = document.getElementById("families");
+  var status = document.getElementById("familyStatus");
+  var familiesOut = document.getElementById("fontFamilies");
+  var stylesOut = document.getElementById("fontStyles");
+  var bytesOut = document.getElementById("fontBytes");
+
+  var data = [];
+  var shown = {};
+  var state = { family: "Poppins", weight: 400, style: "normal" };
+  var DEFAULTS = {
+    family: "Poppins", weight: 400, style: "normal",
+    text: text.defaultValue, size: size.defaultValue
+  };
+
+  function family(name) {
+    return data.filter(function (item) { return item.family === name; })[0];
+  }
+  function face(fam, weight, style) {
+    if (!fam) { return null; }
+    return fam.styles.filter(function (item) {
+      return item.weight === weight && item.style === style;
+    })[0];
+  }
+  function defaultFace(fam) {
+    return face(fam, 400, "normal") || fam.styles[0];
+  }
+  function clamp(px) { return Math.min(MAX, Math.max(MIN, px)); }
+  function bytes(value) { return value.toLocaleString("en-US"); }
+
+  function changed() {
+    return text.value !== DEFAULTS.text || size.value !== DEFAULTS.size ||
+      state.family !== DEFAULTS.family || state.weight !== Number(DEFAULTS.weight) ||
+      state.style !== DEFAULTS.style;
+  }
+
+  function injectFaces() {
+    var css = "";
+    data.forEach(function (fam) {
+      fam.styles.forEach(function (item) {
+        css += '@font-face{font-family:"' + fam.family + '";src:url("' + item.woff2 +
+          '") format("woff2");font-weight:' + item.weight + ";font-style:" + item.style +
+          ";font-display:swap}";
+      });
+    });
+    var tag = document.createElement("style");
+    tag.textContent = css;
+    document.head.appendChild(tag);
+  }
+
+  function stats() {
+    if (!data.length) { return; }
+    var styles = data.reduce(function (n, fam) { return n + fam.styles.length; }, 0);
+    var woff2 = data.reduce(function (n, fam) { return n + fam.woff2_bytes; }, 0);
+    familiesOut.textContent = data.length + " families";
+    stylesOut.textContent = styles + " styles";
+    bytesOut.textContent = "woff2 " + bytes(woff2) + " bytes total";
+  }
+
+  function faceMarkup(fam, item) {
+    var active = fam.family === state.family && item.weight === state.weight &&
+      item.style === state.style;
+    return '<div class="face">' +
+      '<p class="specimen" style="font-family:\'' + fam.family + "';font-weight:" + item.weight +
+        ";font-style:" + item.style + '">Offline, no account.</p>' +
+      (item.use ? '<p class="face-use">' + item.use + "</p>" : "") +
+      '<div class="face-foot"><span class="tag">woff2 ' + bytes(item.woff2_bytes) +
+        " bytes · ttf " + bytes(item.ttf_bytes) + " bytes</span>" +
+      '<a href="' + item.woff2 + '" download>woff2</a>' +
+      '<a href="' + item.ttf + '" download>ttf</a>' +
+      '<button type="button" class="try-style" data-family="' + fam.family +
+        '" data-weight="' + item.weight + '" data-style="' + item.style +
+        '" aria-pressed="' + active + '">Try ' + item.name + "</button></div></div>";
+  }
+
+  function picked(fam) {
+    var choice = shown[fam.family];
+    var item = choice && face(fam, choice.weight, choice.style);
+    return item || defaultFace(fam);
+  }
+
+  function renderFamilies() {
+    if (!data.length) { return; }
+    status.hidden = true;
+    familiesEl.innerHTML = data.map(function (fam, index) {
+      var choice = picked(fam);
+      shown[fam.family] = { weight: choice.weight, style: choice.style };
+      var options = fam.styles.map(function (item) {
+        var value = item.weight + ":" + item.style;
+        var label = item.name + " — " + item.weight + (item.style === "italic" ? " italic" : "");
+        var selected = item.weight === choice.weight && item.style === choice.style;
+        return '<option value="' + value + '"' + (selected ? " selected" : "") + ">" + label + "</option>";
+      }).join("");
+      return '<section class="family" data-family="' + fam.family + '">' +
+        '<div class="family-head"><h3>' + fam.family + '</h3><span class="kind">' + fam.kind +
+          " · " + fam.styles.length + " styles · " + fam.licence + "</span></div>" +
+        '<div class="familybar"><label for="pick-' + index + '">Face</label>' +
+          '<select class="face-pick" id="pick-' + index + '" data-family="' + fam.family + '">' +
+          options + "</select></div>" +
+        '<div class="face-slot" data-family="' + fam.family + '">' + faceMarkup(fam, choice) + "</div>" +
+        "</section>";
+    }).join("");
+  }
+
+  function updateSlot(name) {
+    var fam = family(name);
+    if (!fam) { return; }
+    var slot = familiesEl.querySelector('.face-slot[data-family="' + name + '"]');
+    if (slot) { slot.innerHTML = faceMarkup(fam, picked(fam)); }
+    syncPressed();
+  }
+
+  function syncPressed() {
+    Array.prototype.forEach.call(document.querySelectorAll(".try-style"), function (button) {
+      var on = button.getAttribute("data-family") === state.family &&
+        Number(button.getAttribute("data-weight")) === state.weight &&
+        button.getAttribute("data-style") === state.style;
+      button.setAttribute("aria-pressed", on ? "true" : "false");
+    });
+  }
+
+  function paint() {
+    var fam = family(state.family) || data[0];
+    if (!fam) { return; }
+    var fallback = fam.fallback || "sans-serif";
+    out.textContent = text.value.trim() || "Poppins";
+    out.style.fontFamily = '"' + fam.family + '"';
+    out.style.fontWeight = state.weight;
+    out.style.fontStyle = state.style;
+    out.style.fontSize = size.value + "px";
+    if (document.activeElement !== num) { num.value = size.value; }
+    var lines = ['font-family: "' + fam.family + '", ' + fallback + ";",
+                 "font-weight: " + state.weight + ";"];
+    if (state.style === "italic") { lines.push("font-style: italic;"); }
+    lines.push("font-size: " + size.value + "px;");
+    rule.textContent = lines.join("\n");
+    reset.hidden = !changed();
+    syncPressed();
+  }
+
+  function remember() {
+    try {
+      localStorage.setItem(KEY, JSON.stringify({
+        text: text.value, size: Number(size.value),
+        family: state.family, weight: Number(state.weight), style: state.style
+      }));
+    } catch (error) {
+      /* private mode or a blocked store: the preview still works, it just forgets */
+    }
+  }
+
+  function restore() {
+    var saved = null;
+    try {
+      saved = JSON.parse(localStorage.getItem(KEY) || "null");
+    } catch (error) {
+      saved = null;
+    }
+    if (!saved) { return; }
+    if (typeof saved.text === "string" && saved.text.length <= 80) { text.value = saved.text; }
+    var px = Number(saved.size);
+    if (px >= MIN && px <= MAX) { size.value = String(Math.round(px)); }
+    var fam = family(String(saved.family));
+    if (fam && face(fam, Number(saved.weight), String(saved.style))) {
+      state.family = fam.family;
+      state.weight = Number(saved.weight);
+      state.style = String(saved.style);
+      shown[fam.family] = { weight: state.weight, style: state.style };
+    }
+  }
+
+  function typed() {
+    if (num.value === "") { return; }
+    var px = Number(num.value);
+    if (!isFinite(px)) { return; }
+    size.value = String(clamp(Math.round(px)));
+    paint();
+    remember();
+  }
+
+  function copied(ok) {
+    copy.textContent = ok ? "Copied" : "Select the rule";
+    setTimeout(function () { copy.textContent = "Copy CSS"; }, 1600);
+  }
+  copy.addEventListener("click", function () {
+    var value = rule.textContent;
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(value).then(function () { copied(true); }, function () { copied(false); });
+      return;
+    }
+    var area = document.createElement("textarea");
+    area.value = value;
+    area.setAttribute("readonly", "");
+    area.style.position = "fixed";
+    area.style.opacity = "0";
+    document.body.appendChild(area);
+    area.select();
+    var ok = false;
+    try { ok = document.execCommand("copy"); } catch (error) { ok = false; }
+    document.body.removeChild(area);
+    copied(ok);
+  });
+
+  familiesEl.addEventListener("change", function (event) {
+    var select = event.target.closest(".face-pick");
+    if (!select) { return; }
+    var parts = select.value.split(":");
+    shown[select.getAttribute("data-family")] = { weight: Number(parts[0]), style: parts[1] };
+    updateSlot(select.getAttribute("data-family"));
+  });
+
+  familiesEl.addEventListener("click", function (event) {
+    var button = event.target.closest(".try-style");
+    if (!button) { return; }
+    state.family = button.getAttribute("data-family");
+    state.weight = Number(button.getAttribute("data-weight"));
+    state.style = button.getAttribute("data-style");
+    shown[state.family] = { weight: state.weight, style: state.style };
+    updateSlot(state.family);
+    paint();
+    remember();
+  });
+
+  reset.addEventListener("click", function () {
+    text.value = DEFAULTS.text;
+    size.value = DEFAULTS.size;
+    num.value = size.value;
+    state.family = DEFAULTS.family;
+    state.weight = Number(DEFAULTS.weight);
+    state.style = DEFAULTS.style;
+    shown = {};
+    renderFamilies();
+    paint();
+    try {
+      localStorage.removeItem(KEY);
+    } catch (error) {
+      /* nothing was stored */
+    }
+  });
+
+  text.addEventListener("input", function () { paint(); remember(); });
+  size.addEventListener("input", function () { paint(); remember(); });
+  num.addEventListener("input", typed);
+  num.addEventListener("change", function () { typed(); num.value = size.value; });
+  num.addEventListener("blur", function () { num.value = size.value; });
+
+  fetch("../data/fonts.json")
+    .then(function (response) { return response.json(); })
+    .then(function (payload) {
+      data = payload.families || [];
+      injectFaces();
+      stats();
+      restore();
+      renderFamilies();
+      paint();
+      status.hidden = true;
+    })
+    .catch(function () {
+      status.textContent = "The family catalog did not load; the preview still works.";
+      paint();
+    });
+})();
+</script>
+<script src="../assets/site.a45733d10a.js" defer></script>
+</body>
+</html>

@@ -33,7 +33,7 @@ DOWNLOAD = ROOT / "docs/download/index.html"
 TEMPLATE = ROOT / "tools/releases_template.html"
 OUT = ROOT / "docs/releases/index.html"
 
-APK = re.compile(r"^docs/(Icons|Compress)-([0-9][0-9.]*)\.apk$")
+APK = re.compile(r"^docs/(Icons|Compress|ADD)-([0-9][0-9.]*)\.apk$")
 MONTHS = ("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
 
 
@@ -162,14 +162,14 @@ def main():
     live = {tool["id"]: tool.get("version") for tool in catalog["tools"]}
     everything = releases()
     written = notes()
-    icons = [record for record in everything if record["id"] == "icons"]
-    compress = [record for record in everything if record["id"] == "compress"]
+    # One app, one stream. Icons and Compress are ids this history still carries, but
+    # they are the same shelf, so the page lists every APK rather than splitting it.
     dates = sorted(record["date"] for record in everything)
 
     page = TEMPLATE.read_text(encoding="utf-8")
     meta = "\n".join("      <span>%s</span>" % line for line in (
         "%d releases" % len(everything),
-        "%d Icons %s %d Compress" % (len(icons), "\u00b7", len(compress)),
+        "%d APKs, Icons through ADD" % len(everything),
         "%s \u2013 %s" % (day(dates[0]), day(dates[-1])),
         "Read from git, not typed",
     ))
@@ -177,12 +177,9 @@ def main():
         "__CHROME__": chrome(),
         "__META_LINES__": meta,
         "__TOTAL__": str(len(everything)),
-        "__ICONS_LIVE__": live.get("icons") or "unreleased",
-        "__COMPRESS_LIVE__": live.get("compress") or "unreleased",
-        "__ICONS_KICKER__": kicker(icons),
-        "__COMPRESS_KICKER__": kicker(compress),
-        "__ICONS_ROWS__": rows(icons, written, live),
-        "__COMPRESS_ROWS__": rows(compress, written, live),
+        "__APP_LIVE__": live.get(catalog["tools"][0]["id"]) or "unreleased",
+        "__APP_KICKER__": kicker(everything),
+        "__APP_ROWS__": rows(everything, written, live),
     }
     for key, value in fills.items():
         page = page.replace(key, value)
@@ -193,11 +190,10 @@ def main():
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(pin(page), encoding="utf-8")
     print("wrote %-32s %6d bytes" % (OUT.relative_to(ROOT), OUT.stat().st_size))
-    for label, items in (("Icons", icons), ("Compress", compress)):
-        noted = sum(1 for r in items if written.get((r["id"], r["version"])))
-        print("  %-8s %2d releases, %2d with a note, %s to %s bytes" % (
-            label, len(items), noted,
-            fmt(min(r["bytes"] for r in items)), fmt(max(r["bytes"] for r in items))))
+    noted = sum(1 for r in everything if written.get((r["id"], r["version"])))
+    print("  %2d releases, %2d with a note, %s to %s bytes" % (
+        len(everything), noted,
+        fmt(min(r["bytes"] for r in everything)), fmt(max(r["bytes"] for r in everything))))
     return 0
 
 

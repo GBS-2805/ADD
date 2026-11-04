@@ -16,8 +16,11 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="start|center_vertical"
+        android:ellipsize="end"
         android:fontFamily="@font/poppins_medium"
         android:letterSpacing="-0.01"
+        android:maxWidth="150dp"
+        android:singleLine="true"
         android:text="Compress"
         android:textColor="?attr/bandInk"
         android:textSize="22sp" />
@@ -32,10 +35,11 @@
         android:tint="?attr/ink" />
 
     <LinearLayout
+        android:id="@+id/bandDescriptors"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="end|center_vertical"
-        android:layout_marginEnd="44dp"
+        android:layout_marginEnd="48dp"
         android:gravity="end"
         android:orientation="vertical">
 

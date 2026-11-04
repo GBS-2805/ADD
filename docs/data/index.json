@@ -2,7 +2,7 @@
   "generated": "2026-11-04",
   "site": {
     "name": "Compress",
-    "tagline": "A design shelf: four icon brands, Poppins, one palette, and two offline Android apps.",
+    "tagline": "A design shelf: four icon brands, Poppins, one palette, and one offline Android app.",
     "package": "app.offline.compress"
   },
   "catalogs": [
@@ -11,7 +11,7 @@
       "title": "Tools",
       "href": "/tools/",
       "data": "/data/tools.json",
-      "count": 2
+      "count": 1
     },
     {
       "id": "icons",
@@ -93,20 +93,12 @@
   ],
   "downloads": [
     {
-      "id": "compress",
-      "name": "Compress",
-      "version": "2.3",
-      "apk": "/Compress-2.3.apk",
-      "bytes": 285012,
-      "sha256": "8d6a52f1b6d11c3eaaf383b06e139bb908e836701e2683994913808e5a294915"
-    },
-    {
-      "id": "icons",
-      "name": "Icons",
-      "version": "2.20",
-      "apk": "/Icons-2.20.apk",
-      "bytes": 2064041,
-      "sha256": "681432dc152affa610e4682023a5d2874d1706400ec7923fd8524b3b5abc755c"
+      "id": "add",
+      "name": "ADD",
+      "version": "3.0",
+      "apk": "/ADD-3.0.apk",
+      "bytes": 2348788,
+      "sha256": "237aa0132598a9cc9b01fde1e6b2186cce77c235581e8a12f0af0bcd1b80223e"
     }
   ]
 }

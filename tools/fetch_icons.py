@@ -451,10 +451,14 @@ def category_list(icons, order=None):
 
 
 def release():
-    """The Icons version and APK filename, so the hub cannot quote a stale build."""
+    """The app's version and APK filename, so the hub cannot quote a stale build.
+
+    One app now, so the catalog's single entry is the answer; the id is not consulted,
+    which is what keeps this working when the app is renamed again.
+    """
     catalog = json.loads((ROOT / "tools/catalog.json").read_text(encoding="utf-8"))
-    icons = next(tool for tool in catalog["tools"] if tool["id"] == "icons")
-    return icons["version"], icons["apk"].lstrip("/")
+    app = catalog["tools"][0]
+    return app["version"], app["apk"].lstrip("/")
 
 
 def fetch(url):

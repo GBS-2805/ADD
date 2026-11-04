@@ -228,9 +228,11 @@ a { color: inherit; }
 
 /* ---------- left: accordion pull-down, four destinations ---------- */
 .menu {
-  background: var(--band);
-  color: var(--band-ink);
-  padding: 0 var(--pad) 8px;
+  background: var(--page);
+  color: var(--on);
+  padding: 2px var(--pad) 10px;
+  border-bottom: 1px solid var(--rule);
+  box-shadow: 0 18px 44px rgba(0, 0, 0, .32);
   z-index: 19;
 }
 .menu[data-open="false"] { display: none; }
@@ -244,12 +246,13 @@ a { color: inherit; }
   align-items: baseline;
   justify-content: space-between;
   gap: 24px;
-  padding: 15px 0;
-  border-top: 1px solid var(--band-line);
-  font-size: 19px;
+  padding: 13px 0;
+  border-top: 0;
+  font-size: 15px;
+  color: var(--on);
   text-decoration: none;
 }
-.menu a span { font-size: 14px; color: var(--band-dim); }
+.menu a span { font-size: 13px; color: var(--on-dim); }
 .menu a:hover { text-decoration: underline; }
 .menu a[aria-current="page"] { font-weight: 500; }
 .menu a:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
@@ -272,12 +275,12 @@ a { color: inherit; }
   z-index: 40;
   display: flex;
   flex-direction: column;
-  width: min(340px, 88vw);
+  width: min(300px, 88vw);
   height: 100%;
-  padding: 0 var(--pad) 32px;
-  background: var(--band);
-  color: var(--band-ink);
-  box-shadow: -24px 0 60px rgba(0, 0, 0, .24);
+  padding: 0 20px calc(18px + env(safe-area-inset-bottom, 0px));
+  background: var(--page);
+  color: var(--on);
+  box-shadow: -24px 0 60px rgba(0, 0, 0, .45);
   transform: translateX(101%);
   visibility: hidden;
   transition: transform .24s ease, visibility 0s .24s;
@@ -287,27 +290,30 @@ a { color: inherit; }
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: var(--band-h);
-  border-bottom: 1px solid var(--band-line);
+  flex: none;
+  height: 40px;
+  margin-top: 18px;
+  border-bottom: 1px solid var(--rule);
 }
-.drawer-head p { margin: 0; font-size: 14px; font-weight: 500; letter-spacing: .1em; text-transform: uppercase; color: var(--label); }
-.drawer-close { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; margin-right: -8px; }
+.drawer-head p { margin: 0; font-size: 11px; font-weight: 400; letter-spacing: .14em; text-transform: uppercase; color: var(--on-dim); }
+.drawer-close { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; margin-right: 0; border: 1px solid var(--rule); border-radius: 50%; color: var(--on); }
 .drawer-close svg { width: 24px; height: 24px; }
 .drawer a {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
   gap: 24px;
-  padding: 17px 0;
-  border-bottom: 1px solid var(--band-line);
-  font-size: 21px;
+  padding: 13px 0;
+  border-bottom: 0;
+  font-size: 15px;
+  color: var(--on);
   text-decoration: none;
 }
-.drawer a span { font-size: 14px; color: var(--band-dim); }
+.drawer a span { font-size: 13px; color: var(--on-dim); }
 .drawer a:hover { text-decoration: underline; }
 .drawer a[aria-current="page"] { font-weight: 500; }
 .drawer a:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
-.drawer .drawer-note { margin: 18px 0 0; font-size: 13px; line-height: 1.5; color: var(--band-dim); }
+.drawer .drawer-note { margin: 14px 0 0; font-size: 12px; line-height: 1.5; color: var(--on-dim); }
 
 /* ---------- page ---------- */
 main { padding: 0 var(--pad); }
@@ -321,8 +327,8 @@ h1 {
 }
 .lede { margin: 0; max-width: 46ch; font-size: 20px; line-height: 1.55; }
 .lede b {
-  background: var(--band);
-  color: var(--band-ink);
+  background: var(--accent);
+  color: var(--accent-ink);
   font-weight: 400;
   padding: 0 5px;
   -webkit-box-decoration-break: clone;
@@ -487,7 +493,7 @@ footer a:hover { text-decoration: underline; }
 
 /* The look controls sit at the foot of the tab, under the note: the links stay the
    top of the panel and the switches stay reachable with a thumb. */
-.drawer-controls { flex: none; margin-top: auto; border-top: 1px solid var(--band-line); }
+.drawer-controls { flex: none; margin-top: auto; padding-top: 14px; border-top: 1px solid var(--rule); }
 
 /* The light/dark switch is the last chip in the palette row: the same 26px square as
    the swatches, carrying only the sun or the moon, so it needs no word of its own. */
@@ -497,16 +503,16 @@ footer a:hover { text-decoration: underline; }
   width: 26px;
   height: 26px;
   padding: 0;
-  border: 1px solid var(--band-line);
-  border-radius: 8px;
-  color: var(--label);
+  border: 1px solid var(--rule);
+  border-radius: 50%;
+  color: var(--on);
   background: none;
   cursor: pointer;
 }
 .pal-theme .ico { display: flex; }
 .pal-theme svg { width: 15px; height: 15px; }
 .pal-theme:hover { border-color: currentColor; }
-.pal-theme:focus-visible { outline: 2px solid var(--band-ink); outline-offset: 3px; }
+.pal-theme:focus-visible { outline: 2px solid var(--on); outline-offset: 3px; }
 
 /* Palette chips, one per set: the band colour with the words-on-band dot. The
    live one is ringed, so the row reads without a second label. */
@@ -514,10 +520,10 @@ footer a:hover { text-decoration: underline; }
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 24px;
-  padding: 17px 0;
-  font-size: 21px;
-  color: var(--label);
+  gap: 12px;
+  padding: 0;
+  font-size: 13px;
+  color: var(--on-dim);
 }
 .pal-row { display: flex; align-items: center; gap: 12px; }
 .pal {
@@ -527,13 +533,13 @@ footer a:hover { text-decoration: underline; }
   height: 26px;
   padding: 0;
   border: 0;
-  border-radius: 8px;
+  border-radius: 50%;
   cursor: pointer;
   box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .16);
 }
 .pal i { display: block; width: 9px; height: 9px; border-radius: 50%; }
-.pal[aria-pressed="true"] { outline: 2px solid var(--band-ink); outline-offset: 2px; }
-.pal:focus-visible { outline: 2px solid var(--band-ink); outline-offset: 3px; }
+.pal[aria-pressed="true"] { outline: 2px solid var(--on); outline-offset: 2px; }
+.pal:focus-visible { outline: 2px solid var(--on); outline-offset: 3px; }
 
 @media (max-width: 900px) {
   .who-lines p + p { display: none; }
@@ -563,11 +569,11 @@ footer a:hover { text-decoration: underline; }
   .burger { width: 36px; height: 36px; margin-right: -6px; }
   .burger svg { width: 24px; height: 24px; }
   .menu { padding-bottom: 6px; }
-  .menu a { padding: 13px 0; font-size: 17px; }
+  .menu a { padding: 13px 0; font-size: 15px; }
   .menu a span { font-size: 13px; }
-  .drawer { width: min(320px, 86vw); }
-  .drawer-head { height: 72px; }
-  .drawer a { padding: 15px 0; font-size: 19px; }
+  .drawer { width: min(300px, 86vw); }
+  .drawer-head { height: 40px; }
+  .drawer a { padding: 13px 0; font-size: 15px; }
   .page-head { padding: 48px 0 28px; }
   .lede { font-size: 18px; }
   .stats { font-size: 18px; }

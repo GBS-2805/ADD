@@ -16,8 +16,8 @@
       "title": "Icons app and browser",
       "kind": "Android app + web tool",
       "year": 2026,
-      "summary": "All 1,864 glyphs from two free brands with a live preview, variant controls and the set folded into a scrolling sheet; the same page ships as an offline Android app.",
-      "built": "The fetch pipeline, the two generated brand pages, the preview and variant logic, the collapsible set, the WebView wrapper that serves the bundle from a private origin, and the catalogs both read.",
+      "summary": "All 4,373 glyphs from four free brands with a live preview, variant controls and the set folded into a scrolling sheet; the same page ships as an offline Android app.",
+      "built": "The fetch pipeline, the generated brand pages, the preview and variant logic, the collapsible set, the WebView wrapper that serves the bundle from a private origin, and the catalogs both read.",
       "stack": "Vanilla JavaScript, Java WebView, Python fetch script",
       "href": "/icons/"
     },

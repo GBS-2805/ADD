@@ -4,8 +4,8 @@
   "pages": [
     {
       "path": "/download/",
-      "title": "Download — Icons 2.20 and Compress 2.3, standalone APKs",
-      "description": "Icons 2.20 (2,064,041 bytes) and Compress 2.3 (285,012 bytes): signed APKs, Android 8.0+, SHA-256 listed, no store or account.",
+      "title": "Download — ADD 3.0, one signed APK",
+      "description": "ADD 3.0 (2,348,788 bytes): the icon browser, the fonts page and the compressor in one signed APK. Android 8.0+, SHA-256 listed, no store or account.",
       "heading": "Download",
       "section": "download"
     },
@@ -68,7 +68,7 @@
     {
       "path": "/",
       "title": "A design shelf — icons, type and two Android tools",
-      "description": "4,373 icons in four brands, Poppins and Redaction, one palette, and two offline Android apps.",
+      "description": "4,373 icons in four brands, Poppins and Redaction, one palette, and one offline Android app.",
       "heading": "A design shelf.",
       "section": ""
     },
@@ -102,9 +102,9 @@
     },
     {
       "path": "/tools/",
-      "title": "Tools — Icons 2.20 and Compress 2.3 for Android",
-      "description": "Icons 2.20 bundles the 4,373-icon browser; Compress 2.3 shrinks photos with a before/after preview. Signed APKs, no store.",
-      "heading": "Tool apps",
+      "title": "Tools — one app, three tools, for Android",
+      "description": "One app, three tools: the 4,373-icon browser, the fonts page and a photo compressor. Signed APK, no store.",
+      "heading": "Tools",
       "section": "tools"
     }
   ]

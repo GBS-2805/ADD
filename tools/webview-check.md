@@ -67,7 +67,7 @@ rendered empty sections inside the app while looking perfect on the site.
 
 And check the artifact itself:
 
-    python3 -c "import zipfile;n=zipfile.ZipFile('docs/Icons-2.19.apk').namelist();print([x for x in n if 'www/icons/all' in x or x.endswith('www/icons/index.html')])"
+    python3 -c "import zipfile;n=zipfile.ZipFile('docs/Icons-2.20.apk').namelist();print([x for x in n if 'www/icons/all' in x or x.endswith('www/icons/index.html')])"
 
 ## 4. The unbundled-page fallback
 
@@ -77,7 +77,7 @@ builds its HTML in Java -- so serving `www` returns a plain 404 and never shows 
 `classes.dex`, joins them around a sample address exactly as the client does, and
 loads that document in Chromium at 390x844:
 
-    node tools/webview-fallback-check.js docs/Icons-2.19.apk artifacts/fallback-offline.png
+    node tools/webview-fallback-check.js docs/Icons-2.20.apk artifacts/fallback-offline.png
 
 `build.sh` runs it after signing every Icons APK, so a release whose fallback went
 stale fails instead of shipping. It prints the heading, both links, the background,
