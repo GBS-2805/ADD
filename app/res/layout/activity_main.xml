@@ -507,7 +507,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="18dp"
-            android:lineSpacingExtra="3dp"                android:text="Preview opens a slider on your first selected photo — nothing is saved until you compress. Copies land in Pictures/Compress; originals are never modified."
+            android:lineSpacingExtra="3dp"                android:text="Preview a slider on the first photo, compress, and copies land in Pictures/Compress. Originals stay untouched."
                 android:textColor="@color/muted"
                 android:textSize="10.5sp" />
 

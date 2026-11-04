@@ -111,7 +111,7 @@ def listing(names):
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta name="theme-color" content="#0fbf92" />
-<meta name="description" content="Every page of this site as a Figma-importable artboard, plus the whole set on one canvas." />
+<meta name="description" content="Every page as a Figma-importable artboard, and the whole set on one canvas." />
 <title>Figma hand-off — every artboard of this site</title>
 <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml" />
 <link rel="stylesheet" href="../assets/site.css" />
@@ -139,7 +139,7 @@ def listing(names):
 <main>
   <h1>Figma hand-off</h1>
   <p class="lede">%s</p>
-  <p class="note">Each file is the page as Chromium laid it out: real text, a rect per box, PNG marks. Poppins is embedded, so it renders in the site's type. Drag one into Figma for editable layers.</p>
+  <p class="note">Each file is the page as Chromium laid it out: real text, a rect per box, PNG marks, Poppins embedded. Drag one into Figma for editable layers.</p>
   %s<p class="back"><a href="../">← Back to the site</a></p>
 </main>
 </body>

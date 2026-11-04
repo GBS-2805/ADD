@@ -1,7 +1,7 @@
 {
   "site": {
     "name": "Compress",
-    "tagline": "A design shelf: two free icon brands, Poppins, one palette, and two offline Android apps built from them.",
+    "tagline": "A design shelf: four icon brands, Poppins, one palette, and two offline Android apps.",
     "package": "app.offline.compress"
   },
   "tools": [
@@ -15,7 +15,7 @@
       "package": "app.offline.compress",
       "apk": "/Compress-2.1.apk",
       "min_android": "8.0 (API 26)",
-      "summary": "Pick photos, preview the settings with a before/after slider, then compress. Fully offline: the app has no internet permission at all.",
+      "summary": "Pick photos, check the before/after preview, compress. Offline, with no internet permission.",
       "features": [
         "Real quality: the encoder retries lower until the file actually gets smaller.",
         "Downscale: cap the longest edge at 1280, 1920, 2560, 3200 or 4096 px, or keep the original.",
@@ -46,7 +46,7 @@
       "package": "app.offline.icons",
       "apk": "/Icons-2.20.apk",
       "min_android": "8.0 (API 26)",
-      "summary": "Both free icon brands on the phone: 1,864 glyphs, a preview with weight, size and surface, and the whole set behind one toggle. Bundled offline with no permissions at all.",
+      "summary": "All four icon brands offline: 4,373 icons, a live preview with weight, size and surface, copy to clipboard.",
       "features": [
         "Two brands, 606 Lineicons and 1,258 Coolicons, bundled with the pages and the fonts.",
         "Copy exports SVG, or a PNG, WEBP or JPG at 32-1024px drawn on the chosen background; the site also puts a PNG on the clipboard.",

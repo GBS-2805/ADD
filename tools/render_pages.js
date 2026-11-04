@@ -238,7 +238,7 @@ const escape = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/
 <meta name="theme-color" content="#0fbf92" />
 <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml" />
 <title>Renders — __COUNT__ captures of this site</title>
-<meta name="description" content="__COUNT__ screenshots of the shelf, captured in headless Chromium: the index at its fold, both pull-downs, the two apps, the icon brand pages with their previews and open sets, fonts, portfolio and download, at 1300 wide and 390 on a phone." />
+<meta name="description" content="__COUNT__ screenshots of the shelf in headless Chromium, at 1300 wide and 390 on a phone." />
 <link rel="stylesheet" href="../assets/site.css" />
 <style>
   .gal-filter { display: flex; flex-wrap: wrap; gap: 10px; margin: 20px 0 34px; }
