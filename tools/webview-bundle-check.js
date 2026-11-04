@@ -1,11 +1,12 @@
-// Drive the staged Icons web bundle the way the WebView loads it.
+// Drive the staged ADD web bundle the way the WebView loads it.
 //
 //   python3 -m http.server 8870 --directory app/assets/www
 //   node tools/webview-bundle-check.js http://127.0.0.1:8870
 //
 // Proves the shipped HTML, CSS, JS and JSON work offline: every brand section
-// fills, every menu link resolves inside the bundle, Poppins loads and nothing
-// logs an error. It does not prove the native window or the JS bridge.
+// fills, the fonts page renders its catalog and remembers a face, every menu link
+// resolves inside the bundle, Poppins loads and nothing logs an error. It does not
+// prove the native window or the JS bridge.
 const { chromium } = require("playwright");
 const BASE = (process.argv[2] || "http://127.0.0.1:8870").replace(/\/$/, "");
 
@@ -49,6 +50,7 @@ const BASE = (process.argv[2] || "http://127.0.0.1:8870").replace(/\/$/, "");
 
   const statuses = {};
   const routes = new Set([...shape.menu, "/icons/", "/icons/coolicons/", "/icons/lineicons/", "/icons/phosphor/", "/icons/streamline/",
+    "/fonts/", "/data/fonts.json",
     "/data/lineicons-sheet.json", "/data/coolicons-sheet.json", "/data/phosphor-sheet.json", "/data/streamline-sheet.json",
     "/data/streamline-line.json", "/data/streamline-duo.json", "/data/streamline-solid.json", "/data/streamline-flat.json",
     "/search/", "/data/pages.json", "/data/icons.json", "/data/icons/1.json", "/data/icons/4.json",
@@ -100,11 +102,66 @@ const BASE = (process.argv[2] || "http://127.0.0.1:8870").replace(/\/$/, "");
     && search.filtered > 0 && search.filtered <= search.total
     && search.arrows && search.openedStatus === 200;
 
+  // The fonts page is the bundle's second tool: it fetches the staged catalog,
+  // declares one face per style and remembers the chosen one. Drive a Try button and
+  // reload, so the page is exercised rather than merely reachable.
+  await page.goto(BASE + "/fonts/", { waitUntil: "networkidle" });
+  await page.waitForFunction(() => document.querySelectorAll(".family").length >= 2, { timeout: 20000 });
+  const catalog = await (await page.request.get(BASE + "/data/fonts.json")).json();
+  const families = catalog.families || [];
+  const fontPage = {
+    families: 0, catalogFamilies: families.length, styles: catalog.styles || 0,
+    picksOk: 0, woff2: 0, ttf: 0, woff2Missing: [], ttfMissing: [],
+    tried: null, remembered: false, restored: false, painted: false,
+  };
+  fontPage.families = await page.evaluate(() => document.querySelectorAll(".family").length);
+  fontPage.picksOk = await page.evaluate((fams) => fams.filter((fam) => {
+    const pick = document.querySelector('.family[data-family="' + fam.family + '"] .face-pick');
+    return !!pick && pick.options.length === fam.styles;
+  }).length, families.map((fam) => ({ family: fam.family, styles: fam.styles.length })));
+  // Every woff2 the catalog names has to be staged: that is what the page renders
+  // with. The ttf links are downloads only, and the bundle copies woff2 alone, so a
+  // missing ttf is counted here instead of silently 404ing inside the app later.
+  for (const fam of families) {
+    for (const face of fam.styles) {
+      for (const kind of ["woff2", "ttf"]) {
+        const url = face[kind];
+        if (url && (await page.request.get(BASE + url)).status() === 200) fontPage[kind]++;
+        else if (url) fontPage[kind + "Missing"].push(url);
+      }
+    }
+  }
+  await page.evaluate(() => {
+    const buttons = Array.from(document.querySelectorAll(".try-style"));
+    if (buttons.length) buttons[buttons.length - 1].click();
+  });
+  fontPage.tried = await page.evaluate(() => {
+    const on = document.querySelector('.try-style[aria-pressed="true"]');
+    return on ? { family: on.dataset.family, weight: Number(on.dataset.weight), style: on.dataset.style } : null;
+  });
+  const pressedCount = await page.evaluate(() => document.querySelectorAll('.try-style[aria-pressed="true"]').length);
+  const stored = await page.evaluate(() => { try { return localStorage.getItem("fonts:preview"); } catch (e) { return null; } });
+  fontPage.painted = await page.evaluate((fam) => {
+    const specimen = document.querySelector('.face-slot[data-family="' + fam + '"] .specimen');
+    return specimen ? getComputedStyle(specimen).fontFamily.includes(fam.split(" ")[0]) : false;
+  }, fontPage.tried ? fontPage.tried.family : "");
+  fontPage.remembered = pressedCount === 1 && !!stored
+    && fontPage.tried !== null && stored.includes(fontPage.tried.family);
+  await page.reload({ waitUntil: "networkidle" });
+  fontPage.restored = await page.evaluate((want) => {
+    const on = Array.from(document.querySelectorAll('.try-style[aria-pressed="true"]'));
+    return on.length === 1 && on[0].dataset.family === want.family
+      && Number(on[0].dataset.weight) === want.weight && on[0].dataset.style === want.style;
+  }, fontPage.tried || { family: "", weight: 0, style: "" });
+  const fontPageOk = fontPage.families === fontPage.catalogFamilies && fontPage.catalogFamilies >= 2
+    && fontPage.picksOk === fontPage.catalogFamilies && fontPage.remembered && fontPage.restored
+    && fontPage.painted && fontPage.woff2Missing.length === 0;
+
   const sectionsOk = shape.sections.length === 4 && shape.sections.every((s) => s.cells === 12 && s.svgs === 12);
   const linksOk = Object.values(statuses).every((code) => code === 200);
-  const ok = sectionsOk && linksOk && shape.fonts && searchOk && errors.length === 0;
+  const ok = sectionsOk && linksOk && shape.fonts && searchOk && fontPageOk && errors.length === 0;
 
-  console.log(JSON.stringify({ sections: shape.sections, fonts: shape.fonts, statuses, search, errors, ok }, null, 2));
+  console.log(JSON.stringify({ sections: shape.sections, fonts: shape.fonts, fontPage, statuses, search, errors, ok }, null, 2));
   console.log(ok ? "bundle: OK" : "bundle: FAILED");
   await browser.close();
   process.exit(ok ? 0 : 1);

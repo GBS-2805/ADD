@@ -47,6 +47,13 @@ the list, ArrowDown has to highlight exactly one hit, Escape has to clear both t
 word and the chip, and Enter has to open a page that exists in the bundle. A missing
 file, an unloaded Poppins, a failed request or any console error fails the run.
 
+Last it opens `/fonts/`, the bundle's second tool: every family in the staged catalog
+has to render with one option per style in its Face pick, a Try button has to move the
+preview and still be pressed after a reload, and every woff2 the catalog names has to
+be staged. The `ttf` download links are counted rather than required, because the
+bundle copies woff2 alone -- a ttf click inside the app is a dead link, and the run
+reports those under `fontPage.ttfMissing` instead of hiding them.
+
 A good run, from 2.19 (the shipped build):
 
     sections: 4 brands, 12 cells each (Lineicons, Coolicons, Phosphor, Streamline)
