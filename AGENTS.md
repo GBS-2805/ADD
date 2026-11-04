@@ -291,7 +291,7 @@ changes as unverified on device rather than illustrating them.
   the plan instead: the labels, a diff of each file, the artboards and captures
   that go stale with those pages, and the deploy headroom. Never replace version
   strings by hand — a blanket find-and-replace once relabelled twelve releases as
-  2.2, and the notes only recovered their real versions by reading the commits again.
+  whatever was newest at the time, and the notes only recovered their real versions by reading the commits again.
 - `build_catalog.py` also rewrites the numbers the pages state: every "N icons",
   "N-icon" and "in four brands" / "four free sets" phrase in the shelf pages is
   regenerated from the catalogs it counted, meta descriptions included. `docs/releases/`
