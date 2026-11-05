@@ -51,6 +51,7 @@
           "weight": 100,
           "style": "normal",
           "woff2": "/assets/fonts/poppins-100.woff2",
+          "woff": "/assets/fonts/poppins-100.woff",
           "ttf": "/assets/fonts/poppins-100.ttf"
         },
         {
@@ -58,6 +59,7 @@
           "weight": 100,
           "style": "italic",
           "woff2": "/assets/fonts/poppins-100-italic.woff2",
+          "woff": "/assets/fonts/poppins-100-italic.woff",
           "ttf": "/assets/fonts/poppins-100-italic.ttf"
         },
         {
@@ -65,6 +67,7 @@
           "weight": 200,
           "style": "normal",
           "woff2": "/assets/fonts/poppins-200.woff2",
+          "woff": "/assets/fonts/poppins-200.woff",
           "ttf": "/assets/fonts/poppins-200.ttf"
         },
         {
@@ -72,6 +75,7 @@
           "weight": 200,
           "style": "italic",
           "woff2": "/assets/fonts/poppins-200-italic.woff2",
+          "woff": "/assets/fonts/poppins-200-italic.woff",
           "ttf": "/assets/fonts/poppins-200-italic.ttf"
         },
         {
@@ -79,6 +83,7 @@
           "weight": 300,
           "style": "normal",
           "woff2": "/assets/fonts/poppins-300.woff2",
+          "woff": "/assets/fonts/poppins-300.woff",
           "ttf": "/assets/fonts/poppins-300.ttf"
         },
         {
@@ -86,6 +91,7 @@
           "weight": 300,
           "style": "italic",
           "woff2": "/assets/fonts/poppins-300-italic.woff2",
+          "woff": "/assets/fonts/poppins-300-italic.woff",
           "ttf": "/assets/fonts/poppins-300-italic.ttf"
         },
         {
@@ -93,6 +99,7 @@
           "weight": 400,
           "style": "normal",
           "woff2": "/assets/fonts/poppins-400.woff2",
+          "woff": "/assets/fonts/poppins-400.woff",
           "ttf": "/assets/fonts/poppins-400.ttf",
           "app_res": "app/res/font/poppins_regular.ttf",
           "use": "Body text, ledes and every label on this site."
@@ -102,6 +109,7 @@
           "weight": 400,
           "style": "italic",
           "woff2": "/assets/fonts/poppins-400-italic.woff2",
+          "woff": "/assets/fonts/poppins-400-italic.woff",
           "ttf": "/assets/fonts/poppins-400-italic.ttf"
         },
         {
@@ -109,6 +117,7 @@
           "weight": 500,
           "style": "normal",
           "woff2": "/assets/fonts/poppins-500.woff2",
+          "woff": "/assets/fonts/poppins-500.woff",
           "ttf": "/assets/fonts/poppins-500.ttf",
           "app_res": "app/res/font/poppins_medium.ttf",
           "use": "Row labels, icon names and the tab strip."
@@ -118,6 +127,7 @@
           "weight": 500,
           "style": "italic",
           "woff2": "/assets/fonts/poppins-500-italic.woff2",
+          "woff": "/assets/fonts/poppins-500-italic.woff",
           "ttf": "/assets/fonts/poppins-500-italic.ttf"
         },
         {
@@ -125,6 +135,7 @@
           "weight": 600,
           "style": "normal",
           "woff2": "/assets/fonts/poppins-600.woff2",
+          "woff": "/assets/fonts/poppins-600.woff",
           "ttf": "/assets/fonts/poppins-600.ttf",
           "app_res": "app/res/font/poppins_semibold.ttf",
           "use": "Titles and the one number that matters on a screen."
@@ -134,6 +145,7 @@
           "weight": 600,
           "style": "italic",
           "woff2": "/assets/fonts/poppins-600-italic.woff2",
+          "woff": "/assets/fonts/poppins-600-italic.woff",
           "ttf": "/assets/fonts/poppins-600-italic.ttf"
         },
         {
@@ -141,6 +153,7 @@
           "weight": 700,
           "style": "normal",
           "woff2": "/assets/fonts/poppins-700.woff2",
+          "woff": "/assets/fonts/poppins-700.woff",
           "ttf": "/assets/fonts/poppins-700.ttf"
         },
         {
@@ -148,6 +161,7 @@
           "weight": 700,
           "style": "italic",
           "woff2": "/assets/fonts/poppins-700-italic.woff2",
+          "woff": "/assets/fonts/poppins-700-italic.woff",
           "ttf": "/assets/fonts/poppins-700-italic.ttf"
         },
         {
@@ -155,6 +169,7 @@
           "weight": 800,
           "style": "normal",
           "woff2": "/assets/fonts/poppins-800.woff2",
+          "woff": "/assets/fonts/poppins-800.woff",
           "ttf": "/assets/fonts/poppins-800.ttf"
         },
         {
@@ -162,6 +177,7 @@
           "weight": 800,
           "style": "italic",
           "woff2": "/assets/fonts/poppins-800-italic.woff2",
+          "woff": "/assets/fonts/poppins-800-italic.woff",
           "ttf": "/assets/fonts/poppins-800-italic.ttf"
         },
         {
@@ -169,6 +185,7 @@
           "weight": 900,
           "style": "normal",
           "woff2": "/assets/fonts/poppins-900.woff2",
+          "woff": "/assets/fonts/poppins-900.woff",
           "ttf": "/assets/fonts/poppins-900.ttf"
         },
         {
@@ -176,6 +193,7 @@
           "weight": 900,
           "style": "italic",
           "woff2": "/assets/fonts/poppins-900-italic.woff2",
+          "woff": "/assets/fonts/poppins-900-italic.woff",
           "ttf": "/assets/fonts/poppins-900-italic.ttf"
         }
       ]
@@ -194,6 +212,7 @@
           "weight": 400,
           "style": "italic",
           "woff2": "/assets/fonts/redaction-400-italic.woff2",
+          "woff": "/assets/fonts/redaction-400-italic.woff",
           "ttf": "/assets/fonts/redaction-400-italic.ttf"
         },
         {
@@ -201,6 +220,7 @@
           "weight": 400,
           "style": "normal",
           "woff2": "/assets/fonts/redaction-400.woff2",
+          "woff": "/assets/fonts/redaction-400.woff",
           "ttf": "/assets/fonts/redaction-400.ttf"
         },
         {
@@ -208,6 +228,7 @@
           "weight": 700,
           "style": "normal",
           "woff2": "/assets/fonts/redaction-700.woff2",
+          "woff": "/assets/fonts/redaction-700.woff",
           "ttf": "/assets/fonts/redaction-700.ttf"
         }
       ]
@@ -226,6 +247,7 @@
           "weight": 400,
           "style": "italic",
           "woff2": "/assets/fonts/redaction-10-400-italic.woff2",
+          "woff": "/assets/fonts/redaction-10-400-italic.woff",
           "ttf": "/assets/fonts/redaction-10-400-italic.ttf"
         },
         {
@@ -233,6 +255,7 @@
           "weight": 400,
           "style": "normal",
           "woff2": "/assets/fonts/redaction-10-400.woff2",
+          "woff": "/assets/fonts/redaction-10-400.woff",
           "ttf": "/assets/fonts/redaction-10-400.ttf"
         },
         {
@@ -240,6 +263,7 @@
           "weight": 700,
           "style": "normal",
           "woff2": "/assets/fonts/redaction-10-700.woff2",
+          "woff": "/assets/fonts/redaction-10-700.woff",
           "ttf": "/assets/fonts/redaction-10-700.ttf"
         }
       ]
@@ -258,6 +282,7 @@
           "weight": 400,
           "style": "italic",
           "woff2": "/assets/fonts/redaction-20-400-italic.woff2",
+          "woff": "/assets/fonts/redaction-20-400-italic.woff",
           "ttf": "/assets/fonts/redaction-20-400-italic.ttf"
         },
         {
@@ -265,6 +290,7 @@
           "weight": 400,
           "style": "normal",
           "woff2": "/assets/fonts/redaction-20-400.woff2",
+          "woff": "/assets/fonts/redaction-20-400.woff",
           "ttf": "/assets/fonts/redaction-20-400.ttf"
         },
         {
@@ -272,6 +298,7 @@
           "weight": 700,
           "style": "normal",
           "woff2": "/assets/fonts/redaction-20-700.woff2",
+          "woff": "/assets/fonts/redaction-20-700.woff",
           "ttf": "/assets/fonts/redaction-20-700.ttf"
         }
       ]
@@ -290,6 +317,7 @@
           "weight": 400,
           "style": "italic",
           "woff2": "/assets/fonts/redaction-35-400-italic.woff2",
+          "woff": "/assets/fonts/redaction-35-400-italic.woff",
           "ttf": "/assets/fonts/redaction-35-400-italic.ttf"
         },
         {
@@ -297,6 +325,7 @@
           "weight": 400,
           "style": "normal",
           "woff2": "/assets/fonts/redaction-35-400.woff2",
+          "woff": "/assets/fonts/redaction-35-400.woff",
           "ttf": "/assets/fonts/redaction-35-400.ttf"
         },
         {
@@ -304,6 +333,7 @@
           "weight": 700,
           "style": "normal",
           "woff2": "/assets/fonts/redaction-35-700.woff2",
+          "woff": "/assets/fonts/redaction-35-700.woff",
           "ttf": "/assets/fonts/redaction-35-700.ttf"
         }
       ]
@@ -322,6 +352,7 @@
           "weight": 400,
           "style": "italic",
           "woff2": "/assets/fonts/redaction-50-400-italic.woff2",
+          "woff": "/assets/fonts/redaction-50-400-italic.woff",
           "ttf": "/assets/fonts/redaction-50-400-italic.ttf"
         },
         {
@@ -329,6 +360,7 @@
           "weight": 400,
           "style": "normal",
           "woff2": "/assets/fonts/redaction-50-400.woff2",
+          "woff": "/assets/fonts/redaction-50-400.woff",
           "ttf": "/assets/fonts/redaction-50-400.ttf"
         },
         {
@@ -336,6 +368,7 @@
           "weight": 700,
           "style": "normal",
           "woff2": "/assets/fonts/redaction-50-700.woff2",
+          "woff": "/assets/fonts/redaction-50-700.woff",
           "ttf": "/assets/fonts/redaction-50-700.ttf"
         }
       ]
@@ -354,6 +387,7 @@
           "weight": 400,
           "style": "italic",
           "woff2": "/assets/fonts/redaction-70-400-italic.woff2",
+          "woff": "/assets/fonts/redaction-70-400-italic.woff",
           "ttf": "/assets/fonts/redaction-70-400-italic.ttf"
         },
         {
@@ -361,6 +395,7 @@
           "weight": 400,
           "style": "normal",
           "woff2": "/assets/fonts/redaction-70-400.woff2",
+          "woff": "/assets/fonts/redaction-70-400.woff",
           "ttf": "/assets/fonts/redaction-70-400.ttf"
         },
         {
@@ -368,6 +403,7 @@
           "weight": 700,
           "style": "normal",
           "woff2": "/assets/fonts/redaction-70-700.woff2",
+          "woff": "/assets/fonts/redaction-70-700.woff",
           "ttf": "/assets/fonts/redaction-70-700.ttf"
         }
       ]
@@ -386,6 +422,7 @@
           "weight": 400,
           "style": "italic",
           "woff2": "/assets/fonts/redaction-100-400-italic.woff2",
+          "woff": "/assets/fonts/redaction-100-400-italic.woff",
           "ttf": "/assets/fonts/redaction-100-400-italic.ttf"
         },
         {
@@ -393,6 +430,7 @@
           "weight": 400,
           "style": "normal",
           "woff2": "/assets/fonts/redaction-100-400.woff2",
+          "woff": "/assets/fonts/redaction-100-400.woff",
           "ttf": "/assets/fonts/redaction-100-400.ttf"
         },
         {
@@ -400,6 +438,7 @@
           "weight": 700,
           "style": "normal",
           "woff2": "/assets/fonts/redaction-100-700.woff2",
+          "woff": "/assets/fonts/redaction-100-700.woff",
           "ttf": "/assets/fonts/redaction-100-700.ttf"
         }
       ]

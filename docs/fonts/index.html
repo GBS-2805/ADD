@@ -4,7 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Fonts — Poppins and the seven Redaction grades, one sheet per family</title>
-<meta name="description" content="Poppins and all seven Redaction grades: woff2 and TTF, every weight and italic, free under the SIL Open Font License." />
+<meta name="description" content="Poppins and all seven Redaction grades: woff2, woff and TTF, every weight and italic, free under the SIL Open Font License." />
 <meta name="theme-color" content="#0fbf92" />
 <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml" />
 <link rel="stylesheet" href="../assets/site.254272ab85.css" />
@@ -188,8 +188,8 @@
     <ul class="rows">
       <li><b>Site</b><span><code>assets/site.254272ab85.css</code> sets the site's own Poppins faces; this page declares every downloaded style from <code>/data/fonts.json</code>.</span></li>
       <li><b>App</b><span><code>app/res/font/poppins_regular.ttf</code>, <code>_medium</code> and <code>_semibold</code>, referenced from the layouts.</span></li>
-      <li><b>Downloads</b><span>woff2 for the web at <code>/assets/fonts/</code>, TTF beside it for Android and desktop.</span></li>
-      <li><b>JSON</b><span><code>/data/fonts.json</code> lists each family, its faces, both paths and both measured sizes.</span></li>
+      <li><b>Downloads</b><span>woff2 for the web at <code>/assets/fonts/</code>, woff for engines older than that, TTF for Android and desktop.</span></li>
+      <li><b>JSON</b><span><code>/data/fonts.json</code> lists each family, its faces, all three paths and their measured sizes.</span></li>
     </ul>
     <p class="fine">A face looks like this in CSS:</p>
     <p class="fine"><code>@font-face { font-family: "Poppins"; src: url("/assets/fonts/poppins-400.woff2") format("woff2"); font-weight: 400; font-display: swap; }</code></p>
@@ -295,8 +295,9 @@
         ";font-style:" + item.style + '">' + escapeHtml(sampleText()) + "</p>" +
       (item.use ? '<p class="face-use">' + item.use + "</p>" : "") +
       '<div class="face-foot"><span class="tag">woff2 ' + bytes(item.woff2_bytes) +
-        " · ttf " + bytes(item.ttf_bytes) + "</span>" +
+        " · woff " + bytes(item.woff_bytes) + " · ttf " + bytes(item.ttf_bytes) + "</span>" +
       '<a href="' + item.woff2 + '" download>woff2</a>' +
+      '<a href="' + item.woff + '" download>woff</a>' +
       '<a href="' + item.ttf + '" download>ttf</a>' +
       '<span class="lic">' + fam.licence + "</span>" +
       '<button class="copy-css" type="button" data-family="' + fam.family + '" data-weight="' + item.weight +

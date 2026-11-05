@@ -3,8 +3,13 @@
 
 The site serves its own copies: no page asks Google for a font. This script is
 the only thing that talks to fonts.googleapis.com -- it resolves each style to
-its latin woff2 and to a plain TTF, writes both under docs/assets/fonts/, and
-rewrites the "fonts" block of tools/catalog.json as families of styles.
+its latin woff2, its woff and a plain TTF, writes all three under
+docs/assets/fonts/, and rewrites the "fonts" block of tools/catalog.json as
+families of styles.
+
+woff2 is the one the site loads. woff is the same face for engines that never
+learned woff2, and it is asked for with a browser string old enough that Google
+still answers with a single-format stylesheet; fontTools can read either.
 
 The three faces the apps bundle keep their existing files and their app_res
 path, so the downloadable TTF stays byte-identical to the one in the APK; every
@@ -28,6 +33,12 @@ FONTS = ROOT / "docs/assets/fonts"
 
 UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
       "(KHTML, like Gecko) Chrome/124.0 Safari/537.36")
+
+# Google answers a modern browser with woff2 only and a browser without a UA with
+# a plain TTF. This one is old enough to sit below woff2 support, so the same
+# stylesheet comes back carrying woff -- and nothing else has to be converted.
+LEGACY_UA = ("Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 "
+             "(KHTML, like Gecko) Chrome/27.0.1453.93 Safari/537.36")
 
 POPPINS_NAMES = {100: "Thin", 200: "ExtraLight", 300: "Light", 400: "Regular",
                  500: "Medium", 600: "SemiBold", 700: "Bold", 800: "ExtraBold",
@@ -78,10 +89,10 @@ def fetch(url, binary=True, ua=UA):
     return data if binary else data.decode("utf-8")
 
 
-def css_url(family, weight, style, want):
+def css_url(family, weight, style, want, ua=UA):
     axis = "ital,wght@%d,%d" % (1 if style == "italic" else 0, weight)
     query = urllib.parse.urlencode({"family": family + ":" + axis, "display": "swap"})
-    css = fetch("https://fonts.googleapis.com/css2?" + query, binary=False)
+    css = fetch("https://fonts.googleapis.com/css2?" + query, binary=False, ua=ua)
     blocks = re.findall(r"@font-face\s*\{(.*?)\}", css, re.S)
     chosen = None
     for block in blocks:
@@ -103,6 +114,8 @@ def check_magic(path, kind):
     head = path.read_bytes()[:4]
     if kind == "woff2" and head != b"wOF2":
         raise SystemExit("fetch_fonts: %s is not a woff2" % path.name)
+    if kind == "woff" and head != b"wOFF":
+        raise SystemExit("fetch_fonts: %s is not a woff" % path.name)
     if kind == "ttf" and head not in (b"\x00\x01\x00\x00", b"true", b"ttcf"):
         raise SystemExit("fetch_fonts: %s is not a TTF" % path.name)
 
@@ -112,6 +125,7 @@ def download(family, slug, weight, style, refresh):
     base = "%s-%s" % (slug, tag)
     paths = {
         "woff2": FONTS / (base + ".woff2"),
+        "woff": FONTS / (base + ".woff"),
         "ttf": FONTS / (base + ".ttf"),
     }
     for kind in paths:
@@ -121,6 +135,8 @@ def download(family, slug, weight, style, refresh):
             continue
         if kind == "woff2":
             url = css_url(family, weight, style, "format('woff2')")
+        elif kind == "woff":
+            url = css_url(family, weight, style, "format('woff')", ua=LEGACY_UA)
         else:
             # Without a browser UA Google answers with a plain, unsubset TTF.
             axis = "ital,wght@%d,%d" % (1 if style == "italic" else 0, weight)
@@ -151,7 +167,7 @@ def build_families(refresh):
             entry = {
                 "name": POPPINS_NAMES[weight] + (" Italic" if style == "italic" else ""),
                 "weight": weight, "style": style,
-                "woff2": files["woff2"], "ttf": files["ttf"],
+                "woff2": files["woff2"], "woff": files["woff"], "ttf": files["ttf"],
             }
             app = APP_FACES.get((weight, style))
             if app:
@@ -175,7 +191,7 @@ def build_families(refresh):
             files = download(name, slug, weight, style, refresh)
             redaction["styles"].append({
                 "name": style_name, "weight": weight, "style": style,
-                "woff2": files["woff2"], "ttf": files["ttf"],
+                "woff2": files["woff2"], "woff": files["woff"], "ttf": files["ttf"],
             })
         families.append(redaction)
     return families
@@ -194,9 +210,10 @@ def main():
     print("catalog: %d families, %d styles" % (len(families), styles))
     for family in families:
         woff2 = sum((FONTS / s["woff2"].split("/")[-1]).stat().st_size for s in family["styles"])
+        woff = sum((FONTS / s["woff"].split("/")[-1]).stat().st_size for s in family["styles"])
         ttf = sum((FONTS / s["ttf"].split("/")[-1]).stat().st_size for s in family["styles"])
-        print("  %-12s %2d styles  woff2 %7d  ttf %8d"
-              % (family["family"], len(family["styles"]), woff2, ttf))
+        print("  %-12s %2d styles  woff2 %7d  woff %8d  ttf %8d"
+              % (family["family"], len(family["styles"]), woff2, woff, ttf))
     return 0
 
 

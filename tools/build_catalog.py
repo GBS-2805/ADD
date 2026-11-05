@@ -102,13 +102,14 @@ def measure(catalog):
     for family in catalog["fonts"]:
         for style in family["styles"]:
             copy_face(style)
-            for key in ("woff2", "ttf"):
+            for key in ("woff2", "woff", "ttf"):
                 path = DOCS / style[key].lstrip("/")
                 if not path.exists():
                     fail("missing font %s" % style[key])
                 style[key + "_bytes"] = size(path)
         family["styles_count"] = len(family["styles"])
         family["woff2_bytes"] = sum(style["woff2_bytes"] for style in family["styles"])
+        family["woff_bytes"] = sum(style["woff_bytes"] for style in family["styles"])
         family["ttf_bytes"] = sum(style["ttf_bytes"] for style in family["styles"])
     return catalog
 
