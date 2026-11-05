@@ -163,7 +163,10 @@ stage_shelf_assets() {
     cp "$ROOT/docs/fonts/index.html" "$www/fonts/"
     cp "$ROOT"/docs/assets/site*.css "$ROOT"/docs/assets/site*.js \
        "$ROOT/docs/assets/favicon.svg" "$www/assets/"
-    cp "$ROOT"/docs/assets/fonts/*.woff2 "$www/assets/fonts/"
+    # woff2 is what the pages set; woff is the same face for an older engine, and the
+    # fonts page offers it as a download, so the app carries it too. TTF stays on the
+    # site: it is four times the bytes and adds nothing the woff does not.
+    cp "$ROOT"/docs/assets/fonts/*.woff2 "$ROOT"/docs/assets/fonts/*.woff "$www/assets/fonts/"
     cp -r "$ROOT/docs/data/." "$www/data/"
     cp "$ROOT/docs/search/index.html" "$www/search/"
     # Trim the search index to the pages the bundle carries: a hit that opens a 404

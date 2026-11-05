@@ -73,8 +73,12 @@ CATALOG = ROOT / "tools/catalog.json"
 BUILD = ROOT / "build.sh"
 NOTES = ROOT / "tools/release_notes.json"
 SITE = ROOT / "tools/site.json"
+# The compress page carries the same footer label as the tools page -- the version
+# beside the shelf's one-line description -- so it moves with them. It was the one
+# page printing the label that no sweep rewrote.
 LABEL_FILES = ["docs/index.html", "docs/download/index.html", "docs/icons/index.html",
-               "docs/tools/index.html", "docs/portfolio/index.html", "README.md",
+               "docs/tools/index.html", "docs/compress/index.html",
+               "docs/portfolio/index.html", "README.md",
                "AGENTS.md", "tools/render_pages.js"]
 
 # A note carries its own version and must never be bumped, so the notes live in a

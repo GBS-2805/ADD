@@ -27,6 +27,7 @@ import android.widget.FrameLayout;
 import android.widget.Toast;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -168,6 +169,15 @@ public class ShelfActivity extends Activity {
             toast(writeFile(dataUrl, mime, name, false));
         }
 
+        /**
+         * A font the page offers as a download. A WebView has nobody to hand a download
+         * to, so the page passes the href and the bundle's own bytes are written out.
+         */
+        @JavascriptInterface
+        public void saveFont(final String href) {
+            toast(writeFont(href));
+        }
+
         @JavascriptInterface
         public void chrome(final String band, final String page) {
             final int bandColour = css(band);
@@ -215,14 +225,60 @@ public class ShelfActivity extends Activity {
         } catch (IllegalArgumentException bad) {
             return "Could not read that image";
         }
+        return saveBytes(bytes, mime, name,
+                (picture ? Environment.DIRECTORY_PICTURES : Environment.DIRECTORY_DOWNLOADS) + "/Shelf",
+                picture, "Downloads");
+    }
+
+    /**
+     * A font the page offers as a download, read out of the bundle rather than
+     * fetched: the app carries the woff2 it sets and the woff beside it, and both land
+     * in Downloads/Fonts, where a font belongs. Nothing is saved that is not there.
+     */
+    private String writeFont(String href) {
+        String path = href == null ? "" : href.trim();
+        int cut = path.indexOf('?');
+        if (cut >= 0) {
+            path = path.substring(0, cut);
+        }
+        cut = path.indexOf('#');
+        if (cut >= 0) {
+            path = path.substring(0, cut);
+        }
+        if (path.startsWith(ORIGIN)) {
+            path = path.substring(ORIGIN.length());
+        }
+        if (path.isEmpty()) {
+            return "Nothing to save";
+        }
+        String asset = assetFor(path);
+        String name = asset.substring(asset.lastIndexOf('/') + 1);
+        String format = name.substring(name.lastIndexOf('.') + 1);
+        try {
+            InputStream in = getAssets().open(asset);
+            ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+            byte[] chunk = new byte[8192];
+            int read;
+            while ((read = in.read(chunk)) > 0) {
+                buffer.write(chunk, 0, read);
+            }
+            in.close();
+            return saveBytes(buffer.toByteArray(), mimeOf(asset), name,
+                    Environment.DIRECTORY_DOWNLOADS + "/Fonts", false, "Downloads");
+        } catch (IOException missing) {
+            return "That " + format + " stays on the site";
+        }
+    }
+
+    /** The one write path, so every file lands by the same rule. */
+    private String saveBytes(byte[] bytes, String mime, String name, String relative,
+                             boolean picture, String label) {
         try {
             if (Build.VERSION.SDK_INT >= 29) {
                 ContentValues values = new ContentValues();
                 values.put(MediaStore.MediaColumns.DISPLAY_NAME, name);
                 values.put(MediaStore.MediaColumns.MIME_TYPE, mime);
-                values.put(MediaStore.MediaColumns.RELATIVE_PATH, picture
-                        ? Environment.DIRECTORY_PICTURES + "/Shelf"
-                        : Environment.DIRECTORY_DOWNLOADS + "/Shelf");
+                values.put(MediaStore.MediaColumns.RELATIVE_PATH, relative);
                 Uri collection = picture
                         ? MediaStore.Images.Media.EXTERNAL_CONTENT_URI
                         : MediaStore.Downloads.EXTERNAL_CONTENT_URI;
@@ -236,12 +292,13 @@ public class ShelfActivity extends Activity {
                 }
                 out.write(bytes);
                 out.close();
-                return "Saved to " + (picture ? "Pictures" : "Downloads") + "/Shelf/" + name;
+                return "Saved to " + relative + "/" + name;
             }
             File dir = new File(getExternalFilesDir(
-                    picture ? Environment.DIRECTORY_PICTURES : Environment.DIRECTORY_DOWNLOADS), "Shelf");
+                    picture ? Environment.DIRECTORY_PICTURES : Environment.DIRECTORY_DOWNLOADS),
+                    relative.substring(relative.indexOf('/') + 1));
             if (!dir.exists() && !dir.mkdirs()) {
-                return "Could not create the pictures folder";
+                return "Could not create the " + label + " folder";
             }
             File file = new File(dir, name);
             FileOutputStream out = new FileOutputStream(file);
@@ -353,13 +410,15 @@ public class ShelfActivity extends Activity {
         if (asset.endsWith(".json")) return "application/json";
         if (asset.endsWith(".svg")) return "image/svg+xml";
         if (asset.endsWith(".woff2")) return "font/woff2";
+        if (asset.endsWith(".woff")) return "font/woff";
         if (asset.endsWith(".ttf")) return "font/ttf";
         if (asset.endsWith(".png")) return "image/png";
         return "application/octet-stream";
     }
 
     private static String encodingOf(String asset) {
-        if (asset.endsWith(".woff2") || asset.endsWith(".ttf") || asset.endsWith(".png")) {
+        if (asset.endsWith(".woff2") || asset.endsWith(".woff") || asset.endsWith(".ttf")
+                || asset.endsWith(".png")) {
             return null;
         }
         return "utf-8";

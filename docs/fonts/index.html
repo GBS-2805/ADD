@@ -280,6 +280,16 @@
     document.head.appendChild(tag);
   }
 
+  // In the app the bundle holds the font itself and a WebView has nobody to hand a
+  // download to, so the page asks the bridge to write it instead. On the site
+  // IconsApp is absent and the links download as they always have.
+  document.addEventListener("click", function (event) {
+    var link = event.target && event.target.closest ? event.target.closest("a[download]") : null;
+    if (!link || !window.IconsApp || !window.IconsApp.saveFont) { return; }
+    event.preventDefault();
+    window.IconsApp.saveFont(link.getAttribute("href"));
+  });
+
   function stats() {
     if (!data.length) { return; }
     var styles = data.reduce(function (n, fam) { return n + fam.styles.length; }, 0);
