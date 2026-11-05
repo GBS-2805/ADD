@@ -14,9 +14,9 @@ the pages.
 - **ADD 3.2** — APK [`dist/ADD-3.2.apk`](dist/ADD-3.2.apk) (4 MB, signed v1+v2),
   published as `docs/ADD-3.2.apk`. Package `app.offline.compress` — the merge kept
   the id so installed copies update in place — minSdk 26 · targetSdk 35 ·
-  versionCode 34. One package, three tools: the whole icon browser (all four brands,
-  4,373 glyphs, the stylesheet and Poppins) and the fonts page ride inside it, served
-  to a WebView from a private origin, and the compressor is native.
+  versionCode 34. One package, three tools: the whole shelf rides inside it — every
+  page, all four brands, 4,373 glyphs, the captures, the artboards, the stylesheet and
+  Poppins — served to a WebView from a private origin, and the compressor is native.
 - **Icons browser** — live at `docs/icons/`: four free brands — 606 Lineicons,
   1,258 Coolicons, 1,512 Phosphor and 997 Streamline — each on its own page with a preview, variant controls and the
   set folded into a scrolling sheet. Copy-on-tap, no account.

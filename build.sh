@@ -150,40 +150,19 @@ check_palette() {
     python3 "$ROOT/tools/check_palette.py"
 }
 
-# The unified app: the shelf's web tools (icons, fonts) staged out of docs/ into the
-# one package that also carries the native compressor. Same rule as the Icons build --
-# the pages, their catalogs, the stylesheet and Poppins are copied, never re-authored.
+# The unified app: the whole shelf staged out of docs/ into the one package that also
+# carries the native compressor. Same rule as the Icons build -- the pages, their
+# catalogs, the stylesheets and the faces are copied, never re-authored.
 stage_shelf_assets() {
     local www="$ROOT/app/assets/www"
     echo "== ADD: staging the shelf out of docs/ =="
     rm -rf "$ROOT/app/assets"
-    mkdir -p "$www/icons" "$www/fonts" "$www/assets/fonts" "$www/data" "$www/search"
-    cp "$ROOT/docs/icons/index.html" "$www/icons/"
-    for dir in "$ROOT"/docs/icons/*/; do cp -r "$dir" "$www/icons/"; done
-    cp "$ROOT/docs/fonts/index.html" "$www/fonts/"
-    cp "$ROOT"/docs/assets/site*.css "$ROOT"/docs/assets/site*.js \
-       "$ROOT/docs/assets/favicon.svg" "$www/assets/"
-    # woff2 is what the pages set; woff is the same face for an older engine, and the
-    # fonts page offers it as a download, so the app carries it too. TTF stays on the
-    # site: it is four times the bytes and adds nothing the woff does not.
-    cp "$ROOT"/docs/assets/fonts/*.woff2 "$ROOT"/docs/assets/fonts/*.woff "$www/assets/fonts/"
-    cp -r "$ROOT/docs/data/." "$www/data/"
-    cp "$ROOT/docs/search/index.html" "$www/search/"
-    # Trim the search index to the pages the bundle carries: a hit that opens a 404
-    # offline is worse than a shorter list.
-    python3 - "$ROOT/docs/data/pages.json" "$www/data/pages.json" <<'PY'
-import json, sys
-src, dst = sys.argv[1], sys.argv[2]
-payload = json.load(open(src, encoding="utf-8"))
-pages = [p for p in payload["pages"]
-         if p["path"].startswith("/icons") or p["path"].startswith("/fonts")]
-json.dump(dict(payload, pages=pages), open(dst, "w", encoding="utf-8"), ensure_ascii=False)
-print("bundle index: %d of %d pages" % (len(pages), len(payload["pages"])))
-PY
-    cat > "$www/index.html" <<'HTML'
-<!doctype html><meta charset="utf-8"><meta http-equiv="refresh" content="0;url=icons/">
-<title>ADD</title>
-HTML
+    mkdir -p "$www"
+    # The whole shelf travels now: every page, its catalog, the stylesheets, the faces,
+    # the captures and the artboards. The one file it cannot carry is the APK itself,
+    # so the download page's link opens in the browser rather than the app.
+    tar -C "$ROOT/docs" -cf - --exclude='ADD-*.apk' --exclude='vercel.json' \
+        --exclude='sitemap.xml' --exclude='robots.txt' . | tar -C "$www" -xf -
     python3 "$ROOT/tools/check_bundle.py" "$www"
     du -sh "$www"
 }

@@ -130,7 +130,7 @@ public class ShelfActivity extends Activity {
         if ("fonts".equals(tool)) {
             return ORIGIN + "/fonts/index.html";
         }
-        return ORIGIN + "/icons/index.html";
+        return ORIGIN + "/index.html";
     }
 
     @Override
@@ -451,9 +451,9 @@ public class ShelfActivity extends Activity {
                 + "<p style=\"margin:0 0 10px;font-size:13px;letter-spacing:.12em;"
                 + "text-transform:uppercase;opacity:.65\">ADD \u00b7 offline</p>"
                 + "<h1 style=\"margin:0 0 14px;font-size:28px;font-weight:400\">That page lives on the site</h1>"
-                + "<p style=\"margin:0 0 12px;max-width:34ch\">The app bundles the shelf: every brand, "
-                + "their catalogs, the fonts and the preview. Downloads, the portfolio and the render "
-                + "gallery stay online.</p>"
+                + "<p style=\"margin:0 0 12px;max-width:34ch\">The app carries the whole shelf: every "
+                + "page, the catalogs, the fonts, the captures and the artboards. This one is the "
+                + "only page it does not have.</p>"
                 + "<p style=\"margin:0 0 26px\"><code style=\"font-size:13px;word-break:break-all\">"
                 + address + "</code></p>"
                 + "<a href=\"" + address + "\" style=\"display:inline-block;padding:14px 20px;margin:0 10px 12px 0;"
