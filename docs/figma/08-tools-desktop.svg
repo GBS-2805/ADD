@@ -14,7 +14,7 @@
 <text x="40" y="303.52" fill="#f2eee3" font-family="Poppins" font-size="20" font-weight="400" xml:space="preserve">One offline app, three tools: the icon browser, the</text>
 <text x="40" y="334.52" fill="#f2eee3" font-family="Poppins" font-size="20" font-weight="400" xml:space="preserve">fonts page and the compressor.</text>
 <text x="40" y="379.52" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">1 app</text>
-<text x="101" y="379.52" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">ADD 3.2 shipping</text>
+<text x="101" y="379.52" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">ADD 3.3 shipping</text>
 <text x="241" y="379.52" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">3 tools</text>
 <text x="313" y="379.52" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">No third-party libraries</text>
 <rect x="40" y="426.61" width="1220" height="1" fill="#f2eee3" fill-opacity="0.22"/>
@@ -33,7 +33,7 @@
 <rect x="102.31" y="769.34" width="1" height="26.14" fill="#0fbf92"/>
 <rect x="63" y="794.48" width="40.31" height="1" fill="#0fbf92"/>
 <rect x="63" y="769.34" width="1" height="26.14" fill="#0fbf92"/>
-<text x="73" y="786.34" fill="#0f120f" font-family="Poppins" font-size="11" font-weight="500" letter-spacing="1.1" xml:space="preserve">3.2</text>
+<text x="73" y="786.34" fill="#0f120f" font-family="Poppins" font-size="11" font-weight="500" letter-spacing="1.1" xml:space="preserve">3.3</text>
 <text x="226.31" y="786.34" fill="#f2eee3" font-family="Poppins" font-size="13" font-weight="400" xml:space="preserve"> →</text>
 <text x="113.31" y="786.34" fill="#f2eee3" font-family="Poppins" font-size="13" font-weight="400" xml:space="preserve">Read the detail</text>
 <rect x="852.66" y="587.2" width="1" height="231.28" fill="#f2eee3" fill-opacity="0.22"/>
@@ -56,12 +56,12 @@
 <rect x="914.97" y="769.34" width="1" height="26.14" fill="#0fbf92"/>
 <rect x="875.66" y="794.48" width="40.31" height="1" fill="#0fbf92"/>
 <rect x="875.66" y="769.34" width="1" height="26.14" fill="#0fbf92"/>
-<text x="885.66" y="786.34" fill="#0f120f" font-family="Poppins" font-size="11" font-weight="500" letter-spacing="1.1" xml:space="preserve">3.2</text>
+<text x="885.66" y="786.34" fill="#0f120f" font-family="Poppins" font-size="11" font-weight="500" letter-spacing="1.1" xml:space="preserve">3.3</text>
 <text x="1028.97" y="786.34" fill="#f2eee3" font-family="Poppins" font-size="13" font-weight="400" xml:space="preserve"> →</text>
 <text x="925.97" y="786.34" fill="#f2eee3" font-family="Poppins" font-size="13" font-weight="400" xml:space="preserve">Open the tool</text>
 <rect x="40" y="882.48" width="1220" height="1" fill="#f2eee3" fill-opacity="0.22"/>
 <text x="40" y="976.48" fill="#f2eee3" font-family="Poppins" font-size="30" font-weight="400" letter-spacing="-0.45" xml:space="preserve">Icons</text>
-<text x="40" y="1008.98" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">3.2 · app.offline.compress · in the app</text>
+<text x="40" y="1008.98" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">3.3 · app.offline.compress · in the app</text>
 <rect x="40" y="1076.08" width="248" height="56" fill="#0fbf92"/>
 <image x="68" y="1094.08" width="20" height="20" xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADwAAAA8CAYAAAA6/NlyAAADTUlEQVR4Aexa3U4TQRSe2YrbpHQXGhUT8A+J7yAXRH0Gb40XlPgY4mMY4Cl8AxXv9NIrg9GkXgJbbroEGL9vEgjdbpuddmbLwjTntGfOnDnnfPNtNt3JBuKGfTzg6064Z9gzfM12wF/SrgmNoqjVbDXbVNqu62Xzl8pwo9G4L26Jn4EItqi04VvINuVyXCrg2u3aaynkBUDa9LkEmM1dKmAhxZ1sA/DdHfA5dJQL2CGQoqk94KI7VdU4z3BVmSva901jWHjARS+NqsZ5hqvKXNG+PcNFd6qqcZ7hqjJXtG/PcNGdqmqcNYZnZ2fvxa14O56Lt5rN5uCDvuEO2c53Xt4a4GAm2EXSdfxZbQe3gh/1uP4E47EkjuNlHP18x2KdT85I5sZwcrECOJ6P30kpVy7akeJBWAu/1OfrDy98BQ29piY+I3wJqgVnX89wyrmuBxN+WQE8pIfFUIbfNIAhAVk3Y7kG/kWoE7ECODlIPgol9nI6JOjd+lz9Uc5cnwsxj4eCRe6j/aOdvgVjDqwAZu1Upa/w24FmZSkMwnPQKjuJsdLMBuFX2HnMdlKRvsScFbEGuHfY+yNOxRq6ygO9CNAENHgjU+LpUGaF6DBn76D3F3ktiBDWALObJEn2wPQq7DzQS1LIt5jrE9zs3sCRz6xKV5kT89bEKmB2RTZGgGZIEe0wB3MVCTaJsQ6YxXWjp2JNCfWPYxPVa7BW5zBZWDDWCWDW5qV4rI6fw867vOHOlQ7XcG3urAWnM8DsTbMEtjRrdIxQHYNYvWZE3KRTTgGzObJF1mCPYto5s6ivxTlgViFrvAnBzgPt7AaFegNSCmBWJWh1ol7Qvqz0ce6yz6VdGmCC6Ha7v9LTdBn2jjgT27Tpw7g0KRUwUfWS3u9kP2knh8kGbfrK1NIBlwkur5YHnLcr18k3FsN8vwonEO2oFW1OQ3XtKGqNQ4Qx4Mald63w9PN+GjrJO17GgHG41veu1Ti7bGMNNnqBvZjmMgZsWsBxvDTKj2BjwPhf/EkpdYK1UxX2wF5MmzAGzKMcFFo5E2cbeML5MA1lbfbAXpwDZgEWwinidne/uzkNZW32wF5M1Zhh0wJXLd4DvmqM2O7HM2x7R69avhvH8H8AAAD//0Rl8NwAAAAGSURBVAMA4sTfiLlxDoMAAAAASUVORK5CYII="/>
 <text x="100" y="1110.05" fill="#0f120f" font-family="Poppins" font-size="17" font-weight="400" xml:space="preserve">Download the app</text>
@@ -96,8 +96,8 @@
 <text x="796" y="1689.38" fill="#f2eee3" font-family="Poppins" font-size="17" font-weight="400" xml:space="preserve">, no baked size or weight.</text>
 <rect x="40" y="1712.42" width="1220" height="1" fill="#f2eee3" fill-opacity="0.22"/>
 <text x="40" y="1748.42" fill="#f2eee3" font-family="Poppins" font-size="17" font-weight="500" xml:space="preserve">Offline</text>
-<text x="225" y="1748.42" fill="#f2eee3" font-family="Poppins" font-size="17" font-weight="400" xml:space="preserve">All four catalogs, the pages and the fonts travel inside the APK. One palette, Poppins, hairline rules — the same system</text>
-<text x="225" y="1776.47" fill="#f2eee3" font-family="Poppins" font-size="17" font-weight="400" xml:space="preserve">as this site.</text>
+<text x="225" y="1748.42" fill="#f2eee3" font-family="Poppins" font-size="17" font-weight="400" xml:space="preserve">The whole shelf travels inside the APK: every page, all four catalogs, the fonts, the captures and the artboards. One</text>
+<text x="225" y="1776.47" fill="#f2eee3" font-family="Poppins" font-size="17" font-weight="400" xml:space="preserve">palette, Poppins, hairline rules — the same system as this site.</text>
 <text x="40" y="1837.52" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="16" font-weight="400" xml:space="preserve">The app reads the catalogs this site publishes under</text>
 <text x="455" y="1837.52" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="16" font-weight="400" xml:space="preserve">/data/</text>
 <text x="512" y="1837.52" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="16" font-weight="400" xml:space="preserve">— Lineicons and</text>
@@ -107,7 +107,7 @@
 <text x="303" y="1888.7" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="16" font-weight="400" xml:space="preserve">, so the phone cannot drift from the web.</text>
 <rect x="40" y="1960.3" width="1220" height="1" fill="#f2eee3" fill-opacity="0.22"/>
 <text x="40" y="2054.3" fill="#f2eee3" font-family="Poppins" font-size="30" font-weight="400" letter-spacing="-0.45" xml:space="preserve">Compress</text>
-<text x="40" y="2086.8" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">3.2 · app.offline.compress · in the app</text>
+<text x="40" y="2086.8" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">3.3 · app.offline.compress · in the app</text>
 <rect x="40" y="2153.89" width="248" height="56" fill="#0fbf92"/>
 <image x="68" y="2171.89" width="20" height="20" xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADwAAAA8CAYAAAA6/NlyAAADTUlEQVR4Aexa3U4TQRSe2YrbpHQXGhUT8A+J7yAXRH0Gb40XlPgY4mMY4Cl8AxXv9NIrg9GkXgJbbroEGL9vEgjdbpuddmbLwjTntGfOnDnnfPNtNt3JBuKGfTzg6064Z9gzfM12wF/SrgmNoqjVbDXbVNqu62Xzl8pwo9G4L26Jn4EItqi04VvINuVyXCrg2u3aaynkBUDa9LkEmM1dKmAhxZ1sA/DdHfA5dJQL2CGQoqk94KI7VdU4z3BVmSva901jWHjARS+NqsZ5hqvKXNG+PcNFd6qqcZ7hqjJXtG/PcNGdqmqcNYZnZ2fvxa14O56Lt5rN5uCDvuEO2c53Xt4a4GAm2EXSdfxZbQe3gh/1uP4E47EkjuNlHP18x2KdT85I5sZwcrECOJ6P30kpVy7akeJBWAu/1OfrDy98BQ29piY+I3wJqgVnX89wyrmuBxN+WQE8pIfFUIbfNIAhAVk3Y7kG/kWoE7ECODlIPgol9nI6JOjd+lz9Uc5cnwsxj4eCRe6j/aOdvgVjDqwAZu1Upa/w24FmZSkMwnPQKjuJsdLMBuFX2HnMdlKRvsScFbEGuHfY+yNOxRq6ygO9CNAENHgjU+LpUGaF6DBn76D3F3ktiBDWALObJEn2wPQq7DzQS1LIt5jrE9zs3sCRz6xKV5kT89bEKmB2RTZGgGZIEe0wB3MVCTaJsQ6YxXWjp2JNCfWPYxPVa7BW5zBZWDDWCWDW5qV4rI6fw867vOHOlQ7XcG3urAWnM8DsTbMEtjRrdIxQHYNYvWZE3KRTTgGzObJF1mCPYto5s6ivxTlgViFrvAnBzgPt7AaFegNSCmBWJWh1ol7Qvqz0ce6yz6VdGmCC6Ha7v9LTdBn2jjgT27Tpw7g0KRUwUfWS3u9kP2knh8kGbfrK1NIBlwkur5YHnLcr18k3FsN8vwonEO2oFW1OQ3XtKGqNQ4Qx4Mald63w9PN+GjrJO17GgHG41veu1Ti7bGMNNnqBvZjmMgZsWsBxvDTKj2BjwPhf/EkpdYK1UxX2wF5MmzAGzKMcFFo5E2cbeML5MA1lbfbAXpwDZgEWwinidne/uzkNZW32wF5M1Zhh0wJXLd4DvmqM2O7HM2x7R69avhvH8H8AAAD//0Rl8NwAAAAGSURBVAMA4sTfiLlxDoMAAAAASUVORK5CYII="/>
 <text x="100" y="2187.86" fill="#0f120f" font-family="Poppins" font-size="17" font-weight="400" xml:space="preserve">Download the app</text>
@@ -215,7 +215,7 @@
 <text x="413" y="4297.02" fill="#f2eee3" font-family="Poppins" font-size="17" font-weight="400" xml:space="preserve">: each build with the day it went out, the size of the APK that shipped with it, and the note that</text>
 <text x="225" y="4325.06" fill="#f2eee3" font-family="Poppins" font-size="17" font-weight="400" xml:space="preserve">was written for it — read back out of the repository's own history rather than repeated here.</text>
 <rect x="0" y="4436.11" width="1300" height="1" fill="#f2eee3" fill-opacity="0.22"/>
-<text x="40" y="4473.11" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">ADD 3.2</text>
+<text x="40" y="4473.11" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">ADD 3.3</text>
 <text x="98" y="4473.66" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">·</text>
 <text x="107" y="4473.11" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">one app, three tools</text>
 <text x="961" y="4473.11" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">Index</text>

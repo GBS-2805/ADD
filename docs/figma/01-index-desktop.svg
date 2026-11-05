@@ -49,11 +49,11 @@
 <rect x="40" y="1026.28" width="1220" height="1" fill="#f2eee3" fill-opacity="0.22"/>
 <text x="40" y="1120.28" fill="#f2eee3" font-family="Poppins" font-size="30" font-weight="400" letter-spacing="-0.45" xml:space="preserve">The app</text>
 <text x="40" y="1152.78" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">Standalone, signed, no update server</text>
-<text x="40" y="1205.88" fill="#f2eee3" font-family="Poppins" font-size="17" font-weight="500" xml:space="preserve">ADD 3.2</text>
-<text x="225" y="1205.88" fill="#f2eee3" font-family="Poppins" font-size="17" font-weight="400" xml:space="preserve">4 MB · icons, fonts and Compress in one offline package, no permissions.</text>
-<text x="857" y="1205.88" fill="#f2eee3" font-family="Poppins" font-size="17" font-weight="400" text-decoration="underline" xml:space="preserve">APK</text>
-<text x="888" y="1205.88" fill="#f2eee3" font-family="Poppins" font-size="17" font-weight="400" xml:space="preserve">·</text>
-<text x="901" y="1205.88" fill="#f2eee3" font-family="Poppins" font-size="17" font-weight="400" text-decoration="underline" xml:space="preserve">tools</text>
+<text x="40" y="1205.88" fill="#f2eee3" font-family="Poppins" font-size="17" font-weight="500" xml:space="preserve">ADD 3.3</text>
+<text x="225" y="1205.88" fill="#f2eee3" font-family="Poppins" font-size="17" font-weight="400" xml:space="preserve">9 MB · the whole shelf in one offline package: every page, the icons, the fonts and Compress, no permissions.</text>
+<text x="1171" y="1205.88" fill="#f2eee3" font-family="Poppins" font-size="17" font-weight="400" text-decoration="underline" xml:space="preserve">APK</text>
+<text x="1202" y="1205.88" fill="#f2eee3" font-family="Poppins" font-size="17" font-weight="400" xml:space="preserve">·</text>
+<text x="1215" y="1205.88" fill="#f2eee3" font-family="Poppins" font-size="17" font-weight="400" text-decoration="underline" xml:space="preserve">tools</text>
 <text x="40" y="1266.92" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="16" font-weight="400" xml:space="preserve">The app declares no</text>
 <text x="207" y="1266.92" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="16" font-weight="400" xml:space="preserve">INTERNET</text>
 <text x="285" y="1266.92" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="16" font-weight="400" xml:space="preserve">permission: the shelf ships inside it, and</text>
@@ -82,7 +82,7 @@
 <text x="160" y="1674.14" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="16" font-weight="400" xml:space="preserve">docs/assets/site.254272ab85.css</text>
 <text x="424" y="1674.14" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="16" font-weight="400" xml:space="preserve">and each app's resources.</text>
 <rect x="0" y="1769.73" width="1300" height="1" fill="#f2eee3" fill-opacity="0.22"/>
-<text x="40" y="1806.73" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">ADD 3.2</text>
+<text x="40" y="1806.73" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">ADD 3.3</text>
 <text x="98" y="1807.28" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">·</text>
 <text x="107" y="1806.73" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">app.offline.compress</text>
 <text x="942" y="1806.73" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">Download</text>
