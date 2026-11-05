@@ -174,7 +174,9 @@ case "${1:-add}" in
         check_palette
         stage_shelf_assets
         build_app app ADD ADD-3.3.apk 35 3.3
-        check_fallback "$OUT/ADD-3.0.apk"
+        # The newest build, not a hard-coded one: a stale path silently proved a copy
+        # the release had already replaced.
+        check_fallback "$(ls -t "$OUT"/ADD-*.apk | head -1)"
         ;;
     stage)
         # Stage only: no JDK or SDK needed, which is how the bundle harness runs.
