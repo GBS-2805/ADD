@@ -62,6 +62,8 @@ const shots = [
   { name: "phone-fonts", page: "fonts/", w: 390, h: 844, full: true, title: "Fonts on a phone", caption: "The three faces and the type-your-own preview stacked at 390 wide." },
   { name: "page-releases", page: "releases/", w: 1300, h: 900, title: "Releases", caption: "Every build the shelf has shipped, newest first, with the day, the size and the note." },
   { name: "phone-releases", page: "releases/", w: 390, h: 844, title: "Releases on a phone", caption: "The newest builds at 390 wide: the fold of a history that runs to 7,398 px." },
+  { name: "page-compress", page: "compress/", w: 1300, h: 900, title: "Compress", caption: "The app's compressor as a web tool: photos, format, quality and the longest edge, with nothing uploaded." },
+  { name: "phone-compress", page: "compress/", w: 390, h: 844, title: "Compress on a phone", caption: "One column at 390 wide: WebP chosen by default, the level and the cap under it." },
 ];
 
 // Nothing is rendered apart from a page any more: the mark that used to sit here is
@@ -216,7 +218,8 @@ const escape = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/
   const GROUP_OF = { "": "Index", "tools/": "Tools", "icons/": "Icons app page",
     "icons/coolicons/": "Coolicons", "icons/lineicons/": "Lineicons",
     "icons/all/": "All brands", "icons/streamline/": "Streamline", "fonts/": "Fonts",
-    "portfolio/": "Portfolio", "download/": "Download", "releases/": "Releases" };
+    "portfolio/": "Portfolio", "download/": "Download", "releases/": "Releases",
+    "compress/": "Compress" };
   const all = [...shots, ...extras];
   const groups = [];
   for (const s of all) {

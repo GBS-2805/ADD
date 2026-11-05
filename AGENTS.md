@@ -153,7 +153,7 @@ or handed to someone else. Folder ids live in `tools/site.json` under `drive`; r
 them from there rather than searching Drive by name, which also finds unrelated
 `renders` folders.
 
-- **`figma/`** holds the current 28 files (26 artboards plus `site-figma.svg` and `pantone.svg`) and only the
+- **`figma/`** holds the current 30 files (28 artboards plus `site-figma.svg` and `pantone.svg`) and only the
   current generation. Upload the new set, then delete every file in the folder that
   is not in it -- old artboards go to Drive's trash, not into an `old/` folder.
   Nested `old/` folders are how three generations once piled up there.
@@ -270,8 +270,8 @@ tools *inside* that app, not apps of their own.
   16,000px phone page takes the lossy one. The one canvas
   inlines every mark instead of painting it through `<use>`, which Figma does not
   import: a shared payload came back as a gap in every artboard.
-- The shelf is fifteen pages, each a folder with an `index.html`: the root index,
-  then `tools/`, `icons/` and its four brand folders (`icons/lineicons/`,
+- The shelf is sixteen pages, each a folder with an `index.html`: the root index,
+  then `tools/`, `compress/`, `icons/` and its four brand folders (`icons/lineicons/`,
   `icons/coolicons/`, `icons/phosphor/`, `icons/streamline/`) plus the all-brands
   sheet at `icons/all/`, `fonts/`, `portfolio/`, `download/`, `renders/`, `figma/`
   (written by `figma_publish.py`), `releases/` and the generated `search/`. They share

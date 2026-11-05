@@ -160,7 +160,7 @@ app/src/app/offline/compress/Palette.java           three palettes, one entry ea
 app/src/app/offline/compress/ThemePrefs.java        stores the palette and theme pair
 app/assets/www/                                     staged at build time from docs/ (not committed)
 build.sh                                           SDK-tools build: ./build.sh [add|stage]
-docs/                                              the fifteen-page static shelf + data/
+docs/                                              the sixteen-page static shelf + data/
 tools/catalog.json                                 apps, fonts, portfolio (one source)
 tools/build_catalog.py                             measures the shipped files, writes data/
 tools/build_releases.py                            writes the releases page from git history
