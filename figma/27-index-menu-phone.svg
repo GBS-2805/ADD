@@ -62,7 +62,7 @@
 <rect x="20" y="1367.69" width="350" height="1" fill="#f2eee3" fill-opacity="0.22"/>
 <text x="20" y="1441.69" fill="#f2eee3" font-family="Poppins" font-size="30" font-weight="400" letter-spacing="-0.45" xml:space="preserve">The app</text>
 <text x="20" y="1474.19" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">Standalone, signed, no update server</text>
-<text x="20" y="1525.28" fill="#f2eee3" font-family="Poppins" font-size="16" font-weight="500" xml:space="preserve">ADD 3.1</text>
+<text x="20" y="1525.28" fill="#f2eee3" font-family="Poppins" font-size="16" font-weight="500" xml:space="preserve">ADD 3.2</text>
 <text x="20" y="1553.67" fill="#f2eee3" font-family="Poppins" font-size="16" font-weight="400" xml:space="preserve">4 MB · icons, fonts and Compress in one</text>
 <text x="20" y="1580.06" fill="#f2eee3" font-family="Poppins" font-size="16" font-weight="400" xml:space="preserve">offline package, no permissions.</text>
 <text x="275" y="1580.06" fill="#f2eee3" font-family="Poppins" font-size="16" font-weight="400" text-decoration="underline" xml:space="preserve">APK</text>
@@ -98,9 +98,9 @@
 <text x="288" y="2382.17" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="16" font-weight="400" xml:space="preserve">and each</text>
 <text x="20" y="2407.77" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="16" font-weight="400" xml:space="preserve">app's resources.</text>
 <rect x="0" y="2483.36" width="390" height="1" fill="#f2eee3" fill-opacity="0.22"/>
-<text x="20" y="2520.36" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">ADD 3.1</text>
-<text x="74" y="2520.91" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">·</text>
-<text x="83" y="2520.36" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">app.offline.compress</text>
+<text x="20" y="2520.36" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">ADD 3.2</text>
+<text x="78" y="2520.91" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">·</text>
+<text x="87" y="2520.36" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">app.offline.compress</text>
 <text x="20" y="2555.45" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">Download</text>
 <text x="95" y="2556" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">·</text>
 <text x="104" y="2555.45" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">Renders</text>
