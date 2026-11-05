@@ -173,7 +173,7 @@ case "${1:-add}" in
     add)
         check_palette
         stage_shelf_assets
-        build_app app ADD ADD-3.4.apk 36 3.4
+        build_app app ADD ADD-3.5.apk 37 3.5
         # The newest build, not a hard-coded one: a stale path silently proved a copy
         # the release had already replaced.
         check_fallback "$(ls -t "$OUT"/ADD-*.apk | head -1)"

@@ -2,6 +2,12 @@
   "notes": [
     {
       "id": "add",
+      "version": "3.5",
+      "title": "The shelf, on launch",
+      "note": "ADD opens on the shelf itself now: the home page of the whole site, with the native compressor still on Android's share sheet."
+    },
+    {
+      "id": "add",
       "version": "3.4",
       "title": "The shelf, all the way in",
       "note": "Every page of the site now rides inside the APK — the portfolio, the downloads, the captures and the artboards — and the page it still cannot open names every brand it does carry."

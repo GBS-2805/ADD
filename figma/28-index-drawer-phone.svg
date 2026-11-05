@@ -87,7 +87,7 @@
 <rect x="20" y="1155.69" width="350" height="1" fill="#f2eee3" fill-opacity="0.22"/>
 <text x="20" y="1229.69" fill="#f2eee3" font-family="Poppins" font-size="30" font-weight="400" letter-spacing="-0.45" xml:space="preserve">The app</text>
 <text x="20" y="1262.19" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">Standalone, signed, no update server</text>
-<text x="20" y="1313.28" fill="#f2eee3" font-family="Poppins" font-size="16" font-weight="500" xml:space="preserve">ADD 3.4</text>
+<text x="20" y="1313.28" fill="#f2eee3" font-family="Poppins" font-size="16" font-weight="500" xml:space="preserve">ADD 3.5</text>
 <text x="20" y="1341.67" fill="#f2eee3" font-family="Poppins" font-size="16" font-weight="400" xml:space="preserve">9 MB · the whole shelf in one offline package:</text>
 <text x="20" y="1368.06" fill="#f2eee3" font-family="Poppins" font-size="16" font-weight="400" xml:space="preserve">every page, the icons, the fonts and</text>
 <text x="20" y="1394.45" fill="#f2eee3" font-family="Poppins" font-size="16" font-weight="400" xml:space="preserve">Compress, no permissions.</text>
@@ -124,9 +124,9 @@
 <text x="288" y="2196.56" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="16" font-weight="400" xml:space="preserve">and each</text>
 <text x="20" y="2222.16" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="16" font-weight="400" xml:space="preserve">app's resources.</text>
 <rect x="0" y="2297.75" width="390" height="1" fill="#f2eee3" fill-opacity="0.22"/>
-<text x="20" y="2334.75" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">ADD 3.4</text>
-<text x="80" y="2335.3" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">·</text>
-<text x="89" y="2334.75" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">app.offline.compress</text>
+<text x="20" y="2334.75" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">ADD 3.5</text>
+<text x="78" y="2335.3" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">·</text>
+<text x="87" y="2334.75" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">app.offline.compress</text>
 <text x="20" y="2369.84" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">Download</text>
 <text x="95" y="2370.39" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">·</text>
 <text x="104" y="2369.84" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">Renders</text>

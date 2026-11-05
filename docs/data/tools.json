@@ -6,10 +6,10 @@
       "name": "ADD",
       "kind": "Android app",
       "status": "released",
-      "version": "3.4",
-      "version_code": 36,
+      "version": "3.5",
+      "version_code": 37,
       "package": "app.offline.compress",
-      "apk": "/ADD-3.4.apk",
+      "apk": "/ADD-3.5.apk",
       "min_android": "8.0 (API 26)",
       "summary": "One offline app: the 4,373-icon browser, the fonts page and batch photo compression.",
       "features": [
@@ -31,7 +31,7 @@
         }
       ],
       "bytes": 9334731,
-      "sha256": "96388f8ecd9bb0438024cc112f8a9d3e103a79bb8b8f263d9095c19f6da15447"
+      "sha256": "fc0b48bee8c9043ead365815522b6f2c5c14476456ade8891663e36215467f4e"
     }
   ]
 }

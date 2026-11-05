@@ -95,10 +95,10 @@
     {
       "id": "add",
       "name": "ADD",
-      "version": "3.4",
-      "apk": "/ADD-3.4.apk",
+      "version": "3.5",
+      "apk": "/ADD-3.5.apk",
       "bytes": 9334731,
-      "sha256": "96388f8ecd9bb0438024cc112f8a9d3e103a79bb8b8f263d9095c19f6da15447"
+      "sha256": "fc0b48bee8c9043ead365815522b6f2c5c14476456ade8891663e36215467f4e"
     }
   ]
 }
