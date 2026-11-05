@@ -2,6 +2,12 @@
   "notes": [
     {
       "id": "add",
+      "version": "3.2",
+      "title": "The mark in the launcher",
+      "note": "The app icon is the band's mark now, the same four paths the site draws, scaled to sit inside the safe circle so no launcher mask can clip it."
+    },
+    {
+      "id": "add",
       "version": "3.1",
       "title": "Fonts you can keep",
       "note": "The fonts page's downloads now save into Downloads/Fonts inside the app, which carries woff beside woff2 so the tap has something to write."
