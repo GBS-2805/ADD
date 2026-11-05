@@ -2,6 +2,12 @@
   "notes": [
     {
       "id": "add",
+      "version": "3.4",
+      "title": "The shelf, all the way in",
+      "note": "Every page of the site now rides inside the APK — the portfolio, the downloads, the captures and the artboards — and the page it still cannot open names every brand it does carry."
+    },
+    {
+      "id": "add",
       "version": "3.3",
       "title": "The whole shelf, offline",
       "note": "The APK carries every page of the site now, not just the icon browser and the fonts: the portfolio, the downloads, the captures and the artboards all open with no network."
