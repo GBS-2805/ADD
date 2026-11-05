@@ -21,15 +21,14 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
 
+        <!-- The native compressor is no longer the way in: the app opens on the shelf
+             itself. It stays reachable from Android's own share sheet, which is how a
+             photo reaches it, and from Tools inside the bundled site. -->
         <activity
             android:name=".MainActivity"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|uiMode"
             android:exported="true"
             android:label="ADD">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
 
             <!-- Share a photo, or a handful, from any gallery or camera app. -->
             <intent-filter>
@@ -44,14 +43,18 @@
             </intent-filter>
         </activity>
 
-        <!-- The shelf's web tools, bundled: the icon browser and the fonts page. -->
+        <!-- The shelf, bundled whole: this is what the launcher opens. -->
         <activity
             android:name=".ShelfActivity"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|uiMode"
-            android:exported="false"
+            android:exported="true"
             android:label="ADD"
-            android:parentActivityName=".MainActivity"
-            android:windowSoftInputMode="adjustResize" />
+            android:windowSoftInputMode="adjustResize">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
 
         <activity
             android:name=".CompareActivity"
