@@ -1,11 +1,12 @@
 {
   "generated": "2026-11-04",
-  "styles": 21,
+  "styles": 39,
   "families": [
     {
       "family": "Poppins",
       "slug": "poppins",
       "kind": "Sans serif",
+      "fallback": "sans-serif",
       "licence": "SIL Open Font License 1.1",
       "source": "Google Fonts",
       "note": "The three faces the app bundles are byte-for-byte copies of app/res/font/.",
@@ -179,18 +180,182 @@
           "ttf_bytes": 167692
         }
       ],
-      "fallback": "sans-serif",
       "styles_count": 18,
       "woff2_bytes": 147656,
       "ttf_bytes": 2980572
     },
     {
+      "family": "Redaction",
+      "slug": "redaction",
+      "kind": "Display serif",
+      "fallback": "serif",
+      "licence": "SIL Open Font License 1.1",
+      "source": "Google Fonts",
+      "note": "Grade 0: the plain serif every degraded grade is cut from.",
+      "styles": [
+        {
+          "name": "Italic",
+          "weight": 400,
+          "style": "italic",
+          "woff2": "/assets/fonts/redaction-400-italic.woff2",
+          "ttf": "/assets/fonts/redaction-400-italic.ttf",
+          "woff2_bytes": 20120,
+          "ttf_bytes": 63564
+        },
+        {
+          "name": "Regular",
+          "weight": 400,
+          "style": "normal",
+          "woff2": "/assets/fonts/redaction-400.woff2",
+          "ttf": "/assets/fonts/redaction-400.ttf",
+          "woff2_bytes": 19568,
+          "ttf_bytes": 62676
+        },
+        {
+          "name": "Bold",
+          "weight": 700,
+          "style": "normal",
+          "woff2": "/assets/fonts/redaction-700.woff2",
+          "ttf": "/assets/fonts/redaction-700.ttf",
+          "woff2_bytes": 20364,
+          "ttf_bytes": 65292
+        }
+      ],
+      "styles_count": 3,
+      "woff2_bytes": 60052,
+      "ttf_bytes": 191532
+    },
+    {
+      "family": "Redaction 10",
+      "slug": "redaction-10",
+      "kind": "Display serif",
+      "fallback": "serif",
+      "licence": "SIL Open Font License 1.1",
+      "source": "Google Fonts",
+      "note": "Grade 10: the serifs begin to square off.",
+      "styles": [
+        {
+          "name": "Italic",
+          "weight": 400,
+          "style": "italic",
+          "woff2": "/assets/fonts/redaction-10-400-italic.woff2",
+          "ttf": "/assets/fonts/redaction-10-400-italic.ttf",
+          "woff2_bytes": 12868,
+          "ttf_bytes": 108232
+        },
+        {
+          "name": "Regular",
+          "weight": 400,
+          "style": "normal",
+          "woff2": "/assets/fonts/redaction-10-400.woff2",
+          "ttf": "/assets/fonts/redaction-10-400.ttf",
+          "woff2_bytes": 11708,
+          "ttf_bytes": 86380
+        },
+        {
+          "name": "Bold",
+          "weight": 700,
+          "style": "normal",
+          "woff2": "/assets/fonts/redaction-10-700.woff2",
+          "ttf": "/assets/fonts/redaction-10-700.ttf",
+          "woff2_bytes": 11904,
+          "ttf_bytes": 87836
+        }
+      ],
+      "styles_count": 3,
+      "woff2_bytes": 36480,
+      "ttf_bytes": 282448
+    },
+    {
+      "family": "Redaction 20",
+      "slug": "redaction-20",
+      "kind": "Display serif",
+      "fallback": "serif",
+      "licence": "SIL Open Font License 1.1",
+      "source": "Google Fonts",
+      "note": "Grade 20: light degradation, still readable in long lines.",
+      "styles": [
+        {
+          "name": "Italic",
+          "weight": 400,
+          "style": "italic",
+          "woff2": "/assets/fonts/redaction-20-400-italic.woff2",
+          "ttf": "/assets/fonts/redaction-20-400-italic.ttf",
+          "woff2_bytes": 9948,
+          "ttf_bytes": 66032
+        },
+        {
+          "name": "Regular",
+          "weight": 400,
+          "style": "normal",
+          "woff2": "/assets/fonts/redaction-20-400.woff2",
+          "ttf": "/assets/fonts/redaction-20-400.ttf",
+          "woff2_bytes": 9240,
+          "ttf_bytes": 55824
+        },
+        {
+          "name": "Bold",
+          "weight": 700,
+          "style": "normal",
+          "woff2": "/assets/fonts/redaction-20-700.woff2",
+          "ttf": "/assets/fonts/redaction-20-700.ttf",
+          "woff2_bytes": 9476,
+          "ttf_bytes": 57060
+        }
+      ],
+      "styles_count": 3,
+      "woff2_bytes": 28664,
+      "ttf_bytes": 178916
+    },
+    {
+      "family": "Redaction 35",
+      "slug": "redaction-35",
+      "kind": "Display serif",
+      "fallback": "serif",
+      "licence": "SIL Open Font License 1.1",
+      "source": "Google Fonts",
+      "note": "Grade 35: mid degradation; the capitals keep their bars.",
+      "styles": [
+        {
+          "name": "Italic",
+          "weight": 400,
+          "style": "italic",
+          "woff2": "/assets/fonts/redaction-35-400-italic.woff2",
+          "ttf": "/assets/fonts/redaction-35-400-italic.ttf",
+          "woff2_bytes": 8328,
+          "ttf_bytes": 47660
+        },
+        {
+          "name": "Regular",
+          "weight": 400,
+          "style": "normal",
+          "woff2": "/assets/fonts/redaction-35-400.woff2",
+          "ttf": "/assets/fonts/redaction-35-400.ttf",
+          "woff2_bytes": 7824,
+          "ttf_bytes": 42368
+        },
+        {
+          "name": "Bold",
+          "weight": 700,
+          "style": "normal",
+          "woff2": "/assets/fonts/redaction-35-700.woff2",
+          "ttf": "/assets/fonts/redaction-35-700.ttf",
+          "woff2_bytes": 7936,
+          "ttf_bytes": 43236
+        }
+      ],
+      "styles_count": 3,
+      "woff2_bytes": 24088,
+      "ttf_bytes": 133264
+    },
+    {
       "family": "Redaction 50",
       "slug": "redaction-50",
       "kind": "Display serif",
+      "fallback": "serif",
       "licence": "SIL Open Font License 1.1",
       "source": "Google Fonts",
-      "note": "One of Redaction's six optical sizes, cut for display.",
+      "note": "Grade 50: heavy degradation. The capital A loses its bar in this grade; 35 and 70 both keep theirs.",
       "styles": [
         {
           "name": "Italic",
@@ -220,10 +385,91 @@
           "ttf_bytes": 37276
         }
       ],
-      "fallback": "serif",
       "styles_count": 3,
       "woff2_bytes": 21692,
       "ttf_bytes": 114704
+    },
+    {
+      "family": "Redaction 70",
+      "slug": "redaction-70",
+      "kind": "Display serif",
+      "fallback": "serif",
+      "licence": "SIL Open Font License 1.1",
+      "source": "Google Fonts",
+      "note": "Grade 70: strokes collapse into coarse blocks.",
+      "styles": [
+        {
+          "name": "Italic",
+          "weight": 400,
+          "style": "italic",
+          "woff2": "/assets/fonts/redaction-70-400-italic.woff2",
+          "ttf": "/assets/fonts/redaction-70-400-italic.ttf",
+          "woff2_bytes": 6628,
+          "ttf_bytes": 35000
+        },
+        {
+          "name": "Regular",
+          "weight": 400,
+          "style": "normal",
+          "woff2": "/assets/fonts/redaction-70-400.woff2",
+          "ttf": "/assets/fonts/redaction-70-400.ttf",
+          "woff2_bytes": 6400,
+          "ttf_bytes": 32312
+        },
+        {
+          "name": "Bold",
+          "weight": 700,
+          "style": "normal",
+          "woff2": "/assets/fonts/redaction-70-700.woff2",
+          "ttf": "/assets/fonts/redaction-70-700.ttf",
+          "woff2_bytes": 6500,
+          "ttf_bytes": 32980
+        }
+      ],
+      "styles_count": 3,
+      "woff2_bytes": 19528,
+      "ttf_bytes": 100292
+    },
+    {
+      "family": "Redaction 100",
+      "slug": "redaction-100",
+      "kind": "Display serif",
+      "fallback": "serif",
+      "licence": "SIL Open Font License 1.1",
+      "source": "Google Fonts",
+      "note": "Grade 100: fully pixelated, the coarsest grade.",
+      "styles": [
+        {
+          "name": "Italic",
+          "weight": 400,
+          "style": "italic",
+          "woff2": "/assets/fonts/redaction-100-400-italic.woff2",
+          "ttf": "/assets/fonts/redaction-100-400-italic.ttf",
+          "woff2_bytes": 5752,
+          "ttf_bytes": 29740
+        },
+        {
+          "name": "Regular",
+          "weight": 400,
+          "style": "normal",
+          "woff2": "/assets/fonts/redaction-100-400.woff2",
+          "ttf": "/assets/fonts/redaction-100-400.ttf",
+          "woff2_bytes": 5592,
+          "ttf_bytes": 28912
+        },
+        {
+          "name": "Bold",
+          "weight": 700,
+          "style": "normal",
+          "woff2": "/assets/fonts/redaction-100-700.woff2",
+          "ttf": "/assets/fonts/redaction-100-700.ttf",
+          "woff2_bytes": 5652,
+          "ttf_bytes": 29360
+        }
+      ],
+      "styles_count": 3,
+      "woff2_bytes": 16996,
+      "ttf_bytes": 88012
     }
   ]
 }

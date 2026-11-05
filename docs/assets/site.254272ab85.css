@@ -480,15 +480,26 @@ code { padding: 1px 6px; font-family: inherit; background: var(--tint); }
 
 footer {
   margin-top: 24px;
-  padding: 28px var(--pad) 44px;
+  padding: 20px var(--pad) 40px;
   border-top: 1px solid var(--rule);
   display: flex;
   flex-wrap: wrap;
   gap: 12px 40px;
+  align-items: center;
   justify-content: space-between;
   font-size: 14px;
   color: var(--on-dim);
 }
+/* Each footer line is one flex row, so a separator carries the same space either
+   side of it and sits centred on the line instead of on the baseline. */
+footer > span, footer > p:last-child {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+}
+/* The separator carries its own space, so it reads the same inside a flex line and
+   inside a note, which is a plain paragraph and cannot be a flex row. */
+footer .dot { margin: 0 6px; line-height: 1; vertical-align: middle; }
 footer a { text-decoration: none; }
 footer a:hover { text-decoration: underline; }
 

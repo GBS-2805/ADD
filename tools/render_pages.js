@@ -344,8 +344,8 @@ const escape = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/
 </main>
 
 <footer>
-  <span>__COUNT__ captures · <code>tools/render_pages.js</code></span>
-  <span><a href="../">Index</a> · <a href="../tools/">Tools</a> · <a href="../download/">Download</a></span>
+  <span>__COUNT__ captures<span class="dot" aria-hidden="true">·</span><code>tools/render_pages.js</code></span>
+  <span><a href="../">Index</a><span class="dot" aria-hidden="true">·</span><a href="../tools/">Tools</a><span class="dot" aria-hidden="true">·</span><a href="../download/">Download</a></span>
 </footer>
 
 <script>

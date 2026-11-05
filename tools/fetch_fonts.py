@@ -47,6 +47,28 @@ USE = {
     (600, "normal"): "Titles and the one number that matters on a screen.",
 }
 
+# Redaction is one design in seven grades of degradation: grade 0 is the plain
+# serif, 100 is fully pixelated. Each grade is its own family at Google Fonts.
+# Note that 50's capital A is missing its bar in the shipped typeface itself
+# (the foundry's master has the same outline); grades 35 and 70 both keep theirs.
+REDACTION_GRADES = [
+    (0, "Redaction", "redaction",
+     "Grade 0: the plain serif every degraded grade is cut from."),
+    (10, "Redaction 10", "redaction-10",
+     "Grade 10: the serifs begin to square off."),
+    (20, "Redaction 20", "redaction-20",
+     "Grade 20: light degradation, still readable in long lines."),
+    (35, "Redaction 35", "redaction-35",
+     "Grade 35: mid degradation; the capitals keep their bars."),
+    (50, "Redaction 50", "redaction-50",
+     "Grade 50: heavy degradation. The capital A loses its bar in this grade; "
+     "35 and 70 both keep theirs."),
+    (70, "Redaction 70", "redaction-70",
+     "Grade 70: strokes collapse into coarse blocks."),
+    (100, "Redaction 100", "redaction-100",
+     "Grade 100: fully pixelated, the coarsest grade."),
+]
+
 
 def fetch(url, binary=True, ua=UA):
     headers = {"User-Agent": ua} if ua else {}
@@ -140,19 +162,22 @@ def build_families(refresh):
             poppins["styles"].append(entry)
     families.append(poppins)
 
-    redaction = {"family": "Redaction 50", "slug": "redaction-50", "kind": "Display serif",
-                 "fallback": "serif",
-                 "licence": "SIL Open Font License 1.1", "source": "Google Fonts",
-                 "note": "One of Redaction's six optical sizes, cut for display.",
-                 "styles": []}
-    names = {(400, "normal"): "Regular", (400, "italic"): "Italic", (700, "normal"): "Bold"}
-    for (weight, style), name in sorted(names.items()):
-        files = download("Redaction 50", "redaction-50", weight, style, refresh)
-        redaction["styles"].append({
-            "name": name, "weight": weight, "style": style,
-            "woff2": files["woff2"], "ttf": files["ttf"],
-        })
-    families.append(redaction)
+    # All seven grades, not just the one the site used to show: the grades are
+    # seven cuts of one design, each a separate family at Google Fonts, so the
+    # page can put them side by side and a reader can hear the difference.
+    for grade, name, slug, note in REDACTION_GRADES:
+        redaction = {"family": name, "slug": slug, "kind": "Display serif",
+                     "fallback": "serif",
+                     "licence": "SIL Open Font License 1.1", "source": "Google Fonts",
+                     "note": note, "styles": []}
+        names = {(400, "normal"): "Regular", (400, "italic"): "Italic", (700, "normal"): "Bold"}
+        for (weight, style), style_name in sorted(names.items()):
+            files = download(name, slug, weight, style, refresh)
+            redaction["styles"].append({
+                "name": style_name, "weight": weight, "style": style,
+                "woff2": files["woff2"], "ttf": files["ttf"],
+            })
+        families.append(redaction)
     return families
 
 
