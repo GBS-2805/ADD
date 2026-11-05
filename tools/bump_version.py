@@ -673,6 +673,10 @@ def main():
     if not old_file.exists():
         raise SystemExit("the shipped APK %s is missing" % old_file.relative_to(ROOT))
     old_size, old_sha = fmt(old_file.stat().st_size), digest(old_file)
+    # A page states the size rounded, never as bytes, so the rounded string has to
+    # move with the exact one. It only changes when the build crosses a megabyte,
+    # which is why this went unnoticed until woff pushed ADD past 4 MB.
+    old_human = human(old_file.stat().st_size)
 
     dry = args.dry_run
     print("%s %s (versionCode %d) -> %s (versionCode %d), %s -> %s"
@@ -797,8 +801,12 @@ def main():
     print("  docs/%s  %s bytes  %s.." % (built.name, new_size, new_sha[:10]))
     print("  removed docs/%s" % old_file.name)
 
+    new_human = human(shipped.stat().st_size)
+    pairs = [(old_size, new_size), (old_sha, new_sha)]
+    if new_human != old_human:
+        pairs.append((old_human, new_human))
     for name in LABEL_FILES:
-        hits = rewrite(name, [(old_size, new_size), (old_sha, new_sha)], dry=False)
+        hits = rewrite(name, pairs, dry=False)
         if hits:
             print("  %-30s %d measurement(s)" % (name, hits))
 

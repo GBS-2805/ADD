@@ -11,10 +11,10 @@ the pages.
 
 ## Status
 
-- **ADD 3.0** — APK [`dist/ADD-3.0.apk`](dist/ADD-3.0.apk) (2 MB, signed v1+v2),
-  published as `docs/ADD-3.0.apk`. Package `app.offline.compress` — the merge kept
+- **ADD 3.1** — APK [`dist/ADD-3.1.apk`](dist/ADD-3.1.apk) (4 MB, signed v1+v2),
+  published as `docs/ADD-3.1.apk`. Package `app.offline.compress` — the merge kept
   the id so installed copies update in place — minSdk 26 · targetSdk 35 ·
-  versionCode 32. One package, three tools: the whole icon browser (all four brands,
+  versionCode 33. One package, three tools: the whole icon browser (all four brands,
   4,373 glyphs, the stylesheet and Poppins) and the fonts page ride inside it, served
   to a WebView from a private origin, and the compressor is native.
 - **Icons browser** — live at `docs/icons/`: four free brands — 606 Lineicons,
@@ -187,7 +187,7 @@ export ANDROID_SDK_ROOT=$HOME/android-sdk   # needs build-tools;35.0.0 + platfor
 ./build.sh stage      # the web bundle only: no JDK or SDK needed
 ```
 
-Output: `dist/ADD-3.0.apk`. Copy it to `docs/` and
+Output: `dist/ADD-3.1.apk`. Copy it to `docs/` and
 re-run `python3 tools/build_catalog.py` so the pages, the JSON and the checksums move
 together. Signing uses `$HOME/tools/compress-keystore.jks` (created on first build,
 password `android`). Replace it with

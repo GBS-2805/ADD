@@ -2,6 +2,12 @@
   "notes": [
     {
       "id": "add",
+      "version": "3.1",
+      "title": "Fonts you can keep",
+      "note": "The fonts page's downloads now save into Downloads/Fonts inside the app, which carries woff beside woff2 so the tap has something to write."
+    },
+    {
+      "id": "add",
       "version": "3.0",
       "title": "One app, three tools",
       "note": "Icons, Fonts and Compress ship as one package: the shelf's web tools run from a bundle inside the APK, the compressor stays native, and the pull-down lists all three."

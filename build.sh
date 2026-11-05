@@ -194,7 +194,7 @@ case "${1:-add}" in
     add)
         check_palette
         stage_shelf_assets
-        build_app app ADD ADD-3.0.apk 32 3.0
+        build_app app ADD ADD-3.1.apk 33 3.1
         check_fallback "$OUT/ADD-3.0.apk"
         ;;
     stage)
