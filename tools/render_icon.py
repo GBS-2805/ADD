@@ -1,19 +1,33 @@
 #!/usr/bin/env python3
 """
-Renders the adaptive launcher icon to a PNG from the real vector.
+Renders the adaptive launcher icon from the real vector.
 
 There is no device here, so this reads app/res/drawable/ic_launcher_foreground.xml
-and the background colour from app/res/values/colors.xml, then draws the same
-geometry with Pillow. Only straight M/L path segments are supported, which is all
-the icon uses. It is a render of those files, not a device capture.
+and the background colour from app/res/values/colors.xml, turns them back into an
+SVG and rasterizes it with headless Chromium. It is a render of those files, not a
+device capture.
 
-    python3 tools/render_icon.py     # writes artifacts/icon-*.png
+The vector is filled artwork with cubic curves now (the band mark), which is why
+this no longer draws with Pillow: hand-flattening the curves would put a drawing
+next to the file it claims to show. Chromium paints the same pathData Android
+paints.
+
+    python3 tools/render_icon.py              # artifacts/icon-round.png, icon-sizes.png
+    python3 tools/render_icon.py --name icon-green --disc 0fbf92 --ink f2eee3
+
+--disc and --ink override the disc and the glyph for a side-by-side look at a
+variant; nothing on disk changes. Needs the Chromium from tools/render_env.py
+(PLAYWRIGHT_BROWSERS_PATH, LD_LIBRARY_PATH, FONTCONFIG_FILE exported).
 """
 
+import argparse
+import glob
 import os
 import re
+import subprocess
+import sys
 
-from PIL import Image, ImageDraw
+from PIL import Image, ImageChops, ImageDraw
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ART = os.path.join(ROOT, "artifacts")
@@ -21,144 +35,155 @@ VECTOR = os.path.join(ROOT, "app", "res", "drawable", "ic_launcher_foreground.xm
 COLORS = os.path.join(ROOT, "app", "res", "values", "colors.xml")
 
 SIZE = 512
-VIEWPORT = 108.0
+SAFE_CIRCLE = 66.0          # dp the adaptive mask guarantees to keep
 
 
 def color(name):
     xml = open(COLORS, encoding="utf-8").read()
-    m = re.search(r'<color name="%s">(#\w+)</color>' % name, xml)
+    m = re.search(r'<color name="%s">#(\w+)</color>' % name, xml)
     if not m:
         raise SystemExit("missing colour: %s" % name)
-    return hex_rgb(m.group(1))
+    return m.group(1).lower()
 
 
-def hex_rgb(value):
-    value = value.lstrip("#")
-    return tuple(int(value[i:i + 2], 16) for i in (0, 2, 4))
+def drawable():
+    """Reads the viewport, the group transform and every filled path."""
+    xml = open(VECTOR, encoding="utf-8").read()
+    vw = float(re.search(r'android:viewportWidth="([\d.]+)"', xml).group(1))
+    vh = float(re.search(r'android:viewportHeight="([\d.]+)"', xml).group(1))
+    group = re.search(r"<group\b([^>]*)>", xml, re.S)
+    scale = translate = (1.0, 1.0)
+    if group:
+        attrs = group.group(1)
 
+        def get(name, default):
+            m = re.search(r'android:%s="([-\d.]+)"' % name, attrs)
+            return float(m.group(1)) if m else default
 
-def vector_paths(path):
-    xml = open(path, encoding="utf-8").read()
+        scale = (get("scaleX", 1.0), get("scaleY", 1.0))
+        translate = (get("translateX", 0.0), get("translateY", 0.0))
     paths = []
     for tag in re.findall(r"<path\b[^>]*>", xml, re.S):
         data = re.search(r'android:pathData="([^"]+)"', tag)
-        stroke = re.search(r'android:strokeColor="([^"]+)"', tag)
-        width = re.search(r'android:strokeWidth="([\d.]+)"', tag)
-        if data and stroke:
-            paths.append({
-                "data": data.group(1),
-                "stroke": hex_rgb(stroke.group(1)),
-                "width": float(width.group(1)) if width else 1.0,
-            })
-    return paths
-
-
-def points(data, scale):
-    """Parses absolute M/L commands into a flat point list."""
-    pts = []
-    for cmd, args in re.findall(r"([MLZ])\s*([-\d.,\s]*)", data):
-        if cmd == "Z":
-            continue
-        numbers = [float(n) for n in re.findall(r"-?\d+\.?\d*", args)]
-        for i in range(0, len(numbers) - 1, 2):
-            pts.append((numbers[i] * scale, numbers[i + 1] * scale))
-    return pts
-
-
-def reference_rect(scale):
-    """Bounds of the invisible (transparent, unstroked) reference rectangle."""
-    xml = open(VECTOR, encoding="utf-8").read()
-    for tag in re.findall(r"<path\b[^>]*>", xml, re.S):
         fill = re.search(r'android:fillColor="([^"]+)"', tag)
-        data = re.search(r'android:pathData="([^"]+)"', tag)
-        if not fill or not data or fill.group(1).lower() != "#00000000":
-            continue
-        if re.search(r'android:strokeColor="([^"]+)"', tag):
-            continue
-        pts = points(data.group(1), scale)
-        xs = [p[0] for p in pts]
-        ys = [p[1] for p in pts]
-        return (min(xs), min(ys), max(xs), max(ys))
-    return None
+        if data and fill and fill.group(1).lower() not in ("#00000000", "@android:color/transparent"):
+            paths.append((data.group(1), fill.group(1)[-6:].lower()))
+    if not paths:
+        raise SystemExit("no filled paths in %s" % os.path.relpath(VECTOR, ROOT))
+    return {"vw": vw, "vh": vh, "scale": scale, "translate": translate, "paths": paths}
 
 
-def painted_box(scale):
-    """Bounds actually painted by the stroked arrows, half-widths included."""
-    boxes = []
-    for path in vector_paths(VECTOR):
-        pts = points(path["data"], scale)
-        half = path["width"] * scale / 2.0
-        xs = [p[0] for p in pts]
-        ys = [p[1] for p in pts]
-        boxes.append((min(xs) - half, min(ys) - half, max(xs) + half, max(ys) + half))
-    if not boxes:
-        return None
-    return (min(b[0] for b in boxes), min(b[1] for b in boxes),
-            max(b[2] for b in boxes), max(b[3] for b in boxes))
+def svg(doc, disc, ink, px):
+    tx, ty = doc["translate"]
+    sx, sy = doc["scale"]
+    body = []
+    for data, fill in doc["paths"]:
+        body.append('<path d="%s" fill="#%s"/>' % (data, ink or fill))
+    return (
+        '<svg xmlns="http://www.w3.org/2000/svg" width="%d" height="%d" '
+        'viewBox="0 0 %g %g">'
+        '<rect width="%g" height="%g" fill="#%s"/>'
+        '<g transform="translate(%g %g) scale(%g %g)">%s</g>'
+        "</svg>"
+    ) % (
+        px, px, doc["vw"], doc["vh"],
+        doc["vw"], doc["vh"], disc,
+        tx, ty, sx, sy, "".join(body),
+    )
 
 
-def render():
+def chromium():
+    if os.environ.get("CHROME"):
+        return os.environ["CHROME"]
+    patterns = [
+        # the headless shell first: it carries far fewer library deps than full
+        # chrome, which is why it is the one that runs on a bare VM
+        "/tmp/pw/chromium_headless_shell-*/chrome-headless-shell-linux64/chrome-headless-shell",
+        os.path.expanduser("~/.cache/ms-playwright/chromium_headless_shell-*/chrome-headless-shell-linux64/chrome-headless-shell"),
+        "/tmp/pw/chromium-*/chrome-linux64/chrome",
+        "/tmp/pw/chromium-*/chrome-linux/chrome",
+    ]
+    for pattern in patterns:
+        found = sorted(glob.glob(pattern))
+        if found:
+            return found[-1]
+    raise SystemExit("no Chromium found - run python3 tools/render_env.py first")
+
+
+def shoot(svg_path, out, px):
+    binary = chromium()
+    flags = [binary, "--disable-gpu", "--no-sandbox", "--hide-scrollbars",
+             "--force-device-scale-factor=1", "--window-size=%d,%d" % (px, px),
+             "--screenshot=%s" % out, "file://" + svg_path]
+    if "headless-shell" not in os.path.basename(binary):
+        flags.insert(1, "--headless=new")
+    subprocess.run(
+        flags,
+        check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+    )
+
+
+def main():
+    ap = argparse.ArgumentParser(description=__doc__)
+    ap.add_argument("--name", default="icon", help="output prefix under artifacts/")
+    ap.add_argument("--disc", help="disc colour, no # (default: iconBg)")
+    ap.add_argument("--ink", help="glyph colour, no # (default: the drawable's own)")
+    args = ap.parse_args()
+
     os.makedirs(ART, exist_ok=True)
-    scale = SIZE / VIEWPORT
-    img = Image.new("RGBA", (SIZE, SIZE), (0, 0, 0, 0))
-    d = ImageDraw.Draw(img)
+    doc = drawable()
+    disc = (args.disc or color("iconBg")).lower().lstrip("#")
+    ink = (args.ink or "").lower().lstrip("#") or None
 
-    d.ellipse([0, 0, SIZE - 1, SIZE - 1], fill=color("iconBg"))
+    work = os.path.join(ART, "%s.svg" % args.name)
+    open(work, "w", encoding="utf-8").write(svg(doc, disc, ink, SIZE))
 
-    for path in vector_paths(VECTOR):
-        pts = points(path["data"], scale)
-        if len(pts) < 2:
-            continue
-        w = max(1, int(round(path["width"] * scale)))
-        d.line(pts, fill=path["stroke"], width=w, joint="curve")
-        for x, y in pts:                      # round caps / joins
-            r = w / 2.0
-            d.ellipse([x - r, y - r, x + r, y + r], fill=path["stroke"])
+    round_path = os.path.join(ART, "%s-round.png" % args.name)
+    shoot(work, round_path, SIZE)
+    # the canvas is a full square: an adaptive background is painted edge to edge and
+    # the launcher applies the mask, so a circle here would fake a shape it does not own
+    icon = Image.open(round_path).convert("RGB")
+    disc_rgb = tuple(int(disc[i:i + 2], 16) for i in (0, 2, 4))
+    diff = ImageChops.difference(icon, Image.new("RGB", icon.size, disc_rgb))
+    box = diff.convert("L").point(lambda v: 255 if v else 0).getbbox()
+    scale_px = SIZE / doc["vw"]
+    mark = None
+    if box:
+        mark = (
+            (box[2] - box[0]) / scale_px,
+            (box[3] - box[1]) / scale_px,
+            (box[0] + box[2]) / 2.0 / scale_px,
+            (box[1] + box[3]) / 2.0 / scale_px,
+        )
 
-    round_path = os.path.join(ART, "icon-round.png")
-    img.save(round_path)
-
-    # centring check: the reference rectangle vs what the arrows actually paint
-    rect = reference_rect(scale)
-    painted = painted_box(scale)
-    centre = SIZE / 2.0
-    if rect and painted:
-        rx, ry = (rect[0] + rect[2]) / 2.0, (rect[1] + rect[3]) / 2.0
-        ax, ay = (painted[0] + painted[2]) / 2.0, (painted[1] + painted[3]) / 2.0
-        print("disc centre dp:     54.00, 54.00")
-        print("reference centre dp: %.2f, %.2f" % (rx / scale, ry / scale))
-        print("painted centre dp:   %.2f, %.2f" % (ax / scale, ay / scale))
-        print("rect dp:    %.2f x %.2f" % ((rect[2] - rect[0]) / scale,
-                                           (rect[3] - rect[1]) / scale))
-        print("painted dp: %.2f x %.2f" % ((painted[2] - painted[0]) / scale,
-                                           (painted[3] - painted[1]) / scale))
-        print("rect-vs-painted offset: %.2f, %.2f dp" %
-              ((rx - ax) / scale, (ry - ay) / scale))
-
-    diag = img.copy()
-    dd = ImageDraw.Draw(diag)
-    if rect:
-        dd.rectangle(rect, outline=(220, 30, 30, 255), width=max(1, int(scale * 1.2)))
-    dd.line([centre, 0, centre, SIZE], fill=(220, 30, 30, 140), width=2)
-    dd.line([0, centre, SIZE, centre], fill=(220, 30, 30, 140), width=2)
-    diag_path = os.path.join(ART, "icon-centering.png")
-    diag.save(diag_path)
-
-    # small preview on the app's paper, at launcher size
-    paper = color("bg")
-    small = img.resize((96, 96), Image.LANCZOS)
-    sheet = Image.new("RGB", (336, 160), paper)
+    # launcher sizes on the app's own paper, the way it meets the eye on a home screen
+    paper = tuple(int(color("green_page")[i:i + 2], 16) for i in (0, 2, 4))
+    sheet = Image.new("RGB", (356, 168), paper)
     sd = ImageDraw.Draw(sheet)
-    for i, (size, label) in enumerate(((96, "96"), (64, "64"), (48, "48"))):
-        tile = img.resize((size, size), Image.LANCZOS)
-        x = 24 + i * 104
-        sheet.paste(tile, (x, 32), tile)
-        sd.rectangle([x, 24, x + size - 1, 24 + size - 1], outline=(0, 0, 0), width=1)
-    small_path = os.path.join(ART, "icon-sizes.png")
-    sheet.save(small_path)
-    return round_path, diag_path, small_path
+    for i, size in enumerate((96, 64, 48)):
+        tile = icon.resize((size, size), Image.LANCZOS)
+        x = 22 + i * 108
+        sheet.paste(tile, (x, 36))
+        sd.rectangle([x - 1, 35, x + size, 36 + size], outline=(0, 0, 0))
+        sd.text((x, 140), "%d px" % size, fill=(90, 90, 90))
+    sizes_path = os.path.join(ART, "%s-sizes.png" % args.name)
+    sheet.save(sizes_path)
+
+    sx, sy = doc["scale"]
+    print("disc:      #%s" % disc)
+    print("glyph:     %s" % ("#%s (override)" % ink if ink else "as drawn"))
+    if mark:
+        w, h, cx, cy = mark
+        print("mark box:  %.2f x %.2f dp, centre %.2f, %.2f (canvas centre %.1f, %.1f)"
+              % (w, h, cx, cy, doc["vw"] / 2.0, doc["vh"] / 2.0))
+        print("safe:      %.1f dp circle, mark %s inside"
+              % (SAFE_CIRCLE, "fits" if max(w, h) <= SAFE_CIRCLE else "DOES NOT FIT"))
+    else:
+        print("mark box:  nothing painted")
+    print("scale:     %.6f" % sx)
+    for p in (round_path, sizes_path):
+        print("wrote", os.path.relpath(p, ROOT))
 
 
 if __name__ == "__main__":
-    for p in render():
-        print("wrote", os.path.relpath(p, ROOT))
+    main()

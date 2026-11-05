@@ -5,42 +5,41 @@
     android:viewportWidth="108"
     android:viewportHeight="108">
 
-    <!-- Amber disc comes from the adaptive icon background (@color/iconBg).
+    <!-- The band's mark (@drawable/ic_mark, same artwork as docs/assets/logo.svg),
+         not the three chevrons this icon used to carry.
 
-         Reference rectangle: invisible (fully transparent fill, no stroke), it
-         wraps the arrow stack including stroke half-widths. Its centre is
-         exactly (54,54), the centre of the disc in the 108 viewport, so the
-         three chevrons are centred on the circle by construction.
-         x 30.5-77.5 = 47 wide, y 23.75-84.25 = 60.5 tall, both mid 54. -->
+         The disc comes from the adaptive icon background (@color/iconBg), so it
+         fills the 108 viewport. The mark is 120.6 x 123.11 in its own box; it is
+         scaled to 64 dp tall so it sits inside the 66 dp safe circle (the mask
+         takes the outer 18 dp), and centred by construction:
+             scale    64 / 123.11            = 0.519861
+             width    120.6 * 0.519861       = 62.69 dp
+             x        (108 - 62.69) / 2      = 22.65
+             y        (108 - 64) / 2         = 22.00
+         The glyph keeps the band ink (#2B2926) it wears on the site rather than a
+         palette attribute: the icon is a fixed asset, like its disc, so it does not
+         follow the six themes. -->
 
-    <path
-        android:fillColor="#00000000"
-        android:pathData="M30.5,23.75 L77.5,23.75 L77.5,84.25 L30.5,84.25 Z"
-        android:strokeWidth="0" />
+    <group
+        android:translateX="22.65"
+        android:translateY="22"
+        android:scaleX="0.519861"
+        android:scaleY="0.519861">
 
-    <!-- Large (top), medium, small: 40 / 28 / 16 dp wide, strokes 7 / 5.5 / 4,
-         with an equal 4dp visual gap between each pair. -->
-    <path
-        android:fillColor="#00000000"
-        android:pathData="M34,27.25 L54,43.25 L74,27.25"
-        android:strokeColor="#2B2926"
-        android:strokeLineCap="round"
-        android:strokeLineJoin="round"
-        android:strokeWidth="7" />
+        <path
+            android:fillColor="#FF2B2926"
+            android:pathData="m29.58,61.92c.11,1.85.17,3.7.36,5.54.11,1.02-.23,1.23-1.19,1.29-4.47.26-5.38,1.22-5.27,5.67.13,5.14,2.74,9.13,6.27,12.56,1.53,1.49,2.96,1.05,3.89-.88.61-1.27.96-2.64,1.04-4.06.06-1.13.53-1.24,1.41-.69,1.72,1.08,2.92,2.71,4.38,4.07,8.66,8.04,18.38,13.89,30.58,14.51.52.03,1.04-.02,1.56,0,1.36.07,1.57-.53.89-1.58-.36-.56-.82-1.05-1.21-1.58-1.5-2.04-.63-4.17,1.89-4.53,3.34-.47,6.44.69,9.57,1.56,4.15,1.15,8.3,2.3,12.65,1.03,2.54-.74,2.78-1.66.84-3.54-.63-.61-1.41-1.08-2.11-1.63-2.43-1.91-2.63-3.35-.64-5.76,2.51-3.05,6.01-4.22,9.75-4.74,4.81-.67,9.26.31,13.25,3.19,1.39,1.01,1.75,1.97.94,3.7-9.48,20.25-25.12,32.69-47.2,36.28-29.25,4.75-57.41-12.11-67.54-39.86C-8.51,49.01,10.62,11.88,44.98,2.31c31.94-8.9,65.21,8.7,75.4,39.81.46,1.42.23,2.38-.66,3.4-4.28,4.87-9.78,6.13-15.92,5.16-4.99-.79-9.16-3.27-12.65-6.88-1.34-1.38-2.66-2.79-3.87-4.28-13.61-16.78-43.35-15.8-54.84,7.54-2.32,4.71-3.19,9.66-2.85,14.86Z" />
 
-    <path
-        android:fillColor="#00000000"
-        android:pathData="M40,53.5 L54,65.5 L68,53.5"
-        android:strokeColor="#2B2926"
-        android:strokeLineCap="round"
-        android:strokeLineJoin="round"
-        android:strokeWidth="5.5" />
+        <path
+            android:fillColor="#FF2B2926"
+            android:pathData="m80.89,57.02c.88-.09,2.06-.21,3.22.13,1.56.46,1.88,1.6.75,2.8-1.16,1.23-2.59,1.52-4.25,1.33-4.23-.48-5.14.47-4.58,4.78.43,3.35,1.88,6.19,4.52,8.36.99.81,1.67.93,2.18-.62,1.55-4.74,1.61-4.72,6.46-4.56,1.28.04,2.56-.04,3.49-1.05.76-.83,1.38-1.54,2.5-.44,1.07,1.05,1.29,2.15.42,3.35-1.18,1.61-2.84,2.29-4.82,2.23-1.25-.04-2.77-.51-3.68.03-.98.58-.39,2.29-.7,3.49-.75,2.89-2.94,3.94-5.77,2.62-5.71-2.66-10.17-13.01-8.12-18.87.86-2.45,2.86-3.21,5.21-3.41.96-.08,1.92-.11,3.18-.18Z" />
 
-    <path
-        android:fillColor="#00000000"
-        android:pathData="M46,74.25 L54,82.25 L62,74.25"
-        android:strokeColor="#2B2926"
-        android:strokeLineCap="round"
-        android:strokeLineJoin="round"
-        android:strokeWidth="4" />
+        <path
+            android:fillColor="#FF2B2926"
+            android:pathData="m52.62,58.41c.19-1.57.26-3.23,1.99-3.92,1.62-.65,2.9.23,3.92,1.33,2.41,2.61,3.79,5.64,2.86,9.26-.6,2.33-2.43,2.97-4.42,1.62-2.92-1.97-3.98-4.98-4.35-8.29Z" />
+
+        <path
+            android:fillColor="#FF2B2926"
+            android:pathData="m44.97,66.78c-.03,1.9-.18,3.24-1.63,3.9-1.5.68-2.61-.25-3.53-1.19-2.06-2.11-3.15-4.68-2.7-7.66.4-2.62,2.46-3.4,4.53-1.73,2.25,1.82,3.29,4.3,3.33,6.68Z" />
+    </group>
 </vector>
