@@ -2,6 +2,12 @@
   "notes": [
     {
       "id": "add",
+      "version": "3.3",
+      "title": "The whole shelf, offline",
+      "note": "The APK carries every page of the site now, not just the icon browser and the fonts: the portfolio, the downloads, the captures and the artboards all open with no network."
+    },
+    {
+      "id": "add",
       "version": "3.2",
       "title": "The mark in the launcher",
       "note": "The app icon is the band's mark now, the same four paths the site draws, scaled to sit inside the safe circle so no launcher mask can clip it."
