@@ -1,5 +1,9 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
+  "redirects": [
+    { "source": "/packs", "destination": "/download/#font-packs", "permanent": true },
+    { "source": "/packs/", "destination": "/download/#font-packs", "permanent": true }
+  ],
   "headers": [
     {
       "source": "/(.*)",
