@@ -1,6 +1,6 @@
 {
   "origin": "https://artbase-olive.vercel.app",
-  "count": 16,
+  "count": 17,
   "pages": [
     {
       "path": "/compress/",
@@ -11,8 +11,8 @@
     },
     {
       "path": "/download/",
-      "title": "Download — ADD 3.5, one signed APK",
-      "description": "ADD 3.5 (9 MB): the whole shelf — every page, the icon browser, the fonts and the compressor — in one signed APK. Android 8.0+, SHA-256 listed, no store or account.",
+      "title": "Download — ADD 3.6, one signed APK",
+      "description": "ADD 3.6 (6 MB): the whole shelf — every page, the icon browser, the fonts, the editor and the compressor — in one signed APK. Android 8.0+, SHA-256 listed, no store or account.",
       "heading": "Download",
       "section": "download"
     },
@@ -74,10 +74,17 @@
     },
     {
       "path": "/",
-      "title": "A design shelf — icons, type and two Android tools",
+      "title": "A design shelf — icons, type and one offline Android app",
       "description": "4,373 icons in four brands, Poppins and Redaction, one palette, and one offline Android app.",
       "heading": "A design shelf.",
       "section": ""
+    },
+    {
+      "path": "/packs/",
+      "title": "Font packs — signed, and fetched in the editor",
+      "description": "Poppins and the seven Redaction grades as signed packs. Fetch them in the ADD editor or download one here. No account.",
+      "heading": "Font packs",
+      "section": "packs"
     },
     {
       "path": "/portfolio/",
@@ -88,8 +95,8 @@
     },
     {
       "path": "/releases/",
-      "title": "Releases — 47 builds, with the date and size of each",
-      "description": "Every build this shelf has shipped: 47 releases with the day and the APK size, read out of git.",
+      "title": "Releases — 48 builds, with the date and size of each",
+      "description": "Every build this shelf has shipped: 48 releases with the day and the APK size, read out of git.",
       "heading": "Releases",
       "section": "releases"
     },
@@ -109,8 +116,8 @@
     },
     {
       "path": "/tools/",
-      "title": "Tools — one app, three tools, for Android",
-      "description": "One app, three tools: the 4,373-icon browser, the fonts page and a photo compressor. Signed APK, no store.",
+      "title": "Tools — one app, four tools, for Android",
+      "description": "One app, four tools: the 4,373-icon browser, the fonts page, a photo compressor and an editor with downloadable font packs. Signed APK, no store.",
       "heading": "Tools",
       "section": "tools"
     }

@@ -224,6 +224,16 @@
     if (event.target.closest("a")) setDrawer(false);
   });
 
+  // A Tools card that names a native tool asks the app for it. On the site nothing
+  // answers -- IconsApp only exists inside the WebView -- so the card keeps its href
+  // and stays a normal link to the download page.
+  document.addEventListener("click", function (event) {
+    var target = event.target && event.target.closest ? event.target.closest("[data-tool]") : null;
+    if (!target || !window.IconsApp || typeof IconsApp.openTool !== "function") return;
+    event.preventDefault();
+    IconsApp.openTool(target.getAttribute("data-tool"));
+  });
+
   document.addEventListener("keydown", function (event) {
     if (event.key !== "Escape") return;
     setMenu(false);

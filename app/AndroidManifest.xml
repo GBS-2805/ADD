@@ -11,7 +11,9 @@
         android:name="android.permission.WRITE_EXTERNAL_STORAGE"
         android:maxSdkVersion="28" />
 
-    <!-- Deliberately NO android.permission.INTERNET: the app cannot reach the network. -->
+    <!-- The one network job: fetching a font pack the reader tapped in Font packs.
+         Nothing else in the app opens a socket. -->
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <application
         android:allowBackup="true"
@@ -61,5 +63,21 @@
             android:exported="false"
             android:label="Compare"
             android:parentActivityName=".MainActivity" />
+
+        <!-- The editor: photo, type, effects, export. Native, and reachable from the
+             drawer and from the Tools page through the bridge. -->
+        <activity
+            android:name=".EditorActivity"
+            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|uiMode"
+            android:exported="false"
+            android:label="Editor" />
+
+        <!-- Font packs: the site's list, its packs, and the offline copy on the phone.
+             Network use is explicit here: the reader taps Download. -->
+        <activity
+            android:name=".PacksActivity"
+            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|uiMode"
+            android:exported="false"
+            android:label="Font packs" />
     </application>
 </manifest>

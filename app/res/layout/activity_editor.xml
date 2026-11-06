@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  The editor, in the app's own clothes: a band across the top, the stage in the
+  middle, and the controls a thumb reaches on a phone at the bottom. Every colour is
+  a theme attribute, so all six palettes repaint it without a second layout.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/editorRoot"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="?attr/page"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="52dp"
+        android:background="?attr/band"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingLeft="2dp"
+        android:paddingRight="10dp">
+
+        <TextView
+            android:id="@+id/backButton"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:clickable="true"
+            android:contentDescription="Back"
+            android:focusable="true"
+            android:gravity="center"
+            android:includeFontPadding="false"
+            android:text="&#8249;"
+            android:textColor="?attr/bandInk"
+            android:textSize="28sp" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:fontFamily="@font/poppins_semibold"
+            android:letterSpacing="0.02"
+            android:text="Editor"
+            android:textColor="?attr/bandInk"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/photoButton"
+            android:layout_width="wrap_content"
+            android:layout_height="44dp"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:clickable="true"
+            android:focusable="true"
+            android:fontFamily="@font/poppins_semibold"
+            android:gravity="center"
+            android:letterSpacing="0.08"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:text="PHOTO"
+            android:textColor="?attr/bandInk"
+            android:textSize="11sp" />
+
+        <TextView
+            android:id="@+id/exportButton"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:background="@drawable/bg_primary"
+            android:clickable="true"
+            android:focusable="true"
+            android:fontFamily="@font/poppins_semibold"
+            android:gravity="center"
+            android:letterSpacing="0.08"
+            android:paddingLeft="14dp"
+            android:paddingRight="14dp"
+            android:text="EXPORT"
+            android:textColor="?attr/accentInk"
+            android:textSize="11sp" />
+    </LinearLayout>
+
+    <app.offline.compress.EditorView
+        android:id="@+id/stage"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:background="?attr/page" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?attr/card"
+        android:orientation="vertical"
+        android:paddingLeft="12dp"
+        android:paddingTop="10dp"
+        android:paddingRight="12dp"
+        android:paddingBottom="10dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/addTextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:background="@drawable/bg_ghost"
+                android:clickable="true"
+                android:focusable="true"
+                android:fontFamily="@font/poppins_semibold"
+                android:gravity="center"
+                android:letterSpacing="0.06"
+                android:paddingLeft="12dp"
+                android:paddingRight="12dp"
+                android:text="+ TEXT"
+                android:textColor="?attr/on"
+                android:textSize="11sp" />
+
+            <TextView
+                android:id="@+id/fontButton"
+                android:layout_width="0dp"
+                android:layout_height="40dp"
+                android:layout_marginStart="8dp"
+                android:layout_weight="1"
+                android:background="@drawable/bg_chip"
+                android:clickable="true"
+                android:ellipsize="end"
+                android:focusable="true"
+                android:gravity="center_vertical"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp"
+                android:singleLine="true"
+                android:text="Poppins &#183; Medium"
+                android:textColor="?attr/accentInk"
+                android:textSize="11sp" />
+
+            <TextView
+                android:id="@+id/effectButton"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:layout_marginStart="8dp"
+                android:background="@drawable/bg_ghost"
+                android:clickable="true"
+                android:focusable="true"
+                android:fontFamily="@font/poppins_semibold"
+                android:gravity="center"
+                android:letterSpacing="0.06"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp"
+                android:text="NONE"
+                android:textColor="?attr/on"
+                android:textSize="10sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:letterSpacing="0.08"
+                android:text="SIZE"
+                android:textColor="?attr/onDim"
+                android:textSize="10sp" />
+
+            <SeekBar
+                android:id="@+id/sizeBar"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:max="120"
+                android:min="10"
+                android:paddingLeft="6dp"
+                android:paddingRight="6dp"
+                android:progress="48"
+                android:progressBackgroundTint="?attr/rule"
+                android:progressTint="?attr/accent"
+                android:thumbTint="?attr/accent" />
+
+            <TextView
+                android:id="@+id/sizeValue"
+                android:layout_width="30dp"
+                android:layout_height="wrap_content"
+                android:gravity="end"
+                android:text="48"
+                android:textColor="?attr/on"
+                android:textSize="13sp" />
+
+            <TextView
+                android:id="@+id/colourButton"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:clickable="true"
+                android:contentDescription="Text colour"
+                android:focusable="true"
+                android:gravity="center"
+                android:includeFontPadding="false"
+                android:text="&#9679;"
+                android:textColor="?attr/on"
+                android:textSize="24sp" />
+
+            <TextView
+                android:id="@+id/deleteButton"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:clickable="true"
+                android:contentDescription="Delete the selected line"
+                android:focusable="true"
+                android:gravity="center"
+                android:includeFontPadding="false"
+                android:text="&#10005;"
+                android:textColor="?attr/onDim"
+                android:textSize="15sp" />
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:text="Tap a line to select &#183; drag to move &#183; long-press to edit"
+            android:textColor="?attr/onDim"
+            android:textSize="10sp" />
+    </LinearLayout>
+</LinearLayout>

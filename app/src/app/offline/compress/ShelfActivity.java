@@ -41,8 +41,8 @@ import java.util.Map;
  * WebView from a private origin out of assets/www. It is one half of the ADD app; the
  * compressor next door is native, because encoding photos is the platform's job.
  *
- * Nothing is fetched: the app declares no INTERNET permission, so no page can reach
- * the network even if it asked to.
+ * The pages themselves fetch nothing: they are served from `assets/www`, and the
+ * only network code in ADD is the Font packs screen.
  */
 public class ShelfActivity extends Activity {
 
@@ -176,6 +176,24 @@ public class ShelfActivity extends Activity {
         @JavascriptInterface
         public void saveFont(final String href) {
             toast(writeFont(href));
+        }
+
+        /**
+         * A Tools card that names a native tool. The page keeps its href for the site;
+         * inside the app the bridge takes the tap and opens the native screen instead.
+         */
+        @JavascriptInterface
+        public void openTool(final String slug) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    if ("editor".equals(slug)) {
+                        startActivity(new Intent(ShelfActivity.this, EditorActivity.class));
+                    } else if ("compress".equals(slug)) {
+                        startActivity(new Intent(ShelfActivity.this, MainActivity.class));
+                    }
+                }
+            });
         }
 
         @JavascriptInterface
@@ -427,6 +445,8 @@ public class ShelfActivity extends Activity {
     /** The site page that corresponds to a bundle path the app does not carry. */
     private static String sitePathFor(String asset) {
         if (asset.contains("/renders/")) return "/renders/";
+        if (asset.contains("/figma/")) return "/figma/";
+        if (asset.contains("/packs/")) return "/packs/";
         if (asset.contains("/download/")) return "/download/";
         if (asset.contains("/portfolio/")) return "/portfolio/";
         if (asset.contains("/tools/")) return "/tools/";
@@ -451,9 +471,9 @@ public class ShelfActivity extends Activity {
                 + "<p style=\"margin:0 0 10px;font-size:13px;letter-spacing:.12em;"
                 + "text-transform:uppercase;opacity:.65\">ADD \u00b7 offline</p>"
                 + "<h1 style=\"margin:0 0 14px;font-size:28px;font-weight:400\">That page lives on the site</h1>"
-                + "<p style=\"margin:0 0 12px;max-width:34ch\">The app carries the whole shelf: every "
-                + "brand, their catalogs, the pages, the fonts, the captures and the artboards. "
-                + "This one is the only page it does not have.</p>"
+                + "<p style=\"margin:0 0 12px;max-width:34ch\">The app carries the tools: every "
+                + "brand, their catalogs, the pages and the fonts. The two galleries are pictures, "
+                + "so they stay on the site, where they already live.</p>"
                 + "<p style=\"margin:0 0 26px\"><code style=\"font-size:13px;word-break:break-all\">"
                 + address + "</code></p>"
                 + "<a href=\"" + address + "\" style=\"display:inline-block;padding:14px 20px;margin:0 10px 12px 0;"

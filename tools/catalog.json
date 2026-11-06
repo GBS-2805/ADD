@@ -10,18 +10,19 @@
       "name": "ADD",
       "kind": "Android app",
       "status": "released",
-      "version": "3.5",
-      "version_code": 37,
+      "version": "3.6",
+      "version_code": 38,
       "package": "app.offline.compress",
-      "apk": "/ADD-3.5.apk",
+      "apk": "/ADD-3.6.apk",
       "min_android": "8.0 (API 26)",
-      "summary": "One offline app: the 4,373-icon browser, the fonts page and batch photo compression.",
+      "summary": "One offline app: the 4,373-icon browser, the fonts page, a photo editor with signed font packs, and batch compression.",
       "features": [
-        "One package: the icon browser, the fonts page and the compressor, no second app to install.",
+        "One package: the icon browser, the fonts page, the editor and the compressor, no second app to install.",
         "Icons: four brands, 4,373 glyphs, the same catalogs the site publishes.",
-        "Fonts: both families, with the same faces the site sets.",
+        "Fonts: the three bundled faces plus signed packs fetched on request from the site, verified before install.",
+        "Editor: photo, type and six effects, with installed packs kept for offline use.",
         "Compress: real quality, downscale, batch up to 40 photos, metadata stripped, originals untouched.",
-        "No INTERNET permission anywhere: the shelf ships inside the APK and nothing is fetched.",
+        "Internet for one job only: a font pack you tap in Font packs; the shelf, the editor and Compress otherwise run offline.",
         "Same three palettes and the side tab as the site, including the look controls at its foot."
       ],
       "links": [
@@ -31,7 +32,7 @@
         },
         {
           "label": "Download APK",
-          "href": "/ADD-3.0.apk"
+          "href": "/ADD-3.6.apk"
         }
       ]
     }
@@ -450,7 +451,7 @@
       "title": "Compress",
       "kind": "Android app",
       "year": 2026,
-      "summary": "An offline image compressor with a before/after slider, batch queue and per-file savings. No account, no uploads, no internet permission.",
+      "summary": "An offline image compressor with a before/after slider, batch queue and per-file savings. No account, no uploads, no network calls.",
       "built": "The whole app: picker flow, preview pipeline, encoder retry loop, queue management, sharing, launcher icon and the settings screen.",
       "stack": "Java, Android platform APIs only",
       "href": "/tools/"

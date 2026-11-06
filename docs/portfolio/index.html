@@ -43,7 +43,7 @@
   <a href="../">Index<span>shelf</span></a>
   <a href="../icons/">Icons<span>4,373 icons</span></a>
   <a href="../fonts/">Fonts<span>2 families</span></a>
-  <a href="../tools/">Tools<span>3 tools</span></a>
+  <a href="../tools/">Tools<span>4 tools</span></a>
 </nav>
 
 <div class="scrim" id="scrim" data-open="false"></div>
@@ -79,7 +79,7 @@
       <a class="card" href="../tools/">
         <span class="kind">Android app · 2026</span>
         <h3>Compress</h3>
-        <p>An offline image compressor with a before/after slider, batch queue and per-file savings. No account, no uploads, no internet permission.</p>
+        <p>An offline image compressor with a before/after slider, batch queue and per-file savings. No account, no uploads, no network calls.</p>
         <span class="tag">Java, platform APIs only · <span class="go">Open</span></span>
       </a>
       <a class="card" href="../icons/">
@@ -102,7 +102,7 @@
     <p class="kicker">Android app · 2.3 · 278 KB</p>
     <ul class="rows">
       <li><b>What I built</b><span>The whole app: picker flow, preview pipeline, encoder retry loop, queue management, sharing, the settings screen and the launcher icon.</span></li>
-      <li><b>Decisions</b><span>No internet permission at all, so "offline" is enforced by the manifest rather than promised in copy. Preview encodes to cache and deletes itself; nothing is written until you press compress.</span></li>
+      <li><b>Decisions</b><span>Compress never touches the network: the compressor is platform code, previews encode to cache and delete themselves, and nothing is written until you press compress.</span></li>
       <li><b>Constraint</b><span>Platform APIs only — no image library, no analytics, no SDK. The APK is under 300 KB because of it.</span></li>
     </ul>
   </section>
@@ -131,7 +131,7 @@
     <h2>How I work</h2>
     <p class="kicker">The rules these were built under</p>
     <ul class="rows">
-      <li><b>Offline first</b><span>If a feature needs the network, it either moves on-device or gets cut.</span></li>
+      <li><b>Offline first</b><span>If a feature needs the network, it either moves on-device or waits for a download the reader asks for.</span></li>
       <li><b>No accounts</b><span>Nothing here asks you to sign in, and nothing collects anything about you.</span></li>
       <li><b>Measured, not guessed</b><span>The palette and spacing come from a Figma frame; the sizes on this site come from the files on disk.</span></li>
     </ul>
@@ -143,6 +143,6 @@
   <span><a href="../">Index</a><span class="dot" aria-hidden="true">·</span><a href="../tools/">Tools</a><span class="dot" aria-hidden="true">·</span><a href="../renders/">Renders</a></span>
 </footer>
 
-<script src="../assets/site.fa863f703d.js" defer></script>
+<script src="../assets/site.3b1f9777a2.js" defer></script>
 </body>
 </html>

@@ -19,8 +19,12 @@ files and driving them in a browser proves what the app loads.
 - `docs/search/index.html`, with that index trimmed to the pages the app carries;
 - a redirect `index.html` pointing at `icons/`.
 
-About 8 MB, generated on every build and never committed. Never
-hand-edit that tree: it is rewritten on every build.
+About 5.4 MB, generated on every build and never committed. `renders/` and `figma/`
+are deliberately absent: they are the capture and artboard images themselves, 3.2 MB
+of the APK, and a gallery without its pictures is a grid of broken cells. The app
+answers those two addresses with `ShelfActivity`'s "That page lives on the site" page
+instead, so the bundle harness does not look for them. Never hand-edit that tree: it
+is rewritten on every build.
 
 ## 2. Serve it the way the WebView does
 

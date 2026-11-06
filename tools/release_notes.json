@@ -2,6 +2,12 @@
   "notes": [
     {
       "id": "add",
+      "version": "3.6",
+      "title": "Signed packs, in the editor",
+      "note": "The editor arrives with a Font packs screen: it fetches the site's signed families when the list is first needed or refreshed, verifies the manifest and every file in the app, and keeps installed packs offline."
+    },
+    {
+      "id": "add",
       "version": "3.5",
       "title": "The shelf, on launch",
       "note": "ADD opens on the shelf itself now: the home page of the whole site, with the native compressor still on Android's share sheet."

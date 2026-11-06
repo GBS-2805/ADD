@@ -158,12 +158,22 @@ stage_shelf_assets() {
     echo "== ADD: staging the shelf out of docs/ =="
     rm -rf "$ROOT/app/assets"
     mkdir -p "$www"
-    # The whole shelf travels now: every page, its catalog, the stylesheets, the faces,
-    # the captures and the artboards. The one file it cannot carry is the APK itself,
-    # so the download page's link opens in the browser rather than the app.
+    # Every page, catalog, stylesheet and face travels; the two galleries do not.
+    # renders/ and figma/ are the captures and the artboards themselves -- 3.2 MB of
+    # the 8.9 MB APK -- and a gallery without its images is only a grid of broken
+    # cells. They are the one pair of destinations the app leaves to the site, through
+    # the "That page lives on the site" fallback in ShelfActivity.
     tar -C "$ROOT/docs" -cf - --exclude='ADD-*.apk' --exclude='vercel.json' \
-        --exclude='sitemap.xml' --exclude='robots.txt' . | tar -C "$www" -xf -
+        --exclude='sitemap.xml' --exclude='robots.txt' \
+        --exclude='./renders' --exclude='./figma' --exclude='./packs' . | tar -C "$www" -xf -
     python3 "$ROOT/tools/check_bundle.py" "$www"
+    # Guard the trim: a future staging edit that quietly brings 3.2 MB back fails here.
+    for absent in renders figma packs; do
+        if [ -e "$www/$absent" ]; then
+            echo "stage_shelf_assets: $absent is staged; the galleries and the packs stay on the site" >&2
+            exit 1
+        fi
+    done
     du -sh "$www"
 }
 
@@ -173,7 +183,7 @@ case "${1:-add}" in
     add)
         check_palette
         stage_shelf_assets
-        build_app app ADD ADD-3.5.apk 37 3.5
+        build_app app ADD ADD-3.6.apk 38 3.6
         # The newest build, not a hard-coded one: a stale path silently proved a copy
         # the release had already replaced.
         check_fallback "$(ls -t "$OUT"/ADD-*.apk | head -1)"

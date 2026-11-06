@@ -41,8 +41,8 @@ public class MainActivity extends Activity {
     private static final int REQ_WRITE = 1002;
     private static final int REQ_PREVIEW = 1003;
 
-    /** Public download page, opened in the browser from the footer link. */
-    private static final String SITE_URL = "https://artbase-olive.vercel.app/";
+    /** The shipped origin: the download page, and the packs the editor fetches. */
+    static final String SITE_URL = "https://artbase-olive.vercel.app/";
 
     /** Hard cap on a batch, matching the queue the strip can hold. */
     private static final int MAX_PHOTOS = 40;
@@ -396,8 +396,8 @@ public class MainActivity extends Activity {
     }
 
     /**
-     * Hands a page of the shelf to a browser. The app itself still has no network
-     * permission: the intent is resolved by whatever browser is installed.
+     * Hands a page of the shelf to a browser. ADD's own network use is limited to the
+     * Font packs screen; this intent is resolved by whatever browser is installed.
      */
     private void openSite() {
         openInBrowser(SITE_URL);
@@ -408,8 +408,8 @@ public class MainActivity extends Activity {
     }
 
     /**
-     * Opens one of the shelf's web tools, which ship inside the APK: no network, no
-     * second app, and the same pages the site serves.
+     * Opens one of the shelf's web tools, which ship inside the APK: no network needed,
+     * no second app, and the same pages the site serves.
      */
     private void openShelf(String tool) {
         Intent intent = new Intent(this, ShelfActivity.class);
@@ -429,8 +429,8 @@ public class MainActivity extends Activity {
     /**
      * The band, the side panel and the three palette chips.
      *
-     * Every destination is a page of the shelf, opened in the browser: the app
-     * keeps no network permission of its own.
+     * Every destination is a page of the shelf. The external ones open in the browser;
+     * ADD's only network use is the Font packs screen, never the shelf pages.
      */
     private void setupChrome() {
         final View drawer = findViewById(R.id.drawer);
@@ -450,6 +450,10 @@ public class MainActivity extends Activity {
         findViewById(R.id.linkIcons).setOnClickListener(v -> openShelf("icons"));
         findViewById(R.id.linkFonts).setOnClickListener(v -> openShelf("fonts"));
         findViewById(R.id.linkCompress).setOnClickListener(v -> closeDrawer());
+        findViewById(R.id.linkEditor).setOnClickListener(v -> {
+            closeDrawer();
+            startActivity(new Intent(this, EditorActivity.class));
+        });
 
         link(R.id.linkDownload, "download/");
         link(R.id.linkPortfolio, "portfolio/");

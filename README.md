@@ -1,9 +1,9 @@
 # ADD — one offline Android app and the design shelf it sits on
 
-One small Android app that works with no network at all — icons, fonts and batch
-photo compression behind one pull-down — plus the static site that is both its
-documentation and its database. The manifest declares **no `INTERNET` permission**,
-so it physically cannot upload anything or phone home.
+One small Android app that works offline — icons, fonts, an editor and batch photo
+compression behind one pull-down — plus the static site that is both its documentation
+and its database. The manifest asks for `INTERNET` for one job: fetching the signed font
+packs you choose in the editor. Nothing is uploaded and there is no account or analytics.
 
 The site is a general design shelf: `docs/` carries the icons, the fonts, the work
 and the downloads, all served from one palette and all published as JSON alongside
@@ -11,12 +11,13 @@ the pages.
 
 ## Status
 
-- **ADD 3.5** — APK [`dist/ADD-3.5.apk`](dist/ADD-3.5.apk) (9 MB, signed v1+v2),
-  published as `docs/ADD-3.5.apk`. Package `app.offline.compress` — the merge kept
+- **ADD 3.6** — APK [`dist/ADD-3.6.apk`](dist/ADD-3.6.apk) (6 MB, signed v1+v2),
+  published as `docs/ADD-3.6.apk`. Package `app.offline.compress` — the merge kept
   the id so installed copies update in place — minSdk 26 · targetSdk 35 ·
-  versionCode 37. One package, three tools: the whole shelf rides inside it — every
+  versionCode 38. One package, four tools: the whole shelf rides inside it — every
   page, all four brands, 4,373 glyphs, the captures, the artboards, the stylesheet and
-  Poppins — served to a WebView from a private origin, and the compressor is native.
+  Poppins — served to a WebView from a private origin; the editor and the compressor are
+  native.
 - **Icons browser** — live at `docs/icons/`: four free brands — 606 Lineicons,
   1,258 Coolicons, 1,512 Phosphor and 997 Streamline — each on its own page with a preview, variant controls and the
   set folded into a scrolling sheet. Copy-on-tap, no account.
@@ -40,7 +41,7 @@ Fifteen pages, one stylesheet, no framework:
 | Page | What it is |
 | --- | --- |
 | `docs/index.html` | Index: the material, the app, the palette, the JSON list |
-| `docs/tools/` | The three tools in detail, install steps, a link to the release notes |
+| `docs/tools/` | The four tools in detail, install steps, a link to the release notes |
 | `docs/icons/` | Icons landing: download, the four brands, what the tool does |
 | `docs/icons/lineicons/` | Lineicons: preview tab, variants, the set (generated) |
 | `docs/icons/coolicons/` | Coolicons: preview tab, variants, the set (generated) |
@@ -124,8 +125,9 @@ python3 tools/hash_assets.py --check        # fail when a page names an old asse
   without a wall of cells.
 - **Copy the file**: the exact SVG, with a textarea fallback, and inside the APK a
   Java bridge that puts it on the clipboard.
-- **Offline**: the app has no `INTERNET` permission; the bundle is served from
-  `https://icons.local` by a `WebViewClient` that reads `assets/www`.
+- **Offline shelf**: the bundle is served from `https://icons.local` by a
+  `WebViewClient` that reads `assets/www`; the only network call in ADD is the
+  Font packs screen.
 
 ## What Compress does
 
@@ -146,7 +148,7 @@ python3 tools/hash_assets.py --check        # fail when a page names an old asse
 ## Source layout
 
 ```
-app/AndroidManifest.xml                            manifest (no INTERNET permission)
+app/AndroidManifest.xml                            manifest (INTERNET for font packs only)
 app/src/app/offline/compress/Compressor.java       decode → scale → rotate → encode → publish
 app/src/app/offline/compress/MainActivity.java     picker, settings, trial preview, queue, results
 app/src/app/offline/compress/CompareActivity.java  before/after screen
@@ -187,7 +189,7 @@ export ANDROID_SDK_ROOT=$HOME/android-sdk   # needs build-tools;35.0.0 + platfor
 ./build.sh stage      # the web bundle only: no JDK or SDK needed
 ```
 
-Output: `dist/ADD-3.5.apk`. Copy it to `docs/` and
+Output: `dist/ADD-3.6.apk`. Copy it to `docs/` and
 re-run `python3 tools/build_catalog.py` so the pages, the JSON and the checksums move
 together. Signing uses `$HOME/tools/compress-keystore.jks` (created on first build,
 password `android`). Replace it with

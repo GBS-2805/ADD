@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Tools — one app, three tools, for Android</title>
-<meta name="description" content="One app, three tools: the 4,373-icon browser, the fonts page and a photo compressor. Signed APK, no store." />
+<title>Tools — one app, four tools, for Android</title>
+<meta name="description" content="One app, four tools: the 4,373-icon browser, the fonts page, a photo compressor and an editor with downloadable font packs. Signed APK, no store." />
 <meta name="theme-color" content="#0fbf92" />
 <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml" />
 <link rel="stylesheet" href="../assets/site.254272ab85.css" />
@@ -43,7 +43,7 @@
   <a href="../">Index<span>shelf</span></a>
   <a href="../icons/">Icons<span>4,373 icons</span></a>
   <a href="../fonts/">Fonts<span>2 families</span></a>
-  <a href="../tools/" aria-current="page">Tools<span>3 tools</span></a>
+  <a href="../tools/" aria-current="page">Tools<span>4 tools</span></a>
 </nav>
 
 <div class="scrim" id="scrim" data-open="false"></div>
@@ -62,24 +62,24 @@
 <main>
   <header class="page-head">
     <h1>Tools</h1>
-    <p class="lede">One offline app, three tools: the icon browser, the fonts page and the compressor.</p>
+    <p class="lede">One offline app, four tools: the icon browser, the fonts page, the compressor and the editor.</p>
     <p class="meta">
       <span>1 app</span>
-      <span>ADD 3.5 shipping</span>
-      <span>3 tools</span>
+      <span>ADD 3.6 shipping</span>
+      <span>4 tools</span>
       <span>No third-party libraries</span>
     </p>
   </header>
 
   <section>
-    <h2>The three</h2>
-    <p class="kicker">Icons, fonts and photos, in one app</p>
+    <h2>The four</h2>
+    <p class="kicker">Icons, fonts, photos and type, in one app</p>
     <div class="cards">
       <a class="card" href="#icons">
         <span class="kind">Tool · Icons</span>
         <h3>Icons</h3>
         <p>Four free brands and the whole 4,373-icon browser, with a live preview and every category.</p>
-        <span class="tag"><span class="pill live">3.5</span><span class="go">Read the detail</span></span>
+        <span class="tag"><span class="pill live">3.6</span><span class="go">Read the detail</span></span>
       </a>
       <a class="card" href="../fonts/">
         <span class="kind">Tool · Fonts</span>
@@ -87,28 +87,33 @@
         <p>Both families with the faces the site sets, offline in the same app.</p>
         <span class="tag"><span class="go">Open fonts</span></span>
       </a>
-      <a class="card" href="../compress/">
+      <a class="card" href="../compress/" data-tool="compress">
         <span class="kind">Tool · Compress</span>
         <h3>Compress</h3>
         <p>Pick photos, preview with a before/after slider, then compress. Batch, caps, metadata stripped.</p>
-        <span class="tag"><span class="pill live">3.5</span><span class="go">Open the tool</span></span>
+        <span class="tag"><span class="pill live">3.6</span><span class="go">Open the tool</span></span>
+      </a>
+      <a class="card" href="../download/" data-tool="editor">
+        <span class="kind">Tool · Editor</span>
+        <h3>Editor</h3>
+        <p>Put type on a photo with the faces the app bundles and any pack you download, then export a PNG or JPEG.</p>
+        <span class="tag"><span class="pill live">shipping</span><span class="go">In this build</span></span>
       </a>
     </div>
   </section>
 
   <section id="icons">
     <h2>Icons</h2>
-    <p class="kicker">3.5 · app.offline.compress · in the app</p>
-    <a class="cta" href="../ADD-3.5.apk" download>
+    <p class="kicker">3.6 · app.offline.compress · in the app</p>
+    <a class="cta" href="../ADD-3.6.apk" download>
       <svg class="cta-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M8 12L12 16L16 12M12 16V4M6 20H18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
       Download the app
     </a>
     <p class="meta">
       <span>Android 8.0+ · all ABIs</span>
-      <span>No permissions at all</span>
+      <span>Internet for packs only</span>
       <span>4,373 icons</span>
-    </p>
-    <p class="fine">The browser you can use here without installing is <a href="../icons/">/icons/</a>; the APK is that same page, its stylesheet, Poppins and both catalogs, wrapped in a WebView that serves them from a private origin inside the app. Nothing is fetched, because the app cannot fetch: there is no <code>INTERNET</code> permission in the manifest.</p>
+    </p>      <p class="fine">The browser you can use here without installing is <a href="../icons/">/icons/</a>; the APK is that same page, its stylesheet, Poppins and both catalogs, wrapped in a WebView that serves them from a private origin inside the app. The shelf itself is never fetched; the only network call in ADD is a font pack you ask for in Font packs.</p>
 
     <h2 style="margin-top:44px">What it does</h2>
     <p class="kicker">A preview, three controls, one sheet</p>
@@ -117,15 +122,15 @@
       <li><b>Live preview</b><span>The selected icon sits in its own tab. Weight, size and surface repaint it as you press; the file itself never changes.</span></li>
       <li><b>Quiet set</b><span>All 4,373 icons live behind one toggle and scroll inside their own sheet, so the page reads as a preview rather than a wall.</span></li>
       <li><b>Copy</b><span>Copy SVG hands over the exact file: 24×24 viewBox, <code>currentColor</code>, no baked size or weight.</span></li>
-      <li><b>Offline</b><span>The whole shelf travels inside the APK: every page, all four catalogs, the fonts, the captures and the artboards. One palette, Poppins, hairline rules — the same system as this site.</span></li>
+      <li><b>Offline</b><span>The whole shelf travels inside the APK: every page, all four catalogs, the fonts and the editor. One palette, Poppins, hairline rules — the same system as this site.</span></li>
     </ul>
     <p class="fine">The app reads the catalogs this site publishes under <code>/data/</code> — Lineicons and Coolicons in one file, Phosphor and each Streamline style in their own — bundled at build time by <code>./build.sh</code>, so the phone cannot drift from the web.</p>
   </section>
 
   <section id="compress">
     <h2>Compress</h2>
-    <p class="kicker">3.5 · app.offline.compress · in the app</p>
-    <a class="cta" href="../ADD-3.5.apk" download>
+    <p class="kicker">3.6 · app.offline.compress · in the app</p>
+    <a class="cta" href="../ADD-3.6.apk" download>
       <svg class="cta-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M8 12L12 16L16 12M12 16V4M6 20H18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
       Download the app
     </a>
@@ -155,6 +160,19 @@
     </ul>
   </section>
 
+  <section id="editor">
+    <h2>Editor</h2>
+    <p class="kicker">Photo, type, effects · in this build</p>
+    <ul class="rows">
+      <li><b>Photo</b><span>Pick one from the system picker. It is decoded at up to 2048px and its EXIF rotation is applied, so portraits stay upright.</span></li>
+      <li><b>Type</b><span>Add a line, drag it, set its size with one slider, and pick a colour. Long-press a line to edit its words.</span></li>
+      <li><b>Font packs</b><span>The three bundled Poppins faces are always there. Families fetched in <b>Font packs</b> from <a href="../packs/">/packs/</a> are verified, installed and then appear in the font list.</span></li>
+      <li><b>Effects</b><span>Mono, warm, cool, fade and contrast, applied to the photo without touching the original.</span></li>
+      <li><b>Export</b><span>PNG or JPEG at the photo's own size, capped at 2048 a side, into <code>Pictures/Editor</code>. No storage permission on Android 10+.</span></li>
+    </ul>
+    <p class="fine">A pack is a signed zip carrying a manifest and one SHA-256 per file. The app checks the signature and every hash before it installs anything. It uses the network for the pack list and for a pack you tap in Font packs; the rest of the shelf never leaves the phone.</p>
+  </section>
+
   <section>
     <h2>Install</h2>
     <p class="kicker">Five taps, then never again</p>
@@ -170,9 +188,9 @@
 
   <section>
     <h2>Under the hood</h2>
-    <p class="kicker">No SDKs, no analytics, no network</p>
+    <p class="kicker">No SDKs, no analytics, no account</p>
     <dl class="specs">
-      <div><dt>Network permission</dt><dd>None, in any tool</dd></div>
+      <div><dt>Internet</dt><dd>Packs only, on request</dd></div>
       <div><dt>Storage permission</dt><dd>None (Android 10+)</dd></div>
       <div><dt>Code</dt><dd>Platform APIs only</dd></div>
       <div><dt>Min Android</dt><dd>8.0 / API 26</dd></div>
@@ -189,10 +207,10 @@
 </main>
 
 <footer>
-  <span>ADD 3.5<span class="dot" aria-hidden="true">·</span>one app, three tools</span>
+  <span>ADD<span class="dot" aria-hidden="true">·</span>one app, four tools</span>
   <span><a href="../">Index</a><span class="dot" aria-hidden="true">·</span><a href="../download/">Download</a><span class="dot" aria-hidden="true">·</span>signed for personal use</span>
 </footer>
 
-<script src="../assets/site.fa863f703d.js" defer></script>
+<script src="../assets/site.3b1f9777a2.js" defer></script>
 </body>
 </html>

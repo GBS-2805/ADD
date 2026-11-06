@@ -6,7 +6,7 @@
       "title": "Compress",
       "kind": "Android app",
       "year": 2026,
-      "summary": "An offline image compressor with a before/after slider, batch queue and per-file savings. No account, no uploads, no internet permission.",
+      "summary": "An offline image compressor with a before/after slider, batch queue and per-file savings. No account, no uploads, no network calls.",
       "built": "The whole app: picker flow, preview pipeline, encoder retry loop, queue management, sharing, launcher icon and the settings screen.",
       "stack": "Java, Android platform APIs only",
       "href": "/tools/"
