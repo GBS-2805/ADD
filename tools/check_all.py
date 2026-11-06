@@ -2,7 +2,7 @@
 """Run every check on the shelf, and say whether this tree is shippable.
 
     python3 tools/check_all.py                                   # nothing but python
-    python3 tools/check_all.py --browser http://127.0.0.1:8799/  # + the rendered half
+    python3 tools/check_all.py --browser http://127.0.0.1:8799/  # + palette and menu rendering
     python3 tools/check_all.py --artboards                       # + a re-export diff
 
 Every gate runs even after one fails, so a single pass shows the whole picture rather
@@ -21,8 +21,8 @@ ROOT = Path(__file__).resolve().parent.parent
 
 # The summary line each gate ends with, so a pass prints its verdict and not its
 # working. A gate whose last line is the interesting one has no entry here.
-VERDICT = {"palette": "palette:", "assets": "assets:", "site": "site:",
-           "packs": "build_packs:", "figma": "figma check:",
+VERDICT = {"palette": "palette:", "menu": "menu:", "assets": "assets:",
+           "site": "site:", "packs": "build_packs:", "figma": "figma check:",
            "notes": "notes regression:", "bundle": "bundle check:",
            "artboards": "artboards:"}
 
@@ -43,6 +43,7 @@ def gates(browser, artboards):
         rows.insert(len(rows) - 1, ["artboards", [sys.executable, "tools/check_artboards.py"]])
     if browser:
         rows[0][1].extend(["--browser", browser])
+        rows.insert(1, ["menu", ["node", "tools/check_menu.js", browser]])
     return rows
 
 

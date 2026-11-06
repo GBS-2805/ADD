@@ -606,10 +606,10 @@ where the notes keep the history they shipped with.Icons, Fonts, Compress and th
   secondary link for a file already on the phone.
 - `python3 tools/check_all.py` is the single verdict: palette, asset hashes, site tree,
   catalog, Figma structure, Pantone sheet, note dating and the staged bundle, one line
-  each, all of them run so one pass shows everything. `--browser <url>` and
-  `--artboards` add the two gates that need Chromium, and
-  `.github/workflows/checks.yml` runs the browserless set on every push. The APK build
-  stays local: it needs the JDK, the android-35 platform and the keystore.
+  each, all of them run so one pass shows everything. `--browser <url>` adds the
+  rendered palette and the menu-focus/ARIA regression; `--artboards` adds the
+  re-export diff. Both need Chromium, and `.github/workflows/checks.yml` runs the
+  browserless set on every push. The APK build stays local: it needs the JDK, the android-35 platform and the keystore.
 - Artboards go stale silently -- a board records nothing about the page it came from,
   `check_figma.py` only proves it imports, and the bundler's timestamp comparison is
   satisfied by one late re-export. `python3 tools/check_artboards.py` therefore

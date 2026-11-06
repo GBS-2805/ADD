@@ -152,8 +152,8 @@ def chrome():
     block = swap(block, '<a href="../releases/">Releases<span>history</span></a>',
                  '<a href="../releases/" aria-current="page">Releases<span>history</span></a>',
                  "Releases row")
-    return swap(block, "Compress \u00b7 a design shelf: four free icon brands, Poppins, "
-                       "one palette, and one offline app built from them.",
+    return swap(block, "ADD \u00b7 a design shelf: icons, type, photos and words, "
+                       "in one quiet place.",
                 "Every build this shelf has shipped, read back out of its own history.",
                 "drawer note")
 

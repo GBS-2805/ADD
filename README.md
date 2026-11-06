@@ -171,6 +171,7 @@ tools/fetch_icons.py                               the icon pages + the chunked 
 tools/icons_hub_template.html                      the Icons app landing page
 tools/icons_brand_template.html                    the per-brand preview page
 tools/render_pages.js                              captures every page and writes the gallery
+tools/check_menu.js                                menu ARIA and focus-return regression
 tools/build_site.py                                page manifest, sitemap, robots, search page
 tools/search_template.html                         the search page: section chips, arrow keys
 tools/hash_assets.py                               hashed copies of the CSS and JS every page names

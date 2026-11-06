@@ -4,8 +4,8 @@
 #
 # Two things stay local, on purpose:
 #   * the APK build, which needs a JDK, the android-35 platform and the keystore;
-#   * the Chromium halves -- `--browser <url>` and `--artboards` -- which need the
-#     300 MB toolchain that tools/render_env.py builds.
+#   * the Chromium gates -- the rendered palette, the menu-focus/ARIA check and
+#     `--artboards` -- which need the 300 MB toolchain that tools/render_env.py builds.
 # Before a release: python3 tools/check_all.py --browser <url> --artboards
 name: checks
 

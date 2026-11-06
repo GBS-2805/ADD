@@ -83,22 +83,28 @@
   var scrim = document.getElementById("scrim");
   var closer = document.getElementById("drawerClose");
   if (!menu || !menuBtn || !drawer || !burger) return;
+  var menuOpener = menuBtn;
 
-  function setMenu(open) {
+  function setMenu(open, returnFocus) {
+    var wasOpen = menu.getAttribute("data-open") === "true";
     menu.setAttribute("data-open", open ? "true" : "false");
     menuBtn.setAttribute("aria-expanded", open ? "true" : "false");
     menuBtn.setAttribute("aria-label", open ? "Close sections" : "Open sections");
     var name = document.querySelector(".page-name");
     if (name) name.setAttribute("aria-expanded", open ? "true" : "false");
+    if (!open && wasOpen && returnFocus) menuOpener.focus();
   }
 
-  function setDrawer(open) {
+  function setDrawer(open, returnFocus) {
+    var wasOpen = drawer.getAttribute("data-open") === "true";
     drawer.setAttribute("data-open", open ? "true" : "false");
     burger.setAttribute("aria-expanded", open ? "true" : "false");
     burger.setAttribute("aria-label", open ? "Close side tab" : "Open side tab");
     if (scrim) scrim.setAttribute("data-open", open ? "true" : "false");
     document.body.classList.toggle("drawer-open", open);
-    if (open) setMenu(false); else persistLook();
+    if (open) setMenu(false, false);
+    else if (wasOpen) persistLook();
+    if (!open && wasOpen && returnFocus) burger.focus();
   }
 
   // A route to /search/ from the side tab on every page, without editing each page.
@@ -210,30 +216,34 @@
   if (nameLink) {
     nameLink.setAttribute("role", "button");
     nameLink.setAttribute("aria-controls", "menu");
+    nameLink.setAttribute("aria-expanded",
+      menu.getAttribute("data-open") === "true" ? "true" : "false");
     nameLink.addEventListener("click", function (event) {
       event.preventDefault();
       var open = menu.getAttribute("data-open") !== "true";
-      setMenu(open);
-      if (open) setDrawer(false);
+      menuOpener = nameLink;
+      setMenu(open, true);
+      if (open) setDrawer(false, false);
     });
   }
 
   menuBtn.addEventListener("click", function () {
     var open = menu.getAttribute("data-open") !== "true";
-    setMenu(open);
-    if (open) setDrawer(false);
+    menuOpener = menuBtn;
+    setMenu(open, true);
+    if (open) setDrawer(false, false);
   });
   burger.addEventListener("click", function () {
-    setDrawer(drawer.getAttribute("data-open") !== "true");
+    setDrawer(drawer.getAttribute("data-open") !== "true", true);
   });
-  if (closer) closer.addEventListener("click", function () { setDrawer(false); });
-  if (scrim) scrim.addEventListener("click", function () { setDrawer(false); });
+  if (closer) closer.addEventListener("click", function () { setDrawer(false, true); });
+  if (scrim) scrim.addEventListener("click", function () { setDrawer(false, true); });
 
   menu.addEventListener("click", function (event) {
-    if (event.target.closest("a")) setMenu(false);
+    if (event.target.closest("a")) setMenu(false, false);
   });
   drawer.addEventListener("click", function (event) {
-    if (event.target.closest("a")) setDrawer(false);
+    if (event.target.closest("a")) setDrawer(false, false);
   });
 
   // A Tools card that names a native tool asks the app for it. On the site nothing
@@ -248,7 +258,10 @@
 
   document.addEventListener("keydown", function (event) {
     if (event.key !== "Escape") return;
-    setMenu(false);
-    setDrawer(false);
+    var menuOpen = menu.getAttribute("data-open") === "true";
+    var drawerOpen = drawer.getAttribute("data-open") === "true";
+    if (!menuOpen && !drawerOpen) return;
+    setMenu(false, menuOpen);
+    setDrawer(false, drawerOpen);
   });
 })();
