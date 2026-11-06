@@ -4,10 +4,10 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Portfolio — the work behind the shelf</title>
-<meta name="description" content="Three projects: Compress, the 4,373-icon browser and this site — what I built, the stack, the constraints." />
+<meta name="description" content="Three projects: the ADD app, the 4,373-icon browser and this site — the work and the visual system behind it." />
 <meta name="theme-color" content="#0fbf92" />
 <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml" />
-<link rel="stylesheet" href="../assets/site.254272ab85.css" />
+<link rel="stylesheet" href="../assets/site.a226215efc.css" />
 </head>
 <body>
 
@@ -56,93 +56,62 @@
   <a href="../portfolio/" aria-current="page">Portfolio<span>3 projects</span></a>
   <a href="../renders/">Renders<span>gallery</span></a>
   <a href="../releases/">Releases<span>history</span></a>
-  <p class="drawer-note">Compress · offline Android tools, the icons they use and the fonts they are set in.</p>
+  <p class="drawer-note">ADD · the app, the icons and the shelf, made as one visual system.</p>
 </aside>
 
 
 <main>
   <header class="page-head">
     <h1>Portfolio</h1>
-    <p class="lede">Three things built here: the Compress app, the icon browser and this site.</p>
-    <dl class="specs">
-      <div><dt>Projects</dt><dd>3</dd></div>
-      <div><dt>App shipping</dt><dd>1</dd></div>
-      <div><dt>Third-party libraries</dt><dd>0</dd></div>
-      <div><dt>Year</dt><dd>2026</dd></div>
-    </dl>
+    <p class="lede">Three things made here: the ADD app, the icon browser and this site.</p>
   </header>
 
   <section>
     <h2>The work</h2>
-    <p class="kicker">What each one does, and what I did</p>
+    <p class="kicker">A shelf, a browser and the app that holds them</p>
     <div class="cards">
       <a class="card" href="../tools/">
         <span class="kind">Android app · 2026</span>
-        <h3>Compress</h3>
-        <p>An offline image compressor with a before/after slider, batch queue and per-file savings. No account, no uploads, no network calls.</p>
-        <span class="tag">Java, platform APIs only · <span class="go">Open</span></span>
+        <h3>ADD</h3>
+        <p>One quiet app for icons, type, photos and words, made to work without a signal.</p>
+        <span class="tag">Four tools in one · <span class="go">Open</span></span>
       </a>
       <a class="card" href="../icons/">
-        <span class="kind">Web tool · 2026</span>
+        <span class="kind">Web catalog · 2026</span>
         <h3>Icons browser</h3>
-        <p>All 4,373 icons from four free sets in one filterable grid, one tap each to copy the SVG, with a textarea fallback when the clipboard is blocked.</p>
-        <span class="tag">Vanilla JS, one HTML file · <span class="go">Open</span></span>
+        <p>Four free sets, 4,373 drawings, a filter and a clean copy for your own work.</p>
+        <span class="tag">Browse the sets · <span class="go">Open</span></span>
       </a>
       <a class="card" href="../">
-        <span class="kind">Static site · 2026</span>
+        <span class="kind">Design shelf · 2026</span>
         <h3>This site</h3>
-        <p>The shelf: catalogs for the tools, icons, fonts and work, all built from the same measurements as the app and all readable as JSON.</p>
-        <span class="tag">Hand-written HTML and CSS · <span class="go">Open</span></span>
+        <p>The shelf where the icons, fonts and tools meet, in one palette and one typeface.</p>
+        <span class="tag">The index · <span class="go">Open</span></span>
       </a>
     </div>
   </section>
 
   <section>
-    <h2>Compress</h2>
-    <p class="kicker">Android app · 2.3 · 278 KB</p>
-    <ul class="rows">
-      <li><b>What I built</b><span>The whole app: picker flow, preview pipeline, encoder retry loop, queue management, sharing, the settings screen and the launcher icon.</span></li>
-      <li><b>Decisions</b><span>Compress never touches the network: the compressor is platform code, previews encode to cache and delete themselves, and nothing is written until you press compress.</span></li>
-      <li><b>Constraint</b><span>Platform APIs only — no image library, no analytics, no SDK. The APK is under 300 KB because of it.</span></li>
-    </ul>
-  </section>
-
-  <section>
-    <h2>Icons browser</h2>
-    <p class="kicker">Web tool · 4,373 icons · four sets</p>
-    <ul class="rows">
-      <li><b>What I built</b><span>The fetch pipeline that pulls every free icon, recolours it to <code>currentColor</code>, the filterable grid and the copy-to-clipboard handling.</span></li>
-      <li><b>Decisions</b><span>The icons are inlined in the page instead of fetched, so filtering is instant and the page still works with the network off after load. Copy has a manual fallback because browsers refuse the clipboard on plain HTTP.</span></li>
-      <li><b>Shared source</b><span>The same data is published as <code>/data/icons.json</code>, so the phone app will read exactly what the browser shows.</span></li>
-    </ul>
-  </section>
-
-  <section>
-    <h2>This site</h2>
-    <p class="kicker">Static site · one palette · JSON catalogs</p>
-    <ul class="rows">
-      <li><b>What I built</b><span>The measured layout, one shared stylesheet across seven pages, the JSON builder that re-measures every shipped file, and the render gallery.</span></li>
-      <li><b>Decisions</b><span>No framework and no build step for the pages — they are readable HTML. The build only generates what would otherwise be retyped: the icon set and the catalogs.</span></li>
-      <li><b>Why it is a database</b><span>Because the app needs the same facts the pages state. One catalog file feeds both, and the build fails if a page quotes a stale size.</span></li>
-    </ul>
+    <h2>About the work</h2>
+    <p class="kicker">One palette, one type system, no noise</p>
+    <p>The three projects were made together: the icon browser gathers the drawings, the app carries them offline, and this site is the shelf where they meet. The same three palettes and Poppins run through all of it.</p>
   </section>
 
   <section>
     <h2>How I work</h2>
-    <p class="kicker">The rules these were built under</p>
     <ul class="rows">
-      <li><b>Offline first</b><span>If a feature needs the network, it either moves on-device or waits for a download the reader asks for.</span></li>
-      <li><b>No accounts</b><span>Nothing here asks you to sign in, and nothing collects anything about you.</span></li>
-      <li><b>Measured, not guessed</b><span>The palette and spacing come from a Figma frame; the sizes on this site come from the files on disk.</span></li>
+      <li><b>Quiet first</b><span>The work should leave room for the art, not compete with it.</span></li>
+      <li><b>Made to be used</b><span>Every screen is built to be handled on a phone, not just looked at.</span></li>
+      <li><b>No accounts</b><span>Nothing asks you to sign in, and nothing tracks what you make.</span></li>
     </ul>
   </section>
 </main>
 
 <footer>
-  <span>3 projects<span class="dot" aria-hidden="true">·</span>2026<span class="dot" aria-hidden="true">·</span>built solo</span>
+  <span>3 projects<span class="dot" aria-hidden="true">·</span>2026<span class="dot" aria-hidden="true">·</span>made solo</span>
   <span><a href="../">Index</a><span class="dot" aria-hidden="true">·</span><a href="../tools/">Tools</a><span class="dot" aria-hidden="true">·</span><a href="../renders/">Renders</a></span>
 </footer>
 
-<script src="../assets/site.3b1f9777a2.js" defer></script>
+<script src="../assets/site.54828b32d2.js" defer></script>
 </body>
 </html>

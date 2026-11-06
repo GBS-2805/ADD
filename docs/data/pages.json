@@ -1,11 +1,11 @@
 {
   "origin": "https://artbase-olive.vercel.app",
-  "count": 17,
+  "count": 16,
   "pages": [
     {
       "path": "/compress/",
-      "title": "Compress — downscale and re-encode photos in the browser",
-      "description": "The app's compressor as a web tool: pick up to 40 photos, export JPEG, WebP, PNG or AVIF, set quality and a longest-edge cap, preview with a before/after slider, then save. Nothing is uploaded.",
+      "title": "Compress — a quieter way to shrink photos",
+      "description": "A quiet photo compressor: pick up to 40 photos, choose a size, compare before and after, then save a copy. Nothing is uploaded.",
       "heading": "Compress",
       "section": "compress"
     },
@@ -75,21 +75,14 @@
     {
       "path": "/",
       "title": "A design shelf — icons, type and one offline Android app",
-      "description": "4,373 icons in four brands, Poppins and Redaction, one palette, and one offline Android app.",
+      "description": "4,373 icons, Poppins and Redaction, three palettes, and one quiet app for making things.",
       "heading": "A design shelf.",
       "section": ""
     },
     {
-      "path": "/packs/",
-      "title": "Font packs — signed, and fetched in the editor",
-      "description": "Poppins and the seven Redaction grades as signed packs. Fetch them in the ADD editor or download one here. No account.",
-      "heading": "Font packs",
-      "section": "packs"
-    },
-    {
       "path": "/portfolio/",
       "title": "Portfolio — the work behind the shelf",
-      "description": "Three projects: Compress, the 4,373-icon browser and this site — what I built, the stack, the constraints.",
+      "description": "Three projects: the ADD app, the 4,373-icon browser and this site — the work and the visual system behind it.",
       "heading": "Portfolio",
       "section": "portfolio"
     },
@@ -102,8 +95,8 @@
     },
     {
       "path": "/renders/",
-      "title": "Renders — 31 captures of this site",
-      "description": "31 screenshots of the shelf in headless Chromium, at 1300 wide and 390 on a phone.",
+      "title": "Renders — 32 captures of this site",
+      "description": "32 screenshots of the shelf in headless Chromium, at 1300 wide and 390 on a phone.",
       "heading": "Renders",
       "section": "renders"
     },
@@ -116,8 +109,8 @@
     },
     {
       "path": "/tools/",
-      "title": "Tools — one app, four tools, for Android",
-      "description": "One app, four tools: the 4,373-icon browser, the fonts page, a photo compressor and an editor with downloadable font packs. Signed APK, no store.",
+      "title": "Tools — icons, type, photos and words",
+      "description": "Four quiet tools for icons, type, photos and words, in one independent Android app. No account, no store.",
       "heading": "Tools",
       "section": "tools"
     }

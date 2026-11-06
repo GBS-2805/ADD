@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Compress — downscale and re-encode photos in the browser</title>
-<meta name="description" content="The app's compressor as a web tool: pick up to 40 photos, export JPEG, WebP, PNG or AVIF, set quality and a longest-edge cap, preview with a before/after slider, then save. Nothing is uploaded." />
+<title>Compress — a quieter way to shrink photos</title>
+<meta name="description" content="A quiet photo compressor: pick up to 40 photos, choose a size, compare before and after, then save a copy. Nothing is uploaded." />
 <meta name="theme-color" content="#0fbf92" />
 <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml" />
-<link rel="stylesheet" href="../assets/site.254272ab85.css" />
+<link rel="stylesheet" href="../assets/site.a226215efc.css" />
 <style>
   /* The tool itself: one card, a queue strip, three controls and a results list,
      built out of the site's own tokens so it turns over with the palette. */
@@ -206,18 +206,18 @@
   <a href="../portfolio/">Portfolio<span>3 projects</span></a>
   <a href="../renders/">Renders<span>gallery</span></a>
   <a href="../releases/">Releases<span>history</span></a>
-  <p class="drawer-note">ADD · a design shelf: four free icon brands, Poppins, one palette, and one offline app built from them.</p>
+  <p class="drawer-note">Compress · a quiet photo tool from the ADD shelf.</p>
 </aside>
 
 <main>
   <header class="page-head">
     <h1>Compress</h1>
-    <p class="lede">The app's compressor, running here instead: downscale, re-encode and judge the result on a slider. No upload, no account.</p>
+    <p class="lede">A quiet photo compressor: pick a size, judge the result on the slider, and save a copy. No upload, no account.</p>
     <p class="meta">
       <span>JPEG · WebP · PNG</span>
-      <span>Quality 45–95</span>
-      <span>40 photos at once</span>
-      <span>Runs on this page</span>
+      <span>Up to 40 at once</span>
+      <span>No upload</span>
+      <span>In the browser</span>
     </p>
   </header>
 
@@ -292,27 +292,23 @@
 
   <section>
     <h2>What it does</h2>
-    <p class="kicker">The same rules as the app, in the page</p>
+    <p class="kicker">A smaller file, still your photo</p>
     <ul class="rows">
-      <li><b>More formats</b><span>WebP leads because, measured on one photo at four levels, it matched JPEG’s quality in about 40% fewer bytes. JPEG stays for anything that will not open WebP, and PNG where lossless or transparency matters — being lossless, it usually turns a camera JPEG into a much larger file. AVIF appears only where the browser can encode it.</span></li>
-      <li><b>Real quality</b><span>The encoder tries your level, then 12 and 24 below it, then 40, and keeps the smallest file — the ladder the Android build uses.</span></li>
+      <li><b>Smaller files</b><span>Pick a quality level and compare the result on the slider before you save.</span></li>
       <li><b>Downscale</b><span>Cap the longest edge at 1280, 1920, 2560, 3200 or 4096 px, or keep the original.</span></li>
-      <li><b>Batch it</b><span>Up to 40 photos, per-file savings, and a Save all that hands over every result.</span></li>
-      <li><b>Orientation</b><span>The decoder applies EXIF rotation, so a portrait shot stays upright instead of arriving sideways.</span></li>
-      <li><b>Metadata</b><span>Re-encoding through a canvas drops location and device tags with the original file header.</span></li>
-      <li><b>Colour</b><span>Both sides of the slider are drawn from the same decoded pixels, so only the encoding differs. A wide-gamut photo is re-encoded as sRGB, which is why a saved copy can read a little flatter than the camera\u2019s own file.</span></li>
-      <li><b>Non-destructive</b><span>Results are new files. Nothing is overwritten, and nothing leaves the browser.</span></li>
-      <li><b>Verify</b><span>Every result reopens on the slider, the same check the app offers on a saved file.</span></li>
+      <li><b>Batch it</b><span>Up to 40 photos, with per-file savings and one Save all.</span></li>
+      <li><b>Share in</b><span>Send a photo from any gallery or camera app and it lands in the queue.</span></li>
+      <li><b>Keep the original</b><span>Results are new files; nothing is overwritten, and nothing leaves the browser.</span></li>
+      <li><b>Check it</b><span>Every result reopens on the slider so you can see what changed.</span></li>
     </ul>
-    <p class="fine">The native version is in the app — it writes to <code>Pictures/Compress</code> and takes photos from Android's own share sheet. This page is the same pipeline with the platform's own encoder: <code>createImageBitmap</code>, a canvas at the capped size, and <code>canvas.toBlob()</code> at each quality, so a phone does no more work than the app does.</p>
   </section>
 
   <section>
     <h2>Also on the shelf</h2>
     <p class="kicker">Same system, same palette</p>
     <ul class="rows">
-      <li><b>In the app</b><span><a href="../tools/#compress">Tools → Compress</a> lists what the native screen does, and <a href="../download/">Download</a> has the APK.</span></li>
-      <li><b>The rest of the shelf</b><span><a href="../icons/">Icons</a>, <a href="../fonts/">Fonts</a> and the <a href="../portfolio/">portfolio</a> share this stylesheet and the three palettes.</span></li>
+      <li><b>In the app</b><span><a href="../tools/">Tools</a> shows the four tools, and <a href="../download/">Download</a> has the app.</span></li>
+      <li><b>The rest of the shelf</b><span><a href="../icons/">Icons</a>, <a href="../fonts/">Fonts</a> and the <a href="../portfolio/">portfolio</a>.</span></li>
     </ul>
   </section>
 </main>
@@ -356,7 +352,7 @@
   </div>
 </div>
 
-<script src="../assets/site.3b1f9777a2.js" defer></script>
+<script src="../assets/site.54828b32d2.js" defer></script>
 <script>
 /* The compressor. Everything here runs on the page: decode, scale, encode,
    compare, save. No fetch, no upload, no dependency. */

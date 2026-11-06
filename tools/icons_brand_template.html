@@ -749,7 +749,7 @@ __BRANDS__
   <a href="__ROOT__portfolio/">Portfolio<span>3 projects</span></a>
   <a href="__ROOT__renders/">Renders<span>gallery</span></a>
   <a href="__ROOT__releases/">Releases<span>history</span></a>
-  <p class="drawer-note">__BRAND__ · __COUNTFMT__ icons, __STYLE__, __LICENCE__. The app reads the same catalog this page renders.</p>
+  <p class="drawer-note">__BRAND__ · __COUNTFMT__ icons, __STYLE__, __LICENCE__. Free to browse; the app carries the set with you.</p>
 </aside>
 
 <main>
@@ -916,7 +916,7 @@ __BRANDS__
       </button>
     </div>
     <textarea id="snippet" readonly spellcheck="false" aria-label="SVG markup of the selected icon"></textarea>
-    <p class="pop-note">The markup is the file as it ships: a 24×24 <code>viewBox</code>, <code>currentColor</code> so the icon takes the colour of the text around it, and no weight or size baked in — those are the preview's settings, not the file's.</p>
+    <p class="pop-note">The drawing is clean: it takes the colour of the text around it, and no size or weight is baked in.</p>
   </dialog>
 
   <section class="set-panel">
@@ -959,14 +959,13 @@ __BRANDS__
       <p class="empty" id="empty" hidden>No icon in __BRAND__ matches that name in that category.</p>
       <div class="panel-foot">
         <span>__SOURCE__ · __LICENCE__</span>
-        <a href="__DATA__"><code>__DATAFILE__</code></a>
       </div>
     </div>
   </section>
 </main>
 
 <footer>
-  <p>__BRAND__ is a whole free set from <code>__SOURCE__</code>, __LICENCE__ licensed: __COUNTFMT__ icons, __STYLE__. The paid icons sold on the vendor's site are neither included nor copied.</p>
+  <p>__BRAND__ is a whole free set from __SOURCE__, __LICENCE__ licensed: __COUNTFMT__ icons, __STYLE__. The paid icons sold on the vendor's site are neither included nor copied.</p>
   <p><a href="__ROOT__icons/">Icons</a><span class="dot" aria-hidden="true">·</span><a href="__ROOT__">Index</a><span class="dot" aria-hidden="true">·</span><a href="__ROOT__fonts/">Fonts</a><span class="dot" aria-hidden="true">·</span><a href="__ROOT__download/">Download</a></p>
 </footer>
 
@@ -1279,17 +1278,19 @@ __BRANDS__
     loadCatalog(entry.data).then(function (payload) {
       var next = payload.icons || [];
       if (!next.length) { throw new Error("the catalog is empty"); }
-      var byName = {};
-      next.forEach(function (item) { byName[item.name] = item; });
       applyStyle(entry);
       currentPayload = payload;
+      // The map comes from the tinted list, not the raw one: a colour chosen before
+      // the switch is part of the glyph now, so the stage must paint that copy.
       items = displayed(next);
+      var byName = {};
+      items.forEach(function (item) { byName[item.name] = item; });
       CATS = catsFor(payload);
       chosen = names.map(function (name) { return byName[name]; }).filter(Boolean);
       chosenSet = {};
       chosen.forEach(function (item) { chosenSet[item.name] = true; });
       bulkFilled = false;
-      selected = byName[keepName] || next[0];
+      selected = byName[keepName] || items[0];
       store(STYLE_KEY, entry.slug);
       markStyleSegs();
       renderCats();
@@ -1650,6 +1651,10 @@ __BRANDS__
     return { name: item.name, cat: item.cat, attrs: item.attrs, body: body };
   }
 
+  // The chosen ink. Ink styles take it as currentColor; Duo and Flat are tinted
+  // rather than flattened, so their second tone survives as an opacity. With Auto
+  // (no ink) a palette style keeps the vendor's colours, because that palette is
+  // what makes it a style of its own.
   function displayed(list) {
     if (!COLOUR || !ink) { return list; }
     var key = (STYLE ? STYLE.slug : "") + ink;

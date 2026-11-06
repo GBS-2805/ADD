@@ -10,8 +10,8 @@ name and a browser cannot serve a stale one. The zip is written with a fixed
 timestamp, which keeps a rebuild byte-for-byte identical -- ``--check`` depends on
 that, and so does the deploy's "nothing changed" answer.
 
-    python3 tools/build_packs.py            # write docs/packs/
-    python3 tools/build_packs.py --check    # fail if docs/packs/ is stale
+    python3 tools/build_packs.py            # write docs/packs/ and the download page
+    python3 tools/build_packs.py --check    # fail if either is stale
 
 Each manifest is signed with ECDSA P-256 and the signature travels inside the zip
 as ``manifest.sig``; the app verifies it against the public key it carries. The
@@ -41,7 +41,9 @@ ROOT = Path(__file__).resolve().parent.parent
 DOCS = ROOT / "docs"
 OUT = DOCS / "packs"
 FONTS = DOCS / "data" / "fonts.json"
-TEMPLATE = DOCS / "tools" / "index.html"
+DOWNLOAD = DOCS / "download" / "index.html"
+PACKS_START = "<!-- packs:start -->"
+PACKS_END = "<!-- packs:end -->"
 
 # A fixed stamp, so two runs over the same TTFs make the same bytes.
 STAMP = (2026, 1, 1, 0, 0, 0)
@@ -249,175 +251,43 @@ def build(family: dict, existing_dir: Path | None = None) -> dict:
     }
 
 
-def preview_parts(packs: list[dict]) -> tuple[str, str]:
-    """A compact specimen: Poppins as one line, the Redaction grades as a row.
-
-    One regular face per pack is enough to see the cut without turning the download
-    page into the full type specimen. The family grouping follows the fonts page:
-    Poppins is one family and the seven Redaction grades belong to another.
-    """
-    payload = json.loads(FONTS.read_text(encoding="utf-8"))
-    by_family = {family["family"]: family for family in payload["families"]}
-    groups = []
-    index = {}
-    for pack in packs:
-        match = re.match(r"^(.*?)\s+(\d+)$", pack["family"])
-        base = match.group(1) if match else pack["family"]
-        grade = int(match.group(2)) if match else 0
-        if base not in index:
-            index[base] = {"name": base, "items": []}
-            groups.append(index[base])
-        index[base]["items"].append((grade, pack))
-    for group in groups:
-        group["items"].sort(key=lambda row: row[0])
-
-    faces = []
-    blocks = []
-    for group in groups:
-        items = group["items"]
-        for _, pack in items:
-            family = by_family.get(pack["family"])
-            if family is None:
-                raise SystemExit(f'build_packs: no font data for {pack["family"]}')
-            regular = next((style for style in family["styles"]
-                            if style["weight"] == 400 and style["style"] == "normal"),
-                           family["styles"][0])
-            faces.append(
-                f'@font-face{{font-family:"pack-{pack["slug"]}";'
-                f'src:url("..{regular["woff2"]}") format("woff2");'
-                'font-weight:400;font-style:normal;font-display:swap}')
-
-        if len(items) == 1:
-            pack = items[0][1]
-            body = (f'<p class="preview-sample" style="font-family:\'pack-{pack["slug"]}\'">'
-                    'Art Design Database</p>')
-            meta = f'{pack["faces"]} faces · {human(pack["bytes"])}'
-        else:
-            cells = "".join(
-                f'<div class="preview-grade"><b style="font-family:\'pack-{pack["slug"]}\'">Aa</b>'
-                f'<span>Grade {grade}</span></div>'
-                for grade, pack in items)
-            body = f'<div class="preview-grades">{cells}</div>'
-            total_faces = sum(pack["faces"] for _, pack in items)
-            meta = f'{total_faces} faces · {len(items)} grades'
-        blocks.append(
-            f'<div class="preview-group">\n'
-            f'      <div class="preview-label"><h3>{html.escape(group["name"])}</h3>'
-            f'<span>{meta}</span></div>\n'
-            f'      {body}\n'
-            f'    </div>')
-
-    css = ("<style>\n" + "\n".join(faces) + """
-.preview-groups { margin-top: 20px; }
-.preview-group { display: grid; grid-template-columns: minmax(150px, .26fr) 1fr;
-                 gap: 24px; align-items: end; padding: 20px 0; border-top: 1px solid var(--rule); }
-.preview-group:last-child { border-bottom: 1px solid var(--rule); }
-.preview-label h3 { margin: 0; font-size: 24px; font-weight: 400; line-height: 1.1; }
-.preview-label span { display: block; margin-top: 5px; color: var(--on-dim); font-size: 12px; }
-.preview-sample { margin: 0; font-size: clamp(30px, 4.4vw, 52px); line-height: 1.08;
-                  letter-spacing: -.02em; overflow-wrap: break-word; }
-.preview-grades { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 8px; }
-.preview-grade { min-width: 0; padding-top: 8px; border-top: 1px solid var(--rule); }
-.preview-grade b { display: block; font-size: clamp(22px, 2.2vw, 32px); font-weight: 400; line-height: 1.05; }
-.preview-grade span { display: block; margin-top: 5px; color: var(--on-dim); font-size: 10px;
-                      letter-spacing: .04em; text-transform: uppercase; white-space: nowrap; }
-@media (max-width: 720px) {
-  .preview-group { grid-template-columns: 1fr; gap: 10px; padding: 16px 0; }
-  .preview-grades { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-  .preview-grade b { font-size: 26px; }
-}
-</style>""")
-    return "\n".join(blocks), css
+def replace_section(text: str, markup: str) -> str:
+    """Swap the generated packs block on the download page, leaving the rest alone."""
+    start = text.find(PACKS_START)
+    end = text.find(PACKS_END)
+    if start < 0 or end < start:
+        return text
+    return text[:start] + markup + text[end + len(PACKS_END):]
 
 
-def page(packs: list[dict], total: int) -> str:
-    """The Packs page, built inside the Tools page's own chrome."""
+def packs_section(packs: list[dict], total: int) -> str:
+    # The one place packs are taken: cards on the download page, bytes under /packs/.
     faces = sum(pack["faces"] for pack in packs)
     cards = "\n".join(
-        f'''      <a class="card" href="{pack["file"]}" download>
-        <span class="kind">Signed pack · {pack["faces"]} faces</span>
-        <h3>{html.escape(pack["family"])}</h3>
-        <p>{html.escape(pack["note"] or pack["source"])} · {human(pack["bytes"])} · {html.escape(pack["licence"])}</p>
-        <span class="tag"><span class="go">Download .addpack</span></span>
-      </a>'''
+        '      <a class="card" href="../packs/%s" download>\n'
+        '        <span class="kind">Signed pack · %d faces</span>\n'
+        '        <h3>%s</h3>\n'
+        '        <p>%s · %s · %s</p>\n'
+        '        <span class="tag"><span class="go">Download .addpack</span></span>\n'
+        '      </a>'
+        % (pack["file"], pack["faces"], html.escape(pack["family"]),
+           html.escape(pack["note"] or pack["source"]), human(pack["bytes"]),
+           html.escape(pack["licence"]))
         for pack in packs
     )
-    preview, preview_css = preview_parts(packs)
-    main = f'''<main>
-  <header class="page-head">
-    <h1>Font packs</h1>
-    <p class="lede">Every family as one signed file the editor can fetch itself. Open <b>Font packs</b> in ADD and tap Download, or take a file here for a manual import. No account.</p>
-    <p class="meta">
-      <span>{len(packs)} packs</span>
-      <span>{faces} faces</span>
-      <span>{human(total)} total</span>
-      <span>SIL Open Font License 1.1</span>
-    </p>
-  </header>
-
-  <section>
-    <h2>How it works</h2>
-    <p class="kicker">Two taps in the app, or one file here</p>
-    <ol class="steps">
-      <li><span>In ADD, open <b>Editor → the font button → Font packs…</b>. The app loads this page’s <code>packs.json</code>.</span></li>
-      <li><span>Tap <b>Download</b> beside a family. The pack is saved on the phone; the family appears in the font list and stays there offline.</span></li>
-      <li><span>Come back to <b>Update</b> or remove a family. A file downloaded from this page can still be imported from the same screen.</span></li>
-    </ol>
-    <p class="callout">Each pack is signed with ECDSA P-256. The app checks that signature and a SHA-256 for every file before it installs anything, so a corrupted or altered download is refused. Opening Font packs reads the list saved on the phone; it fetches that list only when nothing is saved, and a pack only when you tap Download.</p>
-  </section>
-
-  <section>
-    <h2>Preview</h2>
-    <p class="kicker">One regular face from each pack · no controls, no text input</p>
-    <div class="preview-groups">
-{preview}
-    </div>
-    <p class="fine">Every weight and italic is in the pack. For a live specimen and your own line, open the <a href="../fonts/">fonts page</a>.</p>
-  </section>
-
-  <section>
-    <h2>The packs</h2>
-    <p class="kicker">One file per family · the seven Redaction grades are seven packs</p>
-    <div class="cards">
-{cards}
-    </div>
-  </section>
-
-  <section>
-    <h2>What is inside</h2>
-    <p class="kicker">A manifest, the TTFs, and their hashes</p>
-    <ul class="rows">
-      <li><b>manifest.json</b><span>Schema, kind, slug, family, version, licence, source, every style with its file, and every file with its bytes and SHA-256.</span></li>
-      <li><b>Version</b><span>Derived from the file hashes: change a TTF and the pack gets a new name, so a cached download cannot be mistaken for the new one.</span></li>
-      <li><b>Checks</b><span>The app refuses a pack with a bad signature, an unexpected entry, a path it does not like, a size over the cap, or a hash that does not match — and leaves the previous install alone.</span></li>
-      <li><b>manifest.sig</b><span>An ECDSA P-256 signature over the exact manifest bytes. The public key ships inside ADD; the private key never enters this site or the repository.</span></li>
-    </ul>
-  </section>
-</main>'''
-    footer = ('<footer>\n'
-              f'  <span>ADD<span class="dot" aria-hidden="true">·</span>{len(packs)} font packs'
-              f'<span class="dot" aria-hidden="true">·</span>{human(total)}</span>\n'
-              '  <span><a href="../">Index</a><span class="dot" aria-hidden="true">·</span>'
-              '<a href="../fonts/">Fonts</a><span class="dot" aria-hidden="true">·</span>'
-              '<a href="../download/">Download</a></span>\n'
-              '</footer>')
-
-    template = TEMPLATE.read_text(encoding="utf-8")
-    out = re.sub(r"<title>.*?</title>",
-                 "<title>Font packs — signed, and fetched in the editor</title>",
-                 template, count=1, flags=re.S)
-    out = re.sub(r'<meta name="description" content=".*?" />',
-                 '<meta name="description" content="Poppins and the seven '
-                 'Redaction grades as signed packs. Fetch them in the ADD editor or '
-                 'download one here. No account." />',
-                 out, count=1)
-    out = out.replace('<a class="page-name" href="../">Tools</a>',
-                      '<a class="page-name" href="../">Packs</a>')
-    out = out.replace(' aria-current="page"', "")
-    out = re.sub(r"<main>.*?</main>", main, out, count=1, flags=re.S)
-    out = re.sub(r"<footer>.*?</footer>", footer, out, count=1, flags=re.S)
-    out = out.replace("</head>", preview_css + "\n</head>", 1)
-    return out
+    return (
+        PACKS_START + "\n"
+        '  <section id="font-packs">\n'
+        '    <h2>Font packs</h2>\n'
+        '    <p class="kicker">Signed files for the editor · %d packs · %d faces · %s</p>\n'
+        '    <p class="fine">Open <b>Font packs</b> in ADD’s editor and it fetches the list from this site; a file below is the same pack, for a manual import. Nothing is installed until you choose one.</p>\n'
+        '    <div class="cards">\n'
+        '%s\n'
+        '    </div>\n'
+        '    <p class="fine">Each pack is signed with ECDSA P-256. ADD checks that signature and a SHA-256 for every file before it installs anything, so a broken or altered download is refused. The version comes from the file hashes, so a changed typeface gets a new file name.</p>\n'
+        '  </section>\n'
+        '  ' + PACKS_END
+    ) % (len(packs), faces, human(total), cards)
 
 
 def collect() -> tuple[list[dict], str, str]:
@@ -437,7 +307,7 @@ def collect() -> tuple[list[dict], str, str]:
                    ("slug", "family", "version", "faces", "styles", "licence", "source",
                     "note", "file", "bytes", "sha256", "key")} for pack in packs],
     }
-    return packs, json.dumps(listing, indent=2) + "\n", page(packs, total)
+    return packs, json.dumps(listing, indent=2) + "\n", packs_section(packs, total)
 
 
 def write(target: Path) -> None:
@@ -448,7 +318,14 @@ def write(target: Path) -> None:
         keep.add(pack["file"])
         (target / pack["file"]).write_bytes(pack["data"])
     (target / "packs.json").write_text(listing, encoding="utf-8")
-    (target / "index.html").write_text(markup, encoding="utf-8")
+    text = DOWNLOAD.read_text(encoding="utf-8")
+    updated = replace_section(text, markup)
+    if updated == text:
+        raise SystemExit("build_packs: docs/download/index.html has no packs markers")
+    DOWNLOAD.write_text(updated, encoding="utf-8")
+    retired = target / "index.html"
+    if retired.exists():
+        retired.unlink()
     for old in target.glob("*.addpack"):
         if old.name not in keep:
             old.unlink()
@@ -464,10 +341,13 @@ def check() -> int:
             problems.append(f"missing {path.relative_to(ROOT)}")
         elif path.read_bytes() != data:
             problems.append(f"stale {path.relative_to(ROOT)}")
-    if not (OUT / "index.html").is_file():
-        problems.append("missing docs/packs/index.html")
-    elif (OUT / "index.html").read_text(encoding="utf-8") != markup:
-        problems.append("stale docs/packs/index.html")
+    page_text = DOWNLOAD.read_text(encoding="utf-8") if DOWNLOAD.is_file() else ""
+    if not page_text:
+        problems.append("missing docs/download/index.html")
+    elif replace_section(page_text, markup) != page_text:
+        problems.append("stale docs/download/index.html (the packs section)")
+    if (OUT / "index.html").exists():
+        problems.append("docs/packs/index.html is retired; packs live on the download page")
     if not (OUT / "packs.json").is_file():
         problems.append("missing docs/packs/packs.json")
     else:
@@ -497,7 +377,8 @@ def main() -> int:
     write(OUT)
     packs, _, _ = collect()
     print(f"build_packs: {len(packs)} packs, {sum(pack['faces'] for pack in packs)} faces, "
-          f"{human(sum(pack['bytes'] for pack in packs))} in docs/packs/")
+          f"{human(sum(pack['bytes'] for pack in packs))} in docs/packs/, "
+          "listed on docs/download/")
     for pack in packs:
         print(f"  {pack['file']:<32} {pack['faces']:>2} faces  {human(pack['bytes']):>7}")
     return 0

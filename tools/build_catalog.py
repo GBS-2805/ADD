@@ -314,15 +314,14 @@ def check(catalog, count):
         if not app.get("apk"):
             continue
         apk = app["apk"].lstrip("/")
-        for key in ("index", "tools", "download"):
-            if apk not in text[key]:
-                problems.append("%s: no link to %s" % (key, apk))
-        for key in ("tools", "download"):
-            if app["version"] not in text[key]:
-                problems.append("%s: version %s is missing" % (key, app["version"]))
-        for key in ("index", "download"):
-            if human_bytes(app["bytes"]) not in text[key]:
-                problems.append("%s: size %s is missing" % (key, human_bytes(app["bytes"])))
+        # The download page is the only page that carries the APK's address and the
+        # figures measured from it; every other page just points there.
+        if apk not in text["download"]:
+            problems.append("download: no link to %s" % apk)
+        if app["version"] not in text["download"]:
+            problems.append("download: version %s is missing" % app["version"])
+        if human_bytes(app["bytes"]) not in text["download"]:
+            problems.append("download: size %s is missing" % human_bytes(app["bytes"]))
         if app["sha256"] not in text["download"]:
             problems.append("download: SHA-256 out of date")
 

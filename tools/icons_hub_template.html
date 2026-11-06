@@ -77,16 +77,7 @@ __BRANDS__
   <header class="page-head">
     <h1>Icons</h1>
     <p class="lede">__BRANDCOUNT_CAP__ free sets, <b>__TOTAL__ icons</b>, in one offline browser.</p>
-    <a class="cta" href="__ROOT____APK__" download id="apk">
-      <svg class="cta-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M8 12L12 16L16 12M12 16V4M6 20H18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      Download Icons __VERSION__
-    </a>
-    <p class="meta">
-      <span>Icons __VERSION__</span>
-      <span>Android 8.0+</span>
-      <span>No internet permission</span>
-      <span>Signed, no store</span>
-    </p>
+    <p class="fine">The app is on the <a href="__ROOT__download/">download page</a>.</p>
   </header>
 
   <section>
@@ -99,54 +90,27 @@ __BRANDCARDS__
 
   <section>
     <h2>In the app</h2>
-    <p class="kicker">The same page, bundled offline</p>
+    <p class="kicker">The same page, carried with you</p>
     <ul class="rows">
-      <li><b>Every brand</b><span>The left pull-down lists the brands; each one opens its own page with its own catalog.</span></li>
-      <li><b>Categories</b><span>The sets whose vendor publishes categories filter by them beside the name filter; the rest filter by name alone.</span></li>
-      <li><b>Live preview</b><span>Pick an icon and it fills the preview tab. Weight, size and surface repaint it as you press, without touching the file.</span></li>
-      <li><b>Quiet by default</b><span>The whole set hides behind one toggle and scrolls inside its own sheet, so the page is a preview rather than a wall of icons.</span></li>
-      <li><b>Copy the file</b><span>Copy SVG puts the exact markup on the clipboard: 24×24 viewBox, <code>currentColor</code>, no baked weight.</span></li>
-      <li><b>Offline</b><span>Every catalog, the pages and Poppins travel inside the APK. No <code>INTERNET</code> permission, so it cannot phone home.</span></li>
+      <li><b>Four brands</b><span>The left pull-down lists the sets; each one opens its own world of drawings.</span></li>
+      <li><b>Find the right mark</b><span>Filter by the categories the artists use, or search by name.</span></li>
+      <li><b>Live preview</b><span>Pick an icon and it fills the stage; weight, size and surface repaint it as you press.</span></li>
+      <li><b>Quiet by default</b><span>The whole set hides behind one toggle, so the page stays a preview rather than a wall.</span></li>
+      <li><b>Copy SVG</b><span>Take a clean drawing with you, ready for your own work.</span></li>
+      <li><b>Always with you</b><span>Every set lives in the app, so it works without a signal.</span></li>
     </ul>
-  </section>
-
-  <section>
-    <h2>Same files</h2>
-    <p class="kicker">The app reads what this site serves</p>
-    <ul class="rows">
-      __DATALIST__
-    </ul>
-    <p class="fine">Every catalog is generated from its vendor's own source by <code>tools/fetch_icons.py</code>, which also writes these pages. Names and markup cannot drift between the phone and the web, because there is only one copy of each icon.</p>
-  </section>
-
-  <section>
-    <h2>Install</h2>
-    <p class="kicker">Three taps and a warning to dismiss</p>
-    <ol class="steps">
-      <li><span>Tap <b>Download Icons __VERSION__</b> and let it finish.</span></li>
-      <li><span>Open it, allow installs from this source, then tap <b>Install</b>.</span></li>
-      <li><span>Play Protect may call it unrecognised. That is what a self-signed sideload looks like; choose <b>Install anyway</b>.</span></li>
-    </ol>
-    <p class="callout">Updates keep your place in the browser. The app is signed once, so an update installs over the last build.</p>
   </section>
 </main>
 
 <footer>
-  <p>Icons __VERSION__<span class="dot" aria-hidden="true">·</span>app.offline.compress<span class="dot" aria-hidden="true">·</span>__SETLIST__. __LICENCES__ The paid icons sold on the vendors' sites are neither included nor copied.</p>
+  <p>Icons __VERSION__<span class="dot" aria-hidden="true">·</span>one app<span class="dot" aria-hidden="true">·</span>__SETLIST__. __LICENCES__ The paid icons sold on the vendors' sites are neither included nor copied.</p>
   <p><a href="__ROOT__">Index</a><span class="dot" aria-hidden="true">·</span><a href="__ROOT__tools/">Tools</a><span class="dot" aria-hidden="true">·</span><a href="__ROOT__fonts/">Fonts</a><span class="dot" aria-hidden="true">·</span><a href="__ROOT__download/">Download</a><span class="dot" aria-hidden="true">·</span><a href="__ROOT__renders/">Renders</a></p>
 </footer>
 
 <script>
-  // Inside the APK there is no download to make; the page is the app.
+  // Inside the APK the page is the app; the referral just stays a quiet link.
   if (window.IconsApp) {
     document.documentElement.classList.add("in-app");
-    var cta = document.getElementById("apk");
-    if (cta) {
-      var note = document.createElement("p");
-      note.className = "fine";
-      note.textContent = "You are reading this inside the app — there is nothing left to install.";
-      cta.replaceWith(note);
-    }
   }
 </script>
 <script src="__ROOT__assets/site.js" defer></script>

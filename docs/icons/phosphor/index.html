@@ -7,7 +7,7 @@
 <link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml" />
 <title>Phosphor — 1,512 icons, preview and variants</title>
 <meta name="description" content="Phosphor: 1,512 regular weight, outline icons, MIT. Preview one, set weight, size and surface, copy the SVG." />
-<link rel="stylesheet" href="../../assets/site.254272ab85.css" />
+<link rel="stylesheet" href="../../assets/site.a226215efc.css" />
 <style>
   /* Corners: one step for boxes and controls, a smaller one for menu rows. */
   :root { --r: 8px; --r-sm: 5px; }
@@ -753,7 +753,7 @@
   <a href="../../portfolio/">Portfolio<span>3 projects</span></a>
   <a href="../../renders/">Renders<span>gallery</span></a>
   <a href="../../releases/">Releases<span>history</span></a>
-  <p class="drawer-note">Phosphor · 1,512 icons, regular weight, outline, MIT. The app reads the same catalog this page renders.</p>
+  <p class="drawer-note">Phosphor · 1,512 icons, regular weight, outline, MIT. Free to browse; the app carries the set with you.</p>
 </aside>
 
 <main>
@@ -920,7 +920,7 @@
       </button>
     </div>
     <textarea id="snippet" readonly spellcheck="false" aria-label="SVG markup of the selected icon"></textarea>
-    <p class="pop-note">The markup is the file as it ships: a 24×24 <code>viewBox</code>, <code>currentColor</code> so the icon takes the colour of the text around it, and no weight or size baked in — those are the preview's settings, not the file's.</p>
+    <p class="pop-note">The drawing is clean: it takes the colour of the text around it, and no size or weight is baked in.</p>
   </dialog>
 
   <section class="set-panel">
@@ -963,14 +963,13 @@
       <p class="empty" id="empty" hidden>No icon in Phosphor matches that name in that category.</p>
       <div class="panel-foot">
         <span>phosphor-icons/core 2.1.1 · MIT</span>
-        <a href="../../data/phosphor.json"><code>/data/phosphor.json</code></a>
       </div>
     </div>
   </section>
 </main>
 
 <footer>
-  <p>Phosphor is a whole free set from <code>phosphor-icons/core 2.1.1</code>, MIT licensed: 1,512 icons, regular weight, outline. The paid icons sold on the vendor's site are neither included nor copied.</p>
+  <p>Phosphor is a whole free set from phosphor-icons/core 2.1.1, MIT licensed: 1,512 icons, regular weight, outline. The paid icons sold on the vendor's site are neither included nor copied.</p>
   <p><a href="../../icons/">Icons</a><span class="dot" aria-hidden="true">·</span><a href="../../">Index</a><span class="dot" aria-hidden="true">·</span><a href="../../fonts/">Fonts</a><span class="dot" aria-hidden="true">·</span><a href="../../download/">Download</a></p>
 </footer>
 
@@ -1283,17 +1282,19 @@
     loadCatalog(entry.data).then(function (payload) {
       var next = payload.icons || [];
       if (!next.length) { throw new Error("the catalog is empty"); }
-      var byName = {};
-      next.forEach(function (item) { byName[item.name] = item; });
       applyStyle(entry);
       currentPayload = payload;
+      // The map comes from the tinted list, not the raw one: a colour chosen before
+      // the switch is part of the glyph now, so the stage must paint that copy.
       items = displayed(next);
+      var byName = {};
+      items.forEach(function (item) { byName[item.name] = item; });
       CATS = catsFor(payload);
       chosen = names.map(function (name) { return byName[name]; }).filter(Boolean);
       chosenSet = {};
       chosen.forEach(function (item) { chosenSet[item.name] = true; });
       bulkFilled = false;
-      selected = byName[keepName] || next[0];
+      selected = byName[keepName] || items[0];
       store(STYLE_KEY, entry.slug);
       markStyleSegs();
       renderCats();
@@ -1654,6 +1655,10 @@
     return { name: item.name, cat: item.cat, attrs: item.attrs, body: body };
   }
 
+  // The chosen ink. Ink styles take it as currentColor; Duo and Flat are tinted
+  // rather than flattened, so their second tone survives as an opacity. With Auto
+  // (no ink) a palette style keeps the vendor's colours, because that palette is
+  // what makes it a style of its own.
   function displayed(list) {
     if (!COLOUR || !ink) { return list; }
     var key = (STYLE ? STYLE.slug : "") + ink;
@@ -2381,6 +2386,6 @@
     });
 })();
 </script>
-<script src="../../assets/site.3b1f9777a2.js" defer></script>
+<script src="../../assets/site.54828b32d2.js" defer></script>
 </body>
 </html>

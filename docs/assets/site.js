@@ -118,6 +118,18 @@
     drawer.insertBefore(searchLink, drawerNote);
   }
 
+  // The note is the tab's About: a small heading over the sentence, so it reads as
+  // a description of the work rather than a stray caption under the links.
+  if (drawerNote && !drawerNote.closest(".drawer-about")) {
+    var about = document.createElement("div");
+    about.className = "drawer-about";
+    var aboutLabel = document.createElement("p");
+    aboutLabel.className = "drawer-about-label";
+    aboutLabel.textContent = "About this";
+    drawerNote.parentNode.insertBefore(about, drawerNote);
+    about.append(aboutLabel, drawerNote);
+  }
+
   // The look controls are one row at the foot of the tab: the three palette chips
   // with the light/dark switch at the end of them. The switch carries no word of its
   // own -- the sun or the moon says what it does -- and both choices are written to
