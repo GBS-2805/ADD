@@ -11,10 +11,10 @@ the pages.
 
 ## Status
 
-- **ADD 3.6** — APK [`dist/ADD-3.6.apk`](dist/ADD-3.6.apk) (6 MB, signed v1+v2),
-  published as `docs/ADD-3.6.apk`. Package `app.offline.compress` — the merge kept
+- **ADD 3.7** — APK [`dist/ADD-3.7.apk`](dist/ADD-3.7.apk) (6 MB, signed v1+v2),
+  published as `docs/ADD-3.7.apk`. Package `app.offline.compress` — the merge kept
   the id so installed copies update in place — minSdk 26 · targetSdk 35 ·
-  versionCode 38. One package, four tools: the whole shelf rides inside it — every
+  versionCode 39. One package, four tools: the whole shelf rides inside it — every
   page, all four brands, 4,373 glyphs, the captures, the artboards, the stylesheet and
   Poppins — served to a WebView from a private origin; the editor and the compressor are
   native.
@@ -190,7 +190,7 @@ export ANDROID_SDK_ROOT=$HOME/android-sdk   # needs build-tools;35.0.0 + platfor
 ./build.sh stage      # the web bundle only: no JDK or SDK needed
 ```
 
-Output: `dist/ADD-3.6.apk`. Copy it to `docs/` and
+Output: `dist/ADD-3.7.apk`. Copy it to `docs/` and
 re-run `python3 tools/build_catalog.py` so the pages, the JSON and the checksums move
 together. Signing uses `$HOME/tools/compress-keystore.jks` (created on first build,
 password `android`). Replace it with
