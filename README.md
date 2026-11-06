@@ -41,8 +41,8 @@ Fifteen pages, one stylesheet, no framework:
 | Page | What it is |
 | --- | --- |
 | `docs/index.html` | Index: the material, the app, the palette, the JSON list |
-| `docs/tools/` | The four tools in detail, install steps, a link to the release notes |
-| `docs/icons/` | Icons landing: download, the four brands, what the tool does |
+| `docs/tools/` | The four tools in detail, with one line to the Download page |
+| `docs/icons/` | Icons landing: the four brands, what each set does, one line to Download |
 | `docs/icons/lineicons/` | Lineicons: preview tab, variants, the set (generated) |
 | `docs/icons/coolicons/` | Coolicons: preview tab, variants, the set (generated) |
 | `docs/icons/phosphor/` | Phosphor: preview tab, variants, the set (generated) |
