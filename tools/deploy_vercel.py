@@ -10,8 +10,9 @@ host that still works.
     python3 tools/deploy_vercel.py                  # deploy, verify, rewrite links
     python3 tools/deploy_vercel.py --links-only URL # rewrite links to a known host
 
-The token is read from VERCEL_TOKEN (Vercel's own variable) and never passed on a
-command line, so it does not land in a process listing or a shell history.
+The deploy token is read from VERCEL_ARTBASE_TOKEN when set, otherwise VERCEL_TOKEN;
+the storage report uses VERCEL_ADMIN_TOKEN (or VERCEL_TOKEN). Tokens reach the CLI
+through the environment, never a command line.
 """
 
 import argparse
@@ -32,6 +33,7 @@ CLI = ("npx", "-y", "vercel@latest")
 
 sys.path.insert(0, str(ROOT / "tools"))
 from build_site import routes as site_routes  # noqa: E402 - the tools directory is on the path above
+from deploy_storage import check as storage_check  # noqa: E402 - the tools directory is on the path above
 
 # Text files that can hold the origin. The generated trees are skipped: they are
 # rebuilt from templates or from git and never carry a link back to the host.
@@ -42,6 +44,10 @@ TEXT_SUFFIXES = {".json", ".java", ".html", ".md", ".py", ".js", ".css", ".xml",
 
 def site():
     return json.loads(SITE.read_text(encoding="utf-8"))
+
+
+def deploy_token():
+    return os.environ.get("VERCEL_ARTBASE_TOKEN") or os.environ.get("VERCEL_TOKEN")
 
 
 def origin_of(url):
@@ -161,17 +167,30 @@ def palette_current():
     print("  " + verdict)
 
 
+def storage_gate():
+    """Gate every docs upload on a successful, non-critical storage report."""
+    storage_check(strict=True)
+
+
 def deploy():
-    if not os.environ.get("VERCEL_TOKEN"):
-        sys.exit("VERCEL_TOKEN is not set. Add it in this project under Settings -> "
-                 "Secrets, then run again; --check works without it.")
+    token = deploy_token()
+    if not token:
+        sys.exit("VERCEL_ARTBASE_TOKEN (or VERCEL_TOKEN) is not set. Add it in this "
+                 "project under Settings -> Secrets, then run again; --check works "
+                 "without it.")
+    storage_gate()
     palette_current()
     assets_current()
     refresh_history()
     cmd = [*CLI, "deploy", "docs", "--prod", "--yes",
            "--project", PROJECT, "--create-if-missing"]
     print("$ " + " ".join(cmd), flush=True)
-    proc = subprocess.run(cmd, cwd=ROOT, capture_output=True, text=True)
+    # The deploy child gets only the project-scoped token, never the admin token.
+    env = {key: value for key, value in os.environ.items()
+           if key not in {"VERCEL_ADMIN_TOKEN", "VERCEL_HANDOFF_TOKEN",
+                          "VERCEL_REVIEW_TOKEN", "VERCEL_SHOTS_TOKEN"}}
+    env["VERCEL_TOKEN"] = token
+    proc = subprocess.run(cmd, cwd=ROOT, capture_output=True, text=True, env=env)
     out = proc.stdout + proc.stderr
     print(out.rstrip())
     if proc.returncode != 0:
@@ -263,8 +282,9 @@ def main():
         problems, verdict = palette_problems()
         print("palette       " + (verdict.replace("palette: ", "", 1) if verdict else
                                  "FAILED - the deploy would refuse the upload"))
-        print("VERCEL_TOKEN is set" if os.environ.get("VERCEL_TOKEN") else
-              "VERCEL_TOKEN is not set - deploy would stop here")
+        print("deploy token is set" if deploy_token() else
+              "deploy token is not set - deploy would stop here")
+        print("storage gate  strict - critical or unavailable stops the deploy")
         return
 
     new = origin_of(args.links_only) if args.links_only else deploy()

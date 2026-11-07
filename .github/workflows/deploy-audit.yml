@@ -1,0 +1,58 @@
+# Daily deployment audit for the three tracked Vercel projects.
+#
+# This is an alert, not an immutable audit system: the JSONL artifact lasts 90 days
+# and the check fails on any deletion in the window, including a planned cleanup or an
+# automatic retention deletion. Inspect the artifact and record the reason.
+name: deployment-audit
+
+on:
+  schedule:
+    - cron: "17 6 * * *" # 06:17 UTC daily
+  workflow_dispatch:
+
+concurrency:
+  group: deployment-audit
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Require Vercel audit credentials
+        env:
+          VERCEL_ADMIN_TOKEN: ${{ secrets.VERCEL_ADMIN_TOKEN }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          if [ -z "${VERCEL_ADMIN_TOKEN}" ] && [ -z "${VERCEL_TOKEN}" ]; then
+            echo "::error::Add VERCEL_ADMIN_TOKEN (preferred) or VERCEL_TOKEN under Settings -> Secrets and variables -> Actions."
+            exit 1
+          fi
+      - name: Check deletions and export activity
+        env:
+          VERCEL_ADMIN_TOKEN: ${{ secrets.VERCEL_ADMIN_TOKEN }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_SCOPE: alfredglezespitia-1605
+        run: |
+          mkdir -p artifacts/audit
+          python3 tools/deploy_audit.py --since 1d \
+            --out artifacts/audit/vercel-activity.jsonl \
+            --fail-on-delete
+      - name: Upload audit evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: vercel-audit-${{ github.run_id }}
+          path: artifacts/audit/vercel-activity.jsonl
+          if-no-files-found: warn
+          retention-days: 90
