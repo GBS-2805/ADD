@@ -18,6 +18,7 @@
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
+        android:usesCleartextTraffic="false"
         android:label="ADD"
         android:roundIcon="@mipmap/ic_launcher"
         android:supportsRtl="true"
@@ -64,13 +65,14 @@
             android:label="Compare"
             android:parentActivityName=".MainActivity" />
 
-        <!-- The editor: photo, type, effects, export. Native, and reachable from the
-             drawer and from the Tools page through the bridge. -->
+        <!-- The editor: photo, type, presets, adjustments, layers and export. Native,
+             and reachable from the drawer and from the Tools page through the bridge. -->
         <activity
             android:name=".EditorActivity"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|uiMode"
             android:exported="false"
-            android:label="Editor" />
+            android:label="Editor"
+            android:windowSoftInputMode="adjustResize" />
 
         <!-- Font packs: the site's list, its packs, and the offline copy on the phone.
              Network use is explicit here: the reader taps Download. -->

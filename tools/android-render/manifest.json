@@ -1,0 +1,22 @@
+{
+  "showcase": {"palette": "green", "mode": "dark"},
+  "themes": [
+    {"palette": "green", "mode": "dark"},
+    {"palette": "green", "mode": "light"},
+    {"palette": "moss", "mode": "dark"},
+    {"palette": "moss", "mode": "light"},
+    {"palette": "navy", "mode": "dark"},
+    {"palette": "navy", "mode": "light"}
+  ],
+  "screens": [
+    {"slug": "compress", "title": "Compress"},
+    {"slug": "editor", "title": "Editor · Quick"},
+    {"slug": "photo", "title": "Editor · Photo"},
+    {"slug": "presets", "title": "Editor · Presets"},
+    {"slug": "type", "title": "Editor · Type"},
+    {"slug": "layers", "title": "Editor · Layers"},
+    {"slug": "colour", "title": "Editor · Colour"},
+    {"slug": "compare", "title": "Compare"},
+    {"slug": "packs", "title": "Font packs"}
+  ]
+}

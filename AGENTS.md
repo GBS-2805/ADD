@@ -56,9 +56,13 @@ draw the Android app from its `dp`/`sp` values and do not recreate a screen for 
 gallery: a reconstruction reads as a screenshot without being one, and this was
 already shipped once and removed.
 
-The app cannot be captured on this VM (see below), so the gallery carries no app
-images. When an image stops being a capture, delete the file from `docs/renders/`
-and its entry from the gallery in the same change; leave no orphan PNGs behind.
+The app's native screens are captures too: `tools/android-render/` hosts the real
+activities in Robolectric and draws them through the app's own resources, views and
+paint code. Those review renders live in `artifacts/android/`; `docs/renders/` stays
+the gallery of site pages. The Shelf and Studio are Chromium WebViews and cannot be
+captured this way -- do not draw them. When an image stops being a capture, delete
+the file from `docs/renders/` and its entry from the gallery in the same change;
+leave no orphan PNGs behind.
 
 ### How renders are sent (learned the hard way)
 
@@ -229,14 +233,40 @@ the accent -- so its labels keep the near-black band ink while Moss and Navy get
 lime and teal. Never spend the accent on body copy or on link words: it sits at 1.03:1
 against the palette's band words and would read as a second, competing ink.
 
-### The app cannot be captured here
+### The app: native screens render; the emulator still cannot
 
 Do not spend another session on the emulator. `/dev/kvm` exists but this account is
 not in the `kvm` group and `sudo` fails with the "no new privileges" flag, so the
 emulator runs under TCG. That path does boot (about 195 s), installs and starts the
 app, but `system_server` stays in a permanent "Application Not Responding" state
-and every screencap is a flat black frame, at any `wm size`/`density`. Report app
-changes as unverified on device rather than illustrating them.
+and every screencap is a flat black frame, at any `wm size`/`density`.
+
+The native screens do render without an emulator. `tools/android-render/` compiles
+`app/res` with `aapt2`, hosts the activities in Robolectric with `NATIVE` graphics,
+and draws their real content views at 1080x2400. It audits every one of the 54
+screen/theme combinations in memory and writes only the nine green-dark
+representatives into `artifacts/android/`. It covers Compress, Editor Quick, its
+Photo/Presets/Type/Layers/Colour sheets, Compare and Font packs, in all six themes.
+The method is the Android-renders handoff: binary resources,
+`android-all-instrumented`, and Skia through the platform runtime. See
+`tools/android-render/README.md`:
+
+```bash
+bash tools/android-render/setup.sh
+bash tools/android-render/render.sh
+```
+
+`render.sh` stages the run and replaces `artifacts/android/` only after all 54
+combinations pass; a failure keeps the previous set. `manifest.json` is the expected
+matrix and names the showcase pair; `review.py` requires exactly the nine showcase
+PNGs, a passing `render-audit.json` with 54 checks, and 1080×2400 dimensions before
+it rebuilds `artifacts/shots/` from scratch for the public review. The screenshots
+are a current set, not an archive, and are never committed.
+
+This verifies drawing, not touch behaviour, and not a WebView. The Shelf and the
+Studio tab are Chromium surfaces; Robolectric has no Chromium compositor, so report
+those as uncaptured rather than faking a screenshot. On-device interaction remains
+unverified.
 
 ## Project shape
 
@@ -609,14 +639,45 @@ where the notes keep the history they shipped with.Icons, Fonts, Compress and th
   private key stays outside the repo; `tools/pack-signing-public.pem` and the copy in
   `PackKey.java` are committed, so a new key needs an app update.
 - The editor is native (`EditorActivity` and `EditorView`): a photo decoded at up to
-  2048 px with its EXIF rotation applied, any number of type lines, six effects, and
-  an export to `Pictures/Editor` through MediaStore. Type is set in the three bundled
+  2048 px with its EXIF rotation applied, any number of type lines, seven built-in
+  presets and the reader's own saved looks (`StyleStore`, in the same preferences
+  file), every one of them thumbnailed from the current canvas; a saved look also
+  carries every line's colour, tracking, leading, opacity and shadow in order, so a
+  whole poster returns in one tap, with an UNDO LOOK chip that stays on the stage
+  until the next edit; five live adjustments, and an export to
+  `Pictures/Editor` through MediaStore. The colour sheet is a real
+  mixer -- a hue/saturation wheel with a brightness bar, 36 swatches, a hex field and
+  RGB sliders -- and paints either the selected
+  line or the canvas behind the photo; TYPE adds alignment, letter spacing, line
+  height, opacity and shadow; PHOTO turns, flips, resets and colours the canvas; the
+  layer panel reorders by drag or arrows, hides, duplicates, centres and deletes.
+  Every sheet goes through `showDialog()`, which anchors it to the bottom of the
+  screen, slides it up with `R.style.SheetAnimation`, and lays it on `bg_sheet` -- the
+  same rounded surface as the dock, never the platform's grey box. Its handle and
+  heading are the grab zone: pull down to close the sheet, and on Presets and Layers
+  pull up to grow the list until the card meets the top of the screen (or tap the
+  header to open and close that list). A sheet reopens at the height it was left,
+  remembered per sheet in `compress_settings`. `SheetDrag` moves the window, so the
+  card slides rather than clips. The colour sheet
+  lays its action row under the palette and sizes to its controls, with the wheel and
+  its brightness bar beside the hex field and RGB sliders, so every control is on
+  screen rather than behind a scroll pane. The dock is that surface behind a `bg_handle`. In the native editor, layer grouping, shared version history and any
+  real-time editing are deliberately absent: the app is offline with no accounts or
+  sync backend, so they would need a service, not a control. Type is set in the three bundled
   Poppins faces or any face from a downloaded pack. `Font packs` is `PacksActivity`: it
   lists the cached `packs.json`, downloads only on tap, and hands the file to
   `PackStore`, which checks the listing's outer SHA-256, then the manifest signature
   against `PackKey`, then a SHA-256 per entry before installing atomically into
   `filesDir/font-packs/<slug>/<version>/`. The manual `.addpack` picker remains as a
-  secondary link for a file already on the phone.
+  secondary link for a file already on the phone. The editor's QUICK/STUDIO tabs keep
+  the Fabric Studio in the same activity: a WebView over `assets/www/studio` running
+  vendored Fabric.js 5.3.0 (MIT) with a custom `AddText` class (gradient, outline,
+  shadow and blend), fast-drag mode, grouping, photo import and a 1080x1350 PNG export
+  to `Pictures/Studio`. `overlays.js` draws eight textures locally — light leak, grain,
+  bokeh, paper, dust, vignette, window shadows and lens flare — and the page exposes
+  opacity, blend, shuffle, remove, on-canvas placement handles and X/Y/scale/rotation
+  controls; nothing is fetched and no stock asset is bundled. It is a spike, not wired
+  to saved looks, and it is unverified on a device.
 - `python3 tools/check_all.py` is the single verdict: palette, asset hashes, site tree,
   catalog, Figma structure, Pantone sheet, note dating and the staged bundle, one line
   each, all of them run so one pass shows everything. `--browser <url>` adds the

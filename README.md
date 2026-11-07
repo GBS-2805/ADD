@@ -171,6 +171,7 @@ tools/fetch_icons.py                               the icon pages + the chunked 
 tools/icons_hub_template.html                      the Icons app landing page
 tools/icons_brand_template.html                    the per-brand preview page
 tools/render_pages.js                              captures every page and writes the gallery
+tools/android-render/                             Robolectric native app renders (review PNGs)
 tools/check_menu.js                                menu ARIA and focus-return regression
 tools/build_site.py                                page manifest, sitemap, robots, search page
 tools/search_template.html                         the search page: section chips, arrow keys
@@ -215,12 +216,27 @@ Coolicons preview, the open set and a variant, fonts, portfolio and download at
 1300×900, then the index, its two menus and both icon pages at 390×844 — and prints
 console errors and horizontal overflow.
 
-**The Android app cannot be captured on this machine**, so the gallery shows no app
-screens. `/dev/kvm` exists but the account here is not in the `kvm` group and `sudo`
-is blocked by `no_new_privs`, so the emulator falls back to software emulation;there it boots, installs and starts the app fine, but Android's `system_server` sits in a
-permanent "Application Not Responding" state and every screenshot comes back as a
-flat black frame. Earlier versions of this README shipped screens drawn from the
-layout's `dp` values; those were removed along with the renderer that produced them.
+**The Android app's native screens can now be rendered without an emulator.**
+`tools/android-render/` compiles `app/res` with `aapt2` and hosts the real activities
+in Robolectric's `NATIVE` graphics mode, so the layouts, themes, drawables, Poppins
+faces and the `EditorView`/`ComparisonView` paint code are the app's own. It audits
+Compress, Editor Quick, the Photo/Presets/Type/Layers/Colour sheets, Compare and
+Font packs in all six themes at 1080x2400, then writes only the nine green-dark
+representatives into `artifacts/android/`; `render-audit.json` records the 54
+palette and layout checks behind them:
+
+```bash
+bash tools/android-render/setup.sh
+bash tools/android-render/render.sh
+```
+
+The Shelf and the Studio tab are Chromium WebViews; Robolectric has no Chromium
+compositor, so those remain uncaptured rather than reconstructed. The emulator is
+still unusable here: `/dev/kvm` exists but the account is not in the `kvm` group and
+`sudo` is blocked by `no_new_privs`, so it runs under TCG, `system_server` sits in a
+permanent "Application Not Responding" state, and every screencap is a flat black
+frame. Earlier versions of this README shipped screens drawn from the layout's `dp`
+values; those were removed along with the renderer that produced them.
 
 ## The address is rented, not owned
 

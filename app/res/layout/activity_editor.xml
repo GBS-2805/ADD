@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
   The editor, in the app's own clothes: a band across the top, the stage in the
-  middle, and the controls a thumb reaches on a phone at the bottom. Every colour is
+  middle, and a rounded tool dock a thumb reaches at the bottom. Every colour is
   a theme attribute, so all six palettes repaint it without a second layout.
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -13,7 +13,7 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="52dp"
+        android:layout_height="64dp"
         android:background="?attr/band"
         android:gravity="center_vertical"
         android:orientation="horizontal"
@@ -34,15 +34,31 @@
             android:textColor="?attr/bandInk"
             android:textSize="28sp" />
 
-        <TextView
+        <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:fontFamily="@font/poppins_semibold"
-            android:letterSpacing="0.02"
-            android:text="Editor"
-            android:textColor="?attr/bandInk"
-            android:textSize="16sp" />
+            android:orientation="vertical"
+            android:paddingTop="2dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/poppins_semibold"
+                android:letterSpacing="0.02"
+                android:text="Editor"
+                android:textColor="?attr/bandInk"
+                android:textSize="18sp" />
+
+            <TextView
+                android:id="@+id/editorSubtitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:letterSpacing="0.1"
+                android:text="QUICK TOOLS &#183; OFFLINE"
+                android:textColor="?attr/bandDim"
+                android:textSize="9sp" />
+        </LinearLayout>
 
         <TextView
             android:id="@+id/photoButton"
@@ -54,49 +70,222 @@
             android:fontFamily="@font/poppins_semibold"
             android:gravity="center"
             android:letterSpacing="0.08"
-            android:paddingLeft="10dp"
-            android:paddingRight="10dp"
+            android:paddingLeft="8dp"
+            android:paddingRight="8dp"
             android:text="PHOTO"
             android:textColor="?attr/bandInk"
-            android:textSize="11sp" />
+            android:textSize="10sp" />
 
         <TextView
             android:id="@+id/exportButton"
             android:layout_width="wrap_content"
-            android:layout_height="40dp"
-            android:background="@drawable/bg_primary"
+            android:layout_height="38dp"
+            android:background="@drawable/bg_chip"
             android:clickable="true"
             android:focusable="true"
             android:fontFamily="@font/poppins_semibold"
             android:gravity="center"
             android:letterSpacing="0.08"
-            android:paddingLeft="14dp"
-            android:paddingRight="14dp"
+            android:paddingLeft="12dp"
+            android:paddingRight="12dp"
             android:text="EXPORT"
             android:textColor="?attr/accentInk"
-            android:textSize="11sp" />
+            android:textSize="10sp" />
     </LinearLayout>
 
-    <app.offline.compress.EditorView
-        android:id="@+id/stage"
+    <LinearLayout
+        android:id="@+id/editorTabs"
+        android:layout_width="match_parent"
+        android:layout_height="44dp"
+        android:background="?attr/card"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingLeft="12dp"
+        android:paddingRight="12dp">
+
+        <TextView
+            android:id="@+id/quickTab"
+            android:layout_width="0dp"
+            android:layout_height="36dp"
+            android:layout_weight="1"
+            android:background="@drawable/bg_chip"
+            android:clickable="true"
+            android:contentDescription="Quick editor tools"
+            android:focusable="true"
+            android:fontFamily="@font/poppins_semibold"
+            android:gravity="center"
+            android:letterSpacing="0.08"
+            android:text="QUICK"
+            android:textColor="?attr/accentInk"
+            android:textSize="10sp" />
+
+        <TextView
+            android:id="@+id/studioTab"
+            android:layout_width="0dp"
+            android:layout_height="36dp"
+            android:layout_marginStart="6dp"
+            android:layout_weight="1"
+            android:background="@drawable/bg_ghost"
+            android:clickable="true"
+            android:contentDescription="Studio canvas tools"
+            android:focusable="true"
+            android:fontFamily="@font/poppins_semibold"
+            android:gravity="center"
+            android:letterSpacing="0.08"
+            android:text="STUDIO"
+            android:textColor="?attr/on"
+            android:textSize="10sp" />
+    </LinearLayout>
+
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
-        android:background="?attr/page" />
+        android:layout_weight="1">
+
+        <app.offline.compress.EditorView
+            android:id="@+id/stage"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="?attr/page" />
+
+        <TextView
+            android:id="@+id/undoLookButton"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:layout_gravity="bottom|center_horizontal"
+            android:layout_marginBottom="14dp"
+            android:background="@drawable/bg_chip"
+            android:clickable="true"
+            android:contentDescription="Undo the last saved look"
+            android:focusable="true"
+            android:fontFamily="@font/poppins_semibold"
+            android:gravity="center"
+            android:letterSpacing="0.06"
+            android:paddingLeft="14dp"
+            android:paddingRight="14dp"
+            android:text="UNDO LOOK"
+            android:textColor="?attr/accentInk"
+            android:textSize="10sp"
+            android:visibility="gone" />
+
+        <FrameLayout
+            android:id="@+id/studioHost"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone" />
+    </FrameLayout>
 
     <LinearLayout
+        android:id="@+id/dock"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="?attr/card"
+        android:background="@drawable/bg_sheet"
         android:orientation="vertical"
         android:paddingLeft="12dp"
-        android:paddingTop="10dp"
+        android:paddingTop="8dp"
         android:paddingRight="12dp"
         android:paddingBottom="10dp">
+
+        <View
+            android:layout_width="36dp"
+            android:layout_height="4dp"
+            android:layout_gravity="center_horizontal"
+            android:background="@drawable/bg_handle" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="7dp"
+            android:letterSpacing="0.1"
+            android:text="QUICK TOOLS"
+            android:textColor="?attr/onDim"
+            android:textSize="9sp" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/typeButton"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:background="@drawable/bg_ghost"
+                android:clickable="true"
+                android:contentDescription="Text style and spacing"
+                android:focusable="true"
+                android:fontFamily="@font/poppins_semibold"
+                android:gravity="center"
+                android:letterSpacing="0.05"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp"
+                android:text="TYPE"
+                android:textColor="?attr/on"
+                android:textSize="10sp" />
+
+            <TextView
+                android:id="@+id/effectButton"
+                android:layout_width="0dp"
+                android:layout_height="40dp"
+                android:layout_marginStart="6dp"
+                android:layout_weight="1"
+                android:background="@drawable/bg_ghost"
+                android:clickable="true"
+                android:contentDescription="Photo preset"
+                android:ellipsize="end"
+                android:focusable="true"
+                android:gravity="center"
+                android:letterSpacing="0.05"
+                android:paddingLeft="6dp"
+                android:paddingRight="6dp"
+                android:singleLine="true"
+                android:text="ORIGINAL"
+                android:textColor="?attr/on"
+                android:textSize="10sp" />
+
+            <TextView
+                android:id="@+id/adjustButton"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:layout_marginStart="6dp"
+                android:background="@drawable/bg_ghost"
+                android:clickable="true"
+                android:contentDescription="Adjust the photo"
+                android:focusable="true"
+                android:fontFamily="@font/poppins_semibold"
+                android:gravity="center"
+                android:letterSpacing="0.05"
+                android:paddingLeft="8dp"
+                android:paddingRight="8dp"
+                android:text="ADJUST"
+                android:textColor="?attr/on"
+                android:textSize="10sp" />
+
+            <TextView
+                android:id="@+id/layersButton"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:layout_marginStart="6dp"
+                android:background="@drawable/bg_ghost"
+                android:clickable="true"
+                android:contentDescription="Reorder text layers"
+                android:focusable="true"
+                android:fontFamily="@font/poppins_semibold"
+                android:gravity="center"
+                android:letterSpacing="0.05"
+                android:paddingLeft="8dp"
+                android:paddingRight="8dp"
+                android:text="LAYERS"
+                android:textColor="?attr/on"
+                android:textSize="10sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="7dp"
             android:gravity="center_vertical"
             android:orientation="horizontal">
 
@@ -110,8 +299,8 @@
                 android:fontFamily="@font/poppins_semibold"
                 android:gravity="center"
                 android:letterSpacing="0.06"
-                android:paddingLeft="12dp"
-                android:paddingRight="12dp"
+                android:paddingLeft="11dp"
+                android:paddingRight="11dp"
                 android:text="+ TEXT"
                 android:textColor="?attr/on"
                 android:textSize="11sp" />
@@ -120,7 +309,7 @@
                 android:id="@+id/fontButton"
                 android:layout_width="0dp"
                 android:layout_height="40dp"
-                android:layout_marginStart="8dp"
+                android:layout_marginStart="6dp"
                 android:layout_weight="1"
                 android:background="@drawable/bg_chip"
                 android:clickable="true"
@@ -135,27 +324,38 @@
                 android:textSize="11sp" />
 
             <TextView
-                android:id="@+id/effectButton"
-                android:layout_width="wrap_content"
+                android:id="@+id/colourButton"
+                android:layout_width="40dp"
                 android:layout_height="40dp"
-                android:layout_marginStart="8dp"
-                android:background="@drawable/bg_ghost"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
                 android:clickable="true"
+                android:contentDescription="Text colour"
                 android:focusable="true"
-                android:fontFamily="@font/poppins_semibold"
                 android:gravity="center"
-                android:letterSpacing="0.06"
-                android:paddingLeft="10dp"
-                android:paddingRight="10dp"
-                android:text="NONE"
+                android:includeFontPadding="false"
+                android:text="&#9679;"
                 android:textColor="?attr/on"
-                android:textSize="10sp" />
+                android:textSize="24sp" />
+
+            <TextView
+                android:id="@+id/deleteButton"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:clickable="true"
+                android:contentDescription="Delete the selected line"
+                android:focusable="true"
+                android:gravity="center"
+                android:includeFontPadding="false"
+                android:text="&#10005;"
+                android:textColor="?attr/onDim"
+                android:textSize="15sp" />
         </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="6dp"
+            android:layout_marginTop="4dp"
             android:gravity="center_vertical"
             android:orientation="horizontal">
 
@@ -189,41 +389,13 @@
                 android:text="48"
                 android:textColor="?attr/on"
                 android:textSize="13sp" />
-
-            <TextView
-                android:id="@+id/colourButton"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:background="?android:attr/selectableItemBackgroundBorderless"
-                android:clickable="true"
-                android:contentDescription="Text colour"
-                android:focusable="true"
-                android:gravity="center"
-                android:includeFontPadding="false"
-                android:text="&#9679;"
-                android:textColor="?attr/on"
-                android:textSize="24sp" />
-
-            <TextView
-                android:id="@+id/deleteButton"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:background="?android:attr/selectableItemBackgroundBorderless"
-                android:clickable="true"
-                android:contentDescription="Delete the selected line"
-                android:focusable="true"
-                android:gravity="center"
-                android:includeFontPadding="false"
-                android:text="&#10005;"
-                android:textColor="?attr/onDim"
-                android:textSize="15sp" />
         </LinearLayout>
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
-            android:text="Tap a line to select &#183; drag to move &#183; long-press to edit"
+            android:layout_marginTop="1dp"
+            android:text="Tap a line to move &#183; long-press to edit &#183; TYPE for spacing"
             android:textColor="?attr/onDim"
             android:textSize="10sp" />
     </LinearLayout>

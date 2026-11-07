@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>app.offline</groupId>
+  <artifactId>add-android-render</artifactId>
+  <version>1.0</version>
+  <packaging>jar</packaging>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <maven.compiler.source>8</maven.compiler.source>
+    <maven.compiler.target>8</maven.compiler.target>
+    <robolectric.version>4.14.1</robolectric.version>
+    <render.root>${project.basedir}/../..</render.root>
+    <add.out>${render.root}/artifacts/android</add.out>
+    <android.jar>${env.ANDROID_SDK_ROOT}/platforms/android-35/android.jar</android.jar>
+    <render.resourceApk>${render.root}/build/android-render/resources.apk</render.resourceApk>
+    <render.manifest>${render.root}/app/AndroidManifest.xml</render.manifest>
+  </properties>
+
+  <dependencies>
+    <!-- The app and the platform are compiled and packaged by setup.sh. -->
+    <dependency>
+      <groupId>app.offline</groupId>
+      <artifactId>add-app</artifactId>
+      <version>1</version>
+      <scope>system</scope>
+      <systemPath>${render.root}/build/android-render/lib/add-app.jar</systemPath>
+    </dependency>
+    <dependency>
+      <groupId>com.google.android</groupId>
+      <artifactId>android</artifactId>
+      <version>35</version>
+      <scope>system</scope>
+      <systemPath>${android.jar}</systemPath>
+    </dependency>
+
+    <!-- Robolectric's own POM asks for the monitor AAR. setup.sh extracts its
+         classes.jar and supplies that as a plain jar, because Maven puts an AAR
+         zip on the classpath without its classes. -->
+    <dependency>
+      <groupId>androidx.test</groupId>
+      <artifactId>monitor</artifactId>
+      <version>1.7.2</version>
+      <scope>system</scope>
+      <systemPath>${render.root}/build/android-render/lib/monitor-1.7.2.jar</systemPath>
+    </dependency>
+
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.13.2</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.robolectric</groupId>
+      <artifactId>robolectric</artifactId>
+      <version>${robolectric.version}</version>
+      <scope>test</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>androidx.test</groupId>
+          <artifactId>monitor</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>androidx.test.espresso</groupId>
+          <artifactId>espresso-idling-resource</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>org.robolectric</groupId>
+      <artifactId>nativeruntime</artifactId>
+      <version>${robolectric.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.robolectric</groupId>
+      <artifactId>nativeruntime-dist-compat</artifactId>
+      <version>1.0.16</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <testResources>
+      <testResource>
+        <directory>src/test/resources</directory>
+        <filtering>true</filtering>
+      </testResource>
+    </testResources>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.13.0</version>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>3.2.5</version>
+        <configuration>
+          <useFile>false</useFile>
+          <argLine>--add-opens java.base/java.io=ALL-UNNAMED --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.util=ALL-UNNAMED --add-opens java.base/java.nio=ALL-UNNAMED</argLine>
+          <systemPropertyVariables>
+            <add.root>${render.root}</add.root>
+            <add.out>${add.out}</add.out>
+            <robolectric.graphicsMode>NATIVE</robolectric.graphicsMode>
+            <robolectric.offline>true</robolectric.offline>
+            <robolectric.dependency.dir>${render.root}/build/android-render/deps</robolectric.dependency.dir>
+            <robolectric.logging>stdout</robolectric.logging>
+            <java.awt.headless>true</java.awt.headless>
+          </systemPropertyVariables>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+</project>

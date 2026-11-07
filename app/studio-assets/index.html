@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>ADD Studio</title>
+<link rel="stylesheet" href="studio.css">
+</head>
+<body>
+<header>
+  <button id="back" aria-label="Back">&#8249;</button>
+  <div class="title">
+    <h1>Studio</h1>
+    <p>FABRIC+ SPIKE &middot; OFFLINE</p>
+  </div>
+  <button id="photo">Photo</button>
+  <button id="export" class="solid">Export</button>
+</header>
+
+<main>
+  <div id="stage">
+    <canvas id="c"></canvas>
+  </div>
+</main>
+
+<section id="panel">
+  <div class="row">
+    <span id="selection">Nothing selected</span>
+    <span class="spacer"></span>
+    <button id="add">+ Text</button>
+    <button id="duplicate">Duplicate</button>
+    <button id="remove" class="quiet">Delete</button>
+  </div>
+
+  <label class="field">
+    <span>Text</span>
+    <textarea id="text" rows="2" placeholder="Select a line first"></textarea>
+  </label>
+
+  <div class="row wrap">
+    <label class="toggle"><input id="gradient" type="checkbox"> Gradient</label>
+    <input id="start" type="color" value="#131513" aria-label="Gradient start">
+    <input id="end" type="color" value="#0fbf92" aria-label="Gradient end">
+    <label class="range">Angle <input id="angle" type="range" min="0" max="360" value="90"><b id="angleValue">90&deg;</b></label>
+  </div>
+
+  <div class="row wrap">
+    <label class="toggle"><input id="outline" type="checkbox"> Outline</label>
+    <input id="outlineColour" type="color" value="#131513" aria-label="Outline colour">
+    <label class="range">Width <input id="outlineWidth" type="range" min="0" max="16" value="6"><b id="outlineValue">6</b></label>
+  </div>
+
+  <div class="row wrap">
+    <label class="toggle"><input id="shadow" type="checkbox" checked> Shadow</label>
+    <label class="toggle">Blend
+      <select id="blend">
+        <option value="source-over">Normal</option>
+        <option value="multiply">Multiply</option>
+        <option value="screen">Screen</option>
+        <option value="overlay">Overlay</option>
+      </select>
+    </label>
+    <button id="group">Group</button>
+    <button id="ungroup">Ungroup</button>
+  </div>
+
+  <div class="row"><span class="section-label">Overlays</span></div>
+  <div class="row wrap">
+    <label class="toggle">Texture
+      <select id="overlayKind">
+        <option value="none">None</option>
+        <option value="light">Light leak</option>
+        <option value="grain">Film grain</option>
+        <option value="bokeh">Bokeh</option>
+        <option value="paper">Paper</option>
+        <option value="dust">Dust &amp; scratches</option>
+        <option value="vignette">Vignette</option>
+        <option value="shadows">Window shadows</option>
+        <option value="flare">Lens flare</option>
+      </select>
+    </label>
+    <label class="range">Opacity <input id="overlayOpacity" type="range" min="0" max="100" value="55"><b id="overlayValue">55</b></label>
+  </div>
+  <div class="row wrap">
+    <label class="toggle">Blend
+      <select id="overlayBlend">
+        <option value="screen">Screen</option>
+        <option value="overlay">Overlay</option>
+        <option value="multiply">Multiply</option>
+        <option value="soft-light">Soft light</option>
+      </select>
+    </label>
+    <button id="overlayPlace" disabled aria-pressed="false">Place</button>
+    <button id="overlayShuffle" disabled>Shuffle</button>
+    <button id="overlayReset" disabled title="Reset position, scale and rotation">Reset</button>
+    <button id="overlayRemove" disabled class="quiet">Remove</button>
+  </div>
+  <div id="overlayTransform" class="overlay-grid" hidden>
+    <label class="range">X <input id="overlayX" type="range" min="-100" max="100" step="0.5" value="0"><b id="overlayXValue">0%</b></label>
+    <label class="range">Y <input id="overlayY" type="range" min="-100" max="100" step="0.5" value="0"><b id="overlayYValue">0%</b></label>
+    <label class="range">Scale <input id="overlayScale" type="range" min="25" max="250" step="1" value="100"><b id="overlayScaleValue">100%</b></label>
+    <label class="range">Rotate <input id="overlayRotate" type="range" min="-180" max="180" step="1" value="0"><b id="overlayRotateValue">0&deg;</b></label>
+  </div>
+
+  <p class="note">Stock Fabric, one custom class. Place unlocks the overlay handles; X, Y, scale and rotate stay below. Drag fast mode strips the expensive passes until you let go.</p>
+  <p class="foot">Fabric.js 5.3.0 &middot; MIT &middot; bundled offline</p>
+</section>
+
+<script src="fabric.min.js"></script>
+<script src="add-text.js"></script>
+<script src="overlays.js"></script>
+<script src="studio.js"></script>
+</body>
+</html>

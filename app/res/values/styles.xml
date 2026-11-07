@@ -189,4 +189,9 @@
         <item name="android:windowLightStatusBar">false</item>
         <item name="android:windowLightNavigationBar">true</item>
     </style>
+    <!-- The editor's sheets slide up from the dock and leave the same way. -->
+    <style name="SheetAnimation">
+        <item name="android:windowEnterAnimation">@anim/sheet_up</item>
+        <item name="android:windowExitAnimation">@anim/sheet_down</item>
+    </style>
 </resources>

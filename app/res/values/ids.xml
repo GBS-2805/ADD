@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- The handle and heading of a sheet: the strip that drags it. -->
+    <item name="sheet_header" type="id" />
+    <!-- The one list a sheet can grow when it is pulled up (presets, layers). -->
+    <item name="sheet_scroller" type="id" />
+</resources>

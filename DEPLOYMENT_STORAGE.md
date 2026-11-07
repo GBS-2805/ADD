@@ -130,6 +130,11 @@ Vercel's [Activity Log](https://vercel.com/docs/activity-log) is available on Ho
 
 ## Change log
 
+- **2026-11-07** — Replaced the 54-image shots showcase with nine green-dark
+  representatives plus a 3×3 contact sheet, published `artbase-shots`, and pruned
+  the five oldest deployments to the newest 10; the live alias was protected and
+  rechecked. Current retained set: 10 `artbase`, 13 `artbase-handoff`, 10
+  `artbase-shots`; estimated 429.8 MiB, no storage warnings.
 - **2026-11-07** — Retention set to 1 day; keep floor 10 verified on all three
   projects. 142 cleanup deletions (95 `artbase`, 10 `artbase-handoff`, 37
   `artbase-shots`) are present in the Activity Log; one deleted review project is
