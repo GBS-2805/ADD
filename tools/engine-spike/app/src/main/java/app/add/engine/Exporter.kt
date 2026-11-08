@@ -76,7 +76,12 @@ object Exporter {
         var black = 0
         visibleModels.forEach { model ->
             val view = sceneViews[model.id] ?: return@forEach
-            val bitmap = requestCapture(view).bitmap ?: return@forEach
+            val raw = requestCapture(view).bitmap ?: return@forEach
+            // A surface can still hand back an opaque frame with a black clear colour,
+            // which painted a black rectangle over the paper in the export. Read that
+            // black as alpha, so the model composites instead of blocking the page.
+            val bitmap = keyedCapture(raw)
+            if (bitmap !== raw) raw.recycle()
             // Same counter the test capture uses: a model that came back 0% lit is in
             // the file but is not visible in it, which a missing model never is.
             val (modelLit, modelTotal) = litSamples(bitmap)
@@ -175,6 +180,42 @@ object Exporter {
                 Handler(Looper.getMainLooper()),
             )
         }
+    }
+
+    /**
+     * Turns a frame rendered on black into straight alpha: a pixel's brightest channel
+     * becomes its opacity and the colour is un-premultiplied, so a black background
+     * disappears while the model keeps its shading. A frame that already carries alpha
+     * is returned untouched.
+     */
+    private fun keyedCapture(bitmap: Bitmap): Bitmap {
+        val width = bitmap.width
+        val height = bitmap.height
+        val pixels = IntArray(width * height)
+        bitmap.getPixels(pixels, 0, width, 0, 0, width, height)
+        var changed = false
+        for (i in pixels.indices) {
+            val pixel = pixels[i]
+            val r = (pixel shr 16) and 0xFF
+            val g = (pixel shr 8) and 0xFF
+            val b = pixel and 0xFF
+            val alpha = maxOf(r, g, b)
+            if (alpha == 255) continue
+            changed = true
+            if (alpha == 0) {
+                pixels[i] = 0
+                continue
+            }
+            val scale = 255f / alpha
+            val rr = (r * scale).toInt().coerceAtMost(255)
+            val gg = (g * scale).toInt().coerceAtMost(255)
+            val bb = (b * scale).toInt().coerceAtMost(255)
+            pixels[i] = (alpha shl 24) or (rr shl 16) or (gg shl 8) or bb
+        }
+        if (!changed) return bitmap
+        val keyed = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+        keyed.setPixels(pixels, 0, width, 0, 0, width, height)
+        return keyed
     }
 
     private fun litSamples(bitmap: Bitmap): Pair<Int, Int> {

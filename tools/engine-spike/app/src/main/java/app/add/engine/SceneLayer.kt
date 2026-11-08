@@ -143,7 +143,9 @@ fun FilamentLayer(
         cameraNode = cameraNode,
         cameraManipulator = null as io.github.sceneview.gesture.CameraGestureDetector.CameraManipulator?,
         childNodes = nodes,
-        isOpaque = true,
+        // A transparent surface is what lets the model sit on the paper instead of
+        // inside a black rectangle, on the stage and in the exported PNG alike.
+        isOpaque = false,
         onViewCreated = {
             currentHandle.view = this
             currentHandle.width = width

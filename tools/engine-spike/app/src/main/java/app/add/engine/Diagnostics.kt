@@ -225,7 +225,8 @@ object Diagnostics {
 
     /** The three facts that explain the last change, for the dialog's top row. */
     fun why(doc: EngineDocument): String {
-        val bits = mutableListOf("undo ${doc.undoDepth}/${doc.redoDepth} · ${doc.action}")
+        val named = doc.actionSubject?.let { " · $it" } ?: ""
+        val bits = mutableListOf("undo ${doc.undoDepth}/${doc.redoDepth} · ${doc.action}$named")
         if (lastGestureBody.isNotBlank()) bits += lastGestureBody
         if (lastDialBody.isNotBlank()) bits += lastDialBody
         return bits.joinToString("   ")
@@ -321,7 +322,9 @@ object Diagnostics {
         }
         // The sampler can see the result of a button but not which button it was.
         if (before.actionId != next.actionId) {
-            val who = next.selected?.let { next.layers[it]?.name } ?: "nothing"
+            val who = next.actionSubject
+                ?: next.selected?.let { next.layers[it]?.name }
+                ?: "nothing"
             append("act", "act  ${next.action} · $who")
         }
         if (percent(before.zoom) != percent(next.zoom)) {
@@ -501,6 +504,7 @@ object Diagnostics {
         editing = doc.editingModelId,
         zoom = doc.zoom,
         action = doc.action,
+        actionSubject = doc.actionSubject,
         actionId = doc.actionId,
         order = doc.layers.map { it.id },
         layers = doc.layers.associate { layer ->
@@ -534,6 +538,7 @@ object Diagnostics {
         val editing: String?,
         val zoom: Float,
         val action: String,
+        val actionSubject: String?,
         val actionId: Int,
         val order: List<String>,
         val layers: Map<String, LayerState>,

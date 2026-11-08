@@ -181,6 +181,9 @@ class EngineDocument(initial: List<Layer>? = null) {
     /** The control that made the last change, so the recorder can name it. */
     var action by mutableStateOf("OPEN")
         private set
+    /** The thing the action changed, when it was not the selected layer. */
+    var actionSubject by mutableStateOf<String?>(null)
+        private set
     var actionId by mutableStateOf(0)
         private set
 
@@ -250,7 +253,10 @@ class EngineDocument(initial: List<Layer>? = null) {
         }
 
     fun toggleVisibility(id: String) {
-        act(if (layers.firstOrNull { it.id == id }?.visible == true) "HIDE" else "SHOW")
+        // The layer list toggles rows that are not the selection, so the row travels
+        // with the action; naming the selection sent the reader to the wrong layer.
+        val target = layers.firstOrNull { it.id == id }
+        act(if (target?.visible == true) "HIDE" else "SHOW", target?.name)
         commit { layers ->
             layers.map { layer -> if (layer.id == id) layer.withVisible(!layer.visible) else layer }
         }
@@ -461,7 +467,7 @@ class EngineDocument(initial: List<Layer>? = null) {
     fun deleteSelected() {
         val id = selectedId
         if (layers.size <= 1) return
-        act("DEL")
+        act("DEL", selected?.name)
         commit { layerList -> layerList.filterNot { it.id == id } }
         if (editingModelId == id) editingModelId = null
         selectedId = layers.firstOrNull()?.id.orEmpty()
@@ -633,8 +639,9 @@ class EngineDocument(initial: List<Layer>? = null) {
         canRedo = redoStack.isNotEmpty()
     }
 
-    private fun act(name: String) {
+    private fun act(name: String, subject: String? = null) {
         action = name
+        actionSubject = subject
         actionId++
     }
 
