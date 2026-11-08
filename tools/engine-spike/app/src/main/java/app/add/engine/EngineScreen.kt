@@ -57,6 +57,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -75,6 +76,19 @@ fun EngineScreen() {
         while (Diagnostics.recording) {
             delay(Diagnostics.sampleMillis)
             Diagnostics.sample(doc)
+        }
+    }
+    // Frame timing runs only while recording: withFrameNanos keeps asking for frames,
+    // so it is a REC session's cost and never the app's. Four samples a second can say
+    // what changed; this says whether the screen was keeping up while it changed.
+    LaunchedEffect(Diagnostics.recording) {
+        if (!Diagnostics.recording) return@LaunchedEffect
+        var last = 0L
+        while (Diagnostics.recording) {
+            withFrameNanos { now ->
+                if (last != 0L) Diagnostics.frame((now - last) / 1_000_000L)
+                last = now
+            }
         }
     }
     val sceneHandles = remember { mutableMapOf<String, SceneHandle>() }
@@ -311,6 +325,14 @@ private fun Stage(
         // pushed out of the window and left as an empty stage; a zoom that cannot be
         // panned cannot lose the drawing, and the pill still reaches the whole range.
         val setZoom: (Float) -> Unit = { raw -> doc.zoom = clampZoom(raw) }
+        // The 3D viewport is sized from this, so a change here moves the surface out
+        // from under a model. "The model got small" and "the frame got small" are the
+        // same report until the frame's own size is on the record.
+        LaunchedEffect(stageWidth, stageHeight) {
+            Diagnostics.note(
+                "view " + stageWidth.value.roundToInt() + " × " + stageHeight.value.roundToInt() + " dp"
+            )
+        }
 
         // The stage is sized rather than scaled: a SurfaceView ignores a graphics
         // layer, so zoom has to reach the 3D viewport through the layout to stay
@@ -356,7 +378,10 @@ private fun Stage(
                                     // so a slow pinch still accumulates and a tremor does not.
                                     val (apply, carry) = foldZoom(pendingZoom, span / lastSpan)
                                     pendingZoom = carry
-                                    if (apply != 1f) setZoom(doc.zoom * apply)
+                                    if (apply != 1f) {
+                                        Diagnostics.zoomFrom("pinch")
+                                        setZoom(doc.zoom * apply)
+                                    }
                                 }
                                 lastSpan = span
                             }
@@ -399,6 +424,7 @@ private fun Stage(
                             val startX = nx
                             val startY = ny
                             var mode = "none"
+                            var subject = "empty stage"
                             var startLayer: Layer? = null
                             var startAngle = 0f
                             var startDistance = 0f
@@ -409,6 +435,7 @@ private fun Stage(
                                 startAngle = Geometry.angle(selectedAtDown.centerX, selectedAtDown.centerY, nx, ny)
                                 startDistance = Geometry.distance(selectedAtDown.centerX, selectedAtDown.centerY, nx, ny)
                                 mode = if (handle == LayerHandle.Rotate) "rotate" else "scale"
+                                subject = "${selectedAtDown.name} grip ${handle.name}"
                                 doc.select(selectedAtDown.id)
                             } else {
                                 val hit = doc.layerAt(nx, ny)
@@ -428,7 +455,11 @@ private fun Stage(
                                     doc.tool == Tool.Vector && doc.selectedNodeId != null -> "node"
                                     else -> "move"
                                 }
+                                subject = hit?.name ?: "empty stage"
                             }
+                            // Opened after the branches have decided what this is, so the
+                            // sampler stops describing the drag one sample at a time.
+                            Diagnostics.beginGesture(doc)
 
                             while (true) {
                                 val event = awaitPointerEvent()
@@ -464,18 +495,10 @@ private fun Stage(
                                 change.consume()
                             }
                             doc.endGesture()
-                            // The sampler only sees the result: a width that jumped from 22%
-                            // to 75% is one line whichever path did it. Naming the gesture
-                            // and the grip it took is what separates a stray grab from the
-                            // inspector's scale dial.
-                            Diagnostics.note(
-                                "gesture " + mode.uppercase() +
-                                    (handle?.let { " ${it.name}" } ?: "") +
-                                    "  " + Diagnostics.three(startX) + "," + Diagnostics.three(startY) +
-                                    " → " + Diagnostics.three(nx) + "," + Diagnostics.three(ny) +
-                                    "  w " + Diagnostics.three(startLayer?.w ?: 0f) +
-                                    "→" + Diagnostics.three(doc.selected?.w ?: 0f)
-                            )
+                            // One line for the whole gesture, and a line even when nothing
+                            // moved: a width that jumped to 75% is one entry whichever
+                            // path did it, and a tap on a dead control is no longer silent.
+                            Diagnostics.endGesture(doc, mode.uppercase(), subject, startX, startY, nx, ny)
                         }
                     },
             ) {
@@ -645,8 +668,14 @@ private fun Stage(
 
         ZoomPill(
             zoom = zoom,
-            onZoom = setZoom,
-            onReset = { doc.zoom = 1f },
+            onZoom = { next ->
+                Diagnostics.zoomFrom("pill")
+                setZoom(next)
+            },
+            onReset = {
+                Diagnostics.zoomFrom("reset")
+                doc.zoom = 1f
+            },
             modifier = Modifier.align(Alignment.BottomEnd).padding(2.dp),
         )
         }

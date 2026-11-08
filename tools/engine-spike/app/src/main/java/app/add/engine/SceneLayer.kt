@@ -1,5 +1,6 @@
 package app.add.engine
 
+import android.view.SurfaceHolder
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -62,8 +63,14 @@ fun FilamentLayer(
     val error = loaded.exceptionOrNull()?.message
     val instance = loaded.getOrNull()
     val currentHandle by rememberUpdatedState(handle)
+    var attached by remember { mutableStateOf<SceneView?>(null) }
 
     LaunchedEffect(error, instance) {
+        if (error != null) {
+            Diagnostics.note("3d ${layer.name} offline · $error")
+        } else if (instance != null) {
+            Diagnostics.note("3d ${layer.name} model loaded")
+        }
         handle.error = error
         handle.modelLoaded = instance != null
         handle.ready = error == null
@@ -132,13 +139,49 @@ fun FilamentLayer(
             currentHandle.height = height
             currentHandle.ready = true
             currentHandle.error = null
+            attached = this
         },
         onViewUpdated = {
             if (currentHandle.view !== this) currentHandle.view = this
-            if (currentHandle.width != width) currentHandle.width = width
-            if (currentHandle.height != height) currentHandle.height = height
+            // A viewport that changes size is the other half of "the model got
+            // small": the frame moved, or the model did, and only one of them is a bug.
+            if (currentHandle.width != width || currentHandle.height != height) {
+                if (currentHandle.width > 0) {
+                    Diagnostics.note(
+                        "viewport ${layer.name} ${currentHandle.width} × ${currentHandle.height} → $width × $height"
+                    )
+                }
+                currentHandle.width = width
+                currentHandle.height = height
+            }
         },
     )
+
+    // The black rectangle left no trace until the report was read at the end of a
+    // session. A surface that goes down and comes back is a line now, with the size
+    // it came back at, so it can be matched against the moment the stage went black.
+    DisposableEffect(attached) {
+        val view = attached
+        if (view == null) {
+            onDispose { }
+        } else {
+            val callback = object : SurfaceHolder.Callback {
+                override fun surfaceCreated(holder: SurfaceHolder) {
+                    Diagnostics.note("surface ${layer.name} up")
+                }
+
+                override fun surfaceChanged(holder: SurfaceHolder, format: Int, width: Int, height: Int) {
+                    Diagnostics.note("surface ${layer.name} $width × $height")
+                }
+
+                override fun surfaceDestroyed(holder: SurfaceHolder) {
+                    Diagnostics.note("surface ${layer.name} down")
+                }
+            }
+            view.holder.addCallback(callback)
+            onDispose { view.holder.removeCallback(callback) }
+        }
+    }
 
     DisposableEffect(instance) {
         onDispose {

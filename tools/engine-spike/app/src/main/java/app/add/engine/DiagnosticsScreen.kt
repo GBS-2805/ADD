@@ -77,6 +77,8 @@ fun DiagnosticsDialog(
     val buildReport: () -> String = {
         Diagnostics.report(context, doc, handle, checked.sorted().map { DeviceChecklist[it] })
     }
+    // Read once: it only changes when the process has already died, which reloads this screen.
+    val crash = remember { Diagnostics.lastCrash(context) }
 
     val gemBytes = remember(context) { readAssetSize(context, ModelAsset.Gem.path) }
     val ringBytes = remember(context) { readAssetSize(context, ModelAsset.Ring.path) }
@@ -132,7 +134,7 @@ fun DiagnosticsDialog(
                             if (Diagnostics.recording) {
                                 Diagnostics.stop(doc)
                             } else {
-                                Diagnostics.start(doc)
+                                Diagnostics.start(doc, context)
                                 transfer = ""
                             }
                         },
@@ -229,10 +231,11 @@ fun DiagnosticsDialog(
                 DiagnosticRow("RENDERER", "SceneView 2.3.0 / Filament 1.56")
                 DiagnosticRow("DEVICE", device.ifBlank { "unknown" })
                 DiagnosticRow("ANDROID", "API ${Build.VERSION.SDK_INT} · ${Build.VERSION.RELEASE} · $abi")
+                DiagnosticRow("LAST CRASH", crash ?: "NONE", if (crash == null) Dim else Clay)
 
                 DiagSection("RECORDED INTERACTION", "${Diagnostics.count} LINES")
                 Text(
-                    "Press REC, CLOSE this screen, then do the thing you want looked at. It samples four times a second and writes a line only when a value moved: selection, tool, every layer's position, size, rotation and unit scale, zoom, and layers added or removed. Come back here to STOP and SHARE. A gesture that ends where it started leaves no line, because nothing changed.",
+                    "Press REC, CLOSE this screen, then do the thing you want looked at. The sampler writes a line only when a value moved: selection, tool, every layer's position, size, rotation and unit scale, zoom, and layers added or removed. A shape gesture is one line rather than one per sample, naming its mode, the handle it took, its travel and the geometry it changed; a tap that changes nothing writes a line naming what it hit. Zoom lines name the control that moved it, frames are sampled every two seconds, and a crash while recording is written to a file the next session shows. Come back here to STOP and SHARE.",
                     color = Dim,
                     fontSize = 8.sp,
                     lineHeight = 12.sp,
