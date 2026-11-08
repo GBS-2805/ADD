@@ -450,9 +450,10 @@ public class MainActivity extends Activity {
         findViewById(R.id.linkIcons).setOnClickListener(v -> openShelf("icons"));
         findViewById(R.id.linkFonts).setOnClickListener(v -> openShelf("fonts"));
         findViewById(R.id.linkCompress).setOnClickListener(v -> closeDrawer());
-        findViewById(R.id.linkEditor).setOnClickListener(v -> {
+        final View editorLink = findViewById(R.id.linkEditor);
+        editorLink.setOnClickListener(v -> {
             closeDrawer();
-            startActivity(new Intent(this, EditorActivity.class));
+            EditorActivity.open(this);
         });
 
         link(R.id.linkDownload, "download/");

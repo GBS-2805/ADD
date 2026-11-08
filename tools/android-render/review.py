@@ -65,15 +65,6 @@ def validate(expected: list[str], matrix: int) -> None:
             details.append("extra: " + ", ".join(extra))
         fail("; ".join(details))
 
-    for name in expected:
-        path = RENDERS / name
-        try:
-            with Image.open(path) as image:
-                if image.format != "PNG" or image.size != (WIDTH, HEIGHT):
-                    fail(f"{name} is {image.format} {image.size}, expected PNG {WIDTH}x{HEIGHT}")
-        except OSError as error:
-            fail(f"cannot read {name}: {error}")
-
     audit_path = RENDERS / AUDIT
     if not audit_path.is_file():
         fail(f"missing {AUDIT}; the palette/layout gates did not finish")
@@ -89,6 +80,23 @@ def validate(expected: list[str], matrix: int) -> None:
         fail(f"{AUDIT} ran {audit.get('layoutChecks')} layout checks, expected {matrix}")
     if audit.get("saved") != len(expected):
         fail(f"{AUDIT} saved {audit.get('saved')} renders, expected {len(expected)}")
+    compress_height = audit.get("compressHeight")
+    if not isinstance(compress_height, int) or compress_height <= HEIGHT:
+        fail(f"{AUDIT} has no full-height Compress capture")
+
+    for name in expected:
+        path = RENDERS / name
+        try:
+            with Image.open(path) as image:
+                if image.format != "PNG":
+                    fail(f"{name} is {image.format}, expected PNG")
+                if name.startswith("compress-"):
+                    if image.width != WIDTH or image.height != compress_height:
+                        fail(f"{name} is {image.size}, expected PNG {WIDTH}x{compress_height} (full form)")
+                elif image.size != (WIDTH, HEIGHT):
+                    fail(f"{name} is {image.format} {image.size}, expected PNG {WIDTH}x{HEIGHT}")
+        except OSError as error:
+            fail(f"cannot read {name}: {error}")
 
 
 def write_contact(screens: list[dict[str, str]], showcase: dict[str, str]) -> None:
@@ -116,9 +124,10 @@ def write_index(screens: list[dict[str, str]], showcase: dict[str, str], matrix:
     cards = []
     for screen in screens:
         stem = f"{screen['slug']}-{showcase['palette']}-{showcase['mode']}"
+        kind = " full" if screen.get("full") else ""
         cards.append(
-            '<a class="shot" href="{0}.png"><img src="{0}.png" alt="{1}" loading="lazy">'
-            '<span>{1}</span></a>'.format(html.escape(stem), html.escape(screen["title"]))
+            '<a class="shot{0}" href="{1}.png"><img src="{1}.png" alt="{2}" loading="lazy">'
+            '<span>{2}</span></a>'.format(kind, html.escape(stem), html.escape(screen["title"]))
         )
 
     page = """<!doctype html>
@@ -146,10 +155,12 @@ a{color:#6fe0bf}code{background:#15121c;padding:2px 5px;border-radius:4px}
 </main></body></html>"""
     lede = (
         f"Nine green-dark screenshots from {matrix} in-memory checks across nine native "
-        "screen states and six palettes. The layouts, themes, drawables, type and the "
-        "Editor/Compare paint code are the app's own. Palette, containment, text-fit, "
-        "composition and cross-theme position gates run before these images are written. "
-        "The Shelf and Studio WebViews are not rendered — no Chromium compositor."
+        "screen states and six palettes. Eight are 1080x2400 phone frames; Compress is "
+        "captured at the ScrollView's full height so the complete form and action row are "
+        "visible. The layouts, themes, drawables, type and the Editor/Compare paint code "
+        "are the app's own. Palette, containment, text-fit, composition and cross-theme "
+        "position gates run before these images are written. The Shelf and Studio WebViews "
+        "are not rendered — no Chromium compositor."
     )
     page = page.replace("__LEDE__", lede).replace("__CARDS__", "".join(cards))
     (STAGE / "index.html").write_text(page, encoding="utf-8")

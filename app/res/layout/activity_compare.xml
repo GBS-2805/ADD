@@ -57,14 +57,20 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_marginTop="14dp"
-        android:layout_weight="1"
-        android:background="@drawable/bg_card"
-        android:padding="10dp">
+        android:layout_weight="1">
 
-        <app.offline.compress.ComparisonView
-            android:id="@+id/comparison"
+        <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:background="@drawable/bg_card"
+            android:padding="10dp">
+
+            <app.offline.compress.ComparisonView
+                android:id="@+id/comparison"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+        </FrameLayout>
     </FrameLayout>
 
     <TextView
@@ -81,16 +87,16 @@
     <TextView
         android:id="@+id/shareButton"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="48dp"
         android:layout_marginTop="12dp"
         android:background="@drawable/bg_primary"
         android:clickable="true"
         android:focusable="true"
+        android:fontFamily="@font/poppins_semibold"
         android:gravity="center"
-        android:paddingTop="16dp"
-        android:paddingBottom="16dp"
+        android:letterSpacing="0.08"
         android:text="SHARE COMPRESSED PHOTO"
+        android:textAllCaps="true"
         android:textColor="?attr/accentInk"
-        android:textSize="14sp"
-        android:textStyle="bold" />
+        android:textSize="11sp" />
 </LinearLayout>

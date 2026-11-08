@@ -24,7 +24,7 @@ Nine native screen states, audited in all six themes (green, moss, navy × dark,
 | **Compare** | `CompareActivity` gets before/after files and the same extras the app sends. |
 | **Font packs** | `PacksActivity` reads a cached copy of `docs/packs/packs.json`; no network request is made. |
 
-The test audits every 1080×2400 combination in memory: the palette must be present in the pixels, and every visible view must keep its cross-theme position within 1 px, stay inside its window, fit its text and keep the dock at the window edge. Only the nine green-dark representatives are written to `artifacts/android/`; `render-audit.json` records the 54 palette and layout checks. The green dark choice is `showcase` in `manifest.json`.
+The test audits every 1080×2400 combination in memory: the palette must be present in the pixels, and every visible view must keep its cross-theme position within 1 px, stay inside its window, fit its text and keep the dock at the window edge. Only the nine green-dark representatives are written to `artifacts/android/`; `render-audit.json` records the 54 palette and layout checks. The Compress form is a scroll view, so after its 1080×2400 audit frame it is also written at its natural full height (currently 1080×3429): the complete form, Preview and Compress all stay visible instead of ending mid-section 4. The other eight representatives remain 1080×2400. The green dark choice is `showcase` in `manifest.json`.
 
 The five Editor sheets are composited from the app's actual dialog panel over the
 actual Activity frame at the window's `dimAmount`; the sheet views are not redrawn.
@@ -35,7 +35,8 @@ separate window from its Activity.
 
 `manifest.json` is the matrix: nine screens × six themes, with one `showcase` pair.
 `review.py` requires exactly the nine showcase PNGs, a valid `render-audit.json`
-(palette/layout pass, 54 checks) and 1080×2400 dimensions. It then builds the 3×3
+(palette/layout pass, 54 checks) and 1080×2400 dimensions for eight screens; Compress
+must match the audited full height in `render-audit.json`. It then builds the 3×3
 contact sheet and `artifacts/shots/` from scratch, so the public gallery cannot
 silently keep an old screen.
 

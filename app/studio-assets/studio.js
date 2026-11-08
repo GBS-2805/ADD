@@ -25,6 +25,28 @@
     enableRetinaScaling: false
   });
 
+  var stageEl = $('stage');
+
+  /** Fit the fixed 540x675 document into the phone's available stage. The Fabric
+   *  coordinate space stays 540x675, so pointer maths and the 2x export are unchanged;
+   *  only the wrapper and its two canvases are scaled in CSS. */
+  function fitCanvas() {
+    if (!stageEl || !canvas.wrapperEl) { return; }
+    var rect = stageEl.getBoundingClientRect();
+    if (rect.width < 1 || rect.height < 1) { return; }
+    var scale = Math.min(rect.width / W, rect.height / H);
+    var width = Math.max(1, Math.round(W * scale));
+    var height = Math.max(1, Math.round(H * scale));
+    canvas.wrapperEl.style.width = width + 'px';
+    canvas.wrapperEl.style.height = height + 'px';
+    [canvas.lowerCanvasEl, canvas.upperCanvasEl].forEach(function (element) {
+      if (!element) { return; }
+      element.style.width = '100%';
+      element.style.height = '100%';
+    });
+    canvas.calcOffset();
+  }
+
   var statusTimer = 0;
   var overlay = null;
   var overlayKind = 'none';
@@ -507,6 +529,13 @@
   };
 
   syncOverlayPanel();
+  fitCanvas();
+  if (window.requestAnimationFrame) { requestAnimationFrame(fitCanvas); }
+  if (window.ResizeObserver) {
+    new ResizeObserver(fitCanvas).observe(stageEl);
+  } else {
+    window.addEventListener('resize', fitCanvas);
+  }
 
   addText('ART', { left: 50, top: 150, width: 440, fontSize: 154, fontWeight: '600' }, false);
   addText('DESIGN', {

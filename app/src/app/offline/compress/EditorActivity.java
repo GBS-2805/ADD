@@ -2,6 +2,7 @@ package app.offline.compress;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
@@ -57,6 +58,8 @@ public class EditorActivity extends Activity {
 
     private static final int REQ_PHOTO = 11;
     private static final int REQ_PACKS = 12;
+    /** Set when the engine asks for the basic editor, so the launch check stands down. */
+    public static final String EXTRA_BASIC_EDITOR = "app.offline.compress.BASIC_EDITOR";
 
     private static final int MIN_PT = 10;
     private static final int MAX_PT = 120;
@@ -95,6 +98,11 @@ public class EditorActivity extends Activity {
     protected void onCreate(Bundle state) {
         super.onCreate(state);
         ThemePrefs.applyTheme(this);
+        if (!getIntent().getBooleanExtra(EXTRA_BASIC_EDITOR, false)
+                && DevFlags.engineLab(this) && openEngineLab(this)) {
+            finish();
+            return;
+        }
         setContentView(R.layout.activity_editor);
         applyInsets();
 
@@ -188,9 +196,31 @@ public class EditorActivity extends Activity {
         restoreTab(state);
     }
 
-    /** Studio is the starting tab; Quick is one tap away. */
+    /**
+     * The one editor entry. In this review build the native engine opens first; every
+     * other build, and a failed lookup, lands on the basic editor.
+     */
+    public static void open(Activity from) {
+        if (DevFlags.engineLab(from) && openEngineLab(from)) {
+            return;
+        }
+        from.startActivity(new Intent(from, EditorActivity.class));
+    }
+
+    /** Reaches the engine by class name so the shipping build still compiles. */
+    private static boolean openEngineLab(Context context) {
+        try {
+            Class<?> engine = Class.forName("app.add.engine.MainActivity");
+            context.startActivity(new Intent(context, engine));
+            return true;
+        } catch (ClassNotFoundException | android.content.ActivityNotFoundException missing) {
+            return false;
+        }
+    }
+
+    /** Quick is the starting tab; Studio is one tap away. */
     private void restoreTab(Bundle state) {
-        boolean studio = state == null || state.getBoolean("editor_studio", true);
+        boolean studio = state != null && state.getBoolean("editor_studio", false);
         if (studio) {
             showStudio();
         } else {
@@ -221,6 +251,9 @@ public class EditorActivity extends Activity {
     }
 
     private void showStudio() {
+        if (DevFlags.engineLab(this) && openEngineLab(this)) {
+            return;
+        }
         studioOpen = true;
         stage.setVisibility(View.GONE);
         dock.setVisibility(View.GONE);
@@ -1019,6 +1052,7 @@ public class EditorActivity extends Activity {
 
         dialog[0] = new AlertDialog.Builder(this)
                 .setView(content)
+                .setPositiveButton("Done", null)
                 .create();
         showDialog(dialog[0]);
     }
@@ -1466,7 +1500,7 @@ public class EditorActivity extends Activity {
         list.setOrientation(LinearLayout.VERTICAL);
         scroll.addView(list);
         content.addView(scroll, new LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, dp(240)));
+                ViewGroup.LayoutParams.MATCH_PARENT, dp(46 * 2)));
 
         LinearLayout actions = new LinearLayout(this);
         actions.setOrientation(LinearLayout.HORIZONTAL);
@@ -1474,6 +1508,7 @@ public class EditorActivity extends Activity {
         final TextView duplicate = chip("DUPLICATE");
         final TextView center = chip("CENTER");
         final TextView remove = chip("DELETE");
+        remove.setBackgroundResource(R.drawable.bg_pill_warn);
         remove.setTextColor(colour(R.attr.warn, 0xFFFFC98A));
         LinearLayout.LayoutParams actionParams = new LinearLayout.LayoutParams(0, dp(40), 1f);
         actionParams.setMargins(dp(2), 0, dp(2), 0);
@@ -1488,6 +1523,14 @@ public class EditorActivity extends Activity {
             list.removeAllViews();
             List<EditorView.Layer> layers = stage.layerList();
             int count = layers.size();
+            LinearLayout.LayoutParams scrollParams =
+                    (LinearLayout.LayoutParams) scroll.getLayoutParams();
+            int rows = count == 0 ? 2 : Math.min(5, count);
+            int wanted = dp(46) * rows;
+            if (scrollParams.height != wanted) {
+                scrollParams.height = wanted;
+                scroll.setLayoutParams(scrollParams);
+            }
             if (count == 0) {
                 TextView empty = note("No lines yet. Add text to start a layer.");
                 empty.setPadding(dp(4), dp(16), dp(4), dp(16));

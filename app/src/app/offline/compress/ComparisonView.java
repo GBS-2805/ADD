@@ -70,7 +70,22 @@ public class ComparisonView extends View {
     public void setImages(Bitmap before, Bitmap after) {
         this.before = before;
         this.after = after;
+        requestLayout();
         invalidate();
+    }
+
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        int width = MeasureSpec.getSize(widthMeasureSpec);
+        if (width <= 0) {
+            super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+            return;
+        }
+        int bitmapWidth = before != null && before.getWidth() > 0 ? before.getWidth() : 4;
+        int bitmapHeight = before != null && before.getHeight() > 0 ? before.getHeight() : 5;
+        int desired = Math.round(width * (bitmapHeight / (float) bitmapWidth));
+        setMeasuredDimension(width,
+                resolveSize(Math.max(1, desired), heightMeasureSpec));
     }
 
     @Override

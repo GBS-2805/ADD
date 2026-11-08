@@ -191,7 +191,7 @@ public class ShelfActivity extends Activity {
                 @Override
                 public void run() {
                     if ("editor".equals(slug)) {
-                        startActivity(new Intent(ShelfActivity.this, EditorActivity.class));
+                        EditorActivity.open(ShelfActivity.this);
                     } else if ("compress".equals(slug)) {
                         startActivity(new Intent(ShelfActivity.this, MainActivity.class));
                     }

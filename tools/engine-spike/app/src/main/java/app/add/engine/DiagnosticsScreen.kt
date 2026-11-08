@@ -1,0 +1,348 @@
+package app.add.engine
+
+import android.content.Context
+import android.os.Build
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
+import kotlinx.coroutines.launch
+import java.util.Locale
+
+private val DeviceChecklist = listOf(
+    "The gem is visible inside the artboard frame.",
+    "EDIT 3D shows a chip; dragging inside it turns the model.",
+    "In 3D edit, corners resize the viewport without shearing the model.",
+    "The RING chip swaps the model without leaving the layer.",
+    "Corner handles rotate and resize a text layer.",
+    "Sticker and vector shapes stay square when corner-scaled.",
+    "Dragging an unedited 3D layer moves it on the artboard.",
+    "The icon catalog opens and places a glyph on the artboard.",
+    "Icon thumbnails are legible against the dark catalog cards.",
+    "EXPORT writes a PNG to Pictures/Engine Spike.",
+    "The exported PNG shows the model, not the placeholder.",
+)
+
+@Composable
+fun DiagnosticsDialog(
+    doc: EngineDocument,
+    handle: SceneHandle,
+    onExport: () -> Unit,
+    onClose: () -> Unit,
+) {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    var capture by remember { mutableStateOf<CaptureResult?>(null) }
+    var testing by remember { mutableStateOf(false) }
+    var checked by remember { mutableStateOf(emptySet<Int>()) }
+
+    val gemBytes = remember(context) { readAssetSize(context, ModelAsset.Gem.path) }
+    val ringBytes = remember(context) { readAssetSize(context, ModelAsset.Ring.path) }
+    val icons = IconCatalog.state
+    LaunchedEffect(Unit) { IconCatalog.load(context) }
+    val view = handle.view
+    val surfaceValid = view?.holder?.surface?.isValid == true
+    val captureResult = capture
+    val captureColor = when {
+        captureResult == null -> Dim
+        !captureResult.success -> Clay
+        captureResult.litSamples == 0 -> Clay
+        else -> Mint
+    }
+    val device = listOf(Build.MANUFACTURER, Build.MODEL)
+        .filter { it.isNotBlank() }
+        .joinToString(" ")
+    val abi = Build.SUPPORTED_ABIS.firstOrNull() ?: "unknown"
+
+    Dialog(
+        onDismissRequest = onClose,
+        properties = DialogProperties(usePlatformDefaultWidth = false),
+    ) {
+        Column(Modifier.fillMaxSize().background(Ink).safeDrawingPadding()) {
+            Row(
+                modifier = Modifier.fillMaxWidth().height(56.dp).background(Panel).padding(horizontal = 12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Column {
+                    Text("DIAGNOSTICS", color = Cream, fontSize = 15.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 0.6.sp)
+                    Text("LOCAL DEVICE / 3D + EXPORT", color = Dim, fontSize = 7.sp, letterSpacing = 1.2.sp)
+                }
+                Spacer(Modifier.weight(1f))
+                DiagAction("CLOSE", onClick = onClose)
+            }
+            Box(Modifier.fillMaxWidth().height(1.dp).background(Rule))
+
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .verticalScroll(rememberScrollState())
+                    .padding(horizontal = 12.dp, vertical = 4.dp),
+            ) {
+                DiagSection("DEVICE / RENDERER")
+                DiagnosticRow("SCENEVIEW", if (view == null) "NOT ATTACHED" else "ATTACHED", if (view == null) Clay else Mint)
+                DiagnosticRow("SURFACE", if (surfaceValid) "VALID" else "NOT VALID", if (surfaceValid) Mint else Clay)
+                DiagnosticRow("VIEW SIZE", if (handle.width > 0) "${handle.width} × ${handle.height}" else "NOT LAID OUT")
+                DiagnosticRow("MODEL", if (handle.modelLoaded) "LOADED" else "NOT LOADED", if (handle.modelLoaded) Mint else Clay)
+                ModelAsset.entries.forEach { asset ->
+                    val bytes = if (asset == ModelAsset.Gem) gemBytes else ringBytes
+                    DiagnosticRow(
+                        asset.label.uppercase(),
+                        bytes?.let { String.format(Locale.US, "%,d B · %s", it, asset.path) }
+                            ?: "MISSING · ${asset.path}",
+                        if (bytes == null) Clay else Cream,
+                    )
+                }
+                handle.error?.let { DiagnosticRow("ERROR", it, Clay) }
+                DiagnosticRow("RENDERER", "SceneView 2.3.0 / Filament 1.56")
+                DiagnosticRow("DEVICE", device.ifBlank { "unknown" })
+                DiagnosticRow("ANDROID", "API ${Build.VERSION.SDK_INT} · ${Build.VERSION.RELEASE} · $abi")
+
+                DiagSection("ICON CATALOG")
+                when (val catalog = icons) {
+                    is IconCatalogState.Ready -> {
+                        DiagnosticRow("GLYPHS", "${catalog.total} · ${catalog.brands.size} BRANDS", Mint)
+                        DiagnosticRow("SEARCH", "${catalog.entries.size} INDEXED GLYPHS", Cream)
+                        catalog.brands.forEach { brand ->
+                            DiagnosticRow(
+                                brand.label.uppercase(),
+                                "${brand.count} · ${brand.licence} · ${brand.categories.size} CATEGORIES",
+                                Cream,
+                            )
+                        }
+                        val samples = catalog.brands.mapNotNull { brand ->
+                            catalog.entries.firstOrNull { it.brandSlug == brand.slug }
+                                ?.let { catalog.glyphs[it.id] }
+                        }
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(9.dp),
+                            modifier = Modifier.padding(vertical = 6.dp),
+                        ) {
+                            samples.forEach { glyph ->
+                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                    IconThumb(glyph, 0xFFF2EEE3.toInt(), Modifier.size(26.dp))
+                                    Text(glyph.brandSlug.uppercase(), color = Dim, fontSize = 5.sp)
+                                }
+                            }
+                        }
+                    }
+                    is IconCatalogState.Failed -> DiagnosticRow("CATALOG", catalog.message, Clay)
+                    else -> DiagnosticRow("CATALOG", "PARSING BRAND FILES…", Dim)
+                }
+
+                DiagSection("CAPTURE TEST")
+                Text(
+                    "PixelCopy reads the live SceneView without saving a file. Wait until the gem is visible, then run the test. A black frame means the 3D surface has not rendered yet.",
+                    color = Dim,
+                    fontSize = 9.sp,
+                    lineHeight = 13.sp,
+                )
+                Spacer(Modifier.height(6.dp))
+                DiagnosticRow("LAST TEST", captureResult?.message ?: "NOT RUN", captureColor)
+                if (captureResult != null) {
+                    DiagnosticRow(
+                        "CAPTURE",
+                        "${captureResult.width} × ${captureResult.height} · ${captureResult.litSamples}/${captureResult.totalSamples} lit",
+                        captureColor,
+                    )
+                }
+                DiagnosticRow(
+                    "LAST EXPORT",
+                    if (doc.exporting) "EXPORTING…" else doc.status,
+                    if (doc.status.contains("FAILED") || doc.status.contains("ERROR") || doc.status.contains("UNAVAILABLE")) Clay else Cream,
+                )
+
+                DiagSection("MANUAL CHECKLIST", "${checked.size}/${DeviceChecklist.size}")
+                DeviceChecklist.forEachIndexed { index, item ->
+                    ChecklistRow(
+                        text = item,
+                        checked = index in checked,
+                        onToggle = {
+                            checked = if (index in checked) checked - index else checked + index
+                        },
+                    )
+                }
+                Spacer(Modifier.height(6.dp))
+                Text(
+                    "This checklist is local to this screen. It records your observation; it does not prove rendering by itself.",
+                    color = Dim,
+                    fontSize = 8.sp,
+                    lineHeight = 12.sp,
+                )
+                Spacer(Modifier.height(12.dp))
+            }
+
+            Box(Modifier.fillMaxWidth().height(1.dp).background(Rule))
+            Row(
+                modifier = Modifier.fillMaxWidth().background(Panel).padding(10.dp),
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                DiagAction(
+                    label = if (testing) "CAPTURING" else "TEST 3D",
+                    active = true,
+                    enabled = !testing && view != null,
+                    onClick = {
+                        testing = true
+                        capture = null
+                        scope.launch {
+                            capture = runCatching { Exporter.testCapture(view) }.getOrElse { error ->
+                                CaptureResult(
+                                    success = false,
+                                    width = 0,
+                                    height = 0,
+                                    litSamples = 0,
+                                    totalSamples = 0,
+                                    message = "DIAGNOSTIC ERROR · ${error.message ?: "unknown"}",
+                                )
+                            }
+                            testing = false
+                        }
+                    },
+                )
+                DiagAction(
+                    label = if (doc.exporting) "EXPORTING" else "EXPORT PNG",
+                    enabled = !doc.exporting,
+                    onClick = onExport,
+                )
+                Spacer(Modifier.weight(1f))
+                Text("NO ACCOUNT", color = Dim, fontSize = 6.sp, letterSpacing = 0.8.sp)
+            }
+        }
+    }
+}
+
+private fun readAssetSize(context: Context, path: String): Long? = runCatching {
+    context.assets.openFd(path).use { it.length }
+}.getOrElse {
+    runCatching {
+        context.assets.open(path).use { it.readBytes().size.toLong() }
+    }.getOrNull()
+}
+
+@Composable
+private fun DiagSection(title: String, trailing: String? = null) {
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(top = 14.dp, bottom = 4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(title, color = Mint, fontSize = 8.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 1.1.sp)
+        Spacer(Modifier.weight(1f))
+        trailing?.let { Text(it, color = Lime, fontSize = 8.sp, fontWeight = FontWeight.SemiBold) }
+    }
+}
+
+@Composable
+private fun DiagnosticRow(label: String, value: String, color: Color = Cream) {
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp),
+        verticalAlignment = Alignment.Top,
+    ) {
+        Text(
+            label,
+            color = Dim,
+            fontSize = 8.sp,
+            letterSpacing = 0.4.sp,
+            modifier = Modifier.width(86.dp),
+        )
+        Text(
+            value,
+            color = color,
+            fontSize = 8.sp,
+            lineHeight = 12.sp,
+            maxLines = 3,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.weight(1f),
+        )
+    }
+}
+
+@Composable
+private fun ChecklistRow(text: String, checked: Boolean, onToggle: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onToggle)
+            .padding(vertical = 5.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Box(
+            modifier = Modifier
+                .size(17.dp)
+                .background(if (checked) Mint else Color.Transparent, RoundedCornerShape(3.dp))
+                .border(1.dp, if (checked) Mint else Rule, RoundedCornerShape(3.dp)),
+            contentAlignment = Alignment.Center,
+        ) {
+            if (checked) {
+                Box(Modifier.size(7.dp).background(Ink, RoundedCornerShape(1.dp)))
+            }
+        }
+        Spacer(Modifier.width(9.dp))
+        Text(
+            text,
+            color = if (checked) Cream else Dim,
+            fontSize = 9.sp,
+            lineHeight = 12.sp,
+            modifier = Modifier.weight(1f),
+        )
+    }
+}
+
+@Composable
+private fun DiagAction(
+    label: String,
+    active: Boolean = false,
+    enabled: Boolean = true,
+    onClick: () -> Unit,
+) {
+    val background = when {
+        !enabled -> PanelRaised.copy(alpha = 0.4f)
+        active -> Mint
+        else -> PanelRaised
+    }
+    val foreground = when {
+        !enabled -> Dim.copy(alpha = 0.45f)
+        active -> Ink
+        else -> Cream
+    }
+    Box(
+        modifier = Modifier
+            .background(background, RoundedCornerShape(4.dp))
+            .clickable(enabled = enabled, onClick = onClick)
+            .padding(horizontal = 8.dp, vertical = 7.dp),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(label, color = foreground, fontSize = 7.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 0.3.sp)
+    }
+}

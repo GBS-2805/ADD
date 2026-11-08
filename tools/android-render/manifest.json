@@ -1,22 +1,71 @@
 {
-  "showcase": {"palette": "green", "mode": "dark"},
+  "showcase": {
+    "palette": "green",
+    "mode": "dark"
+  },
   "themes": [
-    {"palette": "green", "mode": "dark"},
-    {"palette": "green", "mode": "light"},
-    {"palette": "moss", "mode": "dark"},
-    {"palette": "moss", "mode": "light"},
-    {"palette": "navy", "mode": "dark"},
-    {"palette": "navy", "mode": "light"}
+    {
+      "palette": "green",
+      "mode": "dark"
+    },
+    {
+      "palette": "green",
+      "mode": "light"
+    },
+    {
+      "palette": "moss",
+      "mode": "dark"
+    },
+    {
+      "palette": "moss",
+      "mode": "light"
+    },
+    {
+      "palette": "navy",
+      "mode": "dark"
+    },
+    {
+      "palette": "navy",
+      "mode": "light"
+    }
   ],
   "screens": [
-    {"slug": "compress", "title": "Compress"},
-    {"slug": "editor", "title": "Editor · Quick"},
-    {"slug": "photo", "title": "Editor · Photo"},
-    {"slug": "presets", "title": "Editor · Presets"},
-    {"slug": "type", "title": "Editor · Type"},
-    {"slug": "layers", "title": "Editor · Layers"},
-    {"slug": "colour", "title": "Editor · Colour"},
-    {"slug": "compare", "title": "Compare"},
-    {"slug": "packs", "title": "Font packs"}
+    {
+      "slug": "compress",
+      "title": "Compress \u00b7 full form",
+      "full": true
+    },
+    {
+      "slug": "editor",
+      "title": "Editor \u00b7 Quick"
+    },
+    {
+      "slug": "photo",
+      "title": "Editor \u00b7 Photo"
+    },
+    {
+      "slug": "presets",
+      "title": "Editor \u00b7 Presets"
+    },
+    {
+      "slug": "type",
+      "title": "Editor \u00b7 Type"
+    },
+    {
+      "slug": "layers",
+      "title": "Editor \u00b7 Layers"
+    },
+    {
+      "slug": "colour",
+      "title": "Editor \u00b7 Colour"
+    },
+    {
+      "slug": "compare",
+      "title": "Compare"
+    },
+    {
+      "slug": "packs",
+      "title": "Font packs"
+    }
   ]
 }

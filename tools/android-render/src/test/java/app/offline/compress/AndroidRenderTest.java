@@ -20,6 +20,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Looper;
 import android.provider.OpenableColumns;
+import android.util.TypedValue;
 import android.text.Layout;
 import android.view.View;
 import android.view.ViewGroup;
@@ -93,6 +94,7 @@ public class AndroidRenderTest {
     private static int paletteChecks;
     private static int layoutChecks;
     private static int savedRenders;
+    private static int compressHeight;
 
     private File sample;
     private File after;
@@ -126,7 +128,8 @@ public class AndroidRenderTest {
             return;
         }
         String json = "{\n"
-                + "  \"canvas\": \"1080x2400\",\n"
+                + "  \"canvas\": \"1080x2400 phone screens; compress full height\",\n"
+                + "  \"compressHeight\": " + compressHeight + ",\n"
                 + "  \"screens\": 9,\n"
                 + "  \"themes\": 6,\n"
                 + "  \"matrix\": " + paletteChecks + ",\n"
@@ -151,7 +154,12 @@ public class AndroidRenderTest {
                 ActivityController<MainActivity> controller =
                         Robolectric.buildActivity(MainActivity.class, intent).setup();
                 settle(350);
-                save(controller.get(), "compress-" + PALETTE_NAMES[i] + (dark ? "-dark" : "-light"));
+                String name = "compress-" + PALETTE_NAMES[i] + (dark ? "-dark" : "-light");
+                if (i == 0 && dark) {
+                    saveFullForm(controller.get(), name);
+                } else {
+                    save(controller.get(), name);
+                }
                 controller.pause().stop().destroy();
             }
         }
@@ -393,6 +401,59 @@ public class AndroidRenderTest {
     }
 
     /**
+     * The Compress form is a scroll view; its ordinary 1080x2400 frame stops in
+     * section 4. Audit that phone frame exactly as every other screen, then write a
+     * second, full-height draw of the same real content so the review shows the
+     * action row and the whole form instead of a crop.
+     */
+    private void saveFullForm(Activity activity, String name) throws IOException {
+        Bitmap phone = render(activity, name);
+        auditActivity(activity, name);
+        auditPalette(phone, name, false);
+
+        Bitmap full = renderFull(activity, name);
+        assertTrue("Compress full form is not taller than the phone viewport",
+                full.getHeight() > HEIGHT);
+        compressHeight = full.getHeight();
+        auditPalette(full, name, false, WIDTH, full.getHeight(), false);
+        saveTall(full, name);
+    }
+
+    /** Draws the ScrollView's real content at its natural height, not a crop. */
+    private Bitmap renderFull(Activity activity, String name) {
+        ScrollView scroll = activity.findViewById(R.id.root);
+        assertNotNull("no Compress ScrollView in " + name, scroll);
+        assertEquals("scroll child count " + name, 1, scroll.getChildCount());
+        View page = scroll.getChildAt(0);
+        page.measure(
+                View.MeasureSpec.makeMeasureSpec(WIDTH, View.MeasureSpec.EXACTLY),
+                View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
+        int height = page.getMeasuredHeight();
+        assertTrue("Compress page has no full height", height > HEIGHT);
+        page.layout(0, 0, WIDTH, height);
+
+        Bitmap bitmap = Bitmap.createBitmap(WIDTH, height, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        TypedValue background = new TypedValue();
+        canvas.drawColor(activity.getTheme().resolveAttribute(R.attr.page, background, true)
+                ? background.data : Color.BLACK);
+        page.draw(canvas);
+        return bitmap;
+    }
+
+    private void saveTall(Bitmap bitmap, String name) throws IOException {
+        assertEquals("width " + name, WIDTH, bitmap.getWidth());
+        assertTrue("short full form " + name, bitmap.getHeight() > HEIGHT);
+        assertTrue("blank full form " + name, changedPixels(bitmap) > 100);
+        File file = new File(outDir.toFile(), name + ".png");
+        try (OutputStream out = new BufferedOutputStream(new FileOutputStream(file))) {
+            assertTrue("encode " + name, bitmap.compress(Bitmap.CompressFormat.PNG, 100, out));
+        }
+        assertTrue("short render " + name, file.length() > 10_000);
+        savedRenders++;
+    }
+
+    /**
      * Composites the real dialog's content panel over the real activity frame at the
      * dialog's dim amount. The sheet is the app's AlertDialog panel, not a redraw.
      */
@@ -623,6 +684,11 @@ public class AndroidRenderTest {
 
     /** The saved image must carry the palette and the mode ink the theme promises. */
     private static void auditPalette(Bitmap bitmap, String name, boolean sheet) {
+        auditPalette(bitmap, name, sheet, WIDTH, HEIGHT, true);
+    }
+
+    private static void auditPalette(Bitmap bitmap, String name, boolean sheet,
+            int width, int height, boolean count) {
         Context app = RuntimeEnvironment.getApplication();
         Resources.Theme theme = app.getResources().newTheme();
         theme.applyStyle(ThemePrefs.style(app), true);
@@ -634,8 +700,8 @@ public class AndroidRenderTest {
 
         int bandCount = 0;
         int inkCount = 0;
-        for (int y = 0; y < HEIGHT; y += 2) {
-            for (int x = 0; x < WIDTH; x += 2) {
+        for (int y = 0; y < height; y += 2) {
+            for (int x = 0; x < width; x += 2) {
                 int pixel = bitmap.getPixel(x, y) & 0xFFFFFF;
                 if (pixel == band) {
                     bandCount++;
@@ -647,7 +713,9 @@ public class AndroidRenderTest {
         }
         assertTrue(name + " is missing its band colour", sheet || bandCount >= 500);
         assertTrue(name + " is missing its mode ink", inkCount >= 100);
-        paletteChecks++;
+        if (count) {
+            paletteChecks++;
+        }
     }
 
     private static String screenKey(String name) {
