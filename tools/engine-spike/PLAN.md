@@ -382,10 +382,13 @@ piece that failed is dropped without unpicking the rest.
 
 ## Cadence
 
-Every phase: unit tests, `assembleDebug`, APK, handoff page, commit, push, phone verdict.
-Visual phases (P2, P3, P4, P6) wait for the verdict before the commit; the rest commit on
-green. Parallel tracks: debugging (P0, P5) can run while a visual verdict is pending;
-persistence (P1) touches nothing visible and is the safest work to do while waiting.
+Every batch: unit tests, `assembleDebug`, APK, handoff page, commit, push, phone verdict.
+A batch is built with every item it can hold, then ships one engine APK or one editor APK.
+Each item is its own commit after the verdict, so a rejected piece is dropped without
+unpicking the rest of the batch. Invisible work — the recorder, the spill, the schema —
+commits on green. The engine is judged on the phone, always, because there is no render of
+it; the editor is judged from Robolectric renders first, then on the phone for touch and
+behaviour.
 
 ## Not building
 
