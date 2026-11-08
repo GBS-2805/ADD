@@ -235,7 +235,7 @@ fun DiagnosticsDialog(
 
                 DiagSection("RECORDED INTERACTION", "${Diagnostics.count} LINES")
                 Text(
-                    "Press REC, CLOSE this screen, then do the thing you want looked at. The sampler writes a line only when a value moved: selection, tool, every layer's position, size, rotation and unit scale, zoom, and layers added or removed. A shape gesture is one line rather than one per sample, naming its mode, the handle it took, its travel and the geometry it changed; a tap that changes nothing writes a line naming what it hit. Zoom lines name the control that moved it, frames are sampled every two seconds, and a crash while recording is written to a file the next session shows. Come back here to STOP and SHARE.",
+                    "Press REC, CLOSE this screen, then do the thing you want looked at. The sampler writes a line only when a value moved: selection, tool, every layer's position, size, rotation and unit scale, zoom, and layers added or removed. A shape gesture is one line rather than one per sample, naming its mode, the handle it took, its travel and the geometry it changed; a tap that changes nothing writes a line naming what it hit. Zoom lines name the control that moved it, frames are sampled every two seconds, and a crash while recording is written to a file the next session shows. A dial writes one line when it is let go, with the value it started from, and an export records its pixels, its bytes and how many 3D views reached the file. Come back here to STOP and SHARE.",
                     color = Dim,
                     fontSize = 8.sp,
                     lineHeight = 12.sp,

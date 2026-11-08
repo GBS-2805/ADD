@@ -16,6 +16,7 @@ import io.github.sceneview.SceneView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
+import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileOutputStream
 import java.text.SimpleDateFormat
@@ -32,6 +33,20 @@ data class CaptureResult(
     val message: String,
 )
 
+/**
+ * What an export produced, not just whether it worked: the size of the file, the pixels
+ * it holds and how many 3D views made it in. A model that drops out of the capture is
+ * invisible in the status string, so the counts travel with the result.
+ */
+data class ExportResult(
+    val status: String,
+    val width: Int,
+    val height: Int,
+    val bytes: Long,
+    val models: Int,
+    val missing: Int,
+)
+
 private data class CaptureAttempt(
     val bitmap: Bitmap?,
     val width: Int,
@@ -45,7 +60,7 @@ object Exporter {
         layers: List<Layer>,
         typefaces: Typefaces,
         sceneViews: Map<String, SceneView?>,
-    ): String {
+    ): ExportResult {
         val artboard = Bitmap.createBitmap(
             ArtboardPainter.W.toInt(),
             ArtboardPainter.H.toInt(),
@@ -60,9 +75,17 @@ object Exporter {
         }
         ArtboardPainter.draw(canvas, layers, typefaces, captures)
         captures.values.forEach { it.recycle() }
+        val missing = visibleModels.count { it.id !in captures }
 
         val saved = withContext(Dispatchers.IO) { save(context, artboard) }
-        return if (visibleModels.any { it.id !in captures }) "$saved · 3D CAPTURE UNAVAILABLE" else saved
+        return ExportResult(
+            status = if (missing > 0) "${saved.message} · 3D CAPTURE UNAVAILABLE" else saved.message,
+            width = artboard.width,
+            height = artboard.height,
+            bytes = saved.bytes,
+            models = visibleModels.size,
+            missing = missing,
+        )
     }
 
     /**
@@ -167,9 +190,15 @@ object Exporter {
         else -> "CODE $result"
     }
 
-    private fun save(context: Context, bitmap: Bitmap): String {
+    private data class Saved(val message: String, val bytes: Long)
+
+    private fun save(context: Context, bitmap: Bitmap): Saved {
         val stamp = SimpleDateFormat("yyyyMMdd-HHmmss", Locale.US).format(Date())
         val name = "add-engine-$stamp.png"
+        // One encode, so the size reported is the size written.
+        val png = ByteArrayOutputStream().also {
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, it)
+        }.toByteArray()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             val values = ContentValues().apply {
                 put(MediaStore.Images.Media.DISPLAY_NAME, name)
@@ -178,21 +207,21 @@ object Exporter {
                 put(MediaStore.Images.Media.IS_PENDING, 1)
             }
             val uri = context.contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values)
-                ?: return "EXPORT FAILED · could not create a MediaStore entry"
+                ?: return Saved("EXPORT FAILED · could not create a MediaStore entry", 0L)
             context.contentResolver.openOutputStream(uri)?.use { stream ->
-                bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
-            } ?: return "EXPORT FAILED · could not open the destination"
+                stream.write(png)
+            } ?: return Saved("EXPORT FAILED · could not open the destination", 0L)
             values.clear()
             values.put(MediaStore.Images.Media.IS_PENDING, 0)
             context.contentResolver.update(uri, values, null, null)
-            return "SAVED · Pictures/Engine Spike/$name"
+            return Saved("SAVED · Pictures/Engine Spike/$name", png.size.toLong())
         }
 
         val dir = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES) ?: context.filesDir
         val file = File(dir, name)
         FileOutputStream(file).use { stream ->
-            bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
+            stream.write(png)
         }
-        return "SAVED · ${file.absolutePath}"
+        return Saved("SAVED · ${file.absolutePath}", png.size.toLong())
     }
 }

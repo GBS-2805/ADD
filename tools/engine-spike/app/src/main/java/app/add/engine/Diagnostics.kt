@@ -190,6 +190,16 @@ object Diagnostics {
     }
 
     /**
+     * A dial's own drag, in its own units, written once when it is let go. The sampler
+     * says a width moved; this says the SCALE dial moved it, which is what separates a
+     * slider from a stray corner grip.
+     */
+    fun dial(name: String, from: String, to: String) {
+        if (!recording) return
+        append("dial:$name", "dial  $name $from → $to")
+    }
+
+    /**
      * One frame, in milliseconds since the previous one. The window is long enough to
      * survive the coalescing rule, so a steady 60 reads as one line every two seconds
      * and a stutter shows as the worst frame in that window.

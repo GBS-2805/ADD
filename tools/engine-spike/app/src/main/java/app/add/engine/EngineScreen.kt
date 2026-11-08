@@ -119,14 +119,24 @@ fun EngineScreen() {
             doc.status = "CAPTURING ARTBOARD + 3D LAYERS…"
             scope.launch {
                 try {
-                    doc.status = Exporter.export(
+                    val result = Exporter.export(
                         context,
                         doc.layers,
                         typefaces,
                         doc.modelLayers.associate { it.id to handleFor(it).view },
                     )
+                    doc.status = result.status
+                    // What came out, not just that something did: a 3D view that
+                    // dropped out of the file is invisible in the status line.
+                    Diagnostics.note(
+                        "export " + result.width + " × " + result.height +
+                            " · " + result.bytes + " bytes" +
+                            " · 3d " + (result.models - result.missing) + "/" + result.models +
+                            (if (result.missing > 0) " · 3D CAPTURE MISSING" else "")
+                    )
                 } catch (error: Exception) {
                     doc.status = "EXPORT FAILED · ${error.message ?: "unknown error"}"
+                    Diagnostics.note("export failed · ${error.message ?: error.javaClass.simpleName}")
                 } finally {
                     doc.exporting = false
                 }
@@ -1251,15 +1261,29 @@ private fun SliderRow(
     onChange: (Float) -> Unit,
     onChangeFinished: (() -> Unit)? = null,
 ) {
+    // A dial's drag is one line, written when it is let go and in the dial's own units.
+    // The sampler's geometry lines say a width moved; this says SCALE moved it, which
+    // is what separates the dial from a stray corner grip.
+    var dialFrom by remember(label) { mutableStateOf<Float?>(null) }
+    var dialTo by remember(label) { mutableStateOf(value) }
     Row(Modifier.fillMaxWidth().padding(top = 3.dp), verticalAlignment = Alignment.CenterVertically) {
         Text(label, color = Dim, fontSize = 6.sp, letterSpacing = 0.5.sp, modifier = Modifier.weight(1f))
         Text(display(value), color = Cream, fontSize = 7.sp)
     }
     Slider(
         value = value,
-        onValueChange = onChange,
+        onValueChange = {
+            if (dialFrom == null) dialFrom = value
+            dialTo = it
+            onChange(it)
+        },
         valueRange = range,
-        onValueChangeFinished = onChangeFinished,
+        onValueChangeFinished = {
+            val start = dialFrom
+            if (start != null) Diagnostics.dial(label, display(start), display(dialTo))
+            dialFrom = null
+            onChangeFinished?.invoke()
+        },
         modifier = Modifier.fillMaxWidth().height(24.dp),
         colors = SliderDefaults.colors(
             thumbColor = Mint,
