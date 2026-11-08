@@ -217,6 +217,7 @@ object Geometry {
 
 fun Layer.withBounds(x: Float, y: Float, w: Float, h: Float): Layer = when (this) {
     is VectorLayer -> copy(x = x, y = y, w = w, h = h)
+    is ImageLayer -> copy(x = x, y = y, w = w, h = h)
     is TextLayer -> copy(x = x, y = y, w = w, h = h)
     is IconLayer -> copy(x = x, y = y, w = w, h = h)
     is ModelLayer -> copy(x = x, y = y, w = w, h = h)
@@ -226,6 +227,7 @@ fun Layer.withRotation(degrees: Float): Layer {
     val value = Geometry.normalizeAngle(degrees)
     return when (this) {
         is VectorLayer -> copy(rotation = value)
+    is ImageLayer -> copy(rotation = value)
         is TextLayer -> copy(rotation = value)
         is IconLayer -> copy(rotation = value)
         is ModelLayer -> copy(rotation = value)

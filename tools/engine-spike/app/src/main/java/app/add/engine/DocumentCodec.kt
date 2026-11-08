@@ -17,17 +17,19 @@ import java.io.File
  * rather than decoded into a document missing whatever that build added.
  */
 object DocumentCodec {
-    const val VERSION = 1
+    const val VERSION = 2
 
     data class Document(
         val layers: List<Layer>,
         val selectedId: String?,
         val zoom: Float,
+        val locked: Set<String> = emptySet(),
     )
 
-    fun encode(layers: List<Layer>, selectedId: String?, zoom: Float): String {
+    fun encode(layers: List<Layer>, selectedId: String?, zoom: Float, locked: Set<String> = emptySet()): String {
         val root = JSONObject()
         root.put("schema", VERSION)
+        root.put("locked", JSONArray(locked.toList()))
         root.put("zoom", zoom.toDouble())
         root.put("selected", selectedId ?: "")
         val array = JSONArray()
@@ -38,7 +40,8 @@ object DocumentCodec {
 
     fun decode(text: String): Document? = runCatching {
         val root = JSONObject(text)
-        if (root.optInt("schema", 0) != VERSION) return null
+        // 1 is the same document without locks or photographs; it still opens.
+        if (root.optInt("schema", 0) !in 1..VERSION) return null
         val array = root.optJSONArray("layers") ?: return null
         val layers = (0 until array.length()).mapNotNull { index ->
             runCatching { decodeLayer(array.getJSONObject(index)) }.getOrNull()
@@ -48,6 +51,11 @@ object DocumentCodec {
             layers = layers,
             selectedId = root.optString("selected").ifBlank { null },
             zoom = root.optDouble("zoom", 1.0).toFloat().takeIf { it.isFinite() } ?: 1f,
+            locked = root.optJSONArray("locked").let { array ->
+                if (array == null) emptySet() else (0 until array.length())
+                    .mapNotNull { index -> array.optString(index).ifBlank { null } }
+                    .toSet()
+            },
         )
     }.getOrNull()
 
@@ -85,6 +93,10 @@ object DocumentCodec {
             is ModelLayer -> {
                 o.put("asset", layer.asset.name)
                 o.put("scaleToUnits", layer.scaleToUnits.toDouble())
+            }
+            is ImageLayer -> {
+                o.put("path", layer.path)
+                o.put("fill", layer.fill)
             }
         }
         return o
@@ -147,6 +159,19 @@ object DocumentCodec {
                 rotation = rotation,
                 glyph = o.optJSONObject("glyph")?.let { decodeGlyph(it) } ?: return null,
                 tint = o.optInt("tint", 0xFF11231C.toInt()),
+            )
+            "image" -> ImageLayer(
+                id = id,
+                name = name,
+                visible = visible,
+                x = x,
+                y = y,
+                w = w,
+                h = h,
+                opacity = opacity,
+                rotation = rotation,
+                path = o.optString("path"),
+                fill = o.optBoolean("fill", true),
             )
             "model" -> ModelLayer(
                 id = id,
@@ -280,6 +305,7 @@ object DocumentCodec {
             is TextLayer -> "text"
             is IconLayer -> "icon"
             is ModelLayer -> "model"
+            is ImageLayer -> "image"
         }
 
     private fun JSONArray?.orEmpty(): List<JSONObject> {
@@ -296,11 +322,14 @@ object DocumentCodec {
  */
 object DocumentStore {
     private const val FILE = "document.json"
+    private const val LIBRARY = "library"
+
+    data class Entry(val key: String, val name: String, val layers: Int, val modified: Long)
 
     fun save(context: Context, doc: EngineDocument) {
         runCatching {
             File(context.filesDir, FILE).writeText(
-                DocumentCodec.encode(doc.layers, doc.selectedId, doc.zoom)
+                DocumentCodec.encode(doc.layers, doc.selectedId, doc.zoom, doc.lockedIds)
             )
         }
     }
@@ -313,4 +342,42 @@ object DocumentStore {
     fun clear(context: Context) {
         runCatching { File(context.filesDir, FILE).delete() }
     }
+
+    private fun libraryDir(context: Context) = File(context.filesDir, LIBRARY).apply { mkdirs() }
+
+    private fun slug(name: String): String = name.trim().lowercase()
+        .replace(Regex("[^a-z0-9]+"), "-")
+        .trim('-')
+        .ifBlank { "untitled" }
+
+    /** Named documents, newest first. A broken file is skipped, never fatal. */
+    fun library(context: Context): List<Entry> {
+        val files = libraryDir(context).listFiles()?.filter { it.extension == "json" } ?: return emptyList()
+        return files.mapNotNull { file ->
+            val doc = runCatching { DocumentCodec.decode(file.readText()) }.getOrNull() ?: return@mapNotNull null
+            Entry(
+                key = file.nameWithoutExtension,
+                name = file.nameWithoutExtension.replace('-', ' '),
+                layers = doc.layers.size,
+                modified = file.lastModified(),
+            )
+        }.sortedByDescending { it.modified }
+    }
+
+    fun saveAs(context: Context, name: String, doc: EngineDocument): String? = runCatching {
+        val key = slug(name)
+        File(libraryDir(context), "$key.json").writeText(
+            DocumentCodec.encode(doc.layers, doc.selectedId, doc.zoom, doc.lockedIds)
+        )
+        key
+    }.getOrNull()
+
+    fun open(context: Context, key: String): DocumentCodec.Document? = runCatching {
+        val file = File(libraryDir(context), "$key.json")
+        if (!file.exists()) null else DocumentCodec.decode(file.readText())
+    }.getOrNull()
+
+    fun delete(context: Context, key: String): Boolean = runCatching {
+        File(libraryDir(context), "$key.json").delete()
+    }.getOrDefault(false)
 }

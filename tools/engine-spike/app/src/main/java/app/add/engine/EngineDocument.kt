@@ -18,6 +18,9 @@ enum class Tool(val label: String, val glyph: String) {
 
 enum class TextAlign { Left, Center, Right }
 
+/** Where a moved layer caught: the lines the stage draws while the finger is down. */
+data class SnapGuides(val vertical: List<Float> = emptyList(), val horizontal: List<Float> = emptyList())
+
 sealed interface Layer {
     val id: String
     val name: String
@@ -78,6 +81,22 @@ data class IconLayer(
     val tint: Int,
 ) : Layer
 
+data class ImageLayer(
+    override val id: String,
+    override val name: String,
+    override val visible: Boolean = true,
+    override val x: Float,
+    override val y: Float,
+    override val w: Float,
+    override val h: Float,
+    override val opacity: Float = 1f,
+    override val rotation: Float = 0f,
+    /** The file name inside filesDir/media. Copied in, never referenced in place. */
+    val path: String,
+    /** True fills the frame and crops; false fits the whole photograph inside it. */
+    val fill: Boolean = true,
+) : Layer
+
 data class ModelLayer(
     override val id: String,
     override val name: String,
@@ -98,6 +117,7 @@ val Layer.kindLabel: String
         is TextLayer -> "TYPE / HARFBUZZ"
         is IconLayer -> "ICON / PATH PARSER"
         is ModelLayer -> "3D / ${asset.label.uppercase()}"
+        is ImageLayer -> if (fill) "PHOTO / FILL" else "PHOTO / FIT"
     }
 
 val Layer.isVector: Boolean get() = this is VectorLayer
@@ -181,6 +201,21 @@ class EngineDocument(initial: List<Layer>? = null) {
     /** The clock time the last autosave finished, so the shell can say when. */
     var savedAt by mutableStateOf<String?>(null)
         private set
+
+    /** Locked layers refuse every transform; the id lives here so layers stay data. */
+    var lockedIds by mutableStateOf<Set<String>>(emptySet())
+        private set
+
+    /** Names of the last actions, newest first, for the undo sheet. */
+    var recentActions by mutableStateOf<List<String>>(emptyList())
+        private set
+
+    /** The lines the current drag is caught on, if any. */
+    var guides by mutableStateOf<SnapGuides?>(null)
+        private set
+
+    /** A composition guide, not a document property: it is off on every launch. */
+    var safeArea by mutableStateOf(false)
 
     /** The control that made the last change, so the recorder can name it. */
     var action by mutableStateOf("OPEN")
@@ -266,11 +301,145 @@ class EngineDocument(initial: List<Layer>? = null) {
         }
     }
 
+    fun restoreLocked(ids: Set<String>) {
+        lockedIds = ids
+    }
+
+    /** Opens a stored document in place, with the history starting from it. */
+    fun replaceAll(restored: DocumentCodec.Document) {
+        layers = restored.layers
+        selectedId = restored.selectedId ?: restored.layers.first().id
+        zoom = restored.zoom
+        lockedIds = restored.locked
+        undoStack.clear()
+        redoStack.clear()
+        syncHistory()
+        recentActions = emptyList()
+        editingModelId = null
+        selectedNodeId = null
+        status = "OPENED · ${layers.size} LAYERS"
+    }
+
+    /** A fresh page, seeded like a first launch. */
+    fun reset() {
+        replaceAll(DocumentCodec.Document(seedLayers(), null, 1f, emptySet()))
+        status = "NEW DOCUMENT"
+    }
+
+    fun isLocked(id: String): Boolean = id in lockedIds
+
+    fun toggleLock(id: String) {
+        val target = layers.firstOrNull { it.id == id } ?: return
+        act(if (id in lockedIds) "UNLOCK" else "LOCK", target.name)
+        lockedIds = if (id in lockedIds) lockedIds - id else lockedIds + id
+        status = if (id in lockedIds) "LAYER LOCKED" else "LAYER UNLOCKED"
+    }
+
+    fun rename(id: String, name: String) {
+        val clean = name.trim().take(28)
+        if (clean.isBlank()) return
+        act("NAME", clean)
+        commit { layerList -> layerList.map { if (it.id == id) it.withName(clean) else it } }
+        status = "RENAMED · $clean"
+    }
+
+    fun setAlign(align: TextAlign) {
+        act("ALIGN")
+        updateSelected { (it as? TextLayer)?.copy(align = align) ?: it }
+    }
+
+    fun setLineHeight(value: Float) {
+        act("LEADING")
+        updateSelected { (it as? TextLayer)?.copy(lineHeight = value.coerceIn(0.7f, 1.6f)) ?: it }
+    }
+
+    fun setFillHex(hex: String) {
+        val clean = hex.removePrefix("#").trim()
+        if (clean.length != 6) return
+        val value = clean.toIntOrNull(16) ?: return
+        setFill((0xFF shl 24) or value)
+    }
+
+    fun setImageFill(fill: Boolean) {
+        act("PHOTO FIT")
+        updateSelected { (it as? ImageLayer)?.copy(fill = fill) ?: it }
+        status = if (fill) "PHOTO FILLS ITS FRAME" else "PHOTO FITS INSIDE ITS FRAME"
+    }
+
+    fun addImage(path: String) {
+        act("PHOTO+")
+        val id = newId("photo")
+        val offset = (layers.count { it is ImageLayer } * 0.02f).coerceAtMost(0.08f)
+        val layer = ImageLayer(
+            id = id,
+            name = "PHOTO / ${layers.count { it is ImageLayer } + 1}",
+            x = 0.1f + offset,
+            y = 0.14f + offset,
+            w = 0.8f,
+            h = squareFrameHeight(0.8f),
+            path = path,
+        )
+        commit { it + layer }
+        selectedId = id
+        selectedNodeId = null
+        tool = Tool.Select
+        status = "PHOTO PLACED · DRAG, PINCH OR TYPE A PLACE"
+    }
+
+    /**
+     * A move that catches on the page and on other layers. The threshold is in
+     * artboard fractions, so it reads the same at every zoom.
+     */
+    fun moveSelectedSnapped(dx: Float, dy: Float, threshold: Float = 0.012f) {
+        val current = selected ?: return
+        if (isLocked(current.id)) return
+        val rawX = current.x + dx
+        val rawY = current.y + dy
+        val others = layers.filter { it.id != current.id && it.visible }
+        val verticals = listOf(0f, 0.5f, 1f) +
+            others.flatMap { listOf(it.x, it.x + it.w / 2f, it.x + it.w) }
+        val horizontals = listOf(0f, 0.5f, 1f) +
+            others.flatMap { listOf(it.y, it.y + it.h / 2f, it.y + it.h) }
+
+        var nextX = rawX
+        var guideX: Float? = null
+        listOf(rawX, rawX + current.w / 2f, rawX + current.w).forEach { candidate ->
+            val target = verticals.minByOrNull { kotlin.math.abs(it - candidate) }
+            if (target != null && kotlin.math.abs(target - candidate) <= threshold && guideX == null) {
+                nextX = rawX + (target - candidate)
+                guideX = target
+            }
+        }
+        var nextY = rawY
+        var guideY: Float? = null
+        listOf(rawY, rawY + current.h / 2f, rawY + current.h).forEach { candidate ->
+            val target = horizontals.minByOrNull { kotlin.math.abs(it - candidate) }
+            if (target != null && kotlin.math.abs(target - candidate) <= threshold && guideY == null) {
+                nextY = rawY + (target - candidate)
+                guideY = target
+            }
+        }
+        guides = SnapGuides(
+            vertical = listOfNotNull(guideX),
+            horizontal = listOfNotNull(guideY),
+        )
+        updateLayer(current.id) { it.withPosition(nextX, nextY) }
+    }
+
+    fun clearGuides() {
+        guides = null
+    }
+
+    fun undoSteps(count: Int) {
+        repeat(count.coerceIn(1, undoDepth)) { undo() }
+    }
+
     fun beginGesture() {
         if (gestureStart == null) gestureStart = layers
     }
 
     fun endGesture() {
+        guides = null
         val before = gestureStart ?: return
         gestureStart = null
         if (before != layers) {
@@ -547,6 +716,7 @@ class EngineDocument(initial: List<Layer>? = null) {
                     is TextLayer -> layer.copy(color = color)
                     is IconLayer -> layer.copy(tint = color)
                     is ModelLayer -> layer
+                    is ImageLayer -> layer
                 }
             }
         }
@@ -644,6 +814,7 @@ class EngineDocument(initial: List<Layer>? = null) {
     }
 
     fun updateLayer(id: String, transform: (Layer) -> Layer) {
+        if (id in lockedIds) return
         layers = layers.map { if (it.id == id) transform(it) else it }
     }
 
@@ -680,13 +851,23 @@ class EngineDocument(initial: List<Layer>? = null) {
         action = name
         actionSubject = subject
         actionId++
+        recentActions = (listOfNotNull(subject?.let { "$name · $it" } ?: name) + recentActions).take(12)
     }
 
     private fun newId(prefix: String) = "$prefix-${UUID.randomUUID().toString().take(6)}"
 }
 
+private fun Layer.withName(value: String): Layer = when (this) {
+    is VectorLayer -> copy(name = value)
+    is TextLayer -> copy(name = value)
+    is IconLayer -> copy(name = value)
+    is ModelLayer -> copy(name = value)
+    is ImageLayer -> copy(name = value)
+}
+
 private fun Layer.withVisible(value: Boolean): Layer = when (this) {
     is VectorLayer -> copy(visible = value)
+    is ImageLayer -> copy(visible = value)
     is TextLayer -> copy(visible = value)
     is IconLayer -> copy(visible = value)
     is ModelLayer -> copy(visible = value)
@@ -694,6 +875,7 @@ private fun Layer.withVisible(value: Boolean): Layer = when (this) {
 
 private fun Layer.withPosition(x: Float, y: Float): Layer = when (this) {
     is VectorLayer -> copy(x = x, y = y)
+    is ImageLayer -> copy(x = x, y = y)
     is TextLayer -> copy(x = x, y = y)
     is IconLayer -> copy(x = x, y = y)
     is ModelLayer -> copy(x = x, y = y)
@@ -701,17 +883,21 @@ private fun Layer.withPosition(x: Float, y: Float): Layer = when (this) {
 
 private fun Layer.withOpacity(value: Float): Layer = when (this) {
     is VectorLayer -> copy(opacity = value)
+    is ImageLayer -> copy(opacity = value)
     is TextLayer -> copy(opacity = value)
     is IconLayer -> copy(opacity = value)
     is ModelLayer -> copy(opacity = value)
 }
 
 private fun Layer.duplicate(): Layer {
-    val id = "${id.substringBeforeLast('-')}-${UUID.randomUUID().toString().take(6)}"
+    val copyId = "${id.substringBeforeLast('-')}-${UUID.randomUUID().toString().take(6)}"
+    val nx = min(0.9f, x + 0.04f)
+    val ny = min(0.9f, y + 0.04f)
     return when (this) {
-        is VectorLayer -> copy(id = id, name = "$name COPY", x = min(0.9f, x + 0.04f), y = min(0.9f, y + 0.04f))
-        is TextLayer -> copy(id = id, name = "$name COPY", x = min(0.9f, x + 0.04f), y = min(0.9f, y + 0.04f))
-        is IconLayer -> copy(id = id, name = "$name COPY", x = min(0.9f, x + 0.04f), y = min(0.9f, y + 0.04f))
+        is VectorLayer -> copy(id = copyId, name = "$name COPY", x = nx, y = ny)
+        is ImageLayer -> copy(id = copyId, name = "$name COPY", x = nx, y = ny)
+        is TextLayer -> copy(id = copyId, name = "$name COPY", x = nx, y = ny)
+        is IconLayer -> copy(id = copyId, name = "$name COPY", x = nx, y = ny)
         is ModelLayer -> {
             val copyW = min(w, 0.30f)
             val copyH = min(h, 0.30f)
@@ -721,7 +907,7 @@ private fun Layer.duplicate(): Layer {
                 (x + w + 0.04f).coerceIn(0.02f, 0.6f)
             }
             copy(
-                id = id,
+                id = copyId,
                 name = "$name COPY",
                 x = copyX,
                 y = min(0.9f, y + 0.02f),

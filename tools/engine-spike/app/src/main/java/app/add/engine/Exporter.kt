@@ -62,13 +62,18 @@ object Exporter {
         layers: List<Layer>,
         typefaces: Typefaces,
         sceneViews: Map<String, SceneView?>,
+        scale: Int = 1,
     ): ExportResult {
+        val factor = scale.coerceIn(1, 4)
+        // A 2x export is the same page at twice the pixels: the painter draws in
+        // artboard units, so the canvas carries the multiplier and nothing else moves.
         val artboard = Bitmap.createBitmap(
-            ArtboardPainter.W.toInt(),
-            ArtboardPainter.H.toInt(),
+            (ArtboardPainter.W * factor).toInt(),
+            (ArtboardPainter.H * factor).toInt(),
             Bitmap.Config.ARGB_8888,
         )
         val canvas = Canvas(artboard)
+        canvas.scale(factor.toFloat(), factor.toFloat())
         val visibleModels = layers.filterIsInstance<ModelLayer>().filter { it.visible }
         val captures = mutableMapOf<String, Bitmap>()
         var lit = 0
@@ -90,7 +95,11 @@ object Exporter {
             if (modelLit == 0) black++
             captures[model.id] = bitmap
         }
-        ArtboardPainter.draw(canvas, layers, typefaces, captures)
+        val images = layers.filterIsInstance<ImageLayer>().mapNotNull { layer ->
+            val bitmap = ImageStore.load(context, layer.path) ?: return@mapNotNull null
+            layer.path to bitmap
+        }.toMap()
+        ArtboardPainter.draw(canvas, layers, typefaces, captures, images)
         captures.values.forEach { it.recycle() }
         val missing = visibleModels.count { it.id !in captures }
 

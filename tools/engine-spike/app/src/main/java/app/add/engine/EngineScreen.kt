@@ -114,6 +114,23 @@ fun EngineScreen() {
     val primaryHandle = doc.modelLayers.firstOrNull()?.let { handleFor(it) } ?: fallbackHandle
     val selectedHandle = handleFor(doc.selectedModel)
     val typefaces = remember(context) { Typefaces(context) }
+    // Photos are copied in, then decoded once and handed to the painter as a map.
+    val images = remember(doc.layers) {
+        doc.layers.filterIsInstance<ImageLayer>().mapNotNull { layer ->
+            ImageStore.load(context, layer.path)?.let { layer.path to it }
+        }.toMap()
+    }
+    val photoPicker = androidx.activity.compose.rememberLauncherForActivityResult(
+        androidx.activity.result.contract.ActivityResultContracts.GetContent()
+    ) { uri ->
+        if (uri == null) return@rememberLauncherForActivityResult
+        val name = ImageStore.import(context, uri)
+        if (name == null) {
+            doc.status = "PHOTO IMPORT FAILED · could not copy the file"
+        } else {
+            doc.addImage(name)
+        }
+    }
     val scope = rememberCoroutineScope()
     var showInfo by remember { mutableStateOf(false) }
     var showDiagnostics by remember { mutableStateOf(false) }
@@ -121,6 +138,12 @@ fun EngineScreen() {
     var showLegend by remember { mutableStateOf(false) }
     var chrome by remember { mutableStateOf(true) }
     var sheet by remember { mutableStateOf(false) }
+    var showAdd by remember { mutableStateOf(false) }
+    var showHistory by remember { mutableStateOf(false) }
+    var showExport by remember { mutableStateOf(false) }
+    var showLibrary by remember { mutableStateOf(false) }
+    var libraryKey by remember { mutableStateOf(0) }
+    var exportScale by remember { mutableStateOf(1) }
     val basicEditor: (() -> Unit)? = remember(context) {
         runCatching {
             val cls = Class.forName("app.offline.compress.EditorActivity")
@@ -130,7 +153,7 @@ fun EngineScreen() {
             action
         }.getOrNull()
     }
-    val exportArtboard: () -> Unit = {
+    val exportArtboard: (Int) -> Unit = { scale ->
         if (!doc.exporting) {
             doc.exporting = true
             doc.status = "CAPTURING ARTBOARD + 3D LAYERS…"
@@ -139,6 +162,7 @@ fun EngineScreen() {
                     val result = Exporter.export(
                         context, doc.layers, typefaces,
                         doc.modelLayers.associate { it.id to handleFor(it).view },
+                        scale,
                     )
                     doc.status = result.status
                     Diagnostics.note(
@@ -163,6 +187,7 @@ fun EngineScreen() {
             doc = doc,
             sceneHandles = sceneHandles,
             typefaces = typefaces,
+            images = images,
             onCanvasTouch = { chrome = false },
             modifier = Modifier.fillMaxSize(),
         )
@@ -170,8 +195,9 @@ fun EngineScreen() {
             TopBar(
                 doc = doc,
                 onInfo = { showInfo = true },
-                onExport = exportArtboard,
+                onExport = { showExport = true },
                 onLegend = { showLegend = true },
+                onLibrary = { showLibrary = true },
                 modifier = Modifier.align(Alignment.TopCenter).padding(top = 6.dp, start = 8.dp, end = 8.dp),
             )
         } else {
@@ -186,6 +212,7 @@ fun EngineScreen() {
         ToolPill(
             doc = doc,
             onIcons = { showIcons = true },
+            onAdd = { showAdd = true },
             modifier = Modifier
                 .align(Alignment.CenterStart)
                 .padding(start = 3.dp)
@@ -212,12 +239,50 @@ fun EngineScreen() {
                 doc = doc,
                 handle = selectedHandle,
                 onIcons = { showIcons = true },
+                onHistory = { showHistory = true },
                 onClose = { sheet = false },
                 modifier = Modifier.align(Alignment.BottomCenter),
             )
         }
     }
     if (showIcons) IconSheet(doc = doc, onClose = { showIcons = false })
+    if (showAdd) {
+        AddSheet(
+            doc = doc,
+            onPhoto = {
+                showAdd = false
+                photoPicker.launch("image/*")
+            },
+            onIcons = {
+                showAdd = false
+                showIcons = true
+            },
+            onClose = { showAdd = false },
+        )
+    }
+    if (showHistory) HistoryDialog(doc = doc, onClose = { showHistory = false })
+    if (showLibrary) {
+        // The key forces the list to be read again after a save or a delete.
+        key(libraryKey) {
+            LibraryDialog(
+                context = context,
+                doc = doc,
+                onChanged = { libraryKey++ },
+                onClose = { showLibrary = false },
+            )
+        }
+    }
+    if (showExport) {
+        ExportDialog(
+            scale = exportScale,
+            onScale = { exportScale = it },
+            onExport = {
+                showExport = false
+                exportArtboard(exportScale)
+            },
+            onClose = { showExport = false },
+        )
+    }
     if (showLegend) GestureLegend(onClose = { showLegend = false })
     if (showInfo) {
         InfoDialog(
@@ -230,7 +295,7 @@ fun EngineScreen() {
         DiagnosticsDialog(
             doc = doc,
             handle = primaryHandle,
-            onExport = exportArtboard,
+            onExport = { exportArtboard(exportScale) },
             onClose = { showDiagnostics = false },
         )
     }
@@ -281,6 +346,7 @@ private fun TopBar(
     onInfo: () -> Unit,
     onExport: () -> Unit,
     onLegend: () -> Unit,
+    onLibrary: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     // Wraps its own content on purpose. A full-width row is a band however it is
@@ -299,8 +365,8 @@ private fun TopBar(
             contentAlignment = Alignment.Center,
         ) { Text("A", color = Ink, fontSize = 12.sp, fontWeight = FontWeight.Bold) }
         Spacer(Modifier.width(7.dp))
-        Text("ADD", color = Cream, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 0.8.sp)
-        Spacer(Modifier.width(12.dp))
+        ActionChip(label = "DOC", enabled = true, onClick = onLibrary)
+        Spacer(Modifier.width(8.dp))
         NavButton("↶", enabled = doc.canUndo) { doc.undo() }
         NavButton("↷", enabled = doc.canRedo) { doc.redo() }
         Spacer(Modifier.width(6.dp))
@@ -354,7 +420,7 @@ private fun StatusChip(
 }
 
 @Composable
-private fun ToolPill(doc: EngineDocument, onIcons: () -> Unit, modifier: Modifier = Modifier) {
+private fun ToolPill(doc: EngineDocument, onIcons: () -> Unit, onAdd: () -> Unit, modifier: Modifier = Modifier) {
     Column(
         modifier = modifier
             .clip(RoundedCornerShape(99.dp))
@@ -385,6 +451,18 @@ private fun ToolPill(doc: EngineDocument, onIcons: () -> Unit, modifier: Modifie
                 )
             }
         }
+        // The photograph is not a tool with a mode: it is one tap that puts a picture
+        // on the page, which is why it sits under the tools rather than among them.
+        Box(
+            modifier = Modifier
+                .size(34.dp)
+                .clip(CircleShape)
+                .background(Lime.copy(alpha = 0.18f))
+                .clickable(onClick = onAdd),
+            contentAlignment = Alignment.Center,
+        ) {
+            Text("+", color = Lime, fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
+        }
     }
 }
 
@@ -393,6 +471,7 @@ private fun Stage(
     doc: EngineDocument,
     sceneHandles: MutableMap<String, SceneHandle>,
     typefaces: Typefaces,
+    images: Map<String, android.graphics.Bitmap>,
     onCanvasTouch: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -568,7 +647,7 @@ contentAlignment = Alignment.Center,
                                 val dx = (change.position.x - change.previousPosition.x) / scale / ArtboardPainter.W
                                 val dy = (change.position.y - change.previousPosition.y) / scale / ArtboardPainter.H
                                 when (mode) {
-                                    "move" -> doc.moveSelected(dx, dy)
+                                    "move" -> doc.moveSelectedSnapped(dx, dy)
                                     "node" -> doc.selectedNodeId?.let { doc.movePointLocal(it, dx, dy) }
                                     "rotate" -> {
                                         val start = startLayer
@@ -602,7 +681,7 @@ contentAlignment = Alignment.Center,
                 drawContext.canvas.nativeCanvas.apply {
                     save()
                     scale(scale, scale)
-                    ArtboardPainter.draw(this, doc.layers, typefaces)
+                    ArtboardPainter.draw(this, doc.layers, typefaces, images = images, safeArea = doc.safeArea)
                     restore()
                 }
             }
@@ -723,6 +802,21 @@ contentAlignment = Alignment.Center,
                         showRotate = false,
                     )
                         restore()
+                    }
+                }
+            }
+
+            doc.guides?.let { guides ->
+                Canvas(Modifier.matchParentSize()) {
+                    val line = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply {
+                        color = 0xFFE86A4A.toInt()
+                        strokeWidth = 2f
+                    }
+                    guides.vertical.forEach { x ->
+                        drawContext.canvas.nativeCanvas.drawLine(x * size.width, 0f, x * size.width, size.height, line)
+                    }
+                    guides.horizontal.forEach { y ->
+                        drawContext.canvas.nativeCanvas.drawLine(0f, y * size.height, size.width, y * size.height, line)
                     }
                 }
             }
@@ -914,6 +1008,7 @@ private fun Sheet(
     doc: EngineDocument,
     handle: SceneHandle,
     onIcons: () -> Unit,
+    onHistory: () -> Unit,
     onClose: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -944,6 +1039,13 @@ private fun Sheet(
             Spacer(Modifier.width(10.dp))
             Text("LAYERS + INSPECT", color = Cream, fontSize = 7.sp, letterSpacing = 1.0.sp, fontWeight = FontWeight.SemiBold)
             Spacer(Modifier.weight(1f))
+            Text(
+                "HISTORY",
+                color = Mint,
+                fontSize = 7.sp,
+                fontWeight = FontWeight.SemiBold,
+                modifier = Modifier.clickable(onClick = onHistory).padding(horizontal = 8.dp),
+            )
             Text("▾", color = Mint, fontSize = 11.sp)
         }
         Row(Modifier.fillMaxWidth().weight(1f)) {
@@ -1035,6 +1137,7 @@ private fun Inspector(doc: EngineDocument, handle: SceneHandle, onIcons: () -> U
         } else if (doc.tool == Tool.Icon) {
             IconTray(onIcons)
         } else {
+            doc.selected?.let { layer -> LayerIdentityRow(doc, layer); Spacer(Modifier.height(6.dp)) }
             when (val layer = doc.selected) {
                 null -> Column {
                     Text("Nothing selected.", color = Dim, fontSize = 9.sp)
@@ -1057,9 +1160,60 @@ private fun Inspector(doc: EngineDocument, handle: SceneHandle, onIcons: () -> U
                     TransformInspector(doc, layer)
                     ModelInspector(doc, layer, handle)
                 }
+                is ImageLayer -> {
+                    TransformInspector(doc, layer)
+                    ImageInspector(doc, layer)
+                }
             }
         }
     }
+}
+
+@Composable
+private fun LayerIdentityRow(doc: EngineDocument, layer: Layer) {
+    var name by remember(layer.id) { mutableStateOf(layer.name) }
+    LaunchedEffect(layer.name) { if (name != layer.name) name = layer.name }
+    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+        ActionChip(
+            label = if (doc.isLocked(layer.id)) "LOCKED" else "LOCK",
+            active = doc.isLocked(layer.id),
+            onClick = { doc.toggleLock(layer.id) },
+        )
+        Spacer(Modifier.width(4.dp))
+        BasicTextField(
+            value = name,
+            onValueChange = { name = it.take(28) },
+            textStyle = TextStyle(color = Cream, fontFamily = Poppins, fontSize = 9.sp),
+            cursorBrush = SolidColor(Mint),
+            singleLine = true,
+            modifier = Modifier
+                .weight(1f)
+                .clip(RoundedCornerShape(3.dp))
+                .background(PanelRaised)
+                .padding(horizontal = 5.dp, vertical = 4.dp),
+        )
+        if (name.trim() != layer.name && name.isNotBlank()) {
+            Spacer(Modifier.width(4.dp))
+            ActionChip("SET", active = true, onClick = { doc.rename(layer.id, name) })
+        }
+    }
+}
+
+@Composable
+private fun ImageInspector(doc: EngineDocument, layer: ImageLayer) {
+    InfoLine("PHOTO · ${layer.path} · ${if (layer.fill) "FILL" else "FIT"}")
+    Spacer(Modifier.height(4.dp))
+    Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+        ActionChip("FILL", active = layer.fill, onClick = { doc.setImageFill(true) })
+        ActionChip("FIT", active = !layer.fill, onClick = { doc.setImageFill(false) })
+        Spacer(Modifier.width(4.dp))
+        ActionChip("DUP", onClick = { doc.duplicateSelected() })
+        ActionChip("DEL", warn = true, onClick = { doc.deleteSelected() })
+    }
+    Spacer(Modifier.height(4.dp))
+    OpacityRow(doc, layer.opacity)
+    Spacer(Modifier.height(3.dp))
+    InfoLine("FILL CROPS TO THE FRAME · FIT KEEPS THE WHOLE PHOTO")
 }
 
 @Composable
@@ -1093,6 +1247,202 @@ private fun TransformInspector(doc: EngineDocument, layer: Layer) {
         }
     )
     Spacer(Modifier.height(4.dp))
+}
+
+@Composable
+private fun LibraryDialog(
+    context: android.content.Context,
+    doc: EngineDocument,
+    onChanged: () -> Unit,
+    onClose: () -> Unit,
+) {
+    var name by remember { mutableStateOf("") }
+    var entries by remember { mutableStateOf(DocumentStore.library(context)) }
+    Dialog(onDismissRequest = onClose) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(12.dp))
+                .background(Panel)
+                .border(1.dp, Rule, RoundedCornerShape(12.dp))
+                .padding(16.dp),
+        ) {
+            Text("DOCUMENTS", color = Cream, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 1.1.sp)
+            Spacer(Modifier.height(4.dp))
+            Text("A named page reopens as it was left.", color = Dim, fontSize = 8.sp)
+            Spacer(Modifier.height(8.dp))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                BasicTextField(
+                    value = name,
+                    onValueChange = { name = it.take(28) },
+                    textStyle = TextStyle(color = Cream, fontFamily = Poppins, fontSize = 9.sp),
+                    cursorBrush = SolidColor(Mint),
+                    singleLine = true,
+                    modifier = Modifier
+                        .weight(1f)
+                        .clip(RoundedCornerShape(4.dp))
+                        .background(PanelRaised)
+                        .padding(horizontal = 8.dp, vertical = 7.dp),
+                )
+                Spacer(Modifier.width(5.dp))
+                ActionChip(
+                    label = "SAVE AS",
+                    active = name.isNotBlank(),
+                    enabled = name.isNotBlank(),
+                    onClick = {
+                        if (DocumentStore.saveAs(context, name, doc) != null) {
+                            entries = DocumentStore.library(context)
+                            name = ""
+                            onChanged()
+                        }
+                    },
+                )
+            }
+            Spacer(Modifier.height(10.dp))
+            if (entries.isEmpty()) {
+                Text("No saved pages yet.", color = Dim, fontSize = 9.sp)
+            } else {
+                entries.take(6).forEach { entry ->
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text(
+                            text = entry.name.uppercase(),
+                            color = Cream,
+                            fontSize = 8.sp,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.weight(1f),
+                        )
+                        Text("${entry.layers} L", color = Dim, fontSize = 6.sp)
+                        Spacer(Modifier.width(6.dp))
+                        ActionChip("OPEN", onClick = {
+                            DocumentStore.open(context, entry.key)?.let { doc.replaceAll(it) }
+                            onClose()
+                        })
+                        Spacer(Modifier.width(3.dp))
+                        ActionChip("DEL", warn = true, onClick = {
+                            DocumentStore.delete(context, entry.key)
+                            entries = DocumentStore.library(context)
+                            onChanged()
+                        })
+                    }
+                }
+            }
+            Spacer(Modifier.height(10.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(5.dp)) {
+                ActionChip("NEW PAGE", onClick = { doc.reset(); onClose() })
+                ActionChip("CLOSE", onClick = onClose)
+            }
+        }
+    }
+}
+
+@Composable
+private fun AddSheet(
+    doc: EngineDocument,
+    onPhoto: () -> Unit,
+    onIcons: () -> Unit,
+    onClose: () -> Unit,
+) {
+    Dialog(onDismissRequest = onClose) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(12.dp))
+                .background(Panel)
+                .border(1.dp, Rule, RoundedCornerShape(12.dp))
+                .padding(16.dp),
+        ) {
+            Text("ADD TO THE PAGE", color = Cream, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 1.1.sp)
+            Spacer(Modifier.height(4.dp))
+            Text("The artboard stays where it is; this only puts something on it.", color = Dim, fontSize = 8.sp)
+            Spacer(Modifier.height(12.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                ActionChip("TYPE", active = true, onClick = { doc.addText(); onClose() })
+                ActionChip("VECTOR", onClick = { doc.addVector(); onClose() })
+                ActionChip("PHOTO", onClick = onPhoto)
+            }
+            Spacer(Modifier.height(6.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                ActionChip("ICON", onClick = onIcons)
+                ActionChip("STICKER", onClick = { doc.chooseTool(Tool.Sticker); onClose() })
+                ActionChip("3D", onClick = { doc.addModel(ModelAsset.Gem); onClose() })
+            }
+            Spacer(Modifier.height(12.dp))
+            ActionChip("CLOSE", onClick = onClose)
+        }
+    }
+}
+
+@Composable
+private fun HistoryDialog(doc: EngineDocument, onClose: () -> Unit) {
+    Dialog(onDismissRequest = onClose) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(12.dp))
+                .background(Panel)
+                .border(1.dp, Rule, RoundedCornerShape(12.dp))
+                .padding(16.dp),
+        ) {
+            Text("HISTORY", color = Cream, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 1.1.sp)
+            Spacer(Modifier.height(4.dp))
+            Text("Tap a line to go back to just before it.", color = Dim, fontSize = 8.sp)
+            Spacer(Modifier.height(8.dp))
+            if (doc.recentActions.isEmpty()) {
+                Text("Nothing yet.", color = Dim, fontSize = 9.sp)
+            } else {
+                doc.recentActions.take(10).forEachIndexed { index, label ->
+                    Text(
+                        text = "${index + 1} · $label",
+                        color = Cream,
+                        fontSize = 9.sp,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(4.dp))
+                            .background(PanelRaised)
+                            .clickable {
+                                doc.undoSteps(index + 1)
+                                onClose()
+                            }
+                            .padding(horizontal = 8.dp, vertical = 6.dp),
+                    )
+                    Spacer(Modifier.height(3.dp))
+                }
+            }
+            Spacer(Modifier.height(8.dp))
+            ActionChip("CLOSE", active = true, onClick = onClose)
+        }
+    }
+}
+
+@Composable
+private fun ExportDialog(scale: Int, onScale: (Int) -> Unit, onExport: () -> Unit, onClose: () -> Unit) {
+    Dialog(onDismissRequest = onClose) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(12.dp))
+                .background(Panel)
+                .border(1.dp, Rule, RoundedCornerShape(12.dp))
+                .padding(16.dp),
+        ) {
+            Text("EXPORT", color = Cream, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 1.1.sp)
+            Spacer(Modifier.height(4.dp))
+            Text("PNG · ${(ArtboardPainter.W * scale).toInt()} × ${(ArtboardPainter.H * scale).toInt()}", color = Dim, fontSize = 8.sp)
+            Spacer(Modifier.height(10.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                ActionChip("1×", active = scale == 1, onClick = { onScale(1) })
+                ActionChip("2×", active = scale == 2, onClick = { onScale(2) })
+            }
+            Spacer(Modifier.height(12.dp))
+            ActionChip("EXPORT PNG", active = true, onClick = onExport)
+        }
+    }
 }
 
 @Composable
@@ -1421,6 +1771,23 @@ private fun TextInspector(doc: EngineDocument, layer: TextLayer) {
         display = { "${it.toInt()} pt" },
         onChange = { doc.setFontSize(it) },
     )
+    Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+        TextAlign.entries.forEach { align ->
+            ActionChip(
+                label = align.name.take(1),
+                active = layer.align == align,
+                onClick = { doc.setAlign(align) },
+            )
+        }
+    }
+    Spacer(Modifier.height(4.dp))
+    SliderRow(
+        label = "LEADING",
+        value = layer.lineHeight,
+        range = 0.7f..1.6f,
+        display = { String.format("%.2f", it) },
+        onChange = { doc.setLineHeight(it) },
+    )
     OpacityRow(doc, layer.opacity)
     Spacer(Modifier.height(4.dp))
     Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -1481,6 +1848,8 @@ private fun ModelInspector(doc: EngineDocument, layer: ModelLayer, handle: Scene
 
 @Composable
 private fun Swatches(doc: EngineDocument, selected: Int) {
+    var hex by remember(selected) { mutableStateOf(String.format("%06X", selected and 0xFFFFFF)) }
+    LaunchedEffect(selected) { hex = String.format("%06X", selected and 0xFFFFFF) }
     Row(horizontalArrangement = Arrangement.spacedBy(5.dp)) {
         listOf(
             0xFF0FBF92.toInt(),
@@ -1498,6 +1867,22 @@ private fun Swatches(doc: EngineDocument, selected: Int) {
                     .clickable { doc.setFill(value) },
             )
         }
+        Spacer(Modifier.width(3.dp))
+        BasicTextField(
+            value = hex,
+            onValueChange = { raw ->
+                hex = raw.filter { it.isLetterOrDigit() }.take(6).uppercase()
+                if (hex.length == 6) doc.setFillHex(hex)
+            },
+            textStyle = TextStyle(color = Cream, fontFamily = Poppins, fontSize = 7.sp),
+            cursorBrush = SolidColor(Mint),
+            singleLine = true,
+            modifier = Modifier
+                .width(52.dp)
+                .clip(RoundedCornerShape(3.dp))
+                .background(PanelRaised)
+                .padding(horizontal = 4.dp, vertical = 3.dp),
+        )
     }
 }
 
@@ -1561,6 +1946,7 @@ private fun Actions(doc: EngineDocument) {
         ActionChip("FRONT", onClick = { doc.reorderSelected(1) })
         ActionChip("DUP", onClick = { doc.duplicateSelected() })
         ActionChip("DEL", warn = true, onClick = { doc.deleteSelected() })
+        ActionChip("SAFE", active = doc.safeArea, onClick = { doc.safeArea = !doc.safeArea })
     }
 }
 

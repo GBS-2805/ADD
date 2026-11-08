@@ -45,6 +45,8 @@ object ArtboardPainter {
         layers: List<Layer>,
         typefaces: Typefaces,
         modelCaptures: Map<String, Bitmap> = emptyMap(),
+        images: Map<String, Bitmap> = emptyMap(),
+        safeArea: Boolean = false,
     ) {
         canvas.drawColor(0xFFF3EBDD.toInt())
         drawPaper(canvas, typefaces)
@@ -61,10 +63,70 @@ object ArtboardPainter {
                 is ModelLayer -> modelCaptures[layer.id]?.let {
                     drawModelCapture(canvas, layer, it)
                 } ?: drawModelPlaceholder(canvas, layer, typefaces)
+                is ImageLayer -> images[layer.path]?.let {
+                    drawPhoto(canvas, layer, it)
+                } ?: drawPhotoPlaceholder(canvas, layer, typefaces)
             }
             if (rotated) canvas.restore()
         }
+        if (safeArea) drawSafeArea(canvas, typefaces)
         drawFooter(canvas, typefaces)
+    }
+
+    private fun drawSafeArea(canvas: Canvas, typefaces: Typefaces) {
+        val insetX = W * 0.10f
+        val insetY = H * 0.10f
+        val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = 0xAAE86A4A.toInt()
+            style = Paint.Style.STROKE
+            strokeWidth = 2f
+            pathEffect = DashPathEffect(floatArrayOf(12f, 8f), 0f)
+        }
+        canvas.drawRect(insetX, insetY, W - insetX, H - insetY, paint)
+        val label = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = 0xAAE86A4A.toInt()
+            textSize = 13f
+            typeface = typefaces.forWeight(500)
+            letterSpacing = 0.1f
+        }
+        canvas.drawText("SAFE 10%", insetX + 8f, insetY + 20f, label)
+    }
+
+    private fun drawPhoto(canvas: Canvas, layer: ImageLayer, bitmap: Bitmap) {
+        val rect = layerRect(layer)
+        val paint = Paint(Paint.FILTER_BITMAP_FLAG or Paint.DITHER_FLAG).apply {
+            alpha = (layer.opacity * 255).toInt().coerceIn(0, 255)
+        }
+        canvas.save()
+        canvas.clipRect(rect)
+        if (layer.fill) {
+            canvas.drawBitmap(bitmap, centerCrop(bitmap, rect), rect, paint)
+        } else {
+            val ratio = bitmap.width.toFloat() / bitmap.height.toFloat()
+            val rectRatio = rect.width() / rect.height()
+            val target = if (ratio > rectRatio) {
+                val height = rect.width() / ratio
+                RectF(rect.left, rect.centerY() - height / 2f, rect.right, rect.centerY() + height / 2f)
+            } else {
+                val width = rect.height() * ratio
+                RectF(rect.centerX() - width / 2f, rect.top, rect.centerX() + width / 2f, rect.bottom)
+            }
+            canvas.drawBitmap(bitmap, Rect(0, 0, bitmap.width, bitmap.height), target, paint)
+        }
+        canvas.restore()
+    }
+
+    private fun drawPhotoPlaceholder(canvas: Canvas, layer: ImageLayer, typefaces: Typefaces) {
+        val rect = layerRect(layer)
+        canvas.drawRect(rect, Paint().apply { color = 0x3311231C.toInt() })
+        val label = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = 0xFF11231C.toInt()
+            textSize = 16f
+            typeface = typefaces.forWeight(500)
+        }
+        canvas.drawText("PHOTO MISSING", rect.left + 16f, rect.top + 30f, label)
+        val sub = Paint(label).apply { textSize = 12f; color = 0x9911231C.toInt() }
+        canvas.drawText(layer.path, rect.left + 16f, rect.top + 50f, sub)
     }
 
     fun drawSelection(
