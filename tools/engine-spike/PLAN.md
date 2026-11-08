@@ -190,7 +190,7 @@ they do not share a screen.
 - **C23 Last-export thumbnail** (S). The last PNG, 40 dp, tappable to share — the other half
   of C18.
 - **C24 Haptics** (S). A tick when a grip is taken and when a snap catches.
-- **C25 Resizable bottom panel** (S). Drag the strip to any height, using the editor's own
+- **C25 Resizable bottom panel** (S, absorbed by C29). Drag the strip to any height, using the editor's own
   `SheetDrag` pattern.
 - **C26 Icon recents** (S). The last twenty glyphs used, ahead of the catalog.
 - **C27 ADD sheet** (M). Adding a sticker or icon no longer replaces the selected layer's
@@ -258,7 +258,7 @@ today, and those wait until it asks for them.
 
 These record what each phase promised and how it was checked. **Build waves**, below, is
 how the work actually ships: P0 and P1 are done or half done, and P2–P7 are folded into
-two waves.
+the six batches below.
 
 ### P0 — Close the diagnostics loop (S + M)
 Items: D1, D2, D3, D4, D9, D10.
