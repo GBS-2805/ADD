@@ -99,7 +99,7 @@ object Diagnostics {
         if (before.selected != next.selected) {
             append("select", "select ${next.selected?.let { next.layers[it]?.name ?: it } ?: "nothing"}")
         }
-        if (before.zoom != next.zoom) {
+        if (percent(before.zoom) != percent(next.zoom)) {
             append("zoom", "zoom ${percent(before.zoom)} → ${percent(next.zoom)}")
         }
 
@@ -114,11 +114,18 @@ object Diagnostics {
             val a = before.layers[id] ?: return@forEach
             val b = next.layers[id] ?: return@forEach
             val moved = mutableListOf<String>()
-            if (a.x != b.x) moved += "x ${f(a.x)}→${f(b.x)}"
-            if (a.y != b.y) moved += "y ${f(a.y)}→${f(b.y)}"
-            if (a.w != b.w) moved += "w ${f(a.w)}→${f(b.w)}"
-            if (a.h != b.h) moved += "h ${f(a.h)}→${f(b.h)}"
-            if (a.rotation != b.rotation) moved += "rot ${one(a.rotation)}°→${one(b.rotation)}°"
+            // Compared at the precision that is printed: a change too small to alter a
+            // digit would otherwise be logged as "y 0.245→0.245".
+            if (f(a.x) != f(b.x)) moved += "x ${f(a.x)}→${f(b.x)}"
+            if (f(a.y) != f(b.y)) moved += "y ${f(a.y)}→${f(b.y)}"
+            if (f(a.w) != f(b.w)) moved += "w ${f(a.w)}→${f(b.w)}"
+            if (f(a.h) != f(b.h)) moved += "h ${f(a.h)}→${f(b.h)}"
+            if (one(a.rotation) != one(b.rotation)) {
+                // A turn that crosses 360 is one continuous gesture. Printing the stored
+                // value made 186°→0° read as a jump backwards when it was a +174° turn.
+                val turned = a.rotation + shortestTurn(a.rotation, b.rotation)
+                moved += "rot ${one(a.rotation)}°→${one(turned)}°"
+            }
             if (moved.isNotEmpty()) append("geo:$id", "${b.name}  ${moved.joinToString("  ")}")
             if (a.units != b.units) append("unit:$id", "${b.name}  unit ${f(a.units)}→${f(b.units)}")
             if (a.visible != b.visible) {
@@ -253,6 +260,14 @@ object Diagnostics {
         val order: List<String>,
         val layers: Map<String, LayerState>,
     )
+
+    /** Signed turn from one angle to the other on the short arc. */
+    private fun shortestTurn(from: Float, to: Float): Float {
+        var turn = (to - from) % 360f
+        if (turn > 180f) turn -= 360f
+        if (turn < -180f) turn += 360f
+        return turn
+    }
 
     private fun f(value: Float): String = String.format(Locale.US, "%.3f", value)
 

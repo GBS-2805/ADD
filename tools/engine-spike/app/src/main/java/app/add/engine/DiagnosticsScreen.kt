@@ -120,6 +120,97 @@ fun DiagnosticsDialog(
                     .verticalScroll(rememberScrollState())
                     .padding(horizontal = 12.dp, vertical = 4.dp),
             ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(top = 10.dp),
+                    horizontalArrangement = Arrangement.spacedBy(5.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    DiagAction(
+                        label = if (Diagnostics.recording) "STOP" else "REC",
+                        active = Diagnostics.recording,
+                        onClick = {
+                            if (Diagnostics.recording) {
+                                Diagnostics.stop(doc)
+                            } else {
+                                Diagnostics.start(doc)
+                                transfer = ""
+                            }
+                        },
+                    )
+                    DiagAction(
+                        label = "COPY",
+                        enabled = Diagnostics.count > 0,
+                        onClick = {
+                            val text = buildReport()
+                            val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                            clipboard.setPrimaryClip(ClipData.newPlainText("ADD diagnostics", text))
+                            transfer = "COPIED · ${text.length} CHARS · PASTE IT INTO THE CHAT"
+                        },
+                    )
+                    DiagAction(
+                        label = "SHARE",
+                        enabled = Diagnostics.count > 0,
+                        onClick = {
+                            val text = buildReport()
+                            val send = Intent(Intent.ACTION_SEND)
+                                .setType("text/plain")
+                                .putExtra(Intent.EXTRA_TEXT, text)
+                            context.startActivity(
+                                Intent.createChooser(send, "Send ADD diagnostics")
+                                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                            )
+                            transfer = "SHARED · ${text.length} CHARS"
+                        },
+                    )
+                    Spacer(Modifier.weight(1f))
+                    Text(
+                        "${Diagnostics.count} LINES",
+                        color = if (Diagnostics.count > 0) Mint else Dim,
+                        fontSize = 6.sp,
+                        letterSpacing = 0.8.sp,
+                    )
+                }
+                Spacer(Modifier.height(5.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(5.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    DiagAction(
+                        label = if (testing) "CAPTURING" else "TEST 3D",
+                        active = true,
+                        enabled = !testing && view != null,
+                        onClick = {
+                            testing = true
+                            capture = null
+                            scope.launch {
+                                capture = runCatching { Exporter.testCapture(view) }.getOrElse { error ->
+                                    CaptureResult(
+                                        success = false,
+                                        width = 0,
+                                        height = 0,
+                                        litSamples = 0,
+                                        totalSamples = 0,
+                                        message = "DIAGNOSTIC ERROR · ${error.message ?: "unknown"}",
+                                    )
+                                }
+                                testing = false
+                            }
+                        },
+                    )
+                    DiagAction(
+                        label = if (doc.exporting) "EXPORTING" else "EXPORT PNG",
+                        enabled = !doc.exporting,
+                        onClick = onExport,
+                    )
+                    Spacer(Modifier.weight(1f))
+                    Text("NO ACCOUNT", color = Dim, fontSize = 6.sp, letterSpacing = 0.8.sp)
+                }
+                if (transfer.isNotBlank()) {
+                    Spacer(Modifier.height(5.dp))
+                    Text(transfer, color = Mint, fontSize = 6.sp, letterSpacing = 0.4.sp)
+                }
+
                 DiagSection("DEVICE / RENDERER")
                 DiagnosticRow("SCENEVIEW", if (view == null) "NOT ATTACHED" else "ATTACHED", if (view == null) Clay else Mint)
                 DiagnosticRow("SURFACE", if (surfaceValid) "VALID" else "NOT VALID", if (surfaceValid) Mint else Clay)
@@ -252,99 +343,6 @@ fun DiagnosticsDialog(
                 Spacer(Modifier.height(12.dp))
             }
 
-            Box(Modifier.fillMaxWidth().height(1.dp).background(Rule))
-            Column(Modifier.fillMaxWidth().background(Panel).padding(horizontal = 10.dp, vertical = 8.dp)) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(6.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    DiagAction(
-                        label = if (Diagnostics.recording) "STOP" else "REC",
-                        active = Diagnostics.recording,
-                        onClick = {
-                            if (Diagnostics.recording) {
-                                Diagnostics.stop(doc)
-                            } else {
-                                Diagnostics.start(doc)
-                                transfer = ""
-                            }
-                        },
-                    )
-                    DiagAction(
-                        label = "COPY",
-                        enabled = Diagnostics.count > 0,
-                        onClick = {
-                            val text = buildReport()
-                            val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                            clipboard.setPrimaryClip(ClipData.newPlainText("ADD diagnostics", text))
-                            transfer = "COPIED · ${text.length} CHARS · PASTE IT INTO THE CHAT"
-                        },
-                    )
-                    DiagAction(
-                        label = "SHARE",
-                        enabled = Diagnostics.count > 0,
-                        onClick = {
-                            val text = buildReport()
-                            val send = Intent(Intent.ACTION_SEND)
-                                .setType("text/plain")
-                                .putExtra(Intent.EXTRA_TEXT, text)
-                            context.startActivity(
-                                Intent.createChooser(send, "Send ADD diagnostics")
-                                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                            )
-                            transfer = "SHARED · ${text.length} CHARS"
-                        },
-                    )
-                    Spacer(Modifier.weight(1f))
-                    Text(
-                        "${Diagnostics.count} LINES",
-                        color = if (Diagnostics.count > 0) Mint else Dim,
-                        fontSize = 6.sp,
-                        letterSpacing = 0.8.sp,
-                    )
-                }
-                Spacer(Modifier.height(6.dp))
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(6.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    DiagAction(
-                        label = if (testing) "CAPTURING" else "TEST 3D",
-                        active = true,
-                        enabled = !testing && view != null,
-                        onClick = {
-                            testing = true
-                            capture = null
-                            scope.launch {
-                                capture = runCatching { Exporter.testCapture(view) }.getOrElse { error ->
-                                    CaptureResult(
-                                        success = false,
-                                        width = 0,
-                                        height = 0,
-                                        litSamples = 0,
-                                        totalSamples = 0,
-                                        message = "DIAGNOSTIC ERROR · ${error.message ?: "unknown"}",
-                                    )
-                                }
-                                testing = false
-                            }
-                        },
-                    )
-                    DiagAction(
-                        label = if (doc.exporting) "EXPORTING" else "EXPORT PNG",
-                        enabled = !doc.exporting,
-                        onClick = onExport,
-                    )
-                    Spacer(Modifier.weight(1f))
-                    Text("NO ACCOUNT", color = Dim, fontSize = 6.sp, letterSpacing = 0.8.sp)
-                }
-                if (transfer.isNotBlank()) {
-                    Spacer(Modifier.height(5.dp))
-                    Text(transfer, color = Mint, fontSize = 6.sp, letterSpacing = 0.4.sp)
-                }
-            }
         }
     }
 }

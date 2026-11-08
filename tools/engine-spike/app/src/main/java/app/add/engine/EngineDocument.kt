@@ -412,6 +412,14 @@ class EngineDocument {
         status = "3D LAYER ADDED · ${asset.label.uppercase()} · ${asset.path}"
     }
 
+    /** Steps a type layer through the three bundled Poppins faces. */
+    fun setWeight(weight: Int) {
+        val id = selectedId ?: return
+        val face = weight.coerceIn(400, 600)
+        commit { layers -> layers.map { if (it.id == id && it is TextLayer) it.copy(weight = face) else it } }
+        status = "TYPE FACE $face"
+    }
+
     fun duplicateSelected() {
         val layer = selected ?: return
         val copy = layer.duplicate()

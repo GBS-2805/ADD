@@ -19,6 +19,24 @@ const val ZOOM_MAX = 4f
 
 fun clampZoom(value: Float): Float = value.coerceIn(ZOOM_MIN, ZOOM_MAX)
 
+/**
+ * How far a pinch has to move before it reaches the artboard. Finger tremor, a
+ * resting second finger and the last frame of a lift all move the pointer span by a
+ * fraction of a percent; without this band the zoom drifts a point at a time while
+ * nothing is being pinched, and crossing 100% silently commits the pan to zero.
+ */
+const val ZOOM_DEADBAND = 0.015f
+
+/**
+ * Folds one pointer-span ratio into the pending zoom, returning the factor to apply
+ * now and the remainder to carry. Accumulating is the point: a slow deliberate pinch
+ * steps over the band in a few events, while a jitter that reverses itself never does.
+ */
+fun foldZoom(pending: Float, ratio: Float): Pair<Float, Float> {
+    val next = pending * ratio
+    return if (abs(next - 1f) >= ZOOM_DEADBAND) next to 1f else 1f to next
+}
+
 enum class LayerHandle { Rotate, TopLeft, TopRight, BottomRight, BottomLeft }
 
 data class HandlePoint(val handle: LayerHandle, val x: Float, val y: Float)

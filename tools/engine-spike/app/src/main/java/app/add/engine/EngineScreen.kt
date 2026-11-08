@@ -48,6 +48,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.PointerId
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -302,21 +303,14 @@ private fun Stage(
         val fitWidth: Dp = minOf(maxWidth, maxHeight * 0.8f)
         val fitHeight: Dp = fitWidth / 0.8f
         val zoom = doc.zoom
-        var pan by remember { mutableStateOf(Offset.Zero) }
         var modelDrag by remember { mutableStateOf<Pair<String, Offset>?>(null) }
         val stageWidth: Dp = fitWidth * zoom
         val stageHeight: Dp = fitHeight * zoom
         val density = LocalDensity.current
-        val panMaxX = with(density) { ((stageWidth - maxWidth).coerceAtLeast(0.dp)).toPx() } / 2f
-        val panMaxY = with(density) { ((stageHeight - maxHeight).coerceAtLeast(0.dp)).toPx() } / 2f
-        val panOffset = Offset(
-            pan.x.coerceIn(-panMaxX, panMaxX),
-            pan.y.coerceIn(-panMaxY, panMaxY),
-        )
-        val setZoom: (Float) -> Unit = { raw ->
-            doc.zoom = clampZoom(raw)
-            if (doc.zoom <= 1.001f) pan = Offset.Zero
-        }
+        // The stage is centred and never panned. Panning was how the artboard could be
+        // pushed out of the window and left as an empty stage; a zoom that cannot be
+        // panned cannot lose the drawing, and the pill still reaches the whole range.
+        val setZoom: (Float) -> Unit = { raw -> doc.zoom = clampZoom(raw) }
 
         // The stage is sized rather than scaled: a SurfaceView ignores a graphics
         // layer, so zoom has to reach the 3D viewport through the layout to stay
@@ -329,8 +323,10 @@ private fun Stage(
                     awaitEachGesture {
                         awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Initial)
                         var pinching = false
-                        var lastCentroid = Offset.Zero
+                        var firstId: PointerId? = null
+                        var secondId: PointerId? = null
                         var lastSpan = 0f
+                        var pendingZoom = 1f
                         while (true) {
                             val event = awaitPointerEvent(PointerEventPass.Initial)
                             val pressed = event.changes.filter { it.pressed }
@@ -338,18 +334,30 @@ private fun Stage(
                                 if (pinching || pressed.isEmpty()) break
                                 continue
                             }
-                            val centroid = pressed.fold(Offset.Zero) { acc, change ->
-                                acc + change.position
-                            } / pressed.size.toFloat()
-                            val span = (pressed[0].position - pressed[1].position).getDistance()
-                            if (!pinching) {
+                            // Latch the two fingers the pinch began with. Measuring whichever
+                            // pair was first in the event meant a third finger, or one lifting
+                            // while another landed, swapped the pair and threw the zoom
+                            // (368% -> 265% in one sample). A latched finger that lifts
+                            // re-baselines instead of inventing a ratio from a new pair.
+                            val first = pressed.firstOrNull { it.id == firstId } ?: pressed.first()
+                            val second = pressed.firstOrNull { it.id == secondId && it.id != first.id }
+                                ?: pressed.firstOrNull { it.id != first.id }
+                            if (second == null) break
+                            val span = (first.position - second.position).getDistance()
+                            if (!pinching || first.id != firstId || second.id != secondId) {
                                 pinching = true
-                                lastCentroid = centroid
+                                firstId = first.id
+                                secondId = second.id
                                 lastSpan = span
+                                pendingZoom = 1f
                             } else {
-                                if (lastSpan > 1f) setZoom(doc.zoom * (span / lastSpan))
-                                pan += centroid - lastCentroid
-                                lastCentroid = centroid
+                                if (lastSpan > 1f) {
+                                    // A ratio under the deadband is carried, not dropped,
+                                    // so a slow pinch still accumulates and a tremor does not.
+                                    val (apply, carry) = foldZoom(pendingZoom, span / lastSpan)
+                                    pendingZoom = carry
+                                    if (apply != 1f) setZoom(doc.zoom * apply)
+                                }
                                 lastSpan = span
                             }
                             pressed.forEach { it.consume() }
@@ -370,11 +378,11 @@ private fun Stage(
 
             Box(
                 modifier = Modifier
-                    .offset { IntOffset(panOffset.x.roundToInt(), panOffset.y.roundToInt()) }
                     .size(stageWidth, stageHeight)
                     .background(Artboard)
                     .border(1.dp, Rule)
-                    .clip(RoundedCornerShape(2.dp)),
+                    .clip(RoundedCornerShape(2.dp))
+                    .clipToBounds(),
             ) {
             Canvas(
                 modifier = Modifier
@@ -624,10 +632,7 @@ private fun Stage(
         ZoomPill(
             zoom = zoom,
             onZoom = setZoom,
-            onReset = {
-                doc.zoom = 1f
-                pan = Offset.Zero
-            },
+            onReset = { doc.zoom = 1f },
             modifier = Modifier.align(Alignment.BottomEnd).padding(2.dp),
         )
         }
@@ -836,7 +841,11 @@ private fun Inspector(doc: EngineDocument, handle: SceneHandle, onIcons: () -> U
             IconTray(onIcons)
         } else {
             when (val layer = doc.selected) {
-                null -> Text("Select a layer to edit it.", color = Dim, fontSize = 9.sp)
+                null -> Column {
+                    Text("Nothing selected.", color = Dim, fontSize = 9.sp)
+                    Spacer(Modifier.height(5.dp))
+                    ActionChip("ADD TEXT", active = true, onClick = { doc.addText() })
+                }
                 is VectorLayer -> {
                     TransformInspector(doc, layer)
                     VectorInspector(doc, layer)
@@ -1100,6 +1109,18 @@ private fun TextInspector(doc: EngineDocument, layer: TextLayer) {
         onChange = { doc.setFontSize(it) },
     )
     OpacityRow(doc, layer.opacity)
+    Spacer(Modifier.height(4.dp))
+    Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+        ActionChip(
+            label = "FONT ${layer.weight}",
+            onClick = {
+                // The three bundled Poppins faces: Regular, Medium, SemiBold.
+                doc.setWeight(if (layer.weight >= 600) 400 else layer.weight + 100)
+            },
+        )
+        ActionChip("ADD TEXT", active = true, onClick = { doc.addText() })
+    }
+    Spacer(Modifier.height(4.dp))
     InfoLine("HARFBUZZ SHAPING VIA ANDROID MINIKIN")
     Actions(doc)
 }
@@ -1127,7 +1148,9 @@ private fun ModelInspector(doc: EngineDocument, layer: ModelLayer, handle: Scene
     SliderRow(
         label = "UNIT SCALE",
         value = layer.scaleToUnits,
-        range = 0.25f..1.8f,
+        // 1.0 fills the frame; the camera is pinned so this is the only thing that
+        // changes how much of the viewport the model occupies.
+        range = 0.3f..1f,
         display = { String.format("%.2f", it) },
         onChange = { doc.setModelScale(it) },
     )

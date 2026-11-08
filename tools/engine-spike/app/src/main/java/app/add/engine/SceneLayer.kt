@@ -97,7 +97,10 @@ fun FilamentLayer(
     // viewport. Resizing the layer's frame therefore resizes the whole layer, and the
     // unit scale resizes the model inside a frame that stays where it is. Without
     // this the view re-framed itself and every resize read as a zoom.
-    val cameraNode = rememberCameraNode(engine) { position = Float3(0f, 0f, 4f) }
+    // Distance chosen so a model at unit scale 1.0 fills its frame instead of sitting
+    // at a quarter of it: at 4.0 the gem occupied about 25% of the viewport, which read
+    // as "the model is tiny in a big black box". 1.25 puts it near the frame edges.
+    val cameraNode = rememberCameraNode(engine) { position = Float3(0f, 0f, 1.25f) }
 
     LaunchedEffect(layer.scaleToUnits) {
         node.scaleToUnitCube(layer.scaleToUnits)
