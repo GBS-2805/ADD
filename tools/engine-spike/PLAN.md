@@ -29,6 +29,24 @@ Done means all five hold:
 4. The reader can change palette, artboard, feel and snapping without a build.
 5. No WebView, no account, no network.
 
+## What happens to the editor
+
+The native editor is **kept and improved**, not retired. It stays the photo-plus-type
+surface: decode at 2048 px with EXIF rotation, type lines, the seven presets and the
+reader's saved looks, the colour mixer, the TYPE / PHOTO / LAYERS sheets, font packs,
+and export to `Pictures/Editor`. P5 and P6 add instrumentation and controls to it;
+nothing removes it.
+
+The only thing on a retirement path is the **Studio tab inside that editor** — the
+Fabric.js WebView, which is a spike, keeps its own state, is not wired to saved looks
+and is unverified on a device. The engine replaces that tab only after P3 and P4, only
+once it can hold a photo and export the same page, and only with one release where both
+are present.
+
+The engine is a third surface, not a rewrite of the editor: a *composition* page for
+vector, icons, stickers and 3D, where the editor is a *photograph* with type on it. They
+share a nav, a palette and a diagnostics language; they do not share a screen.
+
 ## Workstreams
 
 ### D — Debugging, engine
@@ -166,10 +184,13 @@ Items: E5, E6, E7, E8, E9.
 ### P7 — Layout at scale (L)
 Items: C7, C8. C9 and C10 stay deferred until a reason arrives.
 
-### Integration
-After P3 and P4 the engine has what the Studio has; wire it into ADD as the Studio's
-replacement behind the existing nav, keep the WebView tab for one release, then remove
-it. That is the moment the goal is met; everything before it is preparation.
+### Integration — the Studio tab, not the editor
+After P3 and P4 the engine has what the Studio has: a photo, type, vector, icon and
+sticker on one page, exported. Wire it into ADD as the replacement for the **Studio
+WebView tab** behind the existing nav, keep that tab for one release, then remove it.
+No phase in this plan replaces the native editor. P5 and P6 add to it; C1's photo layer
+is what would let a future plan consider folding it in, and that decision is not made
+here.
 
 ## Cadence
 
