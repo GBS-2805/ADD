@@ -79,6 +79,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun EngineScreen() {
     val context = LocalContext.current
+    BootTrace.mark(context, "engine screen composed")
     val restored = remember { DocumentStore.restore(context) }
     val doc = remember {
         EngineDocument(restored?.layers).also { document ->
@@ -88,6 +89,11 @@ fun EngineScreen() {
                 document.status = "RESTORED · ${it.layers.size} LAYERS"
             }
         }
+    }
+    LaunchedEffect(Unit) {
+        withFrameNanos { }
+        BootTrace.mark(context, "first frame drawn")
+        BootTrace.ready(context)
     }
     LaunchedEffect(Diagnostics.recording) {
         while (Diagnostics.recording) { delay(Diagnostics.sampleMillis); Diagnostics.sample(doc) }
@@ -120,6 +126,7 @@ fun EngineScreen() {
             ImageStore.load(context, layer.path)?.let { layer.path to it }
         }.toMap()
     }
+    BootTrace.mark(context, "document, typefaces and photos ready")
     val photoPicker = androidx.activity.compose.rememberLauncherForActivityResult(
         androidx.activity.result.contract.ActivityResultContracts.GetContent()
     ) { uri ->

@@ -18,11 +18,14 @@ that key Gradle falls back to its debug key, which requires uninstalling ADD fir
 
 ## Open the engine
 
-Open ADD, tap **Tools → Editor**, and the engine opens directly in this review build.
-The original native editor is still available: open the engine's info sheet (i) and
-tap **BASIC EDITOR**. The drawer's Editor row uses the same entry. The engine entry
-only exists in this debuggable build; the release `app.offline.compress` package has
-no engine activity and keeps the Quick/Studio editor.
+Open ADD, tap **Tools → Editor**, and the native editor opens as it does in every
+build: QUICK tools, STUDIO on the Fabric tab, PHOTO, EXPORT. The engine is a third tab
+beside QUICK and STUDIO, labelled **ENGINE**, and only this debuggable build has it;
+the release `app.offline.compress` package has no engine activity and no such tab.
+
+If the app stops, reopen ADD: a report with COPY appears when the process died of a
+Java exception, and the engine's last startup stage when it died natively. Neither is
+needed to keep working — the editor no longer opens the engine on its way in.
 
 ## What is real
 

@@ -98,11 +98,9 @@ public class EditorActivity extends Activity {
     protected void onCreate(Bundle state) {
         super.onCreate(state);
         ThemePrefs.applyTheme(this);
-        if (!getIntent().getBooleanExtra(EXTRA_BASIC_EDITOR, false) && !engineHeld(this)
-                && DevFlags.engineLab(this) && openEngineLab(this)) {
-            finish();
-            return;
-        }
+        // The engine used to take this door in a review build. One lab crash then made
+        // the only editor unreachable, so the engine has its own tab now and this
+        // activity always opens the editor it is named after.
         setContentView(R.layout.activity_editor);
         applyInsets();
 
@@ -126,6 +124,7 @@ public class EditorActivity extends Activity {
         studioHost = findViewById(R.id.studioHost);
         quickTab.setOnClickListener(v -> showQuick());
         studioTab.setOnClickListener(v -> showStudio());
+        installEngineTab();
 
         faces = FontStore.faces(this);
         currentFace = FontStore.defaultFace(this);
@@ -196,32 +195,48 @@ public class EditorActivity extends Activity {
         restoreTab(state);
     }
 
-    /**
-     * The one editor entry. In this review build the native engine opens first; every
-     * other build, and a failed lookup, lands on the basic editor.
-     */
+    /** The one editor entry: always this activity, whatever build it is in. */
     public static void open(Activity from) {
-        if (!engineHeld(from) && DevFlags.engineLab(from) && openEngineLab(from)) {
-            return;
-        }
         from.startActivity(new Intent(from, EditorActivity.class));
     }
 
-    /** Reaches the engine by class name so the shipping build still compiles. */
     /**
-     * True when the review APK's crash net is holding the engine after a crash. The
-     * class exists only in the review source set, so the shipping build always answers
-     * false and this is one reflective lookup, not a second code path.
+     * The engine's own door, in review builds only: a third tab beside QUICK and STUDIO.
+     * It used to open whenever the editor opened, which is why one crash in the lab took
+     * the editor with it; now the editor is always the editor and the engine is one
+     * deliberate tap. Absent from the shipping build, which has no engine classes.
      */
-    private static boolean engineHeld(Context context) {
-        try {
-            Class<?> watch = Class.forName("app.offline.compress.review.CrashWatch");
-            return Boolean.TRUE.equals(watch.getMethod("held", Context.class).invoke(null, context));
-        } catch (ReflectiveOperationException | RuntimeException missing) {
-            return false;
+    private void installEngineTab() {
+        if (!DevFlags.engineLab(this)) {
+            return;
         }
+        View tabs = findViewById(R.id.editorTabs);
+        if (!(tabs instanceof LinearLayout)) {
+            return;
+        }
+        float density = getResources().getDisplayMetrics().density;
+        TextView engine = new TextView(this);
+        engine.setText("ENGINE");
+        engine.setContentDescription("Engine lab");
+        engine.setTextSize(TypedValue.COMPLEX_UNIT_SP, 10);
+        engine.setLetterSpacing(0.08f);
+        engine.setGravity(Gravity.CENTER);
+        engine.setTextColor(colour(R.attr.accentInk, Color.WHITE));
+        engine.setBackgroundResource(R.drawable.bg_chip);
+        engine.setClickable(true);
+        engine.setFocusable(true);
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(0, Math.round(36 * density), 0.7f);
+        params.setMarginStart(Math.round(6 * density));
+        engine.setLayoutParams(params);
+        engine.setOnClickListener(v -> {
+            if (!openEngineLab(this)) {
+                Toast.makeText(this, "The engine is not in this build", Toast.LENGTH_SHORT).show();
+            }
+        });
+        ((LinearLayout) tabs).addView(engine);
     }
 
+    /** Reaches the engine by class name so the shipping build still compiles. */
     private static boolean openEngineLab(Context context) {
         try {
             Class<?> engine = Class.forName("app.add.engine.MainActivity");
@@ -265,9 +280,6 @@ public class EditorActivity extends Activity {
     }
 
     private void showStudio() {
-        if (!engineHeld(this) && DevFlags.engineLab(this) && openEngineLab(this)) {
-            return;
-        }
         studioOpen = true;
         stage.setVisibility(View.GONE);
         dock.setVisibility(View.GONE);
