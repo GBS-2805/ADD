@@ -94,6 +94,7 @@ class EngineCoreTest {
         assertEquals(preset.fill, layer.fill)
         assertEquals(preset.network.points.size, layer.network.points.size)
         assertEquals(preset.network.segments.size, layer.network.segments.size)
+        assertEquals(squareFrameHeight(layer.w), layer.h, 0.0005f)
         assertEquals(Tool.Select, document.tool)
     }
 
@@ -210,7 +211,7 @@ class EngineCoreTest {
     }
 
     @Test
-    fun placedStickersKeepTheirAspectRatioWhenCornerScaled() {
+    fun placedStickersKeepTheirPhysicalAspectRatioWhenCornerScaled() {
         StickerLibrary.presets.forEach { preset ->
             val layer = VectorLayer(
                 id = preset.id,
@@ -218,22 +219,57 @@ class EngineCoreTest {
                 x = 0.2f,
                 y = 0.2f,
                 w = 0.26f,
-                h = 0.26f,
+                h = squareFrameHeight(0.26f),
                 network = preset.network,
                 fill = preset.fill,
                 stroke = preset.stroke,
                 strokeWidth = preset.strokeWidth,
             )
             val scaled = Geometry.scaleLayer(layer, LayerHandle.BottomRight, 1.7f)
-            assertEquals(1f, scaled.w / scaled.h, 0.0005f)
+            assertEquals(squareFrameHeight(scaled.w), scaled.h, 0.0005f)
         }
     }
 
     @Test
-    fun everyVectorLayerUsesASquareFrame() {
+    fun everyVectorLayerUsesAPhysicallySquareFrame() {
         seedLayers().filterIsInstance<VectorLayer>().forEach { layer ->
-            assertEquals(layer.w, layer.h, 0.0005f)
+            assertEquals(squareFrameHeight(layer.w), layer.h, 0.0005f)
         }
+    }
+
+    @Test
+    fun scaleCenteredKeepsTheCentreAndPhysicalAspect() {
+        val layer = VectorLayer(
+            id = "scaled",
+            name = "STICKER / SCALED",
+            x = 0.2f,
+            y = 0.25f,
+            w = 0.3f,
+            h = squareFrameHeight(0.3f),
+            network = starNetwork(),
+            fill = 0xFF0FBF92.toInt(),
+            stroke = 0xFF11231C.toInt(),
+            strokeWidth = 4f,
+        )
+        val scaled = Geometry.scaleCentered(layer, 1.5f)
+        assertEquals(layer.centerX, scaled.centerX, 0.0005f)
+        assertEquals(layer.centerY, scaled.centerY, 0.0005f)
+        assertEquals(squareFrameHeight(scaled.w), scaled.h, 0.0005f)
+    }
+
+    @Test
+    fun scaleDialUsesWidthAndKeepsTheCentre() {
+        val document = EngineDocument()
+        document.select("vector-star")
+        val before = document.selected as VectorLayer
+
+        document.setScaleToWidth(0.66f)
+
+        val after = document.selected as VectorLayer
+        assertEquals(0.66f, after.w, 0.0005f)
+        assertEquals(squareFrameHeight(0.66f), after.h, 0.0005f)
+        assertEquals(before.centerX, after.centerX, 0.0005f)
+        assertEquals(before.centerY, after.centerY, 0.0005f)
     }
 
     @Test
@@ -264,5 +300,44 @@ class EngineCoreTest {
         assertEquals(original, document.layers.size)
         document.redo()
         assertEquals(original + 1, document.layers.size)
+    }
+
+    @Test
+    fun theScaleDialResizesA3dFrameWithoutTouchingTheModel() {
+        val document = EngineDocument()
+        document.select("model-gem")
+        document.setModelScale(1.4f)
+
+        document.setScaleToWidth(0.6f)
+
+        val model = document.selected as ModelLayer
+        assertEquals(0.6f, model.w, 0.0005f)
+        assertEquals(1.4f, model.scaleToUnits, 0.0005f)
+    }
+
+    @Test
+    fun typeAtItsCapStillGrowsItsBox() {
+        val text = TextLayer(
+            id = "type-cap",
+            name = "TYPE / CAP",
+            x = 0.2f,
+            y = 0.2f,
+            w = 0.4f,
+            h = 0.2f,
+            text = "LARGE",
+            fontSize = 180f,
+            lineHeight = 1f,
+            color = 0xFF11231C.toInt(),
+        )
+        val scaled = Geometry.scaleCentered(text, 1.5f) as TextLayer
+        assertEquals(0.6f, scaled.w, 0.0005f)
+        assertEquals(180f, scaled.fontSize, 0.0005f)
+    }
+
+    @Test
+    fun theViewportZoomStaysInsideItsRange() {
+        assertEquals(ZOOM_MIN, clampZoom(0.1f), 0.0005f)
+        assertEquals(ZOOM_MAX, clampZoom(12f), 0.0005f)
+        assertEquals(2f, clampZoom(2f), 0.0005f)
     }
 }

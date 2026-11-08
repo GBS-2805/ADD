@@ -122,7 +122,7 @@ fun seedLayers(): List<Layer> = listOf(
         x = 0.055f,
         y = 0.11f,
         w = 0.44f,
-        h = 0.44f,
+        h = squareFrameHeight(0.44f),
         network = starNetwork(),
         fill = 0xFF0FBF92.toInt(),
         stroke = 0xFF11231C.toInt(),
@@ -134,7 +134,7 @@ fun seedLayers(): List<Layer> = listOf(
         x = 0.55f,
         y = 0.09f,
         w = 0.38f,
-        h = 0.38f,
+        h = squareFrameHeight(0.38f),
         network = orbitNetwork(),
         fill = 0x00000000,
         stroke = 0xFF11231C.toInt(),
@@ -180,6 +180,9 @@ class EngineDocument {
     var exporting by mutableStateOf(false)
     var editingModelId by mutableStateOf<String?>(null)
         private set
+
+    /** Viewport zoom, 1.0 = fit. View state, but the recorder needs to see it. */
+    var zoom by mutableStateOf(1f)
 
     private val undoStack = ArrayDeque<List<Layer>>()
     private val redoStack = ArrayDeque<List<Layer>>()
@@ -336,7 +339,7 @@ class EngineDocument {
             x = 0.18f,
             y = 0.18f,
             w = 0.32f,
-            h = 0.32f,
+            h = squareFrameHeight(0.32f),
             network = triangleNetwork(),
             fill = 0xFFE86A4A.toInt(),
             stroke = 0xFF11231C.toInt(),
@@ -357,7 +360,7 @@ class EngineDocument {
             x = 0.2f + offset,
             y = 0.2f + offset,
             w = 0.26f,
-            h = 0.26f,
+            h = squareFrameHeight(0.26f),
             network = preset.network,
             fill = preset.fill,
             stroke = preset.stroke,
@@ -379,7 +382,7 @@ class EngineDocument {
             x = (0.16f + offset).coerceAtMost(0.7f),
             y = (0.22f + offset).coerceAtMost(0.7f),
             w = 0.24f,
-            h = 0.24f,
+            h = squareFrameHeight(0.24f),
             glyph = glyph,
             tint = 0xFF11231C.toInt(),
         )
@@ -477,6 +480,14 @@ class EngineDocument {
 
     fun setModelScale(value: Float) = updateSelected {
         (it as? ModelLayer)?.copy(scaleToUnits = value.coerceIn(0.25f, 2f)) ?: it
+    }
+
+    /** The inspector's uniform scale dial. Width is in artboard fractions. */
+    fun setScaleToWidth(value: Float) {
+        val layer = selected ?: return
+        if (layer.w <= 0f) return
+        val target = value.coerceIn(0.04f, 1.2f)
+        updateSelected { Geometry.scaleCentered(it, target / it.w) }
     }
 
     fun setModelAsset(asset: ModelAsset) = updateSelected { layer ->

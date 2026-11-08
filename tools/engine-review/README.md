@@ -31,10 +31,18 @@ Skia artboard, Filament `SceneView` and export path. This pass adds:
 
 - a searchable offline catalog of 4,373 icons from Lineicons, Coolicons, Phosphor
   and Streamline, parsed from the shipped JSON into scalable path layers;
-- rotation and corner scaling for every layer, with 22 dp hit targets and inset
-  handles, including text that scales its font with its box; X/Y/W/H sliders are
-  gone, so vector and sticker frames stay square and are placed only by dragging
-  and corner-scaling;
+- rotation and a centred uniform scale dial for every layer, including 3D, with 22 dp
+  hit targets and inset handles, including text that scales its font with its box; X/Y
+  movement stays on direct dragging and corners still scale, while sticker, vector and
+  icon frames stay square in artboard pixels. A type layer at its 180 pt cap keeps
+  growing its box, because the cap now belongs to the font, not to the gesture;
+- a launched 3D viewport with a pinned camera: the **SCALE** dial resizes the layer's
+  frame and the model with it, while **UNIT SCALE** resizes the model inside a frame
+  that stays put, so neither control re-frames the other. The camera ignores gestures,
+  so a drag can no longer orbit the model out of its frame;
+- artboard zoom from 50% to 400%: two fingers pinch and pan, and a floating
+  `− 100% +` pill steps the same range, with the percentage as the reset. One finger
+  still belongs to the selected layer, and the second finger cancels that drag;
 - a floating **EDIT 3D** chip that turns the model inside its viewport instead of
   rotating the SurfaceView, with corners that resize the frame and a direct drag
   that moves the layer on the artboard; the model orientation is baked into the

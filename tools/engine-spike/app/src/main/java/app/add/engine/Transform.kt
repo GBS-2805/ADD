@@ -7,6 +7,18 @@ import kotlin.math.min
 import kotlin.math.round
 import kotlin.math.sin
 
+const val ARTBOARD_WIDTH = 1080f
+const val ARTBOARD_HEIGHT = 1350f
+
+/** Height in normalized layer space for a frame that is square in artboard pixels. */
+fun squareFrameHeight(width: Float): Float = width * ARTBOARD_WIDTH / ARTBOARD_HEIGHT
+
+/** Viewport zoom. It belongs to the stage, never to a layer. */
+const val ZOOM_MIN = 0.5f
+const val ZOOM_MAX = 4f
+
+fun clampZoom(value: Float): Float = value.coerceIn(ZOOM_MIN, ZOOM_MAX)
+
 enum class LayerHandle { Rotate, TopLeft, TopRight, BottomRight, BottomLeft }
 
 data class HandlePoint(val handle: LayerHandle, val x: Float, val y: Float)
@@ -112,13 +124,7 @@ object Geometry {
      */
     fun scaleLayer(layer: Layer, handle: LayerHandle, factor: Float): Layer {
         if (handle == LayerHandle.Rotate) return layer
-        var scale = factor
-        if (layer is TextLayer) {
-            scale = scale.coerceIn(18f / layer.fontSize, 180f / layer.fontSize)
-        }
-        val minScale = maxOf(0.02f / layer.w, 0.02f / layer.h)
-        val maxScale = minOf(1.8f / layer.w, 1.8f / layer.h)
-        scale = scale.coerceIn(minScale, maxScale)
+        val scale = clampedScale(layer, factor)
         if (abs(scale - 1f) < 0.0001f) return layer
 
         val anchorX = when (handle) {
@@ -129,6 +135,27 @@ object Geometry {
             LayerHandle.TopLeft, LayerHandle.TopRight -> layer.h / 2f
             else -> -layer.h / 2f
         }
+        return scaledAt(layer, scale, anchorX, anchorY)
+    }
+
+    /** Uniform scale around the frame centre, used by the inspector scale dial. */
+    fun scaleCentered(layer: Layer, factor: Float): Layer {
+        val scale = clampedScale(layer, factor)
+        if (abs(scale - 1f) < 0.0001f) return layer
+        return scaledAt(layer, scale, 0f, 0f)
+    }
+
+    /**
+     * Bounds on the frame, not on the type inside it: a text layer already at 180 pt
+     * keeps growing its box, and its font saturates separately in [scaledAt].
+     */
+    private fun clampedScale(layer: Layer, factor: Float): Float {
+        val minScale = maxOf(0.02f / layer.w, 0.02f / layer.h)
+        val maxScale = minOf(1.8f / layer.w, 1.8f / layer.h)
+        return factor.coerceIn(minScale, maxScale)
+    }
+
+    private fun scaledAt(layer: Layer, scale: Float, anchorX: Float, anchorY: Float): Layer {
         val (worldX, worldY) = rotateVector(anchorX, anchorY, layer.frameRotation)
         val anchorWorldX = layer.centerX + worldX
         val anchorWorldY = layer.centerY + worldY

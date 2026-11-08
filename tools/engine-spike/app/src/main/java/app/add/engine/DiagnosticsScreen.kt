@@ -1,6 +1,9 @@
 package app.add.engine
 
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.Context
+import android.content.Intent
 import android.os.Build
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -32,6 +35,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -67,6 +71,12 @@ fun DiagnosticsDialog(
     var capture by remember { mutableStateOf<CaptureResult?>(null) }
     var testing by remember { mutableStateOf(false) }
     var checked by remember { mutableStateOf(emptySet<Int>()) }
+    var transfer by remember { mutableStateOf("") }
+    // Read so this screen recomposes while the engine screen keeps sampling.
+    val revision = Diagnostics.revision
+    val buildReport: () -> String = {
+        Diagnostics.report(context, doc, handle, checked.sorted().map { DeviceChecklist[it] })
+    }
 
     val gemBytes = remember(context) { readAssetSize(context, ModelAsset.Gem.path) }
     val ringBytes = remember(context) { readAssetSize(context, ModelAsset.Ring.path) }
@@ -128,6 +138,45 @@ fun DiagnosticsDialog(
                 DiagnosticRow("RENDERER", "SceneView 2.3.0 / Filament 1.56")
                 DiagnosticRow("DEVICE", device.ifBlank { "unknown" })
                 DiagnosticRow("ANDROID", "API ${Build.VERSION.SDK_INT} · ${Build.VERSION.RELEASE} · $abi")
+
+                DiagSection("RECORDED INTERACTION", "${Diagnostics.count} LINES")
+                Text(
+                    "Press REC, CLOSE this screen, then do the thing you want looked at. It samples four times a second and writes a line only when a value moved: selection, tool, every layer's position, size, rotation and unit scale, zoom, and layers added or removed. Come back here to STOP and SHARE. A gesture that ends where it started leaves no line, because nothing changed.",
+                    color = Dim,
+                    fontSize = 8.sp,
+                    lineHeight = 12.sp,
+                )
+                Spacer(Modifier.height(5.dp))
+                Text(
+                    Diagnostics.status,
+                    color = if (Diagnostics.recording) Lime else Dim,
+                    fontSize = 7.sp,
+                    letterSpacing = 0.4.sp,
+                )
+                Spacer(Modifier.height(4.dp))
+                val tail = Diagnostics.lines().takeLast(14)
+                if (tail.isEmpty()) {
+                    Text(
+                        "Nothing recorded yet. Tap REC, close this screen, do the thing, then come back and SHARE.",
+                        color = Dim,
+                        fontSize = 8.sp,
+                        lineHeight = 12.sp,
+                    )
+                } else {
+                    tail.forEach { line ->
+                        Text(
+                            line,
+                            color = Cream,
+                            fontSize = 7.sp,
+                            fontFamily = FontFamily.Monospace,
+                            lineHeight = 11.sp,
+                        )
+                    }
+                }
+                if (transfer.isNotBlank()) {
+                    Spacer(Modifier.height(4.dp))
+                    Text(transfer, color = Mint, fontSize = 7.sp)
+                }
 
                 DiagSection("ICON CATALOG")
                 when (val catalog = icons) {
@@ -204,40 +253,97 @@ fun DiagnosticsDialog(
             }
 
             Box(Modifier.fillMaxWidth().height(1.dp).background(Rule))
-            Row(
-                modifier = Modifier.fillMaxWidth().background(Panel).padding(10.dp),
-                horizontalArrangement = Arrangement.spacedBy(6.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                DiagAction(
-                    label = if (testing) "CAPTURING" else "TEST 3D",
-                    active = true,
-                    enabled = !testing && view != null,
-                    onClick = {
-                        testing = true
-                        capture = null
-                        scope.launch {
-                            capture = runCatching { Exporter.testCapture(view) }.getOrElse { error ->
-                                CaptureResult(
-                                    success = false,
-                                    width = 0,
-                                    height = 0,
-                                    litSamples = 0,
-                                    totalSamples = 0,
-                                    message = "DIAGNOSTIC ERROR · ${error.message ?: "unknown"}",
-                                )
+            Column(Modifier.fillMaxWidth().background(Panel).padding(horizontal = 10.dp, vertical = 8.dp)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    DiagAction(
+                        label = if (Diagnostics.recording) "STOP" else "REC",
+                        active = Diagnostics.recording,
+                        onClick = {
+                            if (Diagnostics.recording) {
+                                Diagnostics.stop(doc)
+                            } else {
+                                Diagnostics.start(doc)
+                                transfer = ""
                             }
-                            testing = false
-                        }
-                    },
-                )
-                DiagAction(
-                    label = if (doc.exporting) "EXPORTING" else "EXPORT PNG",
-                    enabled = !doc.exporting,
-                    onClick = onExport,
-                )
-                Spacer(Modifier.weight(1f))
-                Text("NO ACCOUNT", color = Dim, fontSize = 6.sp, letterSpacing = 0.8.sp)
+                        },
+                    )
+                    DiagAction(
+                        label = "COPY",
+                        enabled = Diagnostics.count > 0,
+                        onClick = {
+                            val text = buildReport()
+                            val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                            clipboard.setPrimaryClip(ClipData.newPlainText("ADD diagnostics", text))
+                            transfer = "COPIED · ${text.length} CHARS · PASTE IT INTO THE CHAT"
+                        },
+                    )
+                    DiagAction(
+                        label = "SHARE",
+                        enabled = Diagnostics.count > 0,
+                        onClick = {
+                            val text = buildReport()
+                            val send = Intent(Intent.ACTION_SEND)
+                                .setType("text/plain")
+                                .putExtra(Intent.EXTRA_TEXT, text)
+                            context.startActivity(
+                                Intent.createChooser(send, "Send ADD diagnostics")
+                                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                            )
+                            transfer = "SHARED · ${text.length} CHARS"
+                        },
+                    )
+                    Spacer(Modifier.weight(1f))
+                    Text(
+                        "${Diagnostics.count} LINES",
+                        color = if (Diagnostics.count > 0) Mint else Dim,
+                        fontSize = 6.sp,
+                        letterSpacing = 0.8.sp,
+                    )
+                }
+                Spacer(Modifier.height(6.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    DiagAction(
+                        label = if (testing) "CAPTURING" else "TEST 3D",
+                        active = true,
+                        enabled = !testing && view != null,
+                        onClick = {
+                            testing = true
+                            capture = null
+                            scope.launch {
+                                capture = runCatching { Exporter.testCapture(view) }.getOrElse { error ->
+                                    CaptureResult(
+                                        success = false,
+                                        width = 0,
+                                        height = 0,
+                                        litSamples = 0,
+                                        totalSamples = 0,
+                                        message = "DIAGNOSTIC ERROR · ${error.message ?: "unknown"}",
+                                    )
+                                }
+                                testing = false
+                            }
+                        },
+                    )
+                    DiagAction(
+                        label = if (doc.exporting) "EXPORTING" else "EXPORT PNG",
+                        enabled = !doc.exporting,
+                        onClick = onExport,
+                    )
+                    Spacer(Modifier.weight(1f))
+                    Text("NO ACCOUNT", color = Dim, fontSize = 6.sp, letterSpacing = 0.8.sp)
+                }
+                if (transfer.isNotBlank()) {
+                    Spacer(Modifier.height(5.dp))
+                    Text(transfer, color = Mint, fontSize = 6.sp, letterSpacing = 0.4.sp)
+                }
             }
         }
     }

@@ -37,8 +37,8 @@ class Typefaces(context: Context) {
  * the same rasterizer in both places.
  */
 object ArtboardPainter {
-    const val W = 1080f
-    const val H = 1350f
+    const val W = ARTBOARD_WIDTH
+    const val H = ARTBOARD_HEIGHT
 
     fun draw(
         canvas: Canvas,

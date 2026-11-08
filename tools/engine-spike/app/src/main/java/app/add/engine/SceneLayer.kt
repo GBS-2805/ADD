@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.sp
 import io.github.sceneview.Scene
 import io.github.sceneview.SceneView
 import io.github.sceneview.node.ModelNode
+import io.github.sceneview.rememberCameraNode
 import io.github.sceneview.rememberEngine
 import io.github.sceneview.rememberEnvironmentLoader
 import io.github.sceneview.rememberModelLoader
@@ -40,6 +41,9 @@ class SceneHandle {
     var width by mutableStateOf(0)
     var height by mutableStateOf(0)
     var modelLoaded by mutableStateOf(false)
+
+    /** Applies a turn straight to the Filament node while a gesture is in flight. */
+    var applyRotation: ((Float) -> Unit)? = null
 }
 
 @Composable
@@ -89,12 +93,23 @@ fun FilamentLayer(
     }
     val nodes = rememberNodes { add(node) }
 
+    // Pinned camera: the model is framed by its own scale, never by the size of the
+    // viewport. Resizing the layer's frame therefore resizes the whole layer, and the
+    // unit scale resizes the model inside a frame that stays where it is. Without
+    // this the view re-framed itself and every resize read as a zoom.
+    val cameraNode = rememberCameraNode(engine) { position = Float3(0f, 0f, 4f) }
+
     LaunchedEffect(layer.scaleToUnits) {
         node.scaleToUnitCube(layer.scaleToUnits)
     }
 
     // Turn the mesh, not the SurfaceView. Rotating the Android view as a 2D quad
     // clips the surface into a diamond and shears the model at oblique angles.
+    LaunchedEffect(node) {
+        currentHandle.applyRotation = { degrees ->
+            node.rotation = Float3(0f, degrees, 0f)
+        }
+    }
     LaunchedEffect(node, rotation) {
         node.rotation = Float3(0f, rotation, 0f)
     }
@@ -104,6 +119,8 @@ fun FilamentLayer(
         engine = engine,
         modelLoader = modelLoader,
         environmentLoader = environmentLoader,
+        cameraNode = cameraNode,
+        cameraManipulator = null as io.github.sceneview.gesture.CameraGestureDetector.CameraManipulator?,
         childNodes = nodes,
         isOpaque = true,
         onViewCreated = {
@@ -122,6 +139,7 @@ fun FilamentLayer(
 
     DisposableEffect(instance) {
         onDispose {
+            currentHandle.applyRotation = null
             if (currentHandle.view != null) currentHandle.view = null
             currentHandle.width = 0
             currentHandle.height = 0

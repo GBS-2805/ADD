@@ -31,6 +31,7 @@ import androidx.compose.material.Slider
 import androidx.compose.material.SliderDefaults
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
@@ -40,9 +41,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.nativeCanvas
+import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -50,14 +55,27 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import kotlin.math.roundToInt
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @Composable
 fun EngineScreen() {
     val doc = remember { EngineDocument() }
+
+    // The sampler lives here, not in the diagnostics dialog: that dialog covers the
+    // whole stage, so a recorder hosted inside it could never see a gesture. This
+    // keeps running while the screen is closed, which is the point of pressing REC.
+    LaunchedEffect(Diagnostics.recording) {
+        while (Diagnostics.recording) {
+            delay(Diagnostics.sampleMillis)
+            Diagnostics.sample(doc)
+        }
+    }
     val sceneHandles = remember { mutableMapOf<String, SceneHandle>() }
     val fallbackHandle = remember { SceneHandle() }
     fun handleFor(layer: ModelLayer?): SceneHandle =
@@ -70,6 +88,7 @@ fun EngineScreen() {
     var showInfo by remember { mutableStateOf(false) }
     var showDiagnostics by remember { mutableStateOf(false) }
     var showIcons by remember { mutableStateOf(false) }
+    var panelOpen by remember { mutableStateOf(true) }
     val basicEditor: (() -> Unit)? = remember(context) {
         runCatching {
             val cls = Class.forName("app.offline.compress.EditorActivity")
@@ -111,7 +130,13 @@ fun EngineScreen() {
             ToolRail(doc, onIcons = { showIcons = true })
             Stage(doc, sceneHandles, typefaces, Modifier.weight(1f))
         }
-        BottomPanel(doc, selectedHandle, onIcons = { showIcons = true })
+        BottomPanel(
+            doc = doc,
+            handle = selectedHandle,
+            onIcons = { showIcons = true },
+            open = panelOpen,
+            onToggle = { panelOpen = !panelOpen },
+        )
         Footer(doc)
     }
 
@@ -185,7 +210,7 @@ private fun StatusLine(doc: EngineDocument, handle: SceneHandle, onDiagnostics: 
         else -> "3D LOADING"
     }
     Row(
-        modifier = Modifier.fillMaxWidth().height(22.dp).background(PanelRaised).padding(horizontal = 10.dp),
+        modifier = Modifier.fillMaxWidth().height(32.dp).background(PanelRaised).padding(horizontal = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
@@ -203,17 +228,19 @@ private fun StatusLine(doc: EngineDocument, handle: SceneHandle, onDiagnostics: 
             fontSize = 7.sp,
             letterSpacing = 0.3.sp,
         )
-        Spacer(Modifier.width(5.dp))
+        Spacer(Modifier.width(6.dp))
         Text(
             text = "DIAG",
             color = Mint,
-            fontSize = 7.sp,
+            fontSize = 9.sp,
             fontWeight = FontWeight.SemiBold,
+            letterSpacing = 0.5.sp,
             modifier = Modifier
-                .clip(RoundedCornerShape(3.dp))
+                .clip(RoundedCornerShape(5.dp))
                 .background(Panel)
+                .border(1.dp, Mint.copy(alpha = 0.45f), RoundedCornerShape(5.dp))
                 .clickable(onClick = onDiagnostics)
-                .padding(horizontal = 4.dp, vertical = 2.dp),
+                .padding(horizontal = 11.dp, vertical = 7.dp),
         )
     }
 }
@@ -272,9 +299,65 @@ private fun Stage(
         modifier = modifier.fillMaxSize().padding(8.dp),
         contentAlignment = Alignment.Center,
     ) {
-        val stageWidth: Dp = minOf(maxWidth, maxHeight * 0.8f)
-        val stageHeight: Dp = stageWidth / 0.8f
+        val fitWidth: Dp = minOf(maxWidth, maxHeight * 0.8f)
+        val fitHeight: Dp = fitWidth / 0.8f
+        val zoom = doc.zoom
+        var pan by remember { mutableStateOf(Offset.Zero) }
+        var modelDrag by remember { mutableStateOf<Pair<String, Offset>?>(null) }
+        val stageWidth: Dp = fitWidth * zoom
+        val stageHeight: Dp = fitHeight * zoom
         val density = LocalDensity.current
+        val panMaxX = with(density) { ((stageWidth - maxWidth).coerceAtLeast(0.dp)).toPx() } / 2f
+        val panMaxY = with(density) { ((stageHeight - maxHeight).coerceAtLeast(0.dp)).toPx() } / 2f
+        val panOffset = Offset(
+            pan.x.coerceIn(-panMaxX, panMaxX),
+            pan.y.coerceIn(-panMaxY, panMaxY),
+        )
+        val setZoom: (Float) -> Unit = { raw ->
+            doc.zoom = clampZoom(raw)
+            if (doc.zoom <= 1.001f) pan = Offset.Zero
+        }
+
+        // The stage is sized rather than scaled: a SurfaceView ignores a graphics
+        // layer, so zoom has to reach the 3D viewport through the layout to stay
+        // crisp. Two fingers zoom and pan; one finger still belongs to the layer.
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .clipToBounds()
+                .pointerInput(maxWidth, maxHeight) {
+                    awaitEachGesture {
+                        awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Initial)
+                        var pinching = false
+                        var lastCentroid = Offset.Zero
+                        var lastSpan = 0f
+                        while (true) {
+                            val event = awaitPointerEvent(PointerEventPass.Initial)
+                            val pressed = event.changes.filter { it.pressed }
+                            if (pressed.size < 2) {
+                                if (pinching || pressed.isEmpty()) break
+                                continue
+                            }
+                            val centroid = pressed.fold(Offset.Zero) { acc, change ->
+                                acc + change.position
+                            } / pressed.size.toFloat()
+                            val span = (pressed[0].position - pressed[1].position).getDistance()
+                            if (!pinching) {
+                                pinching = true
+                                lastCentroid = centroid
+                                lastSpan = span
+                            } else {
+                                if (lastSpan > 1f) setZoom(doc.zoom * (span / lastSpan))
+                                pan += centroid - lastCentroid
+                                lastCentroid = centroid
+                                lastSpan = span
+                            }
+                            pressed.forEach { it.consume() }
+                        }
+                    }
+                },
+            contentAlignment = Alignment.Center,
+        ) {
         val scale = with(density) { stageWidth.toPx() / ArtboardPainter.W }
         val hitPx = with(density) { 22.dp.toPx() } / scale
         val hitX = hitPx / ArtboardPainter.W
@@ -285,13 +368,14 @@ private fun Stage(
         val models = doc.modelLayers.filter { it.visible }
         val editing = doc.editingModel
 
-        Box(
-            modifier = Modifier
-                .size(stageWidth, stageHeight)
-                .background(Artboard)
-                .border(1.dp, Rule)
-                .clip(RoundedCornerShape(2.dp)),
-        ) {
+            Box(
+                modifier = Modifier
+                    .offset { IntOffset(panOffset.x.roundToInt(), panOffset.y.roundToInt()) }
+                    .size(stageWidth, stageHeight)
+                    .background(Artboard)
+                    .border(1.dp, Rule)
+                    .clip(RoundedCornerShape(2.dp)),
+            ) {
             Canvas(
                 modifier = Modifier
                     .matchParentSize()
@@ -338,6 +422,7 @@ private fun Stage(
 
                             while (true) {
                                 val event = awaitPointerEvent()
+                                if (event.changes.count { it.pressed } > 1) break
                                 val change = event.changes.firstOrNull { it.id == down.id } ?: break
                                 if (!change.pressed) break
                                 nx = (change.position.x / scale) / ArtboardPainter.W
@@ -382,67 +467,27 @@ private fun Stage(
 
             models.forEach { model ->
                 key(model.id, model.asset.name) {
-                    FilamentLayer(
-                        layer = model,
+                    ModelLayerStage(
+                        doc = doc,
+                        model = model,
                         handle = sceneHandles.getOrPut("${model.id}:${model.asset.name}") { SceneHandle() },
-                        rotation = model.rotation,
-                        modifier = Modifier
-                            .offset(
-                                x = (model.x * stageWidth.value).dp,
-                                y = (model.y * stageHeight.value).dp,
-                            )
-                            .size(
-                                width = (model.w * stageWidth.value).dp,
-                                height = (model.h * stageHeight.value).dp,
-                            )
-                            .border(1.dp, Mint.copy(alpha = 0.55f)),
+                        stageWidth = stageWidth,
+                        stageHeight = stageHeight,
+                        scale = scale,
+                        onDrag = { offset -> modelDrag = model.id to offset },
+                        onDragEnd = { modelDrag = null },
                     )
                 }
-            }
-
-            // The SurfaceView consumes orbit gestures. This transparent layer gives the
-            // 3D item the same finger-drag movement as every other layer; entering
-            // EDIT 3D turns the model instead.
-            models.filter { it.id != doc.editingModelId }.forEach { model ->
-                Box(
-                    modifier = Modifier
-                        .offset(
-                            x = (model.x * stageWidth.value).dp,
-                            y = (model.y * stageHeight.value).dp,
-                        )
-                        .size(
-                            width = (model.w * stageWidth.value).dp,
-                            height = (model.h * stageHeight.value).dp,
-                        )
-                        .pointerInput(model.id, scale) {
-                            awaitEachGesture {
-                                val down = awaitFirstDown(requireUnconsumed = false)
-                                down.consume()
-                                doc.select(model.id)
-                                doc.beginGesture()
-                                var last = down.position
-                                while (true) {
-                                    val event = awaitPointerEvent()
-                                    val change = event.changes.firstOrNull { it.id == down.id } ?: break
-                                    if (!change.pressed) break
-                                    val dx = (change.position.x - last.x) / scale / ArtboardPainter.W
-                                    val dy = (change.position.y - last.y) / scale / ArtboardPainter.H
-                                    doc.moveSelected(dx, dy)
-                                    last = change.position
-                                    change.consume()
-                                }
-                                doc.endGesture()
-                            }
-                        },
-                )
             }
 
             Canvas(Modifier.matchParentSize()) {
                 val selected = doc.selected ?: return@Canvas
                 val isModel = selected is ModelLayer
+                val carried = modelDrag?.takeIf { it.first == selected.id }?.second ?: Offset.Zero
                 drawContext.canvas.nativeCanvas.apply {
                     save()
                     scale(scale, scale)
+                    translate(carried.x / scale, carried.y / scale)
                     ArtboardPainter.drawSelection(
                         this,
                         selected,
@@ -484,16 +529,29 @@ private fun Stage(
                                 val startX = nx
                                 val startRotation = editing.rotation
                                 val startDistance = Geometry.distance(editing.centerX, editing.centerY, nx, ny)
+                                val sceneHandle = sceneHandles["${editing.id}:${editing.asset.name}"]
+                                var pendingRotation = startRotation
+                                var directRotation = false
                                 if (mode != "none") doc.beginGesture()
                                 while (true) {
                                     val event = awaitPointerEvent()
+                                    if (event.changes.count { it.pressed } > 1) break
                                     val change = event.changes.firstOrNull { it.id == down.id } ?: break
                                     if (!change.pressed) break
                                     nx = (change.position.x / scale) / ArtboardPainter.W
                                     ny = (change.position.y / scale) / ArtboardPainter.H
                                     when (mode) {
-                                        "turn" -> doc.updateLayer(editing.id) {
-                                            it.withRotation(startRotation + (nx - startX) * 360f)
+                                        "turn" -> {
+                                            pendingRotation = startRotation + (nx - startX) * 360f
+                                            val apply = sceneHandle?.applyRotation
+                                            if (apply != null) {
+                                                apply(pendingRotation)
+                                                directRotation = true
+                                            } else {
+                                                doc.updateLayer(editing.id) {
+                                                    it.withRotation(pendingRotation)
+                                                }
+                                            }
                                         }
                                         "scale" -> if (handle != null) {
                                             val distance = Geometry.distance(editing.centerX, editing.centerY, nx, ny)
@@ -502,6 +560,9 @@ private fun Stage(
                                         }
                                     }
                                     change.consume()
+                                }
+                                if (mode == "turn" && directRotation) {
+                                    doc.updateLayer(editing.id) { it.withRotation(pendingRotation) }
                                 }
                                 if (mode != "none") doc.endGesture()
                             }
@@ -536,9 +597,14 @@ private fun Stage(
                 } else {
                     below
                 }
+                val carried = modelDrag?.takeIf { it.first == selectedModel.id }?.second ?: Offset.Zero
                 Box(
                     modifier = Modifier
                         .offset(chipX, rawY.coerceIn(4.dp, maxY))
+                        .graphicsLayer {
+                            translationX = carried.x
+                            translationY = carried.y
+                        }
                         .clip(RoundedCornerShape(99.dp))
                         .background(if (editingNow) Lime else Mint)
                         .clickable { doc.toggleModelEdit(selectedModel.id) }
@@ -554,17 +620,151 @@ private fun Stage(
                 }
             }
         }
+
+        ZoomPill(
+            zoom = zoom,
+            onZoom = setZoom,
+            onReset = {
+                doc.zoom = 1f
+                pan = Offset.Zero
+            },
+            modifier = Modifier.align(Alignment.BottomEnd).padding(2.dp),
+        )
+        }
     }
 }
 
 @Composable
-private fun BottomPanel(doc: EngineDocument, handle: SceneHandle, onIcons: () -> Unit) {
+private fun ModelLayerStage(
+    doc: EngineDocument,
+    model: ModelLayer,
+    handle: SceneHandle,
+    stageWidth: Dp,
+    stageHeight: Dp,
+    scale: Float,
+    onDrag: (Offset) -> Unit,
+    onDragEnd: () -> Unit,
+) {
+    var drag by remember(model.id) { mutableStateOf(Offset.Zero) }
+    val editing = doc.editingModelId == model.id
+    Box(
+        modifier = Modifier
+            .offset(
+                x = (model.x * stageWidth.value).dp,
+                y = (model.y * stageHeight.value).dp,
+            )
+            .size(
+                width = (model.w * stageWidth.value).dp,
+                height = (model.h * stageHeight.value).dp,
+            ),
+    ) {
+        FilamentLayer(
+            layer = model,
+            handle = handle,
+            rotation = model.rotation,
+            modifier = Modifier.matchParentSize(),
+        )
+
+        // The 3D surface is a SurfaceView, so it is moved directly rather than
+        // relaid out on every pointer event. The transparent frame follows on a
+        // graphics layer and captures the gesture.
+        Box(
+            modifier = Modifier
+                .matchParentSize()
+                .graphicsLayer {
+                    translationX = drag.x
+                    translationY = drag.y
+                }
+                .border(1.dp, Mint.copy(alpha = 0.55f))
+                .then(
+                    if (editing) {
+                        Modifier
+                    } else {
+                        Modifier.pointerInput(model.id, scale) {
+                            awaitEachGesture {
+                                val down = awaitFirstDown(requireUnconsumed = false)
+                                down.consume()
+                                doc.select(model.id)
+                                doc.beginGesture()
+                                var last = down.position
+                                var total = Offset.Zero
+                                while (true) {                                        val event = awaitPointerEvent()
+                                        if (event.changes.count { it.pressed } > 1) break
+                                        val change = event.changes.firstOrNull { it.id == down.id } ?: break
+                                        if (!change.pressed) break
+                                        val step = change.position - last
+                                    total += step
+                                    drag = total
+                                    onDrag(total)
+                                    handle.view?.let { view ->
+                                        view.translationX = total.x
+                                        view.translationY = total.y
+                                    }
+                                    last = change.position
+                                    change.consume()
+                                }
+                                if (total != Offset.Zero) {
+                                    doc.moveSelected(
+                                        total.x / scale / ArtboardPainter.W,
+                                        total.y / scale / ArtboardPainter.H,
+                                    )
+                                }
+                                handle.view?.translationX = 0f
+                                handle.view?.translationY = 0f
+                                drag = Offset.Zero
+                                onDragEnd()
+                                doc.endGesture()
+                            }
+                        }
+                    },
+                ),
+        )
+    }
+}
+
+@Composable
+private fun BottomPanel(
+    doc: EngineDocument,
+    handle: SceneHandle,
+    onIcons: () -> Unit,
+    open: Boolean,
+    onToggle: () -> Unit,
+) {
     Column(Modifier.fillMaxWidth().background(Panel)) {
         Box(Modifier.fillMaxWidth().height(1.dp).background(Rule))
-        Row(Modifier.fillMaxWidth().height(236.dp)) {
-            LayerPanel(doc, Modifier.weight(0.42f).fillMaxHeight())
-            Box(Modifier.width(1.dp).fillMaxHeight().background(Rule))
-            Inspector(doc, handle, onIcons, Modifier.weight(0.58f).fillMaxHeight())
+        // The strip stays when the panel is put away, so the stage keeps the 236 dp
+        // and there is still something to tap to bring it back.
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(22.dp)
+                .clickable(onClick = onToggle)
+                .padding(horizontal = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = if (open) "LAYERS + INSPECT" else "PANEL HIDDEN",
+                color = Cream,
+                fontSize = 7.sp,
+                letterSpacing = 1.0.sp,
+                fontWeight = FontWeight.SemiBold,
+            )
+            Spacer(Modifier.width(6.dp))
+            Text(
+                text = if (open) "TAP TO HIDE" else "TAP TO SHOW",
+                color = Mint,
+                fontSize = 6.sp,
+                letterSpacing = 0.4.sp,
+            )
+            Spacer(Modifier.weight(1f))
+            Text(if (open) "▾" else "▴", color = Mint, fontSize = 10.sp)
+        }
+        if (open) {
+            Row(Modifier.fillMaxWidth().height(236.dp)) {
+                LayerPanel(doc, Modifier.weight(0.42f).fillMaxHeight())
+                Box(Modifier.width(1.dp).fillMaxHeight().background(Rule))
+                Inspector(doc, handle, onIcons, Modifier.weight(0.58f).fillMaxHeight())
+            }
         }
     }
 }
@@ -668,15 +868,22 @@ private fun TransformInspector(doc: EngineDocument, layer: Layer) {
         range = 0f..360f,
         display = { "${it.toInt()}°" },
     ) { doc.setRotation(it) }
+    TransformSlider(
+        doc = doc,
+        label = "SCALE",
+        value = layer.w,
+        range = 0.06f..1.2f,
+        display = { "${(it * 100).toInt()}%" },
+    ) { doc.setScaleToWidth(it) }
     Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
         ActionChip("RESET / CENTER", onClick = { doc.centerSelected() })
     }
     Spacer(Modifier.height(3.dp))
     InfoLine(
         if (layer is ModelLayer) {
-            "DRAG TO MOVE · EDIT 3D TURNS THE MODEL"
+            "DRAG TO MOVE · SCALE DIAL RESIZES THE FRAME"
         } else {
-            "DRAG MOVE · CORNERS SCALE · STEM ROTATES"
+            "MOVE · SCALE DIAL OR CORNERS · STEM ROTATES"
         }
     )
     Spacer(Modifier.height(4.dp))
@@ -932,7 +1139,7 @@ private fun ModelInspector(doc: EngineDocument, layer: ModelLayer, handle: Scene
         Text(it, color = Clay, fontSize = 7.sp, maxLines = 2, overflow = TextOverflow.Ellipsis)
     }
     Spacer(Modifier.height(4.dp))
-    InfoLine("3D EDIT: DRAG TURN · CORNERS RESIZE FRAME")
+    InfoLine("UNIT SCALE = MODEL IN FRAME · SCALE DIAL = FRAME")
     Actions(doc)
 }
 
@@ -1089,6 +1296,50 @@ private fun Footer(doc: EngineDocument) {
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
         )
+    }
+}
+
+@Composable
+private fun ZoomPill(
+    zoom: Float,
+    onZoom: (Float) -> Unit,
+    onReset: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier = modifier
+            .clip(RoundedCornerShape(99.dp))
+            .background(Panel.copy(alpha = 0.94f))
+            .border(1.dp, Rule, RoundedCornerShape(99.dp))
+            .padding(horizontal = 3.dp, vertical = 2.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        ZoomStep("−") { onZoom(zoom / 1.3f) }
+        Text(
+            text = "${(zoom * 100).toInt()}%",
+            color = if (zoom > 1.001f) Lime else Cream,
+            fontSize = 8.sp,
+            fontWeight = FontWeight.SemiBold,
+            modifier = Modifier
+                .clip(RoundedCornerShape(99.dp))
+                .clickable(onClick = onReset)
+                .padding(horizontal = 6.dp, vertical = 3.dp),
+        )
+        ZoomStep("+") { onZoom(zoom * 1.3f) }
+    }
+}
+
+@Composable
+private fun ZoomStep(label: String, onClick: () -> Unit) {
+    Box(
+        modifier = Modifier
+            .size(22.dp)
+            .clip(RoundedCornerShape(99.dp))
+            .background(PanelRaised)
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(label, color = Cream, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
     }
 }
 
