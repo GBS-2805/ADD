@@ -41,6 +41,9 @@ Done means all five hold:
   Save as visible controls are still to do, because a top-bar row is a visual change
   and waits for a verdict.
 - Everything else: not started.
+- **Waves, 8 Nov 2026.** The eight batches are grouped into two waves and two tracks — see
+  **Build waves**. Every suggestion from the review is an item now: C11–C27 and E10–E16.
+
 
 ## What happens to the editor
 
@@ -123,6 +126,40 @@ share a nav, a palette and a diagnostics language; they do not share a screen.
 - **C9 Toolbar order and hiding** (S, deferred). Six tools do not need it yet.
 - **C10 Custom sticker and icon import** (L, deferred). Licensing before code.
 
+- **C11 Reorder layers** (S). `layers` is only appended, so the last thing added sits on top
+  for good. `moveLayer(id, to)` plus a grab handle on every row: long-press lifts it, drag
+  moves it, the drop writes the order and autosaves.
+- **C12 Exact placement fields** (S). X, Y, W, H and rotation as fields in the codec's own
+  fractional units, with a 1 px / 10 px nudge pad. Writes go through
+  `beginGesture`/`endGesture`, so one edit is one undo step.
+- **C13 Save state** (S). `SAVED 06:52` / `SAVING…` / `SAVE FAILED` in the status line, and
+  the same state in the report, so autosave stops being invisible.
+- **C14 Type parity** (S). `TextLayer` carries `align` and `lineHeight`; the inspector
+  controls neither, and align is printed in a label. Add both. Letter spacing is a model,
+  codec and painter change (M) and follows.
+- **C15 Layer thumbnails** (M). A 24 dp thumbnail per row, drawn by `ArtboardPainter`,
+  cached and invalidated on `actionId`.
+- **C16 Undo history** (M). Long-press ↶ for the last ten named actions, tap to jump.
+- **C17 Hex colour field** (S). Beside the five swatches, writing the same fill for every
+  layer kind.
+- **C18 Export scale, format, SHARE** (S). 1×/2×, PNG or JPG, and a SHARE chip after a
+  successful export.
+- **C19 One door between the surfaces** (S). `BASIC EDITOR` moves out of the Info dialog to
+  the top bar; the editor gains an ENGINE entry.
+- **C20 Safe-area guides** (S). A 10 % inset rectangle, toggled with the grid.
+- **C21 Document library** (L). Named documents with thumbnails: New, Open, Save as, Delete,
+  and the last one reopened. Needs C2's visible half, which ships in the same wave.
+- **C22 Gesture legend** (S). One sheet naming every gesture the stage accepts.
+- **C23 Last-export thumbnail** (S). The last PNG, 40 dp, tappable to share — the other half
+  of C18.
+- **C24 Haptics** (S). A tick when a grip is taken and when a snap catches.
+- **C25 Resizable bottom panel** (S). Drag the strip to any height, using the editor's own
+  `SheetDrag` pattern.
+- **C26 Icon recents** (S). The last twenty glyphs used, ahead of the catalog.
+- **C27 ADD sheet** (M). Adding a sticker or icon no longer replaces the selected layer's
+  inspector; ADD and the tool mode become separate things.
+
+
 ### E — Editor (main ADD app, `app/src/app/offline/compress/`)
 
 The native editor has no instrumentation at all today.
@@ -144,6 +181,16 @@ The native editor has no instrumentation at all today.
 - **E8 Studio canvas presets** (M). 1080x1350 is fixed today; add post, story, square.
 - **E9 Default type face** (S). Choose the face a new type line starts in.
 
+- **E10 Undo stack** (M). Snapshot the document on every commit, keep fifteen, and fold the
+  UNDO LOOK chip into it rather than shipping two undo systems.
+- **E11 Before/after hold** (S). Hold the stage to see the ungraded photo; release to return.
+- **E12 Eyedropper** (M). Sample a colour out of the photo into the selected line or canvas.
+- **E13 Crop and aspect at export** (M). Square and 4:5, with the crop visible on the stage.
+- **E14 Fine straighten** (S). Rotate by degrees, not 90° steps.
+- **E15 Thirds overlay** (S). A composition grid over the photo.
+- **E16 Font pack samples** (S). Each pack sets a sample line in its own face at 28 sp.
+
+
 ### F — Foundations
 
 - **F1 Versioned document schema** (M). `JSONObject`, `schema: 1`, artboard, layers of
@@ -156,6 +203,10 @@ The native editor has no instrumentation at all today.
   part of P2, not as a refactor for its own sake.
 
 ## Phases
+
+These record what each phase promised and how it was checked. **Build waves**, below, is
+how the work actually ships: P0 and P1 are done or half done, and P2–P7 are folded into
+two waves.
 
 ### P0 — Close the diagnostics loop (S + M)
 Items: D1, D2, D3, D4, D9, D10.
@@ -204,6 +255,51 @@ WebView tab** behind the existing nav, keep that tab for one release, then remov
 No phase in this plan replaces the native editor. P5 and P6 add to it; C1's photo layer
 is what would let a future plan consider folding it in, and that decision is not made
 here.
+
+## Build waves
+
+Eight batches, two waves, two tracks. A wave builds every batch that does not depend on a
+verdict, then ships one engine APK and one editor APK at the same time. Inside a wave a
+batch may depend on another — F3 before the settings sheet, C6 before C24 — but nothing
+waits for the wave's own verdict to start, which is the point of grouping. One APK per
+track per wave: four builds in total instead of eight.
+
+**Wave 1 — the panel, the parity and the look** (19 engine items, 5 editor items)
+
+- Engine track, one APK: C11, C12, C13 (arrange); C14, C7, C17, C15, C19, C20, C22, C23,
+  C25, C26, C18 (parity); C3, C4, C5, C27, F3 (look).
+- Editor track, one APK: E10 (undo) and E1–E4 (recorder, report, decode/export diagnostics,
+  sheet-drag trace).
+- Order inside the engine track: F3 first, because the split makes room for C27 and the C5
+  sheet; then arrange, parity, look. E1–E4 are invisible and commit on green; E10 is visual
+  and waits for its verdict like everything else.
+- Exit: the panel orders by finger, placement is typable, the save is visible, palette and
+  page size change, every obvious control exists, and the editor has both an undo and a
+  report.
+
+**Wave 2 — photo, placement, library** (8 engine items, 11 editor items)
+
+- Engine track, one APK: C1 (photo); C6, D5, D6, D7, C24 (placement and haptics); C2's
+  visible half and C21 (library).
+- Editor track, one APK: E11–E16 (before/after, eyedropper, crop, straighten, thirds, font
+  samples) and E5–E9 (pinned swatches, preset management, export defaults, canvas presets,
+  default type face).
+- Order: C1 before C6, because snapping wants something other than a seed layer to snap to;
+  C6 before C24.
+- Exit: a real photo sits on the page and exports, two layers snap edge to edge, a haptic
+  says so, and posters have names.
+
+**Wave 3 — integration.** Behind the existing nav, the engine replaces the Studio WebView
+tab; both stay for one release; then the tab is removed.
+
+**Why not one wave.** Wave 1 already changes the whole panel, the palette and the page size.
+Adding the photo primitive and snapping to the same build makes a bad verdict impossible to
+attribute to anything, and a wave that size takes a day to unpick instead of a minute. Two
+waves keep each APK to one story and still halve the wall clock, because the tracks run
+beside each other rather than one after the other.
+
+**If a wave is rejected**, each item is its own commit once the verdict is in, so the piece
+that failed is dropped without unpicking the rest of the wave.
 
 ## Cadence
 
