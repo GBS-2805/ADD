@@ -29,6 +29,11 @@ android {
             // Filament libraries and the handoff download for an emulator this VM
             // cannot run anyway.
             abiFilters += listOf("arm64-v8a")
+            // REVIEW_X86=1 adds x86_64 for the headless emulator only. The artifact the
+            // handoff serves is built without it and stays arm64, and so does its size.
+            if (System.getenv("REVIEW_X86") != null) {
+                abiFilters += listOf("x86_64")
+            }
         }
     }
 
