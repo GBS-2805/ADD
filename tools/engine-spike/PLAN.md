@@ -8,7 +8,7 @@ recommendations is dropped: deferred items are marked deferred, not removed.
 The spike stops being a spike: **one native engine inside ADD** that composes a
 poster — photo, type, vector, icon, sticker and 3D — and exports it as a PNG, with no
 WebView in the path, no account and no network. `tools/engine-spike` is the vehicle.
-The editor track is where it plugs in. The recorder is how every failure stays
+The engine plugs into ADD's nav beside the editor, not into it. The recorder is how every failure stays
 diagnosable from a phone.
 
 Two consequences the earlier list missed:
@@ -29,6 +29,31 @@ Done means all five hold:
 4. The reader can change palette, artboard, feel and snapping without a build.
 5. No WebView, no account, no network.
 
+## Canvas-first
+
+The engine is a small-canvas powerhouse: the artboard owns the screen, and the tools
+belong to the canvas rather than sitting beside it. This is the design law for every item
+below, and it outranks convenience.
+
+1. **No permanent bands.** The top bar, the status line and the layer panel all collapse
+   to an edge. Nothing owns a fixed strip of the screen.
+2. **Chrome comes on intent.** Touching the canvas dismisses it; tapping an edge, a handle
+   or a selection summons it. The default state of the app is the artboard.
+3. **Tools float.** The rail becomes a translucent pill over the canvas, and the inspector
+   is a peek that grows into a sheet, never a docked 236 dp block.
+4. **Gestures carry the frequent actions**, buttons the rest: two-finger tap undo,
+   three-finger redo, long-press empty canvas to add.
+5. **Status speaks only when there is something to say** — recording, saved, 3D error — as
+   an overlay chip, not a permanent line.
+6. **Fit on launch.** The page fills the screen at the size the screen can show.
+7. **Nothing added later may reintroduce a fixed band.** An item that needs one is a
+   design failure, not a shortcut.
+
+Today the chrome takes 346 dp before the canvas gets a pixel — 56 dp top bar, 32 dp status,
+22 dp strip, 236 dp panel — plus a permanent 54 dp rail. That is roughly two-fifths of a
+phone, and it is the thing this plan fixes first. The cost of fixing it is discoverability,
+paid with the gesture legend (C22) and a first-run tip, not with more chrome.
+
 ## Progress
 
 - **P0 — done.** D1, D2, D3, D4, D9, D10. The recorder spills to disk and carries the
@@ -41,27 +66,39 @@ Done means all five hold:
   Save as visible controls are still to do, because a top-bar row is a visual change
   and waits for a verdict.
 - Everything else: not started.
-- **Waves, 8 Nov 2026.** The eight batches are grouped into two waves and two tracks — see
-  **Build waves**. Every suggestion from the review is an item now: C11–C27 and E10–E16.
+- **Canvas-first, 8 Nov 2026.** The plan is recut around the artboard owning the screen —
+  see **Canvas-first** and **Build waves**. Every suggestion from the review is an item,
+  C11–C32 and E10–E16. The native editor stays the simple arranging and exporting page,
+  with only E10 and E1–E4 planned.
 
 
 ## What happens to the editor
 
-The native editor is **kept and improved**, not retired. It stays the photo-plus-type
-surface: decode at 2048 px with EXIF rotation, type lines, the seven presets and the
-reader's saved looks, the colour mixer, the TYPE / PHOTO / LAYERS sheets, font packs,
-and export to `Pictures/Editor`. P5 and P6 add instrumentation and controls to it;
-nothing removes it.
+The native editor **stays, and stays simple**. It is the easy arranging and exporting
+page: a photograph, type on it, the seven presets, saved looks, the colour mixer, font
+packs, export to `Pictures/Editor`. That job is done, and it is not a stepping stone — the
+engine does not inherit it, and nothing in this plan retires it.
 
-The only thing on a retirement path is the **Studio tab inside that editor** — the
-Fabric.js WebView, which is a spike, keeps its own state, is not wired to saved looks
-and is unverified on a device. The engine replaces that tab only after P3 and P4, only
-once it can hold a photo and export the same page, and only with one release where both
-are present.
+Two things change in it, and only two:
 
-The engine is a third surface, not a rewrite of the editor: a *composition* page for
-vector, icons, stickers and 3D, where the editor is a *photograph* with type on it. They
-share a nav, a palette and a diagnostics language; they do not share a screen.
+- **E10, a real undo stack.** A deleted line or a turned photo is otherwise permanent. It
+  folds the existing UNDO LOOK chip into itself rather than shipping two undos.
+- **E1–E4, the recorder and report.** Invisible, and it is what makes an editor bug
+  answerable at all.
+
+Everything else on the editor list — E5–E9 and E11–E16 — is **deferred, not deleted**:
+pinned swatches, preset management, export defaults, canvas presets, the default face,
+before/after, the eyedropper, crop, straighten, thirds and font samples. They wait until
+the editor asks for them, which by this plan's own logic it may never do.
+
+The only surface on a retirement path is the **Studio tab inside that editor** — the
+Fabric.js WebView. The engine replaces that tab, and only once it can hold a photo and
+export the same page, in one release where both are present.
+
+The two are different tools, not two versions of one: the engine is the powerhouse for
+composition — vector, icons, stickers, 3D, photo — and the editor is the quick page for a
+photograph and a line of type. They share a nav, a palette and a diagnostics language;
+they do not share a screen.
 
 ## Workstreams
 
@@ -158,11 +195,26 @@ share a nav, a palette and a diagnostics language; they do not share a screen.
 - **C26 Icon recents** (S). The last twenty glyphs used, ahead of the catalog.
 - **C27 ADD sheet** (M). Adding a sticker or icon no longer replaces the selected layer's
   inspector; ADD and the tool mode become separate things.
+- **C28 Auto-hiding chrome** (M). Touching the canvas collapses the top bar, status line and
+  panel to edges; tapping an edge or a handle brings them back. The default state of the app
+  becomes the artboard.
+- **C29 Peek panel** (M). The 236 dp block becomes a 22 dp strip — selected layer, three
+  actions — that drags up into the full inspector. Absorbs C25.
+- **C30 Floating tool pill** (M). The 54 dp rail becomes a translucent five-glyph pill over
+  the canvas, auto-hiding.
+- **C31 Status chip** (S). The 32 dp status line becomes an overlay chip that appears only
+  for recording, saved or a 3D error.
+- **C32 Fit on launch** (S). The artboard opens filling the screen; the dead 1080 / 1350
+  labels at the rail foot go with the rail.
 
 
 ### E — Editor (main ADD app, `app/src/app/offline/compress/`)
 
 The native editor has no instrumentation at all today.
+
+Only **E10** and **E1–E4** are planned: an undo stack and a recorder. **E5–E9 and E11–E16
+are deferred, not removed** — the editor stays the easy arranging and exporting page it is
+today, and those wait until it asks for them.
 
 - **E1 An editor recorder** (M). Same shape as `Diagnostics`, smaller: sheet opened,
   preset applied, look saved, look undone, line added or deleted, colour set, photo
@@ -258,48 +310,75 @@ here.
 
 ## Build waves
 
-Eight batches, two waves, two tracks. A wave builds every batch that does not depend on a
-verdict, then ships one engine APK and one editor APK at the same time. Inside a wave a
-batch may depend on another — F3 before the settings sheet, C6 before C24 — but nothing
-waits for the wave's own verdict to start, which is the point of grouping. One APK per
-track per wave: four builds in total instead of eight.
+Canvas-first, in six engine batches and one editor track. A batch builds everything that
+does not depend on a verdict, then ships one APK. Inside a batch items may depend on each
+other — F3 before the settings sheet, C1 before C6 — but nothing waits for the batch's own
+verdict to start.
 
-**Wave 1 — the panel, the parity and the look** (19 engine items, 5 editor items)
+**A — The shell (the feel test).** C28, C29, C30, C31, C32, C11, C12, C13, C22, C24.
 
-- Engine track, one APK: C11, C12, C13 (arrange); C14, C7, C17, C15, C19, C20, C22, C23,
-  C25, C26, C18 (parity); C3, C4, C5, C27, F3 (look).
-- Editor track, one APK: E10 (undo) and E1–E4 (recorder, report, decode/export diagnostics,
-  sheet-drag trace).
-- Order inside the engine track: F3 first, because the split makes room for C27 and the C5
-  sheet; then arrange, parity, look. E1–E4 are invisible and commit on green; E10 is visual
-  and waits for its verdict like everything else.
-- Exit: the panel orders by finger, placement is typable, the save is visible, palette and
-  page size change, every obvious control exists, and the editor has both an undo and a
-  report.
+Ten items, one question: does the app feel like the artboard? Auto-hiding chrome, a peek
+that grows into the inspector, a floating tool pill, a status chip, fit on launch, layer
+reordering, exact placement fields, a visible save, the gesture legend and haptics on the
+grips. C25's resizable panel is absorbed here — once the panel is a peek, growing it is the
+default posture rather than a nicety. This is the first engine APK.
 
-**Wave 2 — photo, placement, library** (8 engine items, 11 editor items)
+Exit: no fixed band on screen, a layer moves by finger, a position can be typed, and the
+save line says when.
 
-- Engine track, one APK: C1 (photo); C6, D5, D6, D7, C24 (placement and haptics); C2's
-  visible half and C21 (library).
-- Editor track, one APK: E11–E16 (before/after, eyedropper, crop, straighten, thirds, font
-  samples) and E5–E9 (pinned swatches, preset management, export defaults, canvas presets,
-  default type face).
-- Order: C1 before C6, because snapping wants something other than a seed layer to snap to;
-  C6 before C24.
-- Exit: a real photo sits on the page and exports, two layers snap edge to edge, a haptic
-  says so, and posters have names.
+**B — Parity inside the shell.** C7, C14, C15, C16, C17, C18, C19, C20, C23, C26.
 
-**Wave 3 — integration.** Behind the existing nav, the engine replaces the Studio WebView
-tab; both stay for one release; then the tab is removed.
+Ten small items: lock and rename, type alignment and leading, thumbnails sized for the
+peek, undo history, hex colour, export scale and share, the door to the editor, safe-area
+guides, the last-export thumbnail, icon recents. Every one must land inside the shell's
+rules — a thumbnail row is fine, a fixed panel is not.
 
-**Why not one wave.** Wave 1 already changes the whole panel, the palette and the page size.
-Adding the photo primitive and snapping to the same build makes a bad verdict impossible to
-attribute to anything, and a wave that size takes a day to unpick instead of a minute. Two
-waves keep each APK to one story and still halve the wall clock, because the tracks run
-beside each other rather than one after the other.
+Exit: every obvious control exists, and none of them bought back a band.
 
-**If a wave is rejected**, each item is its own commit once the verdict is in, so the piece
-that failed is dropped without unpicking the rest of the wave.
+**C — Look.** C3, C4, C5, C27, F3.
+
+Palette, page sizes, feel, the ADD sheet, and the `EngineScreen` split that makes room for
+them. The ADD sheet is now the contextual add: tools summoned from the canvas, never a mode
+that owns the inspector.
+
+Exit: palette, page size and feel survive a restart, and adding something no longer
+replaces what is selected.
+
+**D — Photo.** C1.
+
+The capability the goal is missing, and the reason the editor can stay simple instead of
+being replaced. Import, fit, fill, crop, persistence, correct draw order, export.
+
+Exit: your own photograph sits on the page and leaves in the PNG.
+
+**E — Placement.** C6, D5, D6, D7.
+
+Snapping and guides, plus the overlays that show what a finger is hitting and what the last
+gesture did. Overlays are a toggle chip over the canvas, not a panel.
+
+Exit: two layers snap edge to edge, and a dead tap explains itself.
+
+**F — Library.** C2's visible half, C21.
+
+New, Open, Save as, named documents, thumbnails.
+
+Exit: a poster has a name and reopens.
+
+**Editor track.** E10 and E1–E4, one APK — the only planned changes to the editor.
+
+**Integration.** Behind the existing nav, the engine replaces the Studio WebView tab; both
+stay for one release; then the tab is removed. The native editor keeps its own entry and is
+not part of this.
+
+**Why this order.** A is the feel, and the feel is the whole point — ten items that decide
+whether the ambition works at all, small enough to judge in one sitting. Everything after
+it lands on a shell that has already been approved, which is why B is allowed to be ten
+small things instead of ten builds. D gives the engine a photograph, which is what lets the
+editor stay simple. F is last because a library is only worth having once there is a
+document worth keeping.
+
+**If a batch is rejected**, each item is its own commit once the verdict is in, so the
+piece that failed is dropped without unpicking the rest.
 
 ## Cadence
 
