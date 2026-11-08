@@ -83,7 +83,7 @@ fun EngineScreen() {
     val doc = remember {
         EngineDocument(restored?.layers).also { document ->
             restored?.let {
-                document.select(it.selectedId ?: it.layers.first().id)
+                (it.selectedId ?: it.layers.firstOrNull()?.id)?.let { id -> document.select(id) }
                 document.zoom = it.zoom
                 document.status = "RESTORED · ${it.layers.size} LAYERS"
             }
@@ -149,7 +149,13 @@ fun EngineScreen() {
             val cls = Class.forName("app.offline.compress.EditorActivity")
             val intent = android.content.Intent(context, cls)
                 .putExtra("app.offline.compress.BASIC_EDITOR", true)
-            val action: () -> Unit = { context.startActivity(intent) }
+            val action: () -> Unit = {
+                // A missing or refused editor must say so on the stage, not close the app.
+                runCatching { context.startActivity(intent) }.onFailure { error ->
+                    doc.status = "EDITOR UNAVAILABLE · " +
+                        (error.message ?: error.javaClass.simpleName)
+                }
+            }
             action
         }.getOrNull()
     }

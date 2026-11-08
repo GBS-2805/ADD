@@ -18,7 +18,9 @@ android {
         applicationId = "app.offline.compress"
         minSdk = 26
         targetSdk = 35
-        versionCode = 39
+        // One above the shipping 3.7 (39): an update installs over it, and the crash
+        // net's hold carries this number so a new build lifts it by itself.
+        versionCode = 40
         versionName = "3.7"
 
         ndk {

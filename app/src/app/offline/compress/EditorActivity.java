@@ -98,7 +98,7 @@ public class EditorActivity extends Activity {
     protected void onCreate(Bundle state) {
         super.onCreate(state);
         ThemePrefs.applyTheme(this);
-        if (!getIntent().getBooleanExtra(EXTRA_BASIC_EDITOR, false)
+        if (!getIntent().getBooleanExtra(EXTRA_BASIC_EDITOR, false) && !engineHeld(this)
                 && DevFlags.engineLab(this) && openEngineLab(this)) {
             finish();
             return;
@@ -201,13 +201,27 @@ public class EditorActivity extends Activity {
      * other build, and a failed lookup, lands on the basic editor.
      */
     public static void open(Activity from) {
-        if (DevFlags.engineLab(from) && openEngineLab(from)) {
+        if (!engineHeld(from) && DevFlags.engineLab(from) && openEngineLab(from)) {
             return;
         }
         from.startActivity(new Intent(from, EditorActivity.class));
     }
 
     /** Reaches the engine by class name so the shipping build still compiles. */
+    /**
+     * True when the review APK's crash net is holding the engine after a crash. The
+     * class exists only in the review source set, so the shipping build always answers
+     * false and this is one reflective lookup, not a second code path.
+     */
+    private static boolean engineHeld(Context context) {
+        try {
+            Class<?> watch = Class.forName("app.offline.compress.review.CrashWatch");
+            return Boolean.TRUE.equals(watch.getMethod("held", Context.class).invoke(null, context));
+        } catch (ReflectiveOperationException | RuntimeException missing) {
+            return false;
+        }
+    }
+
     private static boolean openEngineLab(Context context) {
         try {
             Class<?> engine = Class.forName("app.add.engine.MainActivity");
@@ -251,7 +265,7 @@ public class EditorActivity extends Activity {
     }
 
     private void showStudio() {
-        if (DevFlags.engineLab(this) && openEngineLab(this)) {
+        if (!engineHeld(this) && DevFlags.engineLab(this) && openEngineLab(this)) {
             return;
         }
         studioOpen = true;

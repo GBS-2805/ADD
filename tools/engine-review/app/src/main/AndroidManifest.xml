@@ -18,6 +18,7 @@
         android:required="true" />
 
     <application
+        android:name=".review.CrashWatch"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:usesCleartextTraffic="false"
@@ -77,13 +78,24 @@
 
         <!-- Debug-only destination. MainActivity reaches this by class name only
              when the APK is debuggable, so the release build has no entry path. -->
+        <!-- Its own process: a native Filament fault or a Compose crash here must not
+             take the shelf and the editor down with it, and the review crash net can
+             then show what died on the next launch. -->
         <activity
             android:name="app.add.engine.MainActivity"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|uiMode"
             android:exported="false"
             android:label="Engine Lab"
+            android:process=":engine"
             android:screenOrientation="portrait"
             android:theme="@style/ReviewEngineTheme"
             android:windowSoftInputMode="adjustResize" />
+
+        <!-- The saved trace, with COPY. Review-only, like the net that writes it. -->
+        <activity
+            android:name=".review.CrashReportActivity"
+            android:exported="false"
+            android:label="ADD stopped"
+            android:theme="@style/ReviewEngineTheme" />
     </application>
 </manifest>
