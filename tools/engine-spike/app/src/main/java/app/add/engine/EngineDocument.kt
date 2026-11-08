@@ -178,6 +178,10 @@ class EngineDocument(initial: List<Layer>? = null) {
     var canRedo by mutableStateOf(false)
         private set
 
+    /** The clock time the last autosave finished, so the shell can say when. */
+    var savedAt by mutableStateOf<String?>(null)
+        private set
+
     /** The control that made the last change, so the recorder can name it. */
     var action by mutableStateOf("OPEN")
         private set
@@ -475,12 +479,15 @@ class EngineDocument(initial: List<Layer>? = null) {
         status = "LAYER DELETED"
     }
 
-    fun reorderSelected(delta: Int) {
-        val index = layers.indexOfFirst { it.id == selectedId }
+    fun reorderSelected(delta: Int) = moveLayer(selectedId, delta)
+
+    /** Moves any row, because the layer list reorders in place and not only the selection. */
+    fun moveLayer(id: String, delta: Int) {
+        val index = layers.indexOfFirst { it.id == id }
         if (index < 0) return
         val target = (index + delta).coerceIn(0, layers.lastIndex)
         if (target == index) return
-        act(if (delta > 0) "FRONT" else "BACK")
+        act(if (delta > 0) "FRONT" else "BACK", layers[index].name)
         commit { layerList ->
             layerList.toMutableList().also {
                 val moving = it.removeAt(index)
@@ -488,6 +495,36 @@ class EngineDocument(initial: List<Layer>? = null) {
             }
         }
         status = if (delta > 0) "LAYER MOVED FORWARD" else "LAYER MOVED BACK"
+    }
+
+    /** X, Y, W and H typed in artboard pixels, so a placement can be exact. */
+    fun setBounds(x: Float, y: Float, w: Float, h: Float) {
+        if (selected == null) return
+        act("PLACE")
+        val nextW = w.coerceIn(0.04f, 1.6f)
+        val nextH = h.coerceIn(0.02f, 1.6f)
+        updateSelected {
+            it.withBounds(
+                x.coerceIn(-0.5f, 1.2f),
+                y.coerceIn(-0.5f, 1.2f),
+                nextW,
+                nextH,
+            )
+        }
+    }
+
+    /** One-pixel nudges from the placement row; a finger drag stays coarser. */
+    fun nudge(dxPx: Float, dyPx: Float) {
+        if (selected == null) return
+        act("NUDGE")
+        updateSelected {
+            it.withPosition(it.x + dxPx / ArtboardPainter.W, it.y + dyPx / ArtboardPainter.H)
+        }
+    }
+
+    /** Called by the shell once the debounced write lands. */
+    fun markSaved(clock: String) {
+        savedAt = clock
     }
 
     fun setText(value: String) {
