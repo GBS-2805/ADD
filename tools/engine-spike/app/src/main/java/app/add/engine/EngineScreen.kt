@@ -67,7 +67,20 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun EngineScreen() {
-    val doc = remember { EngineDocument() }
+    val context = LocalContext.current
+    // A document that survives the process. The last edit is on disk before the phone
+    // can kill the app, and anything unreadable falls back to the seed rather than an
+    // empty stage.
+    val restored = remember { DocumentStore.restore(context) }
+    val doc = remember {
+        EngineDocument(restored?.layers).also { document ->
+            restored?.let {
+                document.select(it.selectedId ?: it.layers.first().id)
+                document.zoom = it.zoom
+                document.status = "RESTORED · ${it.layers.size} LAYERS · AUTOSAVE ON"
+            }
+        }
+    }
 
     // The sampler lives here, not in the diagnostics dialog: that dialog covers the
     // whole stage, so a recorder hosted inside it could never see a gesture. This
@@ -91,13 +104,17 @@ fun EngineScreen() {
             }
         }
     }
+    // Debounced: a drag writes once the finger rests, not on every frame.
+    LaunchedEffect(doc.layers, doc.zoom) {
+        delay(700)
+        DocumentStore.save(context, doc)
+    }
     val sceneHandles = remember { mutableMapOf<String, SceneHandle>() }
     val fallbackHandle = remember { SceneHandle() }
     fun handleFor(layer: ModelLayer?): SceneHandle =
         layer?.let { sceneHandles.getOrPut("${it.id}:${it.asset.name}") { SceneHandle() } } ?: fallbackHandle
     val primaryHandle = doc.modelLayers.firstOrNull()?.let { handleFor(it) } ?: fallbackHandle
     val selectedHandle = handleFor(doc.selectedModel)
-    val context = LocalContext.current
     val typefaces = remember(context) { Typefaces(context) }
     val scope = rememberCoroutineScope()
     var showInfo by remember { mutableStateOf(false) }
@@ -132,7 +149,9 @@ fun EngineScreen() {
                         "export " + result.width + " × " + result.height +
                             " · " + result.bytes + " bytes" +
                             " · 3d " + (result.models - result.missing) + "/" + result.models +
-                            (if (result.missing > 0) " · 3D CAPTURE MISSING" else "")
+                            (if (result.missing > 0) " · 3D CAPTURE MISSING" else "") +
+                            (if (result.black > 0) " · ${result.black} 3D BLACK" else "") +
+                            (if (result.models > 0) " · ${result.litPercent}% lit" else "")
                     )
                 } catch (error: Exception) {
                     doc.status = "EXPORT FAILED · ${error.message ?: "unknown error"}"

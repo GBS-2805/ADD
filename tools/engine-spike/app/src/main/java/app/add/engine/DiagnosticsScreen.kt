@@ -232,6 +232,7 @@ fun DiagnosticsDialog(
                 DiagnosticRow("DEVICE", device.ifBlank { "unknown" })
                 DiagnosticRow("ANDROID", "API ${Build.VERSION.SDK_INT} · ${Build.VERSION.RELEASE} · $abi")
                 DiagnosticRow("LAST CRASH", crash ?: "NONE", if (crash == null) Dim else Clay)
+                DiagnosticRow("LAST", Diagnostics.why(doc))
 
                 DiagSection("RECORDED INTERACTION", "${Diagnostics.count} LINES")
                 Text(

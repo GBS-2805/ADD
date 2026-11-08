@@ -29,6 +29,19 @@ Done means all five hold:
 4. The reader can change palette, artboard, feel and snapping without a build.
 5. No WebView, no account, no network.
 
+## Progress
+
+- **P0 — done.** D1, D2, D3, D4, D9, D10. The recorder spills to disk and carries the
+  previous session's tail into the next report, an export reports its lit percentage
+  and any black capture, a dead 3D layer says whether the asset is missing or the
+  loader refused it, every control sets an action label, the header carries the undo
+  depth, and the dialog has a LAST row.
+- **P1 — half done.** F1, the invisible half of C2, and D8's encoder: the document is
+  versioned JSON on disk, saved after each edit and restored at launch. New / Open /
+  Save as visible controls are still to do, because a top-bar row is a visual change
+  and waits for a verdict.
+- Everything else: not started.
+
 ## What happens to the editor
 
 The native editor is **kept and improved**, not retired. It stays the photo-plus-type

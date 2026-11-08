@@ -65,11 +65,22 @@ fun FilamentLayer(
     val currentHandle by rememberUpdatedState(handle)
     var attached by remember { mutableStateOf<SceneView?>(null) }
 
+    val context = androidx.compose.ui.platform.LocalContext.current
     LaunchedEffect(error, instance) {
         if (error != null) {
-            Diagnostics.note("3d ${layer.name} offline · $error")
+            // Three different faults used to read as one word. An asset that is not in
+            // the APK, a loader that refused it, and a surface that went away are
+            // separate reports with separate fixes.
+            val absent = runCatching {
+                context.assets.open(layer.asset.path).close()
+                false
+            }.getOrDefault(true)
+            Diagnostics.note(
+                if (absent) "3d ${layer.name} asset missing · ${layer.asset.path}"
+                else "3d ${layer.name} loader failed · $error"
+            )
         } else if (instance != null) {
-            Diagnostics.note("3d ${layer.name} model loaded")
+            Diagnostics.note("3d ${layer.name} model loaded · ${layer.asset.label}")
         }
         handle.error = error
         handle.modelLoaded = instance != null

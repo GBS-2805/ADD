@@ -45,6 +45,8 @@ data class ExportResult(
     val bytes: Long,
     val models: Int,
     val missing: Int,
+    val black: Int,
+    val litPercent: Int,
 )
 
 private data class CaptureAttempt(
@@ -69,9 +71,19 @@ object Exporter {
         val canvas = Canvas(artboard)
         val visibleModels = layers.filterIsInstance<ModelLayer>().filter { it.visible }
         val captures = mutableMapOf<String, Bitmap>()
+        var lit = 0
+        var sampled = 0
+        var black = 0
         visibleModels.forEach { model ->
             val view = sceneViews[model.id] ?: return@forEach
-            capture(view)?.let { captures[model.id] = it }
+            val bitmap = requestCapture(view).bitmap ?: return@forEach
+            // Same counter the test capture uses: a model that came back 0% lit is in
+            // the file but is not visible in it, which a missing model never is.
+            val (modelLit, modelTotal) = litSamples(bitmap)
+            lit += modelLit
+            sampled += modelTotal
+            if (modelLit == 0) black++
+            captures[model.id] = bitmap
         }
         ArtboardPainter.draw(canvas, layers, typefaces, captures)
         captures.values.forEach { it.recycle() }
@@ -79,12 +91,18 @@ object Exporter {
 
         val saved = withContext(Dispatchers.IO) { save(context, artboard) }
         return ExportResult(
-            status = if (missing > 0) "${saved.message} · 3D CAPTURE UNAVAILABLE" else saved.message,
+            status = buildString {
+                append(saved.message)
+                if (missing > 0) append(" · 3D CAPTURE UNAVAILABLE")
+                if (black > 0) append(" · ${black} 3D BLACK")
+            },
             width = artboard.width,
             height = artboard.height,
             bytes = saved.bytes,
             models = visibleModels.size,
             missing = missing,
+            black = black,
+            litPercent = if (sampled > 0) lit * 100 / sampled else 0,
         )
     }
 
@@ -123,8 +141,6 @@ object Exporter {
             CaptureResult(false, 0, 0, 0, 0, "PIXELCOPY ERROR · ${error.message ?: error.javaClass.simpleName}")
         }
     }
-
-    private suspend fun capture(view: SceneView): Bitmap? = requestCapture(view).bitmap
 
     private suspend fun requestCapture(view: SceneView): CaptureAttempt {
         val width = view.width

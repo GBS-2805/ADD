@@ -6,6 +6,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import java.io.File
+import java.io.FileOutputStream
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -36,6 +37,7 @@ object Diagnostics {
     private const val COALESCE_MS = 700L
     private const val FRAME_WINDOW_MS = 2000L
     private const val CRASH_FILE = "diagnostics-crash.txt"
+    private const val LOG_FILE = "diagnostics-log.txt"
     private const val NANOS = 1_000_000_000.0
 
     val sampleMillis: Long get() = SAMPLE_MS
@@ -56,6 +58,10 @@ object Diagnostics {
     private var frameWorst = 0L
     private var crashHandler: Thread.UncaughtExceptionHandler? = null
     private var previousHandler: Thread.UncaughtExceptionHandler? = null
+    private var logStream: FileOutputStream? = null
+    private var priorLog: List<String> = emptyList()
+    private var lastGestureBody = ""
+    private var lastDialBody = ""
 
     var recording by mutableStateOf(false)
         private set
@@ -79,11 +85,21 @@ object Diagnostics {
         gestureFrom = null
         zoomSource = null
         frameStart = 0L
+        lastGestureBody = ""
+        lastDialBody = ""
+        // A native fault kills the process without reaching the crash handler, so
+        // every line also lands on disk. What the last session wrote is carried into
+        // this one's report rather than quietly truncated.
+        priorLog = readLog(context)
+        openLog(context)
         val earlier = lastCrash(context)
         recording = true
         installCrashHandler(context)
         status = "RECORDING · CLOSE THIS SCREEN AND DO THE THING"
         append("rec", "REC started · ${doc.layers.size} layers · zoom ${percent(doc.zoom)}")
+        if (priorLog.isNotEmpty()) {
+            append("prior:${System.nanoTime()}", "previous session left ${priorLog.size} lines on disk")
+        }
         if (earlier != null) {
             append("crashPrevious:${System.nanoTime()}", "previous session crashed · ${earlier.removePrefix("CRASH ")}")
         }
@@ -96,6 +112,7 @@ object Diagnostics {
         previous = null
         zoomSource = null
         removeCrashHandler()
+        closeLog()
         status = if (count == 0) "STOPPED · NOTHING MOVED" else "STOPPED · $count LINES · COPY OR SHARE"
     }
 
@@ -110,6 +127,10 @@ object Diagnostics {
         gestureFrom = null
         zoomSource = null
         removeCrashHandler()
+        closeLog()
+        priorLog = emptyList()
+        lastGestureBody = ""
+        lastDialBody = ""
         status = "CLEARED"
         revision++
     }
@@ -173,12 +194,13 @@ object Diagnostics {
         )
         val place = "${f(x0)},${f(y0)} → ${f(x1)},${f(y1)}"
         if (parts.isEmpty()) {
-            append("tap:${System.nanoTime()}", "tap   $mode · $subject @ $place · nothing changed")
+            val body = "tap   $mode · $subject @ $place · nothing changed"
+            lastGestureBody = body
+            append("tap:${System.nanoTime()}", body)
         } else {
-            append(
-                "gesture:${System.nanoTime()}",
-                "gesture $mode · $subject · $place · ${ms} ms · ${parts.joinToString(" · ")}",
-            )
+            val body = "gesture $mode · $subject · $place · ${ms} ms · ${parts.joinToString(" · ")}"
+            lastGestureBody = body
+            append("gesture:${System.nanoTime()}", body)
         }
         // The line above already carries the change; the next sample must not repeat it.
         previous = after
@@ -196,7 +218,17 @@ object Diagnostics {
      */
     fun dial(name: String, from: String, to: String) {
         if (!recording) return
-        append("dial:$name", "dial  $name $from → $to")
+        val body = "dial  $name $from → $to"
+        lastDialBody = body
+        append("dial:$name", body)
+    }
+
+    /** The three facts that explain the last change, for the dialog's top row. */
+    fun why(doc: EngineDocument): String {
+        val bits = mutableListOf("undo ${doc.undoDepth}/${doc.redoDepth} · ${doc.action}")
+        if (lastGestureBody.isNotBlank()) bits += lastGestureBody
+        if (lastDialBody.isNotBlank()) bits += lastDialBody
+        return bits.joinToString("   ")
     }
 
     /**
@@ -222,6 +254,34 @@ object Diagnostics {
             frameCount = 0
             frameWorst = 0
         }
+    }
+
+    private fun readLog(context: Context): List<String> = runCatching {
+        val file = File(context.filesDir, LOG_FILE)
+        if (!file.exists()) emptyList() else file.readLines().takeLast(60)
+    }.getOrDefault(emptyList())
+
+    private fun openLog(context: Context) {
+        closeLog()
+        logStream = runCatching {
+            val file = File(context.filesDir, LOG_FILE)
+            file.writeText("")
+            FileOutputStream(file, true)
+        }.getOrNull()
+    }
+
+    private fun writeLog(line: String) {
+        runCatching {
+            logStream?.let { stream ->
+                stream.write((line + "\n").toByteArray())
+                stream.flush()
+            }
+        }
+    }
+
+    private fun closeLog() {
+        runCatching { logStream?.close() }
+        logStream = null
     }
 
     /** The crash line an earlier session left on disk, or null. */
@@ -258,6 +318,11 @@ object Diagnostics {
         }
         if (before.selected != next.selected) {
             append("select", "select ${next.selected?.let { next.layers[it]?.name ?: it } ?: "nothing"}")
+        }
+        // The sampler can see the result of a button but not which button it was.
+        if (before.actionId != next.actionId) {
+            val who = next.selected?.let { next.layers[it]?.name } ?: "nothing"
+            append("act", "act  ${next.action} · $who")
         }
         if (percent(before.zoom) != percent(next.zoom)) {
             val by = zoomSource?.let { " · $it" }.orEmpty()
@@ -318,9 +383,12 @@ object Diagnostics {
         )
         text.appendLine(
             "state    zoom ${percent(doc.zoom)} · ${doc.layers.size} layers · " +
-                "selected ${doc.selected?.name ?: "nothing"}"
+                "selected ${doc.selected?.name ?: "nothing"} · undo ${doc.undoDepth}/${doc.redoDepth}"
         )
         text.appendLine("status   ${doc.status}")
+        if (priorLog.isNotEmpty()) {
+            text.appendLine("prior    ${priorLog.size} lines on disk before this session")
+        }
         lastCrash(context)?.let { text.appendLine("crash    $it") }
         text.appendLine()
         text.appendLine("EVENTS")
@@ -328,6 +396,11 @@ object Diagnostics {
             text.appendLine("  (nothing recorded)")
         } else {
             lines.forEach { text.appendLine("  $it") }
+        }
+        if (priorLog.isNotEmpty()) {
+            text.appendLine()
+            text.appendLine("BEFORE THIS SESSION")
+            priorLog.takeLast(24).forEach { text.appendLine("  $it") }
         }
         text.appendLine()
         text.appendLine("LAYERS")
@@ -418,6 +491,7 @@ object Diagnostics {
             }
             count = lines.size
         }
+        writeLog(line)
         revision++
     }
 
@@ -426,6 +500,8 @@ object Diagnostics {
         selected = doc.selectedId,
         editing = doc.editingModelId,
         zoom = doc.zoom,
+        action = doc.action,
+        actionId = doc.actionId,
         order = doc.layers.map { it.id },
         layers = doc.layers.associate { layer ->
             layer.id to LayerState(
@@ -457,6 +533,8 @@ object Diagnostics {
         val selected: String?,
         val editing: String?,
         val zoom: Float,
+        val action: String,
+        val actionId: Int,
         val order: List<String>,
         val layers: Map<String, LayerState>,
     )

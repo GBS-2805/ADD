@@ -66,4 +66,7 @@ dependencies {
     implementation("io.github.sceneview:sceneview:2.3.0")
 
     testImplementation("junit:junit:4.13.2")
+    // The real org.json, so the document round trip is tested on the JVM instead of
+    // against the stubbed classes in the mockable android.jar.
+    testImplementation("org.json:json:20240303")
 }

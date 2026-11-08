@@ -165,11 +165,11 @@ fun seedLayers(): List<Layer> = listOf(
     ),
 )
 
-class EngineDocument {
-    var layers by mutableStateOf(seedLayers())
+class EngineDocument(initial: List<Layer>? = null) {
+    var layers by mutableStateOf(initial ?: seedLayers())
         private set
 
-    var selectedId by mutableStateOf("vector-star")
+    var selectedId by mutableStateOf(initial?.firstOrNull()?.id ?: "vector-star")
     var selectedNodeId by mutableStateOf<String?>(null)
     var tool by mutableStateOf(Tool.Select)
     var status by mutableStateOf("READY · SKIA ARTBOARD · 4,373 ICONS · FILAMENT 3D")
@@ -177,6 +177,16 @@ class EngineDocument {
         private set
     var canRedo by mutableStateOf(false)
         private set
+
+    /** The control that made the last change, so the recorder can name it. */
+    var action by mutableStateOf("OPEN")
+        private set
+    var actionId by mutableStateOf(0)
+        private set
+
+    val undoDepth: Int get() = undoStack.size
+    val redoDepth: Int get() = redoStack.size
+
     var exporting by mutableStateOf(false)
     var editingModelId by mutableStateOf<String?>(null)
         private set
@@ -239,8 +249,11 @@ class EngineDocument {
             layer.visible && Geometry.contains(layer, x, y)
         }
 
-    fun toggleVisibility(id: String) = commit {
-        it.map { layer -> if (layer.id == id) layer.withVisible(!layer.visible) else layer }
+    fun toggleVisibility(id: String) {
+        act(if (layers.firstOrNull { it.id == id }?.visible == true) "HIDE" else "SHOW")
+        commit { layers ->
+            layers.map { layer -> if (layer.id == id) layer.withVisible(!layer.visible) else layer }
+        }
     }
 
     fun beginGesture() {
@@ -291,16 +304,20 @@ class EngineDocument {
         }
     }
 
-    fun addNode() = commit { layers ->
-        layers.map { layer ->
-            if (layer.id == selectedId && layer is VectorLayer) {
-                layer.copy(network = layer.network.addNode())
-            } else layer
+    fun addNode() {
+        act("NODE+")
+        commit { layers ->
+            layers.map { layer ->
+                if (layer.id == selectedId && layer is VectorLayer) {
+                    layer.copy(network = layer.network.addNode())
+                } else layer
+            }
         }
     }
 
     fun deleteNode() {
         val nodeId = selectedNodeId ?: return
+        act("NODE−")
         commit { layers ->
             layers.map { layer ->
                 if (layer.id == selectedId && layer is VectorLayer) {
@@ -312,6 +329,7 @@ class EngineDocument {
     }
 
     fun addText() {
+        act("TYPE+")
         val id = newId("type")
         val layer = TextLayer(
             id = id,
@@ -332,6 +350,7 @@ class EngineDocument {
     }
 
     fun addVector() {
+        act("VECTOR+")
         val id = newId("vector")
         val layer = VectorLayer(
             id = id,
@@ -352,6 +371,7 @@ class EngineDocument {
     }
 
     fun addSticker(preset: StickerPreset) {
+        act("STICKER+")
         val id = newId("sticker")
         val offset = (layers.count { it.name.startsWith(preset.kind) } * 0.03f).coerceAtMost(0.18f)
         val layer = VectorLayer(
@@ -374,6 +394,7 @@ class EngineDocument {
     }
 
     fun addIcon(glyph: IconGlyph) {
+        act("ICON+")
         val id = newId("icon")
         val offset = (layers.count { it is IconLayer } * 0.025f).coerceAtMost(0.16f)
         val layer = IconLayer(
@@ -394,6 +415,7 @@ class EngineDocument {
     }
 
     fun addModel(asset: ModelAsset) {
+        act("3D+")
         val id = newId("model")
         val offset = (modelLayers.size * 0.05f).coerceAtMost(0.14f)
         val layer = ModelLayer(
@@ -415,6 +437,7 @@ class EngineDocument {
     /** Steps a type layer through the three bundled Poppins faces. */
     fun setWeight(weight: Int) {
         val id = selectedId ?: return
+        act("WEIGHT")
         val face = weight.coerceIn(400, 600)
         commit { layers -> layers.map { if (it.id == id && it is TextLayer) it.copy(weight = face) else it } }
         status = "TYPE FACE $face"
@@ -422,6 +445,7 @@ class EngineDocument {
 
     fun duplicateSelected() {
         val layer = selected ?: return
+        act("DUP")
         val copy = layer.duplicate()
         commit { it + copy }
         selectedId = copy.id
@@ -437,6 +461,7 @@ class EngineDocument {
     fun deleteSelected() {
         val id = selectedId
         if (layers.size <= 1) return
+        act("DEL")
         commit { layerList -> layerList.filterNot { it.id == id } }
         if (editingModelId == id) editingModelId = null
         selectedId = layers.firstOrNull()?.id.orEmpty()
@@ -449,6 +474,7 @@ class EngineDocument {
         if (index < 0) return
         val target = (index + delta).coerceIn(0, layers.lastIndex)
         if (target == index) return
+        act(if (delta > 0) "FRONT" else "BACK")
         commit { layerList ->
             layerList.toMutableList().also {
                 val moving = it.removeAt(index)
@@ -458,65 +484,85 @@ class EngineDocument {
         status = if (delta > 0) "LAYER MOVED FORWARD" else "LAYER MOVED BACK"
     }
 
-    fun setText(value: String) = updateSelected {
-        (it as? TextLayer)?.copy(text = value) ?: it
+    fun setText(value: String) {
+        act("TEXT")
+        updateSelected { (it as? TextLayer)?.copy(text = value) ?: it }
     }
 
-    fun setFontSize(value: Float) = updateSelected {
-        (it as? TextLayer)?.copy(fontSize = value.coerceIn(18f, 180f)) ?: it
+    fun setFontSize(value: Float) {
+        act("TYPE SIZE")
+        updateSelected { (it as? TextLayer)?.copy(fontSize = value.coerceIn(18f, 180f)) ?: it }
     }
 
-    fun setFill(color: Int) = commit { layerList ->
-        layerList.map { layer ->
-            if (layer.id != selectedId) layer
-            else when (layer) {
-                is VectorLayer -> layer.copy(fill = color)
-                is TextLayer -> layer.copy(color = color)
-                is IconLayer -> layer.copy(tint = color)
-                is ModelLayer -> layer
+    fun setFill(color: Int) {
+        act("FILL")
+        commit { layerList ->
+            layerList.map { layer ->
+                if (layer.id != selectedId) layer
+                else when (layer) {
+                    is VectorLayer -> layer.copy(fill = color)
+                    is TextLayer -> layer.copy(color = color)
+                    is IconLayer -> layer.copy(tint = color)
+                    is ModelLayer -> layer
+                }
             }
         }
     }
 
-    fun setStrokeWidth(value: Float) = commit { layerList ->
-        layerList.map { layer ->
-            if (layer.id == selectedId && layer is VectorLayer) {
-                layer.copy(strokeWidth = value.coerceIn(0f, 18f))
-            } else layer
+    fun setStrokeWidth(value: Float) {
+        act("STROKE")
+        commit { layerList ->
+            layerList.map { layer ->
+                if (layer.id == selectedId && layer is VectorLayer) {
+                    layer.copy(strokeWidth = value.coerceIn(0f, 18f))
+                } else layer
+            }
         }
     }
 
-    fun setModelScale(value: Float) = updateSelected {
-        (it as? ModelLayer)?.copy(scaleToUnits = value.coerceIn(0.25f, 2f)) ?: it
+    fun setModelScale(value: Float) {
+        act("3D SCALE")
+        updateSelected { (it as? ModelLayer)?.copy(scaleToUnits = value.coerceIn(0.25f, 2f)) ?: it }
     }
 
     /** The inspector's uniform scale dial. Width is in artboard fractions. */
     fun setScaleToWidth(value: Float) {
         val layer = selected ?: return
         if (layer.w <= 0f) return
+        act("SCALE")
         val target = value.coerceIn(0.04f, 1.2f)
         updateSelected { Geometry.scaleCentered(it, target / it.w) }
     }
 
-    fun setModelAsset(asset: ModelAsset) = updateSelected { layer ->
-        (layer as? ModelLayer)?.let { model ->
-            val auto = model.name == "3D / ${model.asset.label.uppercase()}" ||
-                model.name == "3D / ${model.asset.label.uppercase()} COPY"
-            model.copy(
-                asset = asset,
-                name = if (auto) model.name.replace(model.asset.label.uppercase(), asset.label.uppercase()) else model.name,
-            )
-        } ?: layer
+    fun setModelAsset(asset: ModelAsset) {
+        act("3D ASSET")
+        updateSelected { layer ->
+            (layer as? ModelLayer)?.let { model ->
+                val auto = model.name == "3D / ${model.asset.label.uppercase()}" ||
+                    model.name == "3D / ${model.asset.label.uppercase()} COPY"
+                model.copy(
+                    asset = asset,
+                    name = if (auto) model.name.replace(model.asset.label.uppercase(), asset.label.uppercase()) else model.name,
+                )
+            } ?: layer
+        }
     }
 
-    fun setRotation(value: Float) = updateSelected { it.withRotation(value) }
+    fun setRotation(value: Float) {
+        act("TURN")
+        updateSelected { it.withRotation(value) }
+    }
 
-    fun centerSelected() = updateSelected {
-        it.withBounds((1f - it.w) / 2f, (1f - it.h) / 2f, it.w, it.h).withRotation(0f)
+    fun centerSelected() {
+        act("CENTER")
+        updateSelected {
+            it.withBounds((1f - it.w) / 2f, (1f - it.h) / 2f, it.w, it.h).withRotation(0f)
+        }
     }
 
     fun toggleModelEdit(id: String) {
         val model = layers.firstOrNull { it.id == id } as? ModelLayer ?: return
+        act("3D EDIT")
         editingModelId = if (editingModelId == id) {
             status = "3D EDIT DONE · ${model.asset.label.uppercase()}"
             null
@@ -529,12 +575,14 @@ class EngineDocument {
         }
     }
 
-    fun setOpacity(value: Float) = updateSelected {
-        it.withOpacity(value.coerceIn(0.1f, 1f))
+    fun setOpacity(value: Float) {
+        act("OPACITY")
+        updateSelected { it.withOpacity(value.coerceIn(0.1f, 1f)) }
     }
 
     fun undo() {
         val previous = undoStack.removeLastOrNull() ?: return
+        act("UNDO")
         redoStack.addLast(layers)
         layers = previous
         ensureSelection()
@@ -544,6 +592,7 @@ class EngineDocument {
 
     fun redo() {
         val next = redoStack.removeLastOrNull() ?: return
+        act("REDO")
         undoStack.addLast(layers)
         layers = next
         ensureSelection()
@@ -582,6 +631,11 @@ class EngineDocument {
     private fun syncHistory() {
         canUndo = undoStack.isNotEmpty()
         canRedo = redoStack.isNotEmpty()
+    }
+
+    private fun act(name: String) {
+        action = name
+        actionId++
     }
 
     private fun newId(prefix: String) = "$prefix-${UUID.randomUUID().toString().take(6)}"
