@@ -185,7 +185,7 @@ class EngineCoreTest {
         document.addIcon(glyph)
         val placed = document.selected as IconLayer
         assertEquals("test/box", placed.glyph.id)
-        assertEquals(0.24f, placed.w, 0.0005f)
+        assertEquals(0.22f, placed.w, 0.0005f)
 
         document.duplicateSelected()
         val copy = document.selected as IconLayer

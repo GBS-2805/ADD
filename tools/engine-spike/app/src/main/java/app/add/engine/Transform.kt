@@ -124,10 +124,17 @@ object Geometry {
     ): LayerHandle? {
         val handles = corners(layer, insetX, insetY) +
             if (allowRotate) listOf(rotationHandle(layer, insetX, insetY)) else emptyList()
+        // A 22 dp target is most of a small icon's frame, so every drag on one used to
+        // take a corner instead of moving it: a hundred pixels of drag scaled a 22% icon
+        // to 75% of the artboard. A grip never reaches past a quarter of the layer's
+        // smaller side, which leaves the body of a small layer free to move.
+        val side = minOf(layer.w, layer.h) * 0.25f
+        val reachX = radiusX.coerceAtMost(maxOf(side, 0.012f))
+        val reachY = radiusY.coerceAtMost(maxOf(side, 0.012f))
         return handles
             .map { handle ->
-                val dx = (handle.x - x) / radiusX.coerceAtLeast(0.0001f)
-                val dy = (handle.y - y) / radiusY.coerceAtLeast(0.0001f)
+                val dx = (handle.x - x) / reachX.coerceAtLeast(0.0001f)
+                val dy = (handle.y - y) / reachY.coerceAtLeast(0.0001f)
                 handle to dx * dx + dy * dy
             }
             .filter { it.second <= 1f }

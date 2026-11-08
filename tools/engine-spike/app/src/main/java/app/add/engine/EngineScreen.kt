@@ -396,6 +396,8 @@ private fun Stage(
                             val handle = selectedAtDown
                                 ?.takeIf { it !is ModelLayer }
                                 ?.let { Geometry.nearestHandle(it, nx, ny, hitX, hitY, insetX, insetY) }
+                            val startX = nx
+                            val startY = ny
                             var mode = "none"
                             var startLayer: Layer? = null
                             var startAngle = 0f
@@ -462,6 +464,18 @@ private fun Stage(
                                 change.consume()
                             }
                             doc.endGesture()
+                            // The sampler only sees the result: a width that jumped from 22%
+                            // to 75% is one line whichever path did it. Naming the gesture
+                            // and the grip it took is what separates a stray grab from the
+                            // inspector's scale dial.
+                            Diagnostics.note(
+                                "gesture " + mode.uppercase() +
+                                    (handle?.let { " ${it.name}" } ?: "") +
+                                    "  " + Diagnostics.three(startX) + "," + Diagnostics.three(startY) +
+                                    " → " + Diagnostics.three(nx) + "," + Diagnostics.three(ny) +
+                                    "  w " + Diagnostics.three(startLayer?.w ?: 0f) +
+                                    "→" + Diagnostics.three(doc.selected?.w ?: 0f)
+                            )
                         }
                     },
             ) {

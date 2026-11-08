@@ -82,6 +82,19 @@ object Diagnostics {
 
     fun lines(): List<String> = lines.toList()
 
+    /**
+     * A line for something the sampler cannot see, such as which gesture ran and which
+     * handle it took. The key is unique per call, so two gestures in a row are never
+     * coalesced into one the way a slider's own changes are.
+     */
+    fun note(body: String) {
+        if (!recording) return
+        append("note:${System.nanoTime()}", body)
+    }
+
+    /** Three decimals, the precision the log prints, so a caller never rounds its own way. */
+    fun three(value: Float): String = f(value)
+
     fun sample(doc: EngineDocument) {
         if (!recording) return
         val next = snapshot(doc)

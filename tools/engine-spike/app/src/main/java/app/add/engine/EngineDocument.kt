@@ -381,8 +381,8 @@ class EngineDocument {
             name = "ICON / ${glyph.name.uppercase()}",
             x = (0.16f + offset).coerceAtMost(0.7f),
             y = (0.22f + offset).coerceAtMost(0.7f),
-            w = 0.24f,
-            h = squareFrameHeight(0.24f),
+            w = 0.22f,
+            h = squareFrameHeight(0.22f),
             glyph = glyph,
             tint = 0xFF11231C.toInt(),
         )
