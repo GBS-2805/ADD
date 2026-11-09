@@ -233,13 +233,55 @@ the accent -- so its labels keep the near-black band ink while Moss and Navy get
 lime and teal. Never spend the accent on body copy or on link words: it sits at 1.03:1
 against the palette's band words and would read as a second, competing ink.
 
-### The app: native screens render; the emulator still cannot
+### The app: native screens render; the emulator is a smoke test
 
-Do not spend another session on the emulator. `/dev/kvm` exists but this account is
-not in the `kvm` group and `sudo` fails with the "no new privileges" flag, so the
-emulator runs under TCG. That path does boot (about 195 s), installs and starts the
-app, but `system_server` stays in a permanent "Application Not Responding" state
-and every screencap is a flat black frame, at any `wm size`/`density`.
+The emulator is a smoke test and, at best, an opportunistic capture -- never a renderer
+of record. `/dev/kvm` exists but this account is not in the `kvm` group and `sudo`
+fails with the "no new privileges" flag, so it runs under TCG. It does boot (124 s
+measured on 9 November 2026), installs the APK and starts the app, and it does draw:
+the engine has been captured there at 1080x2340 with its own page `#0c1210` and cream
+`#f3ebdd` on screen. What makes it unusable as a pipeline is that the outcome varies by
+boot. Often the activity aborts before it paints -- `files/engine-boot.txt` stops at
+"document, typefaces and photos ready" and the window goes launcher to flat white --
+and when it does paint, Filament's `fxaa` shader fails to link or compile and
+`FEngine::loop` raises SIGABRT about five seconds after "first frame drawn". Installs
+also fail with a `PackageManagerInternal.freeStorage` null pointer until the guest has
+settled, `sys.boot_completed` never flips, and `mCurrentFocus` can stay null with an
+activity drawn. So: use it to prove the build installs and starts, and keep a frame when
+one lands with its date and attempt count attached -- do not present it as a render, and
+do not try to make the engine capture scriptable.
+
+`am start .../app.add.engine.MainActivity` answers `Activity class ... does not exist`
+because that activity is declared `android:exported="false"` and runs in its own
+`:engine` process: the shell uid cannot resolve a non-exported component, so the message
+means concealment, not a missing class -- the class is there in `classes3.dex` and the
+manifest labels it "Engine Lab". Launch it as the app's own uid (`run-as`) or export it
+in the review build; never read that message as "the screen is gone".
+
+`tools/emulate.sh` gates on capability rather than a boot flag: `cmd package list
+packages` must return packages and `settings` must answer before it launches anything,
+and it skips the reinstall when the installed `base.apk` already matches the local
+build. Its `engine` path grabs in short back-to-back batches, because the painted window
+is only a few seconds wide, and it judges a frame by pixel count, never by the
+breadcrumb alone. Its `grab` stages inside a private directory -- the console's
+screenshot command takes a directory, and a `*.png.tmp` name used to be read as one and
+stall -- checks the PNG signature, and renames into place atomically; a failed grab
+prints the console output and returns nonzero. `tools/emulate-grab-test.sh` drives that
+function with a fake adb, so its staging, fallback and failure paths are tested without
+a guest.
+
+The four-way split this settles on:
+
+- **Site pages -> Chromium.** `tools/render_pages.js` over `docs/`, 1300x900 and
+  390x844, about ten seconds for the shelf, with console errors and horizontal
+  overflow reported. Deterministic, and the only path that feeds `docs/renders/`.
+- **Native screens -> Robolectric.** `tools/android-render/` draws the real activities
+  through the app's own resources and audits 54 combinations before it writes
+  anything.
+- **Emulator -> smoke test** as above, plus an opportunistic engine frame.
+- **Engine screen -> one honest capture with its provenance attached**, or a real
+  device when one exists. It is the one screen neither of the first two paths can
+  reach: Filament needs a compositor Robolectric does not have.
 
 The native screens do render without an emulator. `tools/android-render/` compiles
 `app/res` with `aapt2`, hosts the activities in Robolectric with `NATIVE` graphics,
