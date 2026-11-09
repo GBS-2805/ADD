@@ -4,6 +4,7 @@
     python3 tools/check_all.py                                   # nothing but python
     python3 tools/check_all.py --browser http://127.0.0.1:8799/  # + palette and menu rendering
     python3 tools/check_all.py --artboards                       # + a re-export diff
+    python3 tools/check_all.py --visual                          # + the committed pixel baselines
 
 Every gate runs even after one fails, so a single pass shows the whole picture rather
 than the first thing to break, and the exit status is 1 when anything failed. The one
@@ -24,10 +25,10 @@ ROOT = Path(__file__).resolve().parent.parent
 VERDICT = {"palette": "palette:", "menu": "menu:", "assets": "assets:",
            "site": "site:", "packs": "build_packs:", "figma": "figma check:",
            "notes": "notes regression:", "bundle": "bundle check:",
-           "artboards": "artboards:"}
+           "artboards": "artboards:", "studio": "studio:", "chrome": "chrome:"}
 
 
-def gates(browser, artboards):
+def gates(browser, artboards, visual):
     rows = [
         ["palette", [sys.executable, "tools/check_palette.py"]],
         ["assets", [sys.executable, "tools/hash_assets.py", "--check"]],
@@ -44,6 +45,13 @@ def gates(browser, artboards):
     if browser:
         rows[0][1].extend(["--browser", browser])
         rows.insert(1, ["menu", ["node", "tools/check_menu.js", browser]])
+    if visual:
+        # Both compare against PNGs committed under tools/, so a drift in either is a
+        # push failure rather than something someone has to remember to run.
+        rows[-1:-1] = [
+            ["studio", ["node", "tools/studio-interaction-check.js"]],
+            ["chrome", ["bash", "tools/engine-spike/verify-chrome.sh"]],
+        ]
     return rows
 
 
@@ -64,9 +72,14 @@ def main():
                              "tools/check_palette.py --browser does")
     parser.add_argument("--artboards", action="store_true",
                         help="also re-export the artboards and diff them against figma/")
+    parser.add_argument("--visual", action="store_true",
+                        help="also run the two pixel guards: the Studio baselines in "
+                             "tools/studio-baseline/ and the Robolectric engine chrome "
+                             "goldens. Needs Playwright's Chromium, a JDK 17 and the "
+                             "android-35 platform; .github/workflows/checks.yml installs them")
     args = parser.parse_args()
 
-    rows = gates(args.browser, args.artboards)
+    rows = gates(args.browser, args.artboards, args.visual)
     print("the checks")
     failures = []
     began = time.monotonic()

@@ -40,3 +40,8 @@ export ENGINE_RENDER_OUT="$BASELINE"
 echo
 echo "Native chrome guard: $TASK"
 echo "Baselines: $BASELINE"
+if [ "$TASK" = verifyRoborazziDebug ]; then
+    echo "chrome: goldens match"
+else
+    echo "chrome: goldens recorded"
+fi

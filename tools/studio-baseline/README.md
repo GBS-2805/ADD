@@ -26,5 +26,10 @@ STUDIO_VISUAL_UPDATE=1 node tools/studio-interaction-check.js
 Then run without `STUDIO_VISUAL_UPDATE` to verify against the committed files.
 A failure writes `artifacts/<name>.diff.png` beside the actual capture.
 
+`python3 tools/check_all.py --visual` runs this with the rest of the verdict, and
+`.github/workflows/checks.yml` runs it on every push. The CI job installs Chromium
+at the pinned Playwright version, because the browser build is part of what decides
+the pixels: a bump means re-recording, not a quiet pass.
+
 The guard uses Chromium, not the Android WebView. Insets, clipboard bridge, and
 device touch behaviour still require a phone check.

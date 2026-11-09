@@ -407,6 +407,13 @@ async function main() {
       draggables: { frame: secondDrag.draggableCount, rotation: secondDrag.rotateDraggableCount, path: secondDrag.pathDraggableCount },
       errors
     }, null, 2) + '\n');
+    // A one-line verdict for tools/check_all.py, which prints its summary rather than
+    // the evidence JSON.
+    process.stdout.write(
+      snapVisual.updated || pathVisual.updated
+        ? 'studio: baselines updated\n'
+        : `studio: 2 baselines match (${(snapVisual.diffPixels || 0) + (pathVisual.diffPixels || 0)} px differ, 0 console errors)\n`
+    );
   } finally {
     await browser.close();
     server.close();

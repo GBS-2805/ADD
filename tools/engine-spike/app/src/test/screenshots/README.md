@@ -29,3 +29,9 @@ bash tools/engine-spike/verify-chrome.sh --update
 ```
 
 `ENGINE_CHROME_DIR` overrides the baseline directory for a temporary check.
+
+`python3 tools/check_all.py --visual` runs this with the rest of the verdict, and
+`.github/workflows/checks.yml` runs it on every push with a JDK 17 and the
+android-35 platform. The chrome test declares this directory as an input, so a
+changed or corrupted baseline re-runs the comparison rather than passing on a
+cached UP-TO-DATE result.
