@@ -392,7 +392,10 @@ where the notes keep the history they shipped with.Icons, Fonts, Compress and th
   merges the chunks back for anything that needs the whole set (the sheets), and
   `check_bundle.py` follows the `chunks` list inside the staged JSON.
 - Releases go through `python3 tools/bump_version.py <version> --title "…" --note "…"
-  --build`: it moves the catalog's one entry, the `add` build case and every live
+  --build`: it first runs the push verdict (`tools/check_all.py --visual` — both pixel
+  baselines, the whole engine suite and the shelf's gates) and refuses to move anything
+  while one is red, `--dry-run` included. Then it moves the catalog's one entry, the
+  `add` build case and every live
   version label, adds
   the new note to `tools/release_notes.json`, then builds, copies the APK into `docs/`,
   re-measures size and checksum and rebuilds the catalogs. Then it serves `docs/` and reruns

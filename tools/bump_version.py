@@ -29,7 +29,11 @@ come from tools/render_env.py; the environment is checked before anything is wri
 so a machine without them stops the release instead of leaving it half done.
 
   Before any of that it runs tools/check_palette.py and refuses to bump while the
-  site and the app disagree about a colour, or a page has a colour of its own.
+  site and the app disagree about a colour, or a page has a colour of its own. It then
+  runs the same verdict the push checks run, `tools/check_all.py --visual` -- both pixel
+  baselines, the whole engine suite and the shelf's python gates -- and refuses to move
+  a label while any of them is red. --dry-run passes that gate too: a plan for a tree
+  that would not pass is not a plan.
 
   With --commit it then commits twice: the release, and the history page that names the
   sha of that commit. It refuses to start on a worktree that already has changes, because
@@ -546,6 +550,24 @@ def palette_preflight():
             print("  " + line)
 
 
+def verdict_preflight():
+    """Refuse a release while any gate the push checks enforce is red.
+
+    It is the same verdict .github/workflows/checks.yml runs: the shelf's python gates,
+    the Studio baselines, the whole engine suite and the chrome goldens. It runs before
+    a single version label moves, so a red tree stops the release instead of shipping
+    with a version number on it. --dry-run is gated too, for the same reason.
+    """
+    print("the release gate", flush=True)
+    done = subprocess.run([sys.executable, str(ROOT / "tools/check_all.py"), "--visual"],
+                          cwd=ROOT, env=capture_env())
+    if done.returncode != 0:
+        raise SystemExit("refusing to bump: the checks are red, and nothing has been moved.\n"
+                         "  fix the gates above, then run the bump again\n"
+                         "  (tools/render_env.py builds the Chromium toolchain; the engine "
+                         "gates need a JDK 17 and android-35)")
+
+
 def free_port():
     with socket.socket() as sock:
         sock.bind(("127.0.0.1", 0))
@@ -677,6 +699,11 @@ def main():
     # move with the exact one. It only changes when the build crosses a megabyte,
     # which is why this went unnoticed until woff pushed ADD past 4 MB.
     old_human = human(old_file.stat().st_size)
+
+    # The same verdict CI enforces, before a single label moves: the release quotes new
+    # ink, a new APK and a new gallery, so a red gate would ship a regression with a
+    # version number on it.
+    verdict_preflight()
 
     dry = args.dry_run
     print("%s %s (versionCode %d) -> %s (versionCode %d), %s -> %s"
