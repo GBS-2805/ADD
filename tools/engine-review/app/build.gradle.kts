@@ -29,7 +29,11 @@ android {
         // remains one tap away in the engine's info sheet. 45 settles every add back
         // into Select with a visible DONE, pauses the 3D surface while the panel is up
         // so it cannot cover its own inspector, and rebuilds the chrome for reading.
-        versionCode = 45
+        // 46 keeps the settle strip visible until DONE/INSPECT, moves new layers clear
+        // of the rail, lifts the strip off the zoom/status row, and files the advanced
+        // compositing controls behind a disclosure so the inspector does not end cut.
+        // The Studio WebView ships GSAP 3.12.5 offline for its intro and panel motion.
+        versionCode = 46
         versionName = "3.7"
 
         ndk {

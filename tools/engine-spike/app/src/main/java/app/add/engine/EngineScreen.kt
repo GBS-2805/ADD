@@ -51,6 +51,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clipToBounds
@@ -168,9 +169,10 @@ fun EngineScreen() {
     LaunchedEffect(doc.actionId) {
         if (doc.action in ADD_ACTIONS) {
             val added = doc.selected?.name ?: "LAYER"
+            // The strip stays until DONE or INSPECT. A timed confirmation can vanish
+            // before the reader has finished placing the layer, which is the same
+            // "no way to settle" trap in a smaller form.
             notice = added
-            delay(3200)
-            if (notice == added) notice = null
         }
     }
     val dialogOpen = showInfo || showDiagnostics || showIcons || showLegend ||
@@ -286,7 +288,7 @@ fun EngineScreen() {
         StatusChip(
             doc = doc,
             handle = primaryHandle,
-            visible = chrome && !sheet,
+            visible = chrome && !sheet && notice == null,
             onDiagnostics = { showDiagnostics = true },
             modifier = Modifier.align(Alignment.BottomStart).padding(start = 10.dp, bottom = 48.dp),
         )
@@ -345,7 +347,7 @@ fun EngineScreen() {
             exit = slideOutVertically(targetOffsetY = { it / 2 }) + fadeOut(tween(120)),
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .padding(start = 10.dp, end = 10.dp, bottom = if (sheet) 8.dp else 62.dp),
+                .padding(start = 10.dp, end = 10.dp, bottom = if (sheet) 8.dp else 112.dp),
         ) {
             AddNotice(
                 name = notice.orEmpty(),
@@ -601,8 +603,9 @@ private fun ToolPill(doc: EngineDocument, onIcons: () -> Unit, onAdd: () -> Unit
         // sheet, which is why it sits under the tools rather than among them.
         Column(
             modifier = Modifier
-                .clip(RoundedCornerShape(12.dp))
-                .clickable(onClick = onAdd)
+                .testTag("engine-add")
+                    .clip(RoundedCornerShape(12.dp))
+                    .clickable(onClick = onAdd)
                 .padding(horizontal = 3.dp, vertical = 2.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
@@ -1219,6 +1222,7 @@ private fun AddNotice(name: String, onDone: () -> Unit, onInspect: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .testTag("engine-notice")
             .clip(RoundedCornerShape(14.dp))
             .background(Panel)
             .border(1.dp, Mint.copy(alpha = 0.65f), RoundedCornerShape(14.dp))
@@ -1285,7 +1289,7 @@ private fun Sheet(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .fillMaxHeight(0.72f)
+            .fillMaxHeight(0.80f)
             .clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
             .background(Panel)
             .border(1.dp, Rule, RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)),
@@ -1323,14 +1327,24 @@ private fun Sheet(
                 Spacer(Modifier.width(6.dp))
                 DonePill("DONE") { doc.settle() }
             }
-            Text("▾", color = Mint, fontSize = 13.sp, modifier = Modifier.clickable(onClick = onClose).padding(start = 10.dp))
+            Text(
+                "CLOSE",
+                color = Mint,
+                fontSize = 9.sp,
+                fontWeight = FontWeight.SemiBold,
+                letterSpacing = 0.5.sp,
+                modifier = Modifier
+                    .clip(RoundedCornerShape(8.dp))
+                    .clickable(onClick = onClose)
+                    .padding(horizontal = 8.dp, vertical = 5.dp),
+            )
         }
         Row(
             modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp, vertical = 4.dp),
             horizontalArrangement = Arrangement.spacedBy(6.dp),
         ) {
-            TabChip("LAYERS · ${doc.layers.size}", tab == 0, Modifier.weight(1f)) { tab = 0 }
-            TabChip("INSPECT", tab == 1, Modifier.weight(1f)) { tab = 1 }
+            TabChip("LAYERS · ${doc.layers.size}", tab == 0, Modifier.weight(1f).testTag("tab-layers")) { tab = 0 }
+            TabChip("INSPECT", tab == 1, Modifier.weight(1f).testTag("tab-inspect")) { tab = 1 }
         }
         Box(Modifier.fillMaxWidth().weight(1f)) {
             if (tab == 0) {
@@ -1358,6 +1372,7 @@ private fun LayerPanel(doc: EngineDocument, modifier: Modifier = Modifier) {
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(3.dp))
+                        .testTag("layer-${layer.id}")
                         .background(if (selected) PanelRaised else Color.Transparent)
                         .clickable { doc.select(layer.id) }
                         .padding(horizontal = 7.dp, vertical = 6.dp),
@@ -1367,7 +1382,7 @@ private fun LayerPanel(doc: EngineDocument, modifier: Modifier = Modifier) {
                         text = if (layer.visible) "◉" else "○",
                         color = if (layer.visible) Mint else Dim,
                         fontSize = 10.sp,
-                        modifier = Modifier.clickable { doc.toggleVisibility(layer.id) }.padding(end = 4.dp),
+                        modifier = Modifier.testTag("layer-vis-${layer.id}").clickable { doc.toggleVisibility(layer.id) }.padding(end = 4.dp),
                     )
                     Column(Modifier.weight(1f)) {
                         Text(
@@ -1698,6 +1713,7 @@ private fun AddTile(
 ) {
     Column(
         modifier = modifier
+            .testTag("add-${title.lowercase(Locale.US)}")
             .clip(RoundedCornerShape(12.dp))
             .background(PanelRaised)
             .border(1.dp, Rule, RoundedCornerShape(12.dp))
@@ -2190,12 +2206,27 @@ private fun ModelInspector(doc: EngineDocument, layer: ModelLayer, handle: Scene
  */
 @Composable
 private fun CompositeInspector(doc: EngineDocument, layer: Layer) {
+    // The shared compositing stack is a wall of advanced controls. It stays closed on
+    // first open so the type/vector controls above it are not followed by a cut row;
+    // the disclosure names the live blend so the state is still readable.
+    var open by remember(layer.id) { mutableStateOf(false) }
     Spacer(Modifier.height(9.dp))
-    Row(verticalAlignment = Alignment.CenterVertically) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .testTag("composite-toggle")
+            .clip(RoundedCornerShape(6.dp))
+            .clickable { open = !open }
+            .padding(vertical = 4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
         Text("COMPOSITE", color = Cream, fontSize = 8.sp, letterSpacing = 1.1.sp, fontWeight = FontWeight.SemiBold)
         Spacer(Modifier.weight(1f))
         Text(layer.style.blend.label, color = Mint, fontSize = 7.sp, maxLines = 1)
+        Spacer(Modifier.width(6.dp))
+        Text(if (open) "▴" else "▾", color = Mint, fontSize = 9.sp)
     }
+    if (!open) return
     val layerPaint = when (layer) {
         is VectorLayer -> layer.paint
         is TextLayer -> layer.paint

@@ -2,6 +2,7 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.compose")
+    id("io.github.takahirom.roborazzi")
 }
 
 android {
@@ -39,6 +40,15 @@ android {
         compose = true
     }
 
+    // JVM Compose frames: Robolectric's native graphics draw the real activity, and
+    // Roborazzi writes the PNG. No emulator, no Filament surface on the captured states.
+    testOptions {
+        unitTests {
+            isIncludeAndroidResources = true
+            all { it.systemProperty("robolectric.graphicsMode", "NATIVE") }
+        }
+    }
+
 
     androidResources {
         noCompress += listOf("glb", "filamat", "ktx")
@@ -69,4 +79,13 @@ dependencies {
     // The real org.json, so the document round trip is tested on the JVM instead of
     // against the stubbed classes in the mockable android.jar.
     testImplementation("org.json:json:20240303")
+
+    // Screenshot path for the engine chrome. Roborazzi records the Compose frame that
+    // Robolectric draws through the platform's native graphics, so it needs no device.
+    testImplementation("org.robolectric:robolectric:4.14.1")
+    testImplementation("androidx.test:core:1.6.1")
+    testImplementation("androidx.compose.ui:ui-test-junit4")
+    debugImplementation("androidx.compose.ui:ui-test-manifest")
+    testImplementation("io.github.takahirom.roborazzi:roborazzi:1.44.0")
+    testImplementation("io.github.takahirom.roborazzi:roborazzi-compose:1.44.0")
 }
