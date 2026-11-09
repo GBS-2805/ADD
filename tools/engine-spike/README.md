@@ -24,6 +24,10 @@ The debug APK lands at `app/build/outputs/apk/debug/app-debug.apk`.
 `JAVA_HOME` must point at a JDK 17 install; the project does not assume `java` is on
 `PATH`.
 
+`bash verify-suite.sh` runs every test through that same JDK/SDK setup and prints the
+totals; `python3 tools/check_all.py --visual` runs it with the rest of the shelf's
+verdict, and `.github/workflows/checks.yml` runs it on every push.
+
 ## Device verification
 
 Open **DIAG** in the status bar (or **DIAGNOSTICS** in the info dialog) for live

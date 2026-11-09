@@ -2,12 +2,13 @@
 # structure, Pantone sheet, note dating and the staged bundle. They need nothing but
 # python, so a stock runner covers them in seconds.
 #
-# The two pixel guards run in a second job, because they need a toolchain the python job
-# should not carry: the Studio baselines under tools/studio-baseline/ need Playwright's
-# Chromium at the pinned version -- the browser build is what makes the pixels
-# reproducible -- and the Robolectric engine chrome goldens under tools/engine-spike/
-# need a JDK 17 and the android-35 platform for Gradle. Both caches are kept between
-# runs, and either drift fails the push.
+# The visual job runs in a second job, because it needs a toolchain the python job should
+# not carry: the Studio baselines under tools/studio-baseline/ need Playwright's Chromium
+# at the pinned version -- the browser build is what makes the pixels reproducible -- and
+# the engine-spike gates under tools/engine-spike/ need a JDK 17 and the android-35
+# platform for Gradle: the Robolectric chrome goldens and the whole engine test suite.
+# Caches are kept between runs, and a baseline drift or a failing engine test fails the
+# push.
 #
 # The APK build stays local, on purpose: it needs the keystore.
 # Before a release: python3 tools/check_all.py --browser <url> --artboards --visual
@@ -74,7 +75,7 @@ jobs:
             ~/.m2/repository/org/robolectric
           key: engine-${{ runner.os }}-${{ hashFiles('tools/engine-spike/**/*.gradle.kts', 'tools/engine-spike/gradle/wrapper/gradle-wrapper.properties') }}
           restore-keys: engine-${{ runner.os }}-
-      - name: Both pixel guards, with the rest of the verdict
+      - name: The engine suite, both pixel guards, and the rest of the verdict
         env:
           NODE_PATH: /tmp/pw/node_modules
         run: python3 tools/check_all.py --visual
