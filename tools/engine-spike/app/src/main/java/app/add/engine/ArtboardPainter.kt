@@ -317,9 +317,18 @@ object ArtboardPainter {
     private fun drawIcon(canvas: Canvas, layer: IconLayer) {
         val alpha = Color.alpha(layer.tint).coerceIn(0, 255)
         val tint = (layer.tint and 0x00FFFFFF) or (alpha shl 24)
+        // A document written before the viewBox fix can still arrive empty. The catalog
+        // holds the same glyph under the same id, so use that frame; with no frame at
+        // all, skip the layer rather than index an empty list mid-draw.
+        val glyph = layer.glyph
+        val resolved = if (glyph.viewBox.size < 4) {
+            (IconCatalog.state as? IconCatalogState.Ready)?.glyphs?.get(glyph.id) ?: return
+        } else {
+            glyph
+        }
         IconRenderer.draw(
             canvas = canvas,
-            glyph = layer.glyph,
+            glyph = resolved,
             tint = tint,
             left = layer.x * W,
             top = layer.y * H,

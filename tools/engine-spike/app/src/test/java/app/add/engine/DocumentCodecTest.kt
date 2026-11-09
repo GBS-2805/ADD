@@ -62,6 +62,9 @@ class DocumentCodecTest {
 
         val icon = layers.filterIsInstance<IconLayer>().first()
         assertEquals("test/box", icon.glyph.id)
+        // The round trip used to drop this and the engine crashed on the next draw; the
+        // assertion is what keeps the JSONObject/JSONArray reader mix-up from returning.
+        assertEquals(listOf(0f, 0f, 24f, 24f), icon.glyph.viewBox)
         assertEquals(1, icon.glyph.paths.size)
         assertEquals(6, icon.glyph.paths.first().matrix!!.size)
 

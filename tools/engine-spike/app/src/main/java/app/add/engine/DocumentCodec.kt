@@ -454,7 +454,12 @@ object DocumentCodec {
         brandLabel = o.optString("brandLabel"),
         style = o.optString("style"),
         category = o.optString("category"),
-        viewBox = o.optJSONArray("viewBox").orEmpty().map { it.toString().toFloat() },
+        // This used to reuse the JSONObject array reader, which drops every number in
+        // a number array, so every saved icon came back with no viewBox and drawing it
+        // threw IndexOutOfBounds (IconCatalog.kt). Read the numbers as numbers.
+        viewBox = o.optJSONArray("viewBox")?.let { array ->
+            List(array.length()) { array.getDouble(it).toFloat() }
+        } ?: emptyList(),
         paths = o.optJSONArray("paths").orEmpty().map { spec ->
             IconPathSpec(
                 d = spec.optString("d"),

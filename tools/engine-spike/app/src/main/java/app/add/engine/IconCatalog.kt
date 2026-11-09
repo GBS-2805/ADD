@@ -267,7 +267,11 @@ object IconRenderer {
         width: Float,
         height: Float,
     ) {
+        // A document saved before viewBox was serialised decodes to an empty list, and
+        // indexing it aborted the whole engine tab (IndexOutOfBounds at draw). Skip the
+        // glyph rather than bring the screen down; the decoder repairs old documents.
         val view = glyph.viewBox
+        if (view.size < 4) return
         val viewW = view[2].coerceAtLeast(1f)
         val viewH = view[3].coerceAtLeast(1f)
         val fit = minOf(width / viewW, height / viewH)

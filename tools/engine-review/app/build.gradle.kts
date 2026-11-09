@@ -21,8 +21,9 @@ android {
         targetSdk = 35
         // One above the shipping 3.7 (39): an update installs over it. 40 opened the
         // engine on the editor door; 41 keeps the engine on its own tab and records
-        // startup stages, because the crash left no Java trace to read.
-        versionCode = 41
+        // startup stages, because the crash left no Java trace to read. 42 fixes the
+        // saved-document icon crash (empty viewBox) that 41 hit on first draw.
+        versionCode = 42
         versionName = "3.7"
 
         ndk {
