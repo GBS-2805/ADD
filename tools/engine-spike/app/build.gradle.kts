@@ -61,6 +61,15 @@ android {
     }
 }
 
+// The chrome test compares every frame it renders against the golden on disk, so those
+// PNGs are an input even though Gradle cannot infer it. Without this the task stays
+// UP-TO-DATE and the guard reports success without comparing anything; declaring the
+// directory makes a refreshed, moved or corrupted baseline re-run the comparison.
+tasks.withType<Test>().configureEach {
+    val goldens = file(System.getenv("ENGINE_RENDER_OUT") ?: "src/test/screenshots")
+    inputs.dir(goldens).withPropertyName("engineChromeGoldens").optional()
+}
+
 dependencies {
     implementation(platform("androidx.compose:compose-bom:2025.02.00"))
     implementation("androidx.activity:activity-compose:1.9.3")

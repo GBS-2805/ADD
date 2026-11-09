@@ -23,10 +23,13 @@ const fs = require('fs');
 const path = require('path');
 const assert = require('assert');
 const { chromium } = require('playwright');
+const { comparePng } = require('./png-compare');
 
 const ROOT = path.resolve(__dirname, '..');
 const ASSET_ROOT = path.join(ROOT, 'app', 'studio-assets');
 const ARTIFACTS = path.join(ROOT, 'artifacts');
+const VISUAL_BASELINE = path.join(ROOT, 'tools', 'studio-baseline');
+const VISUAL_MAX_DIFF = Number(process.env.STUDIO_VISUAL_MAX_DIFF || 40);
 const MIME = {
   '.html': 'text/html; charset=utf-8',
   '.js': 'application/javascript; charset=utf-8',
@@ -44,6 +47,35 @@ function close(actual, expected, tolerance = 0.75) {
 
 function assertClose(actual, expected, label, tolerance = 0.75) {
   assert.ok(close(actual, expected, tolerance), `${label}: expected ${expected}, got ${actual}`);
+}
+
+async function visualGuard(page, name) {
+  const actualPath = path.join(ARTIFACTS, `${name}.png`);
+  const baselinePath = path.join(VISUAL_BASELINE, `${name}.png`);
+  await page.screenshot({ path: actualPath, animations: 'disabled', caret: 'hide' });
+
+  if (process.env.STUDIO_VISUAL_UPDATE === '1') {
+    fs.mkdirSync(VISUAL_BASELINE, { recursive: true });
+    fs.copyFileSync(actualPath, baselinePath);
+    console.log(`visual baseline updated: ${name}`);
+    return { updated: true, actual: actualPath, baseline: baselinePath };
+  }
+  if (!fs.existsSync(baselinePath)) {
+    throw new Error(`missing Studio baseline ${baselinePath}; run with STUDIO_VISUAL_UPDATE=1`);
+  }
+  const result = comparePng(actualPath, baselinePath, { threshold: 8 });
+  if (result.diffPixels > VISUAL_MAX_DIFF) {
+    if (result.diff) {
+      fs.writeFileSync(path.join(ARTIFACTS, `${name}.diff.png`), result.diff);
+    }
+    throw new Error(
+      `Studio visual regression in ${name}: ${result.diffPixels}/${result.totalPixels} pixels differ ` +
+      `(${(result.ratio * 100).toFixed(3)}%, max channel delta ${result.maxChannelDelta}); ` +
+      `see artifacts/${name}.diff.png`
+    );
+  }
+  console.log(`visual guard: ${name} ${result.diffPixels}/${result.totalPixels} px differ (allowed ${VISUAL_MAX_DIFF})`);
+  return result;
 }
 
 function startServer() {
@@ -165,8 +197,8 @@ async function main() {
     assertClose(during.vertical.x, geometry.canvas.x + geometry.targetX * geometry.scale, 'vertical guide x', 1);
     assertClose(during.horizontal.y, geometry.canvas.y + geometry.targetY * geometry.scale, 'horizontal guide y', 1);
 
-    // The evidence frame must be taken while the pointer is still down.
-    await page.screenshot({ path: path.join(ARTIFACTS, 'studio-snapped-guides.png') });
+    // The evidence and pixel guard are taken while the pointer is still down.
+    const snapVisual = await visualGuard(page, 'studio-snapped-guides');
 
     await page.mouse.up();
     await page.waitForTimeout(300);
@@ -205,6 +237,7 @@ async function main() {
     assert.ok(opened.path && opened.path.visible, 'curve must open');
     assert.ok(opened.path.d.startsWith('M '), 'curve must be a cubic path');
     assert.strictEqual(await page.isEnabled('#motionPathPlay'), true, 'play must be enabled for a visible path');
+    const pathVisual = await visualGuard(page, 'studio-path-open');
     const pathD = opened.path.d;
     const c1 = await rect('.path-handle[data-point="c1"]');
     assert.ok(c1 && c1.width > 8, 'curve control handle must be visible');
@@ -364,6 +397,10 @@ async function main() {
       },
       rotation: { before: 0, during: rotating.angle, centreDrift: Math.hypot(rotating.center.x - rotateCenter.x, rotating.center.y - rotateCenter.y) },
       motion: { plays: played.path.plays, edits: edited.path.edits, endedAtPathEnd: true },
+      visual: {
+        snapped: snapVisual.updated ? 'updated' : { diffPixels: snapVisual.diffPixels, totalPixels: snapVisual.totalPixels },
+        pathOpen: pathVisual.updated ? 'updated' : { diffPixels: pathVisual.diffPixels, totalPixels: pathVisual.totalPixels }
+      },
       observer: { panX: panned.view.x, panY: panned.view.y, zoom: zoomed.view.scale },
       touch: { before: touchBefore.center, after: touchAfter.center },
       reducedMotion: { playing: reduced.path.playing, plays: reduced.path.plays },
