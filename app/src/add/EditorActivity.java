@@ -195,8 +195,15 @@ public class EditorActivity extends Activity {
         restoreTab(state);
     }
 
-    /** The one editor entry: always this activity, whatever build it is in. */
+    /**
+     * The Editor entry. Review builds go straight to the engine so the lab is the
+     * destination; the basic editor stays one tap away in the engine's info sheet.
+     * Shipping builds, and any build without the engine class, keep this activity.
+     */
     public static void open(Activity from) {
+        if (DevFlags.engineLab(from) && openEngineLab(from)) {
+            return;
+        }
         from.startActivity(new Intent(from, EditorActivity.class));
     }
 

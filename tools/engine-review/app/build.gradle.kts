@@ -25,7 +25,9 @@ android {
         // saved-document icon crash (empty viewBox) that 41 hit on first draw. 43
         // adds the compositing authoring pass from bd3f7de: editable gradients,
         // all 19 blend modes, mask/clip controls and independent effect switches.
-        versionCode = 43
+        // 44 routes the review Editor entry straight to the engine; the basic editor
+        // remains one tap away in the engine's info sheet.
+        versionCode = 44
         versionName = "3.7"
 
         ndk {
