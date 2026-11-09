@@ -23,3 +23,10 @@ node_modules/
 
 # Maven output from the native render harness; rebuilt by tools/android-render/render.sh.
 tools/android-render/target/
+
+# Local agent skill bundles. These are installed per workspace by the agent tooling, not
+# project source; the same GSAP skills appear under several tool-specific directories.
+.agents/
+.claude/
+agent/
+skills-lock.json
