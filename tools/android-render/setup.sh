@@ -43,6 +43,7 @@ echo "== aapt2 link =="
     -o "$BUILD/resources.apk" \
     -I "$PLATFORM" \
     --manifest "$ROOT/app/AndroidManifest.xml" \
+    --custom-package add \
     -R "$BUILD/res.zip" \
     --java "$BUILD/gen" \
     --min-sdk-version 26 \

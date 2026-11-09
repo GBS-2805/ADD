@@ -8,11 +8,11 @@ package app.add.engine;
 public final class R {
     public static final class font {
         public static final int poppins_regular =
-                app.offline.compress.R.font.poppins_regular;
+                add.R.font.poppins_regular;
         public static final int poppins_medium =
-                app.offline.compress.R.font.poppins_medium;
+                add.R.font.poppins_medium;
         public static final int poppins_semibold =
-                app.offline.compress.R.font.poppins_semibold;
+                add.R.font.poppins_semibold;
     }
 
     private R() {

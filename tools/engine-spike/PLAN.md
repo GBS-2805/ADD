@@ -208,7 +208,7 @@ they do not share a screen.
   labels at the rail foot go with the rail.
 
 
-### E — Editor (main ADD app, `app/src/app/offline/compress/`)
+### E — Editor (main ADD app, `app/src/add/`)
 
 The native editor has no instrumentation at all today.
 

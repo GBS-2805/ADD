@@ -1,4 +1,4 @@
-package app.offline.compress;
+package add;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;

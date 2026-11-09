@@ -1,4 +1,4 @@
-package app.offline.compress;
+package add;
 
 import android.content.Context;
 import android.content.SharedPreferences;

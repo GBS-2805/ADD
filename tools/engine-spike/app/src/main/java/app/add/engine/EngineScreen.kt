@@ -153,9 +153,9 @@ fun EngineScreen() {
     var exportScale by remember { mutableStateOf(1) }
     val basicEditor: (() -> Unit)? = remember(context) {
         runCatching {
-            val cls = Class.forName("app.offline.compress.EditorActivity")
+            val cls = Class.forName("add.EditorActivity")
             val intent = android.content.Intent(context, cls)
-                .putExtra("app.offline.compress.BASIC_EDITOR", true)
+                .putExtra("add.BASIC_EDITOR", true)
             val action: () -> Unit = {
                 // A missing or refused editor must say so on the stage, not close the app.
                 runCatching { context.startActivity(intent) }.onFailure { error ->

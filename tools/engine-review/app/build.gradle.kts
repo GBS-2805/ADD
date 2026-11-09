@@ -11,7 +11,8 @@ val addKeystore = file(
 )
 
 android {
-    namespace = "app.offline.compress"
+    // Source and R namespace; the applicationId below stays the install id.
+    namespace = "add"
     compileSdk = 35
 
     defaultConfig {

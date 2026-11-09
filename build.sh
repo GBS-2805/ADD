@@ -73,10 +73,13 @@ build_app() {
     "$BT/aapt2" compile --dir "$app/res" -o "$build/res.zip"
 
     echo "== $name: aapt2 link =="
+    # R and the class names live in `add`; the manifest package is the install id,
+    # so the APK still updates an installed ADD in place.
     "$BT/aapt2" link \
         -o "$build/unsigned.apk" \
         -I "$PLATFORM" \
         --manifest "$app/AndroidManifest.xml" \
+        --custom-package add \
         -R "$build/res.zip" \
         ${assets[@]+"${assets[@]}"} \
         --java "$build/gen" \

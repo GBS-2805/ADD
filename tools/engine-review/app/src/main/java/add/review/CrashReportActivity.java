@@ -1,4 +1,4 @@
-package app.offline.compress.review;
+package add.review;
 
 import android.app.Activity;
 import android.content.ClipData;

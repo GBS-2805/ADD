@@ -12,8 +12,8 @@ the pages.
 ## Status
 
 - **ADD 3.7** — APK [`dist/ADD-3.7.apk`](dist/ADD-3.7.apk) (6 MB, signed v1+v2),
-  published as `docs/ADD-3.7.apk`. Package `app.offline.compress` — the merge kept
-  the id so installed copies update in place — minSdk 26 · targetSdk 35 ·
+  published as `docs/ADD-3.7.apk`. Install id `app.offline.compress` — kept so
+  installed copies update in place — source namespace `add` — minSdk 26 · targetSdk 35 ·
   versionCode 39. One package, four tools: the whole shelf rides inside it — every
   page, all four brands, 4,373 glyphs, the captures, the artboards, the stylesheet and
   Poppins — served to a WebView from a private origin; the editor and the compressor are
@@ -149,17 +149,17 @@ python3 tools/hash_assets.py --check        # fail when a page names an old asse
 
 ```
 app/AndroidManifest.xml                            manifest (INTERNET for font packs only)
-app/src/app/offline/compress/Compressor.java       decode → scale → rotate → encode → publish
-app/src/app/offline/compress/MainActivity.java     picker, settings, trial preview, queue, results
-app/src/app/offline/compress/CompareActivity.java  before/after screen
-app/src/app/offline/compress/ComparisonView.java   draggable comparison surface
-app/src/app/offline/compress/SelectionStore.java   keeps the picked set across activities
-app/src/app/offline/compress/ThemePrefs.java       forces night mode off (one palette)
+app/src/add/Compressor.java       decode → scale → rotate → encode → publish
+app/src/add/MainActivity.java     picker, settings, trial preview, queue, results
+app/src/add/CompareActivity.java  before/after screen
+app/src/add/ComparisonView.java   draggable comparison surface
+app/src/add/SelectionStore.java   keeps the picked set across activities
+app/src/add/ThemePrefs.java       forces night mode off (one palette)
 app/res/                                           27 resources: 3 layouts, 14 drawables,
                                                    Poppins, one values/ (no values-night)
-app/src/app/offline/compress/ShelfActivity.java     WebView tool surface (icons or fonts page)
-app/src/app/offline/compress/Palette.java           three palettes, one entry each
-app/src/app/offline/compress/ThemePrefs.java        stores the palette and theme pair
+app/src/add/ShelfActivity.java     WebView tool surface (icons or fonts page)
+app/src/add/Palette.java           three palettes, one entry each
+app/src/add/ThemePrefs.java        stores the palette and theme pair
 app/assets/www/                                     staged at build time from docs/ (not committed)
 build.sh                                           SDK-tools build: ./build.sh [add|stage]
 docs/                                              the sixteen-page static shelf + data/

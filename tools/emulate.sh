@@ -28,7 +28,7 @@ AVD="${AVD:-add34}"
 IMAGE="system-images;android-34;aosp_atd;x86_64"
 OUT="$ROOT/artifacts/emu"
 APK="$OUT/ADD-3.7-engine-review-x86_64.apk"
-ACTIVITY="${1:-app.offline.compress/.EditorActivity}"
+ACTIVITY="${1:-app.offline.compress/add.EditorActivity}"
 
 mkdir -p "$OUT"
 printf 'sdk.dir=%s\n' "$SDK" > "$ROOT/tools/engine-review/local.properties"

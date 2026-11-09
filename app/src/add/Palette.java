@@ -1,4 +1,4 @@
-package app.offline.compress;
+package add;
 
 /**
  * The site's three palettes, as the app wears them.

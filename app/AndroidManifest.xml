@@ -28,7 +28,7 @@
              itself. It stays reachable from Android's own share sheet, which is how a
              photo reaches it, and from Tools inside the bundled site. -->
         <activity
-            android:name=".MainActivity"
+            android:name="add.MainActivity"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|uiMode"
             android:exported="true"
             android:label="ADD">
@@ -48,7 +48,7 @@
 
         <!-- The shelf, bundled whole: this is what the launcher opens. -->
         <activity
-            android:name=".ShelfActivity"
+            android:name="add.ShelfActivity"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|uiMode"
             android:exported="true"
             android:label="ADD"
@@ -60,15 +60,15 @@
         </activity>
 
         <activity
-            android:name=".CompareActivity"
+            android:name="add.CompareActivity"
             android:exported="false"
             android:label="Compare"
-            android:parentActivityName=".MainActivity" />
+            android:parentActivityName="add.MainActivity" />
 
         <!-- The editor: photo, type, presets, adjustments, layers and export. Native,
              and reachable from the drawer and from the Tools page through the bridge. -->
         <activity
-            android:name=".EditorActivity"
+            android:name="add.EditorActivity"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|uiMode"
             android:exported="false"
             android:label="Editor"
@@ -77,7 +77,7 @@
         <!-- Font packs: the site's list, its packs, and the offline copy on the phone.
              Network use is explicit here: the reader taps Download. -->
         <activity
-            android:name=".PacksActivity"
+            android:name="add.PacksActivity"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|uiMode"
             android:exported="false"
             android:label="Font packs" />

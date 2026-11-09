@@ -1,4 +1,4 @@
-package app.offline.compress;
+package add;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -59,7 +59,7 @@ public class EditorActivity extends Activity {
     private static final int REQ_PHOTO = 11;
     private static final int REQ_PACKS = 12;
     /** Set when the engine asks for the basic editor, so the launch check stands down. */
-    public static final String EXTRA_BASIC_EDITOR = "app.offline.compress.BASIC_EDITOR";
+    public static final String EXTRA_BASIC_EDITOR = "add.BASIC_EDITOR";
 
     private static final int MIN_PT = 10;
     private static final int MAX_PT = 120;
