@@ -1,6 +1,7 @@
 package app.add.engine
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotEquals
 import org.junit.Test
 
 class BlendMathTest {
@@ -80,5 +81,30 @@ class BlendMathTest {
                 assertEquals(true, channel in 0..255)
             }
         }
+    }
+
+    @Test
+    fun theStackAccumulatesEachBlendAgainstEverythingBelow() {
+        val paper = argb(255, 243, 235, 221)
+        val ink = argb(255, 17, 35, 28)
+        val mint = argb(255, 15, 191, 146)
+
+        // A three-layer page: paper, an ink multiply, then mint screen. The mint must
+        // see the multiplied ink, not the bare paper and not just the ink layer.
+        val first = BlendMath.blendPixel(paper, ink, BlendKind.Multiply, 1f)
+        val stack = BlendMath.blendPixel(first, mint, BlendKind.Screen, 1f)
+        val mintAlone = BlendMath.blendPixel(paper, mint, BlendKind.Screen, 1f)
+
+        assertNotEquals(mintAlone, stack)
+        assertNotEquals(first, stack)
+        assertEquals(
+            BlendMath.blendPixel(first, mint, BlendKind.Screen, 1f),
+            stack,
+        )
+    }
+
+    @Test
+    fun theStandardSetHasNineteenModes() {
+        assertEquals(19, BlendKind.entries.size)
     }
 }

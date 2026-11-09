@@ -1932,6 +1932,30 @@ private fun CompositeInspector(doc: EngineDocument, layer: Layer) {
         (layerPaint as? PaintSpec.Gradient)?.let { gradient ->
             GradientStops(doc, layer.id, gradient)
         }
+        (layerPaint as? PaintSpec.Image)?.let { image ->
+            val photos = doc.layers.filterIsInstance<ImageLayer>()
+            Spacer(Modifier.height(3.dp))
+            if (photos.isEmpty()) {
+                InfoLine("NO PHOTO IN THE DOCUMENT TO FILL FROM")
+            } else {
+                Row(
+                    modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                ) {
+                    photos.forEach { photo ->
+                        ActionChip(
+                            label = photo.name,
+                            active = photo.path == image.path,
+                            onClick = { doc.setPaintImage(photo.path, image.fill) },
+                        )
+                    }
+                }
+                Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                    ActionChip("FILL FRAME", active = image.fill, onClick = { doc.setPaintImageFill(true) })
+                    ActionChip("FIT INSIDE", active = !image.fill, onClick = { doc.setPaintImageFill(false) })
+                }
+            }
+        }
         (layerPaint as? PaintSpec.Pattern)?.let { pattern ->
             Spacer(Modifier.height(3.dp))
             Row(
@@ -1974,13 +1998,7 @@ private fun CompositeInspector(doc: EngineDocument, layer: Layer) {
         modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
         horizontalArrangement = Arrangement.spacedBy(4.dp),
     ) {
-        listOf(
-            BlendKind.Normal,
-            BlendKind.Multiply,
-            BlendKind.Screen,
-            BlendKind.Overlay,
-            BlendKind.Difference,
-        ).forEach { kind ->
+        BlendKind.entries.forEach { kind ->
             ActionChip(
                 label = kind.label,
                 active = layer.style.blend == kind,

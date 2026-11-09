@@ -83,25 +83,46 @@ object PaintRenderer {
     }
 
     private fun diamondShader(spec: PaintSpec.Gradient, rect: RectF): Shader {
-        val resolved = shaderStops(spec.stops)
-        if (Build.VERSION.SDK_INT >= 33 && spec.stops.size <= 3 && resolved != null) {
+        val ordered = spec.stops.sortedBy { it.offset }
+        if (Build.VERSION.SDK_INT >= 33 && ordered.size in 2..MAX_AGSL_STOPS) {
             val agsl = runCatching {
-                val shader = RuntimeShader(DIAMOND_AGSL)
+                val shader = RuntimeShader(diamondAgs(ordered.size))
                 shader.setFloatUniform("uOrigin", rect.left, rect.top)
                 shader.setFloatUniform("uSize", rect.width(), rect.height())
-                val ordered = spec.stops.sortedBy { it.offset }
-                val first = ordered.first().color
-                val mid = ordered.getOrNull(1)?.color ?: first
-                val last = ordered.last().color
-                shader.setColorUniform("uColor0", first)
-                shader.setColorUniform("uColor1", mid)
-                shader.setColorUniform("uColor2", last)
-                shader.setFloatUniform("uMid", gradientMidpoint(ordered))
+                ordered.forEachIndexed { index, stop ->
+                    shader.setColorUniform("uColor$index", stop.color)
+                    shader.setFloatUniform("uOffset$index", stop.offset.coerceIn(0f, 1f))
+                }
                 shader
             }.getOrNull()
             if (agsl != null) return agsl
         }
         return diamondBitmapShader(spec, rect)
+    }
+
+    /**
+     * Diamond has no platform gradient, so AGSL does the work on API 33+. The shader
+     * is generated for the stop count rather than hard-coded for three, which keeps
+     * every stop and its alpha on the GPU; older phones keep the bitmap-shader path.
+     */
+    private fun diamondAgs(count: Int): String = buildString {
+        appendLine("uniform float2 uOrigin;")
+        appendLine("uniform float2 uSize;")
+        for (index in 0 until count) {
+            appendLine("uniform half4 uColor$index;")
+            appendLine("uniform float uOffset$index;")
+        }
+        appendLine("half4 main(float2 p) {")
+        appendLine("    float2 uv = (p - uOrigin) / max(uSize, float2(1.0, 1.0));")
+        appendLine("    float t = clamp((abs(uv.x - 0.5) + abs(uv.y - 0.5)) * 2.0, 0.0, 1.0);")
+        for (index in 1 until count) {
+            appendLine("    if (t <= uOffset$index) {")
+            appendLine("        float span = max(uOffset$index - uOffset${index - 1}, 0.0001);")
+            appendLine("        return mix(uColor${index - 1}, uColor$index, clamp((t - uOffset${index - 1}) / span, 0.0, 1.0));")
+            appendLine("    }")
+        }
+        appendLine("    return uColor${count - 1};")
+        appendLine("}")
     }
 
     private fun diamondBitmapShader(spec: PaintSpec.Gradient, rect: RectF): Shader {
@@ -200,22 +221,6 @@ object PaintRenderer {
         postTranslate(rect.left, rect.top)
     }
 
-    /** AGSL 1.0: square distance from the centre, three stops, real per-pixel alpha. */
-    private const val DIAMOND_AGSL = """
-        uniform float2 uOrigin;
-        uniform float2 uSize;
-        uniform half4 uColor0;
-        uniform half4 uColor1;
-        uniform half4 uColor2;
-        uniform float uMid;
-
-        half4 main(float2 p) {
-            float2 uv = (p - uOrigin) / max(uSize, float2(1.0, 1.0));
-            float t = clamp((abs(uv.x - 0.5) + abs(uv.y - 0.5)) * 2.0, 0.0, 1.0);
-            if (t <= uMid) {
-                return mix(uColor0, uColor1, t / max(uMid, 0.001));
-            }
-            return mix(uColor1, uColor2, (t - uMid) / max(1.0 - uMid, 0.001));
-        }
-    """
+    /** A uniform block has a practical size; beyond this the bitmap shader carries it. */
+    private const val MAX_AGSL_STOPS = 24
 }

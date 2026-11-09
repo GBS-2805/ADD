@@ -965,6 +965,23 @@ class EngineDocument(initial: List<Layer>? = null) {
         status = "PAINT · ${spec?.label ?: "SOLID"}"
     }
 
+    /** Chooses which photograph an image paint samples, and how it maps into the frame. */
+    fun setPaintImage(path: String, fill: Boolean = true) {
+        val layer = paintable() ?: return
+        val photo = layers.filterIsInstance<ImageLayer>().firstOrNull { it.path == path } ?: return
+        act("PAINT IMAGE · ${photo.name}", layer.name)
+        updateSelected { it.withPaint(PaintSpec.Image(photo.path, fill)) }
+        status = "PAINT · IMAGE / ${photo.name} / ${if (fill) "FILL" else "FIT"}"
+    }
+
+    fun setPaintImageFill(fill: Boolean) {
+        val layer = paintable() ?: return
+        val image = paintOf(layer) as? PaintSpec.Image ?: return
+        act(if (fill) "PAINT IMAGE FILL" else "PAINT IMAGE FIT", layer.name)
+        updateSelected { it.withPaint(image.copy(fill = fill)) }
+        status = if (fill) "IMAGE PAINT · FILL THE FRAME" else "IMAGE PAINT · FIT INSIDE"
+    }
+
     fun setPatternKind(kind: PatternKind) {
         val layer = paintable() ?: return
         val pattern = paintOf(layer) as? PaintSpec.Pattern ?: return

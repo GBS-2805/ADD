@@ -25,7 +25,8 @@ import kotlin.math.sqrt
  * The pass order on one layer is deliberate: content, then effects, then the
  * paint mask, then the clip to the layer below, then the blend. A blurred edge
  * therefore cannot leak past its own mask, and a clipped layer cannot paint on
- * anything but its base.
+ * anything but its base. A run of clipped layers shares the base that starts the
+ * run; each one is not narrowed by the clipped layer above it.
  */
 class LayerCompositor(
     private val scale: Float,
@@ -39,15 +40,29 @@ class LayerCompositor(
 
     fun draw(destCanvas: Canvas, destBitmap: Bitmap, layers: List<Layer>) {
         var previous: RenderedLayer? = null
+        var clipBase: RenderedLayer? = null
         layers.filter { it.visible }.forEach { layer ->
             val current = render(layer) ?: return@forEach
-            if (layer.style.clipToBelow && previous != null) {
-                applyClip(current, previous)
+            if (layer.style.clipToBelow) {
+                // The first clipped layer claims the layer below as the whole run's
+                // base. Later clipped layers keep clipping to that base instead of to
+                // the previous clipped layer, which is what makes a multi-layer
+                // clipping mask behave like one group rather than a narrowing chain.
+                if (clipBase == null) clipBase = previous
+                clipBase?.let { applyClip(current, it) }
+                composite(destCanvas, destBitmap, current, layer.style.blend, layer.opacity)
+                if (previous != null && previous !== clipBase) previous.bitmap.recycle()
+                previous = current
+            } else {
+                // A normal layer ends the clipped run: the base has no more consumers.
+                clipBase?.bitmap?.recycle()
+                clipBase = null
+                composite(destCanvas, destBitmap, current, layer.style.blend, layer.opacity)
+                previous?.bitmap?.recycle()
+                previous = current
             }
-            composite(destCanvas, destBitmap, current, layer.style.blend, layer.opacity)
-            previous?.bitmap?.recycle()
-            previous = current
         }
+        clipBase?.bitmap?.recycle()
         previous?.bitmap?.recycle()
     }
 

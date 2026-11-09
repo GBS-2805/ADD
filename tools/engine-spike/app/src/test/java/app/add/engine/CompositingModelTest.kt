@@ -148,6 +148,49 @@ class CompositingModelTest {
     }
 
     @Test
+    fun imagePaintTargetsASpecificPhotoAndKeepsItsFitMode() {
+        val doc = EngineDocument()
+        doc.addImage("photo-a.jpg")
+        val photo = doc.selected as ImageLayer
+        doc.select("vector-star")
+
+        doc.setPaintImage(photo.path, fill = false)
+        val paint = (doc.selected as VectorLayer).paint as PaintSpec.Image
+        assertEquals("photo-a.jpg", paint.path)
+        assertFalse(paint.fill)
+
+        val restored = DocumentCodec.decode(
+            DocumentCodec.encode(doc.layers, doc.selectedId, doc.zoom),
+        )!!
+        val vector = restored.layers.first { it.id == "vector-star" } as VectorLayer
+        val imagePaint = vector.paint as PaintSpec.Image
+        assertEquals("photo-a.jpg", imagePaint.path)
+        assertFalse(imagePaint.fill)
+
+        doc.setPaintImageFill(true)
+        assertTrue(((doc.selected as VectorLayer).paint as PaintSpec.Image).fill)
+    }
+
+    @Test
+    fun shaderStopsKeepEveryStopItsAlphaAndTheirOrder() {
+        val stops = listOf(
+            PaintStop(1f, 0x40FFFFFF),
+            PaintStop(0f, 0xFFFF0000.toInt()),
+            PaintStop(0.5f, 0x8000FF00.toInt()),
+            PaintStop(0.25f, 0xFF0000FF.toInt()),
+        )
+
+        val (colors, positions) = shaderStops(stops)!!
+
+        assertEquals(4, colors.size)
+        assertEquals(0xFFFF0000.toInt(), colors.first())
+        assertEquals(0x40FFFFFF, colors.last())
+        assertEquals(0f, positions.first(), 0.0001f)
+        assertEquals(1f, positions.last(), 0.0001f)
+        assertTrue(positions.toList().zipWithNext().all { pair -> pair.first <= pair.second })
+    }
+
+    @Test
     fun documentControlsEditStopsBlendMasksAndEffects() {
         val doc = EngineDocument()
         doc.select("vector-star")
