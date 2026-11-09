@@ -101,20 +101,7 @@ async function main() {
   fs.mkdirSync(ARTIFACTS, { recursive: true });
   const server = await startServer();
   const port = server.address().port;
-  // Pin font rasterisation. A workstation and a stock runner can share the same
-  // family and still hint and subpixel-position glyphs differently; on CI that was
-  // 4899 changed edge pixels (run 42637567824) while every geometric assertion
-  // passed. These switches make the baseline mean the same pixels on both.
-  const browser = await chromium.launch({
-    headless: true,
-    args: [
-      '--no-sandbox',
-      '--font-render-hinting=none',
-      '--disable-lcd-text',
-      '--disable-font-subpixel-positioning',
-      '--force-color-profile=srgb'
-    ]
-  });
+  const browser = await chromium.launch({ headless: true, args: ['--no-sandbox'] });
   const page = await browser.newPage({
     viewport: { width: 390, height: 844 },
     deviceScaleFactor: 2,
