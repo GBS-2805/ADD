@@ -26,8 +26,10 @@ android {
         // adds the compositing authoring pass from bd3f7de: editable gradients,
         // all 19 blend modes, mask/clip controls and independent effect switches.
         // 44 routes the review Editor entry straight to the engine; the basic editor
-        // remains one tap away in the engine's info sheet.
-        versionCode = 44
+        // remains one tap away in the engine's info sheet. 45 settles every add back
+        // into Select with a visible DONE, pauses the 3D surface while the panel is up
+        // so it cannot cover its own inspector, and rebuilds the chrome for reading.
+        versionCode = 45
         versionName = "3.7"
 
         ndk {

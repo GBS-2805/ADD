@@ -406,6 +406,25 @@ class EngineDocument(initial: List<Layer>? = null) {
         }
     }
 
+    /**
+     * Leaves placement and 3D edit mode and returns to Select. This is the one visible
+     * way out of every mode; it is wired to the DONE chips and the system back gesture,
+     * so a half-finished add can never trap the reader in the engine.
+     */
+    fun settle() {
+        val wasEditing = editingModelId != null
+        val wasArmed = tool != Tool.Select || maskMode
+        editingModelId = null
+        maskMode = false
+        tool = Tool.Select
+        selectedNodeId = null
+        status = when {
+            wasEditing -> "3D EDIT CLOSED · ${selected?.name ?: "NOTHING SELECTED"}"
+            wasArmed -> "SETTLED · ${selected?.name ?: "NOTHING SELECTED"}"
+            else -> "READY · ${selected?.name ?: "NOTHING SELECTED"}"
+        }
+    }
+
     fun select(id: String) {
         if (layers.any { it.id == id }) {
             if (editingModelId != null && editingModelId != id) editingModelId = null
@@ -657,8 +676,10 @@ class EngineDocument(initial: List<Layer>? = null) {
         )
         commit { it + layer }
         selectedId = id
-        tool = Tool.Type
-        status = "TYPE LAYER ADDED"
+        // An add is a finished action, not an armed tool: the new line is selected and
+        // ready to move. Leaving Type armed made every later tap feel like another add.
+        tool = Tool.Select
+        status = "TYPE ADDED · DRAG TO PLACE"
     }
 
     fun addVector() {
@@ -678,8 +699,8 @@ class EngineDocument(initial: List<Layer>? = null) {
         )
         commit { it + layer }
         selectedId = id
-        tool = Tool.Vector
-        status = "VECTOR NETWORK ADDED · 3 NODES"
+        tool = Tool.Select
+        status = "VECTOR ADDED · 3 NODES · DRAG TO PLACE"
     }
 
     fun addSticker(preset: StickerPreset) {
@@ -742,8 +763,8 @@ class EngineDocument(initial: List<Layer>? = null) {
         )
         commit { it + layer }
         selectedId = id
-        tool = Tool.Model
-        status = "3D LAYER ADDED · ${asset.label.uppercase()} · ${asset.path}"
+        tool = Tool.Select
+        status = "3D ADDED · ${asset.label.uppercase()} · DRAG TO PLACE"
     }
 
     /** Steps a type layer through the three bundled Poppins faces. */

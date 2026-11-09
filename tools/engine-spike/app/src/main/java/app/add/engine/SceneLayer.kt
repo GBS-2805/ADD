@@ -147,6 +147,11 @@ fun FilamentLayer(
         // inside a black rectangle, on the stage and in the exported PNG alike.
         isOpaque = false,
         onViewCreated = {
+            // A SurfaceView configured as a media overlay draws above every Compose
+            // control. That is how a 3D layer ended up covering its own inspector, so
+            // the surface stays behind the window and Compose always wins.
+            setZOrderMediaOverlay(false)
+            setZOrderOnTop(false)
             currentHandle.view = this
             currentHandle.width = width
             currentHandle.height = height

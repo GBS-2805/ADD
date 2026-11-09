@@ -12,7 +12,7 @@ bash tools/engine-review/build.sh
 
 The APK lands at `artifacts/engine-review/ADD-3.7-engine-review.apk`. It is a debug
 build, same applicationId (`app.offline.compress`) and version `3.7`, with a review-only
-versionCode (`44`), so it replaces an installed ADD copy. It uses the existing ADD signing key when
+versionCode (`45`), so it replaces an installed ADD copy. It uses the existing ADD signing key when
 `$KEYSTORE` (or the default `$HOME/tools/compress-keystore.jks`) is present; without
 that key Gradle falls back to its debug key, which requires uninstalling ADD first.
 
@@ -20,9 +20,10 @@ that key Gradle falls back to its debug key, which requires uninstalling ADD fir
 
 Open ADD and tap **Tools → Editor**: this review opens the engine directly. The basic
 editor is one tap away under **BASIC EDITOR** in the engine's info sheet, where QUICK,
-STUDIO, PHOTO and EXPORT still live. Build 44 routes the review entry to the engine;
-build 43 added the compositing authoring pass, and build 42 fixed the saved-document
-icon crash that stopped the engine on its first draw. The release
+STUDIO, PHOTO and EXPORT still live. Build 45 routes the review entry to the engine and
+makes every add settle; build 44 restored that routing; build 43 added the compositing
+authoring pass; build 42 fixed the saved-document icon crash that stopped the engine on
+its first draw. The release
 `app.offline.compress` package has no engine activity and no such entry.
 
 If the app stops, reopen ADD: a report with COPY appears when the process died of a
@@ -33,6 +34,16 @@ needed to keep working — the editor no longer opens the engine on its way in.
 
 The engine screen is the spike's own Compose UI, `EngineDocument`, vector network,
 Skia artboard, Filament `SceneView` and export path. This pass adds:
+
+- a settled add flow: every TYPE, VECTOR, STICKER, ICON, PHOTO and 3D add commits the
+  layer, returns the tool to Select, and shows an **ADDED TO THE PAGE** notice with
+  **INSPECT** and **DONE**. The top bar and bottom strip also carry **DONE** while any
+  mode is armed, and system back leaves modes before it leaves the engine;
+- a full-width **LAYERS** / **INSPECT** sheet built from two tabs, with the 3D viewport
+  surfaces hidden while the sheet is open, so a model can no longer cover its own
+  controls; the `SurfaceView` is also pinned behind the window;
+- a labelled vertical tool rail and a visible **▾ TOOLS** handle, with larger type and
+  touch targets throughout;
 
 - a searchable offline catalog of 4,373 icons from Lineicons, Coolicons, Phosphor
   and Streamline, parsed from the shipped JSON into scalable path layers;

@@ -1,5 +1,13 @@
 package app.add.engine
 
+import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -67,6 +75,7 @@ import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.ui.text.input.KeyboardType
@@ -152,6 +161,36 @@ fun EngineScreen() {
     var showLibrary by remember { mutableStateOf(false) }
     var libraryKey by remember { mutableStateOf(0) }
     var exportScale by remember { mutableStateOf(1) }
+    var notice by remember { mutableStateOf<String?>(null) }
+    // Every add ends in a commit whose action names the control (TYPE+, 3D+, ICON+ …).
+    // The badge below the stage turns that into a place to settle instead of a mode the
+    // reader has to discover how to leave.
+    LaunchedEffect(doc.actionId) {
+        if (doc.action in ADD_ACTIONS) {
+            val added = doc.selected?.name ?: "LAYER"
+            notice = added
+            delay(3200)
+            if (notice == added) notice = null
+        }
+    }
+    val dialogOpen = showInfo || showDiagnostics || showIcons || showLegend ||
+        showHistory || showExport || showLibrary || showAdd
+    BackHandler(enabled = dialogOpen || sheet || doc.editingModelId != null ||
+        doc.tool != Tool.Select || doc.maskMode) {
+        when {
+            showAdd -> showAdd = false
+            showIcons -> showIcons = false
+            showInfo -> showInfo = false
+            showDiagnostics -> showDiagnostics = false
+            showHistory -> showHistory = false
+            showExport -> showExport = false
+            showLibrary -> showLibrary = false
+            showLegend -> showLegend = false
+            notice != null -> notice = null
+            sheet -> sheet = false
+            else -> doc.settle()
+        }
+    }
     val basicEditor: (() -> Unit)? = remember(context) {
         runCatching {
             val cls = Class.forName("add.EditorActivity")
@@ -203,25 +242,37 @@ fun EngineScreen() {
             typefaces = typefaces,
             images = images,
             onCanvasTouch = { chrome = false },
+            sheetOpen = sheet,
             modifier = Modifier.fillMaxSize(),
         )
         if (chrome) {
             TopBar(
                 doc = doc,
                 onInfo = { showInfo = true },
-                onExport = { showExport = true },
+                onExport = {
+                sheet = false
+                showExport = true
+            },
                 onLegend = { showLegend = true },
                 onLibrary = { showLibrary = true },
                 modifier = Modifier.align(Alignment.TopCenter).padding(top = 6.dp, start = 8.dp, end = 8.dp),
             )
         } else {
-            Box(
+            Row(
                 modifier = Modifier
                     .align(Alignment.TopCenter)
-                    .fillMaxWidth()
-                    .height(9.dp)
-                    .pointerInput(Unit) { detectTapGestures { chrome = true } },
-            )
+                    .padding(top = 6.dp)
+                    .clip(RoundedCornerShape(99.dp))
+                    .background(Panel.copy(alpha = 0.92f))
+                    .border(1.dp, Rule, RoundedCornerShape(99.dp))
+                    .clickable { chrome = true }
+                    .padding(horizontal = 12.dp, vertical = 5.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text("▾", color = Mint, fontSize = 9.sp)
+                Spacer(Modifier.width(5.dp))
+                Text("TOOLS", color = Mint, fontSize = 8.sp, fontWeight = FontWeight.Bold, letterSpacing = 0.8.sp)
+            }
         }
         ToolPill(
             doc = doc,
@@ -239,23 +290,73 @@ fun EngineScreen() {
             onDiagnostics = { showDiagnostics = true },
             modifier = Modifier.align(Alignment.BottomStart).padding(start = 10.dp, bottom = 48.dp),
         )
-        if (!sheet) {
+        if (sheet) {
+            // A scrim makes the open panel a mode with an obvious exit, and the 3D
+            // surfaces stand down while it is up (see Stage), so a model can never
+            // cover the controls that are supposed to settle it.
+            Box(
+                Modifier
+                    .fillMaxSize()
+                    .background(Ink.copy(alpha = 0.45f))
+                    .clickable { sheet = false },
+            )
+        }
+        AnimatedVisibility(
+            visible = !sheet,
+            enter = fadeIn(tween(140)),
+            exit = fadeOut(tween(100)),
+            modifier = Modifier.align(Alignment.BottomCenter),
+        ) {
             PeekStrip(
                 doc = doc,
                 onOpen = { sheet = true },
                 modifier = Modifier
-                    .align(Alignment.BottomCenter)
                     .fillMaxWidth()
                     .padding(horizontal = 8.dp, vertical = 8.dp),
             )
-        } else {
+        }
+        AnimatedVisibility(
+            visible = sheet,
+            enter = slideInVertically(
+                initialOffsetY = { it },
+                animationSpec = tween(280, easing = FastOutSlowInEasing),
+            ) + fadeIn(tween(160)),
+            exit = slideOutVertically(
+                targetOffsetY = { it },
+                animationSpec = tween(200, easing = FastOutSlowInEasing),
+            ) + fadeOut(tween(120)),
+            modifier = Modifier.align(Alignment.BottomCenter),
+        ) {
             Sheet(
                 doc = doc,
                 handle = selectedHandle,
                 onIcons = { showIcons = true },
                 onHistory = { showHistory = true },
                 onClose = { sheet = false },
-                modifier = Modifier.align(Alignment.BottomCenter),
+                modifier = Modifier.fillMaxWidth(),
+            )
+        }
+        AnimatedVisibility(
+            visible = notice != null,
+            enter = slideInVertically(
+                initialOffsetY = { it / 2 },
+                animationSpec = tween(240, easing = FastOutSlowInEasing),
+            ) + fadeIn(tween(160)),
+            exit = slideOutVertically(targetOffsetY = { it / 2 }) + fadeOut(tween(120)),
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(start = 10.dp, end = 10.dp, bottom = if (sheet) 8.dp else 62.dp),
+        ) {
+            AddNotice(
+                name = notice.orEmpty(),
+                onDone = {
+                    doc.settle()
+                    notice = null
+                },
+                onInspect = {
+                    notice = null
+                    sheet = true
+                },
             )
         }
     }
@@ -270,6 +371,11 @@ fun EngineScreen() {
             onIcons = {
                 showAdd = false
                 showIcons = true
+            },
+            onSticker = {
+                showAdd = false
+                doc.chooseTool(Tool.Sticker)
+                sheet = true
             },
             onClose = { showAdd = false },
         )
@@ -377,9 +483,11 @@ private fun TopBar(
         Box(
             modifier = Modifier.size(22.dp).clip(RoundedCornerShape(3.dp)).background(Mint),
             contentAlignment = Alignment.Center,
-        ) { Text("A", color = Ink, fontSize = 12.sp, fontWeight = FontWeight.Bold) }
+        ) { Text("A", color = Ink, fontSize = 13.sp, fontWeight = FontWeight.Bold) }
         Spacer(Modifier.width(7.dp))
-        ActionChip(label = "DOC", enabled = true, onClick = onLibrary)
+        Text("ENGINE", color = Cream, fontSize = 10.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 1.2.sp)
+        Spacer(Modifier.width(9.dp))
+        ActionChip(label = "DOCS", enabled = true, onClick = onLibrary)
         Spacer(Modifier.width(8.dp))
         NavButton("↶", enabled = doc.canUndo) { doc.undo() }
         NavButton("↷", enabled = doc.canRedo) { doc.redo() }
@@ -391,7 +499,11 @@ private fun TopBar(
             onClick = onExport,
         )
         Spacer(Modifier.width(4.dp))
-        ActionChip(label = "?", enabled = true, onClick = onLegend)
+        if (doc.tool != Tool.Select || doc.editingModelId != null || doc.maskMode) {
+            DonePill("DONE") { doc.settle() }
+        } else {
+            ActionChip(label = "?", enabled = true, onClick = onLegend)
+        }
         Spacer(Modifier.width(3.dp))
         ActionChip(label = "i", enabled = true, onClick = onInfo)
     }
@@ -419,63 +531,92 @@ private fun StatusChip(
             .padding(horizontal = 9.dp, vertical = 5.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Box(Modifier.size(5.dp).clip(CircleShape).background(if (alarm) Clay else if (doc.exporting) Lime else Mint))
-        Spacer(Modifier.width(6.dp))
+        Box(Modifier.size(6.dp).clip(CircleShape).background(if (alarm) Clay else if (doc.exporting) Lime else Mint))
+        Spacer(Modifier.width(7.dp))
         Text(
             text = message,
             color = if (alarm) Clay else Cream,
-            fontSize = 6.sp,
-            letterSpacing = 0.3.sp,
+            fontSize = 8.sp,
+            letterSpacing = 0.2.sp,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.widthIn(max = 230.dp),
+            modifier = Modifier.widthIn(max = 260.dp),
         )
     }
 }
 
 @Composable
 private fun ToolPill(doc: EngineDocument, onIcons: () -> Unit, onAdd: () -> Unit, modifier: Modifier = Modifier) {
+    // A glyph alone is a guessing game: V/A/T/I/S/3 now carry their names, so the rail
+    // says what it does without a second screen. The active tool keeps the solid mint
+    // disc, the rest sit on a raised neutral so the column reads as one control.
     Column(
         modifier = modifier
-            .clip(RoundedCornerShape(99.dp))
-            .background(Panel.copy(alpha = 0.74f))
-            .border(1.dp, Rule.copy(alpha = 0.8f), RoundedCornerShape(99.dp))
-            .padding(3.dp),
+            .clip(RoundedCornerShape(18.dp))
+            .background(Panel.copy(alpha = 0.9f))
+            .border(1.dp, Rule.copy(alpha = 0.9f), RoundedCornerShape(18.dp))
+            .padding(vertical = 5.dp, horizontal = 4.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(2.dp),
     ) {
         Tool.entries.forEach { tool ->
             val active = doc.tool == tool
-            Box(
+            Column(
                 modifier = Modifier
-                    .size(34.dp)
-                    .clip(CircleShape)
-                    .background(if (active) Mint else Color.Transparent)
+                    .clip(RoundedCornerShape(12.dp))
                     .clickable {
                         doc.chooseTool(tool)
                         if (tool == Tool.Icon) onIcons()
-                    },
-                contentAlignment = Alignment.Center,
+                    }
+                    .padding(horizontal = 3.dp, vertical = 2.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
             ) {
+                Box(
+                    modifier = Modifier
+                        .size(38.dp)
+                        .clip(CircleShape)
+                        .background(if (active) Mint else PanelRaised.copy(alpha = 0.7f)),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(
+                        text = tool.glyph,
+                        color = if (active) Ink else Cream.copy(alpha = 0.9f),
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.SemiBold,
+                    )
+                }
+                Spacer(Modifier.height(2.dp))
                 Text(
-                    text = tool.glyph,
-                    color = if (active) Ink else Cream.copy(alpha = 0.86f),
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.SemiBold,
+                    text = tool.label.uppercase(Locale.US),
+                    color = if (active) Mint else Cream.copy(alpha = 0.72f),
+                    fontSize = 8.5.sp,
+                    fontWeight = if (active) FontWeight.Bold else FontWeight.Medium,
+                    letterSpacing = 0.4.sp,
+                    maxLines = 1,
                 )
             }
         }
-        // The photograph is not a tool with a mode: it is one tap that puts a picture
-        // on the page, which is why it sits under the tools rather than among them.
-        Box(
+        Spacer(Modifier.height(3.dp))
+        // The photograph is not a tool with a mode: it is one tap that opens the add
+        // sheet, which is why it sits under the tools rather than among them.
+        Column(
             modifier = Modifier
-                .size(34.dp)
-                .clip(CircleShape)
-                .background(Lime.copy(alpha = 0.18f))
-                .clickable(onClick = onAdd),
-            contentAlignment = Alignment.Center,
+                .clip(RoundedCornerShape(12.dp))
+                .clickable(onClick = onAdd)
+                .padding(horizontal = 3.dp, vertical = 2.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Text("+", color = Lime, fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
+            Box(
+                modifier = Modifier
+                    .size(38.dp)
+                    .clip(CircleShape)
+                    .background(Lime.copy(alpha = 0.2f)),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text("+", color = Lime, fontSize = 19.sp, fontWeight = FontWeight.SemiBold)
+            }
+            Spacer(Modifier.height(2.dp))
+            Text("ADD", color = Lime, fontSize = 8.5.sp, fontWeight = FontWeight.Bold, letterSpacing = 0.4.sp)
         }
     }
 }
@@ -487,6 +628,7 @@ private fun Stage(
     typefaces: Typefaces,
     images: Map<String, android.graphics.Bitmap>,
     onCanvasTouch: () -> Unit,
+    sheetOpen: Boolean = false,
     modifier: Modifier = Modifier,
 ) {
     val haptics = LocalHapticFeedback.current
@@ -586,7 +728,10 @@ contentAlignment = Alignment.Center,
         val inset = with(density) { 10.dp.toPx() } / scale
         val insetX = inset / ArtboardPainter.W
         val insetY = inset / ArtboardPainter.H
-        val models = doc.modelLayers.filter { it.visible }
+        // The 3D view is a SurfaceView: it does not clip to the artboard and can sit
+        // above Compose on some builds. While the panel is open it stands down, so the
+        // inspector can never be eaten by the model it is inspecting.
+        val models = doc.modelLayers.filter { it.visible && !sheetOpen }
         val editing = doc.editingModel
 
             Box(
@@ -1007,43 +1152,122 @@ private fun ModelLayerStage(
 
 @Composable
 private fun PeekStrip(doc: EngineDocument, onOpen: () -> Unit, modifier: Modifier = Modifier) {
-    // The panel is a strip until it is wanted. Drag up to open the inspector; tap does
-    // the same for anyone who has not learned the drag yet.
+    // A strip with a name and a job. When a mode is armed the strip carries DONE, so
+    // settling is reachable without opening anything or leaving the engine.
+    val armed = doc.tool != Tool.Select || doc.editingModelId != null || doc.maskMode
     Row(
         modifier = modifier
-            .clip(RoundedCornerShape(99.dp))
-            .background(Panel.copy(alpha = 0.9f))
-            .border(1.dp, Rule, RoundedCornerShape(99.dp))
-            .pointerInput(Unit) {
-                var total = 0f
-                detectVerticalDragGestures(
-                    onDragStart = { total = 0f },
-                    onVerticalDrag = { _, drag -> total += drag },
-                    onDragEnd = { if (total < -24f) onOpen() },
-                )
-            }
-            .clickable(onClick = onOpen)
-            .padding(horizontal = 10.dp, vertical = 7.dp),
+            .clip(RoundedCornerShape(14.dp))
+            .background(Panel.copy(alpha = 0.96f))
+            .border(1.dp, if (armed) Lime else Rule, RoundedCornerShape(14.dp))
+            .padding(horizontal = 6.dp, vertical = 5.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text("▲", color = Mint, fontSize = 9.sp)
-        Spacer(Modifier.width(6.dp))
+        Row(
+            modifier = Modifier
+                .weight(1f)
+                .clip(RoundedCornerShape(10.dp))
+                .clickable(onClick = onOpen)
+                .padding(horizontal = 6.dp, vertical = 4.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Box(Modifier.size(7.dp).clip(CircleShape).background(Mint))
+            Spacer(Modifier.width(8.dp))
+            Column(Modifier.weight(1f)) {
+                Text(
+                    text = doc.selected?.name ?: "NO LAYER SELECTED",
+                    color = Cream,
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+                Text(
+                    text = (doc.selected?.kindLabel ?: "TAP TO OPEN LAYERS") +
+                        (doc.savedAt?.let { " · SAVED $it" } ?: ""),
+                    color = Dim,
+                    fontSize = 9.sp,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
+        }
+        if (armed) {
+            DonePill("DONE") { doc.settle() }
+        } else {
+            Text(
+                "OPEN ▴",
+                color = Mint,
+                fontSize = 9.sp,
+                fontWeight = FontWeight.Bold,
+                letterSpacing = 0.6.sp,
+                modifier = Modifier
+                    .clip(RoundedCornerShape(10.dp))
+                    .clickable(onClick = onOpen)
+                    .padding(horizontal = 10.dp, vertical = 8.dp),
+            )
+        }
+    }
+}
+
+/** Only a placed layer earns the settle notice; NODE+ and STOP+ edit the selection. */
+private val ADD_ACTIONS = setOf("TYPE+", "VECTOR+", "PHOTO+", "STICKER+", "ICON+", "3D+")
+
+/** The confirmation that an add landed, with both ways to finish the job. */
+@Composable
+private fun AddNotice(name: String, onDone: () -> Unit, onInspect: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(14.dp))
+            .background(Panel)
+            .border(1.dp, Mint.copy(alpha = 0.65f), RoundedCornerShape(14.dp))
+            .padding(horizontal = 12.dp, vertical = 9.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Box(Modifier.size(8.dp).clip(CircleShape).background(Mint))
+        Spacer(Modifier.width(9.dp))
+        Column(Modifier.weight(1f)) {
+            Text("ADDED TO THE PAGE", color = Mint, fontSize = 8.5.sp, fontWeight = FontWeight.Bold, letterSpacing = 0.9.sp)
+            Text(name, color = Cream, fontSize = 11.5.sp, fontWeight = FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        }
+        ActionChip("INSPECT", onClick = onInspect)
+        Spacer(Modifier.width(5.dp))
+        DonePill("DONE", onDone)
+    }
+}
+
+@Composable
+private fun DonePill(label: String, onClick: () -> Unit) {
+    Box(
+        modifier = Modifier
+            .clip(RoundedCornerShape(99.dp))
+            .background(Lime)
+            .clickable(onClick = onClick)
+            .padding(horizontal = 12.dp, vertical = 7.dp),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(label, color = Ink, fontSize = 10.sp, fontWeight = FontWeight.Bold, letterSpacing = 0.6.sp)
+    }
+}
+
+@Composable
+private fun TabChip(label: String, active: Boolean, modifier: Modifier = Modifier, onClick: () -> Unit) {
+    Box(
+        modifier = modifier
+            .clip(RoundedCornerShape(9.dp))
+            .background(if (active) Mint else PanelRaised)
+            .clickable(onClick = onClick)
+            .padding(vertical = 9.dp),
+        contentAlignment = Alignment.Center,
+    ) {
         Text(
-            text = doc.selected?.name ?: "NO SELECTION",
-            color = Cream,
-            fontSize = 7.sp,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.weight(1f),
+            label,
+            color = if (active) Ink else Cream,
+            fontSize = 10.5.sp,
+            fontWeight = FontWeight.SemiBold,
+            letterSpacing = 0.5.sp,
         )
-        Text(
-            text = doc.savedAt?.let { "SAVED $it" } ?: "SAVE…",
-            color = if (doc.savedAt != null) Dim else Mint,
-            fontSize = 6.sp,
-            letterSpacing = 0.3.sp,
-        )
-        Spacer(Modifier.width(8.dp))
-        Text("LAYERS", color = Mint, fontSize = 7.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 0.4.sp)
     }
 }
 
@@ -1056,10 +1280,12 @@ private fun Sheet(
     onClose: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    var tab by remember { mutableStateOf(1) }
+    val armed = doc.tool != Tool.Select || doc.editingModelId != null || doc.maskMode
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .fillMaxHeight(0.64f)
+            .fillMaxHeight(0.72f)
             .clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
             .background(Panel)
             .border(1.dp, Rule, RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)),
@@ -1081,34 +1307,50 @@ private fun Sheet(
         ) {
             Box(Modifier.width(34.dp).height(3.dp).clip(RoundedCornerShape(99.dp)).background(Dim.copy(alpha = 0.5f)))
             Spacer(Modifier.width(10.dp))
-            Text("LAYERS + INSPECT", color = Cream, fontSize = 7.sp, letterSpacing = 1.0.sp, fontWeight = FontWeight.SemiBold)
+            Text("INSPECTOR", color = Cream, fontSize = 11.sp, letterSpacing = 1.0.sp, fontWeight = FontWeight.SemiBold)
             Spacer(Modifier.weight(1f))
             Text(
                 "HISTORY",
                 color = Mint,
-                fontSize = 7.sp,
+                fontSize = 9.sp,
                 fontWeight = FontWeight.SemiBold,
-                modifier = Modifier.clickable(onClick = onHistory).padding(horizontal = 8.dp),
+                modifier = Modifier
+                    .clip(RoundedCornerShape(8.dp))
+                    .clickable(onClick = onHistory)
+                    .padding(horizontal = 8.dp, vertical = 5.dp),
             )
-            Text("▾", color = Mint, fontSize = 11.sp)
+            if (armed) {
+                Spacer(Modifier.width(6.dp))
+                DonePill("DONE") { doc.settle() }
+            }
+            Text("▾", color = Mint, fontSize = 13.sp, modifier = Modifier.clickable(onClick = onClose).padding(start = 10.dp))
         }
-        Row(Modifier.fillMaxWidth().weight(1f)) {
-            LayerPanel(doc, Modifier.weight(0.42f).fillMaxHeight())
-            Box(Modifier.width(1.dp).fillMaxHeight().background(Rule))
-            Inspector(doc, handle, onIcons, Modifier.weight(0.58f).fillMaxHeight())
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp, vertical = 4.dp),
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+            TabChip("LAYERS · ${doc.layers.size}", tab == 0, Modifier.weight(1f)) { tab = 0 }
+            TabChip("INSPECT", tab == 1, Modifier.weight(1f)) { tab = 1 }
+        }
+        Box(Modifier.fillMaxWidth().weight(1f)) {
+            if (tab == 0) {
+                LayerPanel(doc, Modifier.fillMaxSize())
+            } else {
+                Inspector(doc, handle, onIcons, Modifier.fillMaxSize())
+            }
         }
     }
 }
 
 @Composable
 private fun LayerPanel(doc: EngineDocument, modifier: Modifier = Modifier) {
-    Column(modifier.padding(8.dp)) {
+    Column(modifier.padding(10.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Text("LAYERS", color = Cream, fontSize = 8.sp, letterSpacing = 1.1.sp, fontWeight = FontWeight.SemiBold)
+            Text("LAYERS", color = Cream, fontSize = 11.sp, letterSpacing = 1.1.sp, fontWeight = FontWeight.SemiBold)
             Spacer(Modifier.weight(1f))
-            Text("${doc.layers.size}", color = Mint, fontSize = 8.sp, fontWeight = FontWeight.SemiBold)
+            Text("${doc.layers.size}", color = Mint, fontSize = 9.sp, fontWeight = FontWeight.SemiBold)
         }
-        Spacer(Modifier.height(5.dp))
+        Spacer(Modifier.height(7.dp))
         Column(Modifier.fillMaxWidth().weight(1f).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(2.dp)) {
             doc.layers.asReversed().forEach { layer ->
                 val selected = layer.id == doc.selectedId
@@ -1118,7 +1360,7 @@ private fun LayerPanel(doc: EngineDocument, modifier: Modifier = Modifier) {
                         .clip(RoundedCornerShape(3.dp))
                         .background(if (selected) PanelRaised else Color.Transparent)
                         .clickable { doc.select(layer.id) }
-                        .padding(horizontal = 3.dp, vertical = 3.dp),
+                        .padding(horizontal = 7.dp, vertical = 6.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(
@@ -1131,14 +1373,15 @@ private fun LayerPanel(doc: EngineDocument, modifier: Modifier = Modifier) {
                         Text(
                             text = layer.name,
                             color = if (selected) Cream else Dim,
-                            fontSize = 7.sp,
+                            fontSize = 9.sp,
+                            fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
                         )
                         Text(
                             text = layer.kindLabel,
                             color = if (selected) Mint else Dim.copy(alpha = 0.7f),
-                            fontSize = 5.sp,
+                            fontSize = 7.sp,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
                         )
@@ -1169,13 +1412,13 @@ private fun LayerPanel(doc: EngineDocument, modifier: Modifier = Modifier) {
 
 @Composable
 private fun Inspector(doc: EngineDocument, handle: SceneHandle, onIcons: () -> Unit, modifier: Modifier = Modifier) {
-    Column(modifier.verticalScroll(rememberScrollState()).padding(8.dp)) {
+    Column(modifier.verticalScroll(rememberScrollState()).padding(10.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Text("INSPECT", color = Cream, fontSize = 8.sp, letterSpacing = 1.1.sp, fontWeight = FontWeight.SemiBold)
+            Text("INSPECT", color = Cream, fontSize = 11.sp, letterSpacing = 1.1.sp, fontWeight = FontWeight.SemiBold)
             Spacer(Modifier.weight(1f))
-            Text(doc.selected?.kindLabel ?: "NONE", color = Dim, fontSize = 6.sp, maxLines = 1)
+            Text(doc.selected?.kindLabel ?: "NONE", color = Dim, fontSize = 8.sp, maxLines = 1)
         }
-        Spacer(Modifier.height(5.dp))
+        Spacer(Modifier.height(7.dp))
         if (doc.tool == Tool.Sticker) {
             StickerTray(doc)
         } else if (doc.tool == Tool.Icon) {
@@ -1228,14 +1471,14 @@ private fun LayerIdentityRow(doc: EngineDocument, layer: Layer) {
         BasicTextField(
             value = name,
             onValueChange = { name = it.take(28) },
-            textStyle = TextStyle(color = Cream, fontFamily = Poppins, fontSize = 9.sp),
+            textStyle = TextStyle(color = Cream, fontFamily = Poppins, fontSize = 10.sp),
             cursorBrush = SolidColor(Mint),
             singleLine = true,
             modifier = Modifier
                 .weight(1f)
                 .clip(RoundedCornerShape(3.dp))
                 .background(PanelRaised)
-                .padding(horizontal = 5.dp, vertical = 4.dp),
+                .padding(horizontal = 7.dp, vertical = 5.dp),
         )
         if (name.trim() != layer.name && name.isNotBlank()) {
             Spacer(Modifier.width(4.dp))
@@ -1389,35 +1632,82 @@ private fun AddSheet(
     doc: EngineDocument,
     onPhoto: () -> Unit,
     onIcons: () -> Unit,
+    onSticker: () -> Unit,
     onClose: () -> Unit,
 ) {
-    Dialog(onDismissRequest = onClose) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(12.dp))
-                .background(Panel)
-                .border(1.dp, Rule, RoundedCornerShape(12.dp))
-                .padding(16.dp),
-        ) {
-            Text("ADD TO THE PAGE", color = Cream, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 1.1.sp)
-            Spacer(Modifier.height(4.dp))
-            Text("The artboard stays where it is; this only puts something on it.", color = Dim, fontSize = 8.sp)
-            Spacer(Modifier.height(12.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                ActionChip("TYPE", active = true, onClick = { doc.addText(); onClose() })
-                ActionChip("VECTOR", onClick = { doc.addVector(); onClose() })
-                ActionChip("PHOTO", onClick = onPhoto)
+    Dialog(
+        onDismissRequest = onClose,
+        properties = DialogProperties(usePlatformDefaultWidth = false),
+    ) {
+        Box(Modifier.fillMaxSize().padding(top = 90.dp), contentAlignment = Alignment.BottomCenter) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp))
+                    .background(Panel)
+                    .border(1.dp, Rule, RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp))
+                    .padding(18.dp),
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text("ADD TO THE PAGE", color = Cream, fontSize = 15.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 1.0.sp)
+                    Spacer(Modifier.weight(1f))
+                    Text(
+                        "CLOSE",
+                        color = Mint,
+                        fontSize = 9.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        modifier = Modifier.clip(RoundedCornerShape(8.dp)).clickable(onClick = onClose).padding(horizontal = 8.dp, vertical = 5.dp),
+                    )
+                }
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    "Every add lands selected and ready to move. Tap DONE to settle it.",
+                    color = Dim,
+                    fontSize = 9.5.sp,
+                    lineHeight = 13.sp,
+                )
+                Spacer(Modifier.height(14.dp))
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    AddTile("T", "TYPE", "Editable line", Modifier.weight(1f)) { doc.addText(); onClose() }
+                    AddTile("A", "VECTOR", "Editable network", Modifier.weight(1f)) { doc.addVector(); onClose() }
+                }
+                Spacer(Modifier.height(8.dp))
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    AddTile("I", "ICON", "4,373 glyphs", Modifier.weight(1f)) { onIcons() }
+                    AddTile("S", "STICKER", "Local shapes", Modifier.weight(1f)) { onSticker() }
+                }
+                Spacer(Modifier.height(8.dp))
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    AddTile("3", "3D", "Gem or ring", Modifier.weight(1f)) { doc.addModel(ModelAsset.Gem); onClose() }
+                    AddTile("P", "PHOTO", "From the gallery", Modifier.weight(1f)) { onPhoto() }
+                }
+                Spacer(Modifier.height(12.dp))
+                Text("The sheet closes after an add, so the new item is on the stage and selected.", color = Dim, fontSize = 8.sp)
             }
-            Spacer(Modifier.height(6.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                ActionChip("ICON", onClick = onIcons)
-                ActionChip("STICKER", onClick = { doc.chooseTool(Tool.Sticker); onClose() })
-                ActionChip("3D", onClick = { doc.addModel(ModelAsset.Gem); onClose() })
-            }
-            Spacer(Modifier.height(12.dp))
-            ActionChip("CLOSE", onClick = onClose)
         }
+    }
+}
+
+@Composable
+private fun AddTile(
+    glyph: String,
+    title: String,
+    note: String,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit,
+) {
+    Column(
+        modifier = modifier
+            .clip(RoundedCornerShape(12.dp))
+            .background(PanelRaised)
+            .border(1.dp, Rule, RoundedCornerShape(12.dp))
+            .clickable(onClick = onClick)
+            .padding(12.dp),
+    ) {
+        Text(glyph, color = Mint, fontSize = 17.sp, fontWeight = FontWeight.SemiBold)
+        Spacer(Modifier.height(3.dp))
+        Text(title, color = Cream, fontSize = 11.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 0.5.sp)
+        Text(note, color = Dim, fontSize = 8.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
     }
 }
 
@@ -1719,7 +2009,7 @@ private fun StickerCard(preset: StickerPreset, modifier: Modifier, onClick: () -
         Text(
             text = preset.label,
             color = Dim,
-            fontSize = 5.sp,
+            fontSize = 7.sp,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
         )
@@ -1888,6 +2178,8 @@ private fun ModelInspector(doc: EngineDocument, layer: ModelLayer, handle: Scene
     }
     Spacer(Modifier.height(4.dp))
     InfoLine("UNIT SCALE = MODEL IN FRAME · SCALE DIAL = FRAME")
+    Spacer(Modifier.height(3.dp))
+    InfoLine("3D PREVIEW PAUSES WHILE THIS PANEL IS OPEN · CLOSE IT TO SEE THE MODEL")
     Actions(doc)
 }
 
@@ -2243,8 +2535,8 @@ private fun SliderRow(
     var dialFrom by remember(label) { mutableStateOf<Float?>(null) }
     var dialTo by remember(label) { mutableStateOf(value) }
     Row(Modifier.fillMaxWidth().padding(top = 3.dp), verticalAlignment = Alignment.CenterVertically) {
-        Text(label, color = Dim, fontSize = 6.sp, letterSpacing = 0.5.sp, modifier = Modifier.weight(1f))
-        Text(display(value), color = Cream, fontSize = 7.sp)
+        Text(label, color = Dim, fontSize = 8.sp, letterSpacing = 0.5.sp, modifier = Modifier.weight(1f))
+        Text(display(value), color = Cream, fontSize = 9.sp)
     }
     Slider(
         value = value,
@@ -2260,7 +2552,7 @@ private fun SliderRow(
             dialFrom = null
             onChangeFinished?.invoke()
         },
-        modifier = Modifier.fillMaxWidth().height(24.dp),
+        modifier = Modifier.fillMaxWidth().height(30.dp),
         colors = SliderDefaults.colors(
             thumbColor = Mint,
             activeTrackColor = Mint,
@@ -2283,7 +2575,7 @@ private fun Actions(doc: EngineDocument) {
 
 @Composable
 private fun InfoLine(text: String) {
-    Text(text, color = Dim, fontSize = 6.sp, letterSpacing = 0.3.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
+    Text(text, color = Dim, fontSize = 8.sp, lineHeight = 11.sp, letterSpacing = 0.2.sp, maxLines = 2, overflow = TextOverflow.Ellipsis)
 }
 
 @Composable
@@ -2294,7 +2586,7 @@ private fun Tag(text: String) {
             .background(Mint.copy(alpha = 0.14f))
             .padding(horizontal = 6.dp, vertical = 3.dp),
     ) {
-        Text(text, color = Mint, fontSize = 6.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 0.6.sp)
+        Text(text, color = Mint, fontSize = 8.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 0.6.sp)
     }
 }
 
@@ -2302,13 +2594,13 @@ private fun Tag(text: String) {
 private fun NavButton(text: String, enabled: Boolean, onClick: () -> Unit) {
     Box(
         modifier = Modifier
-            .size(28.dp)
-            .clip(RoundedCornerShape(4.dp))
+            .size(32.dp)
+            .clip(RoundedCornerShape(6.dp))
             .background(PanelRaised)
             .clickable(enabled = enabled, onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
-        Text(text, color = if (enabled) Cream else Dim.copy(alpha = 0.35f), fontSize = 15.sp)
+        Text(text, color = if (enabled) Cream else Dim.copy(alpha = 0.35f), fontSize = 16.sp)
     }
 }
 
@@ -2333,13 +2625,13 @@ private fun ActionChip(
     }
     Box(
         modifier = Modifier
-            .clip(RoundedCornerShape(4.dp))
+            .clip(RoundedCornerShape(6.dp))
             .background(background)
             .clickable(enabled = enabled, onClick = onClick)
-            .padding(horizontal = 6.dp, vertical = 5.dp),
+            .padding(horizontal = 9.dp, vertical = 6.dp),
         contentAlignment = Alignment.Center,
     ) {
-        Text(label, color = foreground, fontSize = 6.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 0.3.sp)
+        Text(label, color = foreground, fontSize = 8.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 0.4.sp)
     }
 }
 
@@ -2362,7 +2654,7 @@ private fun ZoomPill(
         Text(
             text = "${(zoom * 100).toInt()}%",
             color = if (zoom > 1.001f) Lime else Cream,
-            fontSize = 8.sp,
+            fontSize = 9.sp,
             fontWeight = FontWeight.SemiBold,
             modifier = Modifier
                 .clip(RoundedCornerShape(99.dp))
@@ -2377,13 +2669,13 @@ private fun ZoomPill(
 private fun ZoomStep(label: String, onClick: () -> Unit) {
     Box(
         modifier = Modifier
-            .size(22.dp)
+            .size(26.dp)
             .clip(RoundedCornerShape(99.dp))
             .background(PanelRaised)
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
-        Text(label, color = Cream, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+        Text(label, color = Cream, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
     }
 }
 

@@ -1,6 +1,7 @@
 package app.add.engine
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
@@ -332,6 +333,45 @@ class EngineCoreTest {
         val scaled = Geometry.scaleCentered(text, 1.5f) as TextLayer
         assertEquals(0.6f, scaled.w, 0.0005f)
         assertEquals(180f, scaled.fontSize, 0.0005f)
+    }
+
+    @Test
+    fun everyAddLandsSelectedAndSettledInSelect() {
+        val document = EngineDocument()
+
+        document.chooseTool(Tool.Type)
+        document.addText()
+        assertEquals(Tool.Select, document.tool)
+        assertEquals("TYPE / NEW", document.selected?.name)
+
+        document.chooseTool(Tool.Vector)
+        document.addVector()
+        assertEquals(Tool.Select, document.tool)
+        assertEquals("VECTOR / NEW", document.selected?.name)
+
+        document.chooseTool(Tool.Model)
+        document.addModel(ModelAsset.Ring)
+        assertEquals(Tool.Select, document.tool)
+        assertEquals("3D / RING", document.selected?.name)
+    }
+
+    @Test
+    fun settleCloses3dEditAndMaskAndKeepsTheSelection() {
+        val document = EngineDocument()
+        document.chooseTool(Tool.Model)
+        document.addModel(ModelAsset.Gem)
+        val id = document.selectedId
+        document.toggleModelEdit(id)
+        document.maskMode = true
+
+        document.settle()
+
+        assertEquals(Tool.Select, document.tool)
+        assertFalse(document.maskMode)
+        assertNull(document.editingModelId)
+        assertNull(document.selectedNodeId)
+        assertEquals(id, document.selectedId)
+        assertEquals("3D EDIT CLOSED · 3D / GEM", document.status)
     }
 
     @Test
