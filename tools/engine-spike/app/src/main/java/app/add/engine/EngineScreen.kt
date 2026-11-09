@@ -2018,8 +2018,18 @@ private fun CompositeInspector(doc: EngineDocument, layer: Layer) {
             active = doc.maskErase,
             onClick = { doc.toggleMaskErase() },
         )
-        ActionChip("MASK ON", active = layer.style.mask?.enabled != false, onClick = { doc.toggleMask() })
-        ActionChip("CLEAR MASK", warn = true, onClick = { doc.clearMask() })
+        ActionChip("MASK ON", active = layer.style.mask?.enabled == true, onClick = { doc.toggleMask() })
+        ActionChip(
+            label = "CLEAR MASK",
+            enabled = layer.style.mask?.strokes?.isNotEmpty() == true,
+            onClick = { doc.clearMask() },
+        )
+        ActionChip(
+            label = "REMOVE MASK",
+            enabled = layer.style.mask != null,
+            warn = layer.style.mask != null,
+            onClick = { doc.removeMask() },
+        )
     }
     SliderRow(
         label = "MASK SIZE",
@@ -2029,18 +2039,27 @@ private fun CompositeInspector(doc: EngineDocument, layer: Layer) {
         onChange = { doc.setMaskRadius(it) },
     )
     Spacer(Modifier.height(5.dp))
+    val fx = layer.style.effects
     Row(verticalAlignment = Alignment.CenterVertically) {
         Text("EFFECTS", color = Mint, fontSize = 7.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 0.8.sp)
         Spacer(Modifier.weight(1f))
         ActionChip(
-            label = if (layer.style.effects.enabled) "ON" else "BYPASS",
-            active = layer.style.effects.enabled,
+            label = if (fx.enabled) "ON" else "BYPASS",
+            active = fx.enabled,
             onClick = { doc.toggleEffects() },
         )
-        Spacer(Modifier.width(4.dp))
-        ActionChip("DUOTONE", active = layer.style.effects.duotone, onClick = { doc.toggleDuotone() })
     }
-    val fx = layer.style.effects
+    Spacer(Modifier.height(3.dp))
+    Row(
+        modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
+        ActionChip("GRADE", active = fx.gradeEnabled, onClick = { doc.toggleGrade() })
+        ActionChip("BLUR", active = fx.blurEnabled, onClick = { doc.toggleBlur() })
+        ActionChip("GRAIN", active = fx.grainEnabled, onClick = { doc.toggleGrain() })
+        ActionChip("HALFTONE", active = fx.halftoneEnabled, onClick = { doc.toggleHalftone() })
+        ActionChip("DUOTONE", active = fx.duotone, onClick = { doc.toggleDuotone() })
+    }
     TransformSlider(doc, "EXPOSURE", fx.exposure, -2f..2f, { String.format("%+.2f", it) }) { doc.setExposure(it) }
     TransformSlider(doc, "CONTRAST", fx.contrast, -1f..1f, { String.format("%+.2f", it) }) { doc.setContrast(it) }
     TransformSlider(doc, "SATURATION", fx.saturation, -1f..1f, { String.format("%+.2f", it) }) { doc.setSaturation(it) }
@@ -2059,6 +2078,9 @@ private fun GradientStops(doc: EngineDocument, layerId: String, gradient: PaintS
     var chosen by remember(layerId) { mutableStateOf(0) }
     val index = chosen.coerceIn(0, gradient.stops.lastIndex)
     val stop = gradient.stops.getOrNull(index) ?: return
+    var hex by remember(index, stop.color) {
+        mutableStateOf(String.format("%06X", stop.color and 0xFFFFFF))
+    }
     Spacer(Modifier.height(3.dp))
     Row(
         modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
@@ -2067,6 +2089,22 @@ private fun GradientStops(doc: EngineDocument, layerId: String, gradient: PaintS
         gradient.stops.forEachIndexed { i, _ ->
             ActionChip("${i + 1}", active = i == index, onClick = { chosen = i })
         }
+        ActionChip(
+            label = "◀",
+            enabled = index > 0,
+            onClick = {
+                doc.movePaintStop(index, -1)
+                chosen = index - 1
+            },
+        )
+        ActionChip(
+            label = "▶",
+            enabled = index < gradient.stops.lastIndex,
+            onClick = {
+                doc.movePaintStop(index, 1)
+                chosen = index + 1
+            },
+        )
         ActionChip("+ STOP", onClick = { doc.addPaintStop() })
         ActionChip(
             label = "− STOP",
@@ -2112,6 +2150,30 @@ private fun GradientStops(doc: EngineDocument, layerId: String, gradient: PaintS
                     .clickable { doc.setPaintStopColor(index, value) },
             )
         }
+    }
+    Spacer(Modifier.height(3.dp))
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Text("STOP HEX  #", color = Dim, fontSize = 6.sp, letterSpacing = 0.3.sp)
+        Spacer(Modifier.width(4.dp))
+        BasicTextField(
+            value = hex,
+            onValueChange = { raw ->
+                hex = raw.filter { it.isLetterOrDigit() }.take(6).uppercase()
+                if (hex.length == 6) {
+                    hex.toIntOrNull(16)?.let { value ->
+                        doc.setPaintStopColor(index, 0xFF000000.toInt() or value)
+                    }
+                }
+            },
+            textStyle = TextStyle(color = Cream, fontFamily = Poppins, fontSize = 7.sp),
+            cursorBrush = SolidColor(Mint),
+            singleLine = true,
+            modifier = Modifier
+                .width(58.dp)
+                .clip(RoundedCornerShape(3.dp))
+                .background(PanelRaised)
+                .padding(horizontal = 4.dp, vertical = 3.dp),
+        )
     }
 }
 

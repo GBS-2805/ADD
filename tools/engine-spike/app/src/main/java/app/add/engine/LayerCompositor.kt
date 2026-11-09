@@ -101,11 +101,8 @@ class LayerCompositor(
         )
         val effects = layer.style.effects
         val maskRadius = layer.style.mask?.strokes?.maxOfOrNull { it.radius } ?: 0f
-        val pad = if (effects.enabled) {
-            effects.blur * 2f + maskRadius * min(w, h) + 6f
-        } else {
-            maskRadius * min(w, h) + 6f
-        }
+        val blurPad = if (effects.enabled && EffectPass.Blur in effects.activePasses) effects.blur else 0f
+        val pad = blurPad * 2f + maskRadius * min(w, h) + 6f
         val left = floor((corners.minOf { it.first } - pad) * scale).toInt()
             .coerceIn(0, (ArtboardPainter.W * scale).roundToInt())
         val top = floor((corners.minOf { it.second } - pad) * scale).toInt()
@@ -233,7 +230,8 @@ class LayerCompositor(
      * the layer's own bitmap, so the document and the source pixels never change.
      */
     private fun applyEffects(bitmap: Bitmap, effects: LayerEffects) {
-        if (!effects.enabled || !effects.hasAny) return
+        val passes = effects.activePasses
+        if (!effects.enabled || passes.isEmpty()) return
         val width = bitmap.width
         val height = bitmap.height
         if (width <= 0 || height <= 0) return
@@ -248,18 +246,21 @@ class LayerCompositor(
             var g = ((pixel ushr 8) and 0xFF) / 255f
             var b = (pixel and 0xFF) / 255f
 
-            r = grade(r, effects, exposure)
-            g = grade(g, effects, exposure)
-            b = grade(b, effects, exposure)
+            if (EffectPass.Grade in passes) {
+                r = grade(r, effects, exposure)
+                g = grade(g, effects, exposure)
+                b = grade(b, effects, exposure)
 
-            val lum = 0.2126f * r + 0.7152f * g + 0.0722f * b
-            if (effects.saturation != 0f) {
-                val factor = 1f + effects.saturation.coerceIn(-1f, 1f)
-                r = (lum + (r - lum) * factor).coerceIn(0f, 1f)
-                g = (lum + (g - lum) * factor).coerceIn(0f, 1f)
-                b = (lum + (b - lum) * factor).coerceIn(0f, 1f)
+                val lum = 0.2126f * r + 0.7152f * g + 0.0722f * b
+                if (effects.saturation != 0f) {
+                    val factor = 1f + effects.saturation.coerceIn(-1f, 1f)
+                    r = (lum + (r - lum) * factor).coerceIn(0f, 1f)
+                    g = (lum + (g - lum) * factor).coerceIn(0f, 1f)
+                    b = (lum + (b - lum) * factor).coerceIn(0f, 1f)
+                }
             }
-            if (effects.duotone) {
+            if (EffectPass.Duotone in passes) {
+                val lum = 0.2126f * r + 0.7152f * g + 0.0722f * b
                 val mapped = mixColor(effects.duotoneDark, effects.duotoneLight, lum)
                 r = ((mapped ushr 16) and 0xFF) / 255f
                 g = ((mapped ushr 8) and 0xFF) / 255f
@@ -271,14 +272,16 @@ class LayerCompositor(
                 (b * 255f).roundToInt().coerceIn(0, 255)
         }
 
-        val radius = (effects.blur * scale).roundToInt().coerceIn(0, 32)
-        if (radius > 0) {
-            val temp = IntArray(pixels.size)
-            blurPass(pixels, temp, width, height, radius, horizontal = true)
-            blurPass(temp, pixels, width, height, radius, horizontal = false)
+        if (EffectPass.Blur in passes) {
+            val radius = (effects.blur * scale).roundToInt().coerceIn(0, 32)
+            if (radius > 0) {
+                val temp = IntArray(pixels.size)
+                blurPass(pixels, temp, width, height, radius, horizontal = true)
+                blurPass(temp, pixels, width, height, radius, horizontal = false)
+            }
         }
 
-        if (effects.halftone > 0f) {
+        if (EffectPass.Halftone in passes) {
             val strength = effects.halftone.coerceIn(0f, 1f)
             val cell = (5f + (1f - strength) * 9f).roundToInt().coerceAtLeast(3)
             for (y in 0 until height) for (x in 0 until width) {
@@ -301,7 +304,7 @@ class LayerCompositor(
             }
         }
 
-        if (effects.grain > 0f) {
+        if (EffectPass.Grain in passes) {
             val strength = effects.grain.coerceIn(0f, 1f)
             for (y in 0 until height) for (x in 0 until width) {
                 val index = y * width + x

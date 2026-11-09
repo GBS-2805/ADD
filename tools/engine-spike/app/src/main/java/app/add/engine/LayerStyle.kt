@@ -51,12 +51,19 @@ data class LayerMask(
     val enabled: Boolean = true,
 )
 
+/** One independently switchable stage of the per-layer stack. */
+enum class EffectPass { Grade, Duotone, Blur, Halftone, Grain }
+
 /**
  * Non-destructive grading. Everything here is applied to the rendered layer in
  * the compositor, so the source pixels and the document never change.
  */
 data class LayerEffects(
     val enabled: Boolean = true,
+    val gradeEnabled: Boolean = true,
+    val blurEnabled: Boolean = true,
+    val grainEnabled: Boolean = true,
+    val halftoneEnabled: Boolean = true,
     val exposure: Float = 0f,
     val contrast: Float = 0f,
     val saturation: Float = 0f,
@@ -70,10 +77,23 @@ data class LayerEffects(
     val duotoneDark: Int = 0xFF11231C.toInt(),
     val duotoneLight: Int = 0xFFD6E381.toInt(),
 ) {
+    /**
+     * The passes the compositor should run, in stack order. A disabled pass is
+     * absent even when its value is non-zero, so values survive toggling and are
+     * restored when the pass is switched back on.
+     */
+    val activePasses: List<EffectPass>
+        get() = buildList {
+            if (gradeEnabled && (exposure != 0f || contrast != 0f || saturation != 0f ||
+                    shadows != 0f || midtones != 0f || highlights != 0f)) add(EffectPass.Grade)
+            if (duotone) add(EffectPass.Duotone)
+            if (blurEnabled && blur > 0f) add(EffectPass.Blur)
+            if (halftoneEnabled && halftone > 0f) add(EffectPass.Halftone)
+            if (grainEnabled && grain > 0f) add(EffectPass.Grain)
+        }
+
     val hasAny: Boolean
-        get() = exposure != 0f || contrast != 0f || saturation != 0f ||
-            shadows != 0f || midtones != 0f || highlights != 0f ||
-            blur > 0f || grain > 0f || halftone > 0f || duotone
+        get() = activePasses.isNotEmpty()
 }
 
 data class LayerStyle(

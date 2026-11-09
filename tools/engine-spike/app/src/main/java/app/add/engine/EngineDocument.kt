@@ -1076,6 +1076,25 @@ class EngineDocument(initial: List<Layer>? = null) {
         status = "GRADIENT · ${gradient.stops.size - 1} STOPS"
     }
 
+    fun movePaintStop(index: Int, delta: Int) {
+        val layer = paintable() ?: return
+        val gradient = paintOf(layer)?.gradient ?: return
+        val target = (index + delta).coerceIn(0, gradient.stops.lastIndex)
+        if (target == index) return
+        act("STOP ORDER", layer.name)
+        commit { list ->
+            list.map { item ->
+                if (item.id != layer.id) item
+                else {
+                    val reordered = gradient.stops.toMutableList()
+                    reordered.add(target, reordered.removeAt(index))
+                    item.withPaint(gradient.copy(stops = reordered))
+                }
+            }
+        }
+        status = "GRADIENT · STOP ${index + 1} → ${target + 1}"
+    }
+
     // ------------------------------------------------------------------ blend
 
     fun setBlend(kind: BlendKind) {
@@ -1159,10 +1178,26 @@ class EngineDocument(initial: List<Layer>? = null) {
 
     fun toggleMask() {
         val layer = selected ?: return
-        val mask = layer.style.mask ?: LayerMask()
-        act("MASK", layer.name)
-        updateSelected { it.withStyle(it.style.copy(mask = mask.copy(enabled = !mask.enabled))) }
-        status = if (!mask.enabled) "MASK ON" else "MASK OFF"
+        val mask = layer.style.mask
+        val next = mask?.copy(enabled = !mask.enabled) ?: LayerMask()
+        act(if (mask == null) "MASK+" else "MASK", layer.name)
+        updateSelected { it.withStyle(it.style.copy(mask = next)) }
+        status = when {
+            mask == null -> "PAINT MASK CREATED · PAINT TO CUT"
+            next.enabled -> "PAINT MASK ON"
+            else -> "PAINT MASK OFF"
+        }
+    }
+
+    fun removeMask() {
+        val layer = selected ?: return
+        if (layer.style.mask == null) {
+            status = "NO PAINT MASK TO REMOVE"
+            return
+        }
+        act("MASK−", layer.name)
+        updateSelected { it.withStyle(it.style.copy(mask = null)) }
+        status = "PAINT MASK REMOVED"
     }
 
     // ---------------------------------------------------------------- effects
@@ -1184,6 +1219,20 @@ class EngineDocument(initial: List<Layer>? = null) {
     fun setBlur(value: Float) = effect("BLUR") { it.copy(blur = value.coerceIn(0f, 24f)) }
     fun setGrain(value: Float) = effect("GRAIN") { it.copy(grain = value.coerceIn(0f, 1f)) }
     fun setHalftone(value: Float) = effect("HALFTONE") { it.copy(halftone = value.coerceIn(0f, 1f)) }
+
+    private fun toggleEffectFlag(name: String, transform: (LayerEffects) -> LayerEffects) {
+        val layer = selected ?: return
+        act(name, layer.name)
+        updateSelected {
+            val effects = transform(it.style.effects).copy(enabled = true)
+            it.withStyle(it.style.copy(effects = effects))
+        }
+    }
+
+    fun toggleGrade() = toggleEffectFlag("GRADE") { it.copy(gradeEnabled = !it.gradeEnabled) }
+    fun toggleBlur() = toggleEffectFlag("BLUR") { it.copy(blurEnabled = !it.blurEnabled) }
+    fun toggleGrain() = toggleEffectFlag("GRAIN") { it.copy(grainEnabled = !it.grainEnabled) }
+    fun toggleHalftone() = toggleEffectFlag("HALFTONE") { it.copy(halftoneEnabled = !it.halftoneEnabled) }
 
     fun toggleDuotone() {
         val layer = selected ?: return

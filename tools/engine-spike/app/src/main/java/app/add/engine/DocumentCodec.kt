@@ -324,6 +324,10 @@ object DocumentCodec {
 
     private fun encodeEffects(effects: LayerEffects): JSONObject = JSONObject().apply {
         put("enabled", effects.enabled)
+        put("gradeEnabled", effects.gradeEnabled)
+        put("blurEnabled", effects.blurEnabled)
+        put("grainEnabled", effects.grainEnabled)
+        put("halftoneEnabled", effects.halftoneEnabled)
         put("exposure", effects.exposure.toDouble())
         put("contrast", effects.contrast.toDouble())
         put("saturation", effects.saturation.toDouble())
@@ -342,6 +346,10 @@ object DocumentCodec {
         if (o == null) return LayerEffects()
         return LayerEffects(
             enabled = o.optBoolean("enabled", true),
+            gradeEnabled = o.optBoolean("gradeEnabled", true),
+            blurEnabled = o.optBoolean("blurEnabled", true),
+            grainEnabled = o.optBoolean("grainEnabled", true),
+            halftoneEnabled = o.optBoolean("halftoneEnabled", true),
             exposure = o.optDouble("exposure", 0.0).toFloat(),
             contrast = o.optDouble("contrast", 0.0).toFloat(),
             saturation = o.optDouble("saturation", 0.0).toFloat(),
