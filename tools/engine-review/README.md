@@ -12,7 +12,7 @@ bash tools/engine-review/build.sh
 
 The APK lands at `artifacts/engine-review/ADD-3.7-engine-review.apk`. It is a debug
 build, same applicationId (`app.offline.compress`) and version `3.7`, with a review-only
-versionCode (`42`), so it replaces an installed ADD copy. It uses the existing ADD signing key when
+versionCode (`43`), so it replaces an installed ADD copy. It uses the existing ADD signing key when
 `$KEYSTORE` (or the default `$HOME/tools/compress-keystore.jks`) is present; without
 that key Gradle falls back to its debug key, which requires uninstalling ADD first.
 
@@ -21,8 +21,9 @@ that key Gradle falls back to its debug key, which requires uninstalling ADD fir
 Open ADD, tap **Tools → Editor**, and the native editor opens as it does in every
 build: QUICK tools, STUDIO on the Fabric tab, PHOTO, EXPORT. The engine is a third tab
 beside QUICK and STUDIO, labelled **ENGINE**, and only this debuggable build has it. Build
-42 fixed the saved-document icon crash that stopped the engine on its first draw. The
-release `app.offline.compress` package has no engine activity and no such tab.
+43 adds the compositing authoring pass; build 42 fixed the saved-document icon crash that
+stopped the engine on its first draw. The release `app.offline.compress` package has no
+engine activity and no such tab.
 
 If the app stops, reopen ADD: a report with COPY appears when the process died of a
 Java exception, and the engine's last startup stage when it died natively. Neither is
@@ -54,6 +55,10 @@ Skia artboard, Filament `SceneView` and export path. This pass adds:
 - cream icon thumbnails in the catalog and diagnostics, so glyphs are legible on
   the dark cards;
 - a second 3D asset, `engine_ring.glb`, swappable with the reviewed gem;
+- editable gradients with all four kinds, arbitrary stop colours and per-stop alpha,
+  reorderable stops, all 19 blend modes, creatable/toggleable/removable paint masks,
+  clipping, and independent grading, blur, grain, halftone and duotone switches that
+  survive save and reload through `DocumentCodec`;
 - both GLBs and the icon catalog in diagnostics.
 
 ADD's existing Java and resources are compiled into the same APK, so the rest of the

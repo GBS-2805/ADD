@@ -22,8 +22,10 @@ android {
         // One above the shipping 3.7 (39): an update installs over it. 40 opened the
         // engine on the editor door; 41 keeps the engine on its own tab and records
         // startup stages, because the crash left no Java trace to read. 42 fixes the
-        // saved-document icon crash (empty viewBox) that 41 hit on first draw.
-        versionCode = 42
+        // saved-document icon crash (empty viewBox) that 41 hit on first draw. 43
+        // adds the compositing authoring pass from bd3f7de: editable gradients,
+        // all 19 blend modes, mask/clip controls and independent effect switches.
+        versionCode = 43
         versionName = "3.7"
 
         ndk {
