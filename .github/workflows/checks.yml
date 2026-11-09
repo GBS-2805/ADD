@@ -89,3 +89,13 @@ jobs:
         env:
           NODE_PATH: /tmp/pw/node_modules
         run: python3 tools/check_all.py --visual
+      # A red Studio guard is only actionable with the pixels the runner produced;
+      # the diff image alone does not say which element moved. Keep both on failure.
+      - name: Keep the Studio evidence when the verdict is red
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: studio-visual-${{ github.run_id }}
+          path: artifacts/studio-*.png
+          if-no-files-found: ignore
+          retention-days: 7
