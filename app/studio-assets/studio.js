@@ -39,6 +39,11 @@
     var height = Math.max(1, Math.round(H * scale));
     canvas.wrapperEl.style.width = width + 'px';
     canvas.wrapperEl.style.height = height + 'px';
+    var stageView = stageEl.querySelector('#stage-view');
+    if (stageView) {
+      stageView.style.width = width + 'px';
+      stageView.style.height = height + 'px';
+    }
     [canvas.lowerCanvasEl, canvas.upperCanvasEl].forEach(function (element) {
       if (!element) { return; }
       element.style.width = '100%';
@@ -526,6 +531,20 @@
       canvas.setBackgroundImage(image, canvas.renderAll.bind(canvas));
       flash('Photo added');
     });
+  };
+
+  // The interaction layer (Draggable, snapping, Observer, MotionPath) runs after
+  // this module without a second canvas. Expose the one engine and its helpers.
+  window.StudioEngine = {
+    canvas: canvas,
+    W: W,
+    H: H,
+    activeText: activeText,
+    addText: addText,
+    syncPanel: syncPanel,
+    fitCanvas: fitCanvas,
+    flash: flash,
+    getOverlay: function () { return overlay; }
   };
 
   syncOverlayPanel();

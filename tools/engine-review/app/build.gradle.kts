@@ -32,8 +32,10 @@ android {
         // 46 keeps the settle strip visible until DONE/INSPECT, moves new layers clear
         // of the rail, lifts the strip off the zoom/status row, and files the advanced
         // compositing controls behind a disclosure so the inspector does not end cut.
-        // The Studio WebView ships GSAP 3.12.5 offline for its intro and panel motion.
-        versionCode = 46
+        // 47 completes the Studio authoring layer: Draggable snapping with live
+        // edge/centre guides, a rotation ring, editable MotionPath curves and
+        // Observer pan/zoom, all vendored offline with GSAP 3.12.5.
+        versionCode = 47
         versionName = "3.7"
 
         ndk {
