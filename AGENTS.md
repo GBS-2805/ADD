@@ -342,16 +342,18 @@ where the notes keep the history they shipped with.Icons, Fonts, Compress and th
   inlines every mark instead of painting it through `<use>`, which Figma does not
   import: a shared payload came back as a gap in every artboard.
 - `python3 tools/deploy_storage.py` reports the retained deployment count, target
-  split and retention policy for `artbase`, `artbase-handoff` and `artbase-shots`;
-  `deploy_vercel.py` runs it before uploading, so a release that would add another
-  full copy shows the result first. It warns above 40 retained deployments, above
-  512 MiB of estimated output, or any retention window over 7 days. A critical count
-  or estimate exits 2, and an unavailable report also stops `deploy_vercel.py`
-  (strict gate). `deploy_review.py handoff|shots|review` applies the same gate;
-  `deploy_audit.py` exports deletion and retention events. The size is an estimate
-  from the current folder times the retained count; exact Deployment Storage bytes
-  are dashboard-only on Hobby. This is an operational guardrail, not an audit trail.
-  See `DEPLOYMENT_STORAGE.md` for the token, approval and evidence runbook.
+  split and retention policy for `artbase`, `artbase-handoff`, `artbase-handoff-apk`
+  and `artbase-shots`; `deploy_vercel.py` runs it before uploading, so a release that
+  would add another full copy shows the result first. It warns above 40 retained
+  deployments, above 512 MiB of estimated output, or any retention window over 7
+  days. A critical count or estimate exits 2, and an unavailable report also stops
+  `deploy_vercel.py` (strict gate). `deploy_review.py apk|handoff|shots|review`
+  applies the same gate; `deploy_audit.py` exports deletion and retention events.
+  `artbase-handoff-apk` serves the review APK from `artifacts/handoff-apk`, so a
+  handoff deployment does not carry a 29 MB copy. The size is an estimate from the
+  current folder times the retained count; exact Deployment Storage bytes are
+  dashboard-only on Hobby. This is an operational guardrail, not an audit trail. See
+  `DEPLOYMENT_STORAGE.md` for the token, approval and evidence runbook.
 - The shelf is sixteen pages, each a folder with an `index.html`: the root index,
   then `tools/`, `compress/`, `icons/` and its four brand folders (`icons/lineicons/`,
   `icons/coolicons/`, `icons/phosphor/`, `icons/streamline/`) plus the all-brands

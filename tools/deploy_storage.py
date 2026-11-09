@@ -27,6 +27,7 @@ API = "https://api.vercel.com"
 PROJECTS = (
     ("artbase", ROOT / "docs"),
     ("artbase-handoff", ROOT / "artifacts" / "handoff"),
+    ("artbase-handoff-apk", ROOT / "artifacts" / "handoff-apk"),
     ("artbase-shots", ROOT / "artifacts" / "shots"),
 )
 COUNT_WARN = 40

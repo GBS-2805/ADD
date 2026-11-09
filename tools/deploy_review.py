@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Deploy a review surface only after the deployment-storage gate passes.
 
+    python3 tools/deploy_review.py apk
     python3 tools/deploy_review.py handoff
     python3 tools/deploy_review.py shots
     python3 tools/deploy_review.py review
@@ -24,6 +25,7 @@ sys.path.insert(0, str(ROOT / "tools"))
 from deploy_storage import check as storage_check  # noqa: E402 - the tools directory is on the path above
 
 TARGETS = {
+    "apk": ("artifacts/handoff-apk", "artbase-handoff-apk", "VERCEL_APK_TOKEN"),
     "handoff": ("artifacts/handoff", "artbase-handoff", "VERCEL_HANDOFF_TOKEN"),
     "review": ("docs", "artbase-review", "VERCEL_REVIEW_TOKEN"),
     "shots": ("artifacts/shots", "artbase-shots", "VERCEL_SHOTS_TOKEN"),
@@ -67,8 +69,8 @@ def main():
     # The child gets only this target's deploy token, never the admin token.
     env = {key: value for key, value in os.environ.items()
            if key not in {"VERCEL_ADMIN_TOKEN", "VERCEL_ARTBASE_TOKEN",
-                          "VERCEL_HANDOFF_TOKEN", "VERCEL_REVIEW_TOKEN",
-                          "VERCEL_SHOTS_TOKEN"}}
+                          "VERCEL_APK_TOKEN", "VERCEL_HANDOFF_TOKEN",
+                          "VERCEL_REVIEW_TOKEN", "VERCEL_SHOTS_TOKEN"}}
     env["VERCEL_TOKEN"] = token
     proc = subprocess.run(cmd, cwd=ROOT, capture_output=True, text=True, env=env)
     print((proc.stdout + proc.stderr).rstrip())

@@ -1,8 +1,8 @@
 # Deployment storage operations
 
-This is the runbook for the Vercel deployment storage of `artbase`, `artbase-handoff`
-and `artbase-shots`. It is an operational and evidence record, not a compliance
-certificate.
+This is the runbook for the Vercel deployment storage of `artbase`, `artbase-handoff`,
+`artbase-handoff-apk` and `artbase-shots`. It is an operational and evidence record,
+not a compliance certificate.
 
 ## Current baseline
 
@@ -19,6 +19,7 @@ certificate.
 
 ```bash
 python3 tools/deploy_vercel.py                 # docs / artbase
+python3 tools/deploy_review.py apk             # artifacts/handoff-apk
 python3 tools/deploy_review.py handoff         # artifacts/handoff
 python3 tools/deploy_review.py shots           # artifacts/shots
 python3 tools/deploy_review.py review          # docs / artbase-review
@@ -36,6 +37,7 @@ deploying. `deploy_review.py --check` does not need a token.
 Use the narrowest token available:
 
 - `VERCEL_ARTBASE_TOKEN` for the docs deploy, otherwise `VERCEL_TOKEN`.
+- `VERCEL_APK_TOKEN` for the review APK deploy, otherwise `VERCEL_TOKEN`.
 - `VERCEL_HANDOFF_TOKEN` for the handoff deploy, otherwise `VERCEL_TOKEN`.
 - `VERCEL_REVIEW_TOKEN` for the temporary review deploy, otherwise `VERCEL_TOKEN`.
 - `VERCEL_SHOTS_TOKEN` for the shots deploy, otherwise `VERCEL_TOKEN`.
@@ -80,7 +82,8 @@ the project back.
    team).
 2. Protect the current production aliases and the newest 10 production deployments.
    Never delete the deployment holding `artbase-olive.vercel.app`,
-   `artbase-handoff.vercel.app` or `artbase-shots.vercel.app`.
+   `artbase-handoff.vercel.app`, `artbase-handoff-apk.vercel.app` or
+   `artbase-shots.vercel.app`.
 3. List candidates and record project, deployment ID, age and target.
 4. Delete with `vercel remove --safe --yes --token "$VERCEL_ADMIN_TOKEN" --scope
    alfredglezespitia-1605 <deployment>`; do not use an unrestricted pattern.
@@ -130,6 +133,13 @@ Vercel's [Activity Log](https://vercel.com/docs/activity-log) is available on Ho
 
 ## Change log
 
+- **2026-11-09** — Moved the 29,041,927-byte build 47 review APK to the dedicated
+  `artbase-handoff-apk` project and removed it from `artifacts/handoff`, so a handoff
+  deployment carries the page and five screenshots (~1.4 MiB) instead of the APK.
+  The handoff page links the stable `https://artbase-handoff-apk.vercel.app/` URL.
+  The handoff estimate drops from 931.2 MiB to ~46 MiB; the old fat deployments remain
+  retained until Vercel expires them, and the new project adds one ~27.7 MiB copy.
+  Retention on the new project is 1d/keep 10, matching the other projects.
 - **2026-11-07** — Replaced the 54-image shots showcase with nine green-dark
   representatives plus a 3×3 contact sheet, published `artbase-shots`, and pruned
   the five oldest deployments to the newest 10; the live alias was protected and
