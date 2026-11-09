@@ -17,7 +17,9 @@ import java.io.File
  * rather than decoded into a document missing whatever that build added.
  */
 object DocumentCodec {
-    const val VERSION = 2
+    // 3 adds the optional paint and style blocks. Schema 1 and 2 documents carry
+    // neither and decode to solid paint, normal blend and bypassed effects.
+    const val VERSION = 3
 
     data class Document(
         val layers: List<Layer>,
@@ -77,6 +79,7 @@ object DocumentCodec {
                 o.put("fill", layer.fill)
                 o.put("stroke", layer.stroke)
                 o.put("strokeWidth", layer.strokeWidth.toDouble())
+                layer.paint?.let { o.put("paint", encodePaint(it)) }
             }
             is TextLayer -> {
                 o.put("text", layer.text)
@@ -85,6 +88,7 @@ object DocumentCodec {
                 o.put("color", layer.color)
                 o.put("align", layer.align.name)
                 o.put("weight", layer.weight)
+                layer.paint?.let { o.put("paint", encodePaint(it)) }
             }
             is IconLayer -> {
                 o.put("glyph", encodeGlyph(layer.glyph))
@@ -99,6 +103,7 @@ object DocumentCodec {
                 o.put("fill", layer.fill)
             }
         }
+        if (layer.style != LayerStyle()) o.put("style", encodeStyle(layer.style))
         return o
     }
 
@@ -128,6 +133,8 @@ object DocumentCodec {
                 fill = o.optInt("fill", 0xFF0FBF92.toInt()),
                 stroke = o.optInt("stroke", 0xFF11231C.toInt()),
                 strokeWidth = o.optDouble("strokeWidth", 4.0).toFloat(),
+                paint = decodePaint(o.optJSONObject("paint")),
+                style = decodeStyle(o.optJSONObject("style")),
             )
             "text" -> TextLayer(
                 id = id,
@@ -146,6 +153,8 @@ object DocumentCodec {
                 align = runCatching { TextAlign.valueOf(o.optString("align", "Left")) }
                     .getOrDefault(TextAlign.Left),
                 weight = o.optInt("weight", 600),
+                paint = decodePaint(o.optJSONObject("paint")),
+                style = decodeStyle(o.optJSONObject("style")),
             )
             "icon" -> IconLayer(
                 id = id,
@@ -159,6 +168,7 @@ object DocumentCodec {
                 rotation = rotation,
                 glyph = o.optJSONObject("glyph")?.let { decodeGlyph(it) } ?: return null,
                 tint = o.optInt("tint", 0xFF11231C.toInt()),
+                style = decodeStyle(o.optJSONObject("style")),
             )
             "image" -> ImageLayer(
                 id = id,
@@ -172,6 +182,7 @@ object DocumentCodec {
                 rotation = rotation,
                 path = o.optString("path"),
                 fill = o.optBoolean("fill", true),
+                style = decodeStyle(o.optJSONObject("style")),
             )
             "model" -> ModelLayer(
                 id = id,
@@ -186,9 +197,164 @@ object DocumentCodec {
                 scaleToUnits = o.optDouble("scaleToUnits", 1.0).toFloat(),
                 asset = runCatching { ModelAsset.valueOf(o.optString("asset", "Gem")) }
                     .getOrDefault(ModelAsset.Gem),
+                style = decodeStyle(o.optJSONObject("style")),
             )
             else -> null
         }
+    }
+
+    private fun encodePaint(paint: PaintSpec): JSONObject = JSONObject().apply {
+        when (paint) {
+            is PaintSpec.Solid -> {
+                put("type", "solid")
+                put("color", paint.color)
+            }
+            is PaintSpec.Gradient -> {
+                put("type", "gradient")
+                put("kind", paint.kind.name)
+                put("stops", JSONArray().also { array ->
+                    paint.stops.forEach { stop ->
+                        array.put(
+                            JSONObject()
+                                .put("offset", stop.offset.toDouble())
+                                .put("color", stop.color)
+                        )
+                    }
+                })
+            }
+            is PaintSpec.Image -> {
+                put("type", "image")
+                put("path", paint.path)
+                put("fill", paint.fill)
+            }
+            is PaintSpec.Pattern -> {
+                put("type", "pattern")
+                put("kind", paint.kind.name)
+                put("foreground", paint.foreground)
+                put("background", paint.background)
+                put("scale", paint.scale.toDouble())
+            }
+        }
+    }
+
+    private fun decodePaint(o: JSONObject?): PaintSpec? {
+        if (o == null) return null
+        return when (o.optString("type")) {
+            "solid" -> PaintSpec.Solid(o.optInt("color", 0xFF0FBF92.toInt()))
+            "gradient" -> {
+                val kind = runCatching { PaintKind.valueOf(o.optString("kind", "Linear")) }
+                    .getOrDefault(PaintKind.Linear)
+                val stops = o.optJSONArray("stops").orEmpty().map { stop ->
+                    PaintStop(
+                        offset = stop.optDouble("offset", 0.0).toFloat().coerceIn(0f, 1f),
+                        color = stop.optInt("color", 0xFF000000.toInt()),
+                    )
+                }
+                if (stops.size < 2) null else PaintSpec.Gradient(kind, stops)
+            }
+            "image" -> PaintSpec.Image(
+                path = o.optString("path"),
+                fill = o.optBoolean("fill", true),
+            )
+            "pattern" -> PaintSpec.Pattern(
+                kind = runCatching { PatternKind.valueOf(o.optString("kind", "Checks")) }
+                    .getOrDefault(PatternKind.Checks),
+                foreground = o.optInt("foreground", 0xFF11231C.toInt()),
+                background = o.optInt("background", 0xFFF3EBDD.toInt()),
+                scale = o.optDouble("scale", 1.0).toFloat(),
+            )
+            else -> null
+        }
+    }
+
+    private fun encodeStyle(style: LayerStyle): JSONObject = JSONObject().apply {
+        put("blend", style.blend.name)
+        put("clip", style.clipToBelow)
+        put("effects", encodeEffects(style.effects))
+        style.mask?.let { mask ->
+            put("mask", JSONObject()
+                .put("enabled", mask.enabled)
+                .put("strokes", JSONArray().also { strokes ->
+                    mask.strokes.forEach { stroke ->
+                        strokes.put(
+                            JSONObject()
+                                .put("radius", stroke.radius.toDouble())
+                                .put("erase", stroke.erase)
+                                .put("points", JSONArray().also { points ->
+                                    stroke.points.forEach { point ->
+                                        points.put(
+                                            JSONObject()
+                                                .put("x", point.x.toDouble())
+                                                .put("y", point.y.toDouble())
+                                        )
+                                    }
+                                })
+                        )
+                    }
+                }))
+        }
+    }
+
+    private fun decodeStyle(o: JSONObject?): LayerStyle {
+        if (o == null) return LayerStyle()
+        val maskObject = o.optJSONObject("mask")
+        return LayerStyle(
+            blend = BlendKind.fromName(o.optString("blend", "Normal")),
+            clipToBelow = o.optBoolean("clip", false),
+            effects = decodeEffects(o.optJSONObject("effects")),
+            mask = maskObject?.let { mask ->
+                LayerMask(
+                    enabled = mask.optBoolean("enabled", true),
+                    strokes = mask.optJSONArray("strokes").orEmpty().map { stroke ->
+                        MaskStroke(
+                            points = stroke.optJSONArray("points").orEmpty().map { point ->
+                                MaskPoint(
+                                    x = point.optDouble("x", 0.0).toFloat(),
+                                    y = point.optDouble("y", 0.0).toFloat(),
+                                )
+                            },
+                            radius = stroke.optDouble("radius", 0.1).toFloat(),
+                            erase = stroke.optBoolean("erase", true),
+                        )
+                    },
+                )
+            },
+        )
+    }
+
+    private fun encodeEffects(effects: LayerEffects): JSONObject = JSONObject().apply {
+        put("enabled", effects.enabled)
+        put("exposure", effects.exposure.toDouble())
+        put("contrast", effects.contrast.toDouble())
+        put("saturation", effects.saturation.toDouble())
+        put("shadows", effects.shadows.toDouble())
+        put("midtones", effects.midtones.toDouble())
+        put("highlights", effects.highlights.toDouble())
+        put("blur", effects.blur.toDouble())
+        put("grain", effects.grain.toDouble())
+        put("halftone", effects.halftone.toDouble())
+        put("duotone", effects.duotone)
+        put("duotoneDark", effects.duotoneDark)
+        put("duotoneLight", effects.duotoneLight)
+    }
+
+    private fun decodeEffects(o: JSONObject?): LayerEffects {
+        if (o == null) return LayerEffects()
+        return LayerEffects(
+            enabled = o.optBoolean("enabled", true),
+            exposure = o.optDouble("exposure", 0.0).toFloat(),
+            contrast = o.optDouble("contrast", 0.0).toFloat(),
+            saturation = o.optDouble("saturation", 0.0).toFloat(),
+            shadows = o.optDouble("shadows", 0.0).toFloat(),
+            midtones = o.optDouble("midtones", 0.0).toFloat(),
+            highlights = o.optDouble("highlights", 0.0).toFloat(),
+            blur = o.optDouble("blur", 0.0).toFloat(),
+            grain = o.optDouble("grain", 0.0).toFloat(),
+            halftone = o.optDouble("halftone", 0.0).toFloat(),
+            duotone = o.optBoolean("duotone", false),
+            duotoneDark = o.optInt("duotoneDark", 0xFF11231C.toInt()),
+            duotoneLight = o.optInt("duotoneLight", 0xFFD6E381.toInt()),
+        )
     }
 
     private fun encodeNetwork(network: VectorNetwork): JSONObject = JSONObject().apply {
@@ -242,7 +408,12 @@ object DocumentCodec {
         val regions = o.optJSONArray("regions").orEmpty().map { region ->
             VecRegion(
                 id = region.optString("id"),
-                segments = region.optJSONArray("segments").orEmpty().map { it.toString() },
+                // Region segments are strings, not objects. The object reader this used
+                // to call swallowed every entry and left a region with no path, so a
+                // restored vector layer painted nothing at all.
+                segments = region.optJSONArray("segments")?.let { array ->
+                    List(array.length()) { array.getString(it) }
+                } ?: emptyList(),
                 fill = region.optInt("fill", 0),
             )
         }

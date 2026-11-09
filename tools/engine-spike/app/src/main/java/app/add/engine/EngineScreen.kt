@@ -8,6 +8,7 @@ import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -599,7 +600,7 @@ contentAlignment = Alignment.Center,
             Canvas(
                 modifier = Modifier
                     .matchParentSize()
-                    .pointerInput(doc.tool, doc.selectedId, scale, hitX, hitY, insetX, insetY) {
+                    .pointerInput(doc.tool, doc.selectedId, doc.maskMode, scale, hitX, hitY, insetX, insetY) {
                         awaitEachGesture {
                             val down = awaitFirstDown(requireUnconsumed = false)
                             onCanvasTouch()
@@ -616,6 +617,30 @@ contentAlignment = Alignment.Center,
                             var startLayer: Layer? = null
                             var startAngle = 0f
                             var startDistance = 0f
+
+                            // Mask painting owns the drag before any transform handle does:
+                            // while the brush is armed the stage writes mask strokes, not moves.
+                            if (doc.maskMode && selectedAtDown != null) {
+                                val maskLayer = selectedAtDown
+                                fun localX(x: Float) = ((x - maskLayer.x) / maskLayer.w).coerceIn(-0.2f, 1.2f)
+                                fun localY(y: Float) = ((y - maskLayer.y) / maskLayer.h).coerceIn(-0.2f, 1.2f)
+                                doc.beginGesture()
+                                doc.beginMaskStroke(localX(nx), localY(ny))
+                                while (true) {
+                                    val event = awaitPointerEvent()
+                                    if (event.changes.count { it.pressed } > 1) break
+                                    val change = event.changes.firstOrNull { it.id == down.id } ?: break
+                                    if (!change.pressed) break
+                                    nx = (change.position.x / scale) / ArtboardPainter.W
+                                    ny = (change.position.y / scale) / ArtboardPainter.H
+                                    doc.extendMaskStroke(localX(nx), localY(ny))
+                                    change.consume()
+                                }
+                                doc.endMaskStroke()
+                                doc.endGesture()
+                                Diagnostics.endGesture(doc, "MASK", maskLayer.name, startX, startY, nx, ny)
+                                return@awaitEachGesture
+                            }
 
                             if (handle != null && selectedAtDown != null) {
                                 doc.beginGesture()
@@ -693,8 +718,14 @@ contentAlignment = Alignment.Center,
             ) {
                 drawContext.canvas.nativeCanvas.apply {
                     save()
-                    scale(scale, scale)
-                    ArtboardPainter.draw(this, doc.layers, typefaces, images = images, safeArea = doc.safeArea)
+                    ArtboardPainter.draw(
+                        this,
+                        doc.layers,
+                        typefaces,
+                        images = images,
+                        safeArea = doc.safeArea,
+                        scale = scale,
+                    )
                     restore()
                 }
             }
@@ -1178,6 +1209,7 @@ private fun Inspector(doc: EngineDocument, handle: SceneHandle, onIcons: () -> U
                     ImageInspector(doc, layer)
                 }
             }
+            doc.selected?.let { CompositeInspector(doc, it) }
         }
     }
 }
@@ -1857,6 +1889,212 @@ private fun ModelInspector(doc: EngineDocument, layer: ModelLayer, handle: Scene
     Spacer(Modifier.height(4.dp))
     InfoLine("UNIT SCALE = MODEL IN FRAME · SCALE DIAL = FRAME")
     Actions(doc)
+}
+
+/**
+ * The compositing controls every layer shares: its paint, blend, mask, clip and
+ * non-destructive effect stack. They sit under the kind-specific inspector so a
+ * gradient fill and a Difference blend are reachable without a second screen.
+ */
+@Composable
+private fun CompositeInspector(doc: EngineDocument, layer: Layer) {
+    Spacer(Modifier.height(9.dp))
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Text("COMPOSITE", color = Cream, fontSize = 8.sp, letterSpacing = 1.1.sp, fontWeight = FontWeight.SemiBold)
+        Spacer(Modifier.weight(1f))
+        Text(layer.style.blend.label, color = Mint, fontSize = 7.sp, maxLines = 1)
+    }
+    val layerPaint = when (layer) {
+        is VectorLayer -> layer.paint
+        is TextLayer -> layer.paint
+        else -> null
+    }
+    if (layer is VectorLayer || layer is TextLayer) {
+        Spacer(Modifier.height(3.dp))
+        Row(
+            modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
+            PaintKind.entries.forEach { kind ->
+                ActionChip(
+                    label = kind.label,
+                    active = when (val paint = layerPaint) {
+                        null -> kind == PaintKind.Solid
+                        is PaintSpec.Solid -> kind == PaintKind.Solid
+                        is PaintSpec.Gradient -> paint.kind == kind
+                        is PaintSpec.Image -> kind == PaintKind.Image
+                        is PaintSpec.Pattern -> kind == PaintKind.Pattern
+                    },
+                    onClick = { doc.setPaintKind(kind) },
+                )
+            }
+        }
+        (layerPaint as? PaintSpec.Gradient)?.let { gradient ->
+            GradientStops(doc, layer.id, gradient)
+        }
+        (layerPaint as? PaintSpec.Pattern)?.let { pattern ->
+            Spacer(Modifier.height(3.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+                PatternKind.entries.forEach { kind ->
+                    ActionChip(
+                        label = kind.label,
+                        active = pattern.kind == kind,
+                        onClick = { doc.setPatternKind(kind) },
+                    )
+                }
+            }
+            SliderRow(
+                label = "PATTERN SCALE",
+                value = pattern.scale,
+                range = 0.25f..4f,
+                display = { String.format("%.2f×", it) },
+                onChange = { doc.setPatternScale(it) },
+            )
+        }
+    }
+    Spacer(Modifier.height(5.dp))
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        ActionChip("◀", onClick = { doc.cycleBlend(-1) })
+        Spacer(Modifier.width(4.dp))
+        Text(
+            layer.style.blend.label,
+            color = Cream,
+            fontSize = 8.sp,
+            fontWeight = FontWeight.SemiBold,
+            maxLines = 1,
+            modifier = Modifier.weight(1f),
+        )
+        ActionChip("▶", onClick = { doc.cycleBlend(1) })
+    }
+    Spacer(Modifier.height(3.dp))
+    Row(
+        modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
+        listOf(
+            BlendKind.Normal,
+            BlendKind.Multiply,
+            BlendKind.Screen,
+            BlendKind.Overlay,
+            BlendKind.Difference,
+        ).forEach { kind ->
+            ActionChip(
+                label = kind.label,
+                active = layer.style.blend == kind,
+                onClick = { doc.setBlend(kind) },
+            )
+        }
+    }
+    Spacer(Modifier.height(3.dp))
+    Row(
+        modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
+        ActionChip("CLIP TO BELOW", active = layer.style.clipToBelow, onClick = { doc.toggleClip() })
+        ActionChip("MASK PAINT", active = doc.maskMode, onClick = { doc.toggleMaskMode() })
+        ActionChip(
+            label = if (doc.maskErase) "ERASE" else "RESTORE",
+            active = doc.maskErase,
+            onClick = { doc.toggleMaskErase() },
+        )
+        ActionChip("MASK ON", active = layer.style.mask?.enabled != false, onClick = { doc.toggleMask() })
+        ActionChip("CLEAR MASK", warn = true, onClick = { doc.clearMask() })
+    }
+    SliderRow(
+        label = "MASK SIZE",
+        value = doc.maskBrushSize,
+        range = 0.02f..0.35f,
+        display = { "${(it * 100).toInt()}%" },
+        onChange = { doc.setMaskRadius(it) },
+    )
+    Spacer(Modifier.height(5.dp))
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Text("EFFECTS", color = Mint, fontSize = 7.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 0.8.sp)
+        Spacer(Modifier.weight(1f))
+        ActionChip(
+            label = if (layer.style.effects.enabled) "ON" else "BYPASS",
+            active = layer.style.effects.enabled,
+            onClick = { doc.toggleEffects() },
+        )
+        Spacer(Modifier.width(4.dp))
+        ActionChip("DUOTONE", active = layer.style.effects.duotone, onClick = { doc.toggleDuotone() })
+    }
+    val fx = layer.style.effects
+    TransformSlider(doc, "EXPOSURE", fx.exposure, -2f..2f, { String.format("%+.2f", it) }) { doc.setExposure(it) }
+    TransformSlider(doc, "CONTRAST", fx.contrast, -1f..1f, { String.format("%+.2f", it) }) { doc.setContrast(it) }
+    TransformSlider(doc, "SATURATION", fx.saturation, -1f..1f, { String.format("%+.2f", it) }) { doc.setSaturation(it) }
+    TransformSlider(doc, "SHADOWS", fx.shadows, -1f..1f, { String.format("%+.2f", it) }) { doc.setShadows(it) }
+    TransformSlider(doc, "MIDTONES", fx.midtones, -1f..1f, { String.format("%+.2f", it) }) { doc.setMidtones(it) }
+    TransformSlider(doc, "HIGHLIGHTS", fx.highlights, -1f..1f, { String.format("%+.2f", it) }) { doc.setHighlights(it) }
+    TransformSlider(doc, "BLUR", fx.blur, 0f..24f, { "${it.toInt()} px" }) { doc.setBlur(it) }
+    TransformSlider(doc, "GRAIN", fx.grain, 0f..1f, { "${(it * 100).toInt()}%" }) { doc.setGrain(it) }
+    TransformSlider(doc, "HALFTONE", fx.halftone, 0f..1f, { "${(it * 100).toInt()}%" }) { doc.setHalftone(it) }
+    Spacer(Modifier.height(4.dp))
+    InfoLine("EFFECTS RUN ON THE LAYER BITMAP · MASK CUTS THEM · CLIP USES THE LAYER BELOW")
+}
+
+@Composable
+private fun GradientStops(doc: EngineDocument, layerId: String, gradient: PaintSpec.Gradient) {
+    var chosen by remember(layerId) { mutableStateOf(0) }
+    val index = chosen.coerceIn(0, gradient.stops.lastIndex)
+    val stop = gradient.stops.getOrNull(index) ?: return
+    Spacer(Modifier.height(3.dp))
+    Row(
+        modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
+        gradient.stops.forEachIndexed { i, _ ->
+            ActionChip("${i + 1}", active = i == index, onClick = { chosen = i })
+        }
+        ActionChip("+ STOP", onClick = { doc.addPaintStop() })
+        ActionChip(
+            label = "− STOP",
+            warn = gradient.stops.size > 2,
+            onClick = {
+                doc.removePaintStop(index)
+                chosen = 0
+            },
+        )
+    }
+    SliderRow(
+        label = "STOP POSITION",
+        value = stop.offset,
+        range = 0f..1f,
+        display = { "${(it * 100).toInt()}%" },
+        onChange = { doc.setPaintStopOffset(index, it) },
+    )
+    SliderRow(
+        label = "STOP ALPHA",
+        value = colorAlpha(stop.color),
+        range = 0f..1f,
+        display = { "${(it * 100).toInt()}%" },
+        onChange = { doc.setPaintStopAlpha(index, it) },
+    )
+    Row(horizontalArrangement = Arrangement.spacedBy(5.dp)) {
+        listOf(
+            0xFF0FBF92.toInt(),
+            0xFFE86A4A.toInt(),
+            0xFFD6E381.toInt(),
+            0xFF11231C.toInt(),
+            0xFFF2EEE3.toInt(),
+        ).forEach { value ->
+            Box(
+                modifier = Modifier
+                    .size(17.dp)
+                    .clip(CircleShape)
+                    .background(Color(value))
+                    .border(
+                        1.dp,
+                        if ((value and 0xFFFFFF) == (stop.color and 0xFFFFFF)) Lime else Rule,
+                        CircleShape,
+                    )
+                    .clickable { doc.setPaintStopColor(index, value) },
+            )
+        }
+    }
 }
 
 @Composable

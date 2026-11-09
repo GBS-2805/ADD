@@ -4,6 +4,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import java.util.UUID
+import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
 
@@ -31,6 +32,8 @@ sealed interface Layer {
     val h: Float
     val opacity: Float
     val rotation: Float
+    /** Blend, mask and non-destructive effects; defaults leave older layers unchanged. */
+    val style: LayerStyle
 }
 
 data class VectorLayer(
@@ -47,6 +50,8 @@ data class VectorLayer(
     val fill: Int,
     val stroke: Int,
     val strokeWidth: Float,
+    val paint: PaintSpec? = null,
+    override val style: LayerStyle = LayerStyle(),
 ) : Layer
 
 data class TextLayer(
@@ -65,6 +70,8 @@ data class TextLayer(
     val color: Int,
     val align: TextAlign = TextAlign.Left,
     val weight: Int = 600,
+    val paint: PaintSpec? = null,
+    override val style: LayerStyle = LayerStyle(),
 ) : Layer
 
 data class IconLayer(
@@ -79,6 +86,7 @@ data class IconLayer(
     override val rotation: Float = 0f,
     val glyph: IconGlyph,
     val tint: Int,
+    override val style: LayerStyle = LayerStyle(),
 ) : Layer
 
 data class ImageLayer(
@@ -95,6 +103,7 @@ data class ImageLayer(
     val path: String,
     /** True fills the frame and crops; false fits the whole photograph inside it. */
     val fill: Boolean = true,
+    override val style: LayerStyle = LayerStyle(),
 ) : Layer
 
 data class ModelLayer(
@@ -109,6 +118,7 @@ data class ModelLayer(
     override val rotation: Float = 0f,
     val scaleToUnits: Float = 1.0f,
     val asset: ModelAsset = ModelAsset.Gem,
+    override val style: LayerStyle = LayerStyle(),
 ) : Layer
 
 val Layer.kindLabel: String
@@ -122,6 +132,34 @@ val Layer.kindLabel: String
 
 val Layer.isVector: Boolean get() = this is VectorLayer
 
+fun diamondNetwork(): VectorNetwork = VectorNetwork(
+    points = listOf(
+        VecPoint("diamond-a", 0.5f, 0.04f),
+        VecPoint("diamond-b", 0.96f, 0.5f),
+        VecPoint("diamond-c", 0.5f, 0.96f),
+        VecPoint("diamond-d", 0.04f, 0.5f),
+    ),
+    segments = listOf(
+        VecSegment("diamond-ab", "diamond-a", "diamond-b"),
+        VecSegment("diamond-bc", "diamond-b", "diamond-c"),
+        VecSegment("diamond-cd", "diamond-c", "diamond-d"),
+        VecSegment("diamond-da", "diamond-d", "diamond-a"),
+    ),
+    regions = listOf(
+        VecRegion(
+            "diamond-region",
+            listOf("diamond-ab", "diamond-bc", "diamond-cd", "diamond-da"),
+            0xFFE86A4A.toInt(),
+        )
+    ),
+)
+
+/**
+ * The first page is also the engine's own test plate: a gradient star, a
+ * Difference layer carrying a paint mask and a grade, a diamond clipped to it,
+ * gradient type and a duotone caption. The 3D layer is off so a device without
+ * a working Filament context still paints the whole composition.
+ */
 fun seedLayers(): List<Layer> = listOf(
     TextLayer(
         id = "type-kicker",
@@ -138,7 +176,7 @@ fun seedLayers(): List<Layer> = listOf(
     ),
     VectorLayer(
         id = "vector-star",
-        name = "VECTOR / STAR",
+        name = "VECTOR / GRADIENT STAR",
         x = 0.055f,
         y = 0.11f,
         w = 0.44f,
@@ -147,6 +185,15 @@ fun seedLayers(): List<Layer> = listOf(
         fill = 0xFF0FBF92.toInt(),
         stroke = 0xFF11231C.toInt(),
         strokeWidth = 5f,
+        paint = PaintSpec.Gradient(
+            kind = PaintKind.Linear,
+            stops = listOf(
+                PaintStop(0f, 0xFF11231C.toInt()),
+                PaintStop(0.42f, 0xFF0FBF92.toInt()),
+                PaintStop(0.78f, colorWithAlpha(0xFFD6E381.toInt(), 0.86f)),
+                PaintStop(1f, colorWithAlpha(0xFFF2EEE3.toInt(), 0.55f)),
+            ),
+        ),
     ),
     VectorLayer(
         id = "vector-orbit",
@@ -160,9 +207,56 @@ fun seedLayers(): List<Layer> = listOf(
         stroke = 0xFF11231C.toInt(),
         strokeWidth = 4f,
     ),
+    VectorLayer(
+        id = "vector-blend",
+        name = "VECTOR / DIFFERENCE + MASK",
+        x = 0.46f,
+        y = 0.14f,
+        w = 0.42f,
+        h = squareFrameHeight(0.42f),
+        network = diamondNetwork(),
+        fill = 0xFFE86A4A.toInt(),
+        stroke = 0xFF11231C.toInt(),
+        strokeWidth = 4f,
+        style = LayerStyle(
+            blend = BlendKind.Difference,
+            effects = LayerEffects(
+                enabled = true,
+                exposure = 0.25f,
+                contrast = 0.4f,
+                saturation = 0.2f,
+                grain = 0.22f,
+            ),
+            mask = LayerMask(
+                strokes = listOf(
+                    MaskStroke(
+                        points = listOf(
+                            MaskPoint(0.06f, 0.82f),
+                            MaskPoint(0.5f, 0.5f),
+                            MaskPoint(0.94f, 0.18f),
+                        ),
+                        radius = 0.13f,
+                    ),
+                ),
+            ),
+        ),
+    ),
+    VectorLayer(
+        id = "vector-clip",
+        name = "VECTOR / CLIP TO BELOW",
+        x = 0.60f,
+        y = 0.215f,
+        w = 0.17f,
+        h = squareFrameHeight(0.17f),
+        network = diamondNetwork(),
+        fill = 0xFFD6E381.toInt(),
+        stroke = 0xFF11231C.toInt(),
+        strokeWidth = 2f,
+        style = LayerStyle(clipToBelow = true),
+    ),
     TextLayer(
         id = "type-statement",
-        name = "TYPE / STATEMENT",
+        name = "TYPE / SWEEP GRADIENT",
         x = 0.07f,
         y = 0.555f,
         w = 0.47f,
@@ -172,10 +266,42 @@ fun seedLayers(): List<Layer> = listOf(
         lineHeight = 0.88f,
         color = 0xFF11231C.toInt(),
         weight = 600,
+        paint = PaintSpec.Gradient(
+            kind = PaintKind.Sweep,
+            stops = listOf(
+                PaintStop(0f, 0xFF0FBF92.toInt()),
+                PaintStop(0.35f, 0xFFE86A4A.toInt()),
+                PaintStop(0.7f, 0xFFD6E381.toInt()),
+                PaintStop(1f, 0xFF0FBF92.toInt()),
+            ),
+        ),
+        style = LayerStyle(effects = LayerEffects(contrast = 0.12f, grain = 0.18f)),
+    ),
+    TextLayer(
+        id = "type-duotone",
+        name = "TYPE / DUOTONE",
+        x = 0.57f,
+        y = 0.80f,
+        w = 0.36f,
+        h = 0.06f,
+        text = "DUOTONE / GRAIN",
+        fontSize = 28f,
+        lineHeight = 1f,
+        color = 0xFF11231C.toInt(),
+        weight = 600,
+        style = LayerStyle(
+            effects = LayerEffects(
+                duotone = true,
+                duotoneDark = 0xFF0C1210.toInt(),
+                duotoneLight = 0xFFD6E381.toInt(),
+                grain = 0.18f,
+            ),
+        ),
     ),
     ModelLayer(
         id = "model-gem",
         name = "3D / GEM",
+        visible = false,
         x = 0.57f,
         y = 0.49f,
         w = 0.36f,
@@ -216,6 +342,13 @@ class EngineDocument(initial: List<Layer>? = null) {
 
     /** A composition guide, not a document property: it is off on every launch. */
     var safeArea by mutableStateOf(false)
+
+    /** Paint-mask drawing: when true a drag on the stage writes mask strokes. */
+    var maskMode by mutableStateOf(false)
+    /** True erases from the mask, false paints it back. */
+    var maskErase by mutableStateOf(true)
+    /** Brush size as a fraction of the layer's short side. */
+    var maskBrushSize by mutableStateOf(0.12f)
 
     /** The control that made the last change, so the recorder can name it. */
     var action by mutableStateOf("OPEN")
@@ -793,6 +926,268 @@ class EngineDocument(initial: List<Layer>? = null) {
         updateSelected { it.withOpacity(value.coerceIn(0.1f, 1f)) }
     }
 
+    // ------------------------------------------------------------------ paint
+
+    /** The two layer kinds that carry a paint; icons keep their own tint rules. */
+    private fun paintable(): Layer? = selected?.takeIf { it is VectorLayer || it is TextLayer }
+
+    private fun paintOf(layer: Layer): PaintSpec? = when (layer) {
+        is VectorLayer -> layer.paint
+        is TextLayer -> layer.paint
+        else -> null
+    }
+
+    fun setPaintKind(kind: PaintKind) {
+        val layer = paintable() ?: return
+        val base = when (layer) {
+            is VectorLayer -> layer.fill
+            is TextLayer -> layer.color
+            else -> 0xFF0FBF92.toInt()
+        }
+        val spec: PaintSpec? = when (kind) {
+            PaintKind.Solid -> null
+            PaintKind.Linear, PaintKind.Radial, PaintKind.Sweep, PaintKind.Diamond ->
+                defaultGradient(base, kind)
+            PaintKind.Pattern -> PaintSpec.Pattern(
+                kind = PatternKind.Checks,
+                foreground = base,
+                background = 0xFFF3EBDD.toInt(),
+            )
+            PaintKind.Image -> layers.filterIsInstance<ImageLayer>().firstOrNull()
+                ?.let { PaintSpec.Image(it.path) }
+        }
+        if (kind == PaintKind.Image && spec == null) {
+            status = "NO PHOTO IN THE DOCUMENT TO FILL FROM"
+            return
+        }
+        act("PAINT ${kind.label}", layer.name)
+        commit { list -> list.map { if (it.id == layer.id) it.withPaint(spec) else it } }
+        status = "PAINT · ${spec?.label ?: "SOLID"}"
+    }
+
+    fun setPatternKind(kind: PatternKind) {
+        val layer = paintable() ?: return
+        val pattern = paintOf(layer) as? PaintSpec.Pattern ?: return
+        act("PATTERN ${kind.label}", layer.name)
+        updateSelected { it.withPaint(pattern.copy(kind = kind)) }
+        status = "PATTERN · ${kind.label}"
+    }
+
+    fun setPatternScale(value: Float) {
+        val layer = paintable() ?: return
+        val pattern = paintOf(layer) as? PaintSpec.Pattern ?: return
+        act("PATTERN SCALE")
+        updateSelected { it.withPaint(pattern.copy(scale = value.coerceIn(0.25f, 4f))) }
+    }
+
+    fun setPaintStopOffset(index: Int, offset: Float) {
+        act("STOP POSITION")
+        updateSelected { layer ->
+            layer.withGradient { gradient ->
+                gradient.copy(stops = gradient.stops.mapIndexed { i, stop ->
+                    if (i == index) stop.copy(offset = offset.coerceIn(0f, 1f)) else stop
+                })
+            }
+        }
+    }
+
+    fun setPaintStopColor(index: Int, color: Int) {
+        act("STOP COLOR")
+        updateSelected { layer ->
+            layer.withGradient { gradient ->
+                gradient.copy(stops = gradient.stops.mapIndexed { i, stop ->
+                    if (i == index) stop.copy(color = colorWithAlpha(color, colorAlpha(stop.color))) else stop
+                })
+            }
+        }
+    }
+
+    fun setPaintStopAlpha(index: Int, alpha: Float) {
+        act("STOP ALPHA")
+        updateSelected { layer ->
+            layer.withGradient { gradient ->
+                gradient.copy(stops = gradient.stops.mapIndexed { i, stop ->
+                    if (i == index) stop.copy(color = colorWithAlpha(stop.color, alpha)) else stop
+                })
+            }
+        }
+    }
+
+    fun addPaintStop() {
+        val layer = paintable() ?: return
+        val gradient = paintOf(layer)?.gradient ?: return
+        val ordered = gradient.stops.sortedBy { it.offset }
+        var gapIndex = 0
+        var gap = -1f
+        for (index in 0 until ordered.size - 1) {
+            val span = ordered[index + 1].offset - ordered[index].offset
+            if (span > gap) {
+                gap = span
+                gapIndex = index
+            }
+        }
+        val offset = (ordered[gapIndex].offset + ordered[gapIndex + 1].offset) / 2f
+        val color = mixColor(ordered[gapIndex].color, ordered[gapIndex + 1].color, 0.5f)
+        act("STOP+", layer.name)
+        commit { list ->
+            list.map { item ->
+                if (item.id == layer.id) {
+                    item.withPaint(gradient.copy(stops = gradient.stops + PaintStop(offset, color)))
+                } else item
+            }
+        }
+        status = "GRADIENT · ${gradient.stops.size + 1} STOPS"
+    }
+
+    fun removePaintStop(index: Int) {
+        val layer = paintable() ?: return
+        val gradient = paintOf(layer)?.gradient ?: return
+        if (gradient.stops.size <= 2) {
+            status = "A GRADIENT KEEPS AT LEAST TWO STOPS"
+            return
+        }
+        act("STOP−", layer.name)
+        commit { list ->
+            list.map { item ->
+                if (item.id == layer.id) {
+                    item.withPaint(gradient.copy(
+                        stops = gradient.stops.filterIndexed { i, _ -> i != index },
+                    ))
+                } else item
+            }
+        }
+        status = "GRADIENT · ${gradient.stops.size - 1} STOPS"
+    }
+
+    // ------------------------------------------------------------------ blend
+
+    fun setBlend(kind: BlendKind) {
+        if (selected == null) return
+        act("BLEND ${kind.label}", selected?.name)
+        updateSelected { it.withStyle(it.style.copy(blend = kind)) }
+        status = "BLEND · ${kind.label}"
+    }
+
+    fun cycleBlend(delta: Int) {
+        val current = selected?.style?.blend ?: BlendKind.Normal
+        val values = BlendKind.entries
+        val next = Math.floorMod(values.indexOf(current) + delta, values.size)
+        setBlend(values[next])
+    }
+
+    fun toggleClip() {
+        val layer = selected ?: return
+        act("CLIP", layer.name)
+        updateSelected { it.withStyle(it.style.copy(clipToBelow = !it.style.clipToBelow)) }
+        status = if (selected?.style?.clipToBelow == true) "CLIPPED TO THE LAYER BELOW" else "CLIP OFF"
+    }
+
+    // ------------------------------------------------------------------- mask
+
+    fun toggleMaskMode() {
+        maskMode = !maskMode
+        if (maskMode) {
+            tool = Tool.Select
+            status = "MASK PAINT · DRAG ON THE STAGE · ${if (maskErase) "ERASE" else "RESTORE"}"
+        } else {
+            status = "MASK PAINT DONE"
+        }
+    }
+
+    fun toggleMaskErase() {
+        maskErase = !maskErase
+        status = if (maskErase) "MASK BRUSH · ERASE" else "MASK BRUSH · RESTORE"
+    }
+
+    fun setMaskRadius(value: Float) {
+        maskBrushSize = value.coerceIn(0.02f, 0.4f)
+        act("MASK SIZE")
+    }
+
+    fun beginMaskStroke(x: Float, y: Float) {
+        val layer = selected ?: return
+        act("MASK PAINT", layer.name)
+        val mask = layer.style.mask ?: LayerMask()
+        val stroke = MaskStroke(listOf(MaskPoint(x, y)), radius = maskBrushSize, erase = maskErase)
+        layers = layers.map { item ->
+            if (item.id != layer.id) item
+            else item.withStyle(item.style.copy(mask = mask.copy(enabled = true, strokes = mask.strokes + stroke)))
+        }
+    }
+
+    fun extendMaskStroke(x: Float, y: Float) {
+        val layer = selected ?: return
+        val mask = layer.style.mask ?: return
+        val last = mask.strokes.lastOrNull() ?: return
+        val previous = last.points.lastOrNull()
+        if (previous != null && abs(previous.x - x) + abs(previous.y - y) < 0.002f) return
+        val strokes = mask.strokes.dropLast(1) + last.copy(points = last.points + MaskPoint(x, y))
+        layers = layers.map { item ->
+            if (item.id != layer.id) item
+            else item.withStyle(item.style.copy(mask = mask.copy(strokes = strokes)))
+        }
+    }
+
+    fun endMaskStroke() {
+        status = "MASK · ${selected?.style?.mask?.strokes?.size ?: 0} STROKES"
+    }
+
+    fun clearMask() {
+        val layer = selected ?: return
+        val mask = layer.style.mask ?: return
+        act("MASK CLEAR", layer.name)
+        updateSelected { it.withStyle(it.style.copy(mask = mask.copy(strokes = emptyList()))) }
+        status = "MASK CLEARED"
+    }
+
+    fun toggleMask() {
+        val layer = selected ?: return
+        val mask = layer.style.mask ?: LayerMask()
+        act("MASK", layer.name)
+        updateSelected { it.withStyle(it.style.copy(mask = mask.copy(enabled = !mask.enabled))) }
+        status = if (!mask.enabled) "MASK ON" else "MASK OFF"
+    }
+
+    // ---------------------------------------------------------------- effects
+
+    private fun effect(name: String, transform: (LayerEffects) -> LayerEffects) {
+        if (selected == null) return
+        act(name)
+        updateSelected { layer ->
+            layer.withStyle(layer.style.copy(effects = transform(layer.style.effects.copy(enabled = true))))
+        }
+    }
+
+    fun setExposure(value: Float) = effect("EXPOSURE") { it.copy(exposure = value.coerceIn(-2f, 2f)) }
+    fun setContrast(value: Float) = effect("CONTRAST") { it.copy(contrast = value.coerceIn(-1f, 1f)) }
+    fun setSaturation(value: Float) = effect("SATURATION") { it.copy(saturation = value.coerceIn(-1f, 1f)) }
+    fun setShadows(value: Float) = effect("SHADOWS") { it.copy(shadows = value.coerceIn(-1f, 1f)) }
+    fun setMidtones(value: Float) = effect("MIDTONES") { it.copy(midtones = value.coerceIn(-1f, 1f)) }
+    fun setHighlights(value: Float) = effect("HIGHLIGHTS") { it.copy(highlights = value.coerceIn(-1f, 1f)) }
+    fun setBlur(value: Float) = effect("BLUR") { it.copy(blur = value.coerceIn(0f, 24f)) }
+    fun setGrain(value: Float) = effect("GRAIN") { it.copy(grain = value.coerceIn(0f, 1f)) }
+    fun setHalftone(value: Float) = effect("HALFTONE") { it.copy(halftone = value.coerceIn(0f, 1f)) }
+
+    fun toggleDuotone() {
+        val layer = selected ?: return
+        act("DUOTONE", layer.name)
+        updateSelected {
+            it.withStyle(it.style.copy(
+                effects = it.style.effects.copy(enabled = true, duotone = !it.style.effects.duotone),
+            ))
+        }
+        status = if (selected?.style?.effects?.duotone == true) "DUOTONE LUT ON" else "DUOTONE LUT OFF"
+    }
+
+    fun toggleEffects() {
+        val layer = selected ?: return
+        act("EFFECTS", layer.name)
+        updateSelected {
+            it.withStyle(it.style.copy(effects = it.style.effects.copy(enabled = !it.style.effects.enabled)))
+        }
+        status = if (selected?.style?.effects?.enabled == true) "EFFECTS ON" else "EFFECTS BYPASSED"
+    }
+
     fun undo() {
         val previous = undoStack.removeLastOrNull() ?: return
         act("UNDO")
@@ -855,6 +1250,26 @@ class EngineDocument(initial: List<Layer>? = null) {
     }
 
     private fun newId(prefix: String) = "$prefix-${UUID.randomUUID().toString().take(6)}"
+}
+
+fun Layer.withStyle(value: LayerStyle): Layer = when (this) {
+    is VectorLayer -> copy(style = value)
+    is TextLayer -> copy(style = value)
+    is IconLayer -> copy(style = value)
+    is ImageLayer -> copy(style = value)
+    is ModelLayer -> copy(style = value)
+}
+
+fun Layer.withPaint(value: PaintSpec?): Layer = when (this) {
+    is VectorLayer -> copy(paint = value)
+    is TextLayer -> copy(paint = value)
+    else -> this
+}
+
+/** Applies a gradient change, leaving a solid/image/pattern paint untouched. */
+fun Layer.withGradient(transform: (PaintSpec.Gradient) -> PaintSpec.Gradient): Layer {
+    val gradient = ((this as? VectorLayer)?.paint ?: (this as? TextLayer)?.paint)?.gradient ?: return this
+    return withPaint(transform(gradient))
 }
 
 private fun Layer.withName(value: String): Layer = when (this) {

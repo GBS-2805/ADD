@@ -11,6 +11,7 @@ import android.graphics.Rect
 import android.graphics.RectF
 import android.graphics.Typeface
 import kotlin.math.min
+import kotlin.math.roundToInt
 
 class Typefaces(context: Context) {
     private val assets = context.assets
@@ -47,30 +48,52 @@ object ArtboardPainter {
         modelCaptures: Map<String, Bitmap> = emptyMap(),
         images: Map<String, Bitmap> = emptyMap(),
         safeArea: Boolean = false,
+        scale: Float = 1f,
     ) {
-        canvas.drawColor(0xFFF3EBDD.toInt())
-        drawPaper(canvas, typefaces)
-        layers.filter { it.visible }.forEach { layer ->
-            val rotated = layer.frameRotation != 0f
-            if (rotated) {
-                canvas.save()
-                canvas.rotate(layer.frameRotation, layer.centerX * W, layer.centerY * H)
-            }
-            when (layer) {
-                is VectorLayer -> drawVector(canvas, layer)
-                is TextLayer -> drawText(canvas, layer, typefaces)
-                is IconLayer -> drawIcon(canvas, layer)
-                is ModelLayer -> modelCaptures[layer.id]?.let {
-                    drawModelCapture(canvas, layer, it)
-                } ?: drawModelPlaceholder(canvas, layer, typefaces)
-                is ImageLayer -> images[layer.path]?.let {
-                    drawPhoto(canvas, layer, it)
-                } ?: drawPhotoPlaceholder(canvas, layer, typefaces)
-            }
-            if (rotated) canvas.restore()
+        // The whole page is composited offscreen at the requested scale and blitted
+        // once, so layer bitmaps, masks, effects and blends all share one pixel grid.
+        val unit = scale.coerceIn(0.1f, 4f)
+        val width = (W * unit).roundToInt().coerceAtLeast(1)
+        val height = (H * unit).roundToInt().coerceAtLeast(1)
+        val backing = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+        val surface = Canvas(backing)
+        surface.save()
+        surface.scale(unit, unit)
+        surface.drawColor(0xFFF3EBDD.toInt())
+        drawPaper(surface, typefaces)
+        surface.restore()
+
+        LayerCompositor(unit) { layerCanvas, layer ->
+            drawLayer(layerCanvas, layer, typefaces, modelCaptures, images)
+        }.draw(surface, backing, layers)
+
+        surface.save()
+        surface.scale(unit, unit)
+        if (safeArea) drawSafeArea(surface, typefaces)
+        drawFooter(surface, typefaces)
+        surface.restore()
+        canvas.drawBitmap(backing, 0f, 0f, Paint(Paint.FILTER_BITMAP_FLAG))
+        backing.recycle()
+    }
+
+    private fun drawLayer(
+        canvas: Canvas,
+        layer: Layer,
+        typefaces: Typefaces,
+        modelCaptures: Map<String, Bitmap>,
+        images: Map<String, Bitmap>,
+    ) {
+        when (layer) {
+            is VectorLayer -> drawVector(canvas, layer, images)
+            is TextLayer -> drawText(canvas, layer, typefaces, images)
+            is IconLayer -> drawIcon(canvas, layer)
+            is ModelLayer -> modelCaptures[layer.id]?.let {
+                drawModelCapture(canvas, layer, it)
+            } ?: drawModelPlaceholder(canvas, layer, typefaces)
+            is ImageLayer -> images[layer.path]?.let {
+                drawPhoto(canvas, layer, it)
+            } ?: drawPhotoPlaceholder(canvas, layer, typefaces)
         }
-        if (safeArea) drawSafeArea(canvas, typefaces)
-        drawFooter(canvas, typefaces)
     }
 
     private fun drawSafeArea(canvas: Canvas, typefaces: Typefaces) {
@@ -94,9 +117,7 @@ object ArtboardPainter {
 
     private fun drawPhoto(canvas: Canvas, layer: ImageLayer, bitmap: Bitmap) {
         val rect = layerRect(layer)
-        val paint = Paint(Paint.FILTER_BITMAP_FLAG or Paint.DITHER_FLAG).apply {
-            alpha = (layer.opacity * 255).toInt().coerceIn(0, 255)
-        }
+        val paint = Paint(Paint.FILTER_BITMAP_FLAG or Paint.DITHER_FLAG)
         canvas.save()
         canvas.clipRect(rect)
         if (layer.fill) {
@@ -265,7 +286,7 @@ object ArtboardPainter {
         canvas.drawText("ADD / ARTBOARD 001", W - 54f, 93f, index)
     }
 
-    private fun drawVector(canvas: Canvas, layer: VectorLayer) {
+    private fun drawVector(canvas: Canvas, layer: VectorLayer, images: Map<String, Bitmap>) {
         val path = layer.network.buildPath()
         val matrix = Matrix().apply {
             setScale(layer.w * W, layer.h * H)
@@ -273,11 +294,11 @@ object ArtboardPainter {
         }
         path.transform(matrix)
 
-        if (Color.alpha(layer.fill) > 0) {
+        if (layer.paint != null || Color.alpha(layer.fill) > 0) {
             val fill = Paint(Paint.ANTI_ALIAS_FLAG).apply {
                 style = Paint.Style.FILL
                 color = layer.fill
-                this.alpha = (Color.alpha(layer.fill) * layer.opacity).toInt()
+                PaintRenderer.shaderFor(layer.paint, layer, layerRect(layer), images)?.let { shader = it }
             }
             canvas.drawPath(path, fill)
         }
@@ -288,14 +309,13 @@ object ArtboardPainter {
                 strokeWidth = layer.strokeWidth
                 strokeJoin = Paint.Join.ROUND
                 strokeCap = Paint.Cap.ROUND
-                this.alpha = (Color.alpha(layer.stroke) * layer.opacity).toInt()
             }
             canvas.drawPath(path, stroke)
         }
     }
 
     private fun drawIcon(canvas: Canvas, layer: IconLayer) {
-        val alpha = (Color.alpha(layer.tint) * layer.opacity).toInt().coerceIn(0, 255)
+        val alpha = Color.alpha(layer.tint).coerceIn(0, 255)
         val tint = (layer.tint and 0x00FFFFFF) or (alpha shl 24)
         IconRenderer.draw(
             canvas = canvas,
@@ -308,10 +328,9 @@ object ArtboardPainter {
         )
     }
 
-    private fun drawText(canvas: Canvas, layer: TextLayer, typefaces: Typefaces) {
+    private fun drawText(canvas: Canvas, layer: TextLayer, typefaces: Typefaces, images: Map<String, Bitmap>) {
         val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
             color = layer.color
-            alpha = (layer.opacity * 255).toInt().coerceIn(0, 255)
             textSize = layer.fontSize
             typeface = typefaces.forWeight(layer.weight)
             textAlign = when (layer.align) {
@@ -319,6 +338,7 @@ object ArtboardPainter {
                 TextAlign.Center -> Paint.Align.CENTER
                 TextAlign.Right -> Paint.Align.RIGHT
             }
+            PaintRenderer.shaderFor(layer.paint, layer, layerRect(layer), images)?.let { shader = it }
         }
         val left = layer.x * W
         val right = (layer.x + layer.w) * W
@@ -343,7 +363,6 @@ object ArtboardPainter {
         val rect = layerRect(layer)
         val fill = Paint(Paint.ANTI_ALIAS_FLAG).apply {
             color = 0xFF0C1210.toInt()
-            alpha = (layer.opacity * 255).toInt().coerceIn(0, 255)
         }
         canvas.drawRoundRect(rect, 18f, 18f, fill)
 

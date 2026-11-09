@@ -73,7 +73,6 @@ object Exporter {
             Bitmap.Config.ARGB_8888,
         )
         val canvas = Canvas(artboard)
-        canvas.scale(factor.toFloat(), factor.toFloat())
         val visibleModels = layers.filterIsInstance<ModelLayer>().filter { it.visible }
         val captures = mutableMapOf<String, Bitmap>()
         var lit = 0
@@ -99,7 +98,14 @@ object Exporter {
             val bitmap = ImageStore.load(context, layer.path) ?: return@mapNotNull null
             layer.path to bitmap
         }.toMap()
-        ArtboardPainter.draw(canvas, layers, typefaces, captures, images)
+        ArtboardPainter.draw(
+            canvas,
+            layers,
+            typefaces,
+            captures,
+            images,
+            scale = factor.toFloat(),
+        )
         captures.values.forEach { it.recycle() }
         val missing = visibleModels.count { it.id !in captures }
 
