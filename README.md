@@ -104,6 +104,7 @@ python3 tools/build_site.py                 # pages.json, sitemap.xml, robots.tx
 python3 tools/build_site.py --check         # fail when any of them is stale
 python3 tools/hash_assets.py                # after editing site.css or site.js
 python3 tools/hash_assets.py --check        # fail when a page names an old asset
+python3 tools/check_links.py                # fail when a page links to a missing file
 ```
 
 ## What Icons does
@@ -176,6 +177,7 @@ tools/check_menu.js                                menu ARIA and focus-return re
 tools/build_site.py                                page manifest, sitemap, robots, search page
 tools/search_template.html                         the search page: section chips, arrow keys
 tools/hash_assets.py                               hashed copies of the CSS and JS every page names
+tools/check_links.py                               fails when a page links to a file docs/ does not carry
 tools/deploy_vercel.py                             deploys docs/ to Vercel, verifies it, moves the links
 manifest.json, worker.js                           Sites deployment (fallback host)
 ```
