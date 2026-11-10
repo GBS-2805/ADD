@@ -274,7 +274,9 @@ def audit(total, sets):
     problems = []
     for path in sorted(DOCS.rglob("*.html")):
         rel = path.relative_to(ROOT).as_posix()
-        if rel.startswith(("docs/releases/", "docs/figma/")):
+        # The current history pages and the frozen classic tree keep the numbers they
+        # shipped with; docs/classic/ is a snapshot, not a page to audit.
+        if rel.startswith(("docs/releases/", "docs/figma/", "docs/classic/")):
             continue
         text = path.read_text(encoding="utf-8")
         for match in re.finditer(r"(?<![\w.-])(\d[\d,]*)\s+icons\b", text):
