@@ -27,6 +27,14 @@
     {
       "palette": "navy",
       "mode": "light"
+    },
+    {
+      "palette": "ash",
+      "mode": "dark"
+    },
+    {
+      "palette": "ash",
+      "mode": "light"
     }
   ],
   "screens": [

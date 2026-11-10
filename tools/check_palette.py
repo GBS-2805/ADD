@@ -49,12 +49,13 @@ STYLED_PAGES = [
 ]
 STYLED_PAGES = [page for page in STYLED_PAGES if page.exists()]
 
-PALETTES = ["green", "moss", "navy"]
+PALETTES = ["green", "moss", "navy", "ash"]
 MODES = ["dark", "light"]
 THEMES = {
     "green": {"dark": "AppTheme", "light": "AppTheme.Light"},
     "moss": {"dark": "AppTheme.Moss", "light": "AppTheme.Moss.Light"},
     "navy": {"dark": "AppTheme.Navy", "light": "AppTheme.Navy.Light"},
+    "ash": {"dark": "AppTheme.Ash", "light": "AppTheme.Ash.Light"},
 }
 
 # The colours a theme has to resolve; warn/warnBg/shadow are functional, not palette.

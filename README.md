@@ -21,9 +21,9 @@ the pages.
 - **Icons browser** — live at `docs/icons/`: four free brands — 606 Lineicons,
   1,258 Coolicons, 1,512 Phosphor and 997 Streamline — each on its own page with a preview, variant controls and the
   set folded into a scrolling sheet. Copy-on-tap, no account.
-- Theme: **three palettes over two modes** — green (`#0fbf92` band), Moss and Navy —
-  each in a dark page (`#131513` with cream type) and a light one. A new visitor opens
-  dark. Surfaces are flat: `shadow` is fully transparent.
+- Theme: **four palettes over two modes** — green (`#0fbf92` band), Moss, Navy and
+  Ash (`#dd4124` band, `#2c2722` page) — each in a dark page and a light one. A new
+  visitor opens dark. Surfaces are flat: `shadow` is fully transparent.
 - Type: Poppins, self-hosted. The site serves woff2 from `docs/assets/fonts/`; both
   app bundles Poppins (the compressor from `res/font/`, the web tools inside the
   bundle).
@@ -158,7 +158,7 @@ app/src/add/ThemePrefs.java       forces night mode off (one palette)
 app/res/                                           27 resources: 3 layouts, 14 drawables,
                                                    Poppins, one values/ (no values-night)
 app/src/add/ShelfActivity.java     WebView tool surface (icons or fonts page)
-app/src/add/Palette.java           three palettes, one entry each
+app/src/add/Palette.java           four palettes, one entry each
 app/src/add/ThemePrefs.java        stores the palette and theme pair
 app/assets/www/                                     staged at build time from docs/ (not committed)
 build.sh                                           SDK-tools build: ./build.sh [add|stage]
@@ -221,8 +221,8 @@ console errors and horizontal overflow.
 in Robolectric's `NATIVE` graphics mode, so the layouts, themes, drawables, Poppins
 faces and the `EditorView`/`ComparisonView` paint code are the app's own. It audits
 Compress, Editor Quick, the Photo/Presets/Type/Layers/Colour sheets, Compare and
-Font packs in all six themes at 1080x2400, then writes only the nine green-dark
-representatives into `artifacts/android/`; `render-audit.json` records the 54
+Font packs in all eight themes at 1080x2400, then writes only the nine green-dark
+representatives into `artifacts/android/`; `render-audit.json` records the 72
 palette and layout checks behind them:
 
 ```bash

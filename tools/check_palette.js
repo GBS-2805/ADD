@@ -10,7 +10,7 @@
 //   * the status-bar meta, or the colour codes a page prints, disagree with the
 //     palette in force;
 //   * words on the band fall under 4.5:1;
-//   * a colour stays identical across all three palettes without being on the
+//   * a colour stays identical across all palettes without being on the
 //     allowlist below (a literal that never met the palette);
 //   * a page scrolls sideways.
 const { chromium } = require("playwright");
@@ -21,7 +21,7 @@ if (!BASE || !BASE.endsWith("/")) {
   process.exit(2);
 }
 
-const PALETTES = ["green", "moss", "navy"];
+const PALETTES = ["green", "moss", "navy", "ash"];
 const MODES = ["dark", "light"];
 const VIEWPORT = { width: 1300, height: 900 };
 
@@ -248,7 +248,7 @@ function readSurfaces(page) {
     await context.close();
   }
 
-  // Anything identical in all three palettes never met the palette.
+  // Anything identical in all palettes never met the palette.
   for (const sel of SELECTORS) {
     for (const prop of PROPS) {
       const seen = PALETTES.map((palette) => samples[palette].dark[sel][prop]);

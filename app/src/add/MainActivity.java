@@ -427,7 +427,7 @@ public class MainActivity extends Activity {
     }
 
     /**
-     * The band, the side panel and the three palette chips.
+     * The band, the side panel and the four palette chips.
      *
      * Every destination is a page of the shelf. The external ones open in the browser;
      * ADD's only network use is the Font packs screen, never the shelf pages.

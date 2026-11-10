@@ -27,13 +27,14 @@
   }
   applyTheme(storedTheme());
 
-  // The palette rides beside the theme: same three keys, same store, and the
-  // colour choice survives a reload the way the light/dark one does.
+  // The palette rides beside the theme: same store, and the colour choice
+  // survives a reload the way the light/dark one does.
   var PALETTE_KEY = "site:palette";
   var PALETTES = [
     { id: "green", label: "Green", band: "#0fbf92", word: "#0f120f" },
     { id: "moss", label: "Moss", band: "#005043", word: "#e7ddce" },
-    { id: "navy", label: "Navy", band: "#242d55", word: "#a1b0c3" }
+    { id: "navy", label: "Navy", band: "#242d55", word: "#a1b0c3" },
+    { id: "ash", label: "Ash", band: "#dd4124", word: "#0f0b08" }
   ];
   function storedPalette() {
     try {
@@ -136,7 +137,7 @@
     about.append(aboutLabel, drawerNote);
   }
 
-  // The look controls are one row at the foot of the tab: the three palette chips
+  // The look controls are one row at the foot of the tab: the four palette chips
   // with the light/dark switch at the end of them. The switch carries no word of its
   // own -- the sun or the moon says what it does -- and both choices are written to
   // the store when the tab closes, so closing it never drops one.

@@ -85,8 +85,9 @@ public class AndroidRenderTest {
 
     private static final int WIDTH = 1080;
     private static final int HEIGHT = 2400;
-    private static final String[] PALETTES = {Palette.GREEN, Palette.MOSS, Palette.NAVY};
-    private static final String[] PALETTE_NAMES = {"green", "moss", "navy"};
+    private static final String[] PALETTES = {
+            Palette.GREEN, Palette.MOSS, Palette.NAVY, Palette.ASH};
+    private static final String[] PALETTE_NAMES = {"green", "moss", "navy", "ash"};
     private static final String SHOWCASE_SUFFIX = "-green-dark";
     private static final Map<String, Map<String, Rect>> LAYOUT_BASELINES =
             new LinkedHashMap<>();
@@ -131,7 +132,7 @@ public class AndroidRenderTest {
                 + "  \"canvas\": \"1080x2400 phone screens; compress full height\",\n"
                 + "  \"compressHeight\": " + compressHeight + ",\n"
                 + "  \"screens\": 9,\n"
-                + "  \"themes\": 6,\n"
+                + "  \"themes\": 8,\n"
                 + "  \"matrix\": " + paletteChecks + ",\n"
                 + "  \"layoutChecks\": " + layoutChecks + ",\n"
                 + "  \"saved\": " + savedRenders + ",\n"
@@ -719,7 +720,7 @@ public class AndroidRenderTest {
     }
 
     private static String screenKey(String name) {
-        return name.replaceFirst("-(green|moss|navy)-(dark|light)$", "");
+        return name.replaceFirst("-(green|moss|navy|ash)-(dark|light)$", "");
     }
 
     private static int dp(int value) {

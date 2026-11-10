@@ -30,10 +30,10 @@
 }
 
 
-/* Three palettes. Green is the original: a bright band with near-black words on
-   it. Moss and Navy are the two sets from the hand-off, four colours each - the
-   page, the band, the words that sit on that band, and an accent. The band holds
-   in both themes; only the page turns over. */
+/* Four palettes. Green is the original: a bright band with near-black words on
+   it. Moss and Navy are the two sets from the hand-off, and Ash is the Wheatpaste
+   set - four colours each: the page, the band, the words that sit on that band,
+   and an accent. The band holds in both themes; only the page turns over. */
 :root,
 html[data-palette="green"] {
   --pal-band: #0fbf92;
@@ -104,6 +104,31 @@ html[data-palette="navy"] {
   --pal-on-light-dim: rgba(28, 29, 47, .66);
   --pal-rule-light: rgba(28, 29, 47, .22);
   --pal-tint-light: rgba(28, 29, 47, .07);
+}
+
+/* Ash - #dd4124 band, #2c2722 page, #f2e7d3 words, #c3d363 accent. The band
+   ink is a near-black ash so the tangerine band clears 4.5:1. */
+html[data-palette="ash"] {
+  --pal-band: #dd4124;
+  --pal-band-ink: #0f0b08;
+  --pal-band-dim: rgba(15, 11, 8, .62);
+  --pal-band-line: rgba(15, 11, 8, .24);
+  --pal-band-hover: #f05a3c;
+  --pal-accent: #c3d363;
+  --pal-accent-ink: #2c2722;
+  --pal-label: #f2e7d3;
+  --pal-page: #2c2722;
+  --pal-ink: #0f0b08;
+  --pal-on: #f2e7d3;
+  --pal-on-dim: rgba(242, 231, 211, .64);
+  --pal-rule: rgba(242, 231, 211, .24);
+  --pal-tint: rgba(242, 231, 211, .07);
+  --pal-page-light: #f2e7d3;
+  --pal-ink-light: #f2e7d3;
+  --pal-on-light: #2c2722;
+  --pal-on-light-dim: rgba(44, 39, 34, .66);
+  --pal-rule-light: rgba(44, 39, 34, .22);
+  --pal-tint-light: rgba(44, 39, 34, .06);
 }
 
 /* Light mode: the page and the logo swap places; the band keeps its palette. */

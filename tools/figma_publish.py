@@ -44,7 +44,7 @@ SHEET = "pantone.svg"
 # The listing counts the run in words, so it has to be told what the run has.
 WORDS = {19: "Nineteen", 20: "Twenty", 21: "Twenty-one", 22: "Twenty-two",
          23: "Twenty-three", 24: "Twenty-four", 25: "Twenty-five", 26: "Twenty-six",
-         27: "Twenty-seven"}
+         27: "Twenty-seven", 28: "Twenty-eight"}
 
 # The exporter writes every image twice: the payload under plain `href` and again
 # under `xlink:href`. One copy paints the picture and the other is dead weight --
@@ -87,7 +87,7 @@ def human(n):
 
 
 def palette_cards():
-    """Every solid colour of the three palettes, built the way the sheet builds them.
+    """Every solid colour of the four palettes, built the way the sheet builds them.
 
     Each row opens with the site's own colour, then the nearest Pantone chip and two
     alternatives side by side, every one carrying a square of its own colour so the eye
@@ -139,7 +139,7 @@ def listing(names):
     facts = {n: describe(DST / n) + (human((DST / n).stat().st_size),) for n in names}
     count = len([n for n in names if n.endswith(".svg") and n not in (BUNDLE, SHEET)])
     lede = ("%s sketch artboards of this site, the desktop set on one canvas, and every colour the "
-            "three palettes declare.") % WORDS.get(count, count)
+            "four palettes declare.") % WORDS.get(count, count)
 
     def item(name):
         title, dims, size = facts[name]

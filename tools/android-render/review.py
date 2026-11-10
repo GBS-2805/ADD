@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Validate the showcase renders, then rebuild the public review gallery.
 
-The Maven test audits all 54 screen/theme combinations in memory and writes only
+The Maven test audits all 72 screen/theme combinations in memory and writes only
 the nine green-dark showcase PNGs plus render-audit.json. This script rejects a
 missing, extra or wrongly sized image, and refuses to publish unless that audit
 report says the palette and layout gates passed.
@@ -37,8 +37,8 @@ def load_matrix() -> tuple[list[dict[str, str]], list[dict[str, str]], dict[str,
     themes = data.get("themes", [])
     screens = data.get("screens", [])
     showcase = data.get("showcase")
-    if len(themes) != 6 or len(screens) != 9:
-        fail("manifest must declare six themes and nine screens")
+    if len(themes) != 8 or len(screens) != 9:
+        fail("manifest must declare eight themes and nine screens")
     if len({(t.get("palette"), t.get("mode")) for t in themes}) != len(themes):
         fail("manifest repeats a theme")
     if len({s.get("slug") for s in screens}) != len(screens):
@@ -155,7 +155,7 @@ a{color:#6fe0bf}code{background:#15121c;padding:2px 5px;border-radius:4px}
 </main></body></html>"""
     lede = (
         f"Nine green-dark screenshots from {matrix} in-memory checks across nine native "
-        "screen states and six palettes. Eight are 1080x2400 phone frames; Compress is "
+        "screen states and eight palettes. Eight are 1080x2400 phone frames; Compress is "
         "captured at the ScrollView's full height so the complete form and action row are "
         "visible. The layouts, themes, drawables, type and the Editor/Compare paint code "
         "are the app's own. Palette, containment, text-fit, composition and cross-theme "

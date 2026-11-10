@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-06",
+  "generated": "2026-11-10",
   "tools": [
     {
       "id": "add",
@@ -19,7 +19,7 @@
         "Editor: photo, type, presets and live adjustments, a colour mixer with hex and RGB, type spacing and opacity, photo turn/flip and canvas colour, reorderable layers with visibility, and installed packs kept for offline use.",
         "Compress: real quality, downscale, batch up to 40 photos, metadata stripped, originals untouched.",
         "Internet for one job only: a font pack you tap in Font packs; the shelf, the editor and Compress otherwise run offline.",
-        "Same three palettes and the side tab as the site, including the look controls at its foot."
+        "Same four palettes and the side tab as the site, including the look controls at its foot."
       ],
       "links": [
         {

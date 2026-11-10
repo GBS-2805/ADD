@@ -189,6 +189,68 @@
         <item name="android:windowLightStatusBar">false</item>
         <item name="android:windowLightNavigationBar">true</item>
     </style>
+    <style name="AppTheme.Ash" parent="@android:style/Theme.Material.NoActionBar">
+        <item name="page">@color/ash_page</item>
+        <item name="on">@color/ash_on</item>
+        <item name="onDim">@color/ash_on_dim</item>
+        <item name="rule">@color/ash_rule</item>
+        <item name="card">@color/ash_card</item>
+        <item name="panel2">@color/ash_panel2</item>
+        <item name="band">@color/ash_band</item>
+        <item name="bandInk">@color/ash_band_ink</item>
+        <item name="bandDim">@color/ash_band_dim</item>
+        <item name="bandLine">@color/ash_band_line</item>
+        <item name="accent">@color/ash_accent</item>
+        <item name="accentInk">@color/ash_accent_ink</item>
+        <item name="label">@color/ash_label</item>
+        <item name="ink">@color/ash_band_ink</item>
+        <item name="warn">@color/warn</item>
+        <item name="warnBg">@color/ash_card</item>
+        <item name="shadow">#00000000</item>
+        <item name="android:windowBackground">@color/ash_page</item>
+        <item name="android:fontFamily">@font/poppins_regular</item>
+        <item name="android:colorAccent">@color/ash_accent</item>
+        <item name="android:colorPrimary">@color/ash_band</item>
+        <item name="android:colorPrimaryDark">@color/ash_band</item>
+        <item name="android:textColorPrimary">@color/ash_on</item>
+        <item name="android:textColorSecondary">@color/ash_on_dim</item>
+        <item name="android:statusBarColor">@color/ash_band</item>
+        <item name="android:navigationBarColor">@color/ash_page</item>
+        <!-- The tangerine band carries dark ink, so the status icons go dark. -->
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowLightNavigationBar">false</item>
+    </style>
+
+    <style name="AppTheme.Ash.Light" parent="@android:style/Theme.Material.Light.NoActionBar">
+        <item name="page">@color/ash_page_light</item>
+        <item name="on">@color/ash_on_light</item>
+        <item name="onDim">@color/ash_on_dim_light</item>
+        <item name="rule">@color/ash_rule_light</item>
+        <item name="card">@color/ash_card_light</item>
+        <item name="panel2">@color/ash_panel2_light</item>
+        <item name="band">@color/ash_band</item>
+        <item name="bandInk">@color/ash_band_ink</item>
+        <item name="bandDim">@color/ash_band_dim</item>
+        <item name="bandLine">@color/ash_band_line</item>
+        <item name="accent">@color/ash_accent</item>
+        <item name="accentInk">@color/ash_accent_ink</item>
+        <item name="label">@color/ash_label</item>
+        <item name="ink">@color/ash_band_ink</item>
+        <item name="warn">@color/warn</item>
+        <item name="warnBg">@color/ash_card_light</item>
+        <item name="shadow">#00000000</item>
+        <item name="android:windowBackground">@color/ash_page_light</item>
+        <item name="android:fontFamily">@font/poppins_regular</item>
+        <item name="android:colorAccent">@color/ash_accent</item>
+        <item name="android:colorPrimary">@color/ash_band</item>
+        <item name="android:colorPrimaryDark">@color/ash_band</item>
+        <item name="android:textColorPrimary">@color/ash_on_light</item>
+        <item name="android:textColorSecondary">@color/ash_on_dim_light</item>
+        <item name="android:statusBarColor">@color/ash_band</item>
+        <item name="android:navigationBarColor">@color/ash_page_light</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowLightNavigationBar">true</item>
+    </style>
     <!-- The editor's sheets slide up from the dock and leave the same way. -->
     <style name="SheetAnimation">
         <item name="android:windowEnterAnimation">@anim/sheet_up</item>

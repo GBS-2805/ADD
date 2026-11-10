@@ -216,11 +216,12 @@ while the glyphs themselves are Coolicons line icons (MIT), which is why every
 page loads `assets/site.js`. Page-specific rules live in a small `<style>` on the page. `docs/icons/index.html` is
 generated on the same system out of the three icon templates.
 
-Three palettes ride over those two modes: green (the original band, `#0fbf92`), and the
+Four palettes ride over those two modes: green (the original band, `#0fbf92`), the
 two sets from the hand-off — Moss (`#005043` band, `#0e2a24` page, `#e7ddce` words,
 `#d6e381` accent) and Navy (`#242d55` band, `#1c1d2f` page, `#a1b0c3` words, `#72b6b4`
-accent). `site.js` swaps `data-palette` on `<html>` and remembers the choice under
-`site:palette`; the three chips sit at the foot of the side tab, under the note, with the
+accent) — and Ash (`#dd4124` band, `#2c2722` page, `#f2e7d3` words, `#c3d363` accent).
+`site.js` swaps `data-palette` on `<html>` and remembers the choice under
+`site:palette`; the four chips sit at the foot of the side tab, under the note, with the
 light/dark switch as the last chip in that row rather than a labelled row of its own.
 Closing the tab writes both choices to the store, so neither is lost by dismissing it. The band holds in both themes and only the page turns over, so a palette
 is its block of values in `site.css` plus one entry in the `PALETTES` list in `site.js`.
@@ -229,9 +230,9 @@ The fourth colour of each set is that palette's accent, and it does two jobs: it
 count chips and the live pills (`--accent`, with `--accent-ink` on top, because the accent
 is light and the band ink on it measures 1.03:1), and it colours the two small labels on
 the band (`MORE` and `Palette`, `--label`). Green has no accent of its own -- its band is
-the accent -- so its labels keep the near-black band ink while Moss and Navy get their
-lime and teal. Never spend the accent on body copy or on link words: it sits at 1.03:1
-against the palette's band words and would read as a second, competing ink.
+the accent -- so its labels keep the near-black band ink while Moss, Navy and Ash get
+their own accents. Never spend the accent on body copy or on link words: it sits at
+1.03:1 against the palette's band words and would read as a second, competing ink.
 
 ### The app: native screens render; the emulator is a smoke test
 
@@ -276,7 +277,7 @@ The four-way split this settles on:
   390x844, about ten seconds for the shelf, with console errors and horizontal
   overflow reported. Deterministic, and the only path that feeds `docs/renders/`.
 - **Native screens -> Robolectric.** `tools/android-render/` draws the real activities
-  through the app's own resources and audits 54 combinations before it writes
+  through the app's own resources and audits 72 combinations before it writes
   anything.
 - **Emulator -> smoke test** as above, plus an opportunistic engine frame.
 - **Engine screen -> one honest capture with its provenance attached**, or a real
@@ -285,10 +286,10 @@ The four-way split this settles on:
 
 The native screens do render without an emulator. `tools/android-render/` compiles
 `app/res` with `aapt2`, hosts the activities in Robolectric with `NATIVE` graphics,
-and draws their real content views at 1080x2400. It audits every one of the 54
+and draws their real content views at 1080x2400. It audits every one of the 72
 screen/theme combinations in memory and writes only the nine green-dark
 representatives into `artifacts/android/`. It covers Compress, Editor Quick, its
-Photo/Presets/Type/Layers/Colour sheets, Compare and Font packs, in all six themes.
+Photo/Presets/Type/Layers/Colour sheets, Compare and Font packs, in all eight themes.
 The method is the Android-renders handoff: binary resources,
 `android-all-instrumented`, and Skia through the platform runtime. See
 `tools/android-render/README.md`:
@@ -298,10 +299,10 @@ bash tools/android-render/setup.sh
 bash tools/android-render/render.sh
 ```
 
-`render.sh` stages the run and replaces `artifacts/android/` only after all 54
+`render.sh` stages the run and replaces `artifacts/android/` only after all 72
 combinations pass; a failure keeps the previous set. `manifest.json` is the expected
 matrix and names the showcase pair; `review.py` requires exactly the nine showcase
-PNGs, a passing `render-audit.json` with 54 checks, and 1080×2400 dimensions before
+PNGs, a passing `render-audit.json` with 72 checks, and 1080×2400 dimensions before
 it rebuilds `artifacts/shots/` from scratch for the public review. The screenshots
 are a current set, not an archive, and are never committed.
 
@@ -482,7 +483,7 @@ where the notes keep the history they shipped with.Icons, Fonts, Compress and th
   into `docs/figma/`, which the site does serve, so every artboard can be
   downloaded from a phone at `/figma/<file>`, and writes the listing at `/figma/`.
   Each artboard carries Poppins 400/500/600 as base64 woff2, because a file that
-  only names the family renders in the viewer's fallback sans. `figma/` stays the source. `tools/pantone_sheet.py` writes `figma/pantone.svg`, the colour reference: the nearest Solid Coated chip for every solid colour the three palettes declare, two alternatives for each, and the nearest textile TCX, matched against the vendored `tools/pantone-data.json` by CIEDE2000. It reads `site.css`, so a palette change makes `--check` fail until it is re-run; never hand-edit that sheet. Re-run the
+  only names the family renders in the viewer's fallback sans. `figma/` stays the source. `tools/pantone_sheet.py` writes `figma/pantone.svg`, the colour reference: the nearest Solid Coated chip for every solid colour the four palettes declare, two alternatives for each, and the nearest textile TCX, matched against the vendored `tools/pantone-data.json` by CIEDE2000. It reads `site.css`, so a palette change makes `--check` fail until it is re-run; never hand-edit that sheet. Re-run the
   exporter after a visual change, then the bundle and the publish step; never edit
   the SVGs. `tools/check_figma.py` gates all three: it fails when a text run lacks its
   own family, size or fill, or when a file paints a mark with `<use>`, because Figma
@@ -645,30 +646,31 @@ where the notes keep the history they shipped with.Icons, Fonts, Compress and th
   needs the capture environment exported by hand: `build.sh` hands the check
   `NODE_PATH`, `PLAYWRIGHT_BROWSERS_PATH`, `LD_LIBRARY_PATH` and `FONTCONFIG_FILE`
   itself, and a value already exported still wins.
-- Compress wears the same three palettes as the site, plus the band and the side tab.
+- Compress wears the same four palettes as the site, plus the band and the side tab.
   The colours live in one place, `app/res/values/colors.xml`: a block per palette
   (band, band ink, dim and line, accent and its ink, label, page, words, rule, card)
   in a dark and a light page set, taken from `docs/assets/site.css` so the two cannot
   drift. Nothing in a layout or a drawable names a colour resource directly: every
   one asks for a theme attribute declared in `app/res/values/attrs.xml`, and
-  `app/res/values/styles.xml` maps those attributes across six themes, `AppTheme`
+  `app/res/values/styles.xml` maps those attributes across eight themes, `AppTheme`
   (green, dark page), `AppTheme.Light`, `AppTheme.Moss`, `AppTheme.Moss.Light`,
-  `AppTheme.Navy` and `AppTheme.Navy.Light`.  `ThemePrefs` stores the pair and `applyTheme()` sets the theme before `setContentView()`. Adding a palette is a block
+  `AppTheme.Navy`, `AppTheme.Navy.Light`, `AppTheme.Ash` and `AppTheme.Ash.Light`.
+  `ThemePrefs` stores the pair and `applyTheme()` sets the theme before `setContentView()`. Adding a palette is a block
   of colours, a theme and one entry each in `Palette.IDS`, `LABELS`, `BANDS` and
   `WORDS` — never a second layout. The band is `res/layout/band.xml` and the side
   panel `res/layout/drawer.xml`, both included by `activity_main.xml`; `CompareActivity`
   inherits the themes and wears the same colours.
 - `python3 tools/check_palette.py` guards all of the above, site and app together. It
-  compares every palette block in `site.css` with `colors.xml`, requires all six themes
+  compares every palette block in `site.css` with `colors.xml`, requires all eight themes
   to set every attribute, holds the band in both modes, insists the mark on the band
   wears the band's ink (it is tinted `?attr/ink`, so a themed `ink` is what keeps it
   visible), refuses a literal colour in a layout or a `bg_` drawable and a glyph drawn
   without a tint, and measures contrast — 4.5:1 for words, 3:1 for dim words and the
   band's labels. `--browser http://127.0.0.1:8799/` adds `tools/check_palette.js`, the
-  half a stylesheet cannot prove: all six combinations are driven and it fails when a
+  half a stylesheet cannot prove: all eight combinations are driven and it fails when a
   pull-down paints anything but the page colour, a selected control leaves the band,
   a disabled control looks enabled, the status-bar meta or the printed colour codes
-  disagree with the palette, or a colour is identical across all three palettes
+  disagree with the palette, or a colour is identical across all four palettes
   (the preview stage is the one documented exception). `build.sh` runs the static
   half before staging, so a drifted palette fails a build without a browser.
 - `docs/packs/` is generated by `python3 tools/build_packs.py` from

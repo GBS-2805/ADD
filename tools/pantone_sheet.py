@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Write the Pantone reference for every palette colour, as a Figma-importable sheet.
 
-`docs/assets/site.css` is the only source: this reads the three palette blocks out of
+`docs/assets/site.css` is the only source: this reads the four palette blocks out of
 it, matches each solid colour to the nearest Pantone chip in two directions (Solid
 Coated for print, TCX for textile), and picks two further alternatives for each.
 
@@ -23,7 +23,7 @@ CSS = pathlib.Path("docs/assets/site.css")
 DATA = pathlib.Path("tools/pantone-data.json")
 OUT = pathlib.Path("figma/pantone.svg")
 
-PALETTES = ["green", "moss", "navy"]
+PALETTES = ["green", "moss", "navy", "ash"]
 # The order a designer reads the roles in, not the order CSS happens to declare them.
 ROLE_ORDER = ["band", "band-ink", "band-hover", "accent", "accent-ink", "label",
               "page", "ink", "on", "page-light", "ink-light", "on-light"]
@@ -32,7 +32,7 @@ W, PAD, ROW = 1300, 40, 96
 CREAM, INK, DIM, RULE = "#f2eee3", "#131513", "#5c6157", "#13151333"
 FONT = "Poppins, Helvetica Neue, Arial, sans-serif"
 COL_ROLE, COL_MATCH, COL_ALT1, COL_ALT2 = 124, 340, 640, 900
-HEADINGS = {"green": "Green", "moss": "Moss", "navy": "Navy"}
+HEADINGS = {"green": "Green", "moss": "Moss", "navy": "Navy", "ash": "Ash"}
 
 
 def lin(v):
@@ -151,7 +151,7 @@ def build(pantone):
     blocks = []
     y = PAD
     blocks.append(text(PAD, y + 44, "Pantone reference", 40, 400))
-    blocks.append(text(PAD, y + 78, "Nearest chip for every colour the three palettes declare, and two alternatives for each.",
+    blocks.append(text(PAD, y + 78, "Nearest chip for every colour the four palettes declare, and two alternatives for each.",
                        16, 400, DIM))
     blocks.append(text(PAD, y + 102, "ΔE00 is CIEDE2000 distance from the screen colour: 0 is the same colour, under 3 is indistinguishable.",
                        13, 400, DIM))
@@ -203,7 +203,7 @@ def build(pantone):
 
     height = y + PAD - 6
     head = ('<svg xmlns="http://www.w3.org/2000/svg" width="%d" height="%d" viewBox="0 0 %d %d">'
-            '<title>Pantone reference — green, moss, navy</title>'
+            '<title>Pantone reference — green, moss, navy, ash</title>'
             '<desc>Each palette colour with its nearest Pantone Solid Coated chip, two alternatives, '
             'and the nearest textile TCX chip.</desc>' % (W, height, W, height))
     return head + '<rect width="%d" height="%d" fill="%s"/>' % (W, height, CREAM) + "".join(blocks) + "</svg>\n"

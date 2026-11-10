@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  The three palettes of the site, one block each, taken from the same values as
+  The four palettes of the site, one block each, taken from the same values as
   docs/assets/site.css so the app and the pages cannot drift.
 
   A palette is: the band, the words on that band, its accent (which fills the
@@ -75,6 +75,28 @@
     <color name="navy_rule_light">#381c1d2f</color>
     <color name="navy_card_light">#98a6b9</color>
     <color name="navy_panel2_light">#919eb1</color>
+
+    <!-- Ash: the Wheatpaste palette. The band ink is near-black so the tangerine
+         band keeps 4.5:1; the page is the ash black, the words are cream. -->
+    <color name="ash_band">#dd4124</color>
+    <color name="ash_band_ink">#0f0b08</color>
+    <color name="ash_band_dim">#9e0f0b08</color>
+    <color name="ash_band_line">#3d0f0b08</color>
+    <color name="ash_accent">#c3d363</color>
+    <color name="ash_accent_ink">#2c2722</color>
+    <color name="ash_label">#f2e7d3</color>
+    <color name="ash_page">#2c2722</color>
+    <color name="ash_on">#f2e7d3</color>
+    <color name="ash_on_dim">#a3f2e7d3</color>
+    <color name="ash_rule">#3df2e7d3</color>
+    <color name="ash_card">#3a342e</color>
+    <color name="ash_panel2">#443e37</color>
+    <color name="ash_page_light">#f2e7d3</color>
+    <color name="ash_on_light">#2c2722</color>
+    <color name="ash_on_dim_light">#a32c2722</color>
+    <color name="ash_rule_light">#382c2722</color>
+    <color name="ash_card_light">#e4dac7</color>
+    <color name="ash_panel2_light">#dad0be</color>
 
     <!-- The one functional exception: the same amber in every palette. -->
     <color name="warn">#ffc98a</color>

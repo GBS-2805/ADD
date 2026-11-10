@@ -8,7 +8,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 
 /**
- * The three palette chips, and the light/dark switch as the last of them.
+ * The four palette chips, and the light/dark switch as the last of them.
  *
  * This lives outside the activity so the code that draws the row on a phone can also
  * be run off device: the layoutlib harness inflates the panel and calls this, so the

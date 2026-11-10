@@ -60,6 +60,9 @@ final class ThemePrefs {
         if (Palette.NAVY.equals(palette)) {
             return dark ? R.style.AppTheme_Navy : R.style.AppTheme_Navy_Light;
         }
+        if (Palette.ASH.equals(palette)) {
+            return dark ? R.style.AppTheme_Ash : R.style.AppTheme_Ash_Light;
+        }
         return dark ? R.style.AppTheme : R.style.AppTheme_Light;
     }
 
