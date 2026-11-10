@@ -34,12 +34,14 @@
 <text x="72" y="761.81" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="12" font-weight="400" xml:space="preserve">ADD · a design shelf: icons, type, photos and</text>
 <text x="72" y="780.41" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="12" font-weight="400" xml:space="preserve">words, in one quiet place.</text>
 <text x="72" y="817.28" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="13" font-weight="400" xml:space="preserve">Palette</text>
-<rect x="228" y="800" width="26" height="26" fill="#0fbf92" rx="50"/>
-<rect x="236.5" y="808.5" width="9" height="9" fill="#0f120f" rx="50"/>
-<rect x="266" y="800" width="26" height="26" fill="#005043" rx="50"/>
-<rect x="274.5" y="808.5" width="9" height="9" fill="#e7ddce" rx="50"/>
-<rect x="304" y="800" width="26" height="26" fill="#242d55" rx="50"/>
-<rect x="312.5" y="808.5" width="9" height="9" fill="#a1b0c3" rx="50"/>
+<rect x="190" y="800" width="26" height="26" fill="#0fbf92" rx="50"/>
+<rect x="198.5" y="808.5" width="9" height="9" fill="#0f120f" rx="50"/>
+<rect x="228" y="800" width="26" height="26" fill="#005043" rx="50"/>
+<rect x="236.5" y="808.5" width="9" height="9" fill="#e7ddce" rx="50"/>
+<rect x="266" y="800" width="26" height="26" fill="#242d55" rx="50"/>
+<rect x="274.5" y="808.5" width="9" height="9" fill="#a1b0c3" rx="50"/>
+<rect x="304" y="800" width="26" height="26" fill="#dd4124" rx="50"/>
+<rect x="312.5" y="808.5" width="9" height="9" fill="#0f0b08" rx="50"/>
 <rect x="342" y="800" width="26" height="1" fill="#f2eee3" fill-opacity="0.22"/>
 <rect x="367" y="800" width="1" height="26" fill="#f2eee3" fill-opacity="0.22"/>
 <rect x="342" y="825" width="26" height="1" fill="#f2eee3" fill-opacity="0.22"/>
@@ -91,7 +93,7 @@
 <text x="20" y="1273.27" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="16" font-weight="400" xml:space="preserve">only when you choose one; everything else</text>
 <text x="20" y="1298.86" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="16" font-weight="400" xml:space="preserve">is already on the phone.</text>
 <rect x="0" y="1374.45" width="390" height="1" fill="#f2eee3" fill-opacity="0.22"/>
-<text x="20" y="1411.45" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">ADD 3.7</text>
+<text x="20" y="1411.45" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">ADD 3.8</text>
 <text x="79" y="1412" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">·</text>
 <text x="88" y="1411.45" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">a design shelf</text>
 <text x="20" y="1446.55" fill="#f2eee3" fill-opacity="0.62" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">Download</text>
