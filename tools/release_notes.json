@@ -2,6 +2,12 @@
   "notes": [
     {
       "id": "add",
+      "version": "3.8",
+      "title": "The fourth palette",
+      "note": "Ash joins green, Moss and Navy across the site and the app, band, page and chips alike."
+    },
+    {
+      "id": "add",
       "version": "3.7",
       "title": "The shared menu, named and focused",
       "note": "The shared menu now carries the ADD name and starts with its closed state announced, and Escape, the close button or the scrim returns keyboard focus to the control that opened it."
