@@ -36,6 +36,7 @@ def gates(browser, artboards, visual):
         ["assets", [sys.executable, "tools/hash_assets.py", "--check"]],
         ["links", [sys.executable, "tools/check_links.py"]],
         ["site", [sys.executable, "tools/build_site.py", "--check"]],
+        ["classic", [sys.executable, "tools/archive_classic.py", "--check"]],
         ["catalog", [sys.executable, "tools/build_catalog.py", "--check"]],
         ["packs", [sys.executable, "tools/build_packs.py", "--check"]],
         ["figma", [sys.executable, "tools/check_figma.py"]],
