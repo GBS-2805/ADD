@@ -1,6 +1,6 @@
-# The shelf's checks on every push: palette, asset hashes, site tree, catalog, Figma
-# structure, Pantone sheet, note dating and the staged bundle. They need nothing but
-# python, so a stock runner covers them in seconds.
+# The shelf's checks on every push: palette, asset hashes, internal links, site tree,
+# catalog, Figma structure, Pantone sheet, note dating and the staged bundle. They need
+# nothing but python, so a stock runner covers them in seconds.
 #
 # The visual job runs in a second job, because it needs a toolchain the python job should
 # not carry: the Studio baselines under tools/studio-baseline/ need Playwright's Chromium
