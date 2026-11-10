@@ -1,4 +1,4 @@
-/* ADD Studio spike: Fabric+ canvas with live effects, fast-drag and native export. */
+/* ADD Studio engine shell: Fabric+ canvas with live effects, fast-drag and native export. */
 (function () {
   'use strict';
 
@@ -7,10 +7,10 @@
   var H = 675;
 
   fabric.Object.prototype.set({
-    cornerColor: '#0fbf92',
-    cornerStrokeColor: '#052019',
-    borderColor: '#0fbf92',
-    cornerSize: 14,
+    cornerColor: '#dd4124',
+    cornerStrokeColor: '#f2eee3',
+    borderColor: '#dd4124',
+    cornerSize: 16,
     transparentCorners: false,
     padding: 4
   });
@@ -34,7 +34,7 @@
     if (!stageEl || !canvas.wrapperEl) { return; }
     var rect = stageEl.getBoundingClientRect();
     if (rect.width < 1 || rect.height < 1) { return; }
-    var scale = Math.min(rect.width / W, rect.height / H);
+    var scale = Math.min((rect.width - 24) / W, (rect.height - 24) / H);
     var width = Math.max(1, Math.round(W * scale));
     var height = Math.max(1, Math.round(H * scale));
     canvas.wrapperEl.style.width = width + 'px';
@@ -253,12 +253,12 @@
       fontFamily: 'Poppins, system-ui, sans-serif',
       fontWeight: '600',
       textAlign: 'center',
-      startColour: '#131513',
-      endColour: '#0fbf92',
+      startColour: '#15120e',
+      endColour: '#dd4124',
       gradientOn: true,
       gradientAngle: 90,
       outlineOn: false,
-      outlineColour: '#131513',
+      outlineColour: '#15120e',
       outlineWidth: 6,
       shadowOn: true,
       blendMode: 'source-over'
@@ -508,7 +508,7 @@
     var data = canvas.toDataURL({ format: 'png', multiplier: 2, quality: 1 });
     if (window.StudioApp && StudioApp.savePng) {
       StudioApp.savePng(data);
-      flash('Exporting 1080 x 1350');
+      flash('Exporting at 2\u00d7');
     }
   });
   $('back').addEventListener('click', function () {

@@ -180,11 +180,11 @@ stage_shelf_assets() {
     du -sh "$www"
 }
 
-# The Fabric+ Studio spike lives beside the shelf rather than inside it: it is not a
+# The Studio engine shell lives beside the shelf rather than inside it: it is not a
 # site page, so it is copied into the bundle after the shelf staging has finished.
 stage_studio_assets() {
     local dst="$ROOT/app/assets/www/studio"
-    echo "== ADD: staging the Fabric Studio spike =="
+    echo "== ADD: staging the Studio engine shell =="
     rm -rf "$dst"
     mkdir -p "$dst"
     cp -R "$ROOT/app/studio-assets/." "$dst/"

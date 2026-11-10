@@ -11,31 +11,31 @@
   root.dataset.motion = 'gsap-' + version;
 
   function init() {
-    var header = document.querySelector('header');
-    var stage = document.getElementById('stage');
-    var panel = document.getElementById('panel');
+    var top = document.querySelector('.chrome-top');
+    var doc = document.querySelector('.document-chip');
+    var pill = document.querySelector('.tool-pill');
     var selection = document.getElementById('selection');
     var overlayGrid = document.getElementById('overlayTransform');
 
     if (!reduce) {
       var intro = window.gsap.timeline({ defaults: { ease: 'power3.out' } });
-      if (header) {
-        intro.from(header.children, {
-          y: -10, opacity: 0, duration: 0.35, stagger: 0.05,
+      if (top) {
+        intro.from(top, {
+          y: -8, opacity: 0, duration: 0.32,
           clearProps: 'transform,opacity'
         });
       }
-      if (stage) {
-        intro.from(stage, {
-          opacity: 0, scale: 0.985, duration: 0.5,
+      if (doc) {
+        intro.from(doc, {
+          opacity: 0, x: -4, duration: 0.3,
           clearProps: 'transform,opacity'
         }, '-=0.18');
       }
-      if (panel) {
-        intro.from(panel, {
-          y: 18, opacity: 0, duration: 0.45,
+      if (pill) {
+        intro.from(pill, {
+          y: 12, opacity: 0, duration: 0.38,
           clearProps: 'transform,opacity'
-        }, '-=0.35');
+        }, '-=0.24');
       }
     }
 
@@ -54,7 +54,7 @@
     }
 
     // X/Y/scale/rotate is created by overlays.js only after Place. The grid is
-    // display:grid, so animating from height:0 gives the panel a real reveal
+    // display:grid, so animating from height:0 gives the inspector a real reveal
     // without changing its scroll position or Fabric's canvas geometry.
     if (overlayGrid && window.MutationObserver) {
       var lastHidden = overlayGrid.hidden;
@@ -76,7 +76,8 @@
       version: version,
       plugins: ['core'],
       reduced: !!reduce,
-      duration: reduce ? 0 : 0.45
+      duration: reduce ? 0 : 0.38,
+      shell: true
     };
   }
 

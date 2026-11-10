@@ -12,9 +12,10 @@
     android:orientation="vertical">
 
     <LinearLayout
+        android:id="@+id/editorBand"
         android:layout_width="match_parent"
-        android:layout_height="64dp"
-        android:background="?attr/band"
+        android:layout_height="66dp"
+        android:background="@drawable/bg_masthead"
         android:gravity="center_vertical"
         android:orientation="horizontal"
         android:paddingLeft="2dp"
@@ -31,7 +32,7 @@
             android:gravity="center"
             android:includeFontPadding="false"
             android:text="&#8249;"
-            android:textColor="?attr/bandInk"
+            android:textColor="?attr/on"
             android:textSize="28sp" />
 
         <LinearLayout
@@ -44,19 +45,20 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:fontFamily="@font/poppins_semibold"
-                android:letterSpacing="0.02"
+                android:fontFamily="@font/archivo_black"
+                android:letterSpacing="-0.01"
                 android:text="Editor"
-                android:textColor="?attr/bandInk"
+                android:textColor="?attr/on"
                 android:textSize="18sp" />
 
             <TextView
                 android:id="@+id/editorSubtitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:letterSpacing="0.1"
+                android:fontFamily="@font/plex_mono_regular"
+                android:letterSpacing="0.06"
                 android:text="QUICK TOOLS &#183; OFFLINE"
-                android:textColor="?attr/bandDim"
+                android:textColor="?attr/onDim"
                 android:textSize="9sp" />
         </LinearLayout>
 
@@ -67,13 +69,13 @@
             android:background="?android:attr/selectableItemBackgroundBorderless"
             android:clickable="true"
             android:focusable="true"
-            android:fontFamily="@font/poppins_semibold"
+            android:fontFamily="@font/plex_mono_regular"
             android:gravity="center"
-            android:letterSpacing="0.08"
+            android:letterSpacing="0.04"
             android:paddingLeft="8dp"
             android:paddingRight="8dp"
             android:text="PHOTO"
-            android:textColor="?attr/bandInk"
+            android:textColor="?attr/on"
             android:textSize="10sp" />
 
         <TextView

@@ -47,7 +47,8 @@ import java.util.Locale;
  * The editor: a photo, type set in the bundled faces or an imported pack, seven photo
  * presets and the reader's own saved looks, five live adjustments, reorderable
  * layers, and an export to Pictures/Editor. QUICK and STUDIO are tabs in this one
- * activity, so the native tools and the Fabric canvas never open a second editor.
+ * activity; STUDIO opens first and its WebView takes the canvas while the native band
+ * and tabs recede, so the native tools and the Studio never open a second editor.
  *
  * Nothing here needs a permission. The photo and the pack arrive through the system
  * picker, which hands over one document at a time, and the export goes through
@@ -82,9 +83,12 @@ public class EditorActivity extends Activity {
     private TextView studioTab;
     private TextView editorSubtitle;
     private View dock;
+    private View editorBand;
+    private View editorTabs;
     private FrameLayout studioHost;
     private StudioPane studioPane;
     private boolean studioOpen;
+    private int quickUiFlags = -1;
     /** The look application still reversible from the stage, if any. */
     private LookUndo pendingUndo;
 
@@ -102,6 +106,8 @@ public class EditorActivity extends Activity {
         // the only editor unreachable, so the engine has its own tab now and this
         // activity always opens the editor it is named after.
         setContentView(R.layout.activity_editor);
+        editorBand = findViewById(R.id.editorBand);
+        editorTabs = findViewById(R.id.editorTabs);
         applyInsets();
 
         stage = findViewById(R.id.stage);
@@ -254,9 +260,10 @@ public class EditorActivity extends Activity {
         }
     }
 
-    /** Quick is the starting tab; Studio is one tap away. */
+    /** Studio is the default editor; Quick is one tap away through the Studio back control. */
     private void restoreTab(Bundle state) {
-        boolean studio = state != null && state.getBoolean("editor_studio", false);
+        boolean basic = getIntent().getBooleanExtra(EXTRA_BASIC_EDITOR, false);
+        boolean studio = state != null ? state.getBoolean("editor_studio", false) : !basic;
         if (studio) {
             showStudio();
         } else {
@@ -276,6 +283,9 @@ public class EditorActivity extends Activity {
         if (studioPane != null) {
             studioPane.pause();
         }
+        if (editorBand != null) { editorBand.setVisibility(View.VISIBLE); }
+        if (editorTabs != null) { editorTabs.setVisibility(View.VISIBLE); }
+        paintSystemBars(false);
         stage.setVisibility(View.VISIBLE);
         dock.setVisibility(View.VISIBLE);
         studioHost.setVisibility(View.GONE);
@@ -288,6 +298,9 @@ public class EditorActivity extends Activity {
 
     private void showStudio() {
         studioOpen = true;
+        if (editorBand != null) { editorBand.setVisibility(View.GONE); }
+        if (editorTabs != null) { editorTabs.setVisibility(View.GONE); }
+        paintSystemBars(true);
         stage.setVisibility(View.GONE);
         dock.setVisibility(View.GONE);
         photoButton.setVisibility(View.GONE);
@@ -350,6 +363,27 @@ public class EditorActivity extends Activity {
     protected void onSaveInstanceState(Bundle out) {
         super.onSaveInstanceState(out);
         out.putBoolean("editor_studio", studioOpen);
+    }
+
+    /** The native chrome yields to the press; system bars follow the Studio graphite. */
+    private void paintSystemBars(boolean studio) {
+        View decor = getWindow().getDecorView();
+        if (studio) {
+            if (quickUiFlags < 0) {
+                quickUiFlags = decor.getSystemUiVisibility();
+            }
+            decor.setSystemUiVisibility(quickUiFlags
+                    & ~View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+                    & ~View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
+            getWindow().setStatusBarColor(Color.parseColor("#131513"));
+            getWindow().setNavigationBarColor(Color.parseColor("#131513"));
+        } else {
+            if (quickUiFlags >= 0) {
+                decor.setSystemUiVisibility(quickUiFlags);
+            }
+            getWindow().setStatusBarColor(colour(R.attr.band, Color.BLACK));
+            getWindow().setNavigationBarColor(colour(R.attr.page, Color.BLACK));
+        }
     }
 
     private void applyInsets() {

@@ -14,13 +14,13 @@
       this.callSuper('initialize', text, options);
 
       var base = typeof options.startColour === 'string' ? options.startColour
-        : (typeof options.fill === 'string' ? options.fill : '#131513');
+        : (typeof options.fill === 'string' ? options.fill : '#15120e');
       this.startColour = base;
-      this.endColour = options.endColour || '#0fbf92';
+      this.endColour = options.endColour || '#dd4124';
       this.gradientOn = options.gradientOn !== false;
       this.gradientAngle = options.gradientAngle == null ? 90 : options.gradientAngle;
       this.outlineOn = options.outlineOn === true;
-      this.outlineColour = options.outlineColour || '#131513';
+      this.outlineColour = options.outlineColour || '#15120e';
       this.outlineWidth = options.outlineWidth == null ? 6 : options.outlineWidth;
       this.shadowOn = options.shadowOn !== false;
       this.blendMode = options.blendMode || 'source-over';

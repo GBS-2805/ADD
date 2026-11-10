@@ -32,7 +32,7 @@ import java.io.OutputStream;
 import java.util.HashMap;
 
 /**
- * The Fabric Studio canvas, hosted by the editor rather than an activity of its own.
+ * The Studio engine canvas, hosted by the editor rather than an activity of its own.
  *
  * The page is served from assets/www/studio, so it is offline; the only bridge out is
  * a picked photo and a PNG export into Pictures/Studio. The close bridge returns to

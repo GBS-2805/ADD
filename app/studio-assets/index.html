@@ -2,23 +2,14 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#131513">
 <title>ADD Studio</title>
 <link rel="stylesheet" href="studio.css">
 </head>
-<body>
-<header>
-  <button id="back" aria-label="Back">&#8249;</button>
-  <div class="title">
-    <h1>Studio</h1>
-    <p>FABRIC+ SPIKE &middot; OFFLINE</p>
-  </div>
-  <button id="photo">Photo</button>
-  <button id="export" class="solid">Export</button>
-</header>
-
-<main>
-  <div id="stage">
+<body data-tool="move">
+<div class="studio-shell">
+  <main id="stage" aria-label="Artboard stage">
     <div id="stage-view">
       <canvas id="c"></canvas>
       <div id="studio-ui" aria-hidden="true">
@@ -32,99 +23,158 @@
         <div class="path-handle" data-point="end" title="Path end"></div>
       </div>
     </div>
-  </div>
-</main>
+  </main>
 
-<section id="panel">
-  <div class="row">
+  <header class="chrome-top">
+    <div class="brand">
+      <button id="back" class="icon-button" aria-label="Back to Quick editor" title="Back to Quick editor">&#8249;</button>
+      <span class="ring" aria-hidden="true"></span>
+      <span class="wordmark"><b>ADD</b><em>STUDIO / PRESS</em></span>
+    </div>
+    <div class="actions">
+      <button id="photo" class="action-button">PHOTO</button>
+      <button id="export" class="action-button action-red">EXPORT 2&times;</button>
+    </div>
+  </header>
+
+  <div class="document-chip" aria-label="Current document">
+    <b>POSTER 01</b><span>540 &times; 675 / ED. 3.8</span>
+  </div>
+
+  <div id="selection-bar" aria-live="polite">
+    <span class="status-dot" aria-hidden="true"></span>
     <span id="selection">Nothing selected</span>
-    <span class="spacer"></span>
-    <button id="add">+ Text</button>
-    <button id="duplicate">Duplicate</button>
-    <button id="remove" class="quiet">Delete</button>
   </div>
 
-  <label class="field">
-    <span>Text</span>
-    <textarea id="text" rows="2" placeholder="Select a line first"></textarea>
-  </label>
-
-  <div class="row wrap">
-    <label class="toggle"><input id="gradient" type="checkbox"> Gradient</label>
-    <input id="start" type="color" value="#131513" aria-label="Gradient start">
-    <input id="end" type="color" value="#0fbf92" aria-label="Gradient end">
-    <label class="range">Angle <input id="angle" type="range" min="0" max="360" value="90"><b id="angleValue">90&deg;</b></label>
+  <div class="chrome-bottom">
+    <nav class="tool-pill" role="toolbar" aria-label="Studio tools">
+      <button type="button" data-tool="move" class="is-active" aria-pressed="true">MOVE</button>
+      <button type="button" data-tool="type" aria-pressed="false">TYPE</button>
+      <button type="button" data-tool="style" aria-pressed="false">STYLE</button>
+      <button type="button" data-tool="texture" aria-pressed="false">TEXTURE</button>
+      <button type="button" data-tool="motion" aria-pressed="false">MOTION</button>
+    </nav>
   </div>
 
-  <div class="row wrap">
-    <label class="toggle"><input id="outline" type="checkbox"> Outline</label>
-    <input id="outlineColour" type="color" value="#131513" aria-label="Outline colour">
-    <label class="range">Width <input id="outlineWidth" type="range" min="0" max="16" value="6"><b id="outlineValue">6</b></label>
-  </div>
+  <section id="peek" class="peek" aria-label="Studio inspector" hidden>
+    <div class="peek-head">
+      <div class="peek-title">
+        <strong id="peekTitle">TYPE</strong>
+      </div>
+      <div class="peek-meta">
+        <span id="peekSelection">Nothing selected</span>
+        <button id="peekClose" class="quiet-button" type="button" aria-label="Close inspector">CLOSE</button>
+      </div>
+    </div>
 
-  <div class="row wrap">
-    <label class="toggle"><input id="shadow" type="checkbox" checked> Shadow</label>
-    <label class="toggle">Blend
-      <select id="blend">
-        <option value="source-over">Normal</option>
-        <option value="multiply">Multiply</option>
-        <option value="screen">Screen</option>
-        <option value="overlay">Overlay</option>
-      </select>
-    </label>
-    <button id="group">Group</button>
-    <button id="ungroup">Ungroup</button>
-  </div>
+    <div class="peek-body">
+      <section class="sheet" data-sheet="type">
+        <div class="row">
+          <button id="add" class="primary" type="button">+ ADD LINE</button>
+          <button id="duplicate" type="button">DUPLICATE</button>
+          <button id="remove" class="quiet-button" type="button">DELETE</button>
+        </div>
+        <label class="field">
+          <span>CONTENT</span>
+          <textarea id="text" rows="2" placeholder="Select a line first"></textarea>
+        </label>
+        <div class="row split">
+          <span class="section-label">GROUP / LAYERS</span>
+          <span class="spacer"></span>
+          <button id="group" type="button">GROUP</button>
+          <button id="ungroup" type="button">UNGROUP</button>
+        </div>
+      </section>
 
-  <div class="row">
-    <button id="motionPath" aria-pressed="false" title="Edit the selected layer's motion path">Curve</button>
-    <button id="motionPathPlay" disabled title="Animate the selected layer along the curve">Play path</button>
-    <button id="motionPathReset" disabled title="Reset the curve from the selected layer">Reset path</button>
-    <span class="spacer"></span>
-    <span class="section-label">GSAP</span>
-  </div>
+      <section class="sheet" data-sheet="style" hidden>
+        <div class="control-block">
+          <div class="row">
+            <label class="toggle"><input id="gradient" type="checkbox"> GRADIENT</label>
+            <input id="start" type="color" value="#15120e" aria-label="Gradient start">
+            <input id="end" type="color" value="#dd4124" aria-label="Gradient end">
+          </div>
+          <label class="range">ANGLE <input id="angle" type="range" min="0" max="360" value="90"><b id="angleValue">90&deg;</b></label>
+        </div>
+        <div class="control-block">
+          <div class="row">
+            <label class="toggle"><input id="outline" type="checkbox"> OUTLINE</label>
+            <input id="outlineColour" type="color" value="#15120e" aria-label="Outline colour">
+          </div>
+          <label class="range">WIDTH <input id="outlineWidth" type="range" min="0" max="16" value="6"><b id="outlineValue">6</b></label>
+        </div>
+        <div class="row">
+          <label class="toggle"><input id="shadow" type="checkbox" checked> SHADOW</label>
+          <label class="toggle">BLEND
+            <select id="blend">
+              <option value="source-over">Normal</option>
+              <option value="multiply">Multiply</option>
+              <option value="screen">Screen</option>
+              <option value="overlay">Overlay</option>
+            </select>
+          </label>
+        </div>
+      </section>
 
-  <div class="row"><span class="section-label">Overlays</span></div>
-  <div class="row wrap">
-    <label class="toggle">Texture
-      <select id="overlayKind">
-        <option value="none">None</option>
-        <option value="light">Light leak</option>
-        <option value="grain">Film grain</option>
-        <option value="bokeh">Bokeh</option>
-        <option value="paper">Paper</option>
-        <option value="dust">Dust &amp; scratches</option>
-        <option value="vignette">Vignette</option>
-        <option value="shadows">Window shadows</option>
-        <option value="flare">Lens flare</option>
-      </select>
-    </label>
-    <label class="range">Opacity <input id="overlayOpacity" type="range" min="0" max="100" value="55"><b id="overlayValue">55</b></label>
-  </div>
-  <div class="row wrap">
-    <label class="toggle">Blend
-      <select id="overlayBlend">
-        <option value="screen">Screen</option>
-        <option value="overlay">Overlay</option>
-        <option value="multiply">Multiply</option>
-        <option value="soft-light">Soft light</option>
-      </select>
-    </label>
-    <button id="overlayPlace" disabled aria-pressed="false">Place</button>
-    <button id="overlayShuffle" disabled>Shuffle</button>
-    <button id="overlayReset" disabled title="Reset position, scale and rotation">Reset</button>
-    <button id="overlayRemove" disabled class="quiet">Remove</button>
-  </div>
-  <div id="overlayTransform" class="overlay-grid" hidden>
-    <label class="range">X <input id="overlayX" type="range" min="-100" max="100" step="0.5" value="0"><b id="overlayXValue">0%</b></label>
-    <label class="range">Y <input id="overlayY" type="range" min="-100" max="100" step="0.5" value="0"><b id="overlayYValue">0%</b></label>
-    <label class="range">Scale <input id="overlayScale" type="range" min="25" max="250" step="1" value="100"><b id="overlayScaleValue">100%</b></label>
-    <label class="range">Rotate <input id="overlayRotate" type="range" min="-180" max="180" step="1" value="0"><b id="overlayRotateValue">0&deg;</b></label>
-  </div>
+      <section class="sheet" data-sheet="texture" hidden>
+        <div class="row">
+          <label class="field inline-field">
+            <span>STOCK</span>
+            <select id="overlayKind">
+              <option value="none">None</option>
+              <optgroup label="Press materials">
+                <option value="newsprint">Newsprint</option>
+                <option value="wheatpaste">Wheatpaste</option>
+                <option value="overexposed">Overexposed ink</option>
+                <option value="halftone">Halftone</option>
+                <option value="rough">Rough canvas</option>
+              </optgroup>
+              <optgroup label="Atmosphere">
+                <option value="light">Light leak</option>
+                <option value="grain">Film grain</option>
+                <option value="bokeh">Bokeh</option>
+                <option value="paper">Paper fibre</option>
+                <option value="dust">Dust &amp; scratches</option>
+                <option value="vignette">Vignette</option>
+                <option value="shadows">Window shadows</option>
+                <option value="flare">Lens flare</option>
+              </optgroup>
+            </select>
+          </label>
+          <label class="range">OPACITY <input id="overlayOpacity" type="range" min="0" max="100" value="55"><b id="overlayValue">55</b></label>
+        </div>
+        <div class="row">
+          <label class="toggle">BLEND
+            <select id="overlayBlend">
+              <option value="screen">Screen</option>
+              <option value="overlay">Overlay</option>
+              <option value="multiply">Multiply</option>
+              <option value="soft-light">Soft light</option>
+            </select>
+          </label>
+          <span class="spacer"></span>
+          <button id="overlayPlace" type="button" disabled aria-pressed="false">PLACE</button>
+          <button id="overlayShuffle" type="button" disabled>SHUFFLE</button>
+          <button id="overlayReset" type="button" disabled title="Reset position, scale and rotation">RESET</button>
+          <button id="overlayRemove" type="button" disabled class="quiet-button">REMOVE</button>
+        </div>
+        <div id="overlayTransform" class="overlay-grid" hidden>
+          <label class="range">X <input id="overlayX" type="range" min="-100" max="100" step="0.5" value="0"><b id="overlayXValue">0%</b></label>
+          <label class="range">Y <input id="overlayY" type="range" min="-100" max="100" step="0.5" value="0"><b id="overlayYValue">0%</b></label>
+          <label class="range">SCALE <input id="overlayScale" type="range" min="25" max="250" step="1" value="100"><b id="overlayScaleValue">100%</b></label>
+          <label class="range">ROTATE <input id="overlayRotate" type="range" min="-180" max="180" step="1" value="0"><b id="overlayRotateValue">0&deg;</b></label>
+        </div>
+      </section>
 
-  <p class="note">Stock Fabric, one custom class. Place unlocks the overlay handles; X, Y, scale and rotate stay below. Drag fast mode strips the expensive passes until you let go.</p>
-  <p class="foot">Fabric.js 5.3.0 &middot; MIT &middot; GSAP 3.12.5 &middot; bundled offline</p>
-</section>
+      <section class="sheet" data-sheet="motion" hidden>
+        <div class="row">
+          <button id="motionPath" type="button" aria-pressed="false" title="Edit the selected layer's motion path">CURVE</button>
+          <button id="motionPathPlay" type="button" disabled title="Animate the selected layer along the curve">PLAY PATH</button>
+          <button id="motionPathReset" type="button" disabled title="Reset the curve from the selected layer">RESET PATH</button>
+        </div>
+      </section>
+    </div>
+  </section>
+</div>
 
 <script src="fabric.min.js"></script>
 <script src="add-text.js"></script>
@@ -135,6 +185,7 @@
 <script src="vendor/Observer.min.js"></script>
 <script src="vendor/MotionPathPlugin.min.js"></script>
 <script src="studio-motion.js"></script>
+<script src="studio-shell.js"></script>
 <script src="studio-interaction.js"></script>
 </body>
 </html>

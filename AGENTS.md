@@ -718,15 +718,18 @@ where the notes keep the history they shipped with.Icons, Fonts, Compress and th
   `PackStore`, which checks the listing's outer SHA-256, then the manifest signature
   against `PackKey`, then a SHA-256 per entry before installing atomically into
   `filesDir/font-packs/<slug>/<version>/`. The manual `.addpack` picker remains as a
-  secondary link for a file already on the phone. The editor's QUICK/STUDIO tabs keep
-  the Fabric Studio in the same activity: a WebView over `assets/www/studio` running
-  vendored Fabric.js 5.3.0 (MIT) with a custom `AddText` class (gradient, outline,
-  shadow and blend), fast-drag mode, grouping, photo import and a 1080x1350 PNG export
-  to `Pictures/Studio`. `overlays.js` draws eight textures locally — light leak, grain,
-  bokeh, paper, dust, vignette, window shadows and lens flare — and the page exposes
-  opacity, blend, shuffle, remove, on-canvas placement handles and X/Y/scale/rotation
-  controls; nothing is fetched and no stock asset is bundled. It is a spike, not wired
-  to saved looks, and it is unverified on a device.
+  secondary link for a file already on the phone. The editor's STUDIO tab now opens
+  first; it keeps the Studio engine in the same activity: a WebView over
+  `assets/www/studio` running vendored Fabric.js 5.3.0 (MIT) with a custom `AddText`
+  class (gradient, outline, shadow and blend), fast-drag mode, grouping, photo import
+  and a 1080x1350 PNG export to `Pictures/Studio`. The graphite press shell is
+  canvas-first: floating chrome, a Move/Type/Style/Texture/Motion pill and a peek
+  inspector. `overlays.js` draws the five press materials — newsprint, wheatpaste,
+  overexposed ink, halftone and rough canvas — beside the eight atmosphere textures
+  (light leak, grain, bokeh, paper, dust, vignette, window shadows and lens flare), and
+  the page exposes opacity, blend, shuffle, remove, on-canvas placement handles and
+  X/Y/scale/rotation controls; nothing is fetched and no stock asset is bundled. It is
+  the first Studio 2 slice, not wired to saved looks, and it is unverified on a device.
 - `python3 tools/check_all.py` is the single verdict: palette, asset hashes, site tree,
   catalog, Figma structure, Pantone sheet, note dating and the staged bundle, one line
   each, all of them run so one pass shows everything. `--browser <url>` adds the
