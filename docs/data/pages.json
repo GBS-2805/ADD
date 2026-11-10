@@ -74,15 +74,15 @@
     },
     {
       "path": "/",
-      "title": "A design shelf — icons, type and one offline Android app",
-      "description": "4,373 icons, Poppins and Redaction, four palettes, and one quiet app for making things.",
-      "heading": "A design shelf.",
+      "title": "ADD — take up space.",
+      "description": "A free design shelf for people who'd rather make the thing than ask permission. 4,373 icons, fonts, one engine and one offline Android app.",
+      "heading": "Take up space.",
       "section": ""
     },
     {
       "path": "/portfolio/",
-      "title": "Portfolio — the work behind the shelf",
-      "description": "Three projects: the ADD app, the 4,373-icon browser and this site — the work and the visual system behind it.",
+      "title": "Portfolio — three ways into ADD",
+      "description": "Three ways into the ADD shelf: Resources, the signed app and the public build handoff.",
       "heading": "Portfolio",
       "section": "portfolio"
     },
@@ -109,9 +109,9 @@
     },
     {
       "path": "/tools/",
-      "title": "Tools — icons, type, photos and words",
-      "description": "Four quiet tools for icons, type, photos and words, in one independent Android app. No account, no store.",
-      "heading": "Tools",
+      "title": "Resources — icons, fonts and the engine",
+      "description": "Icons, fonts and the engine: the working parts of ADD, in one independent Android app. No account, no store.",
+      "heading": "Resources",
       "section": "tools"
     }
   ]

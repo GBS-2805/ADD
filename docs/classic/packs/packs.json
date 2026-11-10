@@ -1,0 +1,168 @@
+{
+  "generated": "2026-11-06",
+  "count": 8,
+  "faces": 39,
+  "bytes": 1728548,
+  "key": "add-2026-1",
+  "packs": [
+    {
+      "slug": "poppins",
+      "family": "Poppins",
+      "version": "5d37e5a4",
+      "faces": 18,
+      "styles": [
+        "Thin",
+        "Thin Italic",
+        "ExtraLight",
+        "ExtraLight Italic",
+        "Light",
+        "Light Italic",
+        "Regular",
+        "Regular Italic",
+        "Medium",
+        "Medium Italic",
+        "SemiBold",
+        "SemiBold Italic",
+        "Bold",
+        "Bold Italic",
+        "ExtraBold",
+        "ExtraBold Italic",
+        "Black",
+        "Black Italic"
+      ],
+      "licence": "SIL Open Font License 1.1",
+      "source": "Google Fonts",
+      "note": "The three faces the app bundles are byte-for-byte copies of app/res/font/.",
+      "file": "poppins-5d37e5a4.addpack",
+      "bytes": 1323624,
+      "sha256": "247e1c3735b7c790911c29fa4daeacf04eb9ad51c6172986d643a426fc347767",
+      "key": "add-2026-1"
+    },
+    {
+      "slug": "redaction",
+      "family": "Redaction",
+      "version": "1d5e6eb3",
+      "faces": 3,
+      "styles": [
+        "Italic",
+        "Regular",
+        "Bold"
+      ],
+      "licence": "SIL Open Font License 1.1",
+      "source": "Google Fonts",
+      "note": "Grade 0: the plain serif every degraded grade is cut from.",
+      "file": "redaction-1d5e6eb3.addpack",
+      "bytes": 101120,
+      "sha256": "8f366da2224fddd695abc5b341724a799c4003a296317634ae4995d330f4abaf",
+      "key": "add-2026-1"
+    },
+    {
+      "slug": "redaction-10",
+      "family": "Redaction 10",
+      "version": "882176f4",
+      "faces": 3,
+      "styles": [
+        "Italic",
+        "Regular",
+        "Bold"
+      ],
+      "licence": "SIL Open Font License 1.1",
+      "source": "Google Fonts",
+      "note": "Grade 10: the serifs begin to square off.",
+      "file": "redaction-10-882176f4.addpack",
+      "bytes": 71772,
+      "sha256": "77fe1ccc3f122d6d3495945e7e0db8d017d2e28c5cd952036197dd8d138f6b80",
+      "key": "add-2026-1"
+    },
+    {
+      "slug": "redaction-20",
+      "family": "Redaction 20",
+      "version": "96f5ae43",
+      "faces": 3,
+      "styles": [
+        "Italic",
+        "Regular",
+        "Bold"
+      ],
+      "licence": "SIL Open Font License 1.1",
+      "source": "Google Fonts",
+      "note": "Grade 20: light degradation, still readable in long lines.",
+      "file": "redaction-20-96f5ae43.addpack",
+      "bytes": 58490,
+      "sha256": "b25175fe3097c6087461dd58c6f78ab5009d2766d7470c1db786a7ff6a853406",
+      "key": "add-2026-1"
+    },
+    {
+      "slug": "redaction-35",
+      "family": "Redaction 35",
+      "version": "fd32face",
+      "faces": 3,
+      "styles": [
+        "Italic",
+        "Regular",
+        "Bold"
+      ],
+      "licence": "SIL Open Font License 1.1",
+      "source": "Google Fonts",
+      "note": "Grade 35: mid degradation; the capitals keep their bars.",
+      "file": "redaction-35-fd32face.addpack",
+      "bytes": 50069,
+      "sha256": "da5220527e75051574c3d7693033d7ae4c515603ed5b31fd41f2be01d6b9290e",
+      "key": "add-2026-1"
+    },
+    {
+      "slug": "redaction-50",
+      "family": "Redaction 50",
+      "version": "493245b6",
+      "faces": 3,
+      "styles": [
+        "Italic",
+        "Regular",
+        "Bold"
+      ],
+      "licence": "SIL Open Font License 1.1",
+      "source": "Google Fonts",
+      "note": "Grade 50: heavy degradation. The capital A loses its bar in this grade; 35 and 70 both keep theirs.",
+      "file": "redaction-50-493245b6.addpack",
+      "bytes": 45672,
+      "sha256": "e57e22327d9360fb1592188cac5cfafff81e22d716efa6e7c2ed8d453f8e1d81",
+      "key": "add-2026-1"
+    },
+    {
+      "slug": "redaction-70",
+      "family": "Redaction 70",
+      "version": "672384b0",
+      "faces": 3,
+      "styles": [
+        "Italic",
+        "Regular",
+        "Bold"
+      ],
+      "licence": "SIL Open Font License 1.1",
+      "source": "Google Fonts",
+      "note": "Grade 70: strokes collapse into coarse blocks.",
+      "file": "redaction-70-672384b0.addpack",
+      "bytes": 41348,
+      "sha256": "f74d7503aa4340fc3febc5596755ff433a8300c1a06842e431c80c72bcf47ecc",
+      "key": "add-2026-1"
+    },
+    {
+      "slug": "redaction-100",
+      "family": "Redaction 100",
+      "version": "4eb66631",
+      "faces": 3,
+      "styles": [
+        "Italic",
+        "Regular",
+        "Bold"
+      ],
+      "licence": "SIL Open Font License 1.1",
+      "source": "Google Fonts",
+      "note": "Grade 100: fully pixelated, the coarsest grade.",
+      "file": "redaction-100-4eb66631.addpack",
+      "bytes": 36453,
+      "sha256": "8a6065c458ebcce935652f9f772d1ffe248fdae84cc3332330d21d4ec2a3f0b0",
+      "key": "add-2026-1"
+    }
+  ]
+}

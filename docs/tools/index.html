@@ -1,22 +1,22 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-palette="ash" data-theme="dark">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Tools — icons, type, photos and words</title>
-<meta name="description" content="Four quiet tools for icons, type, photos and words, in one independent Android app. No account, no store." />
-<meta name="theme-color" content="#0fbf92" />
+<title>Resources — icons, fonts and the engine</title>
+<meta name="description" content="Icons, fonts and the engine: the working parts of ADD, in one independent Android app. No account, no store." />
+<meta name="theme-color" content="#f0e7d4" />
 <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml" />
-<link rel="stylesheet" href="../assets/site.8123ef336b.css" />
+<link rel="stylesheet" href="../assets/site.35890e01c7.css" />
 </head>
 <body>
 
 <header class="bar">
-  <div class="lead">
+<div class="lead">
     <button class="menu-btn" id="menuBtn" type="button" aria-expanded="false" aria-controls="menu" aria-label="Open sections">
       <svg class="chev" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M8 13L12 17L16 13M8 7L12 11L16 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
     </button>
-    <a class="page-name" href="../">Tools</a>
+    <a class="page-name" href="./">Resources</a>
   </div>
 
   <a class="mark" href="../" aria-label="ADD — home">
@@ -28,22 +28,18 @@
       </svg>
   </a>
 
-  <div class="who">
-    <div class="who-lines keep">
-      <p class="big">Art Design Database</p>
-      <p class="big">Icons • Fonts • Tools</p>
-    </div>
-    <button class="burger" id="burger" type="button" aria-expanded="false" aria-controls="drawer" aria-label="Open side tab">
+<div class="who">
+<button class="burger" id="burger" type="button" aria-expanded="false" aria-controls="drawer" aria-label="Open side tab">
       <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 7H19M5 12H19M5 17H19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
     </button>
   </div>
 </header>
 
 <nav class="menu" id="menu" data-open="false" aria-label="Sections">
-  <a href="../">Index<span>shelf</span></a>
-  <a href="../icons/">Icons<span>4,373 icons</span></a>
-  <a href="../fonts/">Fonts<span>2 families</span></a>
-  <a href="../tools/" aria-current="page">Tools<span>4 tools</span></a>
+  <a href="../">Index<span>the shelf</span></a>
+  <a href="../tools/" aria-current="page">Resources<span>icons · fonts · engine</span></a>
+  <a href="../download/">Download<span>one app</span></a>
+  <a href="https://artbase-handoff.vercel.app/">Handoff<span>build handoff</span></a>
 </nav>
 
 <div class="scrim" id="scrim" data-open="false"></div>
@@ -61,39 +57,39 @@
 
 <main>
   <header class="page-head">
-    <h1>Tools</h1>
-    <p class="lede">Four ways to make something — icons, type, photos and words — in one quiet app.</p>
-    <p class="fine">The app is on the <a href="../download/">download page</a>.</p>
+    <h1>Resources</h1>
+    <p class="lede">Icons, fonts and the engine: the working parts of ADD, gathered in one place.</p>
+    <p class="fine">The engine ships in the <a href="../download/">app</a>.</p>
     <p class="meta">
-      <span>4 tools</span>
+      <span>Icons · Fonts · Engine</span>
       <span>No account</span>
     </p>
   </header>
 
   <section>
-    <h2>The four</h2>
-    <p class="kicker">Icons, fonts, photos and words</p>
+    <h2>What's here</h2>
+    <p class="kicker">Icons, fonts and the engine</p>
     <div class="cards">
       <a class="card" href="../icons/">
-        <span class="kind">Tool · Icons</span>
+        <span class="kind">Resource · Icons</span>
         <h3>Icons</h3>
         <p>Four free brands, 4,373 drawings and a live preview. Copy the one you want.</p>
         <span class="tag"><span class="pill live">3.8</span><span class="go">Browse icons</span></span>
       </a>
       <a class="card" href="../fonts/">
-        <span class="kind">Tool · Fonts</span>
+        <span class="kind">Resource · Fonts</span>
         <h3>Fonts</h3>
         <p>Poppins and Redaction, with every face the site uses.</p>
         <span class="tag"><span class="go">Open fonts</span></span>
       </a>
       <a class="card" href="../compress/">
-        <span class="kind">Tool · Compress</span>
+        <span class="kind">Engine · Compress</span>
         <h3>Compress</h3>
         <p>Batch photos with a before/after slider. The originals stay untouched.</p>
         <span class="tag"><span class="pill live">3.8</span><span class="go">Open compressor</span></span>
       </a>
       <a class="card" href="../download/" data-tool="editor">
-        <span class="kind">Tool · Editor</span>
+        <span class="kind">Engine · Editor</span>
         <h3>Editor</h3>
         <p>Put type on a photo with the bundled faces, or a font pack from the download page.</p>
         <span class="tag"><span class="pill live">in app</span></span>
@@ -110,10 +106,12 @@
 </main>
 
 <footer>
-  <span>ADD<span class="dot" aria-hidden="true">·</span>one app, four tools</span>
+  <span>ADD<span class="dot" aria-hidden="true">·</span>one app, one engine</span>
   <span><a href="../">Index</a><span class="dot" aria-hidden="true">·</span><a href="../download/">Download</a><span class="dot" aria-hidden="true">·</span>no account</span>
 </footer>
 
-<script src="../assets/site.6a38690486.js" defer></script>
+<script src="../assets/vendor/gsap.min.js" defer></script>
+
+<script src="../assets/site.520be602d0.js" defer></script>
 </body>
 </html>

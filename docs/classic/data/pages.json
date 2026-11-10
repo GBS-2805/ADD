@@ -1,0 +1,118 @@
+{
+  "origin": "https://artbase-olive.vercel.app",
+  "count": 16,
+  "pages": [
+    {
+      "path": "/compress/",
+      "title": "Compress — a quieter way to shrink photos",
+      "description": "A quiet photo compressor: pick up to 40 photos, choose a size, compare before and after, then save a copy. Nothing is uploaded.",
+      "heading": "Compress",
+      "section": "compress"
+    },
+    {
+      "path": "/download/",
+      "title": "Download — ADD 3.8, one signed APK",
+      "description": "ADD 3.8 (6 MB): the whole shelf — every page, the icon browser, the fonts, the editor and the compressor — in one signed APK. Android 8.0+, SHA-256 listed, no store or account.",
+      "heading": "Download",
+      "section": "download"
+    },
+    {
+      "path": "/figma/",
+      "title": "Design files — every sketch and every palette",
+      "description": "Every page as a Figma-importable artboard, the whole set on one canvas, and the Pantone match for every palette colour.",
+      "heading": "Design files",
+      "section": "figma"
+    },
+    {
+      "path": "/fonts/",
+      "title": "Fonts — Poppins and the seven Redaction grades, one sheet per family",
+      "description": "Poppins and all seven Redaction grades: woff2, woff and TTF, every weight and italic, free under the SIL Open Font License.",
+      "heading": "Fonts",
+      "section": "fonts"
+    },
+    {
+      "path": "/icons/all/",
+      "title": "All brands — one icon per category, twelve from each set",
+      "description": "Every brand on one page, twelve icons each from the categories they share: 4,373 icons.",
+      "heading": "One per category",
+      "section": "icons"
+    },
+    {
+      "path": "/icons/coolicons/",
+      "title": "Coolicons — 1,258 icons, preview and variants",
+      "description": "Coolicons: 1,258 line, regular icons, MIT. Preview one, set weight, size and surface, copy the SVG.",
+      "heading": "Coolicons",
+      "section": "icons"
+    },
+    {
+      "path": "/icons/",
+      "title": "Icons — 4,373 icons in four free brands, offline",
+      "description": "The Icons app and its browser: Lineicons, Coolicons, Phosphor and Streamline, 4,373 icons, live preview, copy the SVG. Offline, no account.",
+      "heading": "Icons",
+      "section": "icons"
+    },
+    {
+      "path": "/icons/lineicons/",
+      "title": "Lineicons — 606 icons, preview and variants",
+      "description": "Lineicons: 606 line style, the free set icons, MIT. Preview one, set weight, size and surface, copy the SVG.",
+      "heading": "Lineicons",
+      "section": "icons"
+    },
+    {
+      "path": "/icons/phosphor/",
+      "title": "Phosphor — 1,512 icons, preview and variants",
+      "description": "Phosphor: 1,512 regular weight, outline icons, MIT. Preview one, set weight, size and surface, copy the SVG.",
+      "heading": "Phosphor",
+      "section": "icons"
+    },
+    {
+      "path": "/icons/streamline/",
+      "title": "Streamline — 997 icons, preview and variants",
+      "description": "Streamline: 997 Line, Duo, Solid and Flat icons, CC BY 4.0. Preview one, set weight, size and surface, copy the SVG.",
+      "heading": "Streamline",
+      "section": "icons"
+    },
+    {
+      "path": "/",
+      "title": "A design shelf — icons, type and one offline Android app",
+      "description": "4,373 icons, Poppins and Redaction, four palettes, and one quiet app for making things.",
+      "heading": "A design shelf.",
+      "section": ""
+    },
+    {
+      "path": "/portfolio/",
+      "title": "Portfolio — the work behind the shelf",
+      "description": "Three projects: the ADD app, the 4,373-icon browser and this site — the work and the visual system behind it.",
+      "heading": "Portfolio",
+      "section": "portfolio"
+    },
+    {
+      "path": "/releases/",
+      "title": "Releases — 51 builds, with the date and size of each",
+      "description": "Every build this shelf has shipped: 51 releases with the day and the APK size, read out of git.",
+      "heading": "Releases",
+      "section": "releases"
+    },
+    {
+      "path": "/renders/",
+      "title": "Renders — 32 captures of this site",
+      "description": "32 screenshots of the shelf in headless Chromium, at 1300 wide and 390 on a phone.",
+      "heading": "Renders",
+      "section": "renders"
+    },
+    {
+      "path": "/search/",
+      "title": "Search — every page on the shelf",
+      "description": "Every page of the shelf, by title, section or the words in its lede.",
+      "heading": "Search",
+      "section": "search"
+    },
+    {
+      "path": "/tools/",
+      "title": "Tools — icons, type, photos and words",
+      "description": "Four quiet tools for icons, type, photos and words, in one independent Android app. No account, no store.",
+      "heading": "Tools",
+      "section": "tools"
+    }
+  ]
+}

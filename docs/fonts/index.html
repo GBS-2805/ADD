@@ -1,13 +1,13 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-palette="ash" data-theme="dark">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Fonts — Poppins and the seven Redaction grades, one sheet per family</title>
 <meta name="description" content="Poppins and all seven Redaction grades: woff2, woff and TTF, every weight and italic, free under the SIL Open Font License." />
-<meta name="theme-color" content="#0fbf92" />
+<meta name="theme-color" content="#f0e7d4" />
 <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml" />
-<link rel="stylesheet" href="../assets/site.8123ef336b.css" />
+<link rel="stylesheet" href="../assets/site.35890e01c7.css" />
 <style>
   /* The hero as the hand-off draws it: the page's copy on the left, the typeable
      box on the right under "Try it!", with Copy CSS below its right corner. */
@@ -101,11 +101,11 @@
 <body>
 
 <header class="bar">
-  <div class="lead">
+<div class="lead">
     <button class="menu-btn" id="menuBtn" type="button" aria-expanded="false" aria-controls="menu" aria-label="Open sections">
       <svg class="chev" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M8 13L12 17L16 13M8 7L12 11L16 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
     </button>
-    <a class="page-name" href="../">Fonts</a>
+    <a class="page-name" href="./">Fonts</a>
   </div>
 
   <a class="mark" href="../" aria-label="ADD — home">
@@ -117,22 +117,18 @@
       </svg>
   </a>
 
-  <div class="who">
-    <div class="who-lines keep">
-      <p class="big">Art Design Database</p>
-      <p class="big">Icons • Fonts • Tools</p>
-    </div>
-    <button class="burger" id="burger" type="button" aria-expanded="false" aria-controls="drawer" aria-label="Open side tab">
+<div class="who">
+<button class="burger" id="burger" type="button" aria-expanded="false" aria-controls="drawer" aria-label="Open side tab">
       <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 7H19M5 12H19M5 17H19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
     </button>
   </div>
 </header>
 
 <nav class="menu" id="menu" data-open="false" aria-label="Sections">
-  <a href="../">Index<span>shelf</span></a>
-  <a href="../icons/">Icons<span>4,373 icons</span></a>
-  <a href="../fonts/" aria-current="page">Fonts<span>2 families</span></a>
-  <a href="../tools/">Tools<span>4 tools</span></a>
+  <a href="../">Index<span>the shelf</span></a>
+  <a href="../tools/" aria-current="page">Resources<span>icons · fonts · engine</span></a>
+  <a href="../download/">Download<span>one app</span></a>
+  <a href="https://artbase-handoff.vercel.app/">Handoff<span>build handoff</span></a>
 </nav>
 
 <div class="scrim" id="scrim" data-open="false"></div>
@@ -187,7 +183,7 @@
     <h2>How it is wired</h2>
     <p class="kicker">Two families, seven grades, no network</p>
     <ul class="rows">
-      <li><b>Site</b><span><code>assets/site.8123ef336b.css</code> sets the site's own Poppins faces; this page declares every downloaded style from <code>/data/fonts.json</code>.</span></li>
+      <li><b>Site</b><span><code>assets/site.35890e01c7.css</code> sets the site's own Poppins faces; this page declares every downloaded style from <code>/data/fonts.json</code>.</span></li>
       <li><b>App</b><span><code>app/res/font/poppins_regular.ttf</code>, <code>_medium</code> and <code>_semibold</code>, referenced from the layouts.</span></li>
       <li><b>Downloads</b><span>woff2 for the web at <code>/assets/fonts/</code>, woff for engines older than that, TTF for Android and desktop.</span></li>
       <li><b>JSON</b><span><code>/data/fonts.json</code> lists each family, its faces, all three paths and their measured sizes.</span></li>
@@ -207,7 +203,7 @@
 
 <footer>
   <span>Poppins<span class="dot" aria-hidden="true">·</span>Redaction<span class="dot" aria-hidden="true">·</span>SIL OFL 1.1</span>
-  <span><a href="../">Index</a><span class="dot" aria-hidden="true">·</span><a href="../icons/">Icons</a><span class="dot" aria-hidden="true">·</span><a href="../download/">Download</a></span>
+  <span><a href="../">Index</a><span class="dot" aria-hidden="true">·</span><a href="../tools/">Resources</a><span class="dot" aria-hidden="true">·</span><a href="../download/">Download</a></span>
 </footer>
 
 <script>
@@ -676,6 +672,7 @@
     });
 })();
 </script>
-<script src="../assets/site.6a38690486.js" defer></script>
+<script src="../assets/vendor/gsap.min.js" defer></script>
+<script src="../assets/site.520be602d0.js" defer></script>
 </body>
 </html>
