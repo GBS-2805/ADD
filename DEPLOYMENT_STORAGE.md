@@ -133,6 +133,14 @@ Vercel's [Activity Log](https://vercel.com/docs/activity-log) is available on Ho
 
 ## Change log
 
+- **2026-11-11** — After approval, pruned 61 deployments: the 5 oldest
+  `artbase`, 7 oldest `artbase-handoff-apk`, and 49 oldest `artbase-shots`
+  deployments, keeping the newest 3/2/10 and protecting every live alias.
+  Estimated storage fell from 1.13 GiB to 337.7 MiB. The signed 16 MB ADD 3.8
+  APK was then published to the site and handoff; current retained set is
+  4 `artbase`, 8 `artbase-handoff`, 3 `artbase-handoff-apk`, 10 `artbase-shots`,
+  estimated 451.9 MiB, no warnings.
+
 - **2026-11-09** — Moved the 29,041,927-byte build 47 review APK to the dedicated
   `artbase-handoff-apk` project and removed it from `artifacts/handoff`, so a handoff
   deployment carries the page and five screenshots (~1.4 MiB) instead of the APK.
