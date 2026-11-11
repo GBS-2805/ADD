@@ -1,5 +1,6 @@
 package app.add.engine
 
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Typography
 import androidx.compose.material.darkColors
@@ -9,6 +10,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 val Ink = Color(0xFF0C1210)
@@ -22,6 +24,17 @@ val Lime = Color(0xFFD6E381)
 val Clay = Color(0xFFE86A4A)
 val Artboard = Color(0xFFF3EBDD)
 val ArtboardInk = Color(0xFF11231C)
+
+// Playful Studio: dark green risograph ink, warm paper cards and a deep studio
+// backdrop. The artboard and painter colours above stay unchanged.
+val Forest = Color(0xFF101C16)
+val Paper = Color(0xFFF6EEDF)
+val PaperEdge = Color(0xFFE4D7C1)
+val MintWash = Color(0xFFE4F5EC)
+val StudioOutline = Color(0xFF17241C)
+val PebbleShape = RoundedCornerShape(18.dp)
+val SheetShape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
+val CardShape = RoundedCornerShape(16.dp)
 
 val Poppins = FontFamily(
     Font(R.font.poppins_regular, FontWeight.Normal),
@@ -57,4 +70,11 @@ fun EngineTheme(content: @Composable () -> Unit) {
         typography = SpikeTypography,
         content = content,
     )
+}
+
+/** Shared timing for the chrome: quick press, springy expansion, gentle sheet. */
+object StudioMotion {
+    const val PressScale = 0.96f
+    const val SheetFraction = 0.66f
+    const val StaggerMillis = 25L
 }

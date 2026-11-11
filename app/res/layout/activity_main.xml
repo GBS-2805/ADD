@@ -48,7 +48,7 @@
                 android:text="1. ADD IMAGES"
                 android:textColor="?attr/on"
                 android:textSize="21sp"
-                android:fontFamily="@font/poppins_semibold" />
+                android:fontFamily="@font/instrument_serif" />
 
             <View
                 android:layout_width="match_parent"
@@ -79,7 +79,7 @@
                     android:text="+"
                     android:textColor="?attr/on"
                     android:textSize="22sp"
-                    android:fontFamily="@font/poppins_semibold" />
+                    android:fontFamily="@font/libre_franklin" />
 
                 <TextView
                     android:id="@+id/pickTitle"
@@ -90,7 +90,7 @@
                     android:text="TAP TO PICK PHOTOS"
                     android:textColor="?attr/on"
                     android:textSize="15sp"
-                    android:fontFamily="@font/poppins_semibold" />
+                    android:fontFamily="@font/instrument_serif" />
 
                 <TextView
                     android:id="@+id/pickSub"
@@ -104,7 +104,8 @@
                     android:paddingBottom="2dp"
                     android:text="JPG • PNG • WEBP — up to 40 files"
                     android:textColor="?attr/accentInk"
-                    android:textSize="10.5sp" />
+                    android:textSize="10.5sp"
+                android:fontFamily="@font/spectral_regular" />
             </LinearLayout>
 
             <HorizontalScrollView
@@ -139,7 +140,7 @@
                 android:text="CLEAR ALL"
                 android:textColor="?attr/on"
                 android:textSize="11sp"
-                android:fontFamily="@font/poppins_semibold"
+                android:fontFamily="@font/libre_franklin"
                 android:visibility="gone" />
         </LinearLayout>
 
@@ -161,7 +162,7 @@
                 android:text="2. OUTPUT FORMAT"
                 android:textColor="?attr/on"
                 android:textSize="21sp"
-                android:fontFamily="@font/poppins_semibold" />
+                android:fontFamily="@font/instrument_serif" />
 
             <View
                 android:layout_width="match_parent"
@@ -189,7 +190,7 @@
                     android:paddingBottom="10dp"
                     android:text="JPEG"
                     android:textSize="13sp"
-                    android:fontFamily="@font/poppins_semibold" />
+                    android:fontFamily="@font/libre_franklin" />
 
                 <TextView
                     android:id="@+id/formatWebp"
@@ -203,7 +204,7 @@
                     android:paddingBottom="10dp"
                     android:text="WebP"
                     android:textSize="13sp"
-                    android:fontFamily="@font/poppins_semibold" />
+                    android:fontFamily="@font/libre_franklin" />
             </LinearLayout>
 
             <TextView
@@ -213,7 +214,8 @@
                 android:layout_marginTop="8dp"
                 android:text="JPEG: widely compatible, great for photos"
                 android:textColor="?attr/onDim"
-                android:textSize="10.5sp" />
+                android:textSize="10.5sp"
+                android:fontFamily="@font/spectral_regular" />
         </LinearLayout>
 
         <!-- 3. COMPRESSION -->
@@ -234,7 +236,7 @@
                 android:text="3. COMPRESSION"
                 android:textColor="?attr/on"
                 android:textSize="21sp"
-                android:fontFamily="@font/poppins_semibold" />
+                android:fontFamily="@font/instrument_serif" />
 
             <View
                 android:layout_width="match_parent"
@@ -256,7 +258,8 @@
                     android:layout_weight="1"
                     android:text="Excellent quality"
                     android:textColor="?attr/onDim"
-                    android:textSize="11sp" />
+                    android:textSize="11sp"
+                android:fontFamily="@font/spectral_regular" />
 
                 <TextView
                     android:id="@+id/qualityValue"
@@ -265,7 +268,7 @@
                     android:text="78%"
                     android:textColor="?attr/on"
                     android:textSize="23sp"
-                    android:fontFamily="@font/poppins_semibold" />
+                    android:fontFamily="@font/instrument_serif" />
             </LinearLayout>
 
             <SeekBar
@@ -321,7 +324,7 @@
                 android:text="4. RESIZE (OPTIONAL)"
                 android:textColor="?attr/on"
                 android:textSize="21sp"
-                android:fontFamily="@font/poppins_semibold" />
+                android:fontFamily="@font/instrument_serif" />
 
             <View
                 android:layout_width="match_parent"
@@ -351,7 +354,7 @@
                     android:text="2560 px"
                     android:textColor="?attr/on"
                     android:textSize="23sp"
-                    android:fontFamily="@font/poppins_semibold" />
+                    android:fontFamily="@font/instrument_serif" />
             </LinearLayout>
 
             <SeekBar
@@ -403,7 +406,7 @@
             android:text="PREVIEW BEFORE COMPRESSING"
             android:textColor="?attr/on"
             android:textSize="13.5sp"
-            android:fontFamily="@font/poppins_semibold" />
+            android:fontFamily="@font/libre_franklin" />
 
         <TextView
             android:id="@+id/compressButton"
@@ -419,7 +422,7 @@
             android:text="COMPRESS ALL"
             android:textColor="?attr/accentInk"
             android:textSize="16sp"
-            android:fontFamily="@font/poppins_semibold" />
+            android:fontFamily="@font/libre_franklin" />
 
         <LinearLayout
             android:id="@+id/statusRow"
@@ -462,7 +465,7 @@
                 android:layout_weight="1"
                 android:textColor="?attr/on"
                 android:textSize="14sp"
-                android:fontFamily="@font/poppins_semibold"
+                android:fontFamily="@font/spectral_regular"
                 android:visibility="gone" />
 
             <TextView
@@ -479,7 +482,7 @@
                 android:text="SHARE ALL"
                 android:textColor="?attr/on"
                 android:textSize="11sp"
-                android:fontFamily="@font/poppins_semibold"
+                android:fontFamily="@font/libre_franklin"
                 android:visibility="gone" />
         </LinearLayout>
 
@@ -495,7 +498,8 @@
             android:layout_marginTop="18dp"
             android:lineSpacingExtra="3dp"                android:text="Preview a slider on the first photo, compress, and copies land in Pictures/Compress. Originals stay untouched."
                 android:textColor="?attr/onDim"
-                android:textSize="10.5sp" />
+                android:textSize="10.5sp"
+                android:fontFamily="@font/spectral_regular" />
 
         <!-- Brand footer: the mark plus the download page for the other apps. -->
         <LinearLayout
@@ -533,7 +537,7 @@
                     android:text="MORE APPS"
                     android:textColor="?attr/on"
                     android:textSize="11sp"
-                    android:fontFamily="@font/poppins_semibold" />
+                    android:fontFamily="@font/libre_franklin" />
 
                 <TextView
                     android:layout_width="wrap_content"

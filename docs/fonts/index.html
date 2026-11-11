@@ -7,7 +7,7 @@
 <meta name="description" content="Poppins and all seven Redaction grades: woff2, woff and TTF, every weight and italic, free under the SIL Open Font License." />
 <meta name="theme-color" content="#f0e7d4" />
 <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml" />
-<link rel="stylesheet" href="../assets/site.35890e01c7.css" />
+<link rel="stylesheet" href="../assets/site.6b1bb724fe.css" />
 <style>
   /* The hero as the hand-off draws it: the page's copy on the left, the typeable
      box on the right under "Try it!", with Copy CSS below its right corner. */
@@ -176,15 +176,15 @@
       <p class="fine" id="familyStatus">Loading the families…</p>
     </div>
     <p class="fine">Grade 50's capital A has no bar in the typeface itself — the foundry's master carries the same outline. Grades 35 and 70 both keep theirs, which is why the seven grades sit side by side here.</p>
-    <p class="fine">The three app Poppins faces are copied from <code>app/res/font/</code>; the rest come from <code>tools/fetch_fonts.py</code>.</p>
+    <p class="fine">The app now carries the site faces; the Poppins files here remain for existing artwork and downloads.</p>
   </section>
 
   <section>
     <h2>How it is wired</h2>
     <p class="kicker">Two families, seven grades, no network</p>
     <ul class="rows">
-      <li><b>Site</b><span><code>assets/site.35890e01c7.css</code> sets the site's own Poppins faces; this page declares every downloaded style from <code>/data/fonts.json</code>.</span></li>
-      <li><b>App</b><span><code>app/res/font/poppins_regular.ttf</code>, <code>_medium</code> and <code>_semibold</code>, referenced from the layouts.</span></li>
+      <li><b>Site</b><span><code>assets/site.6b1bb724fe.css</code> sets the site's own Poppins faces; this page declares every downloaded style from <code>/data/fonts.json</code>.</span></li>
+      <li><b>App</b><span><code>app/res/font/instrument_serif.ttf</code>, <code>spectral_regular.ttf</code> and <code>libre_franklin.ttf</code>, referenced from the layouts.</span></li>
       <li><b>Downloads</b><span>woff2 for the web at <code>/assets/fonts/</code>, woff for engines older than that, TTF for Android and desktop.</span></li>
       <li><b>JSON</b><span><code>/data/fonts.json</code> lists each family, its faces, all three paths and their measured sizes.</span></li>
     </ul>

@@ -47,7 +47,7 @@ public class MainActivity extends Activity {
     /** Hard cap on a batch, matching the queue the strip can hold. */
     private static final int MAX_PHOTOS = 40;
 
-    // Keys for the state that has to survive a theme flip (which recreates us).
+    // Keys for the state that has to survive a recreate.
     private static final String STATE_PICKED = "picked";
     private static final String STATE_DONE_SOURCE = "doneSource";
     private static final String STATE_DONE_FILE = "doneFile";
@@ -56,9 +56,6 @@ public class MainActivity extends Activity {
     private static final String STATE_DONE_HEIGHT = "doneHeight";
     private static final String STATE_DONE_ORIGINAL = "doneOriginal";
     private static final String STATE_DONE_COMPRESSED = "doneCompressed";
-
-    /** Set on the intent before a recreate, so the panel survives a look change. */
-    private static final String EXTRA_DRAWER = "drawerOpen";
 
     /** Below this width the band's two descriptor lines run under its mark. */
     private static final int NARROW_BAND = 400;
@@ -107,7 +104,6 @@ public class MainActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        ThemePrefs.applyTheme(this);
         setContentView(R.layout.activity_main);
 
         pickCard = findViewById(R.id.pickCard);
@@ -189,8 +185,8 @@ public class MainActivity extends Activity {
     /**
      * Photos handed over by another app's Share, appended to the queue.
      *
-     * The action is cleared once it has been read, because a theme flip recreates
-     * this activity and would otherwise queue the same photos a second time.
+     * The action is cleared once it has been read, because a recreate would
+     * otherwise queue the same photos a second time.
      */
     private void acceptShared(Intent intent) {
         if (intent == null) {
@@ -248,8 +244,8 @@ public class MainActivity extends Activity {
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        // A theme flip recreates this activity, so the queue and the finished
-        // files are carried across rather than silently dropped.
+        // A recreate must carry the queue and the finished files across rather
+        // than silently dropping them.
         ArrayList<String> sources = new ArrayList<>();
         for (Uri uri : picked) {
             sources.add(uri.toString());
@@ -427,7 +423,7 @@ public class MainActivity extends Activity {
     }
 
     /**
-     * The band, the side panel and the four palette chips.
+     * The band and the side panel.
      *
      * Every destination is a page of the shelf. The external ones open in the browser;
      * ADD's only network use is the Font packs screen, never the shelf pages.
@@ -468,8 +464,6 @@ public class MainActivity extends Activity {
             findViewById(R.id.bandDescriptors).setVisibility(View.GONE);
         }
 
-        buildPaletteRow();
-
         // The panel is off-screen by its own width until it is opened.
         drawer.setTranslationX(dp(320));
 
@@ -493,14 +487,6 @@ public class MainActivity extends Activity {
             return insets;
         });
         drawer.requestApplyInsets();
-
-        // A palette or theme change recreates the activity, and this runs last so the
-        // panel is not pushed off screen after being opened: picking a colour must not
-        // shut the panel it was picked in.
-        if (getIntent().getBooleanExtra(EXTRA_DRAWER, false)) {
-            getIntent().removeExtra(EXTRA_DRAWER);
-            openDrawerNow();
-        }
     }
 
     private void link(int id, final String path) {
@@ -530,39 +516,6 @@ public class MainActivity extends Activity {
         scrim.animate().alpha(0f).setDuration(160)
                 .withEndAction(() -> scrim.setVisibility(View.GONE))
                 .start();
-    }
-
-    /**
-     * The chips and the switch, drawn by PaletteRow: picking either one stores it and
-     * repaints, so the panel shows the choice it just made rather than closing on it.
-     */
-    private void buildPaletteRow() {
-        PaletteRow.fill(findViewById(R.id.palRow),
-                ThemePrefs.palette(this), ThemePrefs.isDark(this),
-                id -> {
-                    ThemePrefs.setPalette(this, id);
-                    repaintKeepingDrawer();
-                },
-                () -> {
-                    ThemePrefs.toggleDark(this);
-                    repaintKeepingDrawer();
-                });
-    }
-
-    /** Recreate for the new colours, with the panel left open across the rebuild. */
-    private void repaintKeepingDrawer() {
-        getIntent().putExtra(EXTRA_DRAWER, true);
-        recreate();
-    }
-
-    /** Show the panel fully open, without the slide, for the frame after a recreate. */
-    private void openDrawerNow() {
-        final View drawer = findViewById(R.id.drawer);
-        final View scrim = findViewById(R.id.scrim);
-        drawer.setVisibility(View.VISIBLE);
-        drawer.setTranslationX(0f);
-        scrim.setVisibility(View.VISIBLE);
-        scrim.setAlpha(1f);
     }
 
     /** A theme attribute as a packed colour. */
@@ -1035,7 +988,7 @@ public class MainActivity extends Activity {
     private void applySegment(TextView view, boolean selected) {
         view.setBackgroundResource(selected ? R.drawable.bg_seg_selected : 0);
         view.setTextColor(color(selected ? R.attr.accentInk : R.attr.onDim));
-        view.setTypeface(null, selected ? Typeface.BOLD : Typeface.NORMAL);
+        view.setTypeface(getResources().getFont(R.font.libre_franklin));
     }
 
     private void updateQualityLabel() {

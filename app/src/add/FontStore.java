@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * The faces the editor can set: the three Poppins faces the app bundles, then every
+ * The faces the editor can set: the three site faces the app bundles, then every
  * face from every installed pack. The bundled three are resources; an imported face is
  * a TTF inside the pack's own folder, read with Typeface.createFromFile.
  *
@@ -50,12 +50,12 @@ final class FontStore {
     /** Bundled first, in the order the app uses them, then packs by family. */
     static List<Face> faces(Context context) {
         List<Face> faces = new ArrayList<>();
-        faces.add(new Face("Poppins \u00b7 Regular", "Poppins",
-                context.getResources().getFont(R.font.poppins_regular), null));
-        faces.add(new Face("Poppins \u00b7 Medium", "Poppins",
-                context.getResources().getFont(R.font.poppins_medium), null));
-        faces.add(new Face("Poppins \u00b7 SemiBold", "Poppins",
-                context.getResources().getFont(R.font.poppins_semibold), null));
+        faces.add(new Face("Instrument Serif", "Instrument Serif",
+                context.getResources().getFont(R.font.instrument_serif), null));
+        faces.add(new Face("Spectral", "Spectral",
+                context.getResources().getFont(R.font.spectral_regular), null));
+        faces.add(new Face("Libre Franklin", "Libre Franklin",
+                context.getResources().getFont(R.font.libre_franklin), null));
 
         for (PackStore.Installed pack : PackStore.installed(context)) {
             JSONArray styles = pack.styles;
@@ -85,10 +85,10 @@ final class FontStore {
         return faces;
     }
 
-    /** The default face for a fresh line: the app's own Medium. */
+    /** The default face for a fresh line: the display face. */
     static Face defaultFace(Context context) {
-        return new Face("Poppins \u00b7 Medium", "Poppins",
-                context.getResources().getFont(R.font.poppins_medium), null);
+        return new Face("Instrument Serif", "Instrument Serif",
+                context.getResources().getFont(R.font.instrument_serif), null);
     }
 
     static Face find(List<Face> faces, String label) {

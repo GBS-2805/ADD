@@ -60,7 +60,7 @@ public class ComparisonView extends View {
 
         labelPaint.setColor(0xFFFFFFFF);
         labelPaint.setTextSize(9.5f * getResources().getDisplayMetrics().scaledDensity);
-        labelPaint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD));
+        labelPaint.setTypeface(getResources().getFont(R.font.libre_franklin));
         labelPaint.setLetterSpacing(0.08f);
 
         labelBackground.setColor(0x99000000);

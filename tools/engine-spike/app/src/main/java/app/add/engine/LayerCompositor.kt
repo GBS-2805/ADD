@@ -28,47 +28,113 @@ import kotlin.math.sqrt
  * anything but its base. A run of clipped layers shares the base that starts the
  * run; each one is not narrowed by the clipped layer above it.
  */
+private data class LayerCacheKey(
+    val layerId: String,
+    val layerHash: Int,
+    val unitBits: Int,
+)
+
+private class LayerBitmapCache {
+    private class Entry(val bitmap: Bitmap, val left: Int, val top: Int) {
+        val bytes: Int get() = bitmap.byteCount
+    }
+
+    private val entries = LinkedHashMap<LayerCacheKey, Entry>(8, 0.75f, true)
+    private var bytes = 0
+    private val maxBytes = 40 * 1024 * 1024
+
+    @Synchronized
+    fun get(key: LayerCacheKey): Triple<Bitmap, Int, Int>? {
+        val entry = entries[key] ?: return null
+        return Triple(entry.bitmap, entry.left, entry.top)
+    }
+
+    @Synchronized
+    fun put(key: LayerCacheKey, bitmap: Bitmap, left: Int, top: Int): Boolean {
+        if (bitmap.byteCount > maxBytes) return false
+        entries.remove(key)?.let {
+            bytes -= it.bytes
+            // Do not recycle here: this bitmap may still be the clip base of the
+            // frame in progress. Dropping the reference lets GC collect it safely.
+        }
+        entries[key] = Entry(bitmap, left, top)
+        bytes += bitmap.byteCount
+        val iterator = entries.entries.iterator()
+        while (bytes > maxBytes && iterator.hasNext()) {
+            val entry = iterator.next()
+            if (entry.key == key) continue
+            bytes -= entry.value.bytes
+            // Same reason as above: an evicted bitmap can still be in use.
+            iterator.remove()
+        }
+        return true
+    }
+
+    @Synchronized
+    fun clear() {
+        entries.values.forEach { it.bitmap.recycle() }
+        entries.clear()
+        bytes = 0
+    }
+}
+
+private val layerBitmapCache = LayerBitmapCache()
+
+fun clearLayerBitmapCache() = layerBitmapCache.clear()
+
 class LayerCompositor(
     private val scale: Float,
+    private val cacheLayers: Boolean = false,
     private val drawContent: (Canvas, Layer) -> Unit,
 ) {
+    private val unitBits = scale.toRawBits()
+
     private data class RenderedLayer(
         val bitmap: Bitmap,
         val left: Int,
         val top: Int,
+        val cached: Boolean = false,
     )
 
     fun draw(destCanvas: Canvas, destBitmap: Bitmap, layers: List<Layer>) {
         var previous: RenderedLayer? = null
         var clipBase: RenderedLayer? = null
         layers.filter { it.visible }.forEach { layer ->
-            val current = render(layer) ?: return@forEach
+            val rendered = render(layer) ?: return@forEach
             if (layer.style.clipToBelow) {
                 // The first clipped layer claims the layer below as the whole run's
                 // base. Later clipped layers keep clipping to that base instead of to
                 // the previous clipped layer, which is what makes a multi-layer
                 // clipping mask behave like one group rather than a narrowing chain.
                 if (clipBase == null) clipBase = previous
-                clipBase?.let { applyClip(current, it) }
+                val current = clipBase?.let { applyClip(rendered, it) } ?: rendered
                 composite(destCanvas, destBitmap, current, layer.style.blend, layer.opacity)
-                if (previous != null && previous !== clipBase) previous.bitmap.recycle()
+                if (previous != null && previous !== clipBase) release(previous)
                 previous = current
             } else {
                 // A normal layer ends the clipped run: the base has no more consumers.
-                clipBase?.bitmap?.recycle()
+                clipBase?.let { release(it) }
                 clipBase = null
-                composite(destCanvas, destBitmap, current, layer.style.blend, layer.opacity)
-                previous?.bitmap?.recycle()
-                previous = current
+                composite(destCanvas, destBitmap, rendered, layer.style.blend, layer.opacity)
+                previous?.let { release(it) }
+                previous = rendered
             }
         }
-        clipBase?.bitmap?.recycle()
-        previous?.bitmap?.recycle()
+        clipBase?.let { release(it) }
+        previous?.let { release(it) }
     }
 
     private fun render(layer: Layer): RenderedLayer? {
         val bounds = boundsFor(layer)
         if (bounds.width() <= 0 || bounds.height() <= 0) return null
+        val cacheKey = if (cacheLayers && layer.style.effects.activePasses.isNotEmpty() && cacheable(layer)) {
+            LayerCacheKey(layer.id, layer.hashCode(), unitBits)
+        } else null
+        cacheKey?.let { key ->
+            layerBitmapCache.get(key)?.let { (bitmap, left, top) ->
+                return RenderedLayer(bitmap, left, top, cached = true)
+            }
+        }
         val bitmap = Bitmap.createBitmap(bounds.width(), bounds.height(), Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
         canvas.scale(scale, scale)
@@ -83,7 +149,20 @@ class LayerCompositor(
 
         applyEffects(bitmap, layer.style.effects)
         applyPaintMask(bitmap, layer, bounds)
-        return RenderedLayer(bitmap, bounds.left, bounds.top)
+        val cached = cacheKey != null &&
+            layerBitmapCache.put(cacheKey, bitmap, bounds.left, bounds.top)
+        return RenderedLayer(bitmap, bounds.left, bounds.top, cached)
+    }
+
+    private fun cacheable(layer: Layer): Boolean = when (layer) {
+        is IconLayer -> true
+        is TextLayer -> layer.paint !is PaintSpec.Image
+        is VectorLayer -> layer.paint !is PaintSpec.Image
+        else -> false
+    }
+
+    private fun release(rendered: RenderedLayer) {
+        if (!rendered.cached) rendered.bitmap.recycle()
     }
 
     private fun boundsFor(layer: Layer): Rect {
@@ -161,20 +240,28 @@ class LayerCompositor(
     }
 
     /** Clips the current layer to the alpha of the layer directly below it. */
-    private fun applyClip(current: RenderedLayer, previous: RenderedLayer) {
-        val mask = Bitmap.createBitmap(current.bitmap.width, current.bitmap.height, Bitmap.Config.ARGB_8888)
+    private fun applyClip(current: RenderedLayer, previous: RenderedLayer): RenderedLayer {
+        val clipped = if (current.cached) {
+            val copy = Bitmap.createBitmap(current.bitmap.width, current.bitmap.height, Bitmap.Config.ARGB_8888)
+            Canvas(copy).drawBitmap(current.bitmap, 0f, 0f, Paint(Paint.FILTER_BITMAP_FLAG))
+            RenderedLayer(copy, current.left, current.top)
+        } else {
+            current
+        }
+        val mask = Bitmap.createBitmap(clipped.bitmap.width, clipped.bitmap.height, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(mask)
         canvas.drawBitmap(
             previous.bitmap,
-            (previous.left - current.left).toFloat(),
-            (previous.top - current.top).toFloat(),
+            (previous.left - clipped.left).toFloat(),
+            (previous.top - clipped.top).toFloat(),
             Paint(Paint.FILTER_BITMAP_FLAG),
         )
         val paint = Paint(Paint.FILTER_BITMAP_FLAG).apply {
             xfermode = PorterDuffXfermode(PorterDuff.Mode.DST_IN)
         }
-        Canvas(current.bitmap).drawBitmap(mask, 0f, 0f, paint)
+        Canvas(clipped.bitmap).drawBitmap(mask, 0f, 0f, paint)
         mask.recycle()
+        return clipped
     }
 
     /**
@@ -311,10 +398,9 @@ class LayerCompositor(
                 val pixel = pixels[index]
                 val a = (pixel ushr 24) and 0xFF
                 if (a == 0) continue
-                var hash = x * 374761393 + y * 668265263
-                hash = (hash xor (hash shr 13)) * 1274126177
-                val noise = ((hash xor (hash shr 16)) and 0xFF) / 127.5f - 1f
-                val delta = (noise * strength * 42f).roundToInt()
+                // A 256x256 tile generated once. Hashing every pixel on every frame
+                // was measurable on a phone at 400% with grain near maximum.
+                val delta = (GRAIN_NOISE[((y and GRAIN_MASK) shl 8) or (x and GRAIN_MASK)] * strength).roundToInt()
                 val r = (((pixel ushr 16) and 0xFF) + delta).coerceIn(0, 255)
                 val g = (((pixel ushr 8) and 0xFF) + delta).coerceIn(0, 255)
                 val b = ((pixel and 0xFF) + delta).coerceIn(0, 255)
@@ -400,4 +486,17 @@ class LayerCompositor(
     private fun red(pixel: Int) = (pixel ushr 16) and 0xFF
     private fun green(pixel: Int) = (pixel ushr 8) and 0xFF
     private fun blue(pixel: Int) = pixel and 0xFF
+
+    private companion object {
+        const val GRAIN_TILE = 256
+        const val GRAIN_MASK = GRAIN_TILE - 1
+        val GRAIN_NOISE = IntArray(GRAIN_TILE * GRAIN_TILE) { index ->
+            val x = index and GRAIN_MASK
+            val y = index shr 8
+            var hash = x * 374761393 + y * 668265263
+            hash = (hash xor (hash shr 13)) * 1274126177
+            val noise = ((hash xor (hash shr 16)) and 0xFF) / 127.5f - 1f
+            (noise * 30f).roundToInt()
+        }
+    }
 }

@@ -101,7 +101,6 @@ public class EditorActivity extends Activity {
     @Override
     protected void onCreate(Bundle state) {
         super.onCreate(state);
-        ThemePrefs.applyTheme(this);
         // The engine used to take this door in a review build. One lab crash then made
         // the only editor unreachable, so the engine has its own tab now and this
         // activity always opens the editor it is named after.
@@ -1868,6 +1867,7 @@ public class EditorActivity extends Activity {
 
         TextView heading = new TextView(this);
         heading.setText(title);
+        heading.setTypeface(getResources().getFont(R.font.instrument_serif));
         heading.setTextColor(colour(R.attr.on, Color.WHITE));
         heading.setTextSize(19);
         heading.setLetterSpacing(-0.01f);
@@ -1893,6 +1893,7 @@ public class EditorActivity extends Activity {
     private TextView note(String message) {
         TextView view = new TextView(this);
         view.setText(message);
+        view.setTypeface(getResources().getFont(R.font.spectral_regular));
         view.setTextColor(colour(R.attr.onDim, Color.GRAY));
         view.setTextSize(11);
         view.setLineSpacing(dp(2), 1f);

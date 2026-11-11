@@ -35,7 +35,13 @@ android {
         // 47 completes the Studio authoring layer: Draggable snapping with live
         // edge/centre guides, a rotation ring, editable MotionPath curves and
         // Observer pan/zoom, all vendored offline with GSAP 3.12.5.
-        versionCode = 47
+        // 48 fixes 3D layer dragging by keeping pointer input on a stationary
+        // node, caps the interactive preview at ~6 MP at high zoom, and caches
+        // effect-rendered layers so grain stops redoing full-page work per frame.
+        // 49 is the Playful Studio shell: stage-first chrome, Create deck, object
+        // bar, Style/FX/Layers inspector, recipe cards, mask and 3D HUDs, and
+        // tactile press/spring feedback. Rendering and export paths are unchanged.
+        versionCode = 49
         versionName = "3.7"
 
         ndk {

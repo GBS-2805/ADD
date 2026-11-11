@@ -10,11 +10,12 @@ resources with `aapt2`, host the Activity in Robolectric with the platform's
 
 ## What is rendered
 
-Nine native screen states, audited in all eight themes (green, moss, navy, ash × dark, light):
+Ten native screen states, audited in one newsprint theme:
 
 | Screen | How it is set up |
 | --- | --- |
 | **Compress** | `MainActivity` receives a sample photo through the same `ACTION_SEND` path as a gallery share. |
+| **Side panel** | `MainActivity` opens the real side panel from the burger; the settled open state is drawn over the scrim. |
 | **Editor · Quick** | `EditorActivity` is created with `editor_studio=false`, then the package-visible `EditorView` API loads a photo and sets two real type layers. |
 | **Editor · Photo** | The real Photo `AlertDialog` is opened from `photoButton`, with a loaded photo and its transform actions. |
 | **Editor · Presets** | The real Presets `AlertDialog` is opened from `effectButton` and its content panel is drawn over the dimmed Editor. |
@@ -24,7 +25,7 @@ Nine native screen states, audited in all eight themes (green, moss, navy, ash �
 | **Compare** | `CompareActivity` gets before/after files and the same extras the app sends. |
 | **Font packs** | `PacksActivity` reads a cached copy of `docs/packs/packs.json`; no network request is made. |
 
-The test audits every 1080×2400 combination in memory: the palette must be present in the pixels, and every visible view must keep its cross-theme position within 1 px, stay inside its window, fit its text and keep the dock at the window edge. Only the nine green-dark representatives are written to `artifacts/android/`; `render-audit.json` records the 72 palette and layout checks. The Compress form is a scroll view, so after its 1080×2400 audit frame it is also written at its natural full height (currently 1080×3429): the complete form, Preview and Compress all stay visible instead of ending mid-section 4. The other eight representatives remain 1080×2400. The green dark choice is `showcase` in `manifest.json`.
+The test audits every 1080×2400 screen in memory: the newsprint palette must be present in the pixels, and every visible view must stay inside its window, fit its text and keep the dock at the window edge. Only the ten newsprint captures are written to `artifacts/android/`; `render-audit.json` records the ten palette and layout checks. The Compress form is a scroll view, so after its 1080×2400 audit frame it is also written at its natural full height: the complete form, Preview and Compress all stay visible instead of ending mid-section 4. The other nine captures remain 1080×2400. `manifest.json` names the one showcase.
 
 The five Editor sheets are composited from the app's actual dialog panel over the
 actual Activity frame at the window's `dimAmount`; the sheet views are not redrawn.
@@ -33,15 +34,15 @@ separate window from its Activity.
 
 ## Keeping the set
 
-`manifest.json` is the matrix: nine screens × eight themes, with one `showcase` pair.
-`review.py` requires exactly the nine showcase PNGs, a valid `render-audit.json`
-(palette/layout pass, 72 checks) and 1080×2400 dimensions for eight screens; Compress
-must match the audited full height in `render-audit.json`. It then builds the 3×3
-contact sheet and `artifacts/shots/` from scratch, so the public gallery cannot
-silently keep an old screen.
+`manifest.json` names the ten screens and the one newsprint `showcase`.
+`review.py` requires exactly the ten showcase PNGs, a valid `render-audit.json`
+(palette/layout pass, ten checks) and 1080×2400 dimensions for nine screens;
+Compress must match the audited full height in `render-audit.json`. It then builds
+the 3-column contact sheet and `artifacts/shots/` from scratch, so the public gallery
+cannot silently keep an old screen.
 
 `render.sh` writes into `artifacts/.android-next/` and replaces `artifacts/android/`
-only after all 72 combinations pass. A failed run leaves the previous good set
+only after all ten screens pass. A failed run leaves the previous good set
 untouched; the screenshots are a current set, never a growing archive.
 `artifacts/android/` is
 the canonical render set, while `artifacts/shots/` is the disposable public review
@@ -51,8 +52,9 @@ mirror. Neither is committed, and neither belongs in `docs/renders/`.
 
 The **Shelf** screen and the **Studio** tab are Chromium WebViews. Robolectric has
 no Chromium compositor, so it can only draw a blank surface. Those surfaces are
-left out rather than faked. The native Studio-adjacent UI is still visible in the
-Editor screenshot; the Fabric canvas itself is not.
+left out rather than faked. The Editor opens in Studio by default, and the test
+asserts that; the five Editor frames show the native Quick tab, which is one tap
+away and deliberately labelled secondary in the gallery.
 
 ## Setup
 
@@ -83,7 +85,7 @@ app's own build is unchanged.
 bash tools/android-render/render.sh
 ```
 
-The Maven test is `AndroidRenderTest`; it audits all 72 combinations, writes the nine
+The Maven test is `AndroidRenderTest`; it audits all ten screens, writes the ten
 showcase PNGs, and asserts dimensions, non-blank content and a minimum encoded size.
 It records `render-audit.json` after the run. `render.sh` then runs `review.py` to
 validate the manifest and audit report, and rebuild `artifacts/shots/`. To render one

@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-"""Write the Pantone reference for every palette colour, as a Figma-importable sheet.
+"""Write the Pantone reference for the newsprint colours, as a Figma-importable sheet.
 
-`docs/assets/site.css` is the only source: this reads the four palette blocks out of
-it, matches each solid colour to the nearest Pantone chip in two directions (Solid
-Coated for print, TCX for textile), and picks two further alternatives for each.
+`docs/assets/site.css` is the only source: this reads the explicit Newsprint edition
+token block out of it, matches each solid colour to the nearest Pantone chip in two
+directions (Solid Coated for print, TCX for textile), and picks two further
+alternatives for each.
 
     python3 tools/pantone_sheet.py           # writes figma/pantone.svg
     python3 tools/pantone_sheet.py --check   # fails when the sheet is stale
@@ -23,16 +24,14 @@ CSS = pathlib.Path("docs/assets/site.css")
 DATA = pathlib.Path("tools/pantone-data.json")
 OUT = pathlib.Path("figma/pantone.svg")
 
-PALETTES = ["green", "moss", "navy", "ash"]
 # The order a designer reads the roles in, not the order CSS happens to declare them.
 ROLE_ORDER = ["band", "band-ink", "band-hover", "accent", "accent-ink", "label",
-              "page", "ink", "on", "page-light", "ink-light", "on-light"]
+              "page", "ink", "on"]
 
 W, PAD, ROW = 1300, 40, 96
-CREAM, INK, DIM, RULE = "#f2eee3", "#131513", "#5c6157", "#13151333"
+CREAM, INK, DIM, RULE = "#e9e0cb", "#15120e", "#625b4f", "#15120e3d"
 FONT = "Poppins, Helvetica Neue, Arial, sans-serif"
 COL_ROLE, COL_MATCH, COL_ALT1, COL_ALT2 = 124, 340, 640, 900
-HEADINGS = {"green": "Green", "moss": "Moss", "navy": "Navy", "ash": "Ash"}
 
 
 def lin(v):
@@ -87,21 +86,25 @@ def delta_e(a, b):
                      + rt * (dc / sc) * (dhp / sh))
 
 
-def palettes():
-    """Every solid colour each palette declares, with the roles it fills."""
+def newsprint():
+    """Every solid colour the newsprint block declares, with the roles it fills."""
     text = CSS.read_text()
-    found = {}
-    for name, body in re.findall(r'html\[data-palette="(\w+)"\]\s*\{(.*?)\n\}', text, re.S):
-        roles = {}
-        for role, value in re.findall(r"--pal-([\w-]+):\s*([^;]+);", body):
-            value = value.strip()
-            if re.fullmatch(r"#[0-9a-fA-F]{6}", value):
-                roles.setdefault(value.lower(), []).append(role)
-        found[name] = roles
-    missing = [p for p in PALETTES if p not in found]
+    marker = text.find("Newsprint edition")
+    start = text.find(":root,", marker) if marker >= 0 else -1
+    end = text.find("\n}", start) if start >= 0 else -1
+    if marker < 0 or start < 0 or end < 0:
+        sys.exit("no Newsprint edition token block in %s" % CSS)
+    values = {key: value.strip()
+              for key, value in re.findall(r"(--[\w-]+)\s*:\s*([^;]+);", text[start:end])}
+    roles = {}
+    for role in ROLE_ORDER:
+        value = values.get("--" + role, "")
+        if re.fullmatch(r"#[0-9a-fA-F]{6}", value):
+            roles.setdefault(value.lower(), []).append(role)
+    missing = [role for role in ("band", "band-ink", "page", "on") if not values.get("--" + role)]
     if missing:
-        sys.exit("no palette block for %s in %s" % (", ".join(missing), CSS))
-    return [(p, found[p]) for p in PALETTES]
+        sys.exit("newsprint block is missing %s" % ", ".join(missing))
+    return roles
 
 
 def order_roles(roles):
@@ -147,11 +150,10 @@ def chip(x, y, size, hexv, radius=0):
 
 def build(pantone):
     coated, tcx = pantone["coated"], pantone["tcx"]
-    rows = []
     blocks = []
     y = PAD
     blocks.append(text(PAD, y + 44, "Pantone reference", 40, 400))
-    blocks.append(text(PAD, y + 78, "Nearest chip for every colour the four palettes declare, and two alternatives for each.",
+    blocks.append(text(PAD, y + 78, "Nearest chip for every colour the newsprint edition declares, and two alternatives for each.",
                        16, 400, DIM))
     blocks.append(text(PAD, y + 102, "ΔE00 is CIEDE2000 distance from the screen colour: 0 is the same colour, under 3 is indistinguishable.",
                        13, 400, DIM))
@@ -159,52 +161,51 @@ def build(pantone):
                        13, 400, DIM))
     y += 168
 
-    for name, roles in palettes():
-        blocks.append(text(PAD, y + 24, HEADINGS[name], 22, 500))
-        y += 38
-        blocks.append('<rect x="%g" y="%g" width="%g" height="1" fill="%s"/>' % (PAD, y, W - 2 * PAD, RULE))
-        labels = [(COL_ROLE, "Colour"), (COL_MATCH, "Nearest Pantone"),
-                  (COL_ALT1, "Alternative"), (COL_ALT2, "Alternative")]
-        for cx, label in labels:
-            blocks.append(text(cx, y + 20, label.upper(), 11, 500, DIM))
-        y += 30
-        for hexv, role_list in roles.items():
-            top = y
-            done = order_roles(role_list)
-            blocks.append(chip(PAD, top + 8, 52, hexv, 2))
-            blocks.append('<rect x="%g" y="%g" width="52" height="52" fill="none" stroke="%s"/>' % (PAD, top + 8, RULE))
-            blocks.append(text(COL_ROLE, top + 26, done[0].replace("-", " "), 15, 500))
-            blocks.append(text(COL_ROLE, top + 45, hexv.upper(), 13, 400, DIM))
-            rest = [r for r in done[1:]]
-            if rest:
-                extra = "also " + ", ".join(r.replace("-", " ") for r in rest[:3])
-                if len(rest) > 3:
-                    extra += " +%d" % (len(rest) - 3)
-                blocks.append(text(COL_ROLE, top + 64, extra, 11.5, 400, DIM))
+    roles = newsprint()
+    blocks.append(text(PAD, y + 24, "Newsprint", 22, 500))
+    y += 38
+    blocks.append('<rect x="%g" y="%g" width="%g" height="1" fill="%s"/>' % (PAD, y, W - 2 * PAD, RULE))
+    labels = [(COL_ROLE, "Colour"), (COL_MATCH, "Nearest Pantone"),
+              (COL_ALT1, "Alternative"), (COL_ALT2, "Alternative")]
+    for cx, label in labels:
+        blocks.append(text(cx, y + 20, label.upper(), 11, 500, DIM))
+    y += 30
+    for hexv, role_list in roles.items():
+        top = y
+        done = order_roles(role_list)
+        blocks.append(chip(PAD, top + 8, 52, hexv, 2))
+        blocks.append('<rect x="%g" y="%g" width="52" height="52" fill="none" stroke="%s"/>' % (PAD, top + 8, RULE))
+        blocks.append(text(COL_ROLE, top + 26, done[0].replace("-", " "), 15, 500))
+        blocks.append(text(COL_ROLE, top + 45, hexv.upper(), 13, 400, DIM))
+        rest = [r for r in done[1:]]
+        if rest:
+            extra = "also " + ", ".join(r.replace("-", " ") for r in rest[:3])
+            if len(rest) > 3:
+                extra += " +%d" % (len(rest) - 3)
+            blocks.append(text(COL_ROLE, top + 64, extra, 11.5, 400, DIM))
 
-            picks = nearest(coated, hexv, count=3)
-            textile = nearest(tcx, hexv, count=1)[0]
-            for i, (cx, (dist, c, _)) in enumerate(zip((COL_MATCH, COL_ALT1, COL_ALT2), picks)):
-                big = i == 0
-                blocks.append(chip(cx, top + (6 if big else 10), 26 if big else 20, c["hex"], 2))
-                blocks.append(text(cx + (34 if big else 28), top + (26 if big else 24),
-                                   pretty(c["code"]), 15 if big else 13, 500 if big else 400))
-                blocks.append(text(cx + (34 if big else 28), top + (45 if big else 40),
-                                   "%s   ΔE %.1f" % (c["hex"].upper(), dist),
-                                   12.5 if big else 11.5, 400, DIM))
-                if big:
-                    blocks.append(text(cx + 34, top + 63,
-                                       "%s · %s" % (textile[1]["code"], textile[1]["name"].replace("-", " ").title()),
-                                       11.5, 400, DIM, opacity=".78"))
-            blocks.append('<rect x="%g" y="%g" width="%g" height="1" fill="%s" fill-opacity=".55"/>'
-                          % (PAD, y + ROW - 6, W - 2 * PAD, RULE))
-            y += ROW
-        y += 26
+        picks = nearest(coated, hexv, count=3)
+        textile = nearest(tcx, hexv, count=1)[0]
+        for i, (cx, (dist, c, _)) in enumerate(zip((COL_MATCH, COL_ALT1, COL_ALT2), picks)):
+            big = i == 0
+            blocks.append(chip(cx, top + (6 if big else 10), 26 if big else 20, c["hex"], 2))
+            blocks.append(text(cx + (34 if big else 28), top + (26 if big else 24),
+                               pretty(c["code"]), 15 if big else 13, 500 if big else 400))
+            blocks.append(text(cx + (34 if big else 28), top + (45 if big else 40),
+                               "%s   ΔE %.1f" % (c["hex"].upper(), dist),
+                               12.5 if big else 11.5, 400, DIM))
+            if big:
+                blocks.append(text(cx + 34, top + 63,
+                                   "%s · %s" % (textile[1]["code"], textile[1]["name"].replace("-", " ").title()),
+                                   11.5, 400, DIM, opacity=".78"))
+        blocks.append('<rect x="%g" y="%g" width="%g" height="1" fill="%s" fill-opacity=".55"/>'
+                      % (PAD, y + ROW - 6, W - 2 * PAD, RULE))
+        y += ROW
 
     height = y + PAD - 6
     head = ('<svg xmlns="http://www.w3.org/2000/svg" width="%d" height="%d" viewBox="0 0 %d %d">'
-            '<title>Pantone reference — green, moss, navy, ash</title>'
-            '<desc>Each palette colour with its nearest Pantone Solid Coated chip, two alternatives, '
+            '<title>Pantone reference — newsprint</title>'
+            '<desc>Every newsprint colour with its nearest Pantone Solid Coated chip, two alternatives, '
             'and the nearest textile TCX chip.</desc>' % (W, height, W, height))
     return head + '<rect width="%d" height="%d" fill="%s"/>' % (W, height, CREAM) + "".join(blocks) + "</svg>\n"
 
@@ -216,13 +217,11 @@ def main():
     if check:
         if not OUT.exists() or OUT.read_text() != svg:
             sys.exit("figma/%s is stale - run python3 tools/pantone_sheet.py" % OUT.name)
-        print("figma/%s matches the palettes" % OUT.name)
+        print("figma/%s matches the newsprint edition" % OUT.name)
         return
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(svg)
-    print("figma/%s: %d KB, %d palette colours" % (
-        OUT.name, len(svg) / 1024, len(re.findall(r"html\[data-palette", CSS.read_text())) * 0
-        or sum(len(r) for _, r in palettes())))
+    print("figma/%s: %d KB, %d newsprint colours" % (OUT.name, len(svg) / 1024, len(newsprint())))
 
 
 if __name__ == "__main__":

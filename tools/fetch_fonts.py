@@ -11,9 +11,9 @@ woff2 is the one the site loads. woff is the same face for engines that never
 learned woff2, and it is asked for with a browser string old enough that Google
 still answers with a single-format stylesheet; fontTools can read either.
 
-The three faces the apps bundle keep their existing files and their app_res
-path, so the downloadable TTF stays byte-identical to the one in the APK; every
-other style is downloaded.
+Bundled app faces can keep their existing files and their app_res path, so the
+downloadable TTF stays byte-identical to the one in the APK; every other style is
+downloaded.
 
     python3 tools/fetch_fonts.py            # missing files only
     python3 tools/fetch_fonts.py --refresh  # re-download everything fetched here
@@ -43,14 +43,6 @@ LEGACY_UA = ("Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 "
 POPPINS_NAMES = {100: "Thin", 200: "ExtraLight", 300: "Light", 400: "Regular",
                  500: "Medium", 600: "SemiBold", 700: "Bold", 800: "ExtraBold",
                  900: "Black"}
-
-# The three app faces are already on disk and must not be replaced: their TTF is
-# a byte-for-byte copy of app/res/font/.
-APP_FACES = {
-    (400, "normal"): "app/res/font/poppins_regular.ttf",
-    (500, "normal"): "app/res/font/poppins_medium.ttf",
-    (600, "normal"): "app/res/font/poppins_semibold.ttf",
-}
 
 USE = {
     (400, "normal"): "Body text, ledes and every label on this site.",
@@ -169,10 +161,6 @@ def build_families(refresh):
                 "weight": weight, "style": style,
                 "woff2": files["woff2"], "woff": files["woff"], "ttf": files["ttf"],
             }
-            app = APP_FACES.get((weight, style))
-            if app:
-                entry["app_res"] = app
-                entry["use"] = USE[(weight, style)]
             if style == "normal" and weight in USE:
                 entry["use"] = USE[(weight, style)]
             poppins["styles"].append(entry)

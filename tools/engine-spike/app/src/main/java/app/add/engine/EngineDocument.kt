@@ -434,6 +434,14 @@ class EngineDocument(initial: List<Layer>? = null) {
         }
     }
 
+    /** Tapping bare stage returns to Create, so the deck is never a one-time screen. */
+    fun clearSelection() {
+        selectedId = ""
+        selectedNodeId = null
+        editingModelId = null
+        status = "NOTHING SELECTED · TAP CREATE OR A LAYER"
+    }
+
     fun selectNode(id: String?) {
         selectedNodeId = id
     }
@@ -1273,6 +1281,14 @@ class EngineDocument(initial: List<Layer>? = null) {
             it.withStyle(it.style.copy(effects = it.style.effects.copy(enabled = !it.style.effects.enabled)))
         }
         status = if (selected?.style?.effects?.enabled == true) "EFFECTS ON" else "EFFECTS BYPASSED"
+    }
+
+    /** A recipe writes one coherent effect stack instead of six separate dials. */
+    fun applyEffectsPreset(name: String, effects: LayerEffects) {
+        val layer = selected ?: return
+        act("FX PRESET $name", layer.name)
+        updateSelected { it.withStyle(it.style.copy(effects = effects)) }
+        status = "FX PRESET · $name"
     }
 
     fun undo() {

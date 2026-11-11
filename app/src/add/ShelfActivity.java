@@ -51,8 +51,8 @@ public class ShelfActivity extends Activity {
 
     private static final String ORIGIN = "https://icons.local";
 
-    /** The page's own colours before any page reports them: the shelf opens dark. */
-    private static final String PAGE = "#131513";
+    /** The page's own colour before any page reports it: the shelf opens on paper. */
+    private static final String PAGE = "#e9e0cb";
 
     /**
      * Asked of the page once loaded and again whenever the look changes, so the system
@@ -469,20 +469,20 @@ public class ShelfActivity extends Activity {
         }
         String address = "https://artbase-olive.vercel.app" + sitePathFor(asset);
         String page = "<!doctype html><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">"
-                + "<body style=\"margin:0;padding:56px 24px;background:#131513;color:#f2eee3;"
-                + "font-family:Poppins,system-ui,sans-serif;line-height:1.6\">"
+                + "<body style=\"margin:0;padding:56px 24px;background:#e9e0cb;color:#15120e;"
+                + "font-family:'Libre Franklin',system-ui,sans-serif;line-height:1.6\">"
                 + "<p style=\"margin:0 0 10px;font-size:13px;letter-spacing:.12em;"
                 + "text-transform:uppercase;opacity:.65\">ADD \u00b7 offline</p>"
-                + "<h1 style=\"margin:0 0 14px;font-size:28px;font-weight:400\">That page lives on the site</h1>"
-                + "<p style=\"margin:0 0 12px;max-width:34ch\">The app carries the tools: every "
+                + "<h1 style=\"margin:0 0 14px;font-family:'Instrument Serif',Georgia,serif;font-size:28px;font-weight:400\">That page lives on the site</h1>"
+                + "<p style=\"margin:0 0 12px;max-width:34ch;font-family:'Spectral',Georgia,serif\">The app carries the tools: every "
                 + "brand, their catalogs, the pages and the fonts. The two galleries are pictures, "
                 + "so they stay on the site, where they already live.</p>"
                 + "<p style=\"margin:0 0 26px\"><code style=\"font-size:13px;word-break:break-all\">"
                 + address + "</code></p>"
                 + "<a href=\"" + address + "\" style=\"display:inline-block;padding:14px 20px;margin:0 10px 12px 0;"
-                + "background:#f2eee3;color:#131513;text-decoration:none\">Open on the web</a>"
+                + "background:#dd4124;color:#f2eee3;text-decoration:none\">Open on the web</a>"
                 + "<a href=\"/icons/index.html\" style=\"display:inline-block;padding:14px 20px;margin:0 0 12px 0;"
-                + "background:transparent;color:#f2eee3;text-decoration:none;border:1px solid rgba(242,238,227,.55)\">"
+                + "background:transparent;color:#15120e;text-decoration:none;border:1px solid rgba(21,18,14,.35)\">"
                 + "Back to the icons</a></body>";
         Map<String, String> headers = new HashMap<String, String>();
         headers.put("Cache-Control", "no-store");

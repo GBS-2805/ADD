@@ -1,42 +1,5 @@
 {
-  "showcase": {
-    "palette": "green",
-    "mode": "dark"
-  },
-  "themes": [
-    {
-      "palette": "green",
-      "mode": "dark"
-    },
-    {
-      "palette": "green",
-      "mode": "light"
-    },
-    {
-      "palette": "moss",
-      "mode": "dark"
-    },
-    {
-      "palette": "moss",
-      "mode": "light"
-    },
-    {
-      "palette": "navy",
-      "mode": "dark"
-    },
-    {
-      "palette": "navy",
-      "mode": "light"
-    },
-    {
-      "palette": "ash",
-      "mode": "dark"
-    },
-    {
-      "palette": "ash",
-      "mode": "light"
-    }
-  ],
+  "showcase": "newsprint",
   "screens": [
     {
       "slug": "compress",
@@ -44,28 +7,32 @@
       "full": true
     },
     {
-      "slug": "editor",
-      "title": "Editor \u00b7 Quick"
+      "slug": "drawer",
+      "title": "Side panel"
+    },
+    {
+      "slug": "quick",
+      "title": "Quick editor \u00b7 secondary"
     },
     {
       "slug": "photo",
-      "title": "Editor \u00b7 Photo"
+      "title": "Quick \u00b7 Photo"
     },
     {
       "slug": "presets",
-      "title": "Editor \u00b7 Presets"
+      "title": "Quick \u00b7 Presets"
     },
     {
       "slug": "type",
-      "title": "Editor \u00b7 Type"
+      "title": "Quick \u00b7 Type"
     },
     {
       "slug": "layers",
-      "title": "Editor \u00b7 Layers"
+      "title": "Quick \u00b7 Layers"
     },
     {
       "slug": "colour",
-      "title": "Editor \u00b7 Colour"
+      "title": "Quick \u00b7 Colour"
     },
     {
       "slug": "compare",

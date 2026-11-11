@@ -1,107 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  The four palettes of the site, one block each, taken from the same values as
-  docs/assets/site.css so the app and the pages cannot drift.
+  One edition: newsprint. The source is the final paper block in
+  docs/assets/site.css; this file is the Android copy of those tokens.
 
-  A palette is: the band, the words on that band, its accent (which fills the
-  count chips and pills), the small labels, and the page with the words that sit
-  on it. The band holds in both modes; only the page turns over, which is why
-  each palette has a dark page set and a light one.
-
-  A card is the page with 7% of the words mixed in, and a panel is 12% - the
-  two tints site.css paints as rgba().
+  A card is the page with 7% of the ink mixed in, and a panel is 12% - the two
+  tints site.css paints as rgba(). The band ink is darker than the page ink so
+  words on the stamp red keep 4.5:1; the page ink is the brief's #15120E.
 -->
 <resources>
 
-    <!-- Green: the original band, bright with near-black words on it. -->
-    <color name="green_band">#0fbf92</color>
-    <color name="green_band_ink">#0f120f</color>
-    <color name="green_band_dim">#9e0f120f</color>
-    <color name="green_band_line">#380f120f</color>
-    <color name="green_accent">#0fbf92</color>
-    <color name="green_accent_ink">#0f120f</color>
-    <color name="green_label">#0f120f</color>
-    <color name="green_page">#131513</color>
-    <color name="green_on">#f2eee3</color>
-    <color name="green_on_dim">#9ef2eee3</color>
-    <color name="green_rule">#38f2eee3</color>
-    <color name="green_card">#232422</color>
-    <color name="green_panel2">#2e2f2c</color>
-    <color name="green_page_light">#f2eee3</color>
-    <color name="green_on_light">#131513</color>
-    <color name="green_on_dim_light">#a3131513</color>
-    <color name="green_rule_light">#38131513</color>
-    <color name="green_card_light">#e5e1d7</color>
-    <color name="green_panel2_light">#d7d4ca</color>
+    <color name="newsprint_band">#dd4124</color>
+    <color name="newsprint_band_ink">#0f0b08</color>
+    <color name="newsprint_band_dim">#a80f0b08</color>
+    <color name="newsprint_band_line">#3d0f0b08</color>
+    <color name="newsprint_accent">#dd4124</color>
+    <color name="newsprint_accent_ink">#0f0b08</color>
+    <color name="newsprint_label">#15120e</color>
+    <color name="newsprint_page">#e9e0cb</color>
+    <color name="newsprint_on">#15120e</color>
+    <color name="newsprint_on_dim">#625b4f</color>
+    <color name="newsprint_rule">#3d15120e</color>
+    <color name="newsprint_card">#dad2be</color>
+    <color name="newsprint_panel2">#d0c7b4</color>
+    <color name="newsprint_warn">#8a3b00</color>
 
-    <!-- Moss: #005043 band, #0e2a24 page, #e7ddce words, #d6e381 accent. -->
-    <color name="moss_band">#005043</color>
-    <color name="moss_band_ink">#e7ddce</color>
-    <color name="moss_band_dim">#a3e7ddce</color>
-    <color name="moss_band_line">#42e7ddce</color>
-    <color name="moss_accent">#d6e381</color>
-    <color name="moss_accent_ink">#0e2a24</color>
-    <color name="moss_label">#d6e381</color>
-    <color name="moss_page">#0e2a24</color>
-    <color name="moss_on">#e7ddce</color>
-    <color name="moss_on_dim">#a3e7ddce</color>
-    <color name="moss_rule">#3de7ddce</color>
-    <color name="moss_card">#1d3730</color>
-    <color name="moss_panel2">#284038</color>
-    <color name="moss_page_light">#e7ddce</color>
-    <color name="moss_on_light">#0e2a24</color>
-    <color name="moss_on_dim_light">#a30e2a24</color>
-    <color name="moss_rule_light">#380e2a24</color>
-    <color name="moss_card_light">#dad2c4</color>
-    <color name="moss_panel2_light">#cdc8ba</color>
-
-    <!-- Navy: #242d55 band, #1c1d2f page, #a1b0c3 words, #72b6b4 accent. -->
-    <color name="navy_band">#242d55</color>
-    <color name="navy_band_ink">#a1b0c3</color>
-    <color name="navy_band_dim">#a8a1b0c3</color>
-    <color name="navy_band_line">#42a1b0c3</color>
-    <color name="navy_accent">#72b6b4</color>
-    <color name="navy_accent_ink">#1c1d2f</color>
-    <color name="navy_label">#72b6b4</color>
-    <color name="navy_page">#1c1d2f</color>
-    <color name="navy_on">#a1b0c3</color>
-    <color name="navy_on_dim">#a3a1b0c3</color>
-    <color name="navy_rule">#38a1b0c3</color>
-    <color name="navy_card">#27293b</color>
-    <color name="navy_panel2">#2c2f41</color>
-    <color name="navy_page_light">#a1b0c3</color>
-    <color name="navy_on_light">#1c1d2f</color>
-    <color name="navy_on_dim_light">#a81c1d2f</color>
-    <color name="navy_rule_light">#381c1d2f</color>
-    <color name="navy_card_light">#98a6b9</color>
-    <color name="navy_panel2_light">#919eb1</color>
-
-    <!-- Ash: the Wheatpaste palette. The band ink is near-black so the tangerine
-         band keeps 4.5:1; the page is the ash black, the words are cream. -->
-    <color name="ash_band">#dd4124</color>
-    <color name="ash_band_ink">#0f0b08</color>
-    <color name="ash_band_dim">#9e0f0b08</color>
-    <color name="ash_band_line">#3d0f0b08</color>
-    <color name="ash_accent">#c3d363</color>
-    <color name="ash_accent_ink">#2c2722</color>
-    <color name="ash_label">#f2e7d3</color>
-    <color name="ash_page">#2c2722</color>
-    <color name="ash_on">#f2e7d3</color>
-    <color name="ash_on_dim">#a3f2e7d3</color>
-    <color name="ash_rule">#3df2e7d3</color>
-    <color name="ash_card">#3a342e</color>
-    <color name="ash_panel2">#443e37</color>
-    <color name="ash_page_light">#f2e7d3</color>
-    <color name="ash_on_light">#2c2722</color>
-    <color name="ash_on_dim_light">#a32c2722</color>
-    <color name="ash_rule_light">#382c2722</color>
-    <color name="ash_card_light">#e4dac7</color>
-    <color name="ash_panel2_light">#dad0be</color>
-
-    <!-- The one functional exception: the same amber in every palette. -->
-    <color name="warn">#ffc98a</color>
-
-    <!-- The launcher's own disc. The icon is a fixed asset, not a themed surface,
-         so it keeps the colour it shipped with whatever palette is chosen. -->
+    <!-- The launcher's own disc. The icon is a fixed asset, not a themed surface. -->
     <color name="iconBg">#d9d9d9</color>
 </resources>

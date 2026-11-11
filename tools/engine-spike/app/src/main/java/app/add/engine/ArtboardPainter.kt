@@ -12,6 +12,7 @@ import android.graphics.RectF
 import android.graphics.Typeface
 import kotlin.math.min
 import kotlin.math.roundToInt
+import kotlin.math.sqrt
 
 class Typefaces(context: Context) {
     private val assets = context.assets
@@ -41,6 +42,16 @@ object ArtboardPainter {
     const val W = ARTBOARD_WIDTH
     const val H = ARTBOARD_HEIGHT
 
+    /**
+     * The interactive stage is often zoomed far past the screen. A 4x preview
+     * allocates a 4320x5400 ARGB page (~93 MB) and runs every effect over it;
+     * cap the preview at ~6 MP and scale the result to the stage. Export passes
+     * preview = false, so it still renders at the requested factor.
+     */
+    private const val MAX_PREVIEW_PIXELS = 6_000_000
+    private fun maxPreviewScale(): Float =
+        sqrt(MAX_PREVIEW_PIXELS.toDouble() / (W.toDouble() * H.toDouble())).toFloat()
+
     fun draw(
         canvas: Canvas,
         layers: List<Layer>,
@@ -49,10 +60,12 @@ object ArtboardPainter {
         images: Map<String, Bitmap> = emptyMap(),
         safeArea: Boolean = false,
         scale: Float = 1f,
+        preview: Boolean = false,
     ) {
         // The whole page is composited offscreen at the requested scale and blitted
         // once, so layer bitmaps, masks, effects and blends all share one pixel grid.
-        val unit = scale.coerceIn(0.1f, 4f)
+        val requested = scale.coerceIn(0.1f, 4f)
+        val unit = if (preview) requested.coerceAtMost(maxPreviewScale()) else requested
         val width = (W * unit).roundToInt().coerceAtLeast(1)
         val height = (H * unit).roundToInt().coerceAtLeast(1)
         val backing = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
@@ -63,7 +76,7 @@ object ArtboardPainter {
         drawPaper(surface, typefaces)
         surface.restore()
 
-        LayerCompositor(unit) { layerCanvas, layer ->
+        LayerCompositor(unit, cacheLayers = preview) { layerCanvas, layer ->
             drawLayer(layerCanvas, layer, typefaces, modelCaptures, images)
         }.draw(surface, backing, layers)
 
@@ -72,7 +85,10 @@ object ArtboardPainter {
         if (safeArea) drawSafeArea(surface, typefaces)
         drawFooter(surface, typefaces)
         surface.restore()
+        canvas.save()
+        canvas.scale(requested / unit, requested / unit)
         canvas.drawBitmap(backing, 0f, 0f, Paint(Paint.FILTER_BITMAP_FLAG))
+        canvas.restore()
         backing.recycle()
     }
 

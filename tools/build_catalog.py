@@ -72,8 +72,8 @@ def digest(path):
 def copy_face(style):
     """Keep an app-bundled TTF byte-identical to the one the app ships.
 
-    Most styles are fetched from Google Fonts and have no app_res; the three the
-    apps bundle do, and those files must never be replaced by a download.
+    Most styles are fetched from Google Fonts and have no app_res; bundled app
+    faces may carry one, and those files must never be replaced by a download.
     """
     if not style.get("app_res"):
         return

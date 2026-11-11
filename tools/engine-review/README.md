@@ -12,7 +12,7 @@ bash tools/engine-review/build.sh
 
 The APK lands at `artifacts/engine-review/ADD-3.7-engine-review.apk`. It is a debug
 build, same applicationId (`app.offline.compress`) and version `3.7`, with a review-only
-versionCode (`46`), so it replaces an installed ADD copy. It uses the existing ADD signing key when
+versionCode (`48`), so it replaces an installed ADD copy. It uses the existing ADD signing key when
 `$KEYSTORE` (or the default `$HOME/tools/compress-keystore.jks`) is present; without
 that key Gradle falls back to its debug key, which requires uninstalling ADD first.
 
@@ -73,6 +73,9 @@ Skia artboard, Filament `SceneView` and export path. This pass adds:
   rotating the SurfaceView, with corners that resize the frame and a direct drag
   that moves the layer on the artboard; the model orientation is baked into the
   export;
+- build 48 keeps that drag on a stationary pointer node while only the frame moves,
+  caps the interactive preview at ~6 MP at high zoom, and caches effect-rendered
+  layers so grain and halftone are not recomputed on every frame;
 - cream icon thumbnails in the catalog and diagnostics, so glyphs are legible on
   the dark cards;
 - a second 3D asset, `engine_ring.glb`, swappable with the reviewed gem;

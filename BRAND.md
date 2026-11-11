@@ -175,11 +175,16 @@ All faces are already local. No new font licence is required for this system.
 
 The existing ring mark (`docs/assets/logo.svg`, `app/res/drawable/ic_mark.xml`) is retained. It is the seal: a circular, slightly imperfect mark that reads as a stamp, a plate or a press mark. Do not redraw it for this system.
 
-- Primary lockup: ring + ADD wordmark, horizontal.
+- Primary lockup for print and app: ring + ADD wordmark, horizontal.
 - Stacked lockup: ring above ADD, descriptor below.
 - Stamp: ring alone, or ring + edition number, inside a red or ink rule.
 - Favicon: ring alone at 24–32 px.
 - App icon: newsprint field, ink ring, red edition mark; no gradient, no glow.
+
+**On the newsprint site, the wordmark is the masthead.** The ring is a colophon,
+favicon or app icon. It is not centred in the header, enlarged into a poster, or
+repeated as a hero object. The page should read as a publication first and a logo
+second.
 
 ### Wordmark
 
@@ -286,6 +291,7 @@ GSAP is part of the identity, but it is choreography, not decoration.
 - Newsprint surface, ink type, one red spot.
 - No palette chips, no theme switch, no four-palette art direction.
 - Masthead, edition line, plates, captions, manifesto.
+- The wordmark is the masthead. No centred ring, logo poster or repeated app-icon tile.
 - Primary door: Studio. Secondary door: Archive.
 - The site is the archive’s front page, not a SaaS landing page.
 
@@ -393,6 +399,7 @@ THE MANIFESTO / WHY
 - No rounded SaaS cards on the archive.
 - No grunge on controls or body copy.
 - The ring is not redrawn, rotated or outlined.
+- The ring is not a hero object on the archive; it stays at favicon, app-icon or colophon size.
 - The user’s artwork is never recoloured by the chrome.
 - The Studio remains graphite; the archive remains newsprint.
 
@@ -421,7 +428,7 @@ THE MANIFESTO / WHY
 - Final app icon (newsprint/ink/red).
 - OG/social template.
 - A drawn ADD wordmark, if the Archivo Black masthead is not enough.
-- Site implementation: masthead, front page, archive plates, palette removal.
+- Site implementation: the newsprint masthead and front page are in review; archive plates and the classic shelf archive remain.
 - Studio application: graphite shell, paper artboard, material presets.
 - Print/edition templates for Wheatpaste.
 
@@ -429,4 +436,4 @@ THE MANIFESTO / WHY
 
 `PLAN.md` sets the engine and document architecture; this brief sets the identity that plan wears. If they conflict on visual direction, this brief wins. If they conflict on product scope, `PLAN.md` wins.
 
-The next implementation step is not the whole site. It is a visual brand sheet review, then the archive masthead and front page, then the Studio shell.
+The next implementation step is the review of the newsprint front page, then the classic shelf archive, then the Studio shell.

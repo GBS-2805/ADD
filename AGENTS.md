@@ -200,39 +200,22 @@ Screenshots are of a local server over `docs/` (`python3 -m http.server`), viewp
 in one run and prints console errors; it needs the toolchain from
 `tools/render_env.py`.
 
-The site has two modes over one palette: a green band (`#0fbf92`) in both, an off-black
-page (`#131513`) with cream type (`#f2eee3`) in dark, and cream with off-black in light.
-A new visitor opens on the dark page: dark is the default, not a lookup of what the
-system asks for. `site.js` swaps `data-theme` on `<html>` for the sun/moon switch it
-injects into the palette row of the side tab and remembers the choice under
-`site:theme`, so generated pages inherit both. Every page links one stylesheet, `docs/assets/site.css`: it carries the
-`@font-face` block, the band, the pull-down menu and the shared type, and its
-`url()` paths are relative to that file so pages at any depth can use it. The band
-keeps frame 6-27's measured geometry -- 26px page name on the left inside a 40px
-tap target, the 45px mark centred, two 17px lines and the burger on the right, and the theme control living in the side
-tab rather than the band; a phone drops the descriptor for `ADD` over
-`Art • Design • Database` --
-while the glyphs themselves are Coolicons line icons (MIT), which is why every
-page loads `assets/site.js`. Page-specific rules live in a small `<style>` on the page. `docs/icons/index.html` is
+The site is one printed edition now: newsprint cream (`#e9e0cb`), ink (`#15120e`) and
+stamp red (`#dd4124`). There are no palette chips and no light/dark switch. The four
+`html[data-palette]` blocks stay in `site.css` because the Android app still uses them,
+but a final `html[data-theme], html[data-palette]` block pins every route to the paper
+tokens; `site.js` no longer reads `site:theme` or `site:palette` and no longer builds
+the look controls. `check_palette.py` continues to guard the app and those legacy
+blocks.
+
+Every page links one stylesheet, `docs/assets/site.css`: it carries the `@font-face`
+block, the masthead, the pull-down menu and the shared type, and its `url()` paths are
+relative to that file so pages at any depth can use it. `site.js` injects the quiet
+`ADD` wordmark on pages that do not carry it, adds the Search row, and keeps the
+navigation. The old ring `.mark` is hidden on the site; the favicon and app icon keep
+it. The header is paper with a red top rule and a black baseline, not a palette band.
+Page-specific rules live in a small `<style>` on the page. `docs/icons/index.html` is
 generated on the same system out of the three icon templates.
-
-Four palettes ride over those two modes: green (the original band, `#0fbf92`), the
-two sets from the hand-off — Moss (`#005043` band, `#0e2a24` page, `#e7ddce` words,
-`#d6e381` accent) and Navy (`#242d55` band, `#1c1d2f` page, `#a1b0c3` words, `#72b6b4`
-accent) — and Ash (`#dd4124` band, `#2c2722` page, `#f2e7d3` words, `#c3d363` accent).
-`site.js` swaps `data-palette` on `<html>` and remembers the choice under
-`site:palette`; the four chips sit at the foot of the side tab, under the note, with the
-light/dark switch as the last chip in that row rather than a labelled row of its own.
-Closing the tab writes both choices to the store, so neither is lost by dismissing it. The band holds in both themes and only the page turns over, so a palette
-is its block of values in `site.css` plus one entry in the `PALETTES` list in `site.js`.
-
-The fourth colour of each set is that palette's accent, and it does two jobs: it fills the
-count chips and the live pills (`--accent`, with `--accent-ink` on top, because the accent
-is light and the band ink on it measures 1.03:1), and it colours the two small labels on
-the band (`MORE` and `Palette`, `--label`). Green has no accent of its own -- its band is
-the accent -- so its labels keep the near-black band ink while Moss, Navy and Ash get
-their own accents. Never spend the accent on body copy or on link words: it sits at
-1.03:1 against the palette's band words and would read as a second, competing ink.
 
 ### The app: native screens render; the emulator is a smoke test
 
@@ -327,8 +310,9 @@ where the notes keep the history they shipped with.Icons, Fonts, Compress and th
   rewrites the origin in
   `tools/site.json` and the two app constants, so a failed deploy leaves the repo
   pointing at the host that still serves. It runs `tools/check_palette.py` before the
-  upload and refuses a palette that drifted, beside its stale-hash and
-  uncommitted-history stops. The deploy token is `VERCEL_ARTBASE_TOKEN` when set,
+  upload and refuses a palette that drifted, and `tools/check_links.py`, which fails
+  when any internal `href` or `src` names a file the shelf does not carry, beside its
+  stale-hash and uncommitted-history stops. The deploy token is `VERCEL_ARTBASE_TOKEN` when set,
   otherwise the `VERCEL_TOKEN` secret; the storage report uses `VERCEL_ADMIN_TOKEN`
   or `VERCEL_TOKEN`. Tokens are read from the environment and never an argument.
   Vercel has no per-deploy size cap.
@@ -646,7 +630,7 @@ where the notes keep the history they shipped with.Icons, Fonts, Compress and th
   needs the capture environment exported by hand: `build.sh` hands the check
   `NODE_PATH`, `PLAYWRIGHT_BROWSERS_PATH`, `LD_LIBRARY_PATH` and `FONTCONFIG_FILE`
   itself, and a value already exported still wins.
-- Compress wears the same four palettes as the site, plus the band and the side tab.
+- Compress wears the app's four palettes, plus the band and the side tab. The site is fixed newsprint.
   The colours live in one place, `app/res/values/colors.xml`: a block per palette
   (band, band ink, dim and line, accent and its ink, label, page, words, rule, card)
   in a dark and a light page set, taken from `docs/assets/site.css` so the two cannot
@@ -730,9 +714,9 @@ where the notes keep the history they shipped with.Icons, Fonts, Compress and th
   the page exposes opacity, blend, shuffle, remove, on-canvas placement handles and
   X/Y/scale/rotation controls; nothing is fetched and no stock asset is bundled. It is
   the first Studio 2 slice, not wired to saved looks, and it is unverified on a device.
-- `python3 tools/check_all.py` is the single verdict: palette, asset hashes, site tree,
-  catalog, Figma structure, Pantone sheet, note dating and the staged bundle, one line
-  each, all of them run so one pass shows everything. `--browser <url>` adds the
+- `python3 tools/check_all.py` is the single verdict: palette, asset hashes, internal
+  links, site tree, catalog, Figma structure, Pantone sheet, note dating and the staged
+  bundle, one line each, all of them run so one pass shows everything. `--browser <url>` adds the
   rendered palette and the menu-focus/ARIA regression; `--artboards` adds the
   re-export diff. Both need Chromium, and `.github/workflows/checks.yml` runs the
   browserless set on every push. The APK build stays local: it needs the JDK, the android-35 platform and the keystore.
@@ -769,6 +753,13 @@ When a domain does exist, the move is already scripted and needs no new tooling:
 3. The APKs still embed the `vercel.app` host. Repointing them at the new one needs a
    version bump (`tools/bump_version.py ... --build`) and a re-capture, because the
    version labels are visible ink.
+
+## Completion notifications
+
+When a task is finished and verified, send one short ntfy notification to
+`https://ntfy.sh/Freebuff-ADD-2805` before the final reply. Say what is ready, the
+pass/fail state, and the one public link to open. Do not notify for progress,
+intermediate milestones, or while blocked; one notification per finished task.
 
 ## Handoff standard
 

@@ -7,8 +7,8 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="52dp"
-        android:background="?attr/band"
+        android:layout_height="66dp"
+        android:background="@drawable/bg_masthead"
         android:gravity="center_vertical"
         android:orientation="horizontal"
         android:paddingLeft="2dp"
@@ -25,17 +25,17 @@
             android:gravity="center"
             android:includeFontPadding="false"
             android:text="&#8249;"
-            android:textColor="?attr/bandInk"
+            android:textColor="?attr/on"
             android:textSize="28sp" />
 
         <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:fontFamily="@font/poppins_semibold"
-            android:letterSpacing="0.02"
+            android:fontFamily="@font/instrument_serif"
+            android:letterSpacing="-0.01"
             android:text="Font packs"
-            android:textColor="?attr/bandInk"
+            android:textColor="?attr/on"
             android:textSize="16sp" />
 
         <TextView
@@ -45,13 +45,13 @@
             android:background="?android:attr/selectableItemBackgroundBorderless"
             android:clickable="true"
             android:focusable="true"
-            android:fontFamily="@font/poppins_semibold"
+            android:fontFamily="@font/libre_franklin"
             android:gravity="center"
-            android:letterSpacing="0.08"
+            android:letterSpacing="0.04"
             android:paddingLeft="10dp"
             android:paddingRight="10dp"
             android:text="REFRESH"
-            android:textColor="?attr/bandInk"
+            android:textColor="?attr/on"
             android:textSize="11sp" />
     </LinearLayout>
 

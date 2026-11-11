@@ -53,7 +53,6 @@ public class PacksActivity extends Activity {
     @Override
     protected void onCreate(Bundle state) {
         super.onCreate(state);
-        ThemePrefs.applyTheme(this);
         setContentView(R.layout.activity_packs);
         applyInsets();
 
@@ -173,11 +172,17 @@ public class PacksActivity extends Activity {
                 + " \u00b7 downloads only when you tap";
     }
 
+    private TextView familyName(String family) {
+        TextView view = text(family, 15, R.attr.on);
+        view.setTypeface(getResources().getFont(R.font.instrument_serif));
+        return view;
+    }
+
     private void addPackRow(PackCatalog.Pack pack, PackStore.Installed installed) {
         LinearLayout row = shell();
         LinearLayout words = new LinearLayout(this);
         words.setOrientation(LinearLayout.VERTICAL);
-        words.addView(text(pack.family, 15, R.attr.on));
+        words.addView(familyName(pack.family));
 
         String meta = pack.faces + (pack.faces == 1 ? " face" : " faces")
                 + " \u00b7 " + PackStore.humanBytes(pack.bytes);
@@ -211,7 +216,7 @@ public class PacksActivity extends Activity {
         LinearLayout row = shell();
         LinearLayout words = new LinearLayout(this);
         words.setOrientation(LinearLayout.VERTICAL);
-        words.addView(text(pack.family, 15, R.attr.on));
+        words.addView(familyName(pack.family));
         words.addView(text(pack.faceCount() + " faces \u00b7 "
                 + PackStore.humanBytes(pack.bytes) + " \u00b7 installed", 12, R.attr.onDim));
         row.addView(words, new LinearLayout.LayoutParams(
@@ -353,7 +358,7 @@ public class PacksActivity extends Activity {
         TextView view = new TextView(this);
         view.setText(label);
         view.setTextSize(TypedValue.COMPLEX_UNIT_SP, 10);
-        view.setTypeface(getResources().getFont(R.font.poppins_semibold));
+        view.setTypeface(getResources().getFont(R.font.libre_franklin));
         view.setLetterSpacing(0.06f);
         view.setGravity(Gravity.CENTER);
         view.setBackgroundResource(R.drawable.bg_primary);
