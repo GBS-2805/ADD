@@ -9,9 +9,9 @@ them for a year and a page still picks up a new palette the moment it is deploye
 
 Writes `docs/assets/site.<hash>.css` and `.js`, records the pair in
 `docs/data/assets.json`, and rewrites the reference in every page under `docs/`
-(hand-written or generated). Run it after changing either file and before the
-generators; `--check` fails when a page points at a stale name, which is what a
-generator run without this step looks like.
+(hand-written or generated), outside the frozen `docs/classic/` archive. Run it
+after changing either file and before the generators; `--check` fails when a page
+points at a stale name, which is what a generator run without this step looks like.
 """
 
 import argparse
@@ -26,6 +26,7 @@ DOCS = ROOT / "docs"
 ASSETS = DOCS / "assets"
 MAP = DOCS / "data/assets.json"
 SHARED = ("site.css", "site.js")
+ARCHIVE = DOCS / "classic"
 
 # Matches a plain or already-hashed reference, at any depth, with an old query.
 REFERENCE = re.compile(r"assets/(site(?:\.\w+)?\.(css|js))(?:\?[^\"']*)?")
@@ -57,7 +58,7 @@ def pin(text, mapping=None):
 
 
 def pages():
-    return sorted(DOCS.rglob("*.html"))
+    return sorted(page for page in DOCS.rglob("*.html") if ARCHIVE not in page.parents)
 
 
 def pin_all(mapping):

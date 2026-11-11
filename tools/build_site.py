@@ -4,7 +4,8 @@
 `docs/data/pages.json`, `docs/sitemap.xml` and `docs/robots.txt` are derived from
 `docs/**/index.html` rather than typed by hand, so the search index, the crawler map
 and the deploy's route check can never name a page that is not there, or miss one
-that is.
+that is. The frozen `docs/classic/` tree is excluded from the search index, sitemap
+and page count; it is still included in the deploy's route check as archived files.
 
     python3 tools/build_site.py            # write them
     python3 tools/build_site.py --check    # fail when what is on disk is stale
@@ -25,6 +26,7 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "tools"))
 import hash_assets  # noqa: E402 - the tools directory is on the path above
 DOCS = ROOT / "docs"
+ARCHIVE = DOCS / "classic"
 SITE = ROOT / "tools/site.json"
 
 # Vercel consumes its config on upload and does not serve it, so it is not a route.
@@ -52,6 +54,7 @@ TYPES = {
     ".webp": "image/webp",
     ".svg": "image/svg+xml",
     ".apk": "android.package-archive",
+    ".woff": "font/woff",
     ".woff2": "font/woff2",
     ".ttf": "font/ttf",
     ".ico": "image/",
@@ -85,6 +88,8 @@ def pages():
     """Every page in the shelf, in path order, with what a search box needs."""
     found = []
     for path in sorted(DOCS.rglob("index.html")):
+        if ARCHIVE in path.parents:
+            continue
         text = path.read_text(encoding="utf-8", errors="replace")
         title = TITLE.search(text)
         lede = H1.search(text)
