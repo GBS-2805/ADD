@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Report retained Vercel deployments, retention and estimated storage.
 
-    python3 tools/deploy_storage.py
+    python3 tools/deploy_storage.py [--early-warning-mib MIB]
 
 The report is an estimate, not the dashboard's Deployment Storage total: Vercel does
 not expose that byte total to Hobby teams through the API. It multiplies the current
@@ -129,7 +129,7 @@ def _size(value):
     return "%d B" % value
 
 
-def report():
+def report(early_warning=SIZE_EARLY_WARN):
     """Print the report; return an OK, UNAVAILABLE or CRITICAL status."""
     rows = []
     try:
@@ -169,7 +169,7 @@ def report():
           ("total", total_deployments, "", "", "", _size(total_estimate)))
     print("thresholds: %d deployments per project, %s early-warning / %s warning total, "
           "%d-day retention"
-          % (COUNT_WARN, _size(SIZE_EARLY_WARN), _size(SIZE_WARN), RETENTION_WARN_DAYS))
+          % (COUNT_WARN, _size(early_warning), _size(SIZE_WARN), RETENTION_WARN_DAYS))
 
     warnings = []
     critical = False
@@ -195,10 +195,10 @@ def report():
     elif total_estimate > SIZE_WARN:
         warnings.append("all projects estimate %s of output (over %s)" %
                         (_size(total_estimate), _size(SIZE_WARN)))
-    elif total_estimate > SIZE_EARLY_WARN:
+    elif total_estimate > early_warning:
         warnings.append("all projects estimate %s of output (over the %s early warning; "
                         "prune before the next release)" %
-                        (_size(total_estimate), _size(SIZE_EARLY_WARN)))
+                        (_size(total_estimate), _size(early_warning)))
 
     if warnings:
         print("warnings:")
@@ -212,9 +212,9 @@ def report():
     return CRITICAL if critical else OK
 
 
-def check(strict=False):
+def check(strict=False, early_warning=SIZE_EARLY_WARN):
     """Run the report and stop on critical; optionally stop when it is unavailable."""
-    status = report()
+    status = report(early_warning=early_warning)
     if status == CRITICAL:
         raise SystemExit("deployment storage: critical threshold crossed; prune old "
                          "deployments or lower retention before deploying")
@@ -228,8 +228,16 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--gate", action="store_true",
                         help="exit non-zero when storage is critical or unavailable")
+    parser.add_argument("--early-warning-mib", type=int, metavar="MIB",
+                        help="test-only override for the 450 MiB early-warning threshold")
     args = parser.parse_args()
-    raise SystemExit(check(strict=args.gate))
+    early_warning = SIZE_EARLY_WARN
+    if args.early_warning_mib is not None:
+        limit = SIZE_WARN // 1024 ** 2
+        if not 0 < args.early_warning_mib <= limit:
+            parser.error("--early-warning-mib must be between 1 and %d" % limit)
+        early_warning = args.early_warning_mib * 1024 ** 2
+    raise SystemExit(check(strict=args.gate, early_warning=early_warning))
 
 
 if __name__ == "__main__":

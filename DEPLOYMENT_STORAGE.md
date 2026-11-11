@@ -120,6 +120,11 @@ manually. It first runs the storage report and posts a warning annotation at the
 fails when any deployment deletion is present, and uploads the JSONL as a 90-day
 GitHub artifact even when the check fails.
 
+For a manual test of the warning annotation, set `storage_warning_mib` on the
+dispatch to a value below the current estimate, for example `300`. That overrides
+only the early-warning size for that run; the 512 MiB warning and the critical gates
+stay fixed, and scheduled runs keep the 450 MiB default.
+
 Add `VERCEL_ADMIN_TOKEN` (preferred) or `VERCEL_TOKEN` under repository Settings ->
 Secrets and variables -> Actions. Scheduled workflows only run from the default
 branch, and the workflow does not exist remotely until these changes are pushed.
