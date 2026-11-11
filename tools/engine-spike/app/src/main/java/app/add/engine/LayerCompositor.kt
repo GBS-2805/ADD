@@ -96,11 +96,16 @@ class LayerCompositor(
         val cached: Boolean = false,
     )
 
-    fun draw(destCanvas: Canvas, destBitmap: Bitmap, layers: List<Layer>) {
+    fun draw(
+        destCanvas: Canvas,
+        destBitmap: Bitmap,
+        layers: List<Layer>,
+        motionOffsets: Map<String, Pair<Float, Float>> = emptyMap(),
+    ) {
         var previous: RenderedLayer? = null
         var clipBase: RenderedLayer? = null
         layers.filter { it.visible }.forEach { layer ->
-            val rendered = render(layer) ?: return@forEach
+            val rendered = render(layer, motionOffsets) ?: return@forEach
             if (layer.style.clipToBelow) {
                 // The first clipped layer claims the layer below as the whole run's
                 // base. Later clipped layers keep clipping to that base instead of to
@@ -124,10 +129,18 @@ class LayerCompositor(
         previous?.let { release(it) }
     }
 
-    private fun render(layer: Layer): RenderedLayer? {
-        val bounds = boundsFor(layer)
+    private fun render(
+        layer: Layer,
+        motionOffsets: Map<String, Pair<Float, Float>>,
+    ): RenderedLayer? {
+        val bounds = boundsFor(layer, motionOffsets)
         if (bounds.width() <= 0 || bounds.height() <= 0) return null
-        val cacheKey = if (cacheLayers && layer.style.effects.activePasses.isNotEmpty() && cacheable(layer)) {
+        val cacheKey = if (
+            cacheLayers &&
+            motionOffsets[layer.id] == null &&
+            layer.style.effects.activePasses.isNotEmpty() &&
+            cacheable(layer)
+        ) {
             LayerCacheKey(layer.id, layer.hashCode(), unitBits)
         } else null
         cacheKey?.let { key ->
@@ -139,7 +152,9 @@ class LayerCompositor(
         val canvas = Canvas(bitmap)
         canvas.scale(scale, scale)
         canvas.translate(-bounds.left.toFloat() / scale, -bounds.top.toFloat() / scale)
-        val rotated = layer.frameRotation != 0f
+        // A group applies its own full transform in the painter; rotating here as well
+        // would double-transform every child.
+        val rotated = layer.frameRotation != 0f && layer !is GroupLayer
         if (rotated) {
             canvas.save()
             canvas.rotate(layer.frameRotation, layer.centerX * ArtboardPainter.W, layer.centerY * ArtboardPainter.H)
@@ -158,6 +173,7 @@ class LayerCompositor(
         is IconLayer -> true
         is TextLayer -> layer.paint !is PaintSpec.Image
         is VectorLayer -> layer.paint !is PaintSpec.Image
+        is GroupLayer -> false
         else -> false
     }
 
@@ -165,14 +181,42 @@ class LayerCompositor(
         if (!rendered.cached) rendered.bitmap.recycle()
     }
 
-    private fun boundsFor(layer: Layer): Rect {
+    /**
+     * A preview displaces the layer inside its own bitmap, so a frame-sized bitmap
+     * would clip the motion. Pad by the largest descendant displacement, scaled
+     * through the groups it travels, rather than resizing the bitmap per frame.
+     */
+    private fun motionPadPx(layer: Layer, offsets: Map<String, Pair<Float, Float>>): Float {
+        var largest = 0f
+        fun visit(node: Layer, inheritedScale: Float) {
+            offsets[node.id]?.let { offset ->
+                largest = max(
+                    largest,
+                    (abs(offset.first) * ArtboardPainter.W + abs(offset.second) * ArtboardPainter.H) * inheritedScale,
+                )
+            }
+            if (node is GroupLayer) {
+                val scale = inheritedScale * max(abs(node.scaleX), abs(node.scaleY))
+                node.children.forEach { visit(it, scale) }
+            }
+        }
+        visit(layer, 1f)
+        return largest
+    }
+
+    private fun boundsFor(
+        layer: Layer,
+        motionOffsets: Map<String, Pair<Float, Float>>,
+    ): Rect {
         val x = layer.x * ArtboardPainter.W
         val y = layer.y * ArtboardPainter.H
         val w = layer.w * ArtboardPainter.W
         val h = layer.h * ArtboardPainter.H
         val cx = layer.centerX * ArtboardPainter.W
         val cy = layer.centerY * ArtboardPainter.H
-        val corners = listOf(
+        val groupCorners = (layer as? GroupLayer)?.worldCorners()
+            ?.map { it.first * ArtboardPainter.W to it.second * ArtboardPainter.H }
+        val corners = groupCorners ?: listOf(
             Geometry.rotatePoint(x, y, cx, cy, layer.frameRotation),
             Geometry.rotatePoint(x + w, y, cx, cy, layer.frameRotation),
             Geometry.rotatePoint(x + w, y + h, cx, cy, layer.frameRotation),
@@ -181,7 +225,7 @@ class LayerCompositor(
         val effects = layer.style.effects
         val maskRadius = layer.style.mask?.strokes?.maxOfOrNull { it.radius } ?: 0f
         val blurPad = if (effects.enabled && EffectPass.Blur in effects.activePasses) effects.blur else 0f
-        val pad = blurPad * 2f + maskRadius * min(w, h) + 6f
+        val pad = blurPad * 2f + maskRadius * min(w, h) + 6f + motionPadPx(layer, motionOffsets)
         val left = floor((corners.minOf { it.first } - pad) * scale).toInt()
             .coerceIn(0, (ArtboardPainter.W * scale).roundToInt())
         val top = floor((corners.minOf { it.second } - pad) * scale).toInt()

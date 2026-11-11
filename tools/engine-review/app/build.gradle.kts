@@ -41,8 +41,25 @@ android {
         // 49 is the Playful Studio shell: stage-first chrome, Create deck, object
         // bar, Style/FX/Layers inspector, recipe cards, mask and 3D HUDs, and
         // tactile press/spring feedback. Rendering and export paths are unchanged.
-        versionCode = 49
-        versionName = "3.7"
+        // 50 makes undo/autosave cover the whole document: snapshots carry selection
+        // and the entered group, atomic save keeps a last-good backup, and a v4 file
+        // with an unknown layer is refused instead of half-decoded.
+        // 51 adds real type controls: family resolution with visible fallback,
+        // display-only case, tracking and installed font-pack faces.
+        // 52 adds a non-destructive source-space photo crop, crop sliders, and a
+        // bounded mtime-keyed image decode path shared by preview and export.
+        // 53 applies the Pajamas shell on top of the same engine: floating toolbar,
+        // segmented inspector tabs, split export, a real layer tree, labelled 48dp
+        // targets and reduced-motion chrome.
+        // 54 adds the Task 8 deterministic artboard texture library: ten seeded
+        // families, a new TEXTURE inspector section, bounded downsampled cache and
+        // recipe-only document persistence.
+        // 55 adds Material Ink: seeded material strokes authored by gesture, stored
+        // as document recipes, rendered through the same Skia artboard as export.
+        // It also gives the object bar a readable two-row layout, opens Type controls
+        // before Transform, and removes duplicate UNDO rows from History.
+        versionCode = 55
+        versionName = "3.8.5"
 
         ndk {
             // Review build for a phone. Keeping the x86_64 copy would double the
@@ -82,7 +99,14 @@ android {
 
     sourceSets.getByName("main") {
         java.srcDirs("src/main/java", "../../../app/src")
-        res.srcDirs("src/main/res", "../../../app/res")
+        // The engine's own res dir carries the Poppins faces that app/add/engine/R.java
+        // bridges into add.R. It also carries Theme.EngineSpike, which the review
+        // manifest does not use. Without this the bridge cannot compile.
+        res.srcDirs(
+            "src/main/res",
+            "../../../app/res",
+            "../../engine-spike/app/src/main/res",
+        )
         assets.srcDirs("../../../app/assets", "../../engine-spike/app/src/main/assets")
         manifest.srcFile("src/main/AndroidManifest.xml")
     }

@@ -110,5 +110,37 @@ class EngineFrameCaptureTest {
         compose.onNodeWithTag("mask-entry").performScrollTo().performClick()
         compose.waitForIdle()
         capture("engine-studio-mask.png")
+
+        // The Material Ink path: arm from Texture, draw on the stage, and keep the
+        // compact HUD visible. This is the artifact that proves the gesture path is
+        // wired through the real activity, not just the renderer unit test.
+        compose.onNodeWithText("DONE").performClick()
+        compose.waitForIdle()
+        compose.onNodeWithTag("object-texture").performClick()
+        compose.waitForIdle()
+        compose.onNodeWithTag("texture-ink-arm").performScrollTo().performClick()
+        compose.waitForIdle()
+        compose.onNodeWithTag("engine-artboard").performTouchInput {
+            down(Offset(width * 0.18f, height * 0.28f))
+            moveTo(Offset(width * 0.35f, height * 0.34f))
+            moveTo(Offset(width * 0.52f, height * 0.46f))
+            moveTo(Offset(width * 0.7f, height * 0.58f))
+            up()
+        }
+        compose.waitForIdle()
+        capture("engine-studio-ink.png")
+
+        // The recording's blank interval was a Marble material painted over the
+        // layers. Keep the applied recipe and the still-readable page in the set.
+        compose.onNodeWithText("DONE").performClick()
+        compose.waitForIdle()
+        compose.onNodeWithTag("object-texture").performClick()
+        compose.waitForIdle()
+        compose.onNodeWithTag("texture-family-marble").performClick()
+        compose.waitForIdle()
+        capture("engine-studio-texture-panel.png")
+        compose.onNodeWithTag("sheet-done").performClick()
+        compose.waitForIdle()
+        capture("engine-studio-texture.png")
     }
 }

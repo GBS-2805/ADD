@@ -22,6 +22,26 @@ enum class TextAlign { Left, Center, Right }
 /** Where a moved layer caught: the lines the stage draws while the finger is down. */
 data class SnapGuides(val vertical: List<Float> = emptyList(), val horizontal: List<Float> = emptyList())
 
+private const val HISTORY_LIMIT = 100
+private const val TEXT_DEBOUNCE_MS = 600L
+
+/**
+ * One undo step. The payload is the tree plus its motion paths; selection, the
+ * entered group, zoom and locks travel with it so an undo puts the stage back
+ * where the reader left it. Selection alone never creates one of these.
+ */
+data class EditorSnapshot(
+    val layers: List<Layer>,
+    val motion: Map<String, MotionPath> = emptyMap(),
+    val selectedIds: Set<String> = emptySet(),
+    val selectedId: String? = selectedIds.firstOrNull(),
+    val editingGroupId: String? = null,
+    val zoom: Float = 1f,
+    val locked: Set<String> = emptySet(),
+    val texture: TextureSpec? = null,
+    val ink: List<TextureInk> = emptyList(),
+)
+
 sealed interface Layer {
     val id: String
     val name: String
@@ -32,6 +52,8 @@ sealed interface Layer {
     val h: Float
     val opacity: Float
     val rotation: Float
+    /** Horizontal shear produced when a non-uniform group scale is flattened. */
+    val skewX: Float
     /** Blend, mask and non-destructive effects; defaults leave older layers unchanged. */
     val style: LayerStyle
 }
@@ -46,6 +68,7 @@ data class VectorLayer(
     override val h: Float,
     override val opacity: Float = 1f,
     override val rotation: Float = 0f,
+    override val skewX: Float = 0f,
     val network: VectorNetwork,
     val fill: Int,
     val stroke: Int,
@@ -64,12 +87,17 @@ data class TextLayer(
     override val h: Float,
     override val opacity: Float = 1f,
     override val rotation: Float = 0f,
+    override val skewX: Float = 0f,
     val text: String,
     val fontSize: Float,
     val lineHeight: Float,
     val color: Int,
     val align: TextAlign = TextAlign.Left,
     val weight: Int = 600,
+    val fontFamily: String = "Poppins",
+    /** Extra tracking in em, applied at paint time only. */
+    val tracking: Float = 0f,
+    val textCase: TextCase = TextCase.None,
     val paint: PaintSpec? = null,
     override val style: LayerStyle = LayerStyle(),
 ) : Layer
@@ -84,10 +112,34 @@ data class IconLayer(
     override val h: Float,
     override val opacity: Float = 1f,
     override val rotation: Float = 0f,
+    override val skewX: Float = 0f,
     val glyph: IconGlyph,
     val tint: Int,
     override val style: LayerStyle = LayerStyle(),
 ) : Layer
+
+/**
+ * A normalised rectangle in the decoded photograph's own pixels. It is a stored
+ * instruction, never a flattened bitmap, so changing it never rewrites the source
+ * and undo only has to carry four floats.
+ */
+data class ImageCrop(
+    val x: Float = 0f,
+    val y: Float = 0f,
+    val w: Float = 1f,
+    val h: Float = 1f,
+) {
+    fun normalized(): ImageCrop {
+        val nw = w.coerceIn(0.05f, 1f)
+        val nh = h.coerceIn(0.05f, 1f)
+        return ImageCrop(
+            x = x.coerceIn(0f, 1f - nw),
+            y = y.coerceIn(0f, 1f - nh),
+            w = nw,
+            h = nh,
+        )
+    }
+}
 
 data class ImageLayer(
     override val id: String,
@@ -99,10 +151,13 @@ data class ImageLayer(
     override val h: Float,
     override val opacity: Float = 1f,
     override val rotation: Float = 0f,
+    override val skewX: Float = 0f,
     /** The file name inside filesDir/media. Copied in, never referenced in place. */
     val path: String,
     /** True fills the frame and crops; false fits the whole photograph inside it. */
     val fill: Boolean = true,
+    /** Source-space crop; the full photograph is the default for older documents. */
+    val crop: ImageCrop = ImageCrop(),
     override val style: LayerStyle = LayerStyle(),
 ) : Layer
 
@@ -116,6 +171,7 @@ data class ModelLayer(
     override val h: Float,
     override val opacity: Float = 1f,
     override val rotation: Float = 0f,
+    override val skewX: Float = 0f,
     val scaleToUnits: Float = 1.0f,
     val asset: ModelAsset = ModelAsset.Gem,
     override val style: LayerStyle = LayerStyle(),
@@ -127,7 +183,12 @@ val Layer.kindLabel: String
         is TextLayer -> "TYPE / HARFBUZZ"
         is IconLayer -> "ICON / PATH PARSER"
         is ModelLayer -> "3D / ${asset.label.uppercase()}"
-        is ImageLayer -> if (fill) "PHOTO / FILL" else "PHOTO / FIT"
+        is ImageLayer -> when {
+            crop != ImageCrop() -> "PHOTO / CROP"
+            fill -> "PHOTO / FILL"
+            else -> "PHOTO / FIT"
+        }
+        is GroupLayer -> "GROUP / ${children.size} LAYERS"
     }
 
 val Layer.isVector: Boolean get() = this is VectorLayer
@@ -311,12 +372,53 @@ fun seedLayers(): List<Layer> = listOf(
     ),
 )
 
-class EngineDocument(initial: List<Layer>? = null) {
+class EngineDocument(
+    initial: List<Layer>? = null,
+    initialTexture: TextureSpec? = null,
+    initialTextureWarning: String? = null,
+    initialInk: List<TextureInk> = emptyList(),
+) {
     var layers by mutableStateOf(initial ?: seedLayers())
         private set
 
     var selectedId by mutableStateOf(initial?.firstOrNull()?.id ?: "vector-star")
     var selectedNodeId by mutableStateOf<String?>(null)
+
+    /** Everything selected at the current editing level; [selectedId] is the primary. */
+    var selectedIds by mutableStateOf(setOf(selectedId))
+        private set
+    /** The group whose children the stage edits; null means the artboard level. */
+    var editingGroupId by mutableStateOf<String?>(null)
+        private set
+
+    /** Parent-local motion paths, keyed by layer. A group carries them by matrix. */
+    var motion by mutableStateOf<Map<String, MotionPath>>(emptyMap())
+        private set
+
+    /** The one artboard-level material; null means clean paper. */
+    var texture by mutableStateOf(initialTexture)
+        private set
+    /** A saved texture that could not be regenerated, reported without blocking the page. */
+    var textureWarning by mutableStateOf(initialTextureWarning)
+        private set
+
+    /** Seeded material strokes, kept as recipes and normalized points, never bitmaps. */
+    var ink by mutableStateOf(initialInk)
+        private set
+    var inkMode by mutableStateOf(false)
+    var inkFamily by mutableStateOf(initialTexture?.family ?: TextureFamily.Brick)
+        private set
+    var inkSeed by mutableStateOf(initialTexture?.seed ?: TexturePresets.seedFor(TextureFamily.Brick))
+        private set
+    var inkWidth by mutableStateOf(0.075f)
+        private set
+    private var inkGestureStart: EditorSnapshot? = null
+
+    /** A preview only: the painter is displaced while this layer follows its path. */
+    var playingLayerId by mutableStateOf<String?>(null)
+        private set
+    var motionProgress by mutableStateOf(0f)
+        private set
     var tool by mutableStateOf(Tool.Select)
     var status by mutableStateOf("READY · SKIA ARTBOARD · 4,373 ICONS · FILAMENT 3D")
     var canUndo by mutableStateOf(false)
@@ -326,6 +428,9 @@ class EngineDocument(initial: List<Layer>? = null) {
 
     /** The clock time the last autosave finished, so the shell can say when. */
     var savedAt by mutableStateOf<String?>(null)
+        private set
+    /** Visible save state: SAVING…, SAVED hh:mm, or SAVE FAILED. */
+    var saveState by mutableStateOf("")
         private set
 
     /** Locked layers refuse every transform; the id lives here so layers stay data. */
@@ -369,11 +474,12 @@ class EngineDocument(initial: List<Layer>? = null) {
     /** Viewport zoom, 1.0 = fit. View state, but the recorder needs to see it. */
     var zoom by mutableStateOf(1f)
 
-    private val undoStack = ArrayDeque<List<Layer>>()
-    private val redoStack = ArrayDeque<List<Layer>>()
-    private var gestureStart: List<Layer>? = null
+    private val undoStack = ArrayDeque<EditorSnapshot>()
+    private val redoStack = ArrayDeque<EditorSnapshot>()
+    private var gestureStart: EditorSnapshot? = null
+    private var textEditAt = 0L
 
-    val selected: Layer? get() = layers.firstOrNull { it.id == selectedId }
+    val selected: Layer? get() = layers.flattenTree().firstOrNull { it.id == selectedId }
     val selectedVector: VectorLayer? get() = selected as? VectorLayer
     val selectedText: TextLayer? get() = selected as? TextLayer
     val selectedIcon: IconLayer? get() = selected as? IconLayer
@@ -383,6 +489,7 @@ class EngineDocument(initial: List<Layer>? = null) {
     val modelLayer: ModelLayer? get() = modelLayers.firstOrNull { it.visible }
 
     fun chooseTool(value: Tool) {
+        if (value != Tool.Select) inkMode = false
         tool = value
         when (value) {
             Tool.Icon -> {
@@ -413,9 +520,10 @@ class EngineDocument(initial: List<Layer>? = null) {
      */
     fun settle() {
         val wasEditing = editingModelId != null
-        val wasArmed = tool != Tool.Select || maskMode
+        val wasArmed = tool != Tool.Select || maskMode || inkMode
         editingModelId = null
         maskMode = false
+        inkMode = false
         tool = Tool.Select
         selectedNodeId = null
         status = when {
@@ -425,59 +533,501 @@ class EngineDocument(initial: List<Layer>? = null) {
         }
     }
 
-    fun select(id: String) {
-        if (layers.any { it.id == id }) {
-            if (editingModelId != null && editingModelId != id) editingModelId = null
-            selectedId = id
-            selectedNodeId = null
-            if (tool == Tool.Sticker) tool = Tool.Select
+    fun select(id: String, additive: Boolean = false) {
+        val target = layers.findLayer(id) ?: return
+        if (editingModelId != null && editingModelId != id) editingModelId = null
+        if (additive) {
+            selectedIds = if (id in selectedIds) selectedIds - id else selectedIds + id
+            if (selectedIds.isEmpty()) selectedIds = setOf(id)
+        } else {
+            selectedIds = setOf(id)
         }
+        selectedId = id
+        selectedNodeId = null
+        // Selecting a nested row edits at that row's level; there is no way to have a
+        // child selected while the stage still believes it is at the artboard.
+        editingGroupId = layers.parentGroup(id)?.id
+        if (tool == Tool.Sticker) tool = Tool.Select
     }
 
     /** Tapping bare stage returns to Create, so the deck is never a one-time screen. */
     fun clearSelection() {
         selectedId = ""
+        selectedIds = emptySet()
         selectedNodeId = null
         editingModelId = null
         status = "NOTHING SELECTED · TAP CREATE OR A LAYER"
+    }
+
+    // ------------------------------------------------------------------- groups
+
+    /** Enters the selected group so its children become the stage's editing level. */
+    fun enterGroup(): Boolean {
+        val group = selected as? GroupLayer ?: return false
+        editingGroupId = group.id
+        selectedIds = emptySet()
+        group.children.lastOrNull { it.visible }?.let { select(it.id) }
+        status = "GROUP ENTERED · ${group.name}"
+        return true
+    }
+
+    /** Leaves one group and selects the group that was left. */
+    fun exitGroup(): Boolean {
+        val id = editingGroupId ?: return false
+        val group = layers.findLayer(id) as? GroupLayer ?: return false
+        editingGroupId = layers.parentGroup(id)?.id
+        select(group.id)
+        status = "GROUP LEFT · ${group.name}"
+        return true
+    }
+
+    /** Repeated click: a child selects its parent, a group leaves the child level. */
+    fun selectParent(): Boolean {
+        val parent = layers.parentGroup(selectedId) ?: return false
+        if (editingGroupId == parent.id) editingGroupId = layers.parentGroup(parent.id)?.id
+        select(parent.id)
+        status = "SELECTED GROUP · ${parent.name}"
+        return true
+    }
+
+    /** Groups the selected siblings and returns the new group's id. */
+    fun groupSelection(): String? {
+        val (next, group) = layers.groupSelected(selectedIds) ?: run {
+            status = "SELECT TWO LAYERS TO GROUP"
+            return null
+        }
+        val movedPaths = motion.filterKeys { it in selectedIds }
+        act("GROUP", group.name)
+        commit { next }
+        // The children's paths were stored in the parent they just left; the group's
+        // local space is the only frame that keeps them on their layers now.
+        val inverse = group.localToWorld.inverse()
+        motion = if (inverse == null) {
+            motion - movedPaths.keys
+        } else {
+            motion + movedPaths.mapValues { (_, path) -> path.mapped(inverse) }
+        }
+        editingGroupId = null
+        selectedIds = setOf(group.id)
+        selectedId = group.id
+        status = "GROUPED · ${group.children.size} LAYERS"
+        return group.id
+    }
+
+    /** Ungroups the selected group and selects the children it released. */
+    fun ungroupSelection(): Boolean {
+        val group = selected as? GroupLayer ?: run {
+            status = "SELECT A GROUP TO UNGROUP"
+            return false
+        }
+        val next = layers.ungroupSelected(group.id) ?: return false
+        val releasedPaths = motion.filterKeys { id -> group.children.any { it.id == id } }
+        act("UNGROUP", group.name)
+        commit { next }
+        motion = (motion - group.id) + releasedPaths.mapValues { (_, path) ->
+            path.mapped(group.localToWorld)
+        }
+        if (editingGroupId == group.id) editingGroupId = null
+        val released = group.children.map { it.id }.filter { next.findLayer(it) != null }
+        selectedIds = released.toSet()
+        selectedId = released.lastOrNull().orEmpty()
+        status = "UNGROUPED · ${released.size} LAYERS"
+        return true
+    }
+
+    /** Drops a dragged row on a target row: into a group, or beside a sibling. */
+    fun dropLayer(draggedId: String, targetId: String): Boolean {
+        if (draggedId == targetId) return true
+        val dragged = layers.findLayer(draggedId) ?: return false
+        if (dragged is GroupLayer && dragged.children.flattenTree().any { it.id == targetId }) return false
+        val target = layers.findLayer(targetId) ?: return false
+        val targetParent = layers.parentGroup(targetId)
+        val intoGroup = target is GroupLayer
+        val newParent = if (intoGroup) target.id else targetParent?.id
+        val siblings = targetParent?.children ?: layers
+        val index = if (intoGroup) target.children.size else siblings.indexOfFirst { it.id == targetId }
+        val without = layers.removeLayer(draggedId).first
+        val next = without.insertLayer(newParent, index.coerceAtLeast(0), dragged)
+        if (next == layers) return true
+        act("MOVE", dragged.name)
+        commit { next }
+        editingGroupId = newParent
+        select(draggedId)
+        status = if (intoGroup) "MOVED INTO ${target.name}" else "LAYER REORDERED"
+        return true
+    }
+
+    // --------------------------------------------------------------- motion
+
+    /** Stores a world-space path in the layer's parent space, where it is kept. */
+    fun setMotionPath(layerId: String, path: MotionPath) {
+        if (layers.findLayer(layerId) == null) return
+        var local = path
+        layers.ancestors(layerId).asReversed().forEach { group ->
+            local = MotionAnchoring.intoGroup(local, group.localToWorld) ?: local
+        }
+        stopMotion()
+        commitMotion { it + (layerId to clampToParent(layerId, local)) }
+        status = "MOTION PATH · ${layers.findLayer(layerId)?.name ?: layerId}"
+    }
+
+    fun clearMotionPath(layerId: String) {
+        stopMotion()
+        commitMotion { it - layerId }
+    }
+
+    /** The path in artboard space, carried by every group that contains the layer. */
+    fun motionPathInWorld(layerId: String): MotionPath? {
+        val path = motion[layerId] ?: return null
+        return layers.motionInWorld(layerId, path)
+    }
+
+    /** Adds a cubic path at the layer's current centre. */
+    fun createMotionPath(layerId: String = selectedId) {
+        val (x, y) = worldCentre(layerId) ?: return
+        setMotionPath(layerId, EngineMotion.defaultPath(x, y))
+    }
+
+    fun playMotion(layerId: String = selectedId) {
+        if (!motion.containsKey(layerId)) {
+            status = "ADD A PATH FIRST"
+            return
+        }
+        playingLayerId = layerId
+        motionProgress = 0f
+        status = "PLAYING PATH · ${layers.findLayer(layerId)?.name ?: layerId}"
+    }
+
+    fun seekMotion(value: Float) {
+        motionProgress = value.coerceIn(0f, 1f)
+    }
+
+    fun stopMotion() {
+        if (playingLayerId == null && motionProgress == 0f) return
+        playingLayerId = null
+        motionProgress = 0f
+    }
+
+    /** Puts the start back on the layer centre without deleting the curve. */
+    fun resetMotionPath(layerId: String = selectedId) {
+        val layer = layers.findLayer(layerId) ?: return
+        val path = motion[layerId] ?: return
+        stopMotion()
+        commitMotion { it + (layerId to MotionAnchoring.anchoredTo(layer.centerX, layer.centerY, path)) }
+        status = "PATH RESET · ${layer.name}"
+    }
+
+    /** One rigid delta in the layer's parent space. A group transform never calls this. */
+    fun translateMotionPath(layerId: String, dx: Float, dy: Float) {
+        val path = motion[layerId] ?: return
+        motion = motion + (layerId to clampToParent(layerId, path.translated(dx, dy)))
+    }
+
+    /** The parent-space displacement the painter uses while previewing. */
+    fun motionOffset(layerId: String): Pair<Float, Float>? {
+        if (playingLayerId != layerId) return null
+        val path = motion[layerId] ?: return null
+        return EngineMotion.offset(path, motionProgress)
+    }
+
+    /** Moves one control dot. Index 0 is the start, which stays on the layer centre. */
+    fun setMotionPoint(layerId: String, index: Int, worldX: Float, worldY: Float) {
+        val layer = layers.findLayer(layerId) ?: return
+        val path = motion[layerId] ?: return
+        val (px, py) = parentPoint(layerId, worldX, worldY) ?: return
+        if (index == 0) {
+            updateLayer(layerId) {
+                it.withPosition(it.x + px - layer.centerX, it.y + py - layer.centerY)
+            }
+            return
+        }
+        val next = when (index) {
+            1 -> path.copy(c1 = MotionPoint(px, py))
+            2 -> path.copy(c2 = MotionPoint(px, py))
+            else -> path.copy(end = MotionPoint(px, py))
+        }
+        motion = motion + (layerId to clampToParent(layerId, next))
+    }
+
+    /** Maps an artboard point through every ancestor group, outermost first. */
+    private fun parentPoint(layerId: String, x: Float, y: Float): Pair<Float, Float>? {
+        var px = x
+        var py = y
+        layers.ancestors(layerId).asReversed().forEach { group ->
+            val inverse = group.localToWorld.inverse() ?: return null
+            val mapped = inverse.map(px, py)
+            px = mapped.first
+            py = mapped.second
+        }
+        return px to py
+    }
+
+    private fun clampToParent(layerId: String, path: MotionPath): MotionPath {
+        val parent = layers.parentGroup(layerId)
+        return if (parent == null) {
+            MotionAnchoring.clampedToArtboard(path)
+        } else {
+            MotionAnchoring.clampedToArtboard(path, parent.w, parent.h)
+        }
+    }
+
+    private fun commitMotion(transform: (Map<String, MotionPath>) -> Map<String, MotionPath>) {
+        val before = snapshot()
+        val next = transform(motion)
+        if (next == motion) return
+        motion = next
+        record(before)
+        pruneMotion()
+        syncHistory()
+    }
+
+    private fun pruneMotion() {
+        val ids = layers.flattenTree().map { it.id }.toSet()
+        motion = motion.filterKeys { it in ids }
+        if (playingLayerId != null && playingLayerId !in ids) stopMotion()
+    }
+
+    /** A layer's centre in artboard space, through every ancestor group. */
+    fun worldCentre(id: String): Pair<Float, Float>? {
+        val layer = layers.findLayer(id) ?: return null
+        var x = layer.centerX
+        var y = layer.centerY
+        layers.ancestors(id).forEach { group ->
+            val mapped = group.localToWorld.map(x, y)
+            x = mapped.first
+            y = mapped.second
+        }
+        return x to y
+    }
+
+    /** A layer's four corners in artboard space, through every ancestor group. */
+    fun worldCorners(id: String): List<Pair<Float, Float>>? {
+        val layer = layers.findLayer(id) ?: return null
+        val local = if (layer is GroupLayer) {
+            layer.worldCorners()
+        } else {
+            val matrix = layer.leafMatrix()
+            listOf(
+                matrix.map(-layer.w / 2f, -layer.h / 2f),
+                matrix.map(layer.w / 2f, -layer.h / 2f),
+                matrix.map(layer.w / 2f, layer.h / 2f),
+                matrix.map(-layer.w / 2f, layer.h / 2f),
+            )
+        }
+        var points = local
+        layers.ancestors(id).forEach { group ->
+            points = points.map { group.localToWorld.map(it.first, it.second) }
+        }
+        return points
     }
 
     fun selectNode(id: String?) {
         selectedNodeId = id
     }
 
-    fun layerAt(x: Float, y: Float): Layer? =
-        layers.asReversed().firstOrNull { layer ->
+    /**
+     * Topmost visible layer under the pointer at the current editing level. Inside a
+     * group the pointer is inverse-mapped into that group's space first, so a turned
+     * or skewed group resolves its children rather than their axis-aligned bounds.
+     */
+    fun layerAt(x: Float, y: Float): Layer? {
+        val scope = editingGroupId?.let { layers.findLayer(it) as? GroupLayer }
+        if (scope == null) return hitIn(layers, x, y)
+        val (lx, ly) = scope.localToWorld.inverse()?.map(x, y) ?: return null
+        return hitIn(scope.children, lx, ly)
+    }
+
+    private fun hitIn(list: List<Layer>, x: Float, y: Float): Layer? =
+        list.asReversed().firstOrNull { layer ->
             layer.visible && Geometry.contains(layer, x, y)
         }
 
     fun toggleVisibility(id: String) {
         // The layer list toggles rows that are not the selection, so the row travels
         // with the action; naming the selection sent the reader to the wrong layer.
-        val target = layers.firstOrNull { it.id == id }
-        act(if (target?.visible == true) "HIDE" else "SHOW", target?.name)
-        commit { layers ->
-            layers.map { layer -> if (layer.id == id) layer.withVisible(!layer.visible) else layer }
-        }
+        val target = layers.findLayer(id) ?: return
+        act(if (target.visible) "HIDE" else "SHOW", target.name)
+        commit { layerList -> layerList.mapLayer(id) { layer -> layer.withVisible(!layer.visible) } }
     }
 
     fun restoreLocked(ids: Set<String>) {
         lockedIds = ids
     }
 
+    /** Applies a family at its catalogue seed, which is the inspector's one-tap path. */
+    fun applyTexture(family: TextureFamily, seed: Int = TexturePresets.seedFor(family)) {
+        commitTexture(TextureSpec.create(family, seed))
+    }
+
+    /** Stores a full recipe and one undo step; null removes the artboard material. */
+    fun commitTexture(next: TextureSpec?) {
+        val clean = next?.let {
+            it.copy(
+                seed = it.seed,
+                opacity = if (it.opacity.isFinite()) it.opacity.coerceIn(0.02f, 1f) else it.family.defaultOpacity,
+                scale = if (it.scale.isFinite()) it.scale.coerceIn(0.25f, 4f) else 1f,
+            )
+        }
+        if (clean == texture) return
+        val before = snapshot()
+        texture = clean
+        textureWarning = null
+        action = if (clean == null) "TEXTURE OFF" else "TEXTURE"
+        actionSubject = clean?.family?.label
+        actionId++
+        record(before)
+        syncHistory()
+        status = if (clean == null) {
+            "ARTBOARD TEXTURE REMOVED"
+        } else {
+            "TEXTURE · ${clean.family.label} · SEED ${clean.seed}"
+        }
+    }
+
+    fun setTextureSeed(seed: Int) {
+        texture?.let { commitTexture(it.copy(seed = seed)) }
+    }
+
+    fun setTextureOpacity(value: Float) {
+        texture?.let { commitTexture(it.copy(opacity = value)) }
+    }
+
+    fun setTextureScale(value: Float) {
+        texture?.let { commitTexture(it.copy(scale = value)) }
+    }
+
+    fun removeTexture() = commitTexture(null)
+
+    // ------------------------------------------------------------- material ink
+
+    /**
+     * Arms a seeded material brush. The brush writes new strokes into the document;
+     * it does not alter or flatten any existing layer.
+     */
+    fun toggleInkMode() {
+        inkMode = !inkMode
+        if (inkMode) {
+            maskMode = false
+            tool = Tool.Select
+            inkFamily = texture?.family ?: inkFamily
+            inkSeed = texture?.seed ?: TexturePresets.seedFor(inkFamily)
+            TextureInkRenderer.prewarm(
+                TextureInk(
+                    id = "prewarm",
+                    recipe = TextureSpec(inkFamily, inkSeed, opacity = 0.72f),
+                    width = inkWidth,
+                    points = listOf(InkPoint(0.5f, 0.5f)),
+                ),
+            )
+            status = "MATERIAL INK · ${inkFamily.label} · DRAG ON THE STAGE"
+        } else {
+            status = "MATERIAL INK OFF · ${ink.size} STROKES KEPT"
+        }
+    }
+
+    fun chooseInkFamily(family: TextureFamily) {
+        inkFamily = family
+        inkSeed = TexturePresets.seedFor(family)
+        TextureInkRenderer.prewarm(
+            TextureInk(
+                id = "prewarm",
+                recipe = TextureSpec(family, inkSeed, opacity = 0.72f),
+                width = inkWidth,
+                points = listOf(InkPoint(0.5f, 0.5f)),
+            ),
+        )
+        status = "MATERIAL INK · ${family.label} · SEED $inkSeed"
+    }
+
+    fun setInkBrushWidth(value: Float) {
+        inkWidth = if (value.isFinite()) value.coerceIn(0.012f, 0.25f) else 0.075f
+    }
+
+    fun beginInkStroke(x: Float, y: Float) {
+        if (!inkMode) return
+        inkGestureStart = snapshot()
+        ink = ink + TextureInk.create(
+            id = newId("ink"),
+            family = inkFamily,
+            seed = inkSeed,
+            width = inkWidth,
+            point = InkPoint(x, y),
+        )
+        action = "MATERIAL INK"
+        actionSubject = inkFamily.label
+        actionId++
+        status = "MATERIAL INK · DRAWING ${inkFamily.label}"
+    }
+
+    fun extendInkStroke(x: Float, y: Float) {
+        val last = ink.lastOrNull() ?: return
+        val previous = last.points.lastOrNull()
+        if (previous != null && abs(previous.x - x) + abs(previous.y - y) < 0.003f) return
+        if (last.points.size >= TextureInk.MAX_POINTS) return
+        ink = ink.dropLast(1) + last.copy(points = last.points + InkPoint(x, y))
+    }
+
+    fun endInkStroke() {
+        val before = inkGestureStart ?: return
+        inkGestureStart = null
+        val current = ink.lastOrNull()
+        if (current == null || current.points.isEmpty()) {
+            ink = before.ink
+            return
+        }
+        if (ink != before.ink) {
+            record(before)
+            recentActions = (listOf("MATERIAL INK · ${current.recipe.family.label}") + recentActions).take(12)
+            syncHistory()
+        }
+        status = "MATERIAL INK · ${ink.size} STROKE${if (ink.size == 1) "" else "S"} · ${current.recipe.family.label}"
+    }
+
+    fun removeLastInk() {
+        if (ink.isEmpty()) return
+        val before = snapshot()
+        ink = ink.dropLast(1)
+        action = "INK REMOVE"
+        actionId++
+        record(before)
+        syncHistory()
+        status = "MATERIAL INK · ${ink.size} STROKE${if (ink.size == 1) "" else "S"}"
+    }
+
+    fun clearInk() {
+        if (ink.isEmpty()) return
+        val before = snapshot()
+        ink = emptyList()
+        action = "INK CLEAR"
+        actionId++
+        record(before)
+        syncHistory()
+        status = "MATERIAL INK CLEARED"
+    }
+
     /** Opens a stored document in place, with the history starting from it. */
     fun replaceAll(restored: DocumentCodec.Document) {
         layers = restored.layers
         selectedId = restored.selectedId ?: restored.layers.first().id
+        selectedIds = setOf(selectedId).filter { it.isNotBlank() }.toSet()
+        editingGroupId = restored.editingGroupId?.takeIf { layers.findLayer(it) is GroupLayer }
         zoom = restored.zoom
         lockedIds = restored.locked
+        texture = restored.texture
+        textureWarning = restored.textureWarning
+        ink = restored.ink
+        inkMode = false
+        motion = restored.motion.filterKeys { layers.findLayer(it) != null }
+        playingLayerId = null
+        motionProgress = 0f
         undoStack.clear()
         redoStack.clear()
+        gestureStart = null
         syncHistory()
         recentActions = emptyList()
         editingModelId = null
         selectedNodeId = null
-        status = "OPENED · ${layers.size} LAYERS"
+        status = restored.textureWarning?.let { "OPENED · $it" } ?: "OPENED · ${layers.size} LAYERS"
     }
 
     /** A fresh page, seeded like a first launch. */
@@ -489,7 +1039,7 @@ class EngineDocument(initial: List<Layer>? = null) {
     fun isLocked(id: String): Boolean = id in lockedIds
 
     fun toggleLock(id: String) {
-        val target = layers.firstOrNull { it.id == id } ?: return
+        val target = layers.findLayer(id) ?: return
         act(if (id in lockedIds) "UNLOCK" else "LOCK", target.name)
         lockedIds = if (id in lockedIds) lockedIds - id else lockedIds + id
         status = if (id in lockedIds) "LAYER LOCKED" else "LAYER UNLOCKED"
@@ -499,7 +1049,7 @@ class EngineDocument(initial: List<Layer>? = null) {
         val clean = name.trim().take(28)
         if (clean.isBlank()) return
         act("NAME", clean)
-        commit { layerList -> layerList.map { if (it.id == id) it.withName(clean) else it } }
+        commit { layerList -> layerList.mapLayer(id) { it.withName(clean) } }
         status = "RENAMED · $clean"
     }
 
@@ -513,6 +1063,23 @@ class EngineDocument(initial: List<Layer>? = null) {
         updateSelected { (it as? TextLayer)?.copy(lineHeight = value.coerceIn(0.7f, 1.6f)) ?: it }
     }
 
+    fun setFontFamily(family: String) {
+        val clean = family.trim().ifBlank { "Poppins" }
+        act("FONT", clean)
+        updateSelected { (it as? TextLayer)?.copy(fontFamily = clean) ?: it }
+        status = "TYPE · ${clean.uppercase()}"
+    }
+
+    fun setTracking(value: Float) {
+        act("TRACKING")
+        updateSelected { (it as? TextLayer)?.copy(tracking = value.coerceIn(-0.04f, 0.3f)) ?: it }
+    }
+
+    fun setTextCase(value: TextCase) {
+        act("CASE", value.name)
+        updateSelected { (it as? TextLayer)?.copy(textCase = value) ?: it }
+    }
+
     fun setFillHex(hex: String) {
         val clean = hex.removePrefix("#").trim()
         if (clean.length != 6) return
@@ -524,6 +1091,32 @@ class EngineDocument(initial: List<Layer>? = null) {
         act("PHOTO FIT")
         updateSelected { (it as? ImageLayer)?.copy(fill = fill) ?: it }
         status = if (fill) "PHOTO FILLS ITS FRAME" else "PHOTO FITS INSIDE ITS FRAME"
+    }
+
+    /**
+     * Stores a source-space crop. The inspector wraps a drag in beginGesture/endGesture,
+     * so one slider movement is one undo step; this setter itself does not push history,
+     * matching the other transform setters.
+     */
+    fun setImageCrop(layerId: String, crop: ImageCrop) {
+        val target = layers.findLayer(layerId) as? ImageLayer ?: return
+        val clean = crop.normalized()
+        if (clean == target.crop) return
+        act("CROP", target.name)
+        updateLayer(layerId) { (it as? ImageLayer)?.copy(crop = clean) ?: it }
+        status = "CROP · ${(clean.w * 100).toInt()} × ${(clean.h * 100).toInt()}%"
+    }
+
+    fun resetImageCrop(layerId: String) {
+        val target = layers.findLayer(layerId) as? ImageLayer ?: return
+        if (target.crop == ImageCrop()) return
+        act("CROP RESET", target.name)
+        commit { list ->
+            list.mapLayer(layerId) { layer ->
+                (layer as? ImageLayer)?.copy(crop = ImageCrop()) ?: layer
+            }
+        }
+        status = "CROP RESET · FULL PHOTO"
     }
 
     fun addImage(path: String) {
@@ -541,6 +1134,7 @@ class EngineDocument(initial: List<Layer>? = null) {
         )
         commit { it + layer }
         selectedId = id
+        selectedIds = setOf(id)
         selectedNodeId = null
         tool = Tool.Select
         status = "PHOTO PLACED · DRAG, PINCH OR TYPE A PLACE"
@@ -553,9 +1147,13 @@ class EngineDocument(initial: List<Layer>? = null) {
     fun moveSelectedSnapped(dx: Float, dy: Float, threshold: Float = 0.012f) {
         val current = selected ?: return
         if (isLocked(current.id)) return
-        val rawX = current.x + dx
-        val rawY = current.y + dy
-        val others = layers.filter { it.id != current.id && it.visible }
+        val (pdx, pdy) = parentDelta(dx, dy)
+        val rawX = current.x + pdx
+        val rawY = current.y + pdy
+        // Snap against siblings at this editing level, never against artboard layers
+        // while the pointer is inside a group.
+        val scope = editingGroupId?.let { layers.findLayer(it) as? GroupLayer }?.children ?: layers
+        val others = scope.filter { it.id != current.id && it.visible }
         val verticals = listOf(0f, 0.5f, 1f) +
             others.flatMap { listOf(it.x, it.x + it.w / 2f, it.x + it.w) }
         val horizontals = listOf(0f, 0.5f, 1f) +
@@ -595,16 +1193,18 @@ class EngineDocument(initial: List<Layer>? = null) {
     }
 
     fun beginGesture() {
-        if (gestureStart == null) gestureStart = layers
+        stopMotion()
+        if (gestureStart == null) gestureStart = snapshot()
     }
 
     fun endGesture() {
         guides = null
         val before = gestureStart ?: return
         gestureStart = null
-        if (before != layers) {
-            undoStack.addLast(before)
-            redoStack.clear()
+        val after = snapshot()
+        // A tap that only selects leaves no history entry and keeps redo alive.
+        if (before.layers != after.layers || before.motion != after.motion) {
+            record(before)
             syncHistory()
             status = "EDITED · UNDO READY"
         }
@@ -612,9 +1212,21 @@ class EngineDocument(initial: List<Layer>? = null) {
 
     fun moveSelected(dx: Float, dy: Float) {
         val current = selected ?: return
-        val nextX = (current.x + dx).coerceIn(-0.45f, 1.0f)
-        val nextY = (current.y + dy).coerceIn(-0.45f, 1.0f)
+        val (pdx, pdy) = parentDelta(dx, dy)
+        val nextX = (current.x + pdx).coerceIn(-0.45f, 1.0f)
+        val nextY = (current.y + pdy).coerceIn(-0.45f, 1.0f)
         updateLayer(current.id) { it.withPosition(nextX, nextY) }
+    }
+
+    /**
+     * A world-space drag becomes a parent-space delta. Inside a rotated or scaled
+     * group the pointer moves in artboard space, while the child is stored in the
+     * group's space; without this the child runs off at the group's angle.
+     */
+    private fun parentDelta(dx: Float, dy: Float): Pair<Float, Float> {
+        val parent = layers.parentGroup(selectedId) ?: return dx to dy
+        val inverse = parent.localToWorld.inverse() ?: return dx to dy
+        return inverse.mapVector(dx, dy)
     }
 
     fun movePoint(pointId: String, dx: Float, dy: Float) {
@@ -684,6 +1296,7 @@ class EngineDocument(initial: List<Layer>? = null) {
         )
         commit { it + layer }
         selectedId = id
+        selectedIds = setOf(id)
         // An add is a finished action, not an armed tool: the new line is selected and
         // ready to move. Leaving Type armed made every later tap feel like another add.
         tool = Tool.Select
@@ -707,6 +1320,7 @@ class EngineDocument(initial: List<Layer>? = null) {
         )
         commit { it + layer }
         selectedId = id
+        selectedIds = setOf(id)
         tool = Tool.Select
         status = "VECTOR ADDED · 3 NODES · DRAG TO PLACE"
     }
@@ -729,6 +1343,7 @@ class EngineDocument(initial: List<Layer>? = null) {
         )
         commit { it + layer }
         selectedId = id
+        selectedIds = setOf(id)
         selectedNodeId = null
         tool = Tool.Select
         status = "${preset.kind} ADDED · ${preset.label}"
@@ -750,6 +1365,7 @@ class EngineDocument(initial: List<Layer>? = null) {
         )
         commit { it + layer }
         selectedId = id
+        selectedIds = setOf(id)
         selectedNodeId = null
         tool = Tool.Select
         status = "ICON PLACED · ${glyph.brandLabel.ifBlank { glyph.brandSlug }} / ${glyph.name} · ${glyph.paths.size} PATHS"
@@ -771,6 +1387,7 @@ class EngineDocument(initial: List<Layer>? = null) {
         )
         commit { it + layer }
         selectedId = id
+        selectedIds = setOf(id)
         tool = Tool.Select
         status = "3D ADDED · ${asset.label.uppercase()} · DRAG TO PLACE"
     }
@@ -786,26 +1403,36 @@ class EngineDocument(initial: List<Layer>? = null) {
 
     fun duplicateSelected() {
         val layer = selected ?: return
+        val parent = layers.parentGroup(selectedId)
+        val siblings = parent?.children ?: layers
+        val index = siblings.indexOfFirst { it.id == selectedId }
         act("DUP")
         val copy = layer.duplicate()
-        commit { it + copy }
+        val next = layers.insertLayer(parent?.id, index + 1, copy)
+        commit { next }
+        selectedIds = setOf(copy.id)
         selectedId = copy.id
         selectedNodeId = null
         editingModelId = null
         status = when (copy) {
             is ModelLayer -> "3D LAYER DUPLICATED · ${modelLayers.size} VIEWPORTS"
             is IconLayer -> "ICON LAYER DUPLICATED"
+            is GroupLayer -> "GROUP DUPLICATED · ${copy.children.size} LAYERS"
             else -> "LAYER DUPLICATED"
         }
     }
 
     fun deleteSelected() {
         val id = selectedId
-        if (layers.size <= 1) return
-        act("DEL", selected?.name)
-        commit { layerList -> layerList.filterNot { it.id == id } }
+        val target = layers.findLayer(id) ?: return
+        val next = layers.removeLayer(id).first
+        if (next.flattenTree().isEmpty()) return
+        act("DEL", target.name)
+        commit { next }
         if (editingModelId == id) editingModelId = null
-        selectedId = layers.firstOrNull()?.id.orEmpty()
+        if (editingGroupId == id || layers.findLayer(editingGroupId.orEmpty()) == null) editingGroupId = null
+        selectedId = next.flattenTree().lastOrNull()?.id.orEmpty()
+        selectedIds = setOf(selectedId).filter { it.isNotBlank() }.toSet()
         selectedNodeId = null
         status = "LAYER DELETED"
     }
@@ -814,17 +1441,19 @@ class EngineDocument(initial: List<Layer>? = null) {
 
     /** Moves any row, because the layer list reorders in place and not only the selection. */
     fun moveLayer(id: String, delta: Int) {
-        val index = layers.indexOfFirst { it.id == id }
+        val parent = layers.parentGroup(id)
+        val siblings = parent?.children ?: layers
+        val index = siblings.indexOfFirst { it.id == id }
         if (index < 0) return
-        val target = (index + delta).coerceIn(0, layers.lastIndex)
+        val target = (index + delta).coerceIn(0, siblings.lastIndex)
         if (target == index) return
-        act(if (delta > 0) "FRONT" else "BACK", layers[index].name)
-        commit { layerList ->
-            layerList.toMutableList().also {
-                val moving = it.removeAt(index)
-                it.add(target, moving)
-            }
+        act(if (delta > 0) "FRONT" else "BACK", siblings[index].name)
+        val reordered = siblings.toMutableList().also {
+            val moving = it.removeAt(index)
+            it.add(target, moving)
         }
+        val next = layers.replaceChildren(parent?.id, reordered)
+        commit { next }
         status = if (delta > 0) "LAYER MOVED FORWARD" else "LAYER MOVED BACK"
     }
 
@@ -854,16 +1483,28 @@ class EngineDocument(initial: List<Layer>? = null) {
     }
 
     /** Called by the shell once the debounced write lands. */
+    fun markSaving() {
+        saveState = "SAVING…"
+    }
+
     fun markSaved(clock: String) {
         savedAt = clock
+        saveState = "SAVED $clock"
+    }
+
+    fun markSaveFailed() {
+        saveState = "SAVE FAILED"
+        status = "SAVE FAILED · the previous draft is untouched"
     }
 
     fun setText(value: String) {
+        recordTextEdit("TEXT")
         act("TEXT")
         updateSelected { (it as? TextLayer)?.copy(text = value) ?: it }
     }
 
     fun setFontSize(value: Float) {
+        recordTextEdit("TYPE SIZE")
         act("TYPE SIZE")
         updateSelected { (it as? TextLayer)?.copy(fontSize = value.coerceIn(18f, 180f)) ?: it }
     }
@@ -879,6 +1520,7 @@ class EngineDocument(initial: List<Layer>? = null) {
                     is IconLayer -> layer.copy(tint = color)
                     is ModelLayer -> layer
                     is ImageLayer -> layer
+                    is GroupLayer -> layer
                 }
             }
         }
@@ -1294,8 +1936,8 @@ class EngineDocument(initial: List<Layer>? = null) {
     fun undo() {
         val previous = undoStack.removeLastOrNull() ?: return
         act("UNDO")
-        redoStack.addLast(layers)
-        layers = previous
+        redoStack.addLast(snapshot())
+        restore(previous)
         ensureSelection()
         syncHistory()
         status = "UNDO · ${layers.size} LAYERS"
@@ -1304,8 +1946,9 @@ class EngineDocument(initial: List<Layer>? = null) {
     fun redo() {
         val next = redoStack.removeLastOrNull() ?: return
         act("REDO")
-        undoStack.addLast(layers)
-        layers = next
+        undoStack.addLast(snapshot())
+        while (undoStack.size > HISTORY_LIMIT) undoStack.removeFirst()
+        restore(next)
         ensureSelection()
         syncHistory()
         status = "REDO · ${layers.size} LAYERS"
@@ -1313,7 +1956,19 @@ class EngineDocument(initial: List<Layer>? = null) {
 
     fun updateLayer(id: String, transform: (Layer) -> Layer) {
         if (id in lockedIds) return
-        layers = layers.map { if (it.id == id) transform(it) else it }
+        stopMotion()
+        val before = layers.findLayer(id) ?: return
+        val next = layers.mapLayer(id, transform)
+        val after = next.findLayer(id) ?: return
+        val dx = after.centerX - before.centerX
+        val dy = after.centerY - before.centerY
+        if ((dx != 0f || dy != 0f) && motion.containsKey(id)) {
+            // The path lives in the layer's own parent space; a centre change there
+            // moves all four points by one delta. A group transform never lands here,
+            // because it does not rewrite the child's coordinates.
+            motion = motion + (id to clampToParent(id, motion.getValue(id).translated(dx, dy)))
+        }
+        layers = next
     }
 
     fun updateSelected(transform: (Layer) -> Layer) {
@@ -1325,19 +1980,74 @@ class EngineDocument(initial: List<Layer>? = null) {
     }
 
     private fun commit(transform: (List<Layer>) -> List<Layer>) {
-        undoStack.addLast(layers)
-        redoStack.clear()
-        layers = transform(layers)
+        val before = snapshot()
+        val next = transform(layers)
+        if (next == layers) return
+        layers = next
+        record(before)
         ensureSelection()
         syncHistory()
     }
 
-    private fun ensureSelection() {
-        if (layers.none { it.id == selectedId }) {
-            selectedId = layers.firstOrNull()?.id.orEmpty()
-            selectedNodeId = null
+    private fun snapshot(): EditorSnapshot = EditorSnapshot(
+        layers = layers,
+        motion = motion,
+        selectedIds = selectedIds,
+        selectedId = selectedId.ifBlank { null },
+        editingGroupId = editingGroupId,
+        zoom = zoom,
+        locked = lockedIds,
+        texture = texture,
+        ink = ink,
+    )
+
+    private fun restore(value: EditorSnapshot) {
+        layers = value.layers
+        motion = value.motion
+        selectedIds = value.selectedIds.filter { layers.findLayer(it) != null }.toSet()
+        selectedId = value.selectedId?.takeIf { layers.findLayer(it) != null }
+            ?: selectedIds.lastOrNull().orEmpty()
+        editingGroupId = value.editingGroupId?.takeIf { layers.findLayer(it) is GroupLayer }
+        zoom = value.zoom
+        lockedIds = value.locked
+        texture = value.texture
+        ink = value.ink
+        playingLayerId = null
+        motionProgress = 0f
+    }
+
+    private fun record(before: EditorSnapshot) {
+        undoStack.addLast(before)
+        while (undoStack.size > HISTORY_LIMIT) undoStack.removeFirst()
+        redoStack.clear()
+    }
+
+    /** A burst of typing is one undo step, not one entry per keystroke. */
+    private fun recordTextEdit(name: String) {
+        val now = EngineClock.nowMillis()
+        if (action == name && now - textEditAt <= TEXT_DEBOUNCE_MS) {
+            textEditAt = now
+            return
         }
-        if (layers.none { it.id == editingModelId }) editingModelId = null
+        record(snapshot())
+        syncHistory()
+        textEditAt = now
+    }
+
+    private fun ensureSelection() {
+        val all = layers.flattenTree()
+        val ids = all.map { it.id }.toSet()
+        selectedIds = selectedIds.filter { it in ids }.toSet()
+        // A missing layer clears the selection; it must not silently steal the first
+        // layer, which made a delete look like it had selected something else.
+        if (selectedId !in ids) selectedId = selectedIds.lastOrNull().orEmpty()
+        if (selectedId.isNotBlank() && selectedId !in selectedIds) selectedIds = selectedIds + selectedId
+        if (selectedIds.isEmpty()) selectedId = ""
+        if (all.none { it.id == editingModelId }) editingModelId = null
+        if (editingGroupId != null && layers.findLayer(editingGroupId!!) !is GroupLayer) {
+            editingGroupId = null
+        }
+        pruneMotion()
     }
 
     private fun syncHistory() {
@@ -1349,7 +2059,11 @@ class EngineDocument(initial: List<Layer>? = null) {
         action = name
         actionSubject = subject
         actionId++
-        recentActions = (listOfNotNull(subject?.let { "$name · $it" } ?: name) + recentActions).take(12)
+        // Undo is a navigation action, not a new edit. Repeating it should not fill
+        // the history sheet with five identical UNDO rows.
+        if (name != "UNDO" && name != "REDO") {
+            recentActions = (listOfNotNull(subject?.let { "$name · $it" } ?: name) + recentActions).take(12)
+        }
     }
 
     private fun newId(prefix: String) = "$prefix-${UUID.randomUUID().toString().take(6)}"
@@ -1361,6 +2075,7 @@ fun Layer.withStyle(value: LayerStyle): Layer = when (this) {
     is IconLayer -> copy(style = value)
     is ImageLayer -> copy(style = value)
     is ModelLayer -> copy(style = value)
+    is GroupLayer -> copy(style = value)
 }
 
 fun Layer.withPaint(value: PaintSpec?): Layer = when (this) {
@@ -1381,6 +2096,7 @@ private fun Layer.withName(value: String): Layer = when (this) {
     is IconLayer -> copy(name = value)
     is ModelLayer -> copy(name = value)
     is ImageLayer -> copy(name = value)
+    is GroupLayer -> copy(name = value)
 }
 
 private fun Layer.withVisible(value: Boolean): Layer = when (this) {
@@ -1389,6 +2105,7 @@ private fun Layer.withVisible(value: Boolean): Layer = when (this) {
     is TextLayer -> copy(visible = value)
     is IconLayer -> copy(visible = value)
     is ModelLayer -> copy(visible = value)
+    is GroupLayer -> copy(visible = value)
 }
 
 private fun Layer.withPosition(x: Float, y: Float): Layer = when (this) {
@@ -1397,6 +2114,7 @@ private fun Layer.withPosition(x: Float, y: Float): Layer = when (this) {
     is TextLayer -> copy(x = x, y = y)
     is IconLayer -> copy(x = x, y = y)
     is ModelLayer -> copy(x = x, y = y)
+    is GroupLayer -> copy(x = x, y = y)
 }
 
 private fun Layer.withOpacity(value: Float): Layer = when (this) {
@@ -1405,6 +2123,7 @@ private fun Layer.withOpacity(value: Float): Layer = when (this) {
     is TextLayer -> copy(opacity = value)
     is IconLayer -> copy(opacity = value)
     is ModelLayer -> copy(opacity = value)
+    is GroupLayer -> copy(opacity = value)
 }
 
 private fun Layer.duplicate(): Layer {
@@ -1416,6 +2135,15 @@ private fun Layer.duplicate(): Layer {
         is ImageLayer -> copy(id = copyId, name = "$name COPY", x = nx, y = ny)
         is TextLayer -> copy(id = copyId, name = "$name COPY", x = nx, y = ny)
         is IconLayer -> copy(id = copyId, name = "$name COPY", x = nx, y = ny)
+        is GroupLayer -> copy(
+            id = copyId,
+            name = "$name COPY",
+            x = nx,
+            y = ny,
+            children = children.map { child ->
+                child.deepCopy({ old -> "${old.substringBeforeLast('-')}-${UUID.randomUUID().toString().take(6)}" })
+            },
+        )
         is ModelLayer -> {
             val copyW = min(w, 0.30f)
             val copyH = min(h, 0.30f)

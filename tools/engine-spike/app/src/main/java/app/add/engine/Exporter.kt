@@ -63,6 +63,8 @@ object Exporter {
         typefaces: Typefaces,
         sceneViews: Map<String, SceneView?>,
         scale: Int = 1,
+        texture: TextureSpec? = null,
+        ink: List<TextureInk> = emptyList(),
     ): ExportResult {
         val factor = scale.coerceIn(1, 4)
         // A 2x export is the same page at twice the pixels: the painter draws in
@@ -95,7 +97,8 @@ object Exporter {
             captures[model.id] = bitmap
         }
         val images = layers.filterIsInstance<ImageLayer>().mapNotNull { layer ->
-            val bitmap = ImageStore.load(context, layer.path) ?: return@mapNotNull null
+            val bitmap = ImageStore.load(context, layer.path, ImageStore.EXPORT_MAX_PX)
+                ?: return@mapNotNull null
             layer.path to bitmap
         }.toMap()
         ArtboardPainter.draw(
@@ -105,6 +108,8 @@ object Exporter {
             captures,
             images,
             scale = factor.toFloat(),
+            texture = texture,
+            ink = ink,
         )
         captures.values.forEach { it.recycle() }
         val missing = visibleModels.count { it.id !in captures }

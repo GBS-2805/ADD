@@ -10,9 +10,11 @@ exists only to put the engine on a phone for review.
 bash tools/engine-review/build.sh
 ```
 
-The APK lands at `artifacts/engine-review/ADD-3.7-engine-review.apk`. It is a debug
-build, same applicationId (`app.offline.compress`) and version `3.7`, with a review-only
-versionCode (`48`), so it replaces an installed ADD copy. It uses the existing ADD signing key when
+The APK lands at `artifacts/engine-review/ADD-3.8.5-engine-review.apk`. It is a debug
+build, same applicationId (`app.offline.compress`) and version `3.8.5`, with a review-only
+versionCode (`55`), so it replaces an installed ADD copy. This build carries the Task 8
+procedural texture library and its TEXTURE inspector section, plus Material Ink and the
+recording-driven chrome fixes. It uses the existing ADD signing key when
 `$KEYSTORE` (or the default `$HOME/tools/compress-keystore.jks`) is present; without
 that key Gradle falls back to its debug key, which requires uninstalling ADD first.
 

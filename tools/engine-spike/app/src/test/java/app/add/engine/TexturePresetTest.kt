@@ -1,0 +1,146 @@
+package app.add.engine
+
+import org.junit.Assert.assertArrayEquals
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
+import org.junit.Test
+
+/**
+ * Task 8's contract is algorithmic, so every proof here uses the pure IntArray
+ * renderer. No Robolectric bitmap or device is involved in determinism.
+ */
+class TexturePresetTest {
+
+    @Test
+    fun tenFamiliesArePresentAndStable() {
+        assertEquals(10, TextureFamily.entries.size)
+        assertEquals(10, TexturePresets.presets.size)
+        assertEquals(TexturePresets.presets.map { it.id }.distinct().size, TexturePresets.presets.size)
+        TextureFamily.entries.forEach { family ->
+            assertEquals(family, TexturePresets.byId(family.id)?.kind)
+            assertTrue(TexturePresets.seedFor(family) != 0)
+        }
+    }
+
+    @Test
+    fun sameSeedProducesByteIdenticalPixelsForEveryFamily() {
+        TextureFamily.entries.forEach { family ->
+            val first = TexturePresets.render(family, seed = 4_242, width = 96, height = 120)
+            val second = TexturePresets.render(family, seed = 4_242, width = 96, height = 120)
+            assertEquals(96, first.width)
+            assertEquals(120, first.height)
+            assertArrayEquals("$family must be deterministic", first.argb, second.argb)
+        }
+    }
+
+    @Test
+    fun differentSeedsProduceVisiblyDifferentPixels() {
+        TextureFamily.entries.forEach { family ->
+            val a = TexturePresets.render(family, seed = 1_001, width = 96, height = 120)
+            val b = TexturePresets.render(family, seed = 9_001, width = 96, height = 120)
+            val changed = a.argb.indices.count { a.argb[it] != b.argb[it] }
+            assertTrue("$family should change with its seed, changed $changed px", changed > a.argb.size / 8)
+        }
+    }
+
+    @Test
+    fun sizeChangeResamplesTheFieldAtTheNewSizeAndNeverStretchesIt() {
+        TextureFamily.entries.forEach { family ->
+            val small = TexturePresets.render(family, seed = 77, width = 120, height = 150)
+            val large = TexturePresets.render(family, seed = 77, width = 240, height = 300)
+            assertEquals(120 * 150, small.argb.size)
+            assertEquals(240 * 300, large.argb.size)
+            assertEquals(240, large.width)
+            assertEquals(300, large.height)
+            assertTrue(small.argb.any { it ushr 24 != 0 })
+            assertTrue(large.argb.any { it ushr 24 != 0 })
+        }
+
+        // A nearest-neighbour upscale of the small field is what a stretched bitmap
+        // would look like. The large render must have new detail at most pixels, not
+        // the same pixel repeated into a bigger grid.
+        TextureFamily.entries.forEach { family ->
+            val small = TexturePresets.render(family, seed = 8, width = 120, height = 150)
+            val large = TexturePresets.render(family, seed = 8, width = 240, height = 300)
+            val repeated = IntArray(large.argb.size) { index ->
+                val x = index % large.width
+                val y = index / large.width
+                small.pixel(x * small.width / large.width, y * small.height / large.height)
+            }
+            val fresh = large.argb.indices.count { large.argb[it] != repeated[it] }
+            assertTrue("$family looks stretched ($fresh fresh pixels)", fresh > large.argb.size / 100)
+        }
+    }
+
+    @Test
+    fun dimensionGuardsReturnAValidRasterInsteadOfAnIndexBlowup() {
+        val zero = TexturePresets.render(TextureFamily.Brick, seed = 1, width = 0, height = -4)
+        assertEquals(1, zero.width)
+        assertEquals(1, zero.height)
+        assertEquals(1, zero.argb.size)
+
+        val huge = TexturePresets.render(TextureFamily.Concrete, seed = 2, width = 99_999, height = 99_999)
+        assertEquals(4_096, huge.width)
+        assertEquals(4_096, huge.height)
+        assertEquals(4_096 * 4_096, huge.argb.size)
+    }
+
+    @Test
+    fun everyFamilyUsesOnlyLocalProceduralPixels() {
+        // A rendered family must already contain varied material. There is no decode
+        // fallback, no resource id and no bitmap in TexturePixels.
+        TextureFamily.entries.forEach { family ->
+            val pixels = TexturePresets.render(family, seed = 5, width = 64, height = 80)
+            assertEquals(64 * 80, pixels.argb.size)
+            assertTrue("$family rendered a blank field", pixels.argb.distinct().size > 1)
+            assertTrue(pixels.argb.all { (it ushr 24) in 0..210 })
+        }
+    }
+
+    @Test
+    fun oneFamilyAtThePreviewFieldFitsTheFrameBudget() {
+        // The renderer caps a field at 240k pixels (about 300x400). The inspector
+        // asks for one family when the reader picks it, then the cache serves frames.
+        TextureFamily.entries.forEach { family ->
+            val started = System.nanoTime()
+            TexturePresets.render(family, TexturePresets.seedFor(family), 300, 375)
+            val elapsedMs = (System.nanoTime() - started) / 1_000_000.0
+            println("texture family=$family previewMs=$elapsedMs")
+            assertTrue("$family took ${elapsedMs}ms", elapsedMs < 16.0)
+        }
+    }
+
+    @Test
+    fun allTenFamilyThumbnailsWarmInsideOneFrame() {
+        // The shelf can describe all ten without decoding anything. This is the
+        // all-families cold measurement at a representative thumbnail field.
+        repeat(2) { pass ->
+            var checksum = 0
+            val started = System.nanoTime()
+            TextureFamily.entries.forEach { family ->
+                checksum += TexturePresets.render(
+                    family,
+                    TexturePresets.seedFor(family) + pass,
+                    96,
+                    120,
+                ).argb[0]
+            }
+            val elapsedMs = (System.nanoTime() - started) / 1_000_000.0
+            println("texture ten-family thumbnails pass=$pass elapsedMs=$elapsedMs checksum=$checksum")
+            assertTrue("ten thumbnails took ${elapsedMs}ms", elapsedMs < 16.0)
+        }
+    }
+
+    @Test
+    fun tenFamilyColdWarmIsBoundedEvenAtTheOldPreviewSize() {
+        // A full ten-family warm at 180x225 is intentionally off the frame path. It
+        // stays bounded and is the number recorded in the status notes.
+        val started = System.nanoTime()
+        TextureFamily.entries.forEach { family ->
+            TexturePresets.render(family, TexturePresets.seedFor(family), 180, 225)
+        }
+        val elapsedMs = (System.nanoTime() - started) / 1_000_000.0
+        println("texture ten-family 180x225 warmMs=$elapsedMs")
+        assertTrue("ten-family warm took ${elapsedMs}ms", elapsedMs < 100.0)
+    }
+}

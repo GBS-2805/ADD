@@ -56,6 +56,11 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -99,9 +104,13 @@ internal fun StyleTab(
         StudioSectionLabel("STYLE", layer.kindLabel)
         Spacer(Modifier.height(6.dp))
         LayerIdentityRow(doc, layer)
-        Spacer(Modifier.height(8.dp))
-        MaskCallout(doc, layer, onMask)
-        Spacer(Modifier.height(12.dp))
+        if (layer is TextLayer) {
+            Spacer(Modifier.height(10.dp))
+            StudioSectionLabel("TYPE", "Words and rhythm")
+            Spacer(Modifier.height(4.dp))
+            TextInspector(doc, layer)
+        }
+        Spacer(Modifier.height(10.dp))
         StudioSectionLabel("TRANSFORM", "Move it, size it, turn it")
         Spacer(Modifier.height(2.dp))
         TransformInspector(doc, layer)
@@ -112,11 +121,7 @@ internal fun StyleTab(
                 Spacer(Modifier.height(4.dp))
                 VectorInspector(doc, layer)
             }
-            is TextLayer -> {
-                StudioSectionLabel("TYPE", "Words and rhythm")
-                Spacer(Modifier.height(4.dp))
-                TextInspector(doc, layer)
-            }
+            is TextLayer -> Unit
             is IconLayer -> {
                 StudioSectionLabel("ICON", "Tint and path")
                 Spacer(Modifier.height(4.dp))
@@ -127,12 +132,23 @@ internal fun StyleTab(
                 Spacer(Modifier.height(4.dp))
                 ModelInspector(doc, layer, handle, onEdit3D = onTurn3D)
             }
+            is GroupLayer -> {
+                StudioSectionLabel("GROUP", "${layer.children.size} layers move together")
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    "Tap ENTER GROUP to edit a child. UNGROUP returns every child to the artboard with its geometry intact.",
+                    color = Dim,
+                    fontSize = 9.sp,
+                )
+            }
             is ImageLayer -> {
                 StudioSectionLabel("PHOTO", "Fill the frame")
                 Spacer(Modifier.height(4.dp))
                 ImageInspector(doc, layer)
             }
         }
+        Spacer(Modifier.height(10.dp))
+        MaskCallout(doc, layer, onMask)
         Spacer(Modifier.height(10.dp))
         PaintAndBlend(doc, layer)
         Spacer(Modifier.height(24.dp))
@@ -774,9 +790,11 @@ internal fun LayersTab(doc: EngineDocument, modifier: Modifier = Modifier) {
     val threshold = with(density) { 42.dp.toPx() }
     var draggingId by remember { mutableStateOf<String?>(null) }
     var carried by remember { mutableFloatStateOf(0f) }
+    var expanded by remember { mutableStateOf(emptySet<String>()) }
     val selected = doc.selected
+    val rows = doc.layers.visibleRows(expanded)
     Column(modifier.padding(horizontal = 14.dp, vertical = 12.dp)) {
-        StudioSectionLabel("YOUR STACK", "${doc.layers.size}")
+        StudioSectionLabel("YOUR STACK", "${rows.size}")
         Spacer(Modifier.height(3.dp))
         Text("Front of the page is at the top. Hold a card to move it.", color = Dim, fontSize = 10.sp)
         Spacer(Modifier.height(8.dp))
@@ -784,16 +802,24 @@ internal fun LayersTab(doc: EngineDocument, modifier: Modifier = Modifier) {
             modifier = Modifier.weight(1f).verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(6.dp),
         ) {
-            doc.layers.asReversed().forEach { layer ->
+            rows.forEach { row ->
+                val layer = row.layer
                 key(layer.id) {
                     LayerCard(
                         layer = layer,
-                        selected = layer.id == doc.selectedId,
+                        selected = layer.id in doc.selectedIds,
+                        depth = row.depth,
+                        expanded = layer.id in expanded,
                         dragging = draggingId == layer.id,
                         onSelect = {
                             doc.select(layer.id)
                             haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                         },
+                        onToggleExpand = if (layer is GroupLayer) {
+                            {
+                                expanded = if (layer.id in expanded) expanded - layer.id else expanded + layer.id
+                            }
+                        } else null,
                         onVisibility = { doc.toggleVisibility(layer.id) },
                         onDragStart = {
                             draggingId = layer.id
@@ -844,8 +870,11 @@ internal fun LayersTab(doc: EngineDocument, modifier: Modifier = Modifier) {
 private fun LayerCard(
     layer: Layer,
     selected: Boolean,
+    depth: Int,
+    expanded: Boolean,
     dragging: Boolean,
     onSelect: () -> Unit,
+    onToggleExpand: (() -> Unit)?,
     onVisibility: () -> Unit,
     onDragStart: () -> Unit,
     onDrag: (Float) -> Unit,
@@ -861,11 +890,16 @@ private fun LayerCard(
         contentPadding = PaddingValues(horizontal = 9.dp, vertical = 8.dp),
         modifier = Modifier
             .fillMaxWidth()
+            .padding(start = (depth * 14).dp)
             .offset(y = if (selected) (-2).dp else 0.dp)
             .graphicsLayer {
                 translationX = if (dragging) 5.dp.toPx() else 0f
             }
             .testTag("layer-${layer.id}")
+            .semantics {
+                this.selected = selected
+                contentDescription = "${layer.name}, ${layer.kindLabel}"
+            }
             .pointerInput(layer.id) {
                 detectDragGesturesAfterLongPress(
                     onDragStart = { onDragStart() },
@@ -880,13 +914,30 @@ private fun LayerCard(
         contentAlignment = Alignment.CenterStart,
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
+            if (onToggleExpand != null) {
+                TactileBox(
+                    onClick = onToggleExpand,
+                    shape = CircleShape,
+                    background = Color.Transparent,
+                    modifier = Modifier
+                        .testTag("layer-expand-${layer.id}")
+                        .semantics {
+                            contentDescription = if (expanded) "Collapse ${layer.name}" else "Expand ${layer.name}"
+                            role = Role.Button
+                        },
+                ) {
+                    Text(if (expanded) "▾" else "▸", color = StudioOutline.copy(alpha = 0.6f), fontSize = 14.sp)
+                }
+            } else {
+                Spacer(Modifier.width(6.dp))
+            }
             Box(
                 modifier = Modifier.size(38.dp).clip(RoundedCornerShape(12.dp)).background(layerStickerWash(layer)),
                 contentAlignment = Alignment.Center,
             ) {
                 Text(layerGlyph(layer), color = layerStickerInk(layer), fontSize = 18.sp, fontWeight = FontWeight.Bold)
             }
-            Spacer(Modifier.width(9.dp))
+            Spacer(Modifier.width(7.dp))
             Column(Modifier.weight(1f)) {
                 Text(
                     layer.name,
@@ -908,7 +959,12 @@ private fun LayerCard(
                 onClick = onVisibility,
                 shape = CircleShape,
                 background = StudioOutline.copy(alpha = 0.05f),
-                modifier = Modifier.size(38.dp).testTag("layer-vis-${layer.id}"),
+                modifier = Modifier
+                    .testTag("layer-vis-${layer.id}")
+                    .semantics {
+                        contentDescription = if (layer.visible) "Hide ${layer.name}" else "Show ${layer.name}"
+                        role = Role.Button
+                    },
             ) {
                 Text(if (layer.visible) "◉" else "○", color = if (layer.visible) Mint else StudioOutline.copy(alpha = 0.35f), fontSize = 15.sp)
             }

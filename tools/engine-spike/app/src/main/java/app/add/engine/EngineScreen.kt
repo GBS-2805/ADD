@@ -1,5 +1,6 @@
 package app.add.engine
 
+import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -14,6 +15,7 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
@@ -60,6 +62,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusProperties
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -98,11 +103,13 @@ fun EngineScreen() {
     BootTrace.mark(context, "engine screen composed")
     val restored = remember { DocumentStore.restore(context) }
     val doc = remember {
-        EngineDocument(restored?.layers).also { document ->
+        EngineDocument(restored?.layers, restored?.texture, restored?.textureWarning, restored?.ink ?: emptyList()).also { document ->
             restored?.let {
                 (it.selectedId ?: it.layers.firstOrNull()?.id)?.let { id -> document.select(id) }
                 document.zoom = it.zoom
-                document.status = "RESTORED · ${it.layers.size} LAYERS"
+                document.status = it.textureWarning?.let { warning ->
+                    "RESTORED · $warning"
+                } ?: "RESTORED · ${it.layers.size} LAYERS"
             }
         }
     }
@@ -124,15 +131,33 @@ fun EngineScreen() {
             }
         }
     }
-    LaunchedEffect(doc.layers, doc.zoom) {
-        delay(700)
-        DocumentStore.save(context, doc)
-        doc.markSaved(SimpleDateFormat("HH:mm", Locale.UK).format(Date(EngineClock.nowMillis())))
+    LaunchedEffect(
+        doc.layers,
+        doc.motion,
+        doc.zoom,
+        doc.selectedIds,
+        doc.editingGroupId,
+        doc.lockedIds,
+        doc.texture,
+        doc.ink,
+    ) {
+        doc.markSaving()
+        delay(300)
+        if (DocumentStore.save(context, doc)) {
+            doc.markSaved(SimpleDateFormat("HH:mm", Locale.UK).format(Date(EngineClock.nowMillis())))
+        } else {
+            doc.markSaveFailed()
+        }
     }
     val sceneHandles = remember { mutableMapOf<String, SceneHandle>() }
     // The layer cache holds phone-sized bitmaps; let them go with the screen.
     DisposableEffect(Unit) {
-        onDispose { clearLayerBitmapCache() }
+        onDispose {
+            // Flush on pause without waiting for the debounce, then release bitmaps.
+            DocumentStore.save(context, doc)
+            clearLayerBitmapCache()
+            TextureRenderer.clear()
+        }
     }
     val fallbackHandle = remember { SceneHandle() }
     fun handleFor(layer: ModelLayer?): SceneHandle =
@@ -143,7 +168,8 @@ fun EngineScreen() {
     // Photos are copied in, then decoded once and handed to the painter as a map.
     val images = remember(doc.layers) {
         doc.layers.filterIsInstance<ImageLayer>().mapNotNull { layer ->
-            ImageStore.load(context, layer.path)?.let { layer.path to it }
+            ImageStore.load(context, layer.path, ImageStore.PREVIEW_MAX_PX)
+                ?.let { layer.path to it }
         }.toMap()
     }
     BootTrace.mark(context, "document, typefaces and photos ready")
@@ -173,6 +199,9 @@ fun EngineScreen() {
     var libraryKey by remember { mutableStateOf(0) }
     var exportScale by remember { mutableStateOf(1) }
     var notice by remember { mutableStateOf<String?>(null) }
+    val stageFocus = remember { FocusRequester() }
+    val toolbarFocus = remember { FocusRequester() }
+    val sheetFocus = remember { FocusRequester() }
     val reduceMotion = prefersReducedMotion()
     // Every add ends in a commit whose action names the control (TYPE+, 3D+, ICON+ …).
     // The badge below the stage turns that into a place to settle instead of a mode the
@@ -189,7 +218,7 @@ fun EngineScreen() {
     val dialogOpen = showInfo || showDiagnostics || showIcons || showLegend ||
         showHistory || showExport || showLibrary || showAdd
     BackHandler(enabled = dialogOpen || sheet || doc.editingModelId != null ||
-        doc.tool != Tool.Select || doc.maskMode) {
+        doc.tool != Tool.Select || doc.maskMode || doc.inkMode) {
         when {
             showAdd -> showAdd = false
             showIcons -> showIcons = false
@@ -229,8 +258,11 @@ fun EngineScreen() {
                         context, doc.layers, typefaces,
                         doc.modelLayers.associate { it.id to handleFor(it).view },
                         scale,
+                        doc.texture,
+                        doc.ink,
                     )
                     doc.status = result.status
+                    Toast.makeText(context, result.status, Toast.LENGTH_SHORT).show()
                     Diagnostics.note(
                         "export " + result.width + " × " + result.height +
                             " · " + result.bytes + " bytes" +
@@ -241,6 +273,7 @@ fun EngineScreen() {
                     )
                 } catch (error: Exception) {
                     doc.status = "EXPORT FAILED · ${error.message ?: "unknown error"}"
+                    Toast.makeText(context, doc.status, Toast.LENGTH_LONG).show()
                     Diagnostics.note("export failed · ${error.message ?: error.javaClass.simpleName}")
                 } finally {
                     doc.exporting = false
@@ -262,6 +295,8 @@ fun EngineScreen() {
                 notice = null
             },
             sheetOpen = sheet,
+            focusRequester = stageFocus,
+            nextFocus = toolbarFocus,
             modifier = Modifier.fillMaxSize(),
         )
         if (chrome) {
@@ -273,9 +308,15 @@ fun EngineScreen() {
                     sheet = false
                     showExport = true
                 },
+                onExportScale = { scale ->
+                    sheet = false
+                    exportArtboard(scale)
+                },
                 onInfo = { showInfo = true },
                 onLegend = { showLegend = true },
                 modifier = Modifier.align(Alignment.TopCenter).padding(top = 6.dp, start = 8.dp, end = 8.dp),
+                focusRequester = toolbarFocus,
+                nextFocus = if (sheet) sheetFocus else null,
             )
         } else {
             StudioPeek(
@@ -313,7 +354,7 @@ fun EngineScreen() {
                     onClick = { showAdd = true },
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 8.dp),
                 )
-            } else if (!doc.maskMode && doc.editingModelId == null && notice == null) {
+            } else if (!doc.maskMode && !doc.inkMode && doc.editingModelId == null && notice == null) {
                 ObjectBar(
                     doc = doc,
                     onOpen = { next ->
@@ -360,6 +401,7 @@ fun EngineScreen() {
                     notice = null
                     chrome = true
                 },
+                focusRequester = sheetFocus,
             )
         }
         AnimatedVisibility(
@@ -385,6 +427,19 @@ fun EngineScreen() {
                     sheet = true
                 },
             )
+        }
+        AnimatedVisibility(
+            visible = doc.inkMode && !sheet,
+            enter = slideInVertically(
+                initialOffsetY = { it / 2 },
+                animationSpec = if (reduceMotion) tween(0) else spring(dampingRatio = 0.78f, stiffness = 420f),
+            ) + fadeIn(tween(if (reduceMotion) 0 else 140)),
+            exit = slideOutVertically(targetOffsetY = { it / 2 }) + fadeOut(tween(if (reduceMotion) 0 else 110)),
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(horizontal = 8.dp, vertical = 8.dp),
+        ) {
+            InkHud(doc = doc, onDone = { doc.settle() })
         }
         AnimatedVisibility(
             visible = doc.maskMode && !sheet,
@@ -564,7 +619,7 @@ private fun TopBar(
             onClick = onExport,
         )
         Spacer(Modifier.width(4.dp))
-        if (doc.tool != Tool.Select || doc.editingModelId != null || doc.maskMode) {
+        if (doc.tool != Tool.Select || doc.editingModelId != null || doc.maskMode || doc.inkMode) {
             DonePill("DONE") { doc.settle() }
         } else {
             ActionChip(label = "?", enabled = true, onClick = onLegend)
@@ -687,6 +742,11 @@ private fun ToolPill(doc: EngineDocument, onIcons: () -> Unit, onAdd: () -> Unit
     }
 }
 
+private fun List<Layer>.rendersSomething(): Boolean = any { layer ->
+    layer.visible && layer.opacity > 0f &&
+        (layer !is GroupLayer || layer.children.rendersSomething())
+}
+
 @Composable
 private fun Stage(
     doc: EngineDocument,
@@ -695,11 +755,18 @@ private fun Stage(
     images: Map<String, android.graphics.Bitmap>,
     onCanvasTouch: () -> Unit,
     sheetOpen: Boolean = false,
+    focusRequester: FocusRequester? = null,
+    nextFocus: FocusRequester? = null,
     modifier: Modifier = Modifier,
 ) {
     val haptics = LocalHapticFeedback.current
     BoxWithConstraints(
-        modifier = modifier.fillMaxSize(),
+        modifier = modifier
+            .fillMaxSize()
+            .then(if (focusRequester != null) Modifier.focusRequester(focusRequester) else Modifier)
+            .focusable()
+            .focusProperties { if (nextFocus != null) next = nextFocus }
+            .testTag("engine-stage"),
         contentAlignment = Alignment.Center,
     ) {
         val fitWidth: Dp = minOf(maxWidth, maxHeight * 0.8f)
@@ -799,6 +866,31 @@ contentAlignment = Alignment.Center,
         // inspector can never be eaten by the model it is inspecting.
         val models = doc.modelLayers.filter { it.visible && !sheetOpen }
         val editing = doc.editingModel
+        val playingId = doc.playingLayerId
+        val motionOffsets = playingId
+            ?.let { id -> doc.motionOffset(id)?.let { mapOf(id to it) } }
+            ?: emptyMap()
+        val stageContext = LocalContext.current
+        LaunchedEffect(playingId) {
+            val id = playingId ?: return@LaunchedEffect
+            val path = doc.motionPathInWorld(id) ?: return@LaunchedEffect
+            val durationScale = EngineMotion.durationScale(stageContext)
+            if (durationScale <= 0f) {
+                doc.seekMotion(1f)
+                return@LaunchedEffect
+            }
+            val started = EngineClock.nowMillis()
+            while (doc.playingLayerId == id) {
+                val progress = EngineMotion.progress(
+                    EngineClock.nowMillis() - started,
+                    path.durationMs,
+                    durationScale,
+                )
+                doc.seekMotion(progress)
+                if (progress >= 1f) break
+                withFrameNanos { }
+            }
+        }
 
             Box(
                 modifier = Modifier
@@ -812,7 +904,7 @@ contentAlignment = Alignment.Center,
             Canvas(
                 modifier = Modifier
                     .matchParentSize()
-                    .pointerInput(doc.tool, doc.selectedId, doc.maskMode, scale, hitX, hitY, insetX, insetY) {
+                    .pointerInput(doc.tool, doc.selectedId, doc.maskMode, doc.inkMode, scale, hitX, hitY, insetX, insetY) {
                         awaitEachGesture {
                             val down = awaitFirstDown(requireUnconsumed = false)
                             onCanvasTouch()
@@ -822,6 +914,10 @@ contentAlignment = Alignment.Center,
                             val handle = selectedAtDown
                                 ?.takeIf { it !is ModelLayer }
                                 ?.let { Geometry.nearestHandle(it, nx, ny, hitX, hitY, insetX, insetY) }
+                            val motionPath = selectedAtDown?.let { doc.motionPathInWorld(it.id) }
+                            val motionHandle = motionPath?.let {
+                                EngineMotion.nearestHandle(it, nx, ny, hitX, hitY)
+                            }
                             val startX = nx
                             val startY = ny
                             var mode = "none"
@@ -831,6 +927,27 @@ contentAlignment = Alignment.Center,
                             var startDistance = 0f
                             var hitLayer: Layer? = null
                             var moved = false
+                            var lastMotionX = nx
+                            var lastMotionY = ny
+
+                            // Material ink owns the drag while the seeded brush is armed.
+                            // It writes a new document stroke; it never moves a layer.
+                            if (doc.inkMode) {
+                                doc.beginInkStroke(nx, ny)
+                                while (true) {
+                                    val event = awaitPointerEvent()
+                                    if (event.changes.count { it.pressed } > 1) break
+                                    val change = event.changes.firstOrNull { it.id == down.id } ?: break
+                                    if (!change.pressed) break
+                                    nx = (change.position.x / scale) / ArtboardPainter.W
+                                    ny = (change.position.y / scale) / ArtboardPainter.H
+                                    doc.extendInkStroke(nx, ny)
+                                    change.consume()
+                                }
+                                doc.endInkStroke()
+                                Diagnostics.endGesture(doc, "INK", doc.inkFamily.label, startX, startY, nx, ny)
+                                return@awaitEachGesture
+                            }
 
                             // Mask painting owns the drag before any transform handle does:
                             // while the brush is armed the stage writes mask strokes, not moves.
@@ -856,7 +973,14 @@ contentAlignment = Alignment.Center,
                                 return@awaitEachGesture
                             }
 
-                            if (handle != null && selectedAtDown != null) {
+                            if (motionHandle != null && selectedAtDown != null) {
+                                doc.beginGesture()
+                                startLayer = selectedAtDown
+                                mode = "motion"
+                                subject = "${selectedAtDown.name} path dot $motionHandle"
+                                haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                                doc.select(selectedAtDown.id)
+                            } else if (handle != null && selectedAtDown != null) {
                                 doc.beginGesture()
                                 startLayer = selectedAtDown
                                 startAngle = Geometry.angle(selectedAtDown.centerX, selectedAtDown.centerY, nx, ny)
@@ -903,6 +1027,16 @@ contentAlignment = Alignment.Center,
                                 val dx = (change.position.x - change.previousPosition.x) / scale / ArtboardPainter.W
                                 val dy = (change.position.y - change.previousPosition.y) / scale / ArtboardPainter.H
                                 when (mode) {
+                                    "motion" -> {
+                                        val subjectLayer = startLayer
+                                        if (subjectLayer != null && motionHandle != null) {
+                                            if (motionHandle == 0) {
+                                                doc.moveSelected(nx - lastMotionX, ny - lastMotionY)
+                                            } else {
+                                                doc.setMotionPoint(subjectLayer.id, motionHandle, nx, ny)
+                                            }
+                                        }
+                                    }
                                     "move" -> doc.moveSelectedSnapped(dx, dy)
                                     "node" -> doc.selectedNodeId?.let { doc.movePointLocal(it, dx, dy) }
                                     "rotate" -> {
@@ -924,13 +1058,23 @@ contentAlignment = Alignment.Center,
                                         }
                                     }
                                 }
+                                lastMotionX = nx
+                                lastMotionY = ny
                                 change.consume()
                             }
                             doc.endGesture()
-                            // An empty tap is the way back to the Create deck. A dragged
-                            // empty gesture is still a miss, not a deselect, so a reader
-                            // cannot lose the selection while trying to move it.
-                            if (handle == null && hitLayer == null && !moved &&
+                            // Tap arbitration on the tree: a second tap on the selected
+                            // group enters it; bare space inside a group leaves one level;
+                            // bare space at the top still returns to the Create deck.
+                            if (!moved && handle == null && motionHandle == null && hitLayer is GroupLayer &&
+                                hitLayer.id == selectedAtDown?.id
+                            ) {
+                                doc.enterGroup()
+                            } else if (!moved && handle == null && motionHandle == null && hitLayer == null &&
+                                doc.editingGroupId != null && doc.tool == Tool.Select && !doc.maskMode
+                            ) {
+                                doc.exitGroup()
+                            } else if (handle == null && motionHandle == null && hitLayer == null && !moved &&
                                 doc.tool == Tool.Select && !doc.maskMode
                             ) {
                                 doc.clearSelection()
@@ -949,9 +1093,12 @@ contentAlignment = Alignment.Center,
                         doc.layers,
                         typefaces,
                         images = images,
+                        motionOffsets = motionOffsets,
                         safeArea = doc.safeArea,
                         scale = scale,
                         preview = true,
+                        texture = doc.texture,
+                        ink = doc.ink,
                     )
                     restore()
                 }
@@ -989,7 +1136,45 @@ contentAlignment = Alignment.Center,
                         inset = inset,
                         showRotate = !isModel,
                     )
+                    doc.motionPathInWorld(selected.id)?.let { path ->
+                        ArtboardPainter.drawMotionPath(this, path, scale)
+                    }
                     restore()
+                }
+            }
+
+            if (!doc.layers.rendersSomething()) {
+                // Never leave a cream rectangle with no explanation. This is the
+                // explicit state for an empty document or a stack with every eye off.
+                Column(
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                        .padding(18.dp)
+                        .clip(RoundedCornerShape(14.dp))
+                        .background(Forest.copy(alpha = 0.94f))
+                        .border(1.dp, Mint.copy(alpha = 0.4f), RoundedCornerShape(14.dp))
+                        .padding(horizontal = 18.dp, vertical = 14.dp)
+                        .testTag("stage-empty"),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    Text(
+                        if (doc.layers.isEmpty()) "EMPTY PAGE" else "NOTHING VISIBLE",
+                        color = Cream,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 1.sp,
+                    )
+                    Spacer(Modifier.height(4.dp))
+                    Text(
+                        if (doc.layers.isEmpty()) {
+                            "Tap + to add a layer."
+                        } else {
+                            "Layers are on the page. Open LAYERS and enable one."
+                        },
+                        color = Dim,
+                        fontSize = 10.sp,
+                        lineHeight = 13.sp,
+                    )
                 }
             }
 
@@ -1131,7 +1316,7 @@ contentAlignment = Alignment.Center,
             }
         }
 
-        if (!sheetOpen && !doc.maskMode && doc.editingModelId == null) {
+        if (!sheetOpen && !doc.maskMode && !doc.inkMode && doc.editingModelId == null) {
             ZoomPill(
                 zoom = zoom,
                 onZoom = { next ->
@@ -1142,7 +1327,7 @@ contentAlignment = Alignment.Center,
                     Diagnostics.zoomFrom("reset")
                     doc.zoom = 1f
                 },
-                modifier = Modifier.align(Alignment.BottomEnd).padding(end = 6.dp, bottom = 84.dp),
+                modifier = Modifier.align(Alignment.BottomEnd).padding(end = 6.dp, bottom = 128.dp),
             )
         }
         }
@@ -1301,7 +1486,9 @@ private fun PeekStrip(doc: EngineDocument, onOpen: () -> Unit, modifier: Modifie
                 )
                 Text(
                     text = (doc.selected?.kindLabel ?: "TAP TO OPEN LAYERS") +
-                        (doc.savedAt?.let { " · SAVED $it" } ?: ""),
+                        doc.saveState.takeIf { it.isNotBlank() }?.let { " · $it" }
+                            ?: doc.savedAt?.let { " · SAVED $it" }
+                            ?: "",
                     color = Dim,
                     fontSize = 9.sp,
                     maxLines = 1,
@@ -1471,26 +1658,53 @@ private fun Sheet(
 
 @Composable
 private fun LayerPanel(doc: EngineDocument, modifier: Modifier = Modifier) {
+    var expanded by remember { mutableStateOf(setOf<String>()) }
+    var multi by remember { mutableStateOf(false) }
+    var dragDistance by remember { mutableStateOf(0f) }
+    val rows = doc.layers.visibleRows(expanded)
+    val rowHeight = with(LocalDensity.current) { 40.dp.toPx() }
     Column(modifier.padding(10.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text("LAYERS", color = Cream, fontSize = 11.sp, letterSpacing = 1.1.sp, fontWeight = FontWeight.SemiBold)
             Spacer(Modifier.weight(1f))
-            Text("${doc.layers.size}", color = Mint, fontSize = 9.sp, fontWeight = FontWeight.SemiBold)
+            Text("${doc.layers.flattenTree().size}", color = Mint, fontSize = 9.sp, fontWeight = FontWeight.SemiBold)
         }
-        Spacer(Modifier.height(7.dp))
+        Spacer(Modifier.height(6.dp))
+        Row(horizontalArrangement = Arrangement.spacedBy(5.dp)) {
+            PanelChip(if (multi) "MULTI ON" else "MULTI", multi) { multi = !multi }
+            PanelChip("GROUP", doc.selectedIds.size >= 2) { doc.groupSelection() }
+            PanelChip("UNGROUP", doc.selected is GroupLayer) { doc.ungroupSelection() }
+            if (doc.editingGroupId != null) PanelChip("BACK", true) { doc.exitGroup() }
+        }
+        Spacer(Modifier.height(6.dp))
         Column(Modifier.fillMaxWidth().weight(1f).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-            doc.layers.asReversed().forEach { layer ->
-                val selected = layer.id == doc.selectedId
+            rows.forEachIndexed { index, row ->
+                val layer = row.layer
+                val selected = layer.id == doc.selectedId || layer.id in doc.selectedIds
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(3.dp))
                         .testTag("layer-${layer.id}")
                         .background(if (selected) PanelRaised else Color.Transparent)
-                        .clickable { doc.select(layer.id) }
-                        .padding(horizontal = 7.dp, vertical = 6.dp),
+                        .clickable { doc.select(layer.id, additive = multi) }
+                        .padding(start = (7 + row.depth * 12).dp, end = 6.dp, top = 5.dp, bottom = 5.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
+                    if (layer is GroupLayer) {
+                        Text(
+                            text = if (layer.id in expanded) "▾" else "▸",
+                            color = Mint,
+                            fontSize = 9.sp,
+                            modifier = Modifier
+                                .clickable {
+                                    expanded = if (layer.id in expanded) expanded - layer.id else expanded + layer.id
+                                }
+                                .padding(end = 4.dp),
+                        )
+                    } else {
+                        Spacer(Modifier.width(11.dp))
+                    }
                     Text(
                         text = if (layer.visible) "◉" else "○",
                         color = if (layer.visible) Mint else Dim,
@@ -1514,6 +1728,30 @@ private fun LayerPanel(doc: EngineDocument, modifier: Modifier = Modifier) {
                             overflow = TextOverflow.Ellipsis,
                         )
                     }
+                    // Drag up or down to reorder among siblings; drop on a group row
+                    // to move the layer into that group.
+                    Text(
+                        "⠿",
+                        color = Dim,
+                        fontSize = 11.sp,
+                        modifier = Modifier
+                            .pointerInput(layer.id, rows) {
+                                detectVerticalDragGestures(
+                                    onDragStart = { dragDistance = 0f },
+                                    onDragEnd = {
+                                        val step = (dragDistance / rowHeight).roundToInt()
+                                        val target = rows.getOrNull(index + step)?.layer
+                                        if (target != null) doc.dropLayer(layer.id, target.id)
+                                        dragDistance = 0f
+                                    },
+                                    onVerticalDrag = { change, amount ->
+                                        dragDistance += amount
+                                        change.consume()
+                                    },
+                                )
+                            }
+                            .padding(horizontal = 4.dp, vertical = 2.dp),
+                    )
                     if (selected) {
                         Text(
                             "▲",
@@ -1521,7 +1759,7 @@ private fun LayerPanel(doc: EngineDocument, modifier: Modifier = Modifier) {
                             fontSize = 9.sp,
                             modifier = Modifier
                                 .clickable { doc.moveLayer(layer.id, 1) }
-                                .padding(horizontal = 4.dp, vertical = 2.dp),
+                                .padding(horizontal = 3.dp, vertical = 2.dp),
                         )
                         Text(
                             "▼",
@@ -1529,13 +1767,29 @@ private fun LayerPanel(doc: EngineDocument, modifier: Modifier = Modifier) {
                             fontSize = 9.sp,
                             modifier = Modifier
                                 .clickable { doc.moveLayer(layer.id, -1) }
-                                .padding(horizontal = 4.dp, vertical = 2.dp),
+                                .padding(horizontal = 3.dp, vertical = 2.dp),
                         )
                     }
                 }
             }
         }
     }
+}
+
+@Composable
+private fun PanelChip(label: String, active: Boolean, onClick: () -> Unit) {
+    Text(
+        text = label,
+        color = if (active) Artboard else Mint,
+        fontSize = 8.sp,
+        fontWeight = FontWeight.SemiBold,
+        letterSpacing = 0.4.sp,
+        modifier = Modifier
+            .clip(RoundedCornerShape(3.dp))
+            .background(if (active) Lime else PanelRaised)
+            .clickable(onClick = onClick)
+            .padding(horizontal = 6.dp, vertical = 4.dp),
+    )
 }
 
 @Composable
@@ -1579,8 +1833,26 @@ private fun Inspector(doc: EngineDocument, handle: SceneHandle, onIcons: () -> U
                     TransformInspector(doc, layer)
                     ImageInspector(doc, layer)
                 }
+                is GroupLayer -> {
+                    TransformInspector(doc, layer)
+                    Spacer(Modifier.height(6.dp))
+                    Text(
+                        "${layer.children.size} LAYERS · ${if (layer.scaleX == 1f && layer.scaleY == 1f) "UNSCALED" else "SCALED"}",
+                        color = Dim,
+                        fontSize = 8.sp,
+                    )
+                    Spacer(Modifier.height(6.dp))
+                    Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        ActionChip("ENTER GROUP", active = true, onClick = { doc.enterGroup() })
+                        ActionChip("UNGROUP", active = false, onClick = { doc.ungroupSelection() })
+                    }
+                }
             }
-            doc.selected?.let { CompositeInspector(doc, it) }
+            doc.selected?.let { layer ->
+                Spacer(Modifier.height(6.dp))
+                MotionInspector(doc, layer)
+                CompositeInspector(doc, layer)
+            }
         }
     }
 }
@@ -1627,9 +1899,44 @@ internal fun ImageInspector(doc: EngineDocument, layer: ImageLayer) {
         ActionChip("DEL", warn = true, onClick = { doc.deleteSelected() })
     }
     Spacer(Modifier.height(4.dp))
+    Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+        ActionChip(
+            label = "RESET CROP",
+            active = layer.crop != ImageCrop(),
+            onClick = { doc.resetImageCrop(layer.id) },
+        )
+    }
+    TransformSlider(
+        doc = doc,
+        label = "CROP X",
+        value = layer.crop.x,
+        range = 0f..(1f - layer.crop.w).coerceAtLeast(0.0001f),
+        display = { "${(it * 100).toInt()}%" },
+    ) { doc.setImageCrop(layer.id, layer.crop.copy(x = it)) }
+    TransformSlider(
+        doc = doc,
+        label = "CROP Y",
+        value = layer.crop.y,
+        range = 0f..(1f - layer.crop.h).coerceAtLeast(0.0001f),
+        display = { "${(it * 100).toInt()}%" },
+    ) { doc.setImageCrop(layer.id, layer.crop.copy(y = it)) }
+    TransformSlider(
+        doc = doc,
+        label = "CROP W",
+        value = layer.crop.w,
+        range = 0.05f..1f,
+        display = { "${(it * 100).toInt()}%" },
+    ) { doc.setImageCrop(layer.id, layer.crop.copy(w = it)) }
+    TransformSlider(
+        doc = doc,
+        label = "CROP H",
+        value = layer.crop.h,
+        range = 0.05f..1f,
+        display = { "${(it * 100).toInt()}%" },
+    ) { doc.setImageCrop(layer.id, layer.crop.copy(h = it)) }
     OpacityRow(doc, layer.opacity)
     Spacer(Modifier.height(3.dp))
-    InfoLine("FILL CROPS TO THE FRAME · FIT KEEPS THE WHOLE PHOTO")
+    InfoLine("CROP IS NON-DESTRUCTIVE · FILL AND FIT BOTH USE THE CROPPED SOURCE")
 }
 
 @Composable
@@ -1663,6 +1970,32 @@ internal fun TransformInspector(doc: EngineDocument, layer: Layer) {
         }
     )
     Spacer(Modifier.height(4.dp))
+}
+
+@Composable
+internal fun MotionInspector(doc: EngineDocument, layer: Layer) {
+    val path = doc.motion[layer.id]
+    Text("MOTION PATH", color = Cream, fontSize = 9.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 0.8.sp)
+    Spacer(Modifier.height(4.dp))
+    if (path == null) {
+        ActionChip("ADD PATH", active = true, onClick = { doc.createMotionPath(layer.id) })
+        Spacer(Modifier.height(3.dp))
+        InfoLine("A PATH STARTS AT THE LAYER CENTRE · DRAG ITS FOUR DOTS")
+    } else {
+        Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+            ActionChip(
+                label = if (doc.playingLayerId == layer.id) "STOP" else "PLAY PATH",
+                active = doc.playingLayerId == layer.id,
+                onClick = {
+                    if (doc.playingLayerId == layer.id) doc.stopMotion() else doc.playMotion(layer.id)
+                },
+            )
+            ActionChip("RESET PATH", onClick = { doc.resetMotionPath(layer.id) })
+            ActionChip("CLEAR", warn = true, onClick = { doc.clearMotionPath(layer.id) })
+        }
+        Spacer(Modifier.height(3.dp))
+        InfoLine("DRAG THE CURVE DOTS · THE LAYER KEEPS ITS CENTRE")
+    }
 }
 
 @Composable
@@ -2210,7 +2543,30 @@ internal fun VectorInspector(doc: EngineDocument, layer: VectorLayer) {
 
 @Composable
 internal fun TextInspector(doc: EngineDocument, layer: TextLayer) {
+    val context = LocalContext.current
+    val registry = remember(context) { TypefaceRegistry(context) }
+    val families = remember(registry) { registry.families() }
+    val resolution = remember(layer.fontFamily, layer.weight) {
+        registry.resolve(layer.fontFamily, layer.weight)
+    }
     InfoLine("TYPE BOX · ${layer.align.name.uppercase()} ALIGN")
+    Spacer(Modifier.height(4.dp))
+    Row(
+        modifier = Modifier.horizontalScroll(rememberScrollState()),
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
+        families.forEach { family ->
+            ActionChip(
+                label = family.uppercase(),
+                active = layer.fontFamily.equals(family, ignoreCase = true),
+                onClick = { doc.setFontFamily(family) },
+            )
+        }
+    }
+    if (resolution.substituted) {
+        Spacer(Modifier.height(3.dp))
+        InfoLine("SUBSTITUTED · ${layer.fontFamily.uppercase()} → POPPINS")
+    }
     Spacer(Modifier.height(4.dp))
     BasicTextField(
         value = layer.text,
@@ -2234,12 +2590,32 @@ internal fun TextInspector(doc: EngineDocument, layer: TextLayer) {
         display = { "${it.toInt()} pt" },
         onChange = { doc.setFontSize(it) },
     )
-    Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-        TextAlign.entries.forEach { align ->
-            ActionChip(
+    EngineSegmentedControl(
+        options = TextAlign.entries.map { align ->
+            EngineSegment(
                 label = align.name.take(1),
-                active = layer.align == align,
-                onClick = { doc.setAlign(align) },
+                accessibilityLabel = align.name.lowercase().replaceFirstChar { it.uppercase() } + " alignment",
+                tag = "align-${align.name.lowercase()}",
+            )
+        },
+        selectedIndex = TextAlign.entries.indexOf(layer.align),
+        onSelect = { index -> doc.setAlign(TextAlign.entries[index]) },
+        description = "Text alignment",
+    )
+    Spacer(Modifier.height(4.dp))
+    SliderRow(
+        label = "TRACKING",
+        value = layer.tracking,
+        range = -0.04f..0.3f,
+        display = { String.format("%+.2f", it) },
+        onChange = { doc.setTracking(it) },
+    )
+    Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+        TextCase.entries.forEach { case ->
+            ActionChip(
+                label = case.name.uppercase(),
+                active = layer.textCase == case,
+                onClick = { doc.setTextCase(case) },
             )
         }
     }

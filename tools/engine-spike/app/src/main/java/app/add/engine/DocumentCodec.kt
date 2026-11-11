@@ -4,6 +4,8 @@ import android.content.Context
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
+import java.io.FileOutputStream
+import java.io.IOException
 
 /**
  * The document on disk, as versioned JSON.
@@ -19,36 +21,134 @@ import java.io.File
 object DocumentCodec {
     // 3 adds the optional paint and style blocks. Schema 1 and 2 documents carry
     // neither and decode to solid paint, normal blend and bypassed effects.
-    const val VERSION = 3
+    // 4 adds groups, per-layer skew and the entered group; older documents decode
+    // with no groups, skew 0 and the artboard as the editing level. Type family,
+    // tracking and case are optional v4 fields: a v3 or early-v4 file opens in
+    // Poppins with no tracking and no case transform.
+    // 5 adds material ink strokes: seeded recipes and normalized points, never pixels.
+    const val VERSION = 5
 
     data class Document(
         val layers: List<Layer>,
         val selectedId: String?,
         val zoom: Float,
         val locked: Set<String> = emptySet(),
+        val selectedIds: Set<String> = emptySet(),
+        val editingGroupId: String? = null,
+        val motion: Map<String, MotionPath> = emptyMap(),
+        val texture: TextureSpec? = null,
+        /** Non-null when a saved texture reference could not be regenerated. */
+        val textureWarning: String? = null,
+        val ink: List<TextureInk> = emptyList(),
     )
 
-    fun encode(layers: List<Layer>, selectedId: String?, zoom: Float, locked: Set<String> = emptySet()): String {
+    fun encode(
+        layers: List<Layer>,
+        selectedId: String?,
+        zoom: Float,
+        locked: Set<String> = emptySet(),
+        selectedIds: Set<String> = emptySet(),
+        editingGroupId: String? = null,
+        motion: Map<String, MotionPath> = emptyMap(),
+        texture: TextureSpec? = null,
+        ink: List<TextureInk> = emptyList(),
+    ): String {
         val root = JSONObject()
         root.put("schema", VERSION)
         root.put("locked", JSONArray(locked.toList()))
         root.put("zoom", zoom.toDouble())
         root.put("selected", selectedId ?: "")
+        root.put("selectedIds", JSONArray(selectedIds.toList()))
+        root.put("editingGroup", editingGroupId ?: "")
         val array = JSONArray()
         layers.forEach { array.put(encodeLayer(it)) }
         root.put("layers", array)
+        val paths = JSONArray()
+        motion.forEach { (id, path) ->
+            paths.put(
+                JSONObject().apply {
+                    put("id", id)
+                    put("startX", path.start.x.toDouble())
+                    put("startY", path.start.y.toDouble())
+                    put("c1X", path.c1.x.toDouble())
+                    put("c1Y", path.c1.y.toDouble())
+                    put("c2X", path.c2.x.toDouble())
+                    put("c2Y", path.c2.y.toDouble())
+                    put("endX", path.end.x.toDouble())
+                    put("endY", path.end.y.toDouble())
+                    put("duration", path.durationMs)
+                }
+            )
+        }
+        root.put("motion", paths)
+        texture?.let {
+            root.put(
+                "texture",
+                JSONObject()
+                    .put("family", it.family.id)
+                    .put("seed", it.seed)
+                    .put("opacity", it.opacity.toDouble())
+                    .put("scale", it.scale.toDouble())
+                    .put("blend", it.blend.name),
+            )
+        }
+        if (ink.isNotEmpty()) {
+            root.put("ink", JSONArray().also { array -> ink.forEach { array.put(encodeInk(it)) } })
+        }
         return root.toString()
     }
 
     fun decode(text: String): Document? = runCatching {
         val root = JSONObject(text)
+        val schema = root.optInt("schema", 0)
         // 1 is the same document without locks or photographs; it still opens.
-        if (root.optInt("schema", 0) !in 1..VERSION) return null
+        if (schema !in 1..VERSION) return null
         val array = root.optJSONArray("layers") ?: return null
-        val layers = (0 until array.length()).mapNotNull { index ->
+        val decoded = (0 until array.length()).map { index ->
             runCatching { decodeLayer(array.getJSONObject(index)) }.getOrNull()
         }
+        // From 4 on, a layer this build does not understand refuses the whole file
+        // rather than opening a document with a silent hole in it.
+        if (schema >= 4 && decoded.any { it == null }) return null
+        val layers = decoded.filterNotNull()
         if (layers.isEmpty()) return null
+        val ids = layers.flattenTree().map { it.id }.toSet()
+        val motion = root.optJSONArray("motion").let { paths ->
+            if (paths == null) emptyMap() else buildMap {
+                for (index in 0 until paths.length()) {
+                    val o = paths.optJSONObject(index) ?: continue
+                    val id = o.optString("id")
+                    // A path for a layer this document does not carry is dropped
+                    // rather than left to dangle against a later id.
+                    if (id !in ids) continue
+                    put(
+                        id,
+                        MotionPath(
+                            start = MotionPoint(
+                                o.optDouble("startX", 0.0).toFloat(),
+                                o.optDouble("startY", 0.0).toFloat(),
+                            ),
+                            c1 = MotionPoint(
+                                o.optDouble("c1X", 0.0).toFloat(),
+                                o.optDouble("c1Y", 0.0).toFloat(),
+                            ),
+                            c2 = MotionPoint(
+                                o.optDouble("c2X", 0.0).toFloat(),
+                                o.optDouble("c2Y", 0.0).toFloat(),
+                            ),
+                            end = MotionPoint(
+                                o.optDouble("endX", 0.0).toFloat(),
+                                o.optDouble("endY", 0.0).toFloat(),
+                            ),
+                            durationMs = o.optInt("duration", EngineMotion.DefaultDurationMs),
+                        ),
+                    )
+                }
+            }
+        }
+        val textureRaw = root.opt("texture")
+        val texture = decodeTexture(textureRaw as? JSONObject)
+        val ink = decodeInk(root.optJSONArray("ink"))
         Document(
             layers = layers,
             selectedId = root.optString("selected").ifBlank { null },
@@ -58,8 +158,81 @@ object DocumentCodec {
                     .mapNotNull { index -> array.optString(index).ifBlank { null } }
                     .toSet()
             },
+            selectedIds = root.optJSONArray("selectedIds").let { array ->
+                if (array == null) emptySet() else (0 until array.length())
+                    .mapNotNull { index -> array.optString(index).ifBlank { null } }
+                    .toSet()
+            },
+            editingGroupId = root.optString("editingGroup").ifBlank { null },
+            motion = motion,
+            texture = texture,
+            textureWarning = if (textureRaw != null && texture == null) {
+                "TEXTURE DROPPED · unknown family or invalid recipe; paper kept clean"
+            } else null,
+            ink = ink,
         )
     }.getOrNull()
+
+    /**
+     * A texture is a recipe, not a bitmap. An unknown family, missing seed or
+     * out-of-range opacity/scale is a clean fallback: the page opens with paper and a
+     * warning, never a crash and never a half-rendered field.
+     */
+    private fun decodeTexture(o: JSONObject?): TextureSpec? {
+        if (o == null) return null
+        val family = TextureFamily.fromId(o.optString("family")) ?: return null
+        val seedValue = o.opt("seed") as? Number ?: return null
+        val opacity = o.optDouble("opacity", family.defaultOpacity.toDouble()).toFloat()
+        val scale = o.optDouble("scale", 1.0).toFloat()
+        if (!opacity.isFinite() || opacity !in 0f..1f) return null
+        if (!scale.isFinite() || scale !in 0.25f..4f) return null
+        return TextureSpec(
+            family = family,
+            seed = seedValue.toInt(),
+            opacity = opacity,
+            scale = scale,
+            blend = BlendKind.fromName(o.optString("blend", family.defaultBlend.name)),
+        )
+    }
+
+    private fun encodeInk(ink: TextureInk): JSONObject = JSONObject().apply {
+        put("id", ink.id)
+        put("width", ink.width.toDouble())
+        put(
+            "recipe",
+            JSONObject()
+                .put("family", ink.recipe.family.id)
+                .put("seed", ink.recipe.seed)
+                .put("opacity", ink.recipe.opacity.toDouble())
+                .put("scale", ink.recipe.scale.toDouble())
+                .put("blend", ink.recipe.blend.name),
+        )
+        put("points", JSONArray().also { points ->
+            ink.points.forEach { point ->
+                points.put(JSONObject().put("x", point.x.toDouble()).put("y", point.y.toDouble()))
+            }
+        })
+    }
+
+    private fun decodeInk(array: JSONArray?): List<TextureInk> {
+        if (array == null) return emptyList()
+        return (0 until array.length()).mapNotNull { index ->
+            val o = array.optJSONObject(index) ?: return@mapNotNull null
+            val recipe = decodeTexture(o.optJSONObject("recipe")) ?: return@mapNotNull null
+            val points = o.optJSONArray("points").orEmpty().mapNotNull { point ->
+                val x = point.optDouble("x", Double.NaN)
+                val y = point.optDouble("y", Double.NaN)
+                if (!x.isFinite() || !y.isFinite()) null else InkPoint(x.toFloat(), y.toFloat())
+            }
+            if (points.isEmpty()) return@mapNotNull null
+            TextureInk(
+                id = o.optString("id").ifBlank { "ink-$index" },
+                recipe = recipe,
+                width = o.optDouble("width", 0.075).toFloat(),
+                points = points,
+            ).clean()
+        }
+    }
 
     private fun encodeLayer(layer: Layer): JSONObject {
         val o = JSONObject()
@@ -73,7 +246,15 @@ object DocumentCodec {
         o.put("h", layer.h.toDouble())
         o.put("opacity", layer.opacity.toDouble())
         o.put("rotation", layer.rotation.toDouble())
+        o.put("skewX", layer.skewX.toDouble())
         when (layer) {
+            is GroupLayer -> {
+                o.put("scaleX", layer.scaleX.toDouble())
+                o.put("scaleY", layer.scaleY.toDouble())
+                val children = JSONArray()
+                layer.children.forEach { children.put(encodeLayer(it)) }
+                o.put("children", children)
+            }
             is VectorLayer -> {
                 o.put("network", encodeNetwork(layer.network))
                 o.put("fill", layer.fill)
@@ -88,6 +269,9 @@ object DocumentCodec {
                 o.put("color", layer.color)
                 o.put("align", layer.align.name)
                 o.put("weight", layer.weight)
+                o.put("fontFamily", layer.fontFamily)
+                o.put("tracking", layer.tracking.toDouble())
+                o.put("textCase", layer.textCase.name)
                 layer.paint?.let { o.put("paint", encodePaint(it)) }
             }
             is IconLayer -> {
@@ -101,10 +285,24 @@ object DocumentCodec {
             is ImageLayer -> {
                 o.put("path", layer.path)
                 o.put("fill", layer.fill)
+                o.put("crop", JSONObject()
+                    .put("x", layer.crop.x.toDouble())
+                    .put("y", layer.crop.y.toDouble())
+                    .put("w", layer.crop.w.toDouble())
+                    .put("h", layer.crop.h.toDouble()))
             }
         }
         if (layer.style != LayerStyle()) o.put("style", encodeStyle(layer.style))
         return o
+    }
+
+    /** A group with one unreadable child is refused, never opened half-decoded. */
+    private fun decodeChildren(o: JSONObject): List<Layer>? {
+        val array = o.optJSONArray("children") ?: return emptyList()
+        val children = (0 until array.length()).map { index ->
+            runCatching { decodeLayer(array.getJSONObject(index)) }.getOrNull()
+        }
+        return if (children.any { it == null }) null else children.filterNotNull()
     }
 
     private fun decodeLayer(o: JSONObject): Layer? {
@@ -118,7 +316,24 @@ object DocumentCodec {
         val h = o.optDouble("h", 0.1).toFloat()
         val opacity = o.optDouble("opacity", 1.0).toFloat()
         val rotation = o.optDouble("rotation", 0.0).toFloat()
+        val skew = o.optDouble("skewX", 0.0).toFloat()
         return when (o.optString("kind")) {
+            "group" -> GroupLayer(
+                id = id,
+                name = name,
+                visible = visible,
+                x = x,
+                y = y,
+                w = w,
+                h = h,
+                opacity = opacity,
+                rotation = rotation,
+                skewX = skew,
+                scaleX = o.optDouble("scaleX", 1.0).toFloat(),
+                scaleY = o.optDouble("scaleY", 1.0).toFloat(),
+                children = decodeChildren(o) ?: return null,
+                style = decodeStyle(o.optJSONObject("style")),
+            )
             "vector" -> VectorLayer(
                 id = id,
                 name = name,
@@ -129,6 +344,7 @@ object DocumentCodec {
                 h = h,
                 opacity = opacity,
                 rotation = rotation,
+                skewX = skew,
                 network = o.optJSONObject("network")?.let { decodeNetwork(it) } ?: starNetwork(),
                 fill = o.optInt("fill", 0xFF0FBF92.toInt()),
                 stroke = o.optInt("stroke", 0xFF11231C.toInt()),
@@ -146,6 +362,7 @@ object DocumentCodec {
                 h = h,
                 opacity = opacity,
                 rotation = rotation,
+                skewX = skew,
                 text = o.optString("text", "TYPE"),
                 fontSize = o.optDouble("fontSize", 48.0).toFloat(),
                 lineHeight = o.optDouble("lineHeight", 1.0).toFloat(),
@@ -153,6 +370,10 @@ object DocumentCodec {
                 align = runCatching { TextAlign.valueOf(o.optString("align", "Left")) }
                     .getOrDefault(TextAlign.Left),
                 weight = o.optInt("weight", 600),
+                fontFamily = o.optString("fontFamily", "Poppins").ifBlank { "Poppins" },
+                tracking = o.optDouble("tracking", 0.0).toFloat(),
+                textCase = runCatching { TextCase.valueOf(o.optString("textCase", "None")) }
+                    .getOrDefault(TextCase.None),
                 paint = decodePaint(o.optJSONObject("paint")),
                 style = decodeStyle(o.optJSONObject("style")),
             )
@@ -166,6 +387,7 @@ object DocumentCodec {
                 h = h,
                 opacity = opacity,
                 rotation = rotation,
+                skewX = skew,
                 glyph = o.optJSONObject("glyph")?.let { decodeGlyph(it) } ?: return null,
                 tint = o.optInt("tint", 0xFF11231C.toInt()),
                 style = decodeStyle(o.optJSONObject("style")),
@@ -180,8 +402,17 @@ object DocumentCodec {
                 h = h,
                 opacity = opacity,
                 rotation = rotation,
+                skewX = skew,
                 path = o.optString("path"),
                 fill = o.optBoolean("fill", true),
+                crop = o.optJSONObject("crop")?.let { crop ->
+                    ImageCrop(
+                        x = crop.optDouble("x", 0.0).toFloat(),
+                        y = crop.optDouble("y", 0.0).toFloat(),
+                        w = crop.optDouble("w", 1.0).toFloat(),
+                        h = crop.optDouble("h", 1.0).toFloat(),
+                    ).normalized()
+                } ?: ImageCrop(),
                 style = decodeStyle(o.optJSONObject("style")),
             )
             "model" -> ModelLayer(
@@ -194,6 +425,7 @@ object DocumentCodec {
                 h = h,
                 opacity = opacity,
                 rotation = rotation,
+                skewX = skew,
                 scaleToUnits = o.optDouble("scaleToUnits", 1.0).toFloat(),
                 asset = runCatching { ModelAsset.valueOf(o.optString("asset", "Gem")) }
                     .getOrDefault(ModelAsset.Gem),
@@ -490,6 +722,7 @@ object DocumentCodec {
             is IconLayer -> "icon"
             is ModelLayer -> "model"
             is ImageLayer -> "image"
+            is GroupLayer -> "group"
         }
 
     private fun JSONArray?.orEmpty(): List<JSONObject> {
@@ -510,21 +743,56 @@ object DocumentStore {
 
     data class Entry(val key: String, val name: String, val layers: Int, val modified: Long)
 
-    fun save(context: Context, doc: EngineDocument) {
-        runCatching {
-            File(context.filesDir, FILE).writeText(
-                DocumentCodec.encode(doc.layers, doc.selectedId, doc.zoom, doc.lockedIds)
-            )
+    /**
+     * Temp file, fsync, then rename: a crash between the write and the swap leaves
+     * the previous document (and its backup) untouched. The last good file is kept
+     * as .bak so a corrupt main file can still open.
+     */
+    fun save(context: Context, doc: EngineDocument): Boolean = runCatching {
+        val target = File(context.filesDir, FILE)
+        val temp = File(context.filesDir, "$FILE.tmp")
+        val backup = File(context.filesDir, "$FILE.bak")
+        val text = DocumentCodec.encode(
+            doc.layers,
+            doc.selectedId,
+            doc.zoom,
+            doc.lockedIds,
+            doc.selectedIds,
+            doc.editingGroupId,
+            doc.motion,
+            doc.texture,
+            doc.ink,
+        )
+        FileOutputStream(temp).use { out ->
+            out.write(text.toByteArray())
+            out.flush()
+            out.fd.sync()
+        }
+        if (target.exists()) {
+            backup.delete()
+            if (!target.renameTo(backup)) throw IOException("could not back up $FILE")
+        }
+        if (!temp.renameTo(target)) {
+            if (backup.exists()) backup.renameTo(target)
+            throw IOException("could not replace $FILE")
+        }
+        true
+    }.getOrDefault(false)
+
+    fun restore(context: Context): DocumentCodec.Document? {
+        val main = File(context.filesDir, FILE)
+        val backup = File(context.filesDir, "$FILE.bak")
+        return listOf(main, backup).firstNotNullOfOrNull { file ->
+            if (!file.exists()) null else runCatching { DocumentCodec.decode(file.readText()) }.getOrNull()
         }
     }
 
-    fun restore(context: Context): DocumentCodec.Document? = runCatching {
-        val file = File(context.filesDir, FILE)
-        if (!file.exists()) null else DocumentCodec.decode(file.readText())
-    }.getOrNull()
-
     fun clear(context: Context) {
-        runCatching { File(context.filesDir, FILE).delete() }
+        runCatching {
+            File(context.filesDir, FILE).delete()
+            File(context.filesDir, "$FILE.tmp").delete()
+            File(context.filesDir, "$FILE.bak").delete()
+        }
     }
 
     private fun libraryDir(context: Context) = File(context.filesDir, LIBRARY).apply { mkdirs() }
@@ -550,9 +818,22 @@ object DocumentStore {
 
     fun saveAs(context: Context, name: String, doc: EngineDocument): String? = runCatching {
         val key = slug(name)
-        File(libraryDir(context), "$key.json").writeText(
-            DocumentCodec.encode(doc.layers, doc.selectedId, doc.zoom, doc.lockedIds)
+        val target = File(libraryDir(context), "$key.json")
+        val temp = File(libraryDir(context), "$key.json.tmp")
+        temp.writeText(
+            DocumentCodec.encode(
+                doc.layers,
+                doc.selectedId,
+                doc.zoom,
+                doc.lockedIds,
+                doc.selectedIds,
+                doc.editingGroupId,
+                doc.motion,
+                doc.texture,
+                doc.ink,
+            )
         )
+        if (!temp.renameTo(target)) throw IOException("could not save $key")
         key
     }.getOrNull()
 

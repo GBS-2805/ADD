@@ -35,6 +35,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
@@ -56,6 +57,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
@@ -67,6 +69,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -78,6 +84,7 @@ import kotlinx.coroutines.delay
 internal enum class StudioTab(val label: String) {
     Style("STYLE"),
     Effects("FX"),
+    Texture("TEXTURE"),
     Layers("LAYERS"),
 }
 
@@ -127,7 +134,9 @@ internal fun TactileBox(
         label = "tactile-press",
     )
     Box(
-        modifier = modifier
+        modifier = Modifier
+            .sizeIn(minWidth = EngineTokens.MinTarget, minHeight = EngineTokens.MinTarget)
+            .then(modifier)
             .graphicsLayer {
                 scaleX = scale
                 scaleY = scale
@@ -159,20 +168,18 @@ internal fun StudioTopBar(
     onBack: () -> Unit,
     onDocs: () -> Unit,
     onExport: () -> Unit,
+    onExportScale: (Int) -> Unit,
     onInfo: () -> Unit,
     onLegend: () -> Unit,
     modifier: Modifier = Modifier,
+    focusRequester: FocusRequester? = null,
+    nextFocus: FocusRequester? = null,
 ) {
     var menu by remember { mutableStateOf(false) }
-    Row(
-        modifier = modifier
-            .shadow(12.dp, RoundedCornerShape(22.dp), clip = false)
-            .clip(RoundedCornerShape(22.dp))
-            .background(Forest.copy(alpha = 0.96f))
-            .border(1.dp, Cream.copy(alpha = 0.16f), RoundedCornerShape(22.dp))
-            .height(54.dp)
-            .padding(horizontal = 5.dp),
-        verticalAlignment = Alignment.CenterVertically,
+    EngineFloatingToolbar(
+        modifier = modifier.height(54.dp).testTag("engine-toolbar"),
+        focusRequester = focusRequester,
+        nextFocus = nextFocus,
     ) {
         BarIcon("←", "Back", onClick = onBack)
         Spacer(Modifier.width(4.dp))
@@ -186,9 +193,9 @@ internal fun StudioTopBar(
                 maxLines = 1,
             )
             Text(
-                "${doc.layers.size} ${if (doc.layers.size == 1) "layer" else "layers"} · ${doc.savedAt?.let { "saved $it" } ?: "private draft"}",
+                "${doc.layers.size} · ${doc.saveState.replace("…", "").ifBlank { doc.savedAt ?: "draft" }}",
                 color = Dim,
-                fontSize = 9.5.sp,
+                fontSize = 9.sp,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
@@ -196,23 +203,17 @@ internal fun StudioTopBar(
         BarIcon("↶", "Undo", enabled = doc.canUndo, onClick = { doc.undo() })
         BarIcon("↷", "Redo", enabled = doc.canRedo, onClick = { doc.redo() })
         Spacer(Modifier.width(4.dp))
-        TactileBox(
-            onClick = onExport,
+        EngineSplitButton(
+            label = if (doc.exporting) "SAVING" else "EXPORT",
+            onPrimary = onExport,
+            options = listOf(
+                "1× PNG" to { onExportScale(1) },
+                "2× PNG" to { onExportScale(2) },
+                "3× PNG" to { onExportScale(3) },
+                "4× PNG" to { onExportScale(4) },
+            ),
             enabled = !doc.exporting,
-            shape = RoundedCornerShape(99.dp),
-            background = Lime,
-            contentPadding = PaddingValues(horizontal = 11.dp),
-            haptic = true,
-            modifier = Modifier.height(42.dp),
-        ) {
-            Text(
-                if (doc.exporting) "SAVING" else "EXPORT",
-                color = Ink,
-                fontSize = 9.5.sp,
-                fontWeight = FontWeight.Bold,
-                letterSpacing = 0.4.sp,
-            )
-        }
+        )
         Spacer(Modifier.width(3.dp))
         Box {
             BarIcon("•••", "More", onClick = { menu = true })
@@ -264,7 +265,12 @@ private fun BarIcon(
         shape = CircleShape,
         background = PanelRaised.copy(alpha = 0.72f),
         pressScale = 0.9f,
-        modifier = Modifier.size(40.dp).testTag("bar-${label.lowercase()}"),
+        modifier = Modifier
+            .testTag("bar-${label.lowercase()}")
+            .semantics {
+                contentDescription = label
+                role = Role.Button
+            },
     ) {
         Text(
             glyph,
@@ -316,65 +322,73 @@ internal fun ObjectBar(
     val displayName = layer?.name?.let { name ->
         name.substringAfter(" / ", name).replaceFirstChar { it.uppercase() }
     }
-    Row(
-        modifier = modifier
-            .shadow(10.dp, RoundedCornerShape(22.dp), clip = false)
-            .clip(RoundedCornerShape(22.dp))
-            .background(Forest.copy(alpha = 0.97f))
-            .border(1.dp, Cream.copy(alpha = 0.16f), RoundedCornerShape(22.dp))
-            .height(66.dp)
-            .padding(horizontal = 7.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(4.dp),
+    EngineFloatingToolbar(
+        modifier = modifier.fillMaxWidth().height(108.dp),
+        docked = true,
     ) {
         if (layer == null) {
             CreateDock(onClick = onCreate, modifier = Modifier.weight(1f))
-            return@Row
+            return@EngineFloatingToolbar
         }
-        TactileBox(
-            onClick = { onOpen(StudioTab.Style) },
-            shape = RoundedCornerShape(15.dp),
-            background = Paper,
-            border = BorderStroke(1.dp, Ink.copy(alpha = 0.16f)),
-            modifier = Modifier.size(42.dp).testTag("object-thumb"),
-        ) {
-            Text(layerGlyph(layer), color = layerStickerInk(layer), fontSize = 19.sp, fontWeight = FontWeight.Bold)
-        }
-        Column(
-            modifier = Modifier
-                .weight(1f)
-                .clip(RoundedCornerShape(12.dp))
-                .clickable { onOpen(StudioTab.Style) }
-                .padding(horizontal = 3.dp, vertical = 5.dp),
-        ) {
-            Text(
-                displayName ?: layer.name,
-                color = Cream,
-                fontSize = 12.sp,
-                fontWeight = FontWeight.SemiBold,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
-            Text(
-                layer.kindLabel.lowercase().replaceFirstChar { it.uppercase() },
-                color = Dim,
-                fontSize = 9.sp,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
-        }
-        ObjectBarButton("+", "Create", onCreate, accent = true, tag = "engine-add")
-        ObjectBarButton("STYLE", "Style", { onOpen(StudioTab.Style) })
-        ObjectBarButton("FX", "Effects", { onOpen(StudioTab.Effects) })
-        ObjectBarButton("LAYERS", "Layers", { onOpen(StudioTab.Layers) })
-        TactileBox(
-            onClick = onDone,
-            shape = RoundedCornerShape(99.dp),
-            background = Lime,
-            haptic = true,
-            modifier = Modifier.height(46.dp).widthIn(min = 52.dp).testTag("object-done"),
-        ) {
-            Text("DONE", color = Ink, fontSize = 9.5.sp, fontWeight = FontWeight.Bold, letterSpacing = 0.5.sp)
+        // Two rows instead of cramming the name and five actions into one. The old
+        // one-row bar reduced "Gradient Star" to "GRADL…" on a 411 dp phone.
+        Column(Modifier.fillMaxWidth().padding(horizontal = 4.dp, vertical = 5.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                TactileBox(
+                    onClick = { onOpen(StudioTab.Style) },
+                    shape = RoundedCornerShape(15.dp),
+                    background = Paper,
+                    border = BorderStroke(1.dp, Ink.copy(alpha = 0.16f)),
+                    modifier = Modifier.size(42.dp).testTag("object-thumb"),
+                ) {
+                    Text(layerGlyph(layer), color = layerStickerInk(layer), fontSize = 19.sp, fontWeight = FontWeight.Bold)
+                }
+                Spacer(Modifier.width(7.dp))
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .clip(RoundedCornerShape(12.dp))
+                        .clickable { onOpen(StudioTab.Style) }
+                        .padding(horizontal = 3.dp, vertical = 2.dp),
+                ) {
+                    Text(
+                        displayName ?: layer.name,
+                        color = Cream,
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                    Text(
+                        layer.kindLabel.lowercase().replaceFirstChar { it.uppercase() },
+                        color = Dim,
+                        fontSize = 9.sp,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
+                Spacer(Modifier.width(7.dp))
+                TactileBox(
+                    onClick = onDone,
+                    shape = RoundedCornerShape(99.dp),
+                    background = Lime,
+                    haptic = true,
+                    modifier = Modifier.height(40.dp).widthIn(min = 52.dp).testTag("object-done"),
+                ) {
+                    Text("DONE", color = Ink, fontSize = 9.5.sp, fontWeight = FontWeight.Bold, letterSpacing = 0.5.sp)
+                }
+            }
+            Spacer(Modifier.height(6.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(5.dp),
+            ) {
+                ObjectBarButton("+", "Create", onCreate, accent = true, tag = "engine-add")
+                ObjectBarButton("STYLE", "Style", { onOpen(StudioTab.Style) }, tag = "object-style")
+                ObjectBarButton("FX", "Effects", { onOpen(StudioTab.Effects) }, tag = "object-effects")
+                ObjectBarButton("INK", "Material ink", { onOpen(StudioTab.Texture) }, tag = "object-texture")
+                ObjectBarButton("LAYERS", "Layers", { onOpen(StudioTab.Layers) }, tag = "object-layers")
+            }
         }
     }
 }
@@ -392,12 +406,18 @@ private fun ObjectBarButton(
         shape = RoundedCornerShape(13.dp),
         background = if (accent) Mint else PanelRaised,
         haptic = true,
-        modifier = Modifier.height(44.dp).widthIn(min = if (label == "+") 36.dp else 40.dp).testTag(tag),
+        modifier = Modifier
+            .widthIn(min = if (label.length <= 1) 36.dp else 40.dp)
+            .testTag(tag)
+            .semantics {
+                contentDescription = accessibility
+                role = Role.Button
+            },
     ) {
         Text(
             label,
             color = if (accent) Ink else Cream,
-            fontSize = if (label == "+") 17.sp else 9.5.sp,
+            fontSize = if (label.length <= 1) 15.sp else 9.5.sp,
             fontWeight = FontWeight.Bold,
             letterSpacing = if (label == "+") 0.sp else 0.2.sp,
         )
@@ -410,6 +430,7 @@ internal fun layerGlyph(layer: Layer): String = when (layer) {
     is IconLayer -> "✦"
     is ImageLayer -> "▧"
     is ModelLayer -> "3"
+    is GroupLayer -> "▣"
 }
 
 internal fun layerStickerInk(layer: Layer): Color = when (layer) {
@@ -418,6 +439,7 @@ internal fun layerStickerInk(layer: Layer): Color = when (layer) {
     is IconLayer -> Color(layer.tint)
     is ImageLayer -> Mint
     is ModelLayer -> Color(0xFF7A5A12)
+    is GroupLayer -> Ink
 }
 
 internal fun layerStickerWash(layer: Layer): Color = when (layer) {
@@ -426,6 +448,7 @@ internal fun layerStickerWash(layer: Layer): Color = when (layer) {
     is IconLayer -> MintWash
     is ImageLayer -> Color(0xFFE9F0E8)
     is ModelLayer -> Color(0xFFF1EBCB)
+    is GroupLayer -> MintWash
 }
 
 @Composable
@@ -585,6 +608,7 @@ internal fun InspectorSheet(
     onClose: () -> Unit,
     onMask: () -> Unit,
     onTurn3D: () -> Unit,
+    focusRequester: FocusRequester? = null,
 ) {
     val density = LocalDensity.current
     val reduceMotion = prefersReducedMotion()
@@ -596,14 +620,18 @@ internal fun InspectorSheet(
         label = "sheet-drag",
     )
     val layer = doc.selected
-    Column(
+    // Keep the type prefix in the sheet header: "NEW" alone loses the fact that
+    // this is a text layer. The object bar shows the shorter leaf name.
+    val displayName = layer?.name ?: "The page"
+    EngineSheet(
+        title = displayName,
+        accessibilityTitle = layer?.name ?: "The page",
+        onDismiss = onClose,
+        focusRequester = focusRequester,
         modifier = Modifier
             .fillMaxWidth()
             .fillMaxHeight(StudioMotion.SheetFraction)
-            .graphicsLayer { translationY = with(density) { dragPx.dp.toPx() } }
-            .clip(SheetShape)
-            .background(Forest)
-            .border(1.dp, Cream.copy(alpha = 0.16f), SheetShape),
+            .graphicsLayer { translationY = with(density) { dragPx.dp.toPx() } },
     ) {
         Box(
             modifier = Modifier
@@ -639,7 +667,7 @@ internal fun InspectorSheet(
             Column(Modifier.weight(1f)) {
                 Text("EDITING", color = Mint, fontSize = 9.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.4.sp)
                 Text(
-                    layer?.name ?: "The page",
+                    displayName,
                     color = Cream,
                     fontSize = 17.sp,
                     fontWeight = FontWeight.SemiBold,
@@ -672,32 +700,19 @@ internal fun InspectorSheet(
             }
         }
         Spacer(Modifier.height(10.dp))
-        Row(
+        EngineSegmentedControl(
+            options = StudioTab.entries.map { entry ->
+                EngineSegment(
+                    label = entry.label,
+                    accessibilityLabel = entry.label.lowercase().replaceFirstChar { it.uppercase() },
+                    tag = "tab-${entry.name.lowercase()}",
+                )
+            },
+            selectedIndex = StudioTab.entries.indexOf(tab),
+            onSelect = { index -> onTab(StudioTab.entries[index]) },
             modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp),
-            horizontalArrangement = Arrangement.spacedBy(5.dp),
-        ) {
-            StudioTab.entries.forEach { entry ->
-                val active = entry == tab
-                TactileBox(
-                    onClick = { onTab(entry) },
-                    shape = RoundedCornerShape(12.dp),
-                    background = if (active) Mint else PanelRaised,
-                    haptic = active.not(),
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(48.dp)
-                        .testTag("tab-${entry.name.lowercase()}"),
-                ) {
-                    Text(
-                        entry.label,
-                        color = if (active) Ink else Cream,
-                        fontSize = 10.5.sp,
-                        fontWeight = FontWeight.Bold,
-                        letterSpacing = 0.5.sp,
-                    )
-                }
-            }
-        }
+            description = "Inspector sections",
+        )
         Spacer(Modifier.height(8.dp))
         Box(Modifier.fillMaxWidth().weight(1f)) {
             when (tab) {
@@ -710,9 +725,76 @@ internal fun InspectorSheet(
                     modifier = Modifier.fillMaxSize(),
                 )
                 StudioTab.Effects -> FxTab(doc = doc, modifier = Modifier.fillMaxSize())
+                StudioTab.Texture -> TextureTab(
+                    doc = doc,
+                    modifier = Modifier.fillMaxSize(),
+                    onPaintInk = onClose,
+                )
                 StudioTab.Layers -> LayersTab(doc = doc, modifier = Modifier.fillMaxSize())
             }
         }
+    }
+}
+
+@Composable
+internal fun InkHud(doc: EngineDocument, onDone: () -> Unit, modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .shadow(16.dp, PebbleShape, clip = false)
+            .clip(PebbleShape)
+            .background(Forest)
+            .border(1.5.dp, Lime.copy(alpha = 0.55f), PebbleShape)
+            .padding(12.dp)
+            .testTag("ink-hud"),
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Box(
+                modifier = Modifier.size(36.dp).clip(CircleShape).background(Mint.copy(alpha = 0.18f)),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text("✎", color = Mint, fontSize = 18.sp)
+            }
+            Spacer(Modifier.width(9.dp))
+            Column(Modifier.weight(1f)) {
+                Text("MATERIAL INK", color = Lime, fontSize = 9.5.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.1.sp)
+                Text(
+                    "${doc.inkFamily.label} · ${doc.ink.size} stroke${if (doc.ink.size == 1) "" else "s"}",
+                    color = Cream,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Medium,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+                Text("Draw directly on the page. No bitmap is stored.", color = Dim, fontSize = 9.sp)
+            }
+            TactileBox(
+                onClick = onDone,
+                shape = RoundedCornerShape(99.dp),
+                background = Lime,
+                contentPadding = PaddingValues(horizontal = 12.dp),
+                haptic = true,
+                modifier = Modifier.height(42.dp).testTag("ink-done"),
+            ) {
+                Text("DONE", color = Ink, fontSize = 9.5.sp, fontWeight = FontWeight.Bold)
+            }
+        }
+        Spacer(Modifier.height(7.dp))
+        Row(
+            modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+            horizontalArrangement = Arrangement.spacedBy(5.dp),
+        ) {
+            HudChip("UNDO", enabled = doc.canUndo) { doc.undo() }
+            HudChip("REMOVE LAST", enabled = doc.ink.isNotEmpty()) { doc.removeLastInk() }
+            HudChip("CLEAR", warn = true, enabled = doc.ink.isNotEmpty()) { doc.clearInk() }
+        }
+        SliderRow(
+            label = "BRUSH WIDTH",
+            value = doc.inkWidth,
+            range = 0.012f..0.2f,
+            display = { "${(it * 100).toInt()}%" },
+            onChange = { doc.setInkBrushWidth(it) },
+        )
     }
 }
 
@@ -913,16 +995,20 @@ internal fun HudChip(
             active -> Mint
             else -> PanelRaised
         },
-        contentPadding = PaddingValues(horizontal = 10.dp),            modifier = Modifier.height(44.dp),
-        ) {
-            Text(
-                label,
-                color = when {
-                    !enabled -> Dim.copy(alpha = 0.5f)
-                    warn || active -> Ink
-                    else -> Cream
-                },
-                fontSize = 9.5.sp,
+        contentPadding = PaddingValues(horizontal = 10.dp),
+        modifier = Modifier.semantics {
+            contentDescription = label
+            role = Role.Button
+        },
+    ) {
+        Text(
+            label,
+            color = when {
+                !enabled -> Dim.copy(alpha = 0.5f)
+                warn || active -> Ink
+                else -> Cream
+            },
+            fontSize = 9.5.sp,
             fontWeight = FontWeight.Bold,
             letterSpacing = 0.35.sp,
         )
