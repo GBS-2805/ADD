@@ -133,6 +133,14 @@ Vercel's [Activity Log](https://vercel.com/docs/activity-log) is available on Ho
 
 ## Change log
 
+- **2026-11-11** — After the 3.9 publication, pruned 4 superseded deployments:
+  the 2 oldest `artbase` and the 2 oldest `artbase-handoff-apk`, keeping the newest
+  3 site builds and 2 APK builds and every live alias. Estimated storage fell from
+  566.0 MiB to 340.6 MiB, with no warnings. Evidence:
+  `artifacts/audit/prune-2026-11-11-before.json`,
+  `artifacts/audit/prune-2026-11-11-remove.log` and the one-day audit export
+  `artifacts/audit/vercel-activity-2026-11-11.jsonl`.
+
 - **2026-11-11** — After approval, pruned 61 deployments: the 5 oldest
   `artbase`, 7 oldest `artbase-handoff-apk`, and 49 oldest `artbase-shots`
   deployments, keeping the newest 3/2/10 and protecting every live alias.
