@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-10",
+  "generated": "2026-11-11",
   "tools": [
     {
       "id": "add",
@@ -28,11 +28,11 @@
         },
         {
           "label": "Download APK",
-          "href": "/ADD-3.6.apk"
+          "href": "/ADD-3.8.apk"
         }
       ],
-      "bytes": 6181148,
-      "sha256": "fe0148e5e0904654b67ba03e24ac6e8522377828c2e7ca7645adee0e0778beed"
+      "bytes": 17234552,
+      "sha256": "c47c2d5ed366301c30d56c1a44f78b0ef819efc9314e81b83c8eb0165716bf5b"
     }
   ]
 }
