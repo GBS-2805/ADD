@@ -127,7 +127,7 @@ fun EngineScreen() {
     LaunchedEffect(doc.layers, doc.zoom) {
         delay(700)
         DocumentStore.save(context, doc)
-        doc.markSaved(SimpleDateFormat("HH:mm", Locale.UK).format(Date()))
+        doc.markSaved(SimpleDateFormat("HH:mm", Locale.UK).format(Date(EngineClock.nowMillis())))
     }
     val sceneHandles = remember { mutableMapOf<String, SceneHandle>() }
     // The layer cache holds phone-sized bitmaps; let them go with the screen.

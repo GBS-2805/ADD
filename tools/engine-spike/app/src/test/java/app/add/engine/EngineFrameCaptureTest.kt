@@ -11,6 +11,8 @@ import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTouchInput
 import com.github.takahirom.roborazzi.captureRoboImage
 import java.io.File
+import org.junit.AfterClass
+import org.junit.BeforeClass
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -26,6 +28,20 @@ import org.robolectric.annotation.GraphicsMode
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(sdk = [35], qualifiers = "w411dp-h891dp-xxhdpi")
 class EngineFrameCaptureTest {
+    companion object {
+        @BeforeClass
+        @JvmStatic
+        fun freezeAutosaveClock() {
+            EngineClock.nowMillis = { 1_700_000_000_000L }
+        }
+
+        @AfterClass
+        @JvmStatic
+        fun restoreAutosaveClock() {
+            EngineClock.nowMillis = { System.currentTimeMillis() }
+        }
+    }
+
     @get:Rule
     val compose = createAndroidComposeRule<MainActivity>()
 
