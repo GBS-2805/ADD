@@ -147,6 +147,14 @@ async function main() {
     // A fresh text layer is selected and has a real frame over the canvas.
     await openTool(page, 'type');
     await page.click('#add');
+    await page.tap('#text');
+    await page.waitForTimeout(120);
+    const field = await page.evaluate(() => ({
+      active: document.activeElement && document.activeElement.id,
+      hidden: document.getElementById('peek').hidden
+    }));
+    assert.strictEqual(field.active, 'text', 'content field must keep focus');
+    assert.strictEqual(field.hidden, false, 'inspector must stay open while editing');
     await page.fill('#text', 'MOVE');
     await page.waitForFunction(() => window.__studioInteraction.state().selected === 'MOVE');
     await closeInspector(page);
@@ -280,6 +288,38 @@ async function main() {
     assert.strictEqual(played.path.plays, 1);
     assertClose(played.path.lastEnd.x, played.path.points.end.x, 'path playback end x', 1);
     assertClose(played.path.lastEnd.y, played.path.points.end.y, 'path playback end y', 1);
+
+    // Moving the layer after a curve exists must carry the curve with it. Without
+    // this, PLAY PATH snaps the layer back to the curve's old origin.
+    await page.click('#motionPathReset');
+    await page.waitForTimeout(100);
+    const beforeCarry = await state();
+    const carryFrame = await rect('#selection-frame');
+    const carryX = carryFrame.x + Math.min(28, carryFrame.width / 3);
+    const carryY = carryFrame.y + Math.min(18, carryFrame.height / 2);
+    await page.mouse.move(carryX, carryY);
+    await page.mouse.down();
+    await page.mouse.move(carryX + 28, carryY + 18, { steps: 12 });
+    await page.waitForTimeout(120);
+    await page.mouse.up();
+    await page.waitForTimeout(220);
+    const carried = await state();
+    const carryDx = carried.center.x - beforeCarry.center.x;
+    const carryDy = carried.center.y - beforeCarry.center.y;
+    assert.ok(carryDx > 4 && carryDy > 4, 'carry check needs a real layer move');
+    assertClose(carried.path.points.start.x, beforeCarry.path.points.start.x + carryDx, 'carried curve start x', 2);
+    assertClose(carried.path.points.start.y, beforeCarry.path.points.start.y + carryDy, 'carried curve start y', 2);
+    assertClose(carried.path.points.start.x, carried.center.x, 'curve start follows layer x', 2);
+    assertClose(carried.path.points.start.y, carried.center.y, 'curve start follows layer y', 2);
+    await page.click('#motionPathPlay');
+    await page.waitForTimeout(140);
+    const carryPlaying = await state();
+    assertClose(carryPlaying.motion.lastStart.x, carried.center.x, 'play starts at moved layer x', 1);
+    assertClose(carryPlaying.motion.lastStart.y, carried.center.y, 'play starts at moved layer y', 1);
+    await page.waitForFunction(() => window.__studioInteraction.state().path.playing === false, null, { timeout: 5000 });
+    const carryPlayed = await state();
+    assertClose(carryPlayed.path.lastEnd.x, carryPlayed.path.points.end.x, 'carried playback end x', 1);
+    assertClose(carryPlayed.path.lastEnd.y, carryPlayed.path.points.end.y, 'carried playback end y', 1);
 
     // Drag mid-animation. This must kill the tween, keep one Draggable, and start
     // the next gesture from the layer's real current position (not its pre-tween

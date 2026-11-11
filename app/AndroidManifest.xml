@@ -24,14 +24,19 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
 
-        <!-- The native compressor is no longer the way in: the app opens on the shelf
-             itself. It stays reachable from Android's own share sheet, which is how a
-             photo reaches it, and from Tools inside the bundled site. -->
+        <!-- The native screen is the way in. The shelf is one tap away in the side
+             tab; launching straight into its WebView made the app read as the website.
+             The compressor still takes shares from Android's own sheet. -->
         <activity
             android:name="add.MainActivity"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|uiMode"
             android:exported="true"
             android:label="ADD">
+
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
 
             <!-- Share a photo, or a handful, from any gallery or camera app. -->
             <intent-filter>
@@ -46,18 +51,13 @@
             </intent-filter>
         </activity>
 
-        <!-- The shelf, bundled whole: this is what the launcher opens. -->
+        <!-- The shelf, bundled whole: reached from the side tab, not the launcher. -->
         <activity
             android:name="add.ShelfActivity"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|uiMode"
             android:exported="true"
             android:label="ADD"
-            android:windowSoftInputMode="adjustResize">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
+            android:windowSoftInputMode="adjustResize" />
 
         <activity
             android:name="add.CompareActivity"

@@ -87,19 +87,40 @@
     peekClose.addEventListener('click', function () { setTool('move'); });
   }
 
+  // Android WebView can blur a field once while its keyboard or native select
+  // popup is taking focus. That blur made the inspector look like it flashed and
+  // closed. Put the reader back in the field they touched, unless they moved to
+  // another control or closed the inspector.
+  var keepFocus = null;
+  if (peek) {
+    peek.addEventListener('focusin', function (event) {
+      if (event.target && /^(INPUT|TEXTAREA|SELECT)$/.test(event.target.tagName)) {
+        keepFocus = event.target;
+      }
+    });
+    peek.addEventListener('focusout', function (event) {
+      if (event.target !== keepFocus) { return; }
+      var field = event.target;
+      window.setTimeout(function () {
+        if (peek.hidden || field.disabled || !field.isConnected) { return; }
+        if (document.activeElement && document.activeElement !== document.body) { return; }
+        field.focus({ preventScroll: true });
+      }, 0);
+    });
+    document.addEventListener('pointerdown', function (event) {
+      if (!peek.contains(event.target)) { keepFocus = null; }
+    }, true);
+  }
+
   document.addEventListener('keydown', function (event) {
     if (event.key === 'Escape' && active !== 'move') {
       setTool('move');
     }
   });
 
-  // Chrome yields to the artwork: a canvas touch closes the inspector but leaves
-  // the selected layer and its live frame intact.
-  if (window.StudioEngine && window.StudioEngine.canvas) {
-    window.StudioEngine.canvas.on('mouse:down', function () {
-      if (active !== 'move') { setTool('move'); }
-    });
-  }
+  // The inspector stays open until MOVE or CLOSE. A canvas touch used to dismiss
+  // it, which closed the TYPE sheet just as the reader reached for the content
+  // field. The selected layer and its live frame still remain intact.
 
   if (selection && peekSelection && window.MutationObserver) {
     var copy = function () {
