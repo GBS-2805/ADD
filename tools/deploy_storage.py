@@ -32,6 +32,9 @@ PROJECTS = (
 )
 COUNT_WARN = 40
 COUNT_CRIT = 80
+# Warn before the release gate's 512 MiB warning, so there is time to prune without
+# a deploy stopping to report the problem.
+SIZE_EARLY_WARN = 450 * 1024 ** 2
 SIZE_WARN = 512 * 1024 ** 2
 SIZE_CRIT = 1024 ** 3
 RETENTION_WARN_DAYS = 7
@@ -164,8 +167,9 @@ def report():
     total_estimate = sum(row["estimate"] for row in rows)
     print("%-20s %5d %5s %7s %18s %12s" %
           ("total", total_deployments, "", "", "", _size(total_estimate)))
-    print("thresholds: %d deployments per project, %s total estimated, %d-day retention" %
-          (COUNT_WARN, _size(SIZE_WARN), RETENTION_WARN_DAYS))
+    print("thresholds: %d deployments per project, %s early-warning / %s warning total, "
+          "%d-day retention"
+          % (COUNT_WARN, _size(SIZE_EARLY_WARN), _size(SIZE_WARN), RETENTION_WARN_DAYS))
 
     warnings = []
     critical = False
@@ -191,6 +195,10 @@ def report():
     elif total_estimate > SIZE_WARN:
         warnings.append("all projects estimate %s of output (over %s)" %
                         (_size(total_estimate), _size(SIZE_WARN)))
+    elif total_estimate > SIZE_EARLY_WARN:
+        warnings.append("all projects estimate %s of output (over the %s early warning; "
+                        "prune before the next release)" %
+                        (_size(total_estimate), _size(SIZE_EARLY_WARN)))
 
     if warnings:
         print("warnings:")

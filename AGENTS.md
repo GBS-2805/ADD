@@ -330,8 +330,8 @@ where the notes keep the history they shipped with.Icons, Fonts, Compress and th
   split and retention policy for `artbase`, `artbase-handoff`, `artbase-handoff-apk`
   and `artbase-shots`; `deploy_vercel.py` runs it before uploading, so a release that
   would add another full copy shows the result first. It warns above 40 retained
-  deployments, above 512 MiB of estimated output, or any retention window over 7
-  days. A critical count or estimate exits 2, and an unavailable report also stops
+  deployments, above 450 MiB of estimated output as an early warning, above 512 MiB,
+  or any retention window over 7 days. A critical count or estimate exits 2, and an unavailable report also stops
   `deploy_vercel.py` (strict gate). `deploy_review.py apk|handoff|shots|review`
   applies the same gate; `deploy_audit.py` exports deletion and retention events.
   `artbase-handoff-apk` serves the review APK from `artifacts/handoff-apk`, so a

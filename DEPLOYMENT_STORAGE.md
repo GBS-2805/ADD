@@ -9,9 +9,9 @@ not a compliance certificate.
 - Keep the newest **10** production deployments per project.
 - Retention is **1 day** for preview, production, canceled and errored deployments.
   Vercel rejected `3d`; `1d` is the shortest accepted value.
-- The gate warns above 40 deployments per project, 512 MiB estimated total, or 7-day
-  retention. It stops a release above 80 deployments per project, 1 GiB per project,
-  or 1 GiB estimated total.
+- The gate warns above 40 deployments per project, 450 MiB estimated total (early
+  warning), 512 MiB estimated total, or 7-day retention. It stops a release above 80
+  deployments per project, 1 GiB per project, or 1 GiB estimated total.
 - The size figure is an estimate: current output folder x retained deployments. Exact
   Deployment Storage bytes are dashboard-only on Hobby.
 
@@ -115,9 +115,10 @@ before/after state, CSV export, SIEM streaming, or immutable retention guarantee
 ## Scheduled audit check
 
 `.github/workflows/deploy-audit.yml` runs daily at **06:17 UTC** and can be dispatched
-manually. It exports the last day of deletion and retention events, fails when any
-deployment deletion is present, and uploads the JSONL as a 90-day GitHub artifact even
-when the check fails.
+manually. It first runs the storage report and posts a warning annotation at the
+450 MiB early threshold, then exports the last day of deletion and retention events,
+fails when any deployment deletion is present, and uploads the JSONL as a 90-day
+GitHub artifact even when the check fails.
 
 Add `VERCEL_ADMIN_TOKEN` (preferred) or `VERCEL_TOKEN` under repository Settings ->
 Secrets and variables -> Actions. Scheduled workflows only run from the default

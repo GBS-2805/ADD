@@ -38,6 +38,23 @@ jobs:
             echo "::error::Add VERCEL_ADMIN_TOKEN (preferred) or VERCEL_TOKEN under Settings -> Secrets and variables -> Actions."
             exit 1
           fi
+      - name: Check deployment storage headroom
+        env:
+          VERCEL_ADMIN_TOKEN: ${{ secrets.VERCEL_ADMIN_TOKEN }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/audit
+          python3 tools/deploy_storage.py | tee artifacts/audit/storage.txt
+          {
+            echo "### Deployment storage"
+            echo '```'
+            cat artifacts/audit/storage.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+          if grep -Eq 'early warning|over 512\.0 MiB' artifacts/audit/storage.txt; then
+            echo "::warning title=Deployment storage headroom::Estimated storage has crossed the 450 MiB early warning; prune older deployments before the next release."
+          fi
       - name: Check deletions and export activity
         env:
           VERCEL_ADMIN_TOKEN: ${{ secrets.VERCEL_ADMIN_TOKEN }}
