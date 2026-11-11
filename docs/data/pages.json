@@ -11,8 +11,8 @@
     },
     {
       "path": "/download/",
-      "title": "Download — ADD 3.8, one signed APK",
-      "description": "ADD 3.8 (16 MB): the whole shelf — every page, the icon browser, the fonts, the editor and the compressor — in one signed APK. Android 8.0+, SHA-256 listed, no store or account.",
+      "title": "Download — ADD 3.9, one signed APK",
+      "description": "ADD 3.9 (16 MB): the whole shelf — every page, the icon browser, the fonts, the editor and the compressor — in one signed APK. Android 8.0+, SHA-256 listed, no store or account.",
       "heading": "Download",
       "section": "download"
     },
@@ -88,8 +88,8 @@
     },
     {
       "path": "/releases/",
-      "title": "Releases — 51 builds, with the date and size of each",
-      "description": "Every build this shelf has shipped: 51 releases with the day and the APK size, read out of git.",
+      "title": "Releases — 52 builds, with the date and size of each",
+      "description": "Every build this shelf has shipped: 52 releases with the day and the APK size, read out of git.",
       "heading": "Releases",
       "section": "releases"
     },

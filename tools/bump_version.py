@@ -717,6 +717,11 @@ def main():
           % (app_name, old, old_code, new, new_code, old_apk, new_apk))
 
     tool.update({"version": new, "version_code": new_code, "apk": new_apk})
+    # The catalog's own link list is what build_catalog.py turns into the app data,
+    # so a stale href here survives every page rewrite.
+    for link in tool.get("links", []):
+        if link.get("href") == old_apk:
+            link["href"] = new_apk
     if not dry:
         CATALOG.write_text(json.dumps(catalog, indent=2, ensure_ascii=False) + "\n",
                            encoding="utf-8")
