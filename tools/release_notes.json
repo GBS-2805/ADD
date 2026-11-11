@@ -2,6 +2,12 @@
   "notes": [
     {
       "id": "add",
+      "version": "3.9",
+      "title": "The new type system",
+      "note": "Instrument Serif, Spectral and Libre Franklin across the native screens, Studio and Shelf, with the icon snippet field corrected."
+    },
+    {
+      "id": "add",
       "version": "3.8",
       "title": "The fourth palette",
       "note": "Ash joins green, Moss and Navy across the site and the app, band, page and chips alike."
