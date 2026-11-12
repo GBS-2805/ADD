@@ -80,6 +80,22 @@ async function capture() {
   const W = document.documentElement.clientWidth;
   const H = Math.max(document.documentElement.scrollHeight, document.body.scrollHeight);
 
+  // The icon sheet is an 18,000 px grid inside a 506 px scroll box. Its offscreen
+  // cards are not on the page, but they still have layout boxes; measuring them
+  // both bloats the SVG and lets fractional grid layout shift the bytes between
+  // runs. Reject anything wholly outside an ancestor's clipping rectangle.
+  const clipped = (el) => {
+    const r = el.getBoundingClientRect();
+    for (let p = el.parentElement; p && p !== document.body; p = p.parentElement) {
+      const s = getComputedStyle(p);
+      if (s.overflowX === "visible" && s.overflowY === "visible") continue;
+      const clip = p.getBoundingClientRect();
+      if (r.bottom <= clip.top || r.top >= clip.bottom ||
+          r.right <= clip.left || r.left >= clip.right) return true;
+    }
+    return false;
+  };
+
   const color = (c) => {
     if (!c) return null;
     const m = c.match(/rgba?\(([^)]+)\)/);
@@ -177,11 +193,13 @@ async function capture() {
         const g = getComputedStyle(n);
         if (g.display === "none" || g.visibility === "hidden") return NodeFilter.FILTER_REJECT;
         if (parseFloat(g.opacity) === 0) return NodeFilter.FILTER_REJECT;
+        if (clipped(n)) return NodeFilter.FILTER_REJECT;
         // An <svg> is visited so it can be rasterised as a whole; its own
         // children are zero-size boxes and emit nothing.
         return NodeFilter.FILTER_ACCEPT;
       }
       if (!n.nodeValue || !n.nodeValue.trim()) return NodeFilter.FILTER_REJECT;
+      if (!n.parentElement || clipped(n.parentElement)) return NodeFilter.FILTER_REJECT;
       return NodeFilter.FILTER_ACCEPT;
     },
   });

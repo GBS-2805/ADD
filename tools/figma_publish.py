@@ -351,10 +351,14 @@ def main():
     print("docs/figma: %d files, %.0f MB, listing written%s" % (
         len(wanted), total / 1e6, (", dropped " + ", ".join(dropped)) if dropped else ""))
 
-    budget = 10485760
-    docs = sum(p.stat().st_size for p in pathlib.Path("docs").rglob("*") if p.is_file())
-    note = "OVER BUDGET - the host will refuse this deploy" if docs > budget else "ok"
-    print("docs: %s of 10.0 MiB, %s left - %s" % (human(docs), human(abs(budget - docs)), note))
+    # Vercel's Hobby CLI limit is 100 MB of source per deployment (and 15,000 files).
+    budget = 100_000_000
+    files = [p for p in pathlib.Path("docs").rglob("*") if p.is_file()]
+    docs = sum(p.stat().st_size for p in files)
+    note = ("OVER 100 MB - the CLI will reject this deploy"
+            if docs > budget else "under the 100 MB limit")
+    print("docs: %.1f MB of 100.0 MB, %d files - %s"
+          % (docs / 1e6, len(files), note))
 
 
 if __name__ == "__main__":
