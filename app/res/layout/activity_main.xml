@@ -25,529 +25,522 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:paddingLeft="16dp"
-                android:paddingTop="16dp"
+                android:paddingTop="24dp"
                 android:paddingRight="16dp"
-                android:paddingBottom="24dp">
+                android:paddingBottom="26dp">
 
-        <!-- 1. ADD IMAGES -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:background="@drawable/bg_card"
-            android:orientation="vertical"
-            android:paddingLeft="14dp"
-            android:paddingTop="14dp"
-            android:paddingRight="14dp"
-            android:paddingBottom="18dp">
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:letterSpacing="0.01"
-                android:text="1. ADD IMAGES"
-                android:textColor="?attr/on"
-                android:textSize="21sp"
-                android:fontFamily="@font/instrument_serif" />
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:layout_marginTop="6dp"
-                android:layout_marginBottom="12dp"
-                android:background="?attr/rule" />
-
-            <LinearLayout
-                android:id="@+id/pickCard"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@drawable/bg_dropzone"
-                android:clickable="true"
-                android:focusable="true"
-                android:gravity="center_horizontal"
-                android:orientation="vertical"
-                android:paddingLeft="14dp"
-                android:paddingTop="16dp"
-                android:paddingRight="12dp"
-                android:paddingBottom="16dp">
-
+                <!-- The screen says what it is once. The photo, the settings and
+                     the action carry the rest of the hierarchy. -->
                 <TextView
-                    android:layout_width="46dp"
-                    android:layout_height="46dp"
-                    android:background="@drawable/bg_plus"
-                    android:gravity="center"
-                    android:text="+"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/instrument_serif"
+                    android:includeFontPadding="false"
+                    android:letterSpacing="-0.045"
+                    android:text="Compress."
                     android:textColor="?attr/on"
-                    android:textSize="22sp"
-                    android:fontFamily="@font/libre_franklin" />
+                    android:textSize="47sp" />
 
                 <TextView
-                    android:id="@+id/pickTitle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:fontFamily="@font/spectral_regular"
+                    android:lineSpacingExtra="2dp"
+                    android:text="Pick a photo. Keep the original. Save the copy."
+                    android:textColor="?attr/onDim"
+                    android:textSize="14sp" />
+
+                <!-- Photos -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="24dp"
+                    android:background="@drawable/bg_card"
+                    android:orientation="vertical"
+                    android:paddingLeft="14dp"
+                    android:paddingTop="14dp"
+                    android:paddingRight="14dp"
+                    android:paddingBottom="14dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:fontFamily="@font/libre_franklin"
+                            android:letterSpacing="0.12"
+                            android:text="PHOTOS"
+                            android:textColor="?attr/on"
+                            android:textSize="9.5sp" />
+
+                        <TextView
+                            android:id="@+id/clearAll"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:background="@drawable/bg_ghost"
+                            android:clickable="true"
+                            android:focusable="true"
+                            android:fontFamily="@font/libre_franklin"
+                            android:paddingLeft="9dp"
+                            android:paddingTop="5dp"
+                            android:paddingRight="9dp"
+                            android:paddingBottom="5dp"
+                            android:text="CLEAR ALL"
+                            android:textColor="?attr/on"
+                            android:textSize="10sp"
+                            android:visibility="gone" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/pickCard"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:background="@drawable/bg_dropzone"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:gravity="center_horizontal"
+                        android:orientation="vertical"
+                        android:paddingLeft="14dp"
+                        android:paddingTop="16dp"
+                        android:paddingRight="14dp"
+                        android:paddingBottom="17dp">
+
+                        <TextView
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:background="@drawable/bg_plus"
+                            android:fontFamily="@font/libre_franklin"
+                            android:gravity="center"
+                            android:text="+"
+                            android:textColor="?attr/on"
+                            android:textSize="20sp" />
+
+                        <TextView
+                            android:id="@+id/pickTitle"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="11dp"
+                            android:fontFamily="@font/instrument_serif"
+                            android:gravity="center"
+                            android:text="Select photos"
+                            android:textColor="?attr/on"
+                            android:textSize="18sp" />
+
+                        <TextView
+                            android:id="@+id/pickSub"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="5dp"
+                            android:fontFamily="@font/spectral_regular"
+                            android:gravity="center"
+                            android:text="JPG, PNG or WebP · multiple allowed"
+                            android:textColor="?attr/onDim"
+                            android:textSize="10.5sp" />
+                    </LinearLayout>
+
+                    <HorizontalScrollView
+                        android:id="@+id/pickedStrip"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:clipToPadding="false"
+                        android:scrollbars="none"
+                        android:visibility="gone">
+
+                        <LinearLayout
+                            android:id="@+id/pickedRow"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal" />
+                    </HorizontalScrollView>
+                </LinearLayout>
+
+                <!-- One settings block. The three choices are parts of the same
+                     output, not three numbered chapters. -->
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
-                    android:gravity="center"
-                    android:text="TAP TO PICK PHOTOS"
-                    android:textColor="?attr/on"
-                    android:textSize="15sp"
-                    android:fontFamily="@font/instrument_serif" />
+                    android:background="@drawable/bg_card"
+                    android:orientation="vertical"
+                    android:paddingLeft="14dp"
+                    android:paddingTop="14dp"
+                    android:paddingRight="14dp"
+                    android:paddingBottom="16dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/libre_franklin"
+                        android:letterSpacing="0.12"
+                        android:text="OUTPUT"
+                        android:textColor="?attr/on"
+                        android:textSize="9.5sp" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="13dp"
+                        android:fontFamily="@font/spectral_regular"
+                        android:text="Format"
+                        android:textColor="?attr/onDim"
+                        android:textSize="11sp" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="6dp"
+                        android:background="@drawable/bg_seg_track"
+                        android:orientation="horizontal"
+                        android:padding="4dp">
+
+                        <TextView
+                            android:id="@+id/formatJpeg"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:clickable="true"
+                            android:focusable="true"
+                            android:fontFamily="@font/libre_franklin"
+                            android:gravity="center"
+                            android:paddingTop="10dp"
+                            android:paddingBottom="10dp"
+                            android:text="JPEG"
+                            android:textSize="13sp" />
+
+                        <TextView
+                            android:id="@+id/formatWebp"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:clickable="true"
+                            android:focusable="true"
+                            android:fontFamily="@font/libre_franklin"
+                            android:gravity="center"
+                            android:paddingTop="10dp"
+                            android:paddingBottom="10dp"
+                            android:text="WebP"
+                            android:textSize="13sp" />
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/formatCaption"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="7dp"
+                        android:fontFamily="@font/spectral_regular"
+                        android:text="JPEG: widely compatible, great for photos"
+                        android:textColor="?attr/onDim"
+                        android:textSize="10.5sp" />
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:layout_marginTop="16dp"
+                        android:layout_marginBottom="13dp"
+                        android:background="?attr/rule" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/qualityHint"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:fontFamily="@font/spectral_regular"
+                            android:text="Excellent quality"
+                            android:textColor="?attr/onDim"
+                            android:textSize="11sp" />
+
+                        <TextView
+                            android:id="@+id/qualityValue"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="@font/instrument_serif"
+                            android:includeFontPadding="false"
+                            android:text="78%"
+                            android:textColor="?attr/on"
+                            android:textSize="24sp" />
+                    </LinearLayout>
+
+                    <SeekBar
+                        android:id="@+id/qualityBar"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:max="50"
+                        android:paddingLeft="0dp"
+                        android:paddingRight="0dp"
+                        android:progress="33"
+                        android:progressBackgroundTint="?attr/rule"
+                        android:progressTint="?attr/accent"
+                        android:thumbTint="?attr/accent" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:fontFamily="@font/libre_franklin"
+                            android:text="SMALLER"
+                            android:textColor="?attr/onDim"
+                            android:textSize="9sp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="@font/libre_franklin"
+                            android:text="SHARPER"
+                            android:textColor="?attr/onDim"
+                            android:textSize="9sp" />
+                    </LinearLayout>
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:layout_marginTop="16dp"
+                        android:layout_marginBottom="13dp"
+                        android:background="?attr/rule" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:fontFamily="@font/spectral_regular"
+                            android:text="Longest edge"
+                            android:textColor="?attr/onDim"
+                            android:textSize="11sp" />
+
+                        <TextView
+                            android:id="@+id/sizeValue"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="@font/instrument_serif"
+                            android:includeFontPadding="false"
+                            android:text="2560 px"
+                            android:textColor="?attr/on"
+                            android:textSize="24sp" />
+                    </LinearLayout>
+
+                    <SeekBar
+                        android:id="@+id/sizeBar"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:max="5"
+                        android:paddingLeft="0dp"
+                        android:paddingRight="0dp"
+                        android:progress="3"
+                        android:progressBackgroundTint="?attr/rule"
+                        android:progressTint="?attr/accent"
+                        android:thumbTint="?attr/accent" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:fontFamily="@font/libre_franklin"
+                            android:text="ORIGINAL"
+                            android:textColor="?attr/onDim"
+                            android:textSize="9sp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="@font/libre_franklin"
+                            android:text="4096 PX"
+                            android:textColor="?attr/onDim"
+                            android:textSize="9sp" />
+                    </LinearLayout>
+                </LinearLayout>
 
                 <TextView
-                    android:id="@+id/pickSub"
-                    android:layout_width="wrap_content"
+                    android:id="@+id/compressButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="18dp"
+                    android:background="@drawable/bg_primary"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:fontFamily="@font/libre_franklin"
+                    android:gravity="center"
+                    android:letterSpacing="0.06"
+                    android:paddingTop="17dp"
+                    android:paddingBottom="17dp"
+                    android:text="COMPRESS PHOTO"
+                    android:textColor="?attr/accentInk"
+                    android:textSize="14sp" />
+
+                <TextView
+                    android:id="@+id/previewButton"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    android:background="@drawable/bg_chip"
-                    android:paddingLeft="6dp"
-                    android:paddingTop="2dp"
-                    android:paddingRight="6dp"
-                    android:paddingBottom="2dp"
-                    android:text="JPG • PNG • WEBP — up to 40 files"
-                    android:textColor="?attr/accentInk"
-                    android:textSize="10.5sp"
-                android:fontFamily="@font/spectral_regular" />
-            </LinearLayout>
-
-            <HorizontalScrollView
-                android:id="@+id/pickedStrip"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:clipToPadding="false"
-                android:scrollbars="none"
-                android:visibility="gone">
-
-                <LinearLayout
-                    android:id="@+id/pickedRow"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal" />
-            </HorizontalScrollView>
-
-            <TextView
-                android:id="@+id/clearAll"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="end"
-                android:layout_marginTop="10dp"
-                android:background="@drawable/bg_ghost"
-                android:clickable="true"
-                android:focusable="true"
-                android:paddingLeft="10dp"
-                android:paddingTop="6dp"
-                android:paddingRight="10dp"
-                android:paddingBottom="6dp"
-                android:text="CLEAR ALL"
-                android:textColor="?attr/on"
-                android:textSize="11sp"
-                android:fontFamily="@font/libre_franklin"
-                android:visibility="gone" />
-        </LinearLayout>
-
-        <!-- 2. OUTPUT FORMAT -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="18dp"
-            android:background="@drawable/bg_card"
-            android:orientation="vertical"
-            android:paddingLeft="14dp"
-            android:paddingTop="14dp"
-            android:paddingRight="14dp"
-            android:paddingBottom="18dp">
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="2. OUTPUT FORMAT"
-                android:textColor="?attr/on"
-                android:textSize="21sp"
-                android:fontFamily="@font/instrument_serif" />
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:layout_marginTop="6dp"
-                android:layout_marginBottom="12dp"
-                android:background="?attr/rule" />
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@drawable/bg_seg_track"
-                android:orientation="horizontal"
-                android:padding="4dp">
-
-                <TextView
-                    android:id="@+id/formatJpeg"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
+                    android:background="@drawable/bg_ghost"
                     android:clickable="true"
                     android:focusable="true"
+                    android:fontFamily="@font/libre_franklin"
                     android:gravity="center"
-                    android:paddingTop="10dp"
-                    android:paddingBottom="10dp"
-                    android:text="JPEG"
-                    android:textSize="13sp"
-                    android:fontFamily="@font/libre_franklin" />
-
-                <TextView
-                    android:id="@+id/formatWebp"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:gravity="center"
-                    android:paddingTop="10dp"
-                    android:paddingBottom="10dp"
-                    android:text="WebP"
-                    android:textSize="13sp"
-                    android:fontFamily="@font/libre_franklin" />
-            </LinearLayout>
-
-            <TextView
-                android:id="@+id/formatCaption"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:text="JPEG: widely compatible, great for photos"
-                android:textColor="?attr/onDim"
-                android:textSize="10.5sp"
-                android:fontFamily="@font/spectral_regular" />
-        </LinearLayout>
-
-        <!-- 3. COMPRESSION -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="18dp"
-            android:background="@drawable/bg_card"
-            android:orientation="vertical"
-            android:paddingLeft="14dp"
-            android:paddingTop="14dp"
-            android:paddingRight="14dp"
-            android:paddingBottom="18dp">
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="3. COMPRESSION"
-                android:textColor="?attr/on"
-                android:textSize="21sp"
-                android:fontFamily="@font/instrument_serif" />
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:layout_marginTop="6dp"
-                android:layout_marginBottom="12dp"
-                android:background="?attr/rule" />
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:id="@+id/qualityHint"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Excellent quality"
-                    android:textColor="?attr/onDim"
-                    android:textSize="11sp"
-                android:fontFamily="@font/spectral_regular" />
-
-                <TextView
-                    android:id="@+id/qualityValue"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="78%"
+                    android:letterSpacing="0.06"
+                    android:paddingTop="13dp"
+                    android:paddingBottom="13dp"
+                    android:text="PREVIEW FIRST"
                     android:textColor="?attr/on"
-                    android:textSize="23sp"
-                    android:fontFamily="@font/instrument_serif" />
-            </LinearLayout>
-
-            <SeekBar
-                android:id="@+id/qualityBar"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="2dp"
-                android:max="50"
-                android:paddingLeft="0dp"
-                android:paddingRight="0dp"
-                android:progress="33"
-                android:progressBackgroundTint="?attr/rule"
-                android:progressTint="?attr/accent"
-                android:thumbTint="?attr/accent" />
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="45% (smallest)"
-                    android:textColor="?attr/onDim"
-                    android:textSize="10sp" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="95% (best)"
-                    android:textColor="?attr/onDim"
-                    android:textSize="10sp" />
-            </LinearLayout>
-        </LinearLayout>
-
-        <!-- 4. RESIZE -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="18dp"
-            android:background="@drawable/bg_card"
-            android:orientation="vertical"
-            android:paddingLeft="14dp"
-            android:paddingTop="14dp"
-            android:paddingRight="14dp"
-            android:paddingBottom="18dp">
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="4. RESIZE (OPTIONAL)"
-                android:textColor="?attr/on"
-                android:textSize="21sp"
-                android:fontFamily="@font/instrument_serif" />
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:layout_marginTop="6dp"
-                android:layout_marginBottom="12dp"
-                android:background="?attr/rule" />
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="LONGEST EDGE"
-                    android:textColor="?attr/onDim"
                     android:textSize="11sp" />
 
-                <TextView
-                    android:id="@+id/sizeValue"
-                    android:layout_width="wrap_content"
+                <LinearLayout
+                    android:id="@+id/statusRow"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="2560 px"
-                    android:textColor="?attr/on"
-                    android:textSize="23sp"
-                    android:fontFamily="@font/instrument_serif" />
-            </LinearLayout>
+                    android:layout_marginTop="12dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:visibility="gone">
 
-            <SeekBar
-                android:id="@+id/sizeBar"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="2dp"
-                android:max="5"
-                android:paddingLeft="0dp"
-                android:paddingRight="0dp"
-                android:progress="3"
-                android:progressBackgroundTint="?attr/rule"
-                android:progressTint="?attr/accent"
-                android:thumbTint="?attr/accent" />
+                    <ProgressBar
+                        android:id="@+id/progressBar"
+                        style="?android:attr/progressBarStyleSmall"
+                        android:layout_width="18dp"
+                        android:layout_height="18dp"
+                        android:indeterminateTint="?attr/accent" />
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                    <TextView
+                        android:id="@+id/statusText"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="10dp"
+                        android:layout_weight="1"
+                        android:fontFamily="@font/spectral_regular"
+                        android:text="Preparing…"
+                        android:textColor="?attr/onDim"
+                        android:textSize="11.5sp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="14dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/summaryText"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:fontFamily="@font/spectral_regular"
+                        android:textColor="?attr/on"
+                        android:textSize="14sp"
+                        android:visibility="gone" />
+
+                    <TextView
+                        android:id="@+id/shareAll"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/bg_ghost"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:fontFamily="@font/libre_franklin"
+                        android:paddingLeft="12dp"
+                        android:paddingTop="8dp"
+                        android:paddingRight="12dp"
+                        android:paddingBottom="8dp"
+                        android:text="SHARE ALL"
+                        android:textColor="?attr/on"
+                        android:textSize="10sp"
+                        android:visibility="gone" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/results"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:orientation="vertical" />
 
                 <TextView
-                    android:layout_width="0dp"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="ORIGINAL"
+                    android:layout_marginTop="16dp"
+                    android:fontFamily="@font/spectral_regular"
+                    android:lineSpacingExtra="3dp"
+                    android:text="Originals stay in your camera roll. Copies go to Pictures/Compress. Nothing is uploaded."
                     android:textColor="?attr/onDim"
-                    android:textSize="10sp" />
+                    android:textSize="10.5sp" />
 
-                <TextView
-                    android:layout_width="wrap_content"
+                <LinearLayout
+                    android:id="@+id/siteLink"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="4096 PX"
-                    android:textColor="?attr/onDim"
-                    android:textSize="10sp" />
-            </LinearLayout>
-        </LinearLayout>
+                    android:layout_marginTop="14dp"
+                    android:background="?android:attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:contentDescription="Open the website to download more apps"
+                    android:focusable="true"
+                    android:gravity="start|center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingTop="10dp"
+                    android:paddingBottom="10dp">
 
-        <TextView
-            android:id="@+id/previewButton"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:background="@drawable/bg_ghost"
-            android:clickable="true"
-            android:focusable="true"
-            android:gravity="center"
-            android:paddingTop="15dp"
-            android:paddingBottom="15dp"
-            android:text="PREVIEW BEFORE COMPRESSING"
-            android:textColor="?attr/on"
-            android:textSize="13.5sp"
-            android:fontFamily="@font/libre_franklin" />
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:contentDescription="@null"
+                        android:scaleType="fitCenter"
+                        android:src="@drawable/ic_mark"
+                        android:tint="?attr/on" />
 
-        <TextView
-            android:id="@+id/compressButton"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="14dp"
-            android:background="@drawable/bg_primary"
-            android:clickable="true"
-            android:focusable="true"
-            android:gravity="center"
-            android:paddingTop="17dp"
-            android:paddingBottom="17dp"
-            android:text="COMPRESS ALL"
-            android:textColor="?attr/accentInk"
-            android:textSize="16sp"
-            android:fontFamily="@font/libre_franklin" />
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="10dp"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
 
-        <LinearLayout
-            android:id="@+id/statusRow"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:visibility="gone">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="@font/libre_franklin"
+                            android:text="MORE APPS"
+                            android:textColor="?attr/on"
+                            android:textSize="10sp" />
 
-            <ProgressBar
-                android:id="@+id/progressBar"
-                style="?android:attr/progressBarStyleSmall"
-                android:layout_width="18dp"
-                android:layout_height="18dp"
-                android:indeterminateTint="?attr/accent" />
-
-            <TextView
-                android:id="@+id/statusText"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
-                android:layout_weight="1"
-                android:text="Preparing…"
-                android:textColor="?attr/onDim"
-                android:textSize="11.5sp" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
-
-            <TextView
-                android:id="@+id/summaryText"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:textColor="?attr/on"
-                android:textSize="14sp"
-                android:fontFamily="@font/spectral_regular"
-                android:visibility="gone" />
-
-            <TextView
-                android:id="@+id/shareAll"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@drawable/bg_ghost"
-                android:clickable="true"
-                android:focusable="true"
-                android:paddingLeft="12dp"
-                android:paddingTop="8dp"
-                android:paddingRight="12dp"
-                android:paddingBottom="8dp"
-                android:text="SHARE ALL"
-                android:textColor="?attr/on"
-                android:textSize="11sp"
-                android:fontFamily="@font/libre_franklin"
-                android:visibility="gone" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/results"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="18dp"
-            android:lineSpacingExtra="3dp"                android:text="Preview a slider on the first photo, compress, and copies land in Pictures/Compress. Originals stay untouched."
-                android:textColor="?attr/onDim"
-                android:textSize="10.5sp"
-                android:fontFamily="@font/spectral_regular" />
-
-        <!-- Brand footer: the mark plus the download page for the other apps. -->
-        <LinearLayout
-            android:id="@+id/siteLink"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="18dp"
-            android:background="?android:attr/selectableItemBackground"
-            android:clickable="true"
-            android:contentDescription="Open the website to download more apps"
-            android:focusable="true"
-            android:gravity="start|center_vertical"
-            android:orientation="horizontal"
-            android:paddingTop="10dp"
-            android:paddingBottom="10dp">
-
-            <ImageView
-                android:layout_width="26dp"
-                android:layout_height="26dp"
-                android:contentDescription="@null"
-                android:scaleType="fitCenter"
-                android:src="@drawable/ic_mark"
-                android:tint="?attr/on" />
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
-                android:layout_weight="1"
-                android:orientation="vertical">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="MORE APPS"
-                    android:textColor="?attr/on"
-                    android:textSize="11sp"
-                    android:fontFamily="@font/libre_franklin" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="2dp"
-                    android:text="TAP TO OPEN THE WEBSITE →"
-                    android:textColor="?attr/onDim"
-                    android:textSize="10sp" />
-            </LinearLayout>
-        </LinearLayout>
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:fontFamily="@font/libre_franklin"
+                            android:text="OPEN THE WEBSITE →"
+                            android:textColor="?attr/onDim"
+                            android:textSize="9sp" />
+                    </LinearLayout>
+                </LinearLayout>
             </LinearLayout>
         </LinearLayout>
     </ScrollView>
