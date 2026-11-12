@@ -44,6 +44,10 @@ BOARDS = ROOT / "figma"
 DERIVED = ("site-figma.svg", "pantone.svg")
 PHONE_ICONS = ("16-icons-lineicons-phone.svg", "17-icons-coolicons-phone.svg",
                "18-icons-streamline-phone.svg")
+SEARCH_BOARDS = ("04-icons-lineicons-desktop.svg", "05-icons-coolicons-desktop.svg",
+                 "06-icons-streamline-desktop.svg", "16-icons-lineicons-phone.svg",
+                 "17-icons-coolicons-phone.svg", "18-icons-streamline-phone.svg")
+SEARCH_PLACEHOLDER = "Search by name"
 HOVER_BOARDS = ("25-index-menu-desktop.svg", "26-index-drawer-desktop.svg",
                 "27-index-menu-phone.svg", "28-index-drawer-phone.svg")
 TEXT_RE = re.compile(r"<text\b([^>]*)>(.*?)</text>")
@@ -93,6 +97,21 @@ def unstable_boards(first, second, names=PHONE_ICONS):
     return [name for name in names
             if not (second / name).is_file()
             or (first / name).read_bytes() != (second / name).read_bytes()]
+
+
+def placeholder_problems(directory, names=SEARCH_BOARDS, text=SEARCH_PLACEHOLDER):
+    """Icon boards that do not carry exactly one visible search placeholder."""
+    found = []
+    for name in names:
+        path = directory / name
+        if not path.is_file():
+            found.append((name, "board missing"))
+            continue
+        count = sum(1 for match in TEXT_RE.finditer(path.read_text(encoding="utf-8"))
+                    if html.unescape(match.group(2)).strip() == text)
+        if count != 1:
+            found.append((name, "%d copies" % count))
+    return found
 
 
 def hover_twins(svg):
@@ -153,13 +172,16 @@ def main():
     hidden = [(name, hover_twins((scratch / name).read_text(encoding="utf-8")))
               for name in HOVER_BOARDS if (scratch / name).is_file()]
     hidden = [(name, found) for name, found in hidden if found]
+    placeholders = placeholder_problems(scratch)
     shutil.rmtree(scratch, ignore_errors=True)
 
-    if stale or missing or unknown or unstable or hidden:
+    if stale or missing or unknown or unstable or hidden or placeholders:
         print("artboards: FAILED - %d board(s) no longer match the pages, "
               "%d phone icon board(s) not byte-identical between exports, "
-              "%d menu/drawer board(s) still emit clipped hover twins"
-              % (len(stale) + len(missing) + len(unknown), len(unstable), len(hidden)))
+              "%d menu/drawer board(s) still emit clipped hover twins, "
+              "%d icon board(s) without one search placeholder"
+              % (len(stale) + len(missing) + len(unknown), len(unstable), len(hidden),
+                 len(placeholders)))
         for name in stale:
             print("  stale    figma/%s" % name)
         for name in missing:
@@ -171,13 +193,16 @@ def main():
         for name, found in hidden:
             labels = ", ".join("%s %.2f/%.2f" % hit for hit in found)
             print("  hidden   figma/%s (repeated one line down: %s)" % (name, labels))
+        for name, problem in placeholders:
+            print("  placeholder figma/%s (%s; expected one %r text run)"
+                  % (name, problem, SEARCH_PLACEHOLDER))
         print("  fix: node tools/figma_export.js <base> figma, then figma_bundle.py, "
               "then figma_publish.py")
         return 1
     print("artboards: OK - %d boards match the pages; %d phone icon boards "
           "byte-identical across two exports; no clipped hover twins in %d "
-          "menu/drawer boards"
-          % (len(kept), len(PHONE_ICONS), len(HOVER_BOARDS)))
+          "menu/drawer boards; search placeholder in %d icon boards"
+          % (len(kept), len(PHONE_ICONS), len(HOVER_BOARDS), len(SEARCH_BOARDS)))
     return 0
 
 

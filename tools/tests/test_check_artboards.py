@@ -13,6 +13,39 @@ def label(text, x, y):
     return '<text x="%s" y="%s" %s>%s</text>' % (x, y, HOVER_STYLE, text)
 
 
+class SearchPlaceholderTest(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.boards = Path(self.tmp.name)
+        for name in check_artboards.SEARCH_BOARDS:
+            (self.boards / name).write_text(
+                '<svg><text x="1" y="2">Search by name</text></svg>\n',
+                encoding="utf-8")
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def test_committed_icon_boards_keep_the_placeholder(self):
+        self.assertEqual(check_artboards.placeholder_problems(check_artboards.BOARDS), [])
+
+    def test_all_icon_boards_with_one_placeholder_are_accepted(self):
+        self.assertEqual(check_artboards.placeholder_problems(self.boards), [])
+
+    def test_board_without_the_placeholder_is_reported(self):
+        name = check_artboards.SEARCH_BOARDS[2]
+        (self.boards / name).write_text("<svg></svg>\n", encoding="utf-8")
+        self.assertEqual(check_artboards.placeholder_problems(self.boards),
+                         [(name, "0 copies")])
+
+    def test_duplicated_placeholder_is_reported(self):
+        name = check_artboards.SEARCH_BOARDS[-1]
+        (self.boards / name).write_text(
+            '<svg><text>Search by name</text><text>Search by name</text></svg>\n',
+            encoding="utf-8")
+        self.assertEqual(check_artboards.placeholder_problems(self.boards),
+                         [(name, "2 copies")])
+
+
 class HiddenHoverTwinTest(unittest.TestCase):
     def test_old_clipped_twin_pattern_is_reported(self):
         svg = "\n".join([label("ICONS", 0, 142.55), label("ICONS", 0, 155.61)])
