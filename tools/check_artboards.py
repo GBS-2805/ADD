@@ -27,7 +27,9 @@ Needs the render toolchain that `tools/render_env.py` builds, like the rendered 
 `tools/check_palette.py`.
 """
 
+import html
 import os
+import re
 import shutil
 import socket
 import subprocess
@@ -42,6 +44,10 @@ BOARDS = ROOT / "figma"
 DERIVED = ("site-figma.svg", "pantone.svg")
 PHONE_ICONS = ("16-icons-lineicons-phone.svg", "17-icons-coolicons-phone.svg",
                "18-icons-streamline-phone.svg")
+HOVER_BOARDS = ("25-index-menu-desktop.svg", "26-index-drawer-desktop.svg",
+                "27-index-menu-phone.svg", "28-index-drawer-phone.svg")
+TEXT_RE = re.compile(r"<text\b([^>]*)>(.*?)</text>")
+ATTR_RE = re.compile(r'([\w:-]+)="([^"]*)"')
 
 # Chromium lives outside node's own lookup path on a bare box: the module and the
 # browsers are installed under /tmp by tools/render_env.py, with their libs unpacked
@@ -89,6 +95,36 @@ def unstable_boards(first, second, names=PHONE_ICONS):
             or (first / name).read_bytes() != (second / name).read_bytes()]
 
 
+def hover_twins(svg):
+    """Repeated labels one line apart, the signature of an emitted hover twin.
+
+    `.roll-a` and `.roll-b` share text, x and type; the hidden twin sits 110% of a
+    1.25 line box lower and is clipped by `.roll`. If the exporter stops rejecting
+    clipped nodes, both copies land in the menu/drawer boards as text runs at the
+    same x separated by 13.06-13.07 px.
+    """
+    lines = {}
+    for match in TEXT_RE.finditer(svg):
+        attrs = dict(ATTR_RE.findall(match.group(1)))
+        try:
+            y = float(attrs["y"])
+        except (KeyError, ValueError):
+            continue
+        key = (attrs.get("x"), html.unescape(match.group(2)),
+               attrs.get("font-family"), attrs.get("font-size"),
+               attrs.get("font-weight"), attrs.get("letter-spacing"),
+               attrs.get("fill"))
+        lines.setdefault(key, []).append(y)
+
+    found = []
+    for key, ys in lines.items():
+        ys = sorted(ys)
+        for first, second in zip(ys, ys[1:]):
+            if 12 <= second - first <= 14:
+                found.append((key[1], round(first, 2), round(second, 2)))
+    return found
+
+
 def main():
     scratch = Path(tempfile.mkdtemp(prefix="artboards-"))
     port = free_port()
@@ -114,12 +150,16 @@ def main():
     missing = [name for name in sorted(kept) if name not in written]
     unknown = [name for name in sorted(written) if name not in kept]
     unstable = unstable_boards(scratch, scratch / "rerun")
+    hidden = [(name, hover_twins((scratch / name).read_text(encoding="utf-8")))
+              for name in HOVER_BOARDS if (scratch / name).is_file()]
+    hidden = [(name, found) for name, found in hidden if found]
     shutil.rmtree(scratch, ignore_errors=True)
 
-    if stale or missing or unknown or unstable:
+    if stale or missing or unknown or unstable or hidden:
         print("artboards: FAILED - %d board(s) no longer match the pages, "
-              "%d phone icon board(s) not byte-identical between exports"
-              % (len(stale) + len(missing) + len(unknown), len(unstable)))
+              "%d phone icon board(s) not byte-identical between exports, "
+              "%d menu/drawer board(s) still emit clipped hover twins"
+              % (len(stale) + len(missing) + len(unknown), len(unstable), len(hidden)))
         for name in stale:
             print("  stale    figma/%s" % name)
         for name in missing:
@@ -128,11 +168,16 @@ def main():
             print("  unknown  %s (exported, not tracked in figma/)" % name)
         for name in unstable:
             print("  unstable figma/%s (two exports disagree)" % name)
+        for name, found in hidden:
+            labels = ", ".join("%s %.2f/%.2f" % hit for hit in found)
+            print("  hidden   figma/%s (repeated one line down: %s)" % (name, labels))
         print("  fix: node tools/figma_export.js <base> figma, then figma_bundle.py, "
               "then figma_publish.py")
         return 1
     print("artboards: OK - %d boards match the pages; %d phone icon boards "
-          "byte-identical across two exports" % (len(kept), len(PHONE_ICONS)))
+          "byte-identical across two exports; no clipped hover twins in %d "
+          "menu/drawer boards"
+          % (len(kept), len(PHONE_ICONS), len(HOVER_BOARDS)))
     return 0
 
 

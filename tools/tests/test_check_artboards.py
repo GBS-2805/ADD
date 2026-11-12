@@ -5,6 +5,33 @@ from pathlib import Path
 from tools import check_artboards
 
 
+HOVER_STYLE = ('font-family="Poppins" font-size="9.5" font-weight="400" '
+               'letter-spacing="1.14" fill="#5f5550"')
+
+
+def label(text, x, y):
+    return '<text x="%s" y="%s" %s>%s</text>' % (x, y, HOVER_STYLE, text)
+
+
+class HiddenHoverTwinTest(unittest.TestCase):
+    def test_old_clipped_twin_pattern_is_reported(self):
+        svg = "\n".join([label("ICONS", 0, 142.55), label("ICONS", 0, 155.61)])
+        self.assertEqual(check_artboards.hover_twins(svg),
+                         [("ICONS", 142.55, 155.61)])
+
+    def test_single_visible_label_is_accepted(self):
+        svg = "\n".join([label("ICONS", 0, 142.55), label("FONTS", 0, 191.05)])
+        self.assertEqual(check_artboards.hover_twins(svg), [])
+
+    def test_same_label_at_another_x_is_accepted(self):
+        svg = "\n".join([label("ICONS", 0, 142.55), label("ICONS", 60, 155.61)])
+        self.assertEqual(check_artboards.hover_twins(svg), [])
+
+    def test_same_label_far_below_is_accepted(self):
+        svg = "\n".join([label("ICONS", 0, 142.55), label("ICONS", 0, 191.05)])
+        self.assertEqual(check_artboards.hover_twins(svg), [])
+
+
 class PhoneIconDeterminismTest(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
