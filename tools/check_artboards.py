@@ -12,6 +12,11 @@ the newest board's, which one late re-export is enough to make look fresh.
 
 So this gate re-exports instead of guessing: it serves docs/, runs
 `tools/figma_export.js` into a scratch folder and compares the bytes with `figma/`.
+It then exports a second time and requires the three long phone icon boards to be
+byte-identical between the two runs. Those boards once drifted by a fraction of a
+pixel because offscreen cards in a clipped scroll box were being measured; one
+export matching the commit is not enough to prove the next one will.
+
 The export is deterministic and takes about ten seconds, so "current" means what it
 should -- the exporter would write this same file today.
 
@@ -35,6 +40,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 BOARDS = ROOT / "figma"
 DERIVED = ("site-figma.svg", "pantone.svg")
+PHONE_ICONS = ("16-icons-lineicons-phone.svg", "17-icons-coolicons-phone.svg",
+               "18-icons-streamline-phone.svg")
 
 # Chromium lives outside node's own lookup path on a bare box: the module and the
 # browsers are installed under /tmp by tools/render_env.py, with their libs unpacked
@@ -75,6 +82,13 @@ def export(base, target):
                          "(python3 tools/render_env.py)\n  " + "\n  ".join(tail))
 
 
+def unstable_boards(first, second, names=PHONE_ICONS):
+    """Phone icon boards whose bytes differ between two exports."""
+    return [name for name in names
+            if not (second / name).is_file()
+            or (first / name).read_bytes() != (second / name).read_bytes()]
+
+
 def main():
     scratch = Path(tempfile.mkdtemp(prefix="artboards-"))
     port = free_port()
@@ -85,6 +99,7 @@ def main():
     try:
         wait_for(base)
         export(base, scratch)
+        export(base, scratch / "rerun")
     finally:
         server.terminate()
         try:
@@ -98,21 +113,26 @@ def main():
              if name in written and written[name].read_bytes() != kept[name].read_bytes()]
     missing = [name for name in sorted(kept) if name not in written]
     unknown = [name for name in sorted(written) if name not in kept]
+    unstable = unstable_boards(scratch, scratch / "rerun")
     shutil.rmtree(scratch, ignore_errors=True)
 
-    if stale or missing or unknown:
-        print("artboards: FAILED - %d board(s) no longer match the pages"
-              % (len(stale) + len(missing) + len(unknown)))
+    if stale or missing or unknown or unstable:
+        print("artboards: FAILED - %d board(s) no longer match the pages, "
+              "%d phone icon board(s) not byte-identical between exports"
+              % (len(stale) + len(missing) + len(unknown), len(unstable)))
         for name in stale:
             print("  stale    figma/%s" % name)
         for name in missing:
             print("  missing  figma/%s (the exporter wrote no board by that name)" % name)
         for name in unknown:
             print("  unknown  %s (exported, not tracked in figma/)" % name)
+        for name in unstable:
+            print("  unstable figma/%s (two exports disagree)" % name)
         print("  fix: node tools/figma_export.js <base> figma, then figma_bundle.py, "
               "then figma_publish.py")
         return 1
-    print("artboards: OK - %d boards match the pages" % len(kept))
+    print("artboards: OK - %d boards match the pages; %d phone icon boards "
+          "byte-identical across two exports" % (len(kept), len(PHONE_ICONS)))
     return 0
 
 
