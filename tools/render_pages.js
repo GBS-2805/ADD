@@ -34,33 +34,33 @@ const iconTotal = (() => {
 })();
 
 const shots = [
-  { name: "page-home-full", page: "", w: 1300, h: 900, full: true, title: "Index, full height", caption: "The material, the one app and the palette." },
-  { name: "page-menu", page: "", w: 1300, h: 900, open: "#menuBtn", title: "Left pull-down", caption: "Index, icons, fonts and tools, one row each." },
+  { name: "page-home-full", page: "", w: 1300, h: 900, full: true, title: "Index, full height", caption: "The shelf, the one app and the paper." },
+  { name: "page-menu", page: "", w: 1300, h: 900, open: "#menuBtn", title: "Left pull-down", caption: "Index, resources, download and handoff, one row each." },
   { name: "page-drawer", page: "", w: 1300, h: 900, open: "#burger", title: "Right side tab", caption: "Download, portfolio and renders over the scrim." },
-  { name: "page-tools", page: "tools/", w: 1300, h: 900, title: "Tools", caption: "One app, four tools, and one quiet line to where the app lives." },
-  { name: "page-icons", page: "icons/", w: 1300, h: 900, title: "Icons app page", caption: "The icon brand landing: four brands and what each set does." },
+  { name: "page-tools", page: "tools/", w: 1300, h: 900, title: "Resources", caption: "Icons, fonts and the engine, with one quiet line to the app." },
+  { name: "page-icons", page: "icons/", w: 1300, h: 900, full: true, title: "Icons database", caption: "A two-line serif hero, a searchable outline grid and the four sets, one row each." },
   { name: "page-icons-brand", page: "icons/coolicons/", w: 1300, h: 900, title: "Coolicons · preview", caption: "The stage is the preview: weight, surface and export size beside it." },
   { name: "page-icons-panel", page: "icons/coolicons/", w: 1300, h: 900, panel: true, scroll: "panel", title: "Coolicons · the set", caption: "All 1,258 icons behind one toggle, scrolling in their own sheet." },
   { name: "page-icons-variants", page: "icons/coolicons/", w: 1300, h: 900, panel: true, pick: 6, weight: "2.5", surface: "white", title: "Coolicons · variants", caption: "Heaviest line on the white tile: the same file, repainted live." },
   { name: "page-icons-streamline", page: "icons/streamline/", w: 1300, h: 900, panel: true, scroll: "stage", title: "Streamline \u00b7 four styles", caption: "One brand, four styles: Line selected, with the Style row above the preview and the set opened below." },
   { name: "page-icons-streamline-duo", page: "icons/streamline/", w: 1300, h: 900, panel: true, style: "duo", scroll: "stage", title: "Streamline \u00b7 Duo", caption: "The same 997 drawings in Duo, keeping Streamline's own two-tone palette." },
-  { name: "page-icons-ink", page: "icons/streamline/", w: 1300, h: 900, panel: true, ink: "#0e9f6e", scroll: "stage", title: "Streamline \u00b7 green ink", caption: "The Colour row at work: the Line set and its sheet drawn in the chosen ink." },  { name: "page-icons-categories", page: "icons/coolicons/", w: 1300, h: 900, panel: true, category: "System", scroll: "panel", title: "Coolicons · categories", caption: "The vendor's own 30 categories: System narrows the sheet to 102 icons." },
+  { name: "page-icons-ink", page: "icons/streamline/", w: 1300, h: 900, panel: true, ink: "#000000", surface: "white", scroll: "stage", title: "Streamline \u00b7 black ink", caption: "The Colour row at work: black ink on the white stage." },  { name: "page-icons-categories", page: "icons/coolicons/", w: 1300, h: 900, panel: true, category: "System", scroll: "panel", title: "Coolicons · categories", caption: "The vendor's own 30 categories: System narrows the sheet to 102 icons." },
   { name: "page-all", page: "icons/all/", w: 1300, h: 900, full: true, title: "All brands \u00b7 one per category", caption: "Four brands, the three categorized sheets opening with the same three shared categories." },
   { name: "page-lineicons-categories", page: "icons/lineicons/", w: 1300, h: 900, panel: true, category: "Brands & Logos", scroll: "panel", title: "Lineicons · categories", caption: "The other brand's own 51 categories: Brands & Logos holds 244 of its 606 icons." },
-  { name: "page-fonts", page: "fonts/", w: 1300, h: 900, full: true, title: "Fonts", caption: "Poppins 400, 500 and 600 with live specimens, the type-your-own preview and the wiring." },
-  { name: "page-portfolio", page: "portfolio/", w: 1300, h: 900, title: "Portfolio", caption: "The app, the browser and the site, with what was built in each." },
+  { name: "page-fonts", page: "fonts/", w: 1300, h: 900, full: true, title: "Fonts database", caption: "Eight families, one specimen row each, with a live try line and a size slider." },
+  { name: "page-portfolio", page: "portfolio/", w: 1300, h: 900, title: "Portfolio", caption: "Resources, download and handoff: the three ways into the shelf." },
   { name: "page-download", page: "download/", w: 1300, h: 900, full: true, title: "Download", caption: "The signed APK, its measured size and SHA-256, with the font packs below." },
   { name: "phone-download-packs", page: "download/", w: 390, h: 844, scroll: "font-packs", title: "Font packs on a phone", caption: "The signed packs at the foot of Download, the only place a file is handed out." },
   { name: "phone-icons-sheet", page: "icons/coolicons/", w: 390, h: 844, scroll: "sheet", title: "Coolicons · shut sheet", caption: "Shut, the set is one complete row with a closed edge." },
   { name: "phone-lineicons-sheet", page: "icons/lineicons/", w: 390, h: 844, panel: true, category: "Arrows", scroll: "panel", title: "Lineicons · categories on a phone", caption: "The same picker on the other brand, stacked under the name filter at 390 wide." },
   { name: "phone-home-full", page: "", w: 390, h: 844, full: true, title: "Index, phone, full height", caption: "The whole landing page at phone width." },
-  { name: "phone-menu", page: "", w: 390, h: 844, open: "#menuBtn", title: "Phone pull-down", caption: "Four rows under the band, counts on the right." },
+  { name: "phone-menu", page: "", w: 390, h: 844, open: "#menuBtn", title: "Phone pull-down", caption: "Index, resources, download and handoff under the band." },
   { name: "phone-drawer", page: "", w: 390, h: 844, open: "#burger", title: "Phone side tab", caption: "The tab keeps the page visible behind it." },
-  { name: "phone-icons", page: "icons/", w: 390, h: 844, title: "Icons on a phone", caption: "The app page at phone width." },
+  { name: "phone-icons", page: "icons/", w: 390, h: 844, full: true, title: "Icons on a phone", caption: "The hero, the searchable five-across icon grid and the four set rows at 390 wide." },
   { name: "phone-icons-brand", page: "icons/coolicons/", w: 390, h: 844, panel: true, pick: 2, scroll: "stage", title: "Coolicons on a phone", caption: "Preview, variant rows, and the set opened below." },
   { name: "phone-icons-streamline", page: "icons/streamline/", w: 390, h: 844, panel: true, pick: 2, style: "flat", scroll: "stage", title: "Streamline on a phone", caption: "Four style buttons above the preview; the set opens below." },
   { name: "phone-all", page: "icons/all/", w: 390, h: 844, full: true, title: "All brands on a phone", caption: "Four sheets stacked at 390 wide, four across." },
-  { name: "phone-fonts", page: "fonts/", w: 390, h: 844, full: true, title: "Fonts on a phone", caption: "The three faces and the type-your-own preview stacked at 390 wide." },
+  { name: "phone-fonts", page: "fonts/", w: 390, h: 844, title: "Fonts on a phone", caption: "The specimen, its size slider and the visible style list at 390 wide." },
   { name: "page-releases", page: "releases/", w: 1300, h: 900, title: "Releases", caption: "Every build the shelf has shipped, newest first, with the day, the size and the note." },
   { name: "phone-releases", page: "releases/", w: 390, h: 844, title: "Releases on a phone", caption: "The newest builds at 390 wide: the fold of a history that runs to 7,398 px." },
   { name: "page-compress", page: "compress/", w: 1300, h: 900, title: "Compress", caption: "The app's compressor as a web tool: photos, format, quality and the longest edge, with nothing uploaded." },
@@ -75,9 +75,8 @@ const extras = [];
 const escape = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;");
 
 (async () => {
-  // The gallery follows the page's own default now, which is dark: nothing is seeded
-  // unless a review asks for a mode (RENDERS_THEME=light|dark) or for a handful of
-  // shots (RENDERS_ONLY=a,b).
+  // The site is one fixed newsprint edition now, so there is no theme to seed.
+  // RENDERS_ONLY still limits a review to a handful of shots.
   const REQUESTED = process.env.RENDERS_THEME;
   const THEME = REQUESTED === "light" || REQUESTED === "dark" ? REQUESTED : "";
   const ONLY = (process.env.RENDERS_ONLY || "").split(",").map((n) => n.trim()).filter(Boolean);
@@ -113,8 +112,11 @@ const escape = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/
       await page.waitForTimeout(320);
     }
     if (s.panel) {
-      await page.click("#panelToggle");
-      await page.waitForTimeout(280);
+      const toggle = page.locator("#panelToggle");
+      if (await toggle.count() && await toggle.isVisible().catch(() => false)) {
+        await toggle.click();
+        await page.waitForTimeout(280);
+      }
     }
     if (s.style) {
       await page.click(`#styleSegs .seg[data-style="${s.style}"]`);
@@ -137,14 +139,17 @@ const escape = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/
       await page.waitForTimeout(320);
     }
     if (s.category) {
-      await page.click("#catBtn");
-      await page.waitForTimeout(120);
-      await page.evaluate((name) => {
-        const hit = Array.from(document.querySelectorAll(".cat-item"))
-          .find((b) => b.textContent.trim().startsWith(name));
-        if (hit) hit.click();
-      }, s.category);
-      await page.waitForTimeout(200);
+      const catBtn = page.locator("#catBtn");
+      if (await catBtn.count() && await catBtn.isVisible().catch(() => false)) {
+        await catBtn.click();
+        await page.waitForTimeout(120);
+        await page.evaluate((name) => {
+          const hit = Array.from(document.querySelectorAll(".cat-item"))
+            .find((b) => b.textContent.trim().startsWith(name));
+          if (hit) hit.click();
+        }, s.category);
+        await page.waitForTimeout(200);
+      }
     }
     if (s.scroll) {
       await page.evaluate((target) => {
@@ -216,7 +221,7 @@ const escape = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/
       console.log("removed orphan", file);
     }
   }
-  const GROUP_OF = { "": "Index", "tools/": "Tools", "icons/": "Icons app page",
+  const GROUP_OF = { "": "Index", "tools/": "Resources", "icons/": "Icons app page",
     "icons/coolicons/": "Coolicons", "icons/lineicons/": "Lineicons",
     "icons/all/": "All brands", "icons/streamline/": "Streamline", "fonts/": "Fonts",
     "portfolio/": "Portfolio", "download/": "Download", "releases/": "Releases",
@@ -250,7 +255,7 @@ const escape = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<meta name="theme-color" content="#0fbf92" />
+<meta name="theme-color" content="#f0e7d4" />
 <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml" />
 <title>Renders — __COUNT__ captures of this site</title>
 <meta name="description" content="__COUNT__ screenshots of the shelf in headless Chromium, at 1300 wide and 390 on a phone." />
@@ -267,9 +272,9 @@ const escape = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/
   .group > h2 span { margin-left: 10px; font-size: 14px; color: var(--on-dim); }
   .group[hidden] { display: none; }
   .figs { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 34px; }
-  figure { margin: 0; display: flex; flex-direction: column; border: 1px solid var(--rule); background: rgba(0, 0, 0, .16); }
+  figure { margin: 0; display: flex; flex-direction: column; border: 1px solid var(--rule); background: var(--tint); }
   figure h3 { margin: 0; padding: 16px 18px 14px; font-size: 18px; font-weight: 500; line-height: 1.3; border-bottom: 1px solid var(--rule); }
-  figure img { display: block; width: 100%; height: auto; border-bottom: 1px solid var(--rule); background: #2c3769; }
+  figure img { display: block; width: 100%; height: auto; border-bottom: 1px solid var(--rule); background: var(--page); }
   .cap { margin: 0; padding: 14px 18px 18px; font-size: 13px; line-height: 1.55; color: var(--on-dim); }
   .wide { grid-column: 1 / -1; }
   @media (max-width: 700px) { .figs { grid-template-columns: 1fr; gap: 24px; } figure h3 { font-size: 17px; } }
@@ -278,7 +283,7 @@ const escape = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/
 <body>
 
 <header class="bar">
-  <div class="lead">
+<div class="lead">
     <button class="menu-btn" id="menuBtn" type="button" aria-expanded="false" aria-controls="menu" aria-label="Open sections">
       <svg class="chev" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M8 13L12 17L16 13M8 7L12 11L16 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
     </button>
@@ -287,29 +292,25 @@ const escape = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/
 
   <a class="mark" href="../" aria-label="ADD — home">
     <svg viewBox="0 0 120.6 123.11" role="img" aria-label="ADD logo" fill="currentColor">
-      <path d="m29.58,61.92c.11,1.85.17,3.7.36,5.54.11,1.02-.23,1.23-1.19,1.29-4.47.26-5.38,1.22-5.27,5.67.13,5.14,2.74,9.13,6.27,12.56,1.53,1.49,2.96,1.05,3.89-.88.61-1.27.96-2.64,1.04-4.06.06-1.13.53-1.24,1.41-.69,1.72,1.08,2.92,2.71,4.38,4.07,8.66,8.04,18.38,13.89,30.58,14.51.52.03,1.04-.02,1.56,0,1.36.07,1.57-.53.89-1.58-.36-.56-.82-1.05-1.21-1.58-1.5-2.04-.63-4.17,1.89-4.53,3.34-.47,6.44.69,9.57,1.56,4.15,1.15,8.3,2.3,12.65,1.03,2.54-.74,2.78-1.66.84-3.54-.63-.61-1.41-1.08-2.11-1.63-2.43-1.91-2.63-3.35-.64-5.76,2.51-3.05,6.01-4.22,9.75-4.74,4.81-.67,9.26.31,13.25,3.19,1.39,1.01,1.75,1.97.94,3.7-9.48,20.25-25.12,32.69-47.2,36.28-29.25,4.75-57.41-12.11-67.54-39.86C-8.51,49.01,10.62,11.88,44.98,2.31c31.94-8.9,65.21,8.7,75.4,39.81.46,1.42.23,2.38-.66,3.4-4.28,4.87-9.78,6.13-15.92,5.16-4.99-.79-9.16-3.27-12.65-6.88-1.34-1.38-2.66-2.79-3.87-4.28-13.61-16.78-43.35-15.8-54.84,7.54-2.32,4.71-3.19,9.66-2.85,14.86Z"/>
-      <path d="m80.89,57.02c.88-.09,2.06-.21,3.22.13,1.56.46,1.88,1.6.75,2.8-1.16,1.23-2.59,1.52-4.25,1.33-4.23-.48-5.14.47-4.58,4.78.43,3.35,1.88,6.19,4.52,8.36.99.81,1.67.93,2.18-.62,1.55-4.74,1.61-4.72,6.46-4.56,1.28.04,2.56-.04,3.49-1.05.76-.83,1.38-1.54,2.5-.44,1.07,1.05,1.29,2.15.42,3.35-1.18,1.61-2.84,2.29-4.82,2.23-1.25-.04-2.77-.51-3.68.03-.98.58-.39,2.29-.7,3.49-.75,2.89-2.94,3.94-5.77,2.62-5.71-2.66-10.17-13.01-8.12-18.87.86-2.45,2.86-3.21,5.21-3.41.96-.08,1.92-.11,3.18-.18Z"/>
-      <path d="m52.62,58.41c.19-1.57.26-3.23,1.99-3.92,1.62-.65,2.9.23,3.92,1.33,2.41,2.61,3.79,5.64,2.86,9.26-.6,2.33-2.43,2.97-4.42,1.62-2.92-1.97-3.98-4.98-4.35-8.29Z"/>
-      <path d="m44.97,66.78c-.03,1.9-.18,3.24-1.63,3.9-1.5.68-2.61-.25-3.53-1.19-2.06-2.11-3.15-4.68-2.7-7.66.4-2.62,2.46-3.4,4.53-1.73,2.25,1.82,3.29,4.3,3.33,6.68Z"/>
-    </svg>
+        <path d="m29.58,61.92c.11,1.85.17,3.7.36,5.54.11,1.02-.23,1.23-1.19,1.29-4.47.26-5.38,1.22-5.27,5.67.13,5.14,2.74,9.13,6.27,12.56,1.53,1.49,2.96,1.05,3.89-.88.61-1.27.96-2.64,1.04-4.06.06-1.13.53-1.24,1.41-.69,1.72,1.08,2.92,2.71,4.38,4.07,8.66,8.04,18.38,13.89,30.58,14.51.52.03,1.04-.02,1.56,0,1.36.07,1.57-.53.89-1.58-.36-.56-.82-1.05-1.21-1.58-1.5-2.04-.63-4.17,1.89-4.53,3.34-.47,6.44.69,9.57,1.56,4.15,1.15,8.3,2.3,12.65,1.03,2.54-.74,2.78-1.66.84-3.54-.63-.61-1.41-1.08-2.11-1.63-2.43-1.91-2.63-3.35-.64-5.76,2.51-3.05,6.01-4.22,9.75-4.74,4.81-.67,9.26.31,13.25,3.19,1.39,1.01,1.75,1.97.94,3.7-9.48,20.25-25.12,32.69-47.2,36.28-29.25,4.75-57.41-12.11-67.54-39.86C-8.51,49.01,10.62,11.88,44.98,2.31c31.94-8.9,65.21,8.7,75.4,39.81.46,1.42.23,2.38-.66,3.4-4.28,4.87-9.78,6.13-15.92,5.16-4.99-.79-9.16-3.27-12.65-6.88-1.34-1.38-2.66-2.79-3.87-4.28-13.61-16.78-43.35-15.8-54.84,7.54-2.32,4.71-3.19,9.66-2.85,14.86Z"/>
+        <path d="m80.89,57.02c.88-.09,2.06-.21,3.22.13,1.56.46,1.88,1.6.75,2.8-1.16,1.23-2.59,1.52-4.25,1.33-4.23-.48-5.14.47-4.58,4.78.43,3.35,1.88,6.19,4.52,8.36.99.81,1.67.93,2.18-.62,1.55-4.74,1.61-4.72,6.46-4.56,1.28.04,2.56-.04,3.49-1.05.76-.83,1.38-1.54,2.5-.44,1.07,1.05,1.29,2.15.42,3.35-1.18,1.61-2.84,2.29-4.82,2.23-1.25-.04-2.77-.51-3.68.03-.98.58-.39,2.29-.7,3.49-.75,2.89-2.94,3.94-5.77,2.62-5.71-2.66-10.17-13.01-8.12-18.87.86-2.45,2.86-3.21,5.21-3.41.96-.08,1.92-.11,3.18-.18Z"/>
+        <path d="m52.62,58.41c.19-1.57.26-3.23,1.99-3.92,1.62-.65,2.9.23,3.92,1.33,2.41,2.61,3.79,5.64,2.86,9.26-.6,2.33-2.43,2.97-4.42,1.62-2.92-1.97-3.98-4.98-4.35-8.29Z"/>
+        <path d="m44.97,66.78c-.03,1.9-.18,3.24-1.63,3.9-1.5.68-2.61-.25-3.53-1.19-2.06-2.11-3.15-4.68-2.7-7.66.4-2.62,2.46-3.4,4.53-1.73,2.25,1.82,3.29,4.3,3.33,6.68Z"/>
+      </svg>
   </a>
 
-  <div class="who">
-    <div class="who-lines keep">
-      <p class="big">Art Design Database</p>
-      <p class="big">Icons • Fonts • Tools</p>
-    </div>
-    <button class="burger" id="burger" type="button" aria-expanded="false" aria-controls="drawer" aria-label="Open side tab">
+<div class="who">
+<button class="burger" id="burger" type="button" aria-expanded="false" aria-controls="drawer" aria-label="Open side tab">
       <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 7H19M5 12H19M5 17H19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
     </button>
   </div>
 </header>
 
 <nav class="menu" id="menu" data-open="false" aria-label="Sections">
-  <a href="../">Index<span>shelf</span></a>
-  <a href="../icons/">Icons<span>${iconTotal} icons</span></a>
-  <a href="../fonts/">Fonts<span>2 families</span></a>
-  <a href="../tools/">Tools<span>1 app</span></a>
+  <a href="../">Index<span>the shelf</span></a>
+  <a href="../tools/">Resources<span>icons · fonts · engine</span></a>
+  <a href="../download/">Download<span>one app</span></a>
+  <a href="https://artbase-handoff.vercel.app/">Handoff<span>build handoff</span></a>
 </nav>
 
 <div class="scrim" id="scrim" data-open="false"></div>
@@ -349,7 +350,7 @@ const escape = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/
 
 <footer>
   <span>__COUNT__ captures<span class="dot" aria-hidden="true">·</span><code>tools/render_pages.js</code></span>
-  <span><a href="../">Index</a><span class="dot" aria-hidden="true">·</span><a href="../tools/">Tools</a><span class="dot" aria-hidden="true">·</span><a href="../download/">Download</a></span>
+  <span><a href="../">Index</a><span class="dot" aria-hidden="true">·</span><a href="../tools/">Resources</a><span class="dot" aria-hidden="true">·</span><a href="../download/">Download</a></span>
 </footer>
 
 <script>

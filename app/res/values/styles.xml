@@ -1,194 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <!-- Green, dark page: the default the manifest names. -->
-    <style name="AppTheme" parent="@android:style/Theme.Material.NoActionBar">
-        <item name="page">@color/green_page</item>
-        <item name="on">@color/green_on</item>
-        <item name="onDim">@color/green_on_dim</item>
-        <item name="rule">@color/green_rule</item>
-        <item name="card">@color/green_card</item>
-        <item name="panel2">@color/green_panel2</item>
-        <item name="band">@color/green_band</item>
-        <item name="bandInk">@color/green_band_ink</item>
-        <item name="bandDim">@color/green_band_dim</item>
-        <item name="bandLine">@color/green_band_line</item>
-        <item name="accent">@color/green_accent</item>
-        <item name="accentInk">@color/green_accent_ink</item>
-        <item name="label">@color/green_label</item>
-        <item name="ink">@color/green_band_ink</item>
-        <item name="warn">@color/warn</item>
-        <item name="warnBg">@color/green_card</item>
+    <!-- The one edition. The manifest names this theme; no activity swaps it. -->
+    <style name="AppTheme" parent="@android:style/Theme.Material.Light.NoActionBar">
+        <item name="page">@color/newsprint_page</item>
+        <item name="on">@color/newsprint_on</item>
+        <item name="onDim">@color/newsprint_on_dim</item>
+        <item name="rule">@color/newsprint_rule</item>
+        <item name="card">@color/newsprint_card</item>
+        <item name="panel2">@color/newsprint_panel2</item>
+        <item name="band">@color/newsprint_band</item>
+        <item name="bandInk">@color/newsprint_band_ink</item>
+        <item name="bandDim">@color/newsprint_band_dim</item>
+        <item name="bandLine">@color/newsprint_band_line</item>
+        <item name="accent">@color/newsprint_accent</item>
+        <item name="accentInk">@color/newsprint_accent_ink</item>
+        <item name="label">@color/newsprint_label</item>
+        <item name="ink">@color/newsprint_band_ink</item>
+        <item name="warn">@color/newsprint_warn</item>
+        <item name="warnBg">@color/newsprint_card</item>
         <item name="shadow">#00000000</item>
-        <item name="android:windowBackground">@color/green_page</item>
-        <item name="android:fontFamily">@font/poppins_regular</item>
-        <item name="android:colorAccent">@color/green_accent</item>
-        <item name="android:colorPrimary">@color/green_band</item>
-        <item name="android:colorPrimaryDark">@color/green_band</item>
-        <item name="android:textColorPrimary">@color/green_on</item>
-        <item name="android:textColorSecondary">@color/green_on_dim</item>
-        <item name="android:statusBarColor">@color/green_band</item>
-        <item name="android:navigationBarColor">@color/green_page</item>
-        <!-- The green band is bright, so the status icons go dark on it. -->
-        <item name="android:windowLightStatusBar">true</item>
-        <item name="android:windowLightNavigationBar">false</item>
-    </style>
-
-    <style name="AppTheme.Light" parent="@android:style/Theme.Material.Light.NoActionBar">
-        <item name="page">@color/green_page_light</item>
-        <item name="on">@color/green_on_light</item>
-        <item name="onDim">@color/green_on_dim_light</item>
-        <item name="rule">@color/green_rule_light</item>
-        <item name="card">@color/green_card_light</item>
-        <item name="panel2">@color/green_panel2_light</item>
-        <item name="band">@color/green_band</item>
-        <item name="bandInk">@color/green_band_ink</item>
-        <item name="bandDim">@color/green_band_dim</item>
-        <item name="bandLine">@color/green_band_line</item>
-        <item name="accent">@color/green_accent</item>
-        <item name="accentInk">@color/green_accent_ink</item>
-        <item name="label">@color/green_label</item>
-        <item name="ink">@color/green_band_ink</item>
-        <item name="warn">@color/warn</item>
-        <item name="warnBg">@color/green_card_light</item>
-        <item name="shadow">#00000000</item>
-        <item name="android:windowBackground">@color/green_page_light</item>
-        <item name="android:fontFamily">@font/poppins_regular</item>
-        <item name="android:colorAccent">@color/green_accent</item>
-        <item name="android:colorPrimary">@color/green_band</item>
-        <item name="android:colorPrimaryDark">@color/green_band</item>
-        <item name="android:textColorPrimary">@color/green_on_light</item>
-        <item name="android:textColorSecondary">@color/green_on_dim_light</item>
-        <item name="android:statusBarColor">@color/green_band</item>
-        <item name="android:navigationBarColor">@color/green_page_light</item>
+        <item name="android:windowBackground">@color/newsprint_page</item>
+        <item name="android:fontFamily">@font/libre_franklin</item>
+        <item name="android:colorAccent">@color/newsprint_accent</item>
+        <item name="android:colorPrimary">@color/newsprint_band</item>
+        <item name="android:colorPrimaryDark">@color/newsprint_band</item>
+        <item name="android:textColorPrimary">@color/newsprint_on</item>
+        <item name="android:textColorSecondary">@color/newsprint_on_dim</item>
+        <item name="android:statusBarColor">@color/newsprint_band</item>
+        <item name="android:navigationBarColor">@color/newsprint_page</item>
+        <!-- Paper is a light surface: both system bar icon sets are dark. -->
         <item name="android:windowLightStatusBar">true</item>
         <item name="android:windowLightNavigationBar">true</item>
+        <item name="android:forceDarkAllowed">false</item>
     </style>
 
-    <style name="AppTheme.Moss" parent="@android:style/Theme.Material.NoActionBar">
-        <item name="page">@color/moss_page</item>
-        <item name="on">@color/moss_on</item>
-        <item name="onDim">@color/moss_on_dim</item>
-        <item name="rule">@color/moss_rule</item>
-        <item name="card">@color/moss_card</item>
-        <item name="panel2">@color/moss_panel2</item>
-        <item name="band">@color/moss_band</item>
-        <item name="bandInk">@color/moss_band_ink</item>
-        <item name="bandDim">@color/moss_band_dim</item>
-        <item name="bandLine">@color/moss_band_line</item>
-        <item name="accent">@color/moss_accent</item>
-        <item name="accentInk">@color/moss_accent_ink</item>
-        <item name="label">@color/moss_label</item>
-        <item name="ink">@color/moss_band_ink</item>
-        <item name="warn">@color/warn</item>
-        <item name="warnBg">@color/moss_card</item>
-        <item name="shadow">#00000000</item>
-        <item name="android:windowBackground">@color/moss_page</item>
-        <item name="android:fontFamily">@font/poppins_regular</item>
-        <item name="android:colorAccent">@color/moss_accent</item>
-        <item name="android:colorPrimary">@color/moss_band</item>
-        <item name="android:colorPrimaryDark">@color/moss_band</item>
-        <item name="android:textColorPrimary">@color/moss_on</item>
-        <item name="android:textColorSecondary">@color/moss_on_dim</item>
-        <item name="android:statusBarColor">@color/moss_band</item>
-        <item name="android:navigationBarColor">@color/moss_page</item>
-        <!-- The moss band is dark, so the status icons stay light. -->
-        <item name="android:windowLightStatusBar">false</item>
-        <item name="android:windowLightNavigationBar">false</item>
-    </style>
-
-    <style name="AppTheme.Moss.Light" parent="@android:style/Theme.Material.Light.NoActionBar">
-        <item name="page">@color/moss_page_light</item>
-        <item name="on">@color/moss_on_light</item>
-        <item name="onDim">@color/moss_on_dim_light</item>
-        <item name="rule">@color/moss_rule_light</item>
-        <item name="card">@color/moss_card_light</item>
-        <item name="panel2">@color/moss_panel2_light</item>
-        <item name="band">@color/moss_band</item>
-        <item name="bandInk">@color/moss_band_ink</item>
-        <item name="bandDim">@color/moss_band_dim</item>
-        <item name="bandLine">@color/moss_band_line</item>
-        <item name="accent">@color/moss_accent</item>
-        <item name="accentInk">@color/moss_accent_ink</item>
-        <item name="label">@color/moss_label</item>
-        <item name="ink">@color/moss_band_ink</item>
-        <item name="warn">@color/warn</item>
-        <item name="warnBg">@color/moss_card_light</item>
-        <item name="shadow">#00000000</item>
-        <item name="android:windowBackground">@color/moss_page_light</item>
-        <item name="android:fontFamily">@font/poppins_regular</item>
-        <item name="android:colorAccent">@color/moss_accent</item>
-        <item name="android:colorPrimary">@color/moss_band</item>
-        <item name="android:colorPrimaryDark">@color/moss_band</item>
-        <item name="android:textColorPrimary">@color/moss_on_light</item>
-        <item name="android:textColorSecondary">@color/moss_on_dim_light</item>
-        <item name="android:statusBarColor">@color/moss_band</item>
-        <item name="android:navigationBarColor">@color/moss_page_light</item>
-        <item name="android:windowLightStatusBar">false</item>
-        <item name="android:windowLightNavigationBar">true</item>
-    </style>
-
-    <style name="AppTheme.Navy" parent="@android:style/Theme.Material.NoActionBar">
-        <item name="page">@color/navy_page</item>
-        <item name="on">@color/navy_on</item>
-        <item name="onDim">@color/navy_on_dim</item>
-        <item name="rule">@color/navy_rule</item>
-        <item name="card">@color/navy_card</item>
-        <item name="panel2">@color/navy_panel2</item>
-        <item name="band">@color/navy_band</item>
-        <item name="bandInk">@color/navy_band_ink</item>
-        <item name="bandDim">@color/navy_band_dim</item>
-        <item name="bandLine">@color/navy_band_line</item>
-        <item name="accent">@color/navy_accent</item>
-        <item name="accentInk">@color/navy_accent_ink</item>
-        <item name="label">@color/navy_label</item>
-        <item name="ink">@color/navy_band_ink</item>
-        <item name="warn">@color/warn</item>
-        <item name="warnBg">@color/navy_card</item>
-        <item name="shadow">#00000000</item>
-        <item name="android:windowBackground">@color/navy_page</item>
-        <item name="android:fontFamily">@font/poppins_regular</item>
-        <item name="android:colorAccent">@color/navy_accent</item>
-        <item name="android:colorPrimary">@color/navy_band</item>
-        <item name="android:colorPrimaryDark">@color/navy_band</item>
-        <item name="android:textColorPrimary">@color/navy_on</item>
-        <item name="android:textColorSecondary">@color/navy_on_dim</item>
-        <item name="android:statusBarColor">@color/navy_band</item>
-        <item name="android:navigationBarColor">@color/navy_page</item>
-        <item name="android:windowLightStatusBar">false</item>
-        <item name="android:windowLightNavigationBar">false</item>
-    </style>
-
-    <style name="AppTheme.Navy.Light" parent="@android:style/Theme.Material.Light.NoActionBar">
-        <item name="page">@color/navy_page_light</item>
-        <item name="on">@color/navy_on_light</item>
-        <item name="onDim">@color/navy_on_dim_light</item>
-        <item name="rule">@color/navy_rule_light</item>
-        <item name="card">@color/navy_card_light</item>
-        <item name="panel2">@color/navy_panel2_light</item>
-        <item name="band">@color/navy_band</item>
-        <item name="bandInk">@color/navy_band_ink</item>
-        <item name="bandDim">@color/navy_band_dim</item>
-        <item name="bandLine">@color/navy_band_line</item>
-        <item name="accent">@color/navy_accent</item>
-        <item name="accentInk">@color/navy_accent_ink</item>
-        <item name="label">@color/navy_label</item>
-        <item name="ink">@color/navy_band_ink</item>
-        <item name="warn">@color/warn</item>
-        <item name="warnBg">@color/navy_card_light</item>
-        <item name="shadow">#00000000</item>
-        <item name="android:windowBackground">@color/navy_page_light</item>
-        <item name="android:fontFamily">@font/poppins_regular</item>
-        <item name="android:colorAccent">@color/navy_accent</item>
-        <item name="android:colorPrimary">@color/navy_band</item>
-        <item name="android:colorPrimaryDark">@color/navy_band</item>
-        <item name="android:textColorPrimary">@color/navy_on_light</item>
-        <item name="android:textColorSecondary">@color/navy_on_dim_light</item>
-        <item name="android:statusBarColor">@color/navy_band</item>
-        <item name="android:navigationBarColor">@color/navy_page_light</item>
-        <item name="android:windowLightStatusBar">false</item>
-        <item name="android:windowLightNavigationBar">true</item>
-    </style>
     <!-- The editor's sheets slide up from the dock and leave the same way. -->
     <style name="SheetAnimation">
         <item name="android:windowEnterAnimation">@anim/sheet_up</item>

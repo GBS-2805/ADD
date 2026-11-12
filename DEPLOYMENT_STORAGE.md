@@ -9,9 +9,9 @@ not a compliance certificate.
 - Keep the newest **10** production deployments per project.
 - Retention is **1 day** for preview, production, canceled and errored deployments.
   Vercel rejected `3d`; `1d` is the shortest accepted value.
-- The gate warns above 40 deployments per project, 512 MiB estimated total, or 7-day
-  retention. It stops a release above 80 deployments per project, 1 GiB per project,
-  or 1 GiB estimated total.
+- The gate warns above 40 deployments per project, 450 MiB estimated total (early
+  warning), 512 MiB estimated total, or 7-day retention. It stops a release above 80
+  deployments per project, 1 GiB per project, or 1 GiB estimated total.
 - The size figure is an estimate: current output folder x retained deployments. Exact
   Deployment Storage bytes are dashboard-only on Hobby.
 
@@ -115,9 +115,15 @@ before/after state, CSV export, SIEM streaming, or immutable retention guarantee
 ## Scheduled audit check
 
 `.github/workflows/deploy-audit.yml` runs daily at **06:17 UTC** and can be dispatched
-manually. It exports the last day of deletion and retention events, fails when any
-deployment deletion is present, and uploads the JSONL as a 90-day GitHub artifact even
-when the check fails.
+manually. It first runs the storage report and posts a warning annotation at the
+450 MiB early threshold, then exports the last day of deletion and retention events,
+fails when any deployment deletion is present, and uploads the JSONL as a 90-day
+GitHub artifact even when the check fails.
+
+For a manual test of the warning annotation, set `storage_warning_mib` on the
+dispatch to a value below the current estimate, for example `300`. That overrides
+only the early-warning size for that run; the 512 MiB warning and the critical gates
+stay fixed, and scheduled runs keep the 450 MiB default.
 
 Add `VERCEL_ADMIN_TOKEN` (preferred) or `VERCEL_TOKEN` under repository Settings ->
 Secrets and variables -> Actions. Scheduled workflows only run from the default
@@ -132,6 +138,34 @@ Vercel's [Activity Log](https://vercel.com/docs/activity-log) is available on Ho
 [Audit Logs](https://vercel.com/docs/audit-log) are Enterprise-only.
 
 ## Change log
+
+- **2026-11-12** — Before publishing the 3.9.1 field preview, the storage report was
+  critical at 1.18 GiB. Pruned the two oldest `artbase-handoff-apk` deployments
+  (`dpl_5GNZWbue7o8pQm7eEUNJQoKhAB3d`, `dpl_B3N6HKs4CT1mGqUFbPiYsp3rSt49`), keeping the
+  deployment that holds `artbase-handoff-apk.vercel.app`. Every historical APK URL on
+  that alias was checked 200 before deletion. The APK and handoff deployments then
+  brought the estimate to 921.1 MiB (warning, below the 1.00 GiB gate). Evidence:
+  `artifacts/audit/prune-2026-11-12-before.json`,
+  `artifacts/audit/prune-2026-11-12-remove.log`,
+  `artifacts/audit/deploy-apk-2026-11-12.log`,
+  `artifacts/audit/deploy-handoff-2026-11-12.log` and
+  `artifacts/audit/vercel-activity-2026-11-12.jsonl`.
+
+- **2026-11-11** — After the 3.9 publication, pruned 4 superseded deployments:
+  the 2 oldest `artbase` and the 2 oldest `artbase-handoff-apk`, keeping the newest
+  3 site builds and 2 APK builds and every live alias. Estimated storage fell from
+  566.0 MiB to 340.6 MiB, with no warnings. Evidence:
+  `artifacts/audit/prune-2026-11-11-before.json`,
+  `artifacts/audit/prune-2026-11-11-remove.log` and the one-day audit export
+  `artifacts/audit/vercel-activity-2026-11-11.jsonl`.
+
+- **2026-11-11** — After approval, pruned 61 deployments: the 5 oldest
+  `artbase`, 7 oldest `artbase-handoff-apk`, and 49 oldest `artbase-shots`
+  deployments, keeping the newest 3/2/10 and protecting every live alias.
+  Estimated storage fell from 1.13 GiB to 337.7 MiB. The signed 16 MB ADD 3.8
+  APK was then published to the site and handoff; current retained set is
+  4 `artbase`, 8 `artbase-handoff`, 3 `artbase-handoff-apk`, 10 `artbase-shots`,
+  estimated 451.9 MiB, no warnings.
 
 - **2026-11-09** — Moved the 29,041,927-byte build 47 review APK to the dedicated
   `artbase-handoff-apk` project and removed it from `artifacts/handoff`, so a handoff

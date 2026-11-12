@@ -9,6 +9,11 @@ on:
   schedule:
     - cron: "17 6 * * *" # 06:17 UTC daily
   workflow_dispatch:
+    inputs:
+      storage_warning_mib:
+        description: "Test only: override the 450 MiB early-warning threshold (1-512)"
+        required: false
+        type: string
 
 concurrency:
   group: deployment-audit
@@ -37,6 +42,29 @@ jobs:
           if [ -z "${VERCEL_ADMIN_TOKEN}" ] && [ -z "${VERCEL_TOKEN}" ]; then
             echo "::error::Add VERCEL_ADMIN_TOKEN (preferred) or VERCEL_TOKEN under Settings -> Secrets and variables -> Actions."
             exit 1
+          fi
+      - name: Check deployment storage headroom
+        env:
+          VERCEL_ADMIN_TOKEN: ${{ secrets.VERCEL_ADMIN_TOKEN }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          STORAGE_WARNING_MIB: ${{ github.event.inputs.storage_warning_mib }}
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/audit
+          args=()
+          if [ -n "${STORAGE_WARNING_MIB:-}" ]; then
+            args+=(--early-warning-mib "${STORAGE_WARNING_MIB}")
+          fi
+          python3 tools/deploy_storage.py "${args[@]}" | tee artifacts/audit/storage.txt
+          {
+            echo "### Deployment storage"
+            echo '```'
+            cat artifacts/audit/storage.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+          if grep -Eq 'early warning|over 512\.0 MiB' artifacts/audit/storage.txt; then
+            threshold="${STORAGE_WARNING_MIB:-450}"
+            echo "::warning title=Deployment storage headroom::Estimated storage has crossed the ${threshold} MiB early warning; prune older deployments before the next release."
           fi
       - name: Check deletions and export activity
         env:

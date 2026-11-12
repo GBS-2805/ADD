@@ -1,12 +1,18 @@
 package app.add.engine
 
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.test.click
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performTouchInput
 import com.github.takahirom.roborazzi.captureRoboImage
 import java.io.File
+import org.junit.AfterClass
+import org.junit.BeforeClass
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -22,6 +28,20 @@ import org.robolectric.annotation.GraphicsMode
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(sdk = [35], qualifiers = "w411dp-h891dp-xxhdpi")
 class EngineFrameCaptureTest {
+    companion object {
+        @BeforeClass
+        @JvmStatic
+        fun freezeAutosaveClock() {
+            EngineClock.nowMillis = { 1_700_000_000_000L }
+        }
+
+        @AfterClass
+        @JvmStatic
+        fun restoreAutosaveClock() {
+            EngineClock.nowMillis = { System.currentTimeMillis() }
+        }
+    }
+
     @get:Rule
     val compose = createAndroidComposeRule<MainActivity>()
 
@@ -32,31 +52,95 @@ class EngineFrameCaptureTest {
     }
 
     @Test
-    fun captureRailSettledAddAndInspector() {
+    fun captureStudioShellDeckAndInspector() {
         compose.waitForIdle()
-        capture("engine-rail.png")
+        capture("engine-studio-stage.png")
+
+        // Bare stage is the way back to the Create dock. The scrim-free top pill
+        // appears after the tap; reopen it so the dock is shown in its real frame.
+        compose.onNodeWithTag("engine-artboard").performTouchInput {
+            click(Offset(width * 0.9f, height * 0.7f))
+        }
+        compose.waitForIdle()
+        compose.onNodeWithTag("studio-peek").performClick()
+        compose.waitForIdle()
+        capture("engine-studio-dock.png")
 
         compose.onNodeWithTag("engine-add").performClick()
-        compose.onNodeWithTag("add-type").performClick()
         compose.waitForIdle()
-        capture("engine-added.png")
+        capture("engine-studio-create.png")
 
-        compose.onNodeWithText("INSPECT").performClick()
+        compose.onNodeWithTag("create-type").performClick()
         compose.waitForIdle()
-        capture("engine-inspector.png")
+        capture("engine-studio-landed.png")
+
+        compose.onNodeWithTag("notice-inspect").performClick()
+        compose.waitForIdle()
+        capture("engine-studio-style.png")
+
+        compose.onNodeWithTag("tab-effects").performClick()
+        compose.waitForIdle()
+        capture("engine-studio-fx.png")
+
+        compose.onNodeWithText("Grade").performClick()
+        compose.waitForIdle()
+        compose.onNodeWithText("FINE TUNE").performClick()
+        compose.waitForIdle()
+        capture("engine-studio-fx-grade.png")
 
         compose.onNodeWithTag("tab-layers").performClick()
         compose.waitForIdle()
-        capture("engine-layers.png")
+        capture("engine-studio-layers.png")
 
         // A visible 3D layer in the document, with the sheet still up. It must stay
         // off the panel; no Filament surface is composed while the sheet is open.
         compose.onNodeWithTag("layer-vis-model-gem").performClick()
         compose.waitForIdle()
-        capture("engine-layers-3d-visible.png")
+        capture("engine-studio-layers-3d.png")
         compose.onNodeWithTag("layer-model-gem").performClick()
-        compose.onNodeWithTag("tab-inspect").performClick()
+        compose.onNodeWithTag("tab-style").performClick()
         compose.waitForIdle()
-        capture("engine-inspector-3d-visible.png")
+        capture("engine-studio-3d-style.png")
+
+        compose.onNodeWithTag("tab-layers").performClick()
+        compose.onNodeWithTag("layer-vis-model-gem").performScrollTo().performClick()
+        compose.onNodeWithTag("layer-type-statement").performScrollTo().performClick()
+        compose.onNodeWithTag("tab-style").performClick()
+        compose.waitForIdle()
+        compose.onNodeWithTag("mask-entry").performScrollTo().performClick()
+        compose.waitForIdle()
+        capture("engine-studio-mask.png")
+
+        // The Material Ink path: arm from Texture, draw on the stage, and keep the
+        // compact HUD visible. This is the artifact that proves the gesture path is
+        // wired through the real activity, not just the renderer unit test.
+        compose.onNodeWithText("DONE").performClick()
+        compose.waitForIdle()
+        compose.onNodeWithTag("object-texture").performClick()
+        compose.waitForIdle()
+        compose.onNodeWithTag("texture-ink-arm").performScrollTo().performClick()
+        compose.waitForIdle()
+        compose.onNodeWithTag("engine-artboard").performTouchInput {
+            down(Offset(width * 0.18f, height * 0.28f))
+            moveTo(Offset(width * 0.35f, height * 0.34f))
+            moveTo(Offset(width * 0.52f, height * 0.46f))
+            moveTo(Offset(width * 0.7f, height * 0.58f))
+            up()
+        }
+        compose.waitForIdle()
+        capture("engine-studio-ink.png")
+
+        // The recording's blank interval was a Marble material painted over the
+        // layers. Keep the applied recipe and the still-readable page in the set.
+        compose.onNodeWithText("DONE").performClick()
+        compose.waitForIdle()
+        compose.onNodeWithTag("object-texture").performClick()
+        compose.waitForIdle()
+        compose.onNodeWithTag("texture-family-marble").performClick()
+        compose.waitForIdle()
+        capture("engine-studio-texture-panel.png")
+        compose.onNodeWithTag("sheet-done").performClick()
+        compose.waitForIdle()
+        capture("engine-studio-texture.png")
     }
 }

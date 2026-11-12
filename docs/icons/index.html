@@ -3,33 +3,17 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<meta name="theme-color" content="#0fbf92" />
+<meta name="theme-color" content="#f0e7d4" />
 <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml" />
 <title>Icons — 4,373 icons in four free brands, offline</title>
 <meta name="description" content="The Icons app and its browser: Lineicons, Coolicons, Phosphor and Streamline, 4,373 icons, live preview, copy the SVG. Offline, no account." />
-<link rel="stylesheet" href="../assets/site.a226215efc.css" />
-<style>
-  /* page-only: the brand cards and the app notes */
-  .brands { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); border-top: 1px solid var(--rule); border-left: 1px solid var(--rule); }
-  .brand { display: flex; flex-direction: column; gap: 8px; padding: 24px 22px 22px; border-right: 1px solid var(--rule); border-bottom: 1px solid var(--rule); text-decoration: none; }
-  .brand:hover { background: var(--tint); }
-  .brand .kind { font-size: 12px; font-weight: 500; letter-spacing: .1em; text-transform: uppercase; color: var(--on-dim); }
-  .brand h3 { margin: 0; font-size: 24px; font-weight: 400; letter-spacing: -.015em; }
-  .brand p { margin: 0; font-size: 15px; line-height: 1.55; }
-  .brand .go { margin-top: auto; padding-top: 16px; font-size: 13px; }
-  .brand .go::after { content: " \2192"; }
-  .peek { display: flex; gap: 10px; align-items: center; height: 44px; color: var(--on); }
-  .peek svg { width: 26px; height: 26px; }
-  .fine a { color: inherit; }
-  @media (max-width: 700px) {
-    .peek svg { width: 22px; height: 22px; }
-  }
-</style>
+<link rel="stylesheet" href="../assets/site.6b1bb724fe.css" />
+<link rel="stylesheet" href="../assets/database.428eeb4e23.css" />
 </head>
-<body>
+<body class="db-page ih-page">
 
 <header class="bar">
-  <div class="lead">
+<div class="lead">
     <button class="menu-btn" id="menuBtn" type="button" aria-expanded="false" aria-controls="menu" aria-label="Open icon brands">
       <svg class="chev" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M8 13L12 17L16 13M8 7L12 11L16 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
     </button>
@@ -45,12 +29,8 @@
       </svg>
   </a>
 
-  <div class="who">
-    <div class="who-lines keep">
-      <p class="big">Art Design Database</p>
-      <p class="big">Icons • Fonts • Tools</p>
-    </div>
-    <button class="burger" id="burger" type="button" aria-expanded="false" aria-controls="drawer" aria-label="Open side tab">
+<div class="who">
+<button class="burger" id="burger" type="button" aria-expanded="false" aria-controls="drawer" aria-label="Open side tab">
       <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 7H19M5 12H19M5 17H19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
     </button>
   </div>
@@ -77,61 +57,49 @@
   <p class="drawer-note">Icons · 4,373 icons across four brands, packaged offline. The shelf is at the index.</p>
 </aside>
 
-<main>
-  <header class="page-head">
-    <h1>Icons</h1>
-    <p class="lede">Four free sets, <b>4,373 icons</b>, in one offline browser.</p>
-    <p class="fine">The app is on the <a href="../download/">download page</a>.</p>
+<main class="db-main ih-main">
+  <header class="ih-hero">
+    <h1><span>4,373 free</span><br /><span>SVG icons</span></h1>
+    <p class="ih-lede">Four free sets, taken whole. Preview any icon and copy its SVG.</p>
+    <div class="ih-actions">
+      <a class="ih-btn ih-btn-primary" href="#sets">Browse the icons</a>
+      <a class="ih-btn" href="../download/">Download the app</a>
+    </div>
   </header>
 
-  <section>
-    <h2>Brands</h2>
-    <p class="kicker">Every set taken whole — nothing sampled, nothing Pro</p>
-    <div class="brands">
-<a class="brand" href="lineicons/">
-        <span class="kind">Brand · MIT · 606</span>
-        <h3>Lineicons</h3>
-        <p>The free Lineicons set, whole: 606 icons drawn as filled paths on a 24 px grid.</p>
-        <span class="go">Open Lineicons</span>
-      </a>
-      <a class="brand" href="coolicons/">
-        <span class="kind">Brand · MIT · 1,258</span>
-        <h3>Coolicons</h3>
-        <p>Coolicons drawn as strokes with regular corners: 1,258 icons, the variant that matches the hairline chrome these pages use.</p>
-        <span class="go">Open Coolicons</span>
-      </a>
-      <a class="brand" href="phosphor/">
-        <span class="kind">Brand · MIT · 1,512</span>
-        <h3>Phosphor</h3>
-        <p>Phosphor's regular weight, whole: 1,512 outline icons drawn on a 256 px grid, the weight its own site calls the default.</p>
-        <span class="go">Open Phosphor</span>
-      </a>
-      <a class="brand" href="streamline/">
-        <span class="kind">Brand · CC BY 4.0 · 997</span>
-        <h3>Streamline</h3>
-        <p>997 icons in four styles -- Line, Duo, Solid and Flat -- on a 14 px grid, with the vendor's own categories.</p>
-        <span class="go">Open Streamline</span>
-      </a>
+  <section class="ih-sets" id="sets" aria-labelledby="sets-heading">
+    <header class="ih-sets-head">
+      <h2 id="sets-heading">Four sets, nothing sampled</h2>
+      <p>Each set comes whole, with no Pro tier held back. Mix styles or stay with one.</p>
+    </header>
+    <div class="ih-set-list">
+<a class="ih-set" href="lineicons/">
+  <div class="ih-set-head"><h3>Lineicons</h3><span class="ih-licence">MIT</span></div>
+  <p class="ih-count"><span class="ih-num">606</span><span class="ih-unit">icons</span></p>
+  <p class="ih-set-note">The free Lineicons set in full, drawn as filled paths on a 24 px grid.</p>
+</a>
+    <a class="ih-set" href="coolicons/">
+  <div class="ih-set-head"><h3>Coolicons</h3><span class="ih-licence">MIT</span></div>
+  <p class="ih-count"><span class="ih-num">1,258</span><span class="ih-unit">icons</span></p>
+  <p class="ih-set-note">Stroke drawings with regular corners, the line style kept whole across 30 categories.</p>
+</a>
+    <a class="ih-set" href="phosphor/">
+  <div class="ih-set-head"><h3>Phosphor</h3><span class="ih-licence">MIT</span></div>
+  <p class="ih-count"><span class="ih-num">1,512</span><span class="ih-unit">icons</span></p>
+  <p class="ih-set-note">The regular outline weight, whole, with every category drawn on a 256 px grid.</p>
+</a>
+    <a class="ih-set" href="streamline/">
+  <div class="ih-set-head"><h3>Streamline</h3><span class="ih-licence">CC BY 4.0</span></div>
+  <p class="ih-count"><span class="ih-num">997</span><span class="ih-unit">icons</span></p>
+  <p class="ih-set-note">Four styles of the same drawings — Line, Duo, Solid and Flat — from the free Core set.</p>
+</a>
     </div>
-  </section>
-
-  <section>
-    <h2>In the app</h2>
-    <p class="kicker">The same page, carried with you</p>
-    <ul class="rows">
-      <li><b>Four brands</b><span>The left pull-down lists the sets; each one opens its own world of drawings.</span></li>
-      <li><b>Find the right mark</b><span>Filter by the categories the artists use, or search by name.</span></li>
-      <li><b>Live preview</b><span>Pick an icon and it fills the stage; weight, size and surface repaint it as you press.</span></li>
-      <li><b>Quiet by default</b><span>The whole set hides behind one toggle, so the page stays a preview rather than a wall.</span></li>
-      <li><b>Copy SVG</b><span>Take a clean drawing with you, ready for your own work.</span></li>
-      <li><b>Always with you</b><span>Every set lives in the app, so it works without a signal.</span></li>
-    </ul>
   </section>
 </main>
 
 <footer>
-  <p>Icons 3.7<span class="dot" aria-hidden="true">·</span>one app<span class="dot" aria-hidden="true">·</span>Lineicons, Coolicons, Phosphor and Streamline. Every set is MIT except Streamline, which is CC BY 4.0. The paid icons sold on the vendors' sites are neither included nor copied.</p>
-  <p><a href="../">Index</a><span class="dot" aria-hidden="true">·</span><a href="../tools/">Tools</a><span class="dot" aria-hidden="true">·</span><a href="../fonts/">Fonts</a><span class="dot" aria-hidden="true">·</span><a href="../download/">Download</a><span class="dot" aria-hidden="true">·</span><a href="../renders/">Renders</a></p>
+  <p>Icons 3.9<span class="dot" aria-hidden="true">·</span>one app<span class="dot" aria-hidden="true">·</span>Lineicons, Coolicons, Phosphor and Streamline. Every set is MIT except Streamline, which is CC BY 4.0. The paid icons sold on the vendors' sites are neither included nor copied.</p>
+  <p><a href="../">Index</a><span class="dot" aria-hidden="true">·</span><a href="../tools/">Resources</a><span class="dot" aria-hidden="true">·</span><a href="../fonts/">Fonts</a><span class="dot" aria-hidden="true">·</span><a href="../download/">Download</a><span class="dot" aria-hidden="true">·</span><a href="../renders/">Renders</a></p>
 </footer>
 
 <script>
@@ -139,7 +107,8 @@
   if (window.IconsApp) {
     document.documentElement.classList.add("in-app");
   }
+
 </script>
-<script src="../assets/site.8e0ef906fa.js" defer></script>
+<script src="../assets/site.520be602d0.js" defer></script>
 </body>
 </html>

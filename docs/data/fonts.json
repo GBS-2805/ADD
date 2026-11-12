@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-06",
+  "generated": "2026-11-11",
   "styles": 39,
   "families": [
     {
@@ -84,7 +84,6 @@
           "woff2": "/assets/fonts/poppins-400.woff2",
           "woff": "/assets/fonts/poppins-400.woff",
           "ttf": "/assets/fonts/poppins-400.ttf",
-          "app_res": "app/res/font/poppins_regular.ttf",
           "use": "Body text, ledes and every label on this site.",
           "woff2_bytes": 7900,
           "woff_bytes": 66572,
@@ -108,7 +107,6 @@
           "woff2": "/assets/fonts/poppins-500.woff2",
           "woff": "/assets/fonts/poppins-500.woff",
           "ttf": "/assets/fonts/poppins-500.ttf",
-          "app_res": "app/res/font/poppins_medium.ttf",
           "use": "Row labels, icon names and the tab strip.",
           "woff2_bytes": 7740,
           "woff_bytes": 65760,
@@ -132,7 +130,6 @@
           "woff2": "/assets/fonts/poppins-600.woff2",
           "woff": "/assets/fonts/poppins-600.woff",
           "ttf": "/assets/fonts/poppins-600.ttf",
-          "app_res": "app/res/font/poppins_semibold.ttf",
           "use": "Titles and the one number that matters on a screen.",
           "woff2_bytes": 7992,
           "woff_bytes": 66232,

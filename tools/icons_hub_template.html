@@ -3,33 +3,17 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<meta name="theme-color" content="#0fbf92" />
+<meta name="theme-color" content="#f0e7d4" />
 <link rel="icon" href="__ROOT__assets/favicon.svg" type="image/svg+xml" />
 <title>Icons — __TOTAL__ icons in __BRANDCOUNT__ free brands, offline</title>
 <meta name="description" content="The Icons app and its browser: __SETLIST__, __TOTAL__ icons, live preview, copy the SVG. Offline, no account." />
 <link rel="stylesheet" href="__ROOT__assets/site.css" />
-<style>
-  /* page-only: the brand cards and the app notes */
-  .brands { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); border-top: 1px solid var(--rule); border-left: 1px solid var(--rule); }
-  .brand { display: flex; flex-direction: column; gap: 8px; padding: 24px 22px 22px; border-right: 1px solid var(--rule); border-bottom: 1px solid var(--rule); text-decoration: none; }
-  .brand:hover { background: var(--tint); }
-  .brand .kind { font-size: 12px; font-weight: 500; letter-spacing: .1em; text-transform: uppercase; color: var(--on-dim); }
-  .brand h3 { margin: 0; font-size: 24px; font-weight: 400; letter-spacing: -.015em; }
-  .brand p { margin: 0; font-size: 15px; line-height: 1.55; }
-  .brand .go { margin-top: auto; padding-top: 16px; font-size: 13px; }
-  .brand .go::after { content: " \2192"; }
-  .peek { display: flex; gap: 10px; align-items: center; height: 44px; color: var(--on); }
-  .peek svg { width: 26px; height: 26px; }
-  .fine a { color: inherit; }
-  @media (max-width: 700px) {
-    .peek svg { width: 22px; height: 22px; }
-  }
-</style>
+<link rel="stylesheet" href="__ROOT__assets/database.css" />
 </head>
-<body>
+<body class="db-page ih-page">
 
 <header class="bar">
-  <div class="lead">
+<div class="lead">
     <button class="menu-btn" id="menuBtn" type="button" aria-expanded="false" aria-controls="menu" aria-label="Open icon brands">
       <svg class="chev" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M8 13L12 17L16 13M8 7L12 11L16 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
     </button>
@@ -45,12 +29,8 @@
       </svg>
   </a>
 
-  <div class="who">
-    <div class="who-lines keep">
-      <p class="big">Art Design Database</p>
-      <p class="big">Icons • Fonts • Tools</p>
-    </div>
-    <button class="burger" id="burger" type="button" aria-expanded="false" aria-controls="drawer" aria-label="Open side tab">
+<div class="who">
+<button class="burger" id="burger" type="button" aria-expanded="false" aria-controls="drawer" aria-label="Open side tab">
       <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 7H19M5 12H19M5 17H19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
     </button>
   </div>
@@ -73,38 +53,30 @@ __BRANDS__
   <p class="drawer-note">Icons · __TOTAL__ icons across __BRANDCOUNT__ brands, packaged offline. The shelf is at the index.</p>
 </aside>
 
-<main>
-  <header class="page-head">
-    <h1>Icons</h1>
-    <p class="lede">__BRANDCOUNT_CAP__ free sets, <b>__TOTAL__ icons</b>, in one offline browser.</p>
-    <p class="fine">The app is on the <a href="__ROOT__download/">download page</a>.</p>
+<main class="db-main ih-main">
+  <header class="ih-hero">
+    <h1><span>__TOTAL__ free</span><br /><span>SVG icons</span></h1>
+    <p class="ih-lede">__BRANDCOUNT_CAP__ free sets, taken whole. Preview any icon and copy its SVG.</p>
+    <div class="ih-actions">
+      <a class="ih-btn ih-btn-primary" href="#sets">Browse the icons</a>
+      <a class="ih-btn" href="__ROOT__download/">Download the app</a>
+    </div>
   </header>
 
-  <section>
-    <h2>Brands</h2>
-    <p class="kicker">Every set taken whole — nothing sampled, nothing Pro</p>
-    <div class="brands">
+  <section class="ih-sets" id="sets" aria-labelledby="sets-heading">
+    <header class="ih-sets-head">
+      <h2 id="sets-heading">__BRANDCOUNT_CAP__ sets, nothing sampled</h2>
+      <p>Each set comes whole, with no Pro tier held back. Mix styles or stay with one.</p>
+    </header>
+    <div class="ih-set-list">
 __BRANDCARDS__
     </div>
-  </section>
-
-  <section>
-    <h2>In the app</h2>
-    <p class="kicker">The same page, carried with you</p>
-    <ul class="rows">
-      <li><b>Four brands</b><span>The left pull-down lists the sets; each one opens its own world of drawings.</span></li>
-      <li><b>Find the right mark</b><span>Filter by the categories the artists use, or search by name.</span></li>
-      <li><b>Live preview</b><span>Pick an icon and it fills the stage; weight, size and surface repaint it as you press.</span></li>
-      <li><b>Quiet by default</b><span>The whole set hides behind one toggle, so the page stays a preview rather than a wall.</span></li>
-      <li><b>Copy SVG</b><span>Take a clean drawing with you, ready for your own work.</span></li>
-      <li><b>Always with you</b><span>Every set lives in the app, so it works without a signal.</span></li>
-    </ul>
   </section>
 </main>
 
 <footer>
   <p>Icons __VERSION__<span class="dot" aria-hidden="true">·</span>one app<span class="dot" aria-hidden="true">·</span>__SETLIST__. __LICENCES__ The paid icons sold on the vendors' sites are neither included nor copied.</p>
-  <p><a href="__ROOT__">Index</a><span class="dot" aria-hidden="true">·</span><a href="__ROOT__tools/">Tools</a><span class="dot" aria-hidden="true">·</span><a href="__ROOT__fonts/">Fonts</a><span class="dot" aria-hidden="true">·</span><a href="__ROOT__download/">Download</a><span class="dot" aria-hidden="true">·</span><a href="__ROOT__renders/">Renders</a></p>
+  <p><a href="__ROOT__">Index</a><span class="dot" aria-hidden="true">·</span><a href="__ROOT__tools/">Resources</a><span class="dot" aria-hidden="true">·</span><a href="__ROOT__fonts/">Fonts</a><span class="dot" aria-hidden="true">·</span><a href="__ROOT__download/">Download</a><span class="dot" aria-hidden="true">·</span><a href="__ROOT__renders/">Renders</a></p>
 </footer>
 
 <script>
@@ -112,6 +84,7 @@ __BRANDCARDS__
   if (window.IconsApp) {
     document.documentElement.classList.add("in-app");
   }
+
 </script>
 <script src="__ROOT__assets/site.js" defer></script>
 </body>

@@ -316,6 +316,11 @@ def label_pairs(app, old, new, old_code, new_code, clash=False):
             # and the merge kept the old compressor id, so the id is not the answer.
             (f"{old} \u00b7 app.offline.", f"{new} \u00b7 app.offline."),
             (f"Android app \u00b7 {old} \u00b7", f"Android app \u00b7 {new} \u00b7"),
+            # The front page names the edition in three places that do not carry
+            # the app's name: the vol. line, the paper's folio and the archive door.
+            (f"Vol. {old}", f"Vol. {new}"),
+            (f"No. {old}", f"No. {new}"),
+            (f"OG shelf / {old}", f"OG shelf / {new}"),
             version_code] + codes
 
 
@@ -337,7 +342,9 @@ def human(number):
 
 # Pages whose text is generated elsewhere, or is a list of every version the shelf has
 # ever run: neither holds a live label the bump has to move.
-SWEEP_SKIP = ("docs/releases", "docs/figma", "docs/renders", "docs/data")
+SWEEP_SKIP = ("docs/releases", "docs/figma", "docs/renders", "docs/data",
+              # The classic shelf is a frozen archive of the edition it shipped.
+              "docs/classic")
 
 
 # 2.5 is both a version of this app and the heaviest stroke the icon preview offers,
@@ -710,6 +717,11 @@ def main():
           % (app_name, old, old_code, new, new_code, old_apk, new_apk))
 
     tool.update({"version": new, "version_code": new_code, "apk": new_apk})
+    # The catalog's own link list is what build_catalog.py turns into the app data,
+    # so a stale href here survives every page rewrite.
+    for link in tool.get("links", []):
+        if link.get("href") == old_apk:
+            link["href"] = new_apk
     if not dry:
         CATALOG.write_text(json.dumps(catalog, indent=2, ensure_ascii=False) + "\n",
                            encoding="utf-8")

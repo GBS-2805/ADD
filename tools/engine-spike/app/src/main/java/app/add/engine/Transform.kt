@@ -74,6 +74,7 @@ object Geometry {
         rotatePoint(x, y, layer.centerX, layer.centerY, -layer.frameRotation)
 
     fun contains(layer: Layer, x: Float, y: Float): Boolean {
+        if (layer is GroupLayer) return layer.containsWorldPoint(x, y)
         val (lx, ly) = localPoint(layer, x, y)
         return lx >= layer.x && lx <= layer.x + layer.w && ly >= layer.y && ly <= layer.y + layer.h
     }
@@ -86,6 +87,17 @@ object Geometry {
 
     fun corners(layer: Layer, insetX: Float, insetY: Float): List<HandlePoint> {
         val (ix, iy) = handleInset(layer, insetX, insetY)
+        if (layer is GroupLayer) {
+            val matrix = layer.localToWorld
+            fun at(handle: LayerHandle, x: Float, y: Float) =
+                HandlePoint(handle, matrix.map(x, y).first, matrix.map(x, y).second)
+            return listOf(
+                at(LayerHandle.TopLeft, ix, iy),
+                at(LayerHandle.TopRight, layer.w - ix, iy),
+                at(LayerHandle.BottomRight, layer.w - ix, layer.h - iy),
+                at(LayerHandle.BottomLeft, ix, layer.h - iy),
+            )
+        }
         val left = layer.x + ix
         val right = layer.x + layer.w - ix
         val top = layer.y + iy
@@ -105,6 +117,12 @@ object Geometry {
     /** The rotate handle sits outside the frame, or below it when the frame touches the top. */
     fun rotationHandle(layer: Layer, insetX: Float, insetY: Float): HandlePoint {
         val (ix, iy) = handleInset(layer, insetX, insetY)
+        if (layer is GroupLayer) {
+            val above = iy - 0.045f
+            val y = if (above > 0.015f) above else layer.h - iy + 0.045f
+            val (x, wy) = layer.localToWorld.map(layer.w / 2f, y)
+            return HandlePoint(LayerHandle.Rotate, x, wy)
+        }
         val above = layer.y + iy - 0.045f
         val y = if (above > 0.015f) above else layer.y + layer.h - iy + 0.045f
         val x = (layer.x + layer.w / 2f).coerceIn(layer.x + ix, layer.x + layer.w - ix)
@@ -149,6 +167,16 @@ object Geometry {
      */
     fun scaleLayer(layer: Layer, handle: LayerHandle, factor: Float): Layer {
         if (handle == LayerHandle.Rotate) return layer
+        if (layer is GroupLayer) {
+            val scale = factor.coerceIn(0.2f, 5f)
+            if (abs(scale - 1f) < 0.0001f) return layer
+            // Scaling the group scales the children through its matrix; no child
+            // coordinate is rewritten and no motion path is touched.
+            return layer.copy(
+                scaleX = (layer.scaleX * scale).coerceIn(0.05f, 20f),
+                scaleY = (layer.scaleY * scale).coerceIn(0.05f, 20f),
+            )
+        }
         val scale = clampedScale(layer, factor)
         if (abs(scale - 1f) < 0.0001f) return layer
 
@@ -221,15 +249,17 @@ fun Layer.withBounds(x: Float, y: Float, w: Float, h: Float): Layer = when (this
     is TextLayer -> copy(x = x, y = y, w = w, h = h)
     is IconLayer -> copy(x = x, y = y, w = w, h = h)
     is ModelLayer -> copy(x = x, y = y, w = w, h = h)
+    is GroupLayer -> copy(x = x, y = y, w = w, h = h)
 }
 
 fun Layer.withRotation(degrees: Float): Layer {
     val value = Geometry.normalizeAngle(degrees)
     return when (this) {
         is VectorLayer -> copy(rotation = value)
-    is ImageLayer -> copy(rotation = value)
+        is ImageLayer -> copy(rotation = value)
         is TextLayer -> copy(rotation = value)
         is IconLayer -> copy(rotation = value)
         is ModelLayer -> copy(rotation = value)
+        is GroupLayer -> copy(rotation = value)
     }
 }

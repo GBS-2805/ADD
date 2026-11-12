@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  The app wears the site's palettes. Nothing in a layout or a drawable names a
-  colour resource directly any more: each one asks for one of these attributes,
-  and the theme supplies the value for the palette and mode in force. Adding a
-  palette is a block of colours plus one theme, never a second layout.
+  The app wears the site's Review edition tokens. Nothing in a layout or a drawable
+  names a colour resource directly any more: each one asks for one of these
+  attributes, and the one theme supplies the value.
 -->
 <resources>
     <!-- The page and the words on it. -->

@@ -40,7 +40,8 @@
             android:singleLine="true"
             android:textColor="?attr/on"
             android:textSize="16sp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+                android:fontFamily="@font/instrument_serif" />
     </LinearLayout>
 
     <TextView
@@ -49,7 +50,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="50dp"
         android:layout_marginTop="3dp"
-        android:fontFamily="monospace"
+        android:fontFamily="@font/libre_franklin"
         android:textColor="?attr/onDim"
         android:textSize="10.5sp" />
 
@@ -78,7 +79,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
-        android:fontFamily="monospace"
+        android:fontFamily="@font/libre_franklin"
         android:gravity="center"
         android:text="Drag the handle to compare before and after"
         android:textColor="?attr/onDim"
@@ -92,7 +93,7 @@
         android:background="@drawable/bg_primary"
         android:clickable="true"
         android:focusable="true"
-        android:fontFamily="@font/poppins_semibold"
+        android:fontFamily="@font/libre_franklin"
         android:gravity="center"
         android:letterSpacing="0.08"
         android:text="SHARE COMPRESSED PHOTO"

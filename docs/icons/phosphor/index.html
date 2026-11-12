@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<meta name="theme-color" content="#0fbf92" />
+<meta name="theme-color" content="#f0e7d4" />
 <link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml" />
 <title>Phosphor — 1,512 icons, preview and variants</title>
 <meta name="description" content="Phosphor: 1,512 regular weight, outline icons, MIT. Preview one, set weight, size and surface, copy the SVG." />
-<link rel="stylesheet" href="../../assets/site.a226215efc.css" />
+<link rel="stylesheet" href="../../assets/site.6b1bb724fe.css" />
 <style>
   /* Corners: one step for boxes and controls, a smaller one for menu rows. */
   :root { --r: 8px; --r-sm: 5px; }
@@ -130,6 +130,7 @@
   .preview .preview-box svg {
     width: calc(var(--size, 64px) * 3.375);
     height: calc(var(--size, 64px) * 3.375);
+    transform-origin: 50% 50%;
   }
   .preview-meta {
     position: absolute;
@@ -195,7 +196,7 @@
     cursor: pointer;
   }
   .seg:last-child { border-right: 0; }
-  .seg[aria-pressed="true"] { background: var(--band); color: var(--ink); }
+  .seg[aria-pressed="true"] { background: var(--band); color: var(--band-ink); }
   .seg:focus-visible { outline: 2px solid var(--band); outline-offset: -3px; }
   .status { margin: 0; font-size: 13px; color: var(--on-dim); min-height: 1.4em; }
 
@@ -248,7 +249,7 @@
     height: 190px;
     resize: none;
     padding: 14px 16px;
-    font-family: "Poppins", sans-serif;
+    font-family: var(--wheat-mono, "Libre Franklin", Arial, sans-serif);
     font-size: 13px;
     line-height: 1.6;
     color: var(--on);
@@ -453,11 +454,11 @@
   }
   .icon-card:hover { background: var(--tint); }
   .icon-card:focus-visible { outline: 2px solid var(--band); outline-offset: -4px; }
-  .icon-card[aria-pressed="true"] { background: var(--band); color: var(--ink); }
+  .icon-card[aria-pressed="true"] { background: var(--band); color: var(--band-ink); }
   .icon-card .glyph { display: grid; place-items: center; width: 30px; height: 30px; }
   .icon-card .glyph svg { width: 30px; height: 30px; }
   .icon-card .name { font-size: 9px; font-weight: 500; letter-spacing: .06em; text-transform: uppercase; line-height: 1.25; text-align: center; word-break: break-word; color: var(--on-dim); }
-  .icon-card[aria-pressed="true"] .name { color: var(--ink); }
+  .icon-card[aria-pressed="true"] .name { color: var(--band-ink); }
   .icon-card { position: relative; }
   .icon-card[data-picked="true"]::after {
     content: "";
@@ -468,7 +469,7 @@
     height: 7px;
     background: var(--band);
   }
-  .icon-card[aria-pressed="true"][data-picked="true"]::after { background: var(--ink); }
+  .icon-card[aria-pressed="true"][data-picked="true"]::after { background: var(--band-ink); }
   .empty { margin: 0; padding: 18px 22px; font-size: 14px; color: var(--on-dim); }
   .panel-foot { display: flex; flex-wrap: wrap; gap: 6px 24px; justify-content: space-between; padding: 13px 22px; border-top: 1px solid var(--rule); font-size: 13px; color: var(--on-dim); }
   footer p { margin: 0; max-width: 62ch; }
@@ -517,17 +518,6 @@
   .ink {
     width: 26px; height: 26px; padding: 0; border-radius: 50%;
     border: 1px solid var(--rule); background: var(--sw, transparent); cursor: pointer;
-  }
-  /* Auto is one swatch among the colours, not a word among dots: a circle with an A. */
-  .ink.auto {
-    display: grid;
-    place-items: center;
-    padding: 0;
-    background: transparent;
-    font-size: 12px;
-    font-weight: 500;
-    line-height: 1;
-    color: var(--on);
   }
   .ink[aria-pressed="true"] { outline: 2px solid var(--on); outline-offset: 2px; }
   .ink:focus-visible { outline: 2px solid var(--band); outline-offset: 2px; }
@@ -594,7 +584,7 @@
     cursor: pointer;
   }
   .ink-mode:hover { border-color: var(--on); }
-  .ink-mode[aria-pressed="true"] { background: var(--band); border-color: var(--band); color: var(--ink); }
+  .ink-mode[aria-pressed="true"] { background: var(--band); border-color: var(--band); color: var(--band-ink); }
   .ink-pane { display: grid; gap: 10px; }
   .ink-pane[hidden] { display: none; }
   .ink-hex { display: flex; align-items: center; gap: 6px; min-width: 0; }
@@ -701,14 +691,102 @@
   .ink-set[disabled] { opacity: .45; cursor: default; }
   .preview-box[data-surface="black"] { color: var(--glyph, #fff); }
   .preview-box[data-surface="white"] { color: var(--glyph, #000); }
-  .icon-card .glyph { color: var(--glyph, inherit); }
-  .sel-chip svg { color: var(--glyph, inherit); }
+  /* The sheet is a browser, not the output: it keeps the page ink so white and
+     black choices stay legible there. The stage, chips and raster use --glyph. */
+  .icon-card .glyph { color: inherit; }
+  .sel-chip svg { color: inherit; }
+
+  /* The set is one quiet sheet: a search field and the glyphs, nothing else. */
+  .set-panel { margin: 34px 0 0; padding: 0; border: 0; }
+  .panel-toggle { display: none !important; }
+  .panel[data-open="true"] { border: 0; border-radius: 0; overflow: visible; animation: none; }
+  .panel-bar { display: block; padding: 0; border: 0; }
+  .panel-bar .count,
+  .panel-bar .add-all,
+  .panel-bar .search-icon { display: none !important; }
+  .panel-bar .search-wrap { display: block; position: static; flex: none; }
+  #search {
+    width: 100%;
+    height: 58px;
+    padding: 0 14px;
+    border: 1px solid var(--on);
+    border-radius: 0;
+    font: 400 16px/1.3 var(--wheat-body), Georgia, serif;
+    color: var(--on);
+    outline: none;
+  }
+  #search::placeholder { color: var(--on-dim); }
+  #search:focus { border-color: var(--on); outline: 2px solid var(--band); outline-offset: 3px; }
+  .panel-bar .cat-wrap { display: block; position: relative; flex: 0 0 auto; margin-top: 10px; }
+  .panel-bar .cat-btn {
+    width: 100%;
+    min-width: 0;
+    height: 58px;
+    padding: 0 14px;
+    justify-content: space-between;
+    gap: 10px;
+    font: 400 15px/1.3 var(--wheat-body), Georgia, serif;
+    color: var(--on);
+    background: transparent;
+    border: 1px solid var(--on);
+    border-radius: 0;
+  }
+  .panel-bar .cat-btn:hover { background: var(--tint); }
+  .panel-bar .cat-btn:focus-visible { outline: 2px solid var(--band); outline-offset: 3px; }
+  .panel-bar .cat-btn .cat-chev { flex: none; }
+  .panel-bar #catLabel { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .panel-bar .cat-menu {
+    width: 100%;
+    max-height: min(360px, 50vh);
+    border-radius: 0;
+    box-shadow: 0 12px 30px rgba(27, 18, 18, .12);
+  }
+  @media (min-width: 760px) {
+    .panel-bar { display: flex; flex-wrap: nowrap; align-items: center; gap: 10px; }
+    .panel-bar .search-wrap { flex: 1 1 auto; min-width: 0; }
+    .panel-bar .cat-wrap { flex: 0 0 240px; width: 240px; margin-top: 0; }
+  }
+  .grid-wrap { max-height: min(60vh, 560px); overflow-y: auto; border: 0; border-radius: 0; }
+  .grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; padding: 22px 0 0; }
+  .icon-card {
+    display: grid;
+    place-items: center;
+    min-height: 0;
+    aspect-ratio: 1;
+    padding: 8px;
+    border: 0;
+    border-radius: 0;
+    gap: 0;
+  }
+  .icon-card .glyph, .icon-card .glyph svg { width: 34px; height: 34px; }
+  .icon-card .name { display: none; }
+  .icon-card[data-picked="true"]::after { display: none; }
+  .sel-tab { margin: 0 0 16px; border: 0; border-radius: 0; }
+  .sel-tab[hidden] { display: none; }
+  .sel-head { padding: 0 0 10px; }
+  .sel-strip { padding: 0 0 12px; }
+  .empty { padding: 18px 0; }
+  @media (min-width: 760px) {
+    .grid { grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 20px; }
+  }
+  @media (min-width: 1100px) {
+    .grid { grid-template-columns: repeat(10, minmax(0, 1fr)); }
+    .icon-card .glyph, .icon-card .glyph svg { width: 38px; height: 38px; }
+  }
+  @media (max-width: 700px) {
+    .set-panel { margin-top: 26px; }
+    .grid { gap: 10px; padding-top: 20px; }
+    .icon-card { padding: 8px; }
+    .icon-card .glyph, .icon-card .glyph svg { width: 32px; height: 32px; }
+    #search { height: 54px; font-size: 15px; }
+    .panel-bar .cat-btn { height: 54px; }
+  }
 </style>
 </head>
 <body>
 
 <header class="bar">
-  <div class="lead">
+<div class="lead">
     <button class="menu-btn" id="menuBtn" type="button" aria-expanded="false" aria-controls="menu" aria-label="Open icon brands">
       <svg class="chev" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M8 13L12 17L16 13M8 7L12 11L16 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
     </button>
@@ -724,12 +802,8 @@
       </svg>
   </a>
 
-  <div class="who">
-    <div class="who-lines keep">
-      <p class="big">Art Design Database</p>
-      <p class="big">Icons • Fonts • Tools</p>
-    </div>
-    <button class="burger" id="burger" type="button" aria-expanded="false" aria-controls="drawer" aria-label="Open side tab">
+<div class="who">
+<button class="burger" id="burger" type="button" aria-expanded="false" aria-controls="drawer" aria-label="Open side tab">
       <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 7H19M5 12H19M5 17H19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
     </button>
   </div>
@@ -822,13 +896,9 @@
         <div class="ctl-row" role="group" aria-label="Icon colour">
           <span class="ctl-label">Colour</span>
           <div class="inks" id="inks">
-            <button class="ink auto" type="button" data-ink="" aria-pressed="true" title="Auto — follow the background" aria-label="Auto — follow the background">A</button>
-            <button class="ink" type="button" data-ink="#ffffff" style="--sw: #ffffff" aria-label="White" aria-pressed="false"></button>
             <button class="ink" type="button" data-ink="#000000" style="--sw: #000000" aria-label="Black" aria-pressed="false"></button>
-            <button class="ink" type="button" data-ink="#4147d5" style="--sw: #4147d5" aria-label="Indigo" aria-pressed="false"></button>
-            <button class="ink" type="button" data-ink="#0e9f6e" style="--sw: #0e9f6e" aria-label="Green" aria-pressed="false"></button>
-            <button class="ink" type="button" data-ink="#e02424" style="--sw: #e02424" aria-label="Red" aria-pressed="false"></button>
-            <button class="ink manual" id="inkManual" type="button" title="Manual colour — pick your own" aria-label="Manual colour — pick your own">M</button>
+            <button class="ink" type="button" data-ink="#ffffff" style="--sw: #ffffff" aria-label="White" aria-pressed="true"></button>
+            <button class="ink manual" id="inkManual" type="button" title="Manual colour — pick your own" aria-label="Manual colour — pick your own" aria-pressed="false">M</button>
           </div>
         </div>
 
@@ -870,13 +940,9 @@
       </button>
     </div>
     <div class="ink-body">
-      <div class="ink-grid" id="inkGrid" role="group" aria-label="Colours">
-        <button class="ink-cell" type="button" data-c="" title="Auto — follow the background">A</button>
-        <button class="ink-cell" type="button" data-c="#ffffff" style="--c: #ffffff" aria-label="White"></button>
+      <div class="ink-grid" id="inkGrid" role="group" aria-label="Preset colours">
         <button class="ink-cell" type="button" data-c="#000000" style="--c: #000000" aria-label="Black"></button>
-        <button class="ink-cell" type="button" data-c="#4147d5" style="--c: #4147d5" aria-label="Indigo"></button>
-        <button class="ink-cell" type="button" data-c="#0e9f6e" style="--c: #0e9f6e" aria-label="Green"></button>
-        <button class="ink-cell" type="button" data-c="#e02424" style="--c: #e02424" aria-label="Red"></button>
+        <button class="ink-cell" type="button" data-c="#ffffff" style="--c: #ffffff" aria-label="White"></button>
       </div>
       <div class="ink-modes" role="group" aria-label="Colour mode">
         <button class="ink-mode" id="inkCustom" type="button" aria-pressed="false">Custom</button>
@@ -924,7 +990,7 @@
   </dialog>
 
   <section class="set-panel">
-    <div class="sel-tab" id="selTab">
+    <div class="sel-tab" id="selTab" hidden>
       <div class="sel-head">
         <p><b id="selCount">No icons</b> in the export selection</p>
         <div class="sel-actions">
@@ -935,35 +1001,25 @@
       <div class="sel-strip" id="selStrip"></div>
     </div>
 
-    <button class="panel-toggle" id="panelToggle" type="button" aria-expanded="false" aria-controls="panel">
-      <span>
-        <b>Phosphor · all 1,512 icons</b>
-        <span class="panel-sub">Opens into a scrolling sheet — tap to preview, double-tap to collect for export</span>
-      </span>
-      <svg class="chev" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M8 13L12 17L16 13M8 7L12 11L16 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-    </button>
+    <button class="panel-toggle" id="panelToggle" type="button" aria-expanded="true" aria-controls="panel" hidden></button>
 
-    <div class="panel" id="panel" data-open="false">
+    <div class="panel" id="panel" data-open="true">
       <div class="panel-bar">
         <div class="search-wrap">
-          <svg class="search-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 10C3 13.86599 6.13401 17 10 17C13.86599 17 17 13.86599 17 10C17 6.13401 13.86599 3 10 3C6.13401 3 3 6.13401 3 10ZM15 15L21 21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          <input id="search" type="search" placeholder="Filter Phosphor by name…" aria-label="Filter icons by name" autocomplete="off" />
+          <input id="search" type="search" placeholder="Search by name" aria-label="Search icons by name" autocomplete="off" />
         </div>
         <div class="cat-wrap" id="catWrap" hidden>
           <button class="cat-btn" id="catBtn" type="button" aria-expanded="false" aria-haspopup="listbox" aria-controls="catMenu">
-            <span id="catLabel">All icons</span>
+            <span id="catLabel">All categories</span>
             <svg class="cat-chev" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M8 10L12 14L16 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </button>
           <div class="cat-menu" id="catMenu" role="listbox" aria-label="Icon category" hidden></div>
         </div>
-        <p class="count" id="count">1,512</p>
-        <button class="add-all" id="addAllBtn" type="button">Add all</button>
+        <p class="count" id="count" hidden>1,512</p>
+        <button class="add-all" id="addAllBtn" type="button" hidden>Add all</button>
       </div>
       <div class="grid-wrap"><div class="grid" id="grid"></div></div>
-      <p class="empty" id="empty" hidden>No icon in Phosphor matches that name in that category.</p>
-      <div class="panel-foot">
-        <span>phosphor-icons/core 2.1.1 · MIT</span>
-      </div>
+      <p class="empty" id="empty" hidden>No icon in Phosphor matches that search or category.</p>
     </div>
   </section>
 </main>
@@ -1014,6 +1070,7 @@
   var styleRow = document.getElementById("styleRow");
   var styleSegs = document.getElementById("styleSegs");
   var weightRow = document.getElementById("weightRow");
+  var selTab = document.getElementById("selTab");
   var selCount = document.getElementById("selCount");
   var selStrip = document.getElementById("selStrip");
   var selRemove = document.getElementById("selRemove");
@@ -1108,8 +1165,40 @@
     }
   }
 
-  function paint() {
+  // A size change carries the old glyph into the new one; a weight change gives
+  // the same size a small settle. Both stop entirely for reduced motion.
+  function stageMotion(kind, before) {
+    var svg = box.querySelector("svg");
+    if (!svg || !svg.animate) { return; }
+    if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) { return; }
+    var frames;
+    if (kind === "size" && before && before.width) {
+      var after = svg.getBoundingClientRect();
+      var x = before.left + before.width / 2 - (after.left + after.width / 2);
+      var y = before.top + before.height / 2 - (after.top + after.height / 2);
+      var scale = before.width / after.width;
+      frames = [
+        { transform: "translate(" + x + "px," + y + "px) scale(" + scale + ")" },
+        { transform: "translate(0,0) scale(1.02)", offset: .7 },
+        { transform: "translate(0,0) scale(1)" }
+      ];
+    } else {
+      frames = [
+        { transform: "scale(.94)" },
+        { transform: "scale(1.03)", offset: .6 },
+        { transform: "scale(1)" }
+      ];
+    }
+    svg.animate(frames, {
+      duration: kind === "size" ? 320 : 240,
+      easing: "cubic-bezier(.2,.8,.3,1)"
+    });
+  }
+
+  function paint(motion) {
     if (!selected) { return; }
+    var old = motion ? box.querySelector("svg") : null;
+    var before = old ? old.getBoundingClientRect() : null;
     var svg = markup(selected);
     box.innerHTML = svg;
     box.style.setProperty("--size", size + "px");
@@ -1120,6 +1209,7 @@
       box.style.setProperty("--w", w);
       tune(box.querySelector("svg"), w, MODE !== "stroke");
     }
+    if (motion) { stageMotion(motion, before); }
     box.setAttribute("data-surface", surface);
     box.closest(".preview").setAttribute("data-surface", surface);
     // The style rides on the name, where the file label used to say it twice.
@@ -1142,7 +1232,7 @@
   // the toggle asks for them and then kept for the visit.
   // The chosen ink. Ink styles take it as currentColor; Duo and Flat are tinted
   // rather than flattened, so their second tone survives as an opacity.
-  var ink = "";
+  var ink = "#ffffff";
   var tints = {};
   var currentPayload = null;
 
@@ -1323,6 +1413,7 @@
 
   function renderSelection() {
     var n = chosen.length;
+    selTab.hidden = n === 0;
     selCount.textContent = n ? n.toLocaleString() + (n === 1 ? " icon" : " icons") : "No icons";
     selRemove.disabled = !(selected && inSelection(selected));
     selClear.disabled = !n;
@@ -1330,7 +1421,7 @@
     if (!n) {
       var hint = document.createElement("p");
       hint.className = "sel-hint";
-      hint.textContent = "Double-tap an icon in the sheet to collect it, or press Add all.";
+      hint.textContent = "Double-tap an icon in the sheet to collect it.";
       selStrip.append(hint);
     } else {
       var frag = document.createDocumentFragment();
@@ -1436,7 +1527,7 @@
     var list = exportList();
     var token = ++estimateToken;
     if (!list || !list.length) {
-      estimateEl.textContent = "Nothing selected yet \u2014 double-tap an icon or press Add all.";
+      estimateEl.textContent = "Nothing selected yet \u2014 double-tap an icon.";
       return;
     }
     if (format === "svg") {
@@ -1523,7 +1614,7 @@
 
   function chooseCat(name) {
     cat = name;
-    catLabel.textContent = name || "All icons";
+    catLabel.textContent = name || "All categories";
     try {
       if (name) { window.localStorage.setItem(CAT_KEY, name); }
       else { window.localStorage.removeItem(CAT_KEY); }
@@ -1551,7 +1642,7 @@
       btn.setAttribute("aria-selected", entry.name === cat ? "true" : "false");
       var label = document.createElement("span");
       label.className = "cat-label";
-      label.textContent = entry.name || "All icons";
+      label.textContent = entry.name || "All categories";
       var num = document.createElement("span");
       num.className = "cat-n";
       num.textContent = entry.count.toLocaleString();
@@ -1592,22 +1683,26 @@
   weights.addEventListener("click", function (event) {
     var btn = event.target.closest(".seg");
     if (!btn) { return; }
-    weight = btn.getAttribute("data-weight");
+    var next = btn.getAttribute("data-weight");
+    var changed = next !== weight;
+    weight = next;
     Array.prototype.forEach.call(weights.children, function (other) {
       other.setAttribute("aria-pressed", other === btn ? "true" : "false");
     });
-    paint();
+    paint(changed ? "weight" : "");
     queueEstimate();
   });
 
   sizes.addEventListener("click", function (event) {
     var btn = event.target.closest(".seg");
     if (!btn) { return; }
-    size = Number(btn.getAttribute("data-size"));
+    var next = Number(btn.getAttribute("data-size"));
+    var changed = next !== size;
+    size = next;
     Array.prototype.forEach.call(sizes.children, function (other) {
       other.setAttribute("aria-pressed", other === btn ? "true" : "false");
     });
-    paint();
+    paint(changed ? "size" : "");
   });
 
   function applySurface(value) {
@@ -1680,6 +1775,7 @@
     });
     // M carries the colour it stands for, so a custom choice is visible in the row.
     var custom = ink !== "" && !inks.querySelector('.ink[data-ink="' + ink + '"]');
+    inkManual.setAttribute("aria-pressed", custom ? "true" : "false");
     inkManual.style.setProperty("--sw", custom ? ink : "transparent");
     inkManual.style.color = custom ? readableInk(ink) : "";
   }
@@ -1824,12 +1920,12 @@
   }
 
   function seedCmyk() {
-    var c = hexCmyk(pendingInk || "#4147d5");
+    var c = hexCmyk(pendingInk || "#ffffff");
     inkC.value = c.c; inkM.value = c.m; inkY.value = c.y; inkK.value = c.k;
   }
 
   function seedWheel() {
-    var hsv = hexHsv(pendingInk || "#4147d5");
+    var hsv = hexHsv(pendingInk || "#ffffff");
     wheelH = hsv.h; wheelS = hsv.s; wheelV = hsv.v;
     inkValue.value = Math.round(wheelV * 100);
     paintWheel();
@@ -1843,12 +1939,12 @@
     var reach = wheelS * 50;
     inkWheelDot.style.left = (50 + Math.cos(angle) * reach) + "%";
     inkWheelDot.style.top = (50 + Math.sin(angle) * reach) + "%";
-    inkWheelDot.style.background = pendingInk || "#4147d5";
+    inkWheelDot.style.background = pendingInk || "#ffffff";
   }
 
   function openInk() {
     pendingInk = ink;
-    inkHex.value = (ink || "#4147d5").slice(1).toUpperCase();
+    inkHex.value = (ink || "#ffffff").slice(1).toUpperCase();
     // A colour that is not one of the swatches came from a pane, so open on the
     // field it can be read in rather than a grid that cannot show it.
     var onSwatch = ink === "" || inkGrid.querySelector('.ink-cell[data-c="' + ink + '"]');
@@ -2352,7 +2448,8 @@
       applyExportSize(savedSize, false);
     }
     applySurface(recall(SURFACE_KEY));
-    setInk(recall(INK_KEY), false);
+    var savedInk = recall(INK_KEY);
+    setInk(savedInk || (surface === "white" ? "#000000" : "#ffffff"), false);
   })();
 
   var initial = STYLES.length ? (styleBySlug(recall(STYLE_KEY)) || STYLES[0]) : null;
@@ -2371,7 +2468,7 @@
       currentPayload = payload;
       items = displayed(payload.icons || []);
       if (!items.length) { throw new Error("the catalog is empty"); }
-      CATS =      catsFor(payload);
+      CATS = catsFor(payload);
       if (savedCat) {
         var known = CATS.some(function (entry) { return entry.name === savedCat; });
         if (known) { cat = savedCat; catLabel.textContent = savedCat; }
@@ -2379,6 +2476,7 @@
       renderCats();
       select(items[0], null);
       renderGrid();
+      statusEl.textContent = "";
     })
     .catch(function (error) {
       nameEl.textContent = "The catalog did not load";
@@ -2386,6 +2484,6 @@
     });
 })();
 </script>
-<script src="../../assets/site.8e0ef906fa.js" defer></script>
+<script src="../../assets/site.520be602d0.js" defer></script>
 </body>
 </html>

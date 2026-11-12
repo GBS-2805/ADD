@@ -29,24 +29,24 @@ object StickerLibrary {
             kind = "STICKER",
             label = "STAR",
             network = starNetwork(),
-            fill = 0xFF0FBF92.toInt(),
-            stroke = 0xFF11231C.toInt(),
+            fill = EngineEdition.PlumArgb,
+            stroke = EngineEdition.InkArgb,
         ),
         StickerPreset(
             id = "burst",
             kind = "STICKER",
             label = "BURST",
             network = radialNetwork("burst", 16, 0.49f, 0.22f),
-            fill = 0xFFE86A4A.toInt(),
-            stroke = 0xFF11231C.toInt(),
+            fill = EngineEdition.PlumHoverArgb,
+            stroke = EngineEdition.InkArgb,
         ),
         StickerPreset(
             id = "heart",
             kind = "STICKER",
             label = "HEART",
             network = heartNetwork(),
-            fill = 0xFFE86A4A.toInt(),
-            stroke = 0xFF11231C.toInt(),
+            fill = EngineEdition.CardArgb,
+            stroke = EngineEdition.InkArgb,
         ),
         StickerPreset(
             id = "bolt",
@@ -64,8 +64,8 @@ object StickerLibrary {
                     0.68f to 0.03f,
                 ),
             ),
-            fill = 0xFFD6E381.toInt(),
-            stroke = 0xFF11231C.toInt(),
+            fill = EngineEdition.PaperArgb,
+            stroke = EngineEdition.InkArgb,
         ),
     )
 
@@ -79,7 +79,7 @@ object StickerLibrary {
                 listOf(0.5f to 0.04f, 0.95f to 0.5f, 0.5f to 0.96f, 0.05f to 0.5f),
             ),
             fill = 0,
-            stroke = 0xFF0FBF92.toInt(),
+            stroke = EngineEdition.PlumArgb,
             strokeWidth = 5f,
         ),
         StickerPreset(
@@ -99,7 +99,7 @@ object StickerLibrary {
                 ),
             ),
             fill = 0,
-            stroke = 0xFF0FBF92.toInt(),
+            stroke = EngineEdition.PlumArgb,
             strokeWidth = 5f,
         ),
         StickerPreset(
@@ -124,7 +124,7 @@ object StickerLibrary {
                 ),
             ),
             fill = 0,
-            stroke = 0xFF0FBF92.toInt(),
+            stroke = EngineEdition.PlumArgb,
             strokeWidth = 5f,
         ),
         StickerPreset(
@@ -133,7 +133,7 @@ object StickerLibrary {
             label = "RING",
             network = radialNetwork("ring", 28, 0.47f, 0.47f),
             fill = 0,
-            stroke = 0xFF0FBF92.toInt(),
+            stroke = EngineEdition.PlumArgb,
             strokeWidth = 5f,
         ),
     )
@@ -189,6 +189,6 @@ private fun normalizedNetwork(prefix: String, raw: List<Pair<Float, Float>>): Ve
     return VectorNetwork(
         points = points,
         segments = segments,
-        regions = listOf(VecRegion("$prefix-region", segments.map { it.id }, 0xFF0FBF92.toInt())),
+        regions = listOf(VecRegion("$prefix-region", segments.map { it.id }, EngineEdition.PlumArgb)),
     )
 }

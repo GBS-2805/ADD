@@ -149,6 +149,8 @@ check_fallback() {
 # the attributes, and every layout against the theme. No browser needed, which is why
 # this half runs here; `tools/check_palette.py --browser <url>` adds the rendered one.
 check_palette() {
+    echo "== edition: sync app and Studio from the site =="
+    python3 "$ROOT/tools/sync_edition.py"
     echo "== palette: site and app =="
     python3 "$ROOT/tools/check_palette.py"
 }
@@ -180,11 +182,11 @@ stage_shelf_assets() {
     du -sh "$www"
 }
 
-# The Fabric+ Studio spike lives beside the shelf rather than inside it: it is not a
+# The Studio engine shell lives beside the shelf rather than inside it: it is not a
 # site page, so it is copied into the bundle after the shelf staging has finished.
 stage_studio_assets() {
     local dst="$ROOT/app/assets/www/studio"
-    echo "== ADD: staging the Fabric Studio spike =="
+    echo "== ADD: staging the Studio engine shell =="
     rm -rf "$dst"
     mkdir -p "$dst"
     cp -R "$ROOT/app/studio-assets/." "$dst/"
@@ -199,7 +201,7 @@ case "${1:-add}" in
         check_palette
         stage_shelf_assets
         stage_studio_assets
-        build_app app ADD ADD-3.7.apk 39 3.7
+        build_app app ADD ADD-3.9.apk 41 3.9
         # The newest build, not a hard-coded one: a stale path silently proved a copy
         # the release had already replaced.
         check_fallback "$(ls -t "$OUT"/ADD-*.apk | head -1)"

@@ -1,82 +1,81 @@
-/* Band chrome. The chevrons on the left open a pull-down accordion with the four
-   section links; the burger on the right pulls out a side tab with the other
-   three. Opening one closes the other, Escape closes both, and the scrim behind
-   the tab dismisses it. */
+/* The site is one printed edition. The old palette and light/dark controls are
+   gone: the page always reads as newsprint, ink and stamp red. This script keeps
+   the shared chrome — wordmark, pull-down, side tab, search row and hover rolls —
+   in one place so every page gets the same masthead. */
 (function () {
-  var THEME_KEY = "site:theme";
-  var SUN = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="2"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M19.1 4.9l-1.4 1.4M6.3 17.7l-1.4 1.4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
-  var MOON = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 1 0 10.5 10.5Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>';
+  function rootPrefix() {
+    var script = document.currentScript || document.querySelector('script[src*="assets/site"]');
+    var src = script ? script.getAttribute("src") || "" : "";
+    var cut = src.indexOf("assets/");
+    return cut > -1 ? src.slice(0, cut) : "";
+  }
 
-  function storedTheme() {
-    try {
-      var value = localStorage.getItem(THEME_KEY);
-      if (value === "light" || value === "dark") return value;
-    } catch (error) { /* blocked store: fall through to the system */ }
-    // Dark is the default now: a first visit opens on the off-black page whatever
-    // the system asks for, and only a saved choice turns it over.
-    return "dark";
+  function motion() {
+    var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    return window.gsap && !reduce ? window.gsap : null;
   }
-  function applyTheme(theme) {
-    document.documentElement.setAttribute("data-theme", theme);
-    var button = document.getElementById("themeBtn");
-    if (!button) return;
-    var icon = button.querySelector(".ico") || button;
-    icon.innerHTML = theme === "light" ? MOON : SUN;
-    button.setAttribute("aria-label",
-      theme === "light" ? "Switch to dark theme" : "Switch to light theme");
-  }
-  applyTheme(storedTheme());
 
-  // The palette rides beside the theme: same three keys, same store, and the
-  // colour choice survives a reload the way the light/dark one does.
-  var PALETTE_KEY = "site:palette";
-  var PALETTES = [
-    { id: "green", label: "Green", band: "#0fbf92", word: "#0f120f" },
-    { id: "moss", label: "Moss", band: "#005043", word: "#e7ddce" },
-    { id: "navy", label: "Navy", band: "#242d55", word: "#a1b0c3" }
-  ];
-  function storedPalette() {
-    try {
-      var saved = localStorage.getItem(PALETTE_KEY);
-      for (var i = 0; i < PALETTES.length; i++) if (PALETTES[i].id === saved) return saved;
-    } catch (error) { /* blocked store: fall through to green */ }
-    return "green";
-  }
-  // A page that prints the palette's codes reads them back out of the stylesheet
-  // instead of carrying a second copy: [data-code="band"] takes --pal-band, so the
-  // values under "The system" follow the chosen palette rather than staying green.
-  function syncCodes() {
-    var slots = document.querySelectorAll("[data-code]");
-    if (!slots.length) return;
-    var live = getComputedStyle(document.documentElement);
-    for (var i = 0; i < slots.length; i++) {
-      var hex = live.getPropertyValue("--pal-" + slots[i].getAttribute("data-code")).trim();
-      if (hex) slots[i].textContent = hex.toUpperCase();
+  // The masthead lockup is the brand's own: ADD, its descriptor, and the promise.
+  // The old mark stays in the favicon and app icon; on the site the wordmark is
+  // a signature, not the composition. Build the lockup once for every page.
+  var bar = document.querySelector(".bar");
+  if (bar && !bar.querySelector(".brand-lockup")) {
+    var wordmark = bar.querySelector(".site-wordmark");
+    if (!wordmark) {
+      wordmark = document.createElement("a");
+      wordmark.className = "site-wordmark";
+      wordmark.href = rootPrefix() || "./";
+      wordmark.setAttribute("aria-label", "ADD — home");
+      wordmark.textContent = "ADD";
     }
+    var lockup = document.createElement("div");
+    lockup.className = "brand-lockup";
+    var descriptor = document.createElement("span");
+    descriptor.className = "brand-descriptor";
+    descriptor.textContent = "Art · Design · Database";
+    lockup.append(wordmark, descriptor);
+    // The lockup is the pull-down's label now: ADD and its descriptor take the
+    // left cell where the page name used to sit, and still open the sections.
+    var leadCell = bar.querySelector(".lead");
+    var menuButton = bar.querySelector(".menu-btn");
+    if (leadCell) leadCell.insertBefore(lockup, menuButton ? menuButton.nextSibling : null);
+    else bar.insertBefore(lockup, bar.firstElementChild);
+    var oldName = bar.querySelector(".page-name");
+    if (oldName) oldName.remove();
   }
-  // A phone paints its status bar from the theme-color meta, which is otherwise stuck
-  // on green whatever palette is live: give it the band the page is actually wearing.
-  function syncBandMeta() {
-    var meta = document.querySelector('meta[name="theme-color"]');
-    if (!meta) return;
-    var band = getComputedStyle(document.documentElement).getPropertyValue("--pal-band").trim();
-    if (band) meta.setAttribute("content", band);
+  if (bar) {
+    var oldLines = bar.querySelectorAll(".who-lines");
+    for (var i = 0; i < oldLines.length; i++) oldLines[i].remove();
   }
-  function applyPalette(id) {
-    document.documentElement.setAttribute("data-palette", id);
-    syncCodes();
-    syncBandMeta();
-    var row = document.getElementById("palRow");
-    if (!row) return;
-    var chips = row.querySelectorAll(".pal");
-    for (var i = 0; i < chips.length; i++) {
-      chips[i].setAttribute("aria-pressed",
-        chips[i].getAttribute("data-palette") === id ? "true" : "false");
-    }
+
+  // Band motion, kept quiet: the hairline draws in, the two ends settle, and the
+  // menu panels animate their own height. Reduced motion and a missing library
+  // both leave the finished CSS state.
+  if (bar && !bar.querySelector(".band-rule")) {
+    var bandRule = document.createElement("i");
+    bandRule.className = "band-rule";
+    bandRule.setAttribute("aria-hidden", "true");
+    bar.appendChild(bandRule);
   }
-  applyPalette(storedPalette());
+  var g = motion();
+  if (g) {
+    g.fromTo(".band-rule", { scaleX: 0 }, { scaleX: 1, duration: .9, ease: "power3.inOut", delay: .12 });
+    g.from(".bar .lead", { y: 7, opacity: 0, duration: .55, ease: "power3.out" });
+    g.from(".bar .who", { y: 7, opacity: 0, duration: .55, ease: "power3.out" }, .05);
+    g.from(".site-wordmark", { y: 5, opacity: 0, duration: .45, ease: "power2.out" });
+  }
 
   var menu = document.getElementById("menu");
+  // The folio under the page name is the label the menu already carries for the
+  // current section, so the three-zone masthead stays data-driven.
+  var pageLink = document.querySelector(".page-name");
+  var sectionLabel = menu ? menu.querySelector('a[aria-current="page"] span') : null;
+  if (pageLink && sectionLabel && !pageLink.parentNode.querySelector(".page-note")) {
+    var pageNote = document.createElement("span");
+    pageNote.className = "page-note";
+    pageNote.textContent = sectionLabel.textContent.trim() === "shelf" ? "The shelf" : sectionLabel.textContent.trim();
+    pageLink.parentNode.insertBefore(pageNote, pageLink.nextSibling);
+  }
   var menuBtn = document.getElementById("menuBtn");
   var drawer = document.getElementById("drawer");
   var burger = document.getElementById("burger");
@@ -84,13 +83,37 @@
   var closer = document.getElementById("drawerClose");
   if (!menu || !menuBtn || !drawer || !burger) return;
   var menuOpener = menuBtn;
+  var menuTween = null;
 
   function setMenu(open, returnFocus) {
     var wasOpen = menu.getAttribute("data-open") === "true";
-    menu.setAttribute("data-open", open ? "true" : "false");
+    if (menuTween) { menuTween.kill(); menuTween = null; }
     menuBtn.setAttribute("aria-expanded", open ? "true" : "false");
     menuBtn.setAttribute("aria-label", open ? "Close sections" : "Open sections");
-    var name = document.querySelector(".page-name");
+    if (open) {
+      menu.setAttribute("data-open", "true");
+      if (g) {
+        var target = menu.scrollHeight;
+        g.set(menu, { height: 0 });
+        menuTween = g.timeline({ onComplete: function () {
+          menu.style.height = "";
+          menuTween = null;
+        }});
+        menuTween.to(menu, { height: target, duration: .42, ease: "power3.out" }, 0)
+          .fromTo(menu.querySelectorAll("a"), { y: 10, opacity: 0 }, { y: 0, opacity: 1, duration: .4, stagger: .045, ease: "power2.out" }, .04);
+      }
+    } else if (wasOpen) {
+      if (g) {
+        menuTween = g.to(menu, { height: 0, duration: .22, ease: "power2.in", onComplete: function () {
+          menu.setAttribute("data-open", "false");
+          menu.style.height = "";
+          menuTween = null;
+        }});
+      } else {
+        menu.setAttribute("data-open", "false");
+      }
+    }
+    var name = document.querySelector(".bar .site-wordmark");
     if (name) name.setAttribute("aria-expanded", open ? "true" : "false");
     if (!open && wasOpen && returnFocus) menuOpener.focus();
   }
@@ -102,19 +125,14 @@
     burger.setAttribute("aria-label", open ? "Close side tab" : "Open side tab");
     if (scrim) scrim.setAttribute("data-open", open ? "true" : "false");
     document.body.classList.toggle("drawer-open", open);
-    if (open) setMenu(false, false);
-    else if (wasOpen) persistLook();
+    if (open) {
+      setMenu(false, false);
+      if (g) g.fromTo(drawer.querySelectorAll("a, .drawer-about"), { y: 8, opacity: 0 }, { y: 0, opacity: 1, duration: .4, stagger: .035, ease: "power3.out", overwrite: true });
+    }
     if (!open && wasOpen && returnFocus) burger.focus();
   }
 
-  // A route to /search/ from the side tab on every page, without editing each page.
-  // The bundle carries the page too, so the app keeps the link.
-  function rootPrefix() {
-    var script = document.currentScript || document.querySelector('script[src*="assets/site"]');
-    var src = script ? script.getAttribute("src") || "" : "";
-    var cut = src.indexOf("assets/");
-    return cut > -1 ? src.slice(0, cut) : "";
-  }
+  // The search page is part of the shelf but not in the four section links.
   var drawerNote = drawer.querySelector(".drawer-note");
   if (drawerNote && !document.getElementById("searchLink")) {
     var searchLink = document.createElement("a");
@@ -124,8 +142,7 @@
     drawer.insertBefore(searchLink, drawerNote);
   }
 
-  // The note is the tab's About: a small heading over the sentence, so it reads as
-  // a description of the work rather than a stray caption under the links.
+  // The note becomes the tab's About, a small heading over the sentence.
   if (drawerNote && !drawerNote.closest(".drawer-about")) {
     var about = document.createElement("div");
     about.className = "drawer-about";
@@ -136,85 +153,37 @@
     about.append(aboutLabel, drawerNote);
   }
 
-  // The look controls are one row at the foot of the tab: the three palette chips
-  // with the light/dark switch at the end of them. The switch carries no word of its
-  // own -- the sun or the moon says what it does -- and both choices are written to
-  // the store when the tab closes, so closing it never drops one.
-  var controls = document.getElementById("drawerControls");
-  if (!controls) {
-    controls = document.createElement("div");
-    controls.id = "drawerControls";
-    controls.className = "drawer-controls";
-    drawer.appendChild(controls);
-  }
+  // Menu and tab labels roll over themselves on hover. The duplicate is hidden
+  // from assistive tech, so the link still reads once.
+  (function addRolls() {
+    var links = document.querySelectorAll(".menu a, .drawer a");
+    for (var i = 0; i < links.length; i++) {
+      var link = links[i];
+      if (link.querySelector(".roll")) continue;
+      var node = link.firstChild;
+      while (node && node.nodeType === 3 && !node.textContent.trim()) node = node.nextSibling;
+      if (!node || node.nodeType !== 3) continue;
+      var label = node.textContent.trim();
+      if (!label) continue;
+      var roll = document.createElement("span");
+      roll.className = "roll";
+      var top = document.createElement("span");
+      top.className = "roll-a";
+      top.textContent = label;
+      var under = document.createElement("span");
+      under.className = "roll-b";
+      under.setAttribute("aria-hidden", "true");
+      under.textContent = label;
+      roll.appendChild(top);
+      roll.appendChild(under);
+      node.parentNode.replaceChild(roll, node);
+    }
+  })();
 
-  function persistLook() {
-    var theme = document.documentElement.getAttribute("data-theme");
-    var palette = document.documentElement.getAttribute("data-palette");
-    try {
-      if (theme === "light" || theme === "dark") localStorage.setItem(THEME_KEY, theme);
-      if (palette) localStorage.setItem(PALETTE_KEY, palette);
-    } catch (error) { /* blocked store: the page keeps the live choice */ }
-  }
-
-  if (!document.getElementById("palRow")) {
-    var paletteRow = document.createElement("div");
-    paletteRow.className = "drawer-palette";
-    paletteRow.innerHTML = '<span>Palette</span><span class="pal-row" id="palRow" role="group" aria-label="Palette"></span>';
-    controls.appendChild(paletteRow);
-    var palRow = paletteRow.querySelector(".pal-row");
-    PALETTES.forEach(function (palette) {
-      var chip = document.createElement("button");
-      chip.type = "button";
-      chip.className = "pal";
-      chip.setAttribute("data-palette", palette.id);
-      chip.setAttribute("aria-label", palette.label + " palette");
-      chip.title = palette.label;
-      chip.style.background = palette.band;
-      var dot = document.createElement("i");
-      dot.style.background = palette.word;
-      chip.appendChild(dot);
-      chip.addEventListener("click", function () {
-        applyPalette(palette.id);
-        persistLook();
-      });
-      palRow.appendChild(chip);
-    });
-
-    var themeBtn = document.createElement("button");
-    themeBtn.type = "button";
-    themeBtn.id = "themeBtn";
-    themeBtn.className = "pal-theme";
-    themeBtn.innerHTML = '<span class="ico"></span>';
-    themeBtn.addEventListener("click", function () {
-      applyTheme(document.documentElement.getAttribute("data-theme") === "light" ? "dark" : "light");
-      persistLook();
-    });
-    palRow.appendChild(themeBtn);
-  }
-  applyTheme(document.documentElement.getAttribute("data-theme") || storedTheme());
-  applyPalette(document.documentElement.getAttribute("data-palette") || storedPalette());
-
-  // A phone has no room for the two-line descriptor, so the band carries the short
-  // name over the long one instead. Injected here, so every page gets both.
-  var who = document.querySelector(".who");
-  if (who && !who.querySelector(".who-lines.phone")) {
-    var phone = document.createElement("div");
-    phone.className = "who-lines phone";
-    phone.innerHTML = '<p class="big">ADD</p><p class="sub">Art &#8226; Design &#8226; Database</p>';
-    who.insertBefore(phone, who.firstChild);
-  }
-
-  // The name in the band names the pull-down sitting beside it, so tapping it opens
-  // that instead of walking back to the index. The mark in the middle of the band is
-  // the way home, from any depth; its href is set from the stylesheet's own path so a
-  // page nested two folders deep still reaches the shelf.
-  var markLink = document.querySelector(".bar .mark") || document.querySelector("header .mark");
-  if (markLink) markLink.setAttribute("href", rootPrefix());
-
-  var nameLink = document.querySelector(".page-name");
+  var nameLink = document.querySelector(".bar .site-wordmark");
   if (nameLink) {
     nameLink.setAttribute("role", "button");
+    nameLink.setAttribute("aria-label", "ADD — open sections");
     nameLink.setAttribute("aria-controls", "menu");
     nameLink.setAttribute("aria-expanded",
       menu.getAttribute("data-open") === "true" ? "true" : "false");
@@ -246,9 +215,8 @@
     if (event.target.closest("a")) setDrawer(false, false);
   });
 
-  // A Tools card that names a native tool asks the app for it. On the site nothing
-  // answers -- IconsApp only exists inside the WebView -- so the card keeps its href
-  // and stays a normal link to the download page.
+  // A Tools card that names a native tool asks the app for it. On the site
+  // nothing answers, so the card keeps its href and stays a normal link.
   document.addEventListener("click", function (event) {
     var target = event.target && event.target.closest ? event.target.closest("[data-tool]") : null;
     if (!target || !window.IconsApp || typeof IconsApp.openTool !== "function") return;

@@ -32,7 +32,7 @@ import java.io.OutputStream;
 import java.util.HashMap;
 
 /**
- * The Fabric Studio canvas, hosted by the editor rather than an activity of its own.
+ * The Studio engine canvas, hosted by the editor rather than an activity of its own.
  *
  * The page is served from assets/www/studio, so it is offline; the only bridge out is
  * a picked photo and a PNG export into Pictures/Studio. The close bridge returns to
@@ -56,10 +56,10 @@ public final class StudioPane extends FrameLayout {
     public StudioPane(Activity host) {
         super(host);
         this.host = host;
-        setBackgroundColor(Color.parseColor("#131513"));
+        setBackgroundColor(host.getResources().getColor(R.color.newsprint_page));
 
         web = new WebView(host);
-        web.setBackgroundColor(Color.parseColor("#131513"));
+        web.setBackgroundColor(host.getResources().getColor(R.color.newsprint_page));
         web.setLayerType(View.LAYER_TYPE_HARDWARE, null);
         WebSettings settings = web.getSettings();
         settings.setJavaScriptEnabled(true);

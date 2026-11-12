@@ -1,0 +1,104 @@
+{
+  "generated": "2026-11-10",
+  "site": {
+    "name": "Compress",
+    "tagline": "A design shelf: four icon brands, Poppins, one palette, and one offline Android app.",
+    "package": "app.offline.compress"
+  },
+  "catalogs": [
+    {
+      "id": "tools",
+      "title": "Tools",
+      "href": "/tools/",
+      "data": "/data/tools.json",
+      "count": 1
+    },
+    {
+      "id": "icons",
+      "title": "Icons",
+      "href": "/icons/",
+      "data": "/data/icons.json",
+      "count": 4373,
+      "sets": [
+        {
+          "id": "Coolicons",
+          "source": "krystonschwarze/coolicons",
+          "licence": "MIT",
+          "style": "line/regular",
+          "count": 1258,
+          "data": "/data/coolicons.json"
+        },
+        {
+          "id": "Lineicons",
+          "source": "LineiconsHQ/Lineicons",
+          "licence": "MIT",
+          "style": null,
+          "count": 606,
+          "data": "/data/icons.json"
+        },
+        {
+          "id": "Phosphor",
+          "source": "phosphor-icons/core 2.1.1",
+          "licence": "MIT",
+          "style": "regular weight, outline",
+          "count": 1512,
+          "data": "/data/phosphor.json"
+        },
+        {
+          "id": "Streamline",
+          "source": "webalys-hq/streamline-vectors",
+          "licence": "CC BY 4.0",
+          "style": "Line",
+          "count": 997,
+          "data": "/data/streamline-line.json",
+          "styles": [
+            {
+              "name": "Duo",
+              "count": 997,
+              "data": "/data/streamline-duo.json"
+            },
+            {
+              "name": "Flat",
+              "count": 997,
+              "data": "/data/streamline-flat.json"
+            },
+            {
+              "name": "Line",
+              "count": 997,
+              "data": "/data/streamline-line.json"
+            },
+            {
+              "name": "Solid",
+              "count": 997,
+              "data": "/data/streamline-solid.json"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "fonts",
+      "title": "Fonts",
+      "href": "/fonts/",
+      "data": "/data/fonts.json",
+      "count": 39
+    },
+    {
+      "id": "portfolio",
+      "title": "Portfolio",
+      "href": "/portfolio/",
+      "data": "/data/portfolio.json",
+      "count": 3
+    }
+  ],
+  "downloads": [
+    {
+      "id": "add",
+      "name": "ADD",
+      "version": "3.8",
+      "apk": "/ADD-3.8.apk",
+      "bytes": 6181148,
+      "sha256": "fe0148e5e0904654b67ba03e24ac6e8522377828c2e7ca7645adee0e0778beed"
+    }
+  ]
+}

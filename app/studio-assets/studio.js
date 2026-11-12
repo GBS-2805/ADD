@@ -1,4 +1,4 @@
-/* ADD Studio spike: Fabric+ canvas with live effects, fast-drag and native export. */
+/* ADD Studio engine shell: Fabric+ canvas with live effects, fast-drag and native export. */
 (function () {
   'use strict';
 
@@ -6,11 +6,22 @@
   var W = 540;
   var H = 675;
 
+  // The canvas is a drawing surface, not a separate colour system: read the
+  // generated edition tokens so a site change reaches the engine on reload.
+  var rootStyle = window.getComputedStyle(document.documentElement);
+  function token(name, fallback) {
+    var value = rootStyle.getPropertyValue(name).trim();
+    return value || fallback;
+  }
+  var INK = token('--on', '#1B1212');
+  var PAPER = token('--paper', '#f0e7d4');
+  var ACCENT = token('--accent', '#5b2a4b');
+
   fabric.Object.prototype.set({
-    cornerColor: '#0fbf92',
-    cornerStrokeColor: '#052019',
-    borderColor: '#0fbf92',
-    cornerSize: 14,
+    cornerColor: ACCENT,
+    cornerStrokeColor: PAPER,
+    borderColor: ACCENT,
+    cornerSize: 16,
     transparentCorners: false,
     padding: 4
   });
@@ -18,7 +29,7 @@
   var canvas = new fabric.Canvas('c', {
     width: W,
     height: H,
-    backgroundColor: '#f2eee3',
+    backgroundColor: PAPER,
     preserveObjectStacking: true,
     selection: true,
     allowTouchScrolling: false,
@@ -34,7 +45,7 @@
     if (!stageEl || !canvas.wrapperEl) { return; }
     var rect = stageEl.getBoundingClientRect();
     if (rect.width < 1 || rect.height < 1) { return; }
-    var scale = Math.min(rect.width / W, rect.height / H);
+    var scale = Math.min((rect.width - 24) / W, (rect.height - 24) / H);
     var width = Math.max(1, Math.round(W * scale));
     var height = Math.max(1, Math.round(H * scale));
     canvas.wrapperEl.style.width = width + 'px';
@@ -250,15 +261,15 @@
       top: 180,
       width: 420,
       fontSize: 84,
-      fontFamily: 'Poppins, system-ui, sans-serif',
-      fontWeight: '600',
+      fontFamily: 'Instrument Serif, Georgia, serif',
+      fontWeight: '400',
       textAlign: 'center',
-      startColour: '#131513',
-      endColour: '#0fbf92',
+      startColour: INK,
+      endColour: ACCENT,
       gradientOn: true,
       gradientAngle: 90,
       outlineOn: false,
-      outlineColour: '#131513',
+      outlineColour: INK,
       outlineWidth: 6,
       shadowOn: true,
       blendMode: 'source-over'
@@ -508,7 +519,7 @@
     var data = canvas.toDataURL({ format: 'png', multiplier: 2, quality: 1 });
     if (window.StudioApp && StudioApp.savePng) {
       StudioApp.savePng(data);
-      flash('Exporting 1080 x 1350');
+      flash('Exporting at 2\u00d7');
     }
   });
   $('back').addEventListener('click', function () {
@@ -556,10 +567,27 @@
     window.addEventListener('resize', fitCanvas);
   }
 
-  addText('ART', { left: 50, top: 150, width: 440, fontSize: 154, fontWeight: '600' }, false);
-  addText('DESIGN', {
-    left: 50, top: 355, width: 440, fontSize: 96, fontWeight: '500', gradientAngle: 0
-  }, false);
-  canvas.requestRenderAll();
-  syncPanel();
+  function seedCanvas() {
+    addText('ART', { left: 50, top: 150, width: 440, fontSize: 154, fontWeight: '600' }, false);
+    addText('DESIGN', {
+      left: 50, top: 355, width: 440, fontSize: 96, fontWeight: '500', gradientAngle: 0
+    }, false);
+    canvas.requestRenderAll();
+    syncPanel();
+    window.StudioSeedReady = true;
+  }
+
+  // Fabric caches glyph widths at creation. Wait for the display face first,
+  // otherwise a cold load seeds DESIGN with Georgia and never re-measures it.
+  function seedWhenFontsReady() {
+    if (!document.fonts || !document.fonts.load) { seedCanvas(); return; }
+    Promise.all([
+      document.fonts.load('600 154px "Instrument Serif"'),
+      document.fonts.load('500 96px "Instrument Serif"')
+    ]).then(function () {
+      if (document.fonts.ready) { document.fonts.ready.then(seedCanvas); } else { seedCanvas(); }
+    }, seedCanvas);
+  }
+
+  seedWhenFontsReady();
 })();

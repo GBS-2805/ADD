@@ -10,14 +10,21 @@ import android.graphics.Paint
 import android.graphics.Rect
 import android.graphics.RectF
 import android.graphics.Typeface
+import androidx.compose.ui.graphics.toArgb
 import kotlin.math.min
 import kotlin.math.roundToInt
+import kotlin.math.sqrt
+import kotlin.math.tan
 
 class Typefaces(context: Context) {
     private val assets = context.assets
+    private val registry = TypefaceRegistry(context)
     private val regular = load("fonts/poppins_regular.ttf", Typeface.NORMAL)
     private val medium = load("fonts/poppins_medium.ttf", Typeface.NORMAL)
     private val semibold = load("fonts/poppins_semibold.ttf", Typeface.BOLD)
+
+    fun resolve(family: String, weight: Int): TypefaceRegistry.Resolution =
+        registry.resolve(family, weight)
 
     fun forWeight(weight: Int): Typeface = when {
         weight >= 600 -> semibold
@@ -41,38 +48,82 @@ object ArtboardPainter {
     const val W = ARTBOARD_WIDTH
     const val H = ARTBOARD_HEIGHT
 
+    /**
+     * The interactive stage is often zoomed far past the screen. A 4x preview
+     * allocates a 4320x5400 ARGB page (~93 MB) and runs every effect over it;
+     * cap the preview at ~6 MP and scale the result to the stage. Export passes
+     * preview = false, so it still renders at the requested factor.
+     */
+    private const val MAX_PREVIEW_PIXELS = 6_000_000
+    private fun maxPreviewScale(): Float =
+        sqrt(MAX_PREVIEW_PIXELS.toDouble() / (W.toDouble() * H.toDouble())).toFloat()
+
     fun draw(
         canvas: Canvas,
         layers: List<Layer>,
         typefaces: Typefaces,
         modelCaptures: Map<String, Bitmap> = emptyMap(),
         images: Map<String, Bitmap> = emptyMap(),
+        motionOffsets: Map<String, Pair<Float, Float>> = emptyMap(),
         safeArea: Boolean = false,
         scale: Float = 1f,
+        preview: Boolean = false,
+        texture: TextureSpec? = null,
+        ink: List<TextureInk> = emptyList(),
+        backgroundField: FieldSpec? = null,
+        fieldPhase: Float = 0f,
     ) {
         // The whole page is composited offscreen at the requested scale and blitted
         // once, so layer bitmaps, masks, effects and blends all share one pixel grid.
-        val unit = scale.coerceIn(0.1f, 4f)
+        val requested = scale.coerceIn(0.1f, 4f)
+        val unit = if (preview) requested.coerceAtMost(maxPreviewScale()) else requested
         val width = (W * unit).roundToInt().coerceAtLeast(1)
         val height = (H * unit).roundToInt().coerceAtLeast(1)
         val backing = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
         val surface = Canvas(backing)
         surface.save()
         surface.scale(unit, unit)
-        surface.drawColor(0xFFF3EBDD.toInt())
+        surface.drawColor(Artboard.toArgb())
         drawPaper(surface, typefaces)
+        backgroundField?.let { field ->
+            FieldRenderer.draw(
+                surface,
+                field,
+                W,
+                H,
+                fieldPhase,
+                maxWidth = if (preview) FieldBudget.previewWidth else FieldBudget.exportWidth,
+            )
+        }
         surface.restore()
-
-        LayerCompositor(unit) { layerCanvas, layer ->
-            drawLayer(layerCanvas, layer, typefaces, modelCaptures, images)
-        }.draw(surface, backing, layers)
 
         surface.save()
         surface.scale(unit, unit)
+        texture?.let {
+            // Artboard material is paper, not a cover. It sits under the layers above
+            // the base wash; painting it after the compositor erased every layer at
+            // the recording's Marble setting while selection handles stayed visible.
+            TextureRenderer.draw(surface, it, W.roundToInt(), H.roundToInt())
+        }
+        surface.restore()
+
+        LayerCompositor(unit, cacheLayers = preview) { layerCanvas, layer ->
+            drawLayer(layerCanvas, layer, typefaces, modelCaptures, images, motionOffsets, fieldPhase)
+        }.draw(surface, backing, layers, motionOffsets)
+
+        surface.save()
+        surface.scale(unit, unit)
+        if (ink.isNotEmpty()) {
+            // Material ink is authored by gesture, but it is still a document recipe.
+            TextureInkRenderer.draw(surface, ink, W.roundToInt(), H.roundToInt())
+        }
         if (safeArea) drawSafeArea(surface, typefaces)
         drawFooter(surface, typefaces)
         surface.restore()
+        canvas.save()
+        canvas.scale(requested / unit, requested / unit)
         canvas.drawBitmap(backing, 0f, 0f, Paint(Paint.FILTER_BITMAP_FLAG))
+        canvas.restore()
         backing.recycle()
     }
 
@@ -82,10 +133,33 @@ object ArtboardPainter {
         typefaces: Typefaces,
         modelCaptures: Map<String, Bitmap>,
         images: Map<String, Bitmap>,
+        motionOffsets: Map<String, Pair<Float, Float>>,
+        fieldPhase: Float = 0f,
+        nested: Boolean = false,
     ) {
+        // A child inside a group has no compositor pass of its own, so its opacity is
+        // applied here. Top-level opacity stays in the compositor and is applied once.
+        val alphaLayer = nested && layer.opacity < 1f
+        if (alphaLayer) {
+            canvas.saveLayerAlpha(
+                0f,
+                0f,
+                W.toFloat(),
+                H.toFloat(),
+                (layer.opacity.coerceIn(0f, 1f) * 255f).roundToInt(),
+            )
+        }
+        // A preview displaces the layer through its parent's space; the stored frame
+        // is untouched, so stopping playback snaps back without an undo entry.
+        val motion = motionOffsets[layer.id] ?: (0f to 0f)
+        val displaced = motion.first != 0f || motion.second != 0f
+        if (displaced) {
+            canvas.save()
+            canvas.translate(motion.first * W, motion.second * H)
+        }
         when (layer) {
-            is VectorLayer -> drawVector(canvas, layer, images)
-            is TextLayer -> drawText(canvas, layer, typefaces, images)
+            is VectorLayer -> drawVector(canvas, layer, images, fieldPhase)
+            is TextLayer -> drawText(canvas, layer, typefaces, images, fieldPhase)
             is IconLayer -> drawIcon(canvas, layer)
             is ModelLayer -> modelCaptures[layer.id]?.let {
                 drawModelCapture(canvas, layer, it)
@@ -93,7 +167,27 @@ object ArtboardPainter {
             is ImageLayer -> images[layer.path]?.let {
                 drawPhoto(canvas, layer, it)
             } ?: drawPhotoPlaceholder(canvas, layer, typefaces)
+            is GroupLayer -> {
+                // One transform, applied once. Children are stored in this space, so
+                // moving or scaling the group never rewrites a child coordinate.
+                canvas.save()
+                canvas.translate(layer.centerX * W, layer.centerY * H)
+                canvas.rotate(layer.rotation)
+                if (layer.skewX != 0f) {
+                    canvas.skew(tan(Math.toRadians(layer.skewX.toDouble())).toFloat(), 0f)
+                }
+                canvas.scale(layer.scaleX, layer.scaleY)
+                canvas.translate(-layer.w * W / 2f, -layer.h * H / 2f)
+                layer.children.forEach { child ->
+                    if (child.visible) {
+                        drawLayer(canvas, child, typefaces, modelCaptures, images, motionOffsets, fieldPhase, nested = true)
+                    }
+                }
+                canvas.restore()
+            }
         }
+        if (alphaLayer) canvas.restore()
+        if (displaced) canvas.restore()
     }
 
     private fun drawSafeArea(canvas: Canvas, typefaces: Typefaces) {
@@ -117,36 +211,61 @@ object ArtboardPainter {
 
     private fun drawPhoto(canvas: Canvas, layer: ImageLayer, bitmap: Bitmap) {
         val rect = layerRect(layer)
+        val source = croppedSource(bitmap, layer.crop)
         val paint = Paint(Paint.FILTER_BITMAP_FLAG or Paint.DITHER_FLAG)
+        val target = if (layer.fill) coverTarget(source, rect) else fitTarget(source, rect)
         canvas.save()
         canvas.clipRect(rect)
-        if (layer.fill) {
-            canvas.drawBitmap(bitmap, centerCrop(bitmap, rect), rect, paint)
-        } else {
-            val ratio = bitmap.width.toFloat() / bitmap.height.toFloat()
-            val rectRatio = rect.width() / rect.height()
-            val target = if (ratio > rectRatio) {
-                val height = rect.width() / ratio
-                RectF(rect.left, rect.centerY() - height / 2f, rect.right, rect.centerY() + height / 2f)
-            } else {
-                val width = rect.height() * ratio
-                RectF(rect.centerX() - width / 2f, rect.top, rect.centerX() + width / 2f, rect.bottom)
-            }
-            canvas.drawBitmap(bitmap, Rect(0, 0, bitmap.width, bitmap.height), target, paint)
-        }
+        canvas.drawBitmap(bitmap, source, target, paint)
         canvas.restore()
+    }
+
+    /** Crop lives in source pixels, so one rect serves every preview and export scale. */
+    private fun croppedSource(bitmap: Bitmap, crop: ImageCrop): Rect {
+        val clean = crop.normalized()
+        val left = (clean.x * bitmap.width).roundToInt().coerceIn(0, bitmap.width - 1)
+        val top = (clean.y * bitmap.height).roundToInt().coerceIn(0, bitmap.height - 1)
+        val right = ((clean.x + clean.w) * bitmap.width).roundToInt()
+            .coerceIn(left + 1, bitmap.width)
+        val bottom = ((clean.y + clean.h) * bitmap.height).roundToInt()
+            .coerceIn(top + 1, bitmap.height)
+        return Rect(left, top, right, bottom)
+    }
+
+    /** Scale the cropped source until it covers the frame, then let the clip trim it. */
+    private fun coverTarget(source: Rect, target: RectF): RectF {
+        val ratio = source.width().toFloat() / source.height()
+        return if (ratio > target.width() / target.height()) {
+            val width = target.height() * ratio
+            RectF(target.centerX() - width / 2f, target.top, target.centerX() + width / 2f, target.bottom)
+        } else {
+            val height = target.width() / ratio
+            RectF(target.left, target.centerY() - height / 2f, target.right, target.centerY() + height / 2f)
+        }
+    }
+
+    /** Fit the whole cropped source inside the frame; no pixels outside it can appear. */
+    private fun fitTarget(source: Rect, target: RectF): RectF {
+        val ratio = source.width().toFloat() / source.height()
+        return if (ratio > target.width() / target.height()) {
+            val height = target.width() / ratio
+            RectF(target.left, target.centerY() - height / 2f, target.right, target.centerY() + height / 2f)
+        } else {
+            val width = target.height() * ratio
+            RectF(target.centerX() - width / 2f, target.top, target.centerX() + width / 2f, target.bottom)
+        }
     }
 
     private fun drawPhotoPlaceholder(canvas: Canvas, layer: ImageLayer, typefaces: Typefaces) {
         val rect = layerRect(layer)
-        canvas.drawRect(rect, Paint().apply { color = 0x3311231C.toInt() })
+        canvas.drawRect(rect, Paint().apply { color = Cream.copy(alpha = 0.2f).toArgb() })
         val label = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = 0xFF11231C.toInt()
+            color = Cream.toArgb()
             textSize = 16f
             typeface = typefaces.forWeight(500)
         }
         canvas.drawText("PHOTO MISSING", rect.left + 16f, rect.top + 30f, label)
-        val sub = Paint(label).apply { textSize = 12f; color = 0x9911231C.toInt() }
+        val sub = Paint(label).apply { textSize = 12f; color = Dim.toArgb() }
         canvas.drawText(layer.path, rect.left + 16f, rect.top + 50f, sub)
     }
 
@@ -160,10 +279,11 @@ object ArtboardPainter {
         showRotate: Boolean = true,
     ) {
         val unit = 1f / scale.coerceAtLeast(0.01f)
-        val left = layer.x * W
-        val top = layer.y * H
-        val right = (layer.x + layer.w) * W
-        val bottom = (layer.y + layer.h) * H
+        val group = layer as? GroupLayer
+        val left = if (group != null) 0f else layer.x * W
+        val top = if (group != null) 0f else layer.y * H
+        val right = if (group != null) layer.w * W else (layer.x + layer.w) * W
+        val bottom = if (group != null) layer.h * H else (layer.y + layer.h) * H
         val centerX = (left + right) / 2f
         val centerY = (top + bottom) / 2f
         val ix = min(inset, (right - left) * 0.34f)
@@ -174,10 +294,20 @@ object ArtboardPainter {
         val innerBottom = bottom - iy
 
         canvas.save()
-        if (layer.frameRotation != 0f) canvas.rotate(layer.frameRotation, centerX, centerY)
+        if (group != null) {
+            canvas.translate(group.centerX * W, group.centerY * H)
+            canvas.rotate(group.rotation)
+            if (group.skewX != 0f) {
+                canvas.skew(tan(Math.toRadians(group.skewX.toDouble())).toFloat(), 0f)
+            }
+            canvas.scale(group.scaleX, group.scaleY)
+            canvas.translate(-group.w * W / 2f, -group.h * H / 2f)
+        } else if (layer.frameRotation != 0f) {
+            canvas.rotate(layer.frameRotation, centerX, centerY)
+        }
 
         val box = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = 0xFFD6E381.toInt()
+            color = Mint.toArgb()
             style = Paint.Style.STROKE
             strokeWidth = 2f * unit
             pathEffect = DashPathEffect(floatArrayOf(9f * unit, 6f * unit), 0f)
@@ -186,11 +316,11 @@ object ArtboardPainter {
 
         if (showHandles) {
             val corner = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                color = 0xFFF2EEE3.toInt()
+                color = Paper.toArgb()
                 style = Paint.Style.FILL
             }
             val ring = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                color = 0xFF11231C.toInt()
+                color = Cream.toArgb()
                 style = Paint.Style.STROKE
                 strokeWidth = 2f * unit
             }
@@ -209,7 +339,7 @@ object ArtboardPainter {
                 val rotateY = if (innerTop - gap > 18f) innerTop - gap else innerBottom + gap
                 val rotateX = centerX.coerceIn(innerLeft, innerRight)
                 canvas.drawLine(centerX.coerceIn(innerLeft, innerRight), if (rotateY < innerTop) innerTop else innerBottom, rotateX, rotateY, ring)
-                val grip = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = 0xFFD6E381.toInt() }
+                val grip = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Mint.toArgb() }
                 canvas.drawCircle(rotateX, rotateY, 10f * unit, grip)
                 canvas.drawCircle(rotateX, rotateY, 10f * unit, ring)
             }
@@ -217,11 +347,11 @@ object ArtboardPainter {
 
         if (layer is VectorLayer) {
             val dot = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                color = 0xFFF2EEE3.toInt()
+                color = Paper.toArgb()
                 style = Paint.Style.FILL
             }
             val ring = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                color = 0xFF11231C.toInt()
+                color = Cream.toArgb()
                 style = Paint.Style.STROKE
                 strokeWidth = 2f * unit
             }
@@ -232,18 +362,53 @@ object ArtboardPainter {
                 canvas.drawCircle(x, y, radius, dot)
                 canvas.drawCircle(x, y, radius, ring)
                 if (point.id == selectedNodeId) {
-                    dot.color = 0xFFD6E381.toInt()
+                    dot.color = Mint.toArgb()
                     canvas.drawCircle(x, y, 4f * unit, dot)
-                    dot.color = 0xFFF2EEE3.toInt()
+                    dot.color = Paper.toArgb()
                 }
             }
         }
         canvas.restore()
     }
 
+    /** The live path in world units, with its four control dots. */
+    fun drawMotionPath(canvas: Canvas, path: MotionPath, scale: Float, activePoint: Int? = null) {
+        val unit = 1f / scale.coerceAtLeast(0.01f)
+        val points = path.sample(64)
+        val curve = android.graphics.Path().apply {
+            moveTo(points.first().x * W, points.first().y * H)
+            points.drop(1).forEach { lineTo(it.x * W, it.y * H) }
+        }
+        val hull = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = Lime.copy(alpha = 0.4f).toArgb()
+            style = Paint.Style.STROKE
+            strokeWidth = 1f * unit
+        }
+        canvas.drawLine(path.start.x * W, path.start.y * H, path.c1.x * W, path.c1.y * H, hull)
+        canvas.drawLine(path.end.x * W, path.end.y * H, path.c2.x * W, path.c2.y * H, hull)
+        val line = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = Lime.toArgb()
+            style = Paint.Style.STROKE
+            strokeWidth = 2.5f * unit
+            pathEffect = DashPathEffect(floatArrayOf(10f * unit, 6f * unit), 0f)
+        }
+        canvas.drawPath(curve, line)
+        val dot = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Paper.toArgb() }
+        val ring = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = Cream.toArgb()
+            style = Paint.Style.STROKE
+            strokeWidth = 2f * unit
+        }
+        listOf(path.start, path.c1, path.c2, path.end).forEachIndexed { index, point ->
+            val radius = if (index == activePoint) 11f * unit else 7f * unit
+            canvas.drawCircle(point.x * W, point.y * H, radius, dot)
+            canvas.drawCircle(point.x * W, point.y * H, radius, ring)
+        }
+    }
+
     private fun drawPaper(canvas: Canvas, typefaces: Typefaces) {
         val grid = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = 0x1411231C.toInt()
+            color = Cream.copy(alpha = 0.08f).toArgb()
             strokeWidth = 1f
         }
         var x = 54f
@@ -257,18 +422,18 @@ object ArtboardPainter {
             y += 54f
         }
 
-        val band = Paint().apply { color = 0xFF0FBF92.toInt() }
+        val band = Paint().apply { color = Mint.toArgb() }
         canvas.drawRect(0f, 0f, W, 15f, band)
 
         val margin = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = 0x3311231C.toInt()
+            color = Cream.copy(alpha = 0.2f).toArgb()
             style = Paint.Style.STROKE
             strokeWidth = 1f
         }
         canvas.drawRect(54f, 54f, W - 54f, H - 54f, margin)
 
         val cross = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = 0x6611231C.toInt()
+            color = Cream.copy(alpha = 0.4f).toArgb()
             strokeWidth = 1f
         }
         canvas.drawLine(54f, 54f, 78f, 54f, cross)
@@ -277,7 +442,7 @@ object ArtboardPainter {
         canvas.drawLine(W - 54f, H - 54f, W - 54f, H - 78f, cross)
 
         val index = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = 0x9911231C.toInt()
+            color = Cream.copy(alpha = 0.6f).toArgb()
             textSize = 15f
             typeface = typefaces.forWeight(500)
             letterSpacing = 0.12f
@@ -286,7 +451,12 @@ object ArtboardPainter {
         canvas.drawText("ADD / ARTBOARD 001", W - 54f, 93f, index)
     }
 
-    private fun drawVector(canvas: Canvas, layer: VectorLayer, images: Map<String, Bitmap>) {
+    private fun drawVector(
+        canvas: Canvas,
+        layer: VectorLayer,
+        images: Map<String, Bitmap>,
+        fieldPhase: Float,
+    ) {
         val path = layer.network.buildPath()
         val matrix = Matrix().apply {
             setScale(layer.w * W, layer.h * H)
@@ -298,7 +468,7 @@ object ArtboardPainter {
             val fill = Paint(Paint.ANTI_ALIAS_FLAG).apply {
                 style = Paint.Style.FILL
                 color = layer.fill
-                PaintRenderer.shaderFor(layer.paint, layer, layerRect(layer), images)?.let { shader = it }
+                PaintRenderer.shaderFor(layer.paint, layer, layerRect(layer), images, fieldPhase)?.let { shader = it }
             }
             canvas.drawPath(path, fill)
         }
@@ -337,17 +507,24 @@ object ArtboardPainter {
         )
     }
 
-    private fun drawText(canvas: Canvas, layer: TextLayer, typefaces: Typefaces, images: Map<String, Bitmap>) {
+    private fun drawText(
+        canvas: Canvas,
+        layer: TextLayer,
+        typefaces: Typefaces,
+        images: Map<String, Bitmap>,
+        fieldPhase: Float,
+    ) {
         val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
             color = layer.color
             textSize = layer.fontSize
-            typeface = typefaces.forWeight(layer.weight)
+            typeface = typefaces.resolve(layer.fontFamily, layer.weight).typeface
+            letterSpacing = layer.tracking
             textAlign = when (layer.align) {
                 TextAlign.Left -> Paint.Align.LEFT
                 TextAlign.Center -> Paint.Align.CENTER
                 TextAlign.Right -> Paint.Align.RIGHT
             }
-            PaintRenderer.shaderFor(layer.paint, layer, layerRect(layer), images)?.let { shader = it }
+            PaintRenderer.shaderFor(layer.paint, layer, layerRect(layer), images, fieldPhase)?.let { shader = it }
         }
         val left = layer.x * W
         val right = (layer.x + layer.w) * W
@@ -357,7 +534,8 @@ object ArtboardPainter {
             TextAlign.Center -> (left + right) / 2f
             TextAlign.Right -> right
         }
-        val lines = layer.text.ifBlank { " " }.split("\n")
+        // Case is a display transform: setTextCase never rewrites the stored string.
+        val lines = layer.text.ifBlank { " " }.split("\n").map { layer.textCase.applyTo(it) }
         canvas.save()
         canvas.clipRect(left, top, right, (layer.y + layer.h) * H)
         var baseline = top + layer.fontSize
@@ -371,33 +549,33 @@ object ArtboardPainter {
     private fun drawModelPlaceholder(canvas: Canvas, layer: ModelLayer, typefaces: Typefaces) {
         val rect = layerRect(layer)
         val fill = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = 0xFF0C1210.toInt()
+            color = Panel.toArgb()
         }
         canvas.drawRoundRect(rect, 18f, 18f, fill)
 
         val rule = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = 0x553EF0C0.toInt()
+            color = Mint.copy(alpha = 0.33f).toArgb()
             style = Paint.Style.STROKE
             strokeWidth = 1.5f
         }
         canvas.drawRoundRect(rect, 18f, 18f, rule)
 
         val cross = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = 0x663EF0C0.toInt()
+            color = Mint.copy(alpha = 0.4f).toArgb()
             strokeWidth = 1f
         }
         canvas.drawLine(rect.centerX(), rect.top, rect.centerX(), rect.bottom, cross)
         canvas.drawLine(rect.left, rect.centerY(), rect.right, rect.centerY(), cross)
 
         val label = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = 0xFFD6E381.toInt()
+            color = Cream.toArgb()
             textSize = 16f
             typeface = typefaces.forWeight(500)
             letterSpacing = 0.1f
         }
         canvas.drawText("3D LAYER / ${layer.asset.label.uppercase()}", rect.left + 18f, rect.bottom - 20f, label)
         val sub = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = 0x99F2EEE3.toInt()
+            color = Dim.toArgb()
             textSize = 12f
             typeface = typefaces.forWeight(400)
         }
@@ -416,7 +594,7 @@ object ArtboardPainter {
 
     private fun drawFooter(canvas: Canvas, typefaces: Typefaces) {
         val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = 0x9911231C.toInt()
+            color = Dim.toArgb()
             textSize = 14f
             typeface = typefaces.forWeight(500)
             letterSpacing = 0.12f

@@ -11,8 +11,8 @@
     },
     {
       "path": "/download/",
-      "title": "Download — ADD 3.7, one signed APK",
-      "description": "ADD 3.7 (6 MB): the whole shelf — every page, the icon browser, the fonts, the editor and the compressor — in one signed APK. Android 8.0+, SHA-256 listed, no store or account.",
+      "title": "Download — ADD 3.9, one signed APK",
+      "description": "ADD 3.9 (16 MB): the whole shelf — every page, the icon browser, the fonts, the editor and the compressor — in one signed APK. Android 8.0+, SHA-256 listed, no store or account.",
       "heading": "Download",
       "section": "download"
     },
@@ -25,8 +25,8 @@
     },
     {
       "path": "/fonts/",
-      "title": "Fonts — Poppins and the seven Redaction grades, one sheet per family",
-      "description": "Poppins and all seven Redaction grades: woff2, woff and TTF, every weight and italic, free under the SIL Open Font License.",
+      "title": "Fonts — a type tester for Poppins and Redaction",
+      "description": "Poppins and the seven Redaction grades: 39 styles, one live specimen each, with woff2, woff and TTF downloads under the SIL Open Font License.",
       "heading": "Fonts",
       "section": "fonts"
     },
@@ -48,7 +48,7 @@
       "path": "/icons/",
       "title": "Icons — 4,373 icons in four free brands, offline",
       "description": "The Icons app and its browser: Lineicons, Coolicons, Phosphor and Streamline, 4,373 icons, live preview, copy the SVG. Offline, no account.",
-      "heading": "Icons",
+      "heading": "4,373 free SVG icons",
       "section": "icons"
     },
     {
@@ -74,22 +74,22 @@
     },
     {
       "path": "/",
-      "title": "A design shelf — icons, type and one offline Android app",
-      "description": "4,373 icons, Poppins and Redaction, three palettes, and one quiet app for making things.",
-      "heading": "A design shelf.",
+      "title": "ADD — 4,373 icons. No account.",
+      "description": "A free design shelf: 4,373 icons, three type families, a photo compressor and one offline Android app. No account, no upload.",
+      "heading": "4,373 icons. No account.",
       "section": ""
     },
     {
       "path": "/portfolio/",
-      "title": "Portfolio — the work behind the shelf",
-      "description": "Three projects: the ADD app, the 4,373-icon browser and this site — the work and the visual system behind it.",
+      "title": "Portfolio — three ways into ADD",
+      "description": "Three ways into the ADD shelf: Resources, the signed app and the public build handoff.",
       "heading": "Portfolio",
       "section": "portfolio"
     },
     {
       "path": "/releases/",
-      "title": "Releases — 50 builds, with the date and size of each",
-      "description": "Every build this shelf has shipped: 50 releases with the day and the APK size, read out of git.",
+      "title": "Releases — 52 builds, with the date and size of each",
+      "description": "Every build this shelf has shipped: 52 releases with the day and the APK size, read out of git.",
       "heading": "Releases",
       "section": "releases"
     },
@@ -109,9 +109,9 @@
     },
     {
       "path": "/tools/",
-      "title": "Tools — icons, type, photos and words",
-      "description": "Four quiet tools for icons, type, photos and words, in one independent Android app. No account, no store.",
-      "heading": "Tools",
+      "title": "Resources — icons, fonts and the engine",
+      "description": "Icons, fonts and the engine: the working parts of ADD, in one independent Android app. No account, no store.",
+      "heading": "Resources",
       "section": "tools"
     }
   ]

@@ -8,14 +8,15 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.Rect;
+import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Looper;
@@ -85,9 +86,8 @@ public class AndroidRenderTest {
 
     private static final int WIDTH = 1080;
     private static final int HEIGHT = 2400;
-    private static final String[] PALETTES = {Palette.GREEN, Palette.MOSS, Palette.NAVY};
-    private static final String[] PALETTE_NAMES = {"green", "moss", "navy"};
-    private static final String SHOWCASE_SUFFIX = "-green-dark";
+    private static final String[] PALETTE_NAMES = {"newsprint"};
+    private static final String SHOWCASE_SUFFIX = "-newsprint";
     private static final Map<String, Map<String, Rect>> LAYOUT_BASELINES =
             new LinkedHashMap<>();
     private static Path auditFile;
@@ -130,8 +130,8 @@ public class AndroidRenderTest {
         String json = "{\n"
                 + "  \"canvas\": \"1080x2400 phone screens; compress full height\",\n"
                 + "  \"compressHeight\": " + compressHeight + ",\n"
-                + "  \"screens\": 9,\n"
-                + "  \"themes\": 6,\n"
+                + "  \"screens\": 10,\n"
+                + "  \"themes\": 1,\n"
                 + "  \"matrix\": " + paletteChecks + ",\n"
                 + "  \"layoutChecks\": " + layoutChecks + ",\n"
                 + "  \"saved\": " + savedRenders + ",\n"
@@ -143,9 +143,8 @@ public class AndroidRenderTest {
 
     @Test
     public void compressScreen() throws Exception {
-        for (int i = 0; i < PALETTES.length; i++) {
-            for (boolean dark : new boolean[]{true, false}) {
-                theme(PALETTES[i], dark);
+        for (int i = 0; i < PALETTE_NAMES.length; i++) {
+            for (boolean dark : new boolean[]{false}) {
                 registerPhotoCursor();
                 Intent intent = new Intent(RuntimeEnvironment.getApplication(), MainActivity.class);
                 intent.setAction(Intent.ACTION_SEND);
@@ -154,8 +153,8 @@ public class AndroidRenderTest {
                 ActivityController<MainActivity> controller =
                         Robolectric.buildActivity(MainActivity.class, intent).setup();
                 settle(350);
-                String name = "compress-" + PALETTE_NAMES[i] + (dark ? "-dark" : "-light");
-                if (i == 0 && dark) {
+                String name = "compress-" + PALETTE_NAMES[i];
+                if (name.equals("compress" + SHOWCASE_SUFFIX)) {
                     saveFullForm(controller.get(), name);
                 } else {
                     save(controller.get(), name);
@@ -166,25 +165,95 @@ public class AndroidRenderTest {
     }
 
     @Test
-    public void editorQuickScreen() throws Exception {
-        for (int i = 0; i < PALETTES.length; i++) {
-            for (boolean dark : new boolean[]{true, false}) {
-                ActivityController<EditorActivity> controller = openEditor(i, dark);
-                save(controller.get(),
-                        "editor-" + PALETTE_NAMES[i] + (dark ? "-dark" : "-light"));
+    public void drawerScreen() throws Exception {
+        for (int i = 0; i < PALETTE_NAMES.length; i++) {
+            for (boolean dark : new boolean[]{false}) {
+                registerPhotoCursor();
+                Intent intent = new Intent(RuntimeEnvironment.getApplication(), MainActivity.class);
+                intent.setAction(Intent.ACTION_SEND);
+                intent.setType("image/jpeg");
+                intent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(sample));
+                ActivityController<MainActivity> controller =
+                        Robolectric.buildActivity(MainActivity.class, intent).setup();
+                settle(350);
+
+                View burger = controller.get().findViewById(R.id.burger);
+                assertNotNull("missing side-panel button", burger);
+                assertTrue("side-panel button did not click", burger.performClick());
+                settle(120);
+
+                View drawer = controller.get().findViewById(R.id.drawer);
+                View scrim = controller.get().findViewById(R.id.scrim);
+                assertNotNull("missing side panel", drawer);
+                assertNotNull("missing side-panel scrim", scrim);
+                assertEquals(View.VISIBLE, drawer.getVisibility());
+                assertEquals(View.VISIBLE, scrim.getVisibility());
+
+                // Pin the settled open state; the panel's property animation may still
+                // be mid-slide when Robolectric draws the frame.
+                drawer.animate().cancel();
+                drawer.setTranslationX(0f);
+                scrim.animate().cancel();
+                scrim.setAlpha(1f);
+
+                saveDrawer(controller.get(), "drawer-" + PALETTE_NAMES[i]);
                 controller.pause().stop().destroy();
             }
         }
     }
 
     @Test
+    public void editorQuickScreen() throws Exception {
+        for (int i = 0; i < PALETTE_NAMES.length; i++) {
+            for (boolean dark : new boolean[]{false}) {
+                ActivityController<EditorActivity> controller = openEditor();
+                save(controller.get(), "quick-" + PALETTE_NAMES[i]);
+                controller.pause().stop().destroy();
+            }
+        }
+    }
+
+    @Test
+    public void editorDefaultsToStudio() {
+        ActivityController<EditorActivity> controller =
+                Robolectric.buildActivity(EditorActivity.class).setup();
+        EditorActivity activity = controller.get();
+        // The Quick tab is captured deliberately, but it is not what the app opens.
+        assertEquals(View.VISIBLE, activity.findViewById(R.id.studioHost).getVisibility());
+        assertEquals(View.GONE, activity.findViewById(R.id.stage).getVisibility());
+        controller.pause().stop().destroy();
+    }
+
+    private static float measure(Typeface face) {
+        Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        paint.setTextSize(100f);
+        paint.setTypeface(face);
+        return paint.measureText("AFTER HOURS 03");
+    }
+
+    @Test
+    public void bundledFontsLoad() {
+        Context app = RuntimeEnvironment.getApplication();
+        float instrument = measure(app.getResources().getFont(R.font.instrument_serif));
+        float spectral = measure(app.getResources().getFont(R.font.spectral_regular));
+        float libre = measure(app.getResources().getFont(R.font.libre_franklin));
+        float fallback = measure(Typeface.DEFAULT);
+        assertTrue("Instrument Serif did not load", Math.abs(instrument - fallback) > 1f);
+        assertTrue("Spectral did not load", Math.abs(spectral - fallback) > 1f);
+        assertTrue("Libre Franklin did not load", Math.abs(libre - fallback) > 1f);
+        assertTrue("The three bundled faces are not distinct",
+                Math.abs(instrument - spectral) > 1f
+                        && Math.abs(spectral - libre) > 1f
+                        && Math.abs(instrument - libre) > 1f);
+    }
+
+    @Test
     public void presetSheetScreen() throws Exception {
-        for (int i = 0; i < PALETTES.length; i++) {
-            for (boolean dark : new boolean[]{true, false}) {
-                ActivityController<EditorActivity> controller = openEditor(i, dark);
+        for (int i = 0; i < PALETTE_NAMES.length; i++) {
+            for (boolean dark : new boolean[]{false}) {
+                ActivityController<EditorActivity> controller = openEditor();
                 AlertDialog sheet = openSheet(controller.get(), R.id.effectButton);
-                saveSheet(controller.get(), sheet,
-                        "presets-" + PALETTE_NAMES[i] + (dark ? "-dark" : "-light"));
+                saveSheet(controller.get(), sheet, "presets-" + PALETTE_NAMES[i]);
                 sheet.dismiss();
                 controller.pause().stop().destroy();
             }
@@ -193,12 +262,11 @@ public class AndroidRenderTest {
 
     @Test
     public void typeSheetScreen() throws Exception {
-        for (int i = 0; i < PALETTES.length; i++) {
-            for (boolean dark : new boolean[]{true, false}) {
-                ActivityController<EditorActivity> controller = openEditor(i, dark);
+        for (int i = 0; i < PALETTE_NAMES.length; i++) {
+            for (boolean dark : new boolean[]{false}) {
+                ActivityController<EditorActivity> controller = openEditor();
                 AlertDialog sheet = openSheet(controller.get(), R.id.typeButton);
-                saveSheet(controller.get(), sheet,
-                        "type-" + PALETTE_NAMES[i] + (dark ? "-dark" : "-light"));
+                saveSheet(controller.get(), sheet, "type-" + PALETTE_NAMES[i]);
                 sheet.dismiss();
                 controller.pause().stop().destroy();
             }
@@ -207,12 +275,11 @@ public class AndroidRenderTest {
 
     @Test
     public void layersSheetScreen() throws Exception {
-        for (int i = 0; i < PALETTES.length; i++) {
-            for (boolean dark : new boolean[]{true, false}) {
-                ActivityController<EditorActivity> controller = openEditor(i, dark);
+        for (int i = 0; i < PALETTE_NAMES.length; i++) {
+            for (boolean dark : new boolean[]{false}) {
+                ActivityController<EditorActivity> controller = openEditor();
                 AlertDialog sheet = openSheet(controller.get(), R.id.layersButton);
-                saveSheet(controller.get(), sheet,
-                        "layers-" + PALETTE_NAMES[i] + (dark ? "-dark" : "-light"));
+                saveSheet(controller.get(), sheet, "layers-" + PALETTE_NAMES[i]);
                 sheet.dismiss();
                 controller.pause().stop().destroy();
             }
@@ -221,12 +288,11 @@ public class AndroidRenderTest {
 
     @Test
     public void photoSheetScreen() throws Exception {
-        for (int i = 0; i < PALETTES.length; i++) {
-            for (boolean dark : new boolean[]{true, false}) {
-                ActivityController<EditorActivity> controller = openEditor(i, dark);
+        for (int i = 0; i < PALETTE_NAMES.length; i++) {
+            for (boolean dark : new boolean[]{false}) {
+                ActivityController<EditorActivity> controller = openEditor();
                 AlertDialog sheet = openSheet(controller.get(), R.id.photoButton);
-                saveSheet(controller.get(), sheet,
-                        "photo-" + PALETTE_NAMES[i] + (dark ? "-dark" : "-light"));
+                saveSheet(controller.get(), sheet, "photo-" + PALETTE_NAMES[i]);
                 sheet.dismiss();
                 controller.pause().stop().destroy();
             }
@@ -235,12 +301,11 @@ public class AndroidRenderTest {
 
     @Test
     public void colourSheetScreen() throws Exception {
-        for (int i = 0; i < PALETTES.length; i++) {
-            for (boolean dark : new boolean[]{true, false}) {
-                ActivityController<EditorActivity> controller = openEditor(i, dark);
+        for (int i = 0; i < PALETTE_NAMES.length; i++) {
+            for (boolean dark : new boolean[]{false}) {
+                ActivityController<EditorActivity> controller = openEditor();
                 AlertDialog sheet = openSheet(controller.get(), R.id.colourButton);
-                saveSheet(controller.get(), sheet,
-                        "colour-" + PALETTE_NAMES[i] + (dark ? "-dark" : "-light"));
+                saveSheet(controller.get(), sheet, "colour-" + PALETTE_NAMES[i]);
                 sheet.dismiss();
                 controller.pause().stop().destroy();
             }
@@ -249,9 +314,8 @@ public class AndroidRenderTest {
 
     @Test
     public void compareScreen() throws Exception {
-        for (int i = 0; i < PALETTES.length; i++) {
-            for (boolean dark : new boolean[]{true, false}) {
-                theme(PALETTES[i], dark);
+        for (int i = 0; i < PALETTE_NAMES.length; i++) {
+            for (boolean dark : new boolean[]{false}) {
                 Intent intent = new Intent(RuntimeEnvironment.getApplication(), CompareActivity.class);
                 intent.putExtra(CompareActivity.EXTRA_BEFORE, Uri.fromFile(sample).toString());
                 intent.putExtra(CompareActivity.EXTRA_AFTER, Uri.fromFile(after).toString());
@@ -263,7 +327,7 @@ public class AndroidRenderTest {
                 ActivityController<CompareActivity> controller =
                         Robolectric.buildActivity(CompareActivity.class, intent).setup();
                 settle(450);
-                save(controller.get(), "compare-" + PALETTE_NAMES[i] + (dark ? "-dark" : "-light"));
+                save(controller.get(), "compare-" + PALETTE_NAMES[i]);
                 controller.pause().stop().destroy();
             }
         }
@@ -276,13 +340,12 @@ public class AndroidRenderTest {
         Files.copy(Paths.get(root, "docs/packs/packs.json"), catalog.toPath(),
                 StandardCopyOption.REPLACE_EXISTING);
 
-        for (int i = 0; i < PALETTES.length; i++) {
-            for (boolean dark : new boolean[]{true, false}) {
-                theme(PALETTES[i], dark);
+        for (int i = 0; i < PALETTE_NAMES.length; i++) {
+            for (boolean dark : new boolean[]{false}) {
                 ActivityController<PacksActivity> controller =
                         Robolectric.buildActivity(PacksActivity.class).setup();
                 settle(80);
-                save(controller.get(), "packs-" + PALETTE_NAMES[i] + (dark ? "-dark" : "-light"));
+                save(controller.get(), "packs-" + PALETTE_NAMES[i]);
                 controller.pause().stop().destroy();
             }
         }
@@ -292,8 +355,7 @@ public class AndroidRenderTest {
      * The real Editor with a photo and two type layers, ready for the Quick screen or
      * any of its sheets. No dialog is opened here.
      */
-    private ActivityController<EditorActivity> openEditor(int palette, boolean dark) {
-        theme(PALETTES[palette], dark);
+    private ActivityController<EditorActivity> openEditor() {
         Bundle state = new Bundle();
         state.putBoolean("editor_studio", false);
         ActivityController<EditorActivity> controller =
@@ -350,7 +412,6 @@ public class AndroidRenderTest {
         return dialog;
     }
 
-    /** Writes the palette and light/dark choice the app reads before setContentView. */
     /**
      * A file URI has no OpenableColumns row, so the Compress subtitle would read
      * "0 KB". Register the row a gallery provider would return; the app's own
@@ -363,15 +424,6 @@ public class AndroidRenderTest {
         ShadowContentResolver resolver = Shadows.shadowOf(
                 RuntimeEnvironment.getApplication().getContentResolver());
         resolver.setCursor(Uri.fromFile(sample), cursor);
-    }
-
-    private void theme(String palette, boolean dark) {
-        SharedPreferences prefs = RuntimeEnvironment.getApplication()
-                .getSharedPreferences("compress_settings", Context.MODE_PRIVATE);
-        prefs.edit().clear()
-                .putString("palette", palette)
-                .putBoolean("dark_mode", dark)
-                .commit();
     }
 
     /**
@@ -406,6 +458,17 @@ public class AndroidRenderTest {
      * second, full-height draw of the same real content so the review shows the
      * action row and the whole form instead of a crop.
      */
+    /**
+     * The side panel sits over a scrim that dims the band, so the ordinary band-colour
+     * sample does not apply. Its own page, ink and text layout are still audited.
+     */
+    private void saveDrawer(Activity activity, String name) throws IOException {
+        Bitmap bitmap = render(activity, name);
+        auditActivity(activity, name);
+        auditPalette(bitmap, name, true);
+        saveBitmap(bitmap, name);
+    }
+
     private void saveFullForm(Activity activity, String name) throws IOException {
         Bitmap phone = render(activity, name);
         auditActivity(activity, name);
@@ -529,7 +592,7 @@ public class AndroidRenderTest {
         if (back != null) {
             ViewParent parent = back.getParent();
             assertTrue("band is not a view in " + name, parent instanceof View);
-            assertEquals("band height " + name, dp(64), ((View) parent).getHeight());
+            assertEquals("band height " + name, dp(66), ((View) parent).getHeight());
         }
         View dock = content.findViewById(R.id.dock);
         if (dock != null) {
@@ -691,7 +754,7 @@ public class AndroidRenderTest {
             int width, int height, boolean count) {
         Context app = RuntimeEnvironment.getApplication();
         Resources.Theme theme = app.getResources().newTheme();
-        theme.applyStyle(ThemePrefs.style(app), true);
+        theme.applyStyle(R.style.AppTheme, true);
         TypedArray values = theme.obtainStyledAttributes(
                 new int[]{R.attr.band, R.attr.on});
         int band = values.getColor(0, Color.BLACK) & 0xFFFFFF;
@@ -719,7 +782,7 @@ public class AndroidRenderTest {
     }
 
     private static String screenKey(String name) {
-        return name.replaceFirst("-(green|moss|navy)-(dark|light)$", "");
+        return name.replaceFirst("-newsprint$", "");
     }
 
     private static int dp(int value) {

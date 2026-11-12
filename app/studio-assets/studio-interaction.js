@@ -29,6 +29,22 @@
   function clamp(value, min, max) { return Math.max(min, Math.min(max, value)); }
   function normalAngle(angle) { return ((angle + 180) % 360 + 360) % 360 - 180; }
   function copyPoint(point) { return { x: point.x, y: point.y }; }
+  function copyPathState(state) {
+    return {
+      start: copyPoint(state.start),
+      c1: copyPoint(state.c1),
+      c2: copyPoint(state.c2),
+      end: copyPoint(state.end)
+    };
+  }
+  function shiftPath(state, base, dx, dy) {
+    ['start', 'c1', 'c2', 'end'].forEach(function (key) {
+      state[key] = {
+        x: clamp(base[key].x + dx, 4, W - 4),
+        y: clamp(base[key].y + dy, 4, H - 4)
+      };
+    });
+  }
 
   var stage = $('stage');
   var view = $('stage-view');
@@ -53,6 +69,7 @@
   var pathStates = new WeakMap();
   var motionTween = null;
   var motionInfo = { plays: 0, lastStart: null, lastEnd: null, edits: 0, lastDragStart: null };
+  var dragPathBase = null;
   var dragging = false;
   var rotating = false;
   var activePathHandle = null;
@@ -325,6 +342,7 @@
     if (next !== current) { stopMotion(); }
     current = next;
     if (current) { prepareObject(current); }
+    dragPathBase = null;
     dragging = false;
     rotating = false;
     activePathHandle = null;
@@ -353,6 +371,7 @@
     var finalTop = current.top;
     frameDrag.x = 0;
     frameDrag.y = 0;
+    dragPathBase = null;
     gsap.set(frame, { x: 0, y: 0 });
     syncFrame();
     lastGuides = { x: snapX, y: snapY, activeX: snapX !== null, activeY: snapY !== null };
@@ -395,6 +414,8 @@
         center: current.getCenterPoint(),
         box: startDrag.box
       };
+      var path = currentPath();
+      dragPathBase = path ? copyPathState(path) : null;
       prepareTargets();
       snapX = null;
       snapY = null;
@@ -420,6 +441,11 @@
       });
       current.setCoords();
       canvas.requestRenderAll();
+      var path = currentPath();
+      if (path && dragPathBase) {
+        shiftPath(path, dragPathBase, dx, dy);
+        syncPath();
+      }
       gsap.set(frame, { x: dx * s, y: dy * s });
       showGuides();
     },

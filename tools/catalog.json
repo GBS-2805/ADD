@@ -10,10 +10,10 @@
       "name": "ADD",
       "kind": "Android app",
       "status": "released",
-      "version": "3.7",
-      "version_code": 39,
+      "version": "3.9",
+      "version_code": 41,
       "package": "app.offline.compress",
-      "apk": "/ADD-3.7.apk",
+      "apk": "/ADD-3.9.apk",
       "min_android": "8.0 (API 26)",
       "summary": "One offline app: the 4,373-icon browser, the fonts page, a photo editor with signed font packs, and batch compression.",
       "features": [
@@ -23,7 +23,7 @@
         "Editor: photo, type, presets and live adjustments, a colour mixer with hex and RGB, type spacing and opacity, photo turn/flip and canvas colour, reorderable layers with visibility, and installed packs kept for offline use.",
         "Compress: real quality, downscale, batch up to 40 photos, metadata stripped, originals untouched.",
         "Internet for one job only: a font pack you tap in Font packs; the shelf, the editor and Compress otherwise run offline.",
-        "Same three palettes and the side tab as the site, including the look controls at its foot."
+        "Same four palettes and the side tab as the site, including the look controls at its foot."
       ],
       "links": [
         {
@@ -32,7 +32,7 @@
         },
         {
           "label": "Download APK",
-          "href": "/ADD-3.6.apk"
+          "href": "/ADD-3.9.apk"
         }
       ]
     }
@@ -102,7 +102,6 @@
           "woff2": "/assets/fonts/poppins-400.woff2",
           "woff": "/assets/fonts/poppins-400.woff",
           "ttf": "/assets/fonts/poppins-400.ttf",
-          "app_res": "app/res/font/poppins_regular.ttf",
           "use": "Body text, ledes and every label on this site."
         },
         {
@@ -120,7 +119,6 @@
           "woff2": "/assets/fonts/poppins-500.woff2",
           "woff": "/assets/fonts/poppins-500.woff",
           "ttf": "/assets/fonts/poppins-500.ttf",
-          "app_res": "app/res/font/poppins_medium.ttf",
           "use": "Row labels, icon names and the tab strip."
         },
         {
@@ -138,7 +136,6 @@
           "woff2": "/assets/fonts/poppins-600.woff2",
           "woff": "/assets/fonts/poppins-600.woff",
           "ttf": "/assets/fonts/poppins-600.ttf",
-          "app_res": "app/res/font/poppins_semibold.ttf",
           "use": "Titles and the one number that matters on a screen."
         },
         {

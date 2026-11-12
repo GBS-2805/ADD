@@ -139,6 +139,33 @@ def assets_current():
                  + (done.stdout or done.stderr).strip())
 
 
+def link_problems():
+    """What the link check says, as the lines worth printing and its verdict."""
+    done = subprocess.run([sys.executable, str(ROOT / "tools/check_links.py")],
+                          cwd=ROOT, capture_output=True, text=True)
+    output = (done.stdout or "") + (done.stderr or "")
+    verdict = next((line for line in output.splitlines() if line.startswith("links:")), "")
+    if done.returncode == 0:
+        return [], verdict
+    return [line.rstrip() for line in output.splitlines() if line.strip()], verdict
+
+
+def links_current():
+    """Stop when a page points at a file or route the shelf does not carry.
+
+    The route check after the upload proves the pages that exist answer; it cannot
+    prove that what they link to exists, because a dead link is a 200 page with a
+    404 behind it. A browser-less, token-free read of the shipped HTML is the
+    cheapest place to catch that, so it runs before the upload.
+    """
+    problems, verdict = link_problems()
+    if problems:
+        sys.exit("the link check failed, so nothing was uploaded:\n  "
+                 + "\n  ".join(problems[-20:])
+                 + "\n  run python3 tools/check_links.py for the whole report")
+    print("  " + verdict)
+
+
 def palette_problems():
     """What the palette check says, as the lines worth printing and its verdict."""
     done = subprocess.run([sys.executable, str(ROOT / "tools/check_palette.py")],
@@ -181,6 +208,7 @@ def deploy():
     storage_gate()
     palette_current()
     assets_current()
+    links_current()
     refresh_history()
     cmd = [*CLI, "deploy", "docs", "--prod", "--yes",
            "--project", PROJECT, "--create-if-missing"]
@@ -281,6 +309,9 @@ def main():
               f"and rewrite the {len(files)} files above")
         problems, verdict = palette_problems()
         print("palette       " + (verdict.replace("palette: ", "", 1) if verdict else
+                                 "FAILED - the deploy would refuse the upload"))
+        problems, verdict = link_problems()
+        print("links         " + (verdict.replace("links: ", "", 1) if not problems else
                                  "FAILED - the deploy would refuse the upload"))
         print("deploy token is set" if deploy_token() else
               "deploy token is not set - deploy would stop here")

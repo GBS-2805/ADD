@@ -11,25 +11,26 @@ the pages.
 
 ## Status
 
-- **ADD 3.7** — APK [`dist/ADD-3.7.apk`](dist/ADD-3.7.apk) (6 MB, signed v1+v2),
-  published as `docs/ADD-3.7.apk`. Install id `app.offline.compress` — kept so
+- **ADD 3.9** — APK [`dist/ADD-3.9.apk`](dist/ADD-3.9.apk) (6 MB, signed v1+v2),
+  published as `docs/ADD-3.9.apk`. Install id `app.offline.compress` — kept so
   installed copies update in place — source namespace `add` — minSdk 26 · targetSdk 35 ·
-  versionCode 39. One package, four tools: the whole shelf rides inside it — every
+  versionCode 41. One package, four tools: the whole shelf rides inside it — every
   page, all four brands, 4,373 glyphs, the captures, the artboards, the stylesheet and
   Poppins — served to a WebView from a private origin; the editor and the compressor are
   native.
 - **Icons browser** — live at `docs/icons/`: four free brands — 606 Lineicons,
   1,258 Coolicons, 1,512 Phosphor and 997 Streamline — each on its own page with a preview, variant controls and the
   set folded into a scrolling sheet. Copy-on-tap, no account.
-- Theme: **three palettes over two modes** — green (`#0fbf92` band), Moss and Navy —
-  each in a dark page (`#131513` with cream type) and a light one. A new visitor opens
-  dark. Surfaces are flat: `shadow` is fully transparent.
-- Type: Poppins, self-hosted. The site serves woff2 from `docs/assets/fonts/`; both
-  app bundles Poppins (the compressor from `res/font/`, the web tools inside the
-  bundle).
-- **Dark and light**, on the site and in the app, remembered under `site:theme`. The
-  compressor reads the same choice: `ThemePrefs` stores the palette pair and
-  `applyTheme()` sets it before `setContentView()`.
+- Theme: **one Review edition** — paper `#f0e7d4`, ink `#1B1212`, plum
+  `#5b2a4b`, with flat surfaces and no palette or light/dark switch. The site's final
+  token block is canonical; `tools/sync_edition.py` generates the Android colours,
+  the Studio WebView tokens and the native engine palette from it so they cannot drift.
+- Type: **Instrument Serif, Spectral and Libre Franklin**, self-hosted. The site
+  serves woff2 from `docs/assets/fonts/`; the app carries the three faces in
+  `res/font/` and the Studio bundle carries its own copies.
+- **One edition**, on the site, in the app, Studio and the native engine lab. `build.sh`
+  runs the edition sync before the palette gate, so a site token change reaches every
+  surface on the next build.
 
 `dist/` keeps every older build as history; only the current APK is copied into
 `docs/`.
@@ -104,6 +105,7 @@ python3 tools/build_site.py                 # pages.json, sitemap.xml, robots.tx
 python3 tools/build_site.py --check         # fail when any of them is stale
 python3 tools/hash_assets.py                # after editing site.css or site.js
 python3 tools/hash_assets.py --check        # fail when a page names an old asset
+python3 tools/check_links.py                # fail when a page links to a missing file
 ```
 
 ## What Icons does
@@ -158,7 +160,7 @@ app/src/add/ThemePrefs.java       forces night mode off (one palette)
 app/res/                                           27 resources: 3 layouts, 14 drawables,
                                                    Poppins, one values/ (no values-night)
 app/src/add/ShelfActivity.java     WebView tool surface (icons or fonts page)
-app/src/add/Palette.java           three palettes, one entry each
+app/src/add/StudioPane.java        the paper Studio WebView in the editor
 app/src/add/ThemePrefs.java        stores the palette and theme pair
 app/assets/www/                                     staged at build time from docs/ (not committed)
 build.sh                                           SDK-tools build: ./build.sh [add|stage]
@@ -176,6 +178,7 @@ tools/check_menu.js                                menu ARIA and focus-return re
 tools/build_site.py                                page manifest, sitemap, robots, search page
 tools/search_template.html                         the search page: section chips, arrow keys
 tools/hash_assets.py                               hashed copies of the CSS and JS every page names
+tools/check_links.py                               fails when a page links to a file docs/ does not carry
 tools/deploy_vercel.py                             deploys docs/ to Vercel, verifies it, moves the links
 manifest.json, worker.js                           Sites deployment (fallback host)
 ```
@@ -191,7 +194,7 @@ export ANDROID_SDK_ROOT=$HOME/android-sdk   # needs build-tools;35.0.0 + platfor
 ./build.sh stage      # the web bundle only: no JDK or SDK needed
 ```
 
-Output: `dist/ADD-3.7.apk`. Copy it to `docs/` and
+Output: `dist/ADD-3.9.apk`. Copy it to `docs/` and
 re-run `python3 tools/build_catalog.py` so the pages, the JSON and the checksums move
 together. Signing uses `$HOME/tools/compress-keystore.jks` (created on first build,
 password `android`). Replace it with
@@ -221,8 +224,8 @@ console errors and horizontal overflow.
 in Robolectric's `NATIVE` graphics mode, so the layouts, themes, drawables, Poppins
 faces and the `EditorView`/`ComparisonView` paint code are the app's own. It audits
 Compress, Editor Quick, the Photo/Presets/Type/Layers/Colour sheets, Compare and
-Font packs in all six themes at 1080x2400, then writes only the nine green-dark
-representatives into `artifacts/android/`; `render-audit.json` records the 54
+Font packs in all eight themes at 1080x2400, then writes only the nine green-dark
+representatives into `artifacts/android/`; `render-audit.json` records the 72
 palette and layout checks behind them:
 
 ```bash

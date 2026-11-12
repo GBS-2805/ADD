@@ -8,6 +8,12 @@ It is deliberately **not** wired into `build.sh` or the ADD release. ADD's raw
 Kotlin 2.0, Compose and Filament's native libraries. Keeping the spike here proves
 the engine without putting a 28 MB debug dependency set into the shipping APK.
 
+The chrome is on the same Review edition as the site, app and Studio. `EngineEdition.kt`
+is generated from the site's final token block by `tools/sync_edition.py`; do not hand-
+edit it. The engine's old semantic names remain aliases in `EngineTokens.kt`: `Ink` is
+the page, `Cream` the words, `Mint` the plum selection, `Lime` the plum-hover action,
+and `Clay` the app's functional warning ink.
+
 ## Run
 
 Requirements: JDK 17, Android SDK 35, Node 20+ (only for the asset pipeline).
@@ -49,6 +55,8 @@ saved PNG by itself; those remain manual checks.
 | Live 3D layers | `SceneLayer.kt` — one SceneView / Filament 1.56 viewport per visible glTF layer, orbit camera |
 | PNG composite | `Exporter.kt` — artboard draw plus `PixelCopy` of the SceneView surface |
 | Native screen | `EngineScreen.kt` — tool rail, stage, layer stack, inspector, export |
+| Procedural artboard textures | `TexturePresets.kt` — ten seeded families, bounded downsample cache, recipe-only document storage |
+| Material Ink | `TextureInk.kt` — seeded material strokes authored by drag, stored as v5 recipes and rendered through the same Skia artboard/export path |
 | Device diagnostics | `DiagnosticsScreen.kt` — live SceneView/model state, PixelCopy test, manual checklist |
 | Asset pipeline | `scripts/make_gem.py`, `scripts/prepare-assets.mjs` |
 
@@ -96,8 +104,50 @@ This writes `app/src/main/assets/models/engine_gem.glb`. The generated `.gltf`,
 script is the source of truth. The shipped GLB is committed so a clean Gradle build
 does not require Node.
 
+## Task 8 status (11 Nov 2026)
+
+**Shipped:** ten deterministic artboard families — brick, wood grain, marble,
+concrete, fabric, halftone, gradient mesh, grain, checker and scanline. They cover
+masonry/stone engraving, laser-cut grain and cloth, print screens and tonal meshes,
+and calibration grids. A texture is stored as `{family, seed, opacity, scale, blend}`
+in the v4 document; no bitmap and no downloaded asset is involved.
+
+The `TEXTURE` inspector section applies a family to the current artboard, steps the
+seed, changes opacity/scale and removes it. All controls are 48dp with labels and
+selected state. A hand-edited or unknown reference decodes to clean paper with a
+`TEXTURE DROPPED` warning instead of failing the document. The renderer caps its
+field at 240k pixels and LRU-caches by family/seed/scale/dimensions, so frames reuse
+the overlay instead of regenerating it.
+
+Measured by `TexturePresetTest`: every cold family at 300×375 is under the 16ms
+frame budget (slowest: marble at about 12ms); all ten thumbnails warm in about 7ms;
+a ten-family 180×225 warm takes under 35ms off the frame path.
+
+### Material Ink (3.8.5 / 55)
+
+The Texture sheet now arms **Material Ink**. A drag on the stage creates one document
+stroke: `{id, recipe(family/seed/opacity/scale/blend), width, points[]}`, with normalized
+points and no bitmap in the file. Schema **v5** persists the strokes; v1–v4 files open
+with an empty list. The renderer shares a cached 256 px material tile and draws it along
+a rounded Skia path, so preview and export use the same recipe. The compact HUD exposes
+Undo, Remove last, Clear and brush width. `TextureInkTest` covers repository round-trip,
+undo/redo, deterministic pixels, seed divergence and the frame budget; measured median
+render time is **1.18 ms**. The reviewed capture is
+`artifacts/material-ink.png`.
+
+Full suite: **160 tests, 0 failures, 0 errors, 0 skipped**. Chrome: **14/14 goldens
+match**, including the Material Ink capture and the Marble-under-layers repair. No
+bitmap assets or network calls were added.
+Task 9–11, Studio and `app.offline.compress` were not touched. The review is built as
+**3.8.5 (55)** at `artifacts/engine-review/ADD-3.8.5-engine-review.apk`; it has not been
+deployed to the handoff from this workspace.
+
 ## Verification
 
+- `python3 tools/sync_edition.py --check` proves `EngineEdition.kt` still matches the
+  site's Review block.
+- `bash verify-chrome.sh` compares the 14 Compose goldens; use `--update` only after
+  reviewing a deliberate visual change.
 - `:app:assembleDebug` compiles the Kotlin/Compose/SceneView app and packages the
   GLB and Filament native libraries.
 - `:app:testDebugUnitTest` exercises the network topology and undo/redo without a

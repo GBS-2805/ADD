@@ -1,15 +1,15 @@
 {
-  "generated": "2026-11-06",
+  "generated": "2026-11-11",
   "tools": [
     {
       "id": "add",
       "name": "ADD",
       "kind": "Android app",
       "status": "released",
-      "version": "3.7",
-      "version_code": 39,
+      "version": "3.9",
+      "version_code": 41,
       "package": "app.offline.compress",
-      "apk": "/ADD-3.7.apk",
+      "apk": "/ADD-3.9.apk",
       "min_android": "8.0 (API 26)",
       "summary": "One offline app: the 4,373-icon browser, the fonts page, a photo editor with signed font packs, and batch compression.",
       "features": [
@@ -19,7 +19,7 @@
         "Editor: photo, type, presets and live adjustments, a colour mixer with hex and RGB, type spacing and opacity, photo turn/flip and canvas colour, reorderable layers with visibility, and installed packs kept for offline use.",
         "Compress: real quality, downscale, batch up to 40 photos, metadata stripped, originals untouched.",
         "Internet for one job only: a font pack you tap in Font packs; the shelf, the editor and Compress otherwise run offline.",
-        "Same three palettes and the side tab as the site, including the look controls at its foot."
+        "Same four palettes and the side tab as the site, including the look controls at its foot."
       ],
       "links": [
         {
@@ -28,11 +28,11 @@
         },
         {
           "label": "Download APK",
-          "href": "/ADD-3.6.apk"
+          "href": "/ADD-3.9.apk"
         }
       ],
-      "bytes": 5979036,
-      "sha256": "3bc5bcada95c4cd5c6193cb5879e602c7943aa9a3c9d3e4eb1c2abfd52ad2206"
+      "bytes": 17234552,
+      "sha256": "340810238ee240fdf897e0c1f5d17f29df98710d9fec18cf1a9bace821fc231b"
     }
   ]
 }

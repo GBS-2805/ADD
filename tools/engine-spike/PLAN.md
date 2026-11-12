@@ -67,7 +67,7 @@ paid with the gesture legend (C22) and a first-run tip, not with more chrome.
   and waits for a verdict.
 - Everything else: not started.
 - **Canvas-first, 8 Nov 2026.** The plan is recut around the artboard owning the screen —
-  see **Canvas-first** and **Build waves**. Every suggestion from the review is an item,
+  see **Canvas-first** and **Build waves**. Every note from the review is an item,
   C11–C32 and E10–E16. The native editor stays the simple arranging and exporting page,
   with only E10 and E1–E4 planned.
 

@@ -44,7 +44,7 @@ SHEET = "pantone.svg"
 # The listing counts the run in words, so it has to be told what the run has.
 WORDS = {19: "Nineteen", 20: "Twenty", 21: "Twenty-one", 22: "Twenty-two",
          23: "Twenty-three", 24: "Twenty-four", 25: "Twenty-five", 26: "Twenty-six",
-         27: "Twenty-seven"}
+         27: "Twenty-seven", 28: "Twenty-eight"}
 
 # The exporter writes every image twice: the payload under plain `href` and again
 # under `xlink:href`. One copy paints the picture and the other is dead weight --
@@ -87,7 +87,7 @@ def human(n):
 
 
 def palette_cards():
-    """Every solid colour of the three palettes, built the way the sheet builds them.
+    """Every solid colour of the four palettes, built the way the sheet builds them.
 
     Each row opens with the site's own colour, then the nearest Pantone chip and two
     alternatives side by side, every one carrying a square of its own colour so the eye
@@ -131,7 +131,7 @@ def palette_cards():
             '<b>\u0394E00 is how far a chip sits from the colour</b>: 0 is the same colour, under 3 '
             'cannot be told apart by eye, 3 to 5 is a close but visible step, and over 5 is a '
             'different shade kept only as a further option. The same table is handed over as '
-            '<a href="pantone.svg">pantone.svg</a>.</p>\n  %s\n</section>\n  '
+            '<a href="pantone.svg">pantone.svg</a>.</p>\n  %s\n</section>\n'
             % "".join(cards))
 
 
@@ -139,7 +139,7 @@ def listing(names):
     facts = {n: describe(DST / n) + (human((DST / n).stat().st_size),) for n in names}
     count = len([n for n in names if n.endswith(".svg") and n not in (BUNDLE, SHEET)])
     lede = ("%s sketch artboards of this site, the desktop set on one canvas, and every colour the "
-            "three palettes declare.") % WORDS.get(count, count)
+            "four palettes declare.") % WORDS.get(count, count)
 
     def item(name):
         title, dims, size = facts[name]
@@ -163,19 +163,18 @@ def listing(names):
         + group("Colour reference", [SHEET] if SHEET in names else [])
     )
     return """<!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-palette="ash" data-theme="dark">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<meta name="theme-color" content="#0fbf92" />
+<meta name="theme-color" content="#f0e7d4" />
 <meta name="description" content="Every page as a Figma-importable artboard, the whole set on one canvas, and the Pantone match for every palette colour." />
 <title>Design files — every sketch and every palette</title>
 <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml" />
 <link rel="stylesheet" href="../assets/site.css" />
 <script src="../assets/site.js" defer></script>
 <style>
-  main { padding: 52px 40px 64px; max-width: 1040px; }
-  h1 { margin: 0 0 10px; font-size: 40px; font-weight: 400; line-height: 1.15; letter-spacing: -.02em; }
+  main { max-width: 1040px; }
   .lede { margin: 0 0 10px; }
   .note { margin: 0 0 34px; max-width: 70ch; font-size: 15px; color: var(--on-dim); }
   h2 { margin: 38px 0 12px; font-size: 20px; font-weight: 500; }
@@ -209,8 +208,6 @@ def listing(names):
   ul.swatches .pm .tcx { font-size: 10.5px; }
   ul.swatches .role b, ul.swatches .role code { overflow-wrap: anywhere; }
   @media (max-width: 700px) {
-    main { padding: 32px 20px 48px; }
-    h1 { font-size: 30px; }
     li { flex-wrap: wrap; gap: 2px 14px; }
     ul.swatches li { grid-template-columns: 30px minmax(0, 1fr); gap: 4px 12px; padding: 12px 0; }
     ul.swatches .own { width: 30px; height: 30px; }
@@ -222,12 +219,64 @@ def listing(names):
 </style>
 </head>
 <body>
+
+<header class="bar">
+<div class="lead">
+    <button class="menu-btn" id="menuBtn" type="button" aria-expanded="false" aria-controls="menu" aria-label="Open sections">
+      <svg class="chev" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M8 13L12 17L16 13M8 7L12 11L16 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+    <a class="page-name" href="./">Figma</a>
+  </div>
+
+  <a class="mark" href="../" aria-label="ADD — home">
+    <svg viewBox="0 0 120.6 123.11" role="img" aria-label="ADD logo" fill="currentColor">
+        <path d="m29.58,61.92c.11,1.85.17,3.7.36,5.54.11,1.02-.23,1.23-1.19,1.29-4.47.26-5.38,1.22-5.27,5.67.13,5.14,2.74,9.13,6.27,12.56,1.53,1.49,2.96,1.05,3.89-.88.61-1.27.96-2.64,1.04-4.06.06-1.13.53-1.24,1.41-.69,1.72,1.08,2.92,2.71,4.38,4.07,8.66,8.04,18.38,13.89,30.58,14.51.52.03,1.04-.02,1.56,0,1.36.07,1.57-.53.89-1.58-.36-.56-.82-1.05-1.21-1.58-1.5-2.04-.63-4.17,1.89-4.53,3.34-.47,6.44.69,9.57,1.56,4.15,1.15,8.3,2.3,12.65,1.03,2.54-.74,2.78-1.66.84-3.54-.63-.61-1.41-1.08-2.11-1.63-2.43-1.91-2.63-3.35-.64-5.76,2.51-3.05,6.01-4.22,9.75-4.74,4.81-.67,9.26.31,13.25,3.19,1.39,1.01,1.75,1.97.94,3.7-9.48,20.25-25.12,32.69-47.2,36.28-29.25,4.75-57.41-12.11-67.54-39.86C-8.51,49.01,10.62,11.88,44.98,2.31c31.94-8.9,65.21,8.7,75.4,39.81.46,1.42.23,2.38-.66,3.4-4.28,4.87-9.78,6.13-15.92,5.16-4.99-.79-9.16-3.27-12.65-6.88-1.34-1.38-2.66-2.79-3.87-4.28-13.61-16.78-43.35-15.8-54.84,7.54-2.32,4.71-3.19,9.66-2.85,14.86Z"/>
+        <path d="m80.89,57.02c.88-.09,2.06-.21,3.22.13,1.56.46,1.88,1.6.75,2.8-1.16,1.23-2.59,1.52-4.25,1.33-4.23-.48-5.14.47-4.58,4.78.43,3.35,1.88,6.19,4.52,8.36.99.81,1.67.93,2.18-.62,1.55-4.74,1.61-4.72,6.46-4.56,1.28.04,2.56-.04,3.49-1.05.76-.83,1.38-1.54,2.5-.44,1.07,1.05,1.29,2.15.42,3.35-1.18,1.61-2.84,2.29-4.82,2.23-1.25-.04-2.77-.51-3.68.03-.98.58-.39,2.29-.7,3.49-.75,2.89-2.94,3.94-5.77,2.62-5.71-2.66-10.17-13.01-8.12-18.87.86-2.45,2.86-3.21,5.21-3.41.96-.08,1.92-.11,3.18-.18Z"/>
+        <path d="m52.62,58.41c.19-1.57.26-3.23,1.99-3.92,1.62-.65,2.9.23,3.92,1.33,2.41,2.61,3.79,5.64,2.86,9.26-.6,2.33-2.43,2.97-4.42,1.62-2.92-1.97-3.98-4.98-4.35-8.29Z"/>
+        <path d="m44.97,66.78c-.03,1.9-.18,3.24-1.63,3.9-1.5.68-2.61-.25-3.53-1.19-2.06-2.11-3.15-4.68-2.7-7.66.4-2.62,2.46-3.4,4.53-1.73,2.25,1.82,3.29,4.3,3.33,6.68Z"/>
+      </svg>
+  </a>
+
+<div class="who">
+<button class="burger" id="burger" type="button" aria-expanded="false" aria-controls="drawer" aria-label="Open side tab">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 7H19M5 12H19M5 17H19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+  </div>
+</header>
+
+<nav class="menu" id="menu" data-open="false" aria-label="Sections">
+  <a href="../">Index<span>the shelf</span></a>
+  <a href="../tools/">Resources<span>icons · fonts · engine</span></a>
+  <a href="../download/">Download<span>one app</span></a>
+  <a href="https://artbase-handoff.vercel.app/">Handoff<span>build handoff</span></a>
+</nav>
+
+<div class="scrim" id="scrim" data-open="false"></div>
+<aside class="drawer" id="drawer" data-open="false" aria-label="More">
+  <div class="drawer-head">
+    <p>More</p>
+    <button class="drawer-close" id="drawerClose" type="button" aria-label="Close side tab"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 6L18 18M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+  </div>
+  <a href="../download/">Download<span>1 app</span></a>
+  <a href="../portfolio/">Portfolio<span>3 projects</span></a>
+  <a href="../renders/">Renders<span>gallery</span></a>
+  <a href="../releases/">Releases<span>history</span></a>
+  <p class="drawer-note">ADD · a design shelf: icons, type, photos and words, in one quiet place.</p>
+</aside>
+
 <main>
-  <h1>Design files</h1>
-  <p class="lede">%s</p>
+  <header class="page-head">
+    <h1>Design files</h1>
+    <p class="lede">%s</p>
+  </header>
   <p class="note">Each artboard is the page as Chromium laid it out: real text, a rect per box, PNG marks, Poppins embedded. Drag one into Figma for editable layers. The palettes below are read from the stylesheet the site actually ships.</p>
-  %s%s<p class="back"><a href="../">← Back to the site</a></p>
+%s%s
 </main>
+
+<footer>
+  <span>ADD<span class="dot" aria-hidden="true">·</span>one app, four tools</span>
+  <span><a href="../">Index</a><span class="dot" aria-hidden="true">·</span><a href="../download/">Download</a><span class="dot" aria-hidden="true">·</span>no account</span>
+</footer>
 </body>
 </html>
 """ % (lede, body, palette_cards())

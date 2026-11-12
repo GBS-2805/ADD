@@ -23,7 +23,8 @@ ROOT = Path(__file__).resolve().parent.parent
 # The summary line each gate ends with, so a pass prints its verdict and not its
 # working. A gate whose last line is the interesting one has no entry here.
 VERDICT = {"palette": "palette:", "menu": "menu:", "assets": "assets:",
-           "site": "site:", "packs": "build_packs:", "figma": "figma check:",
+           "links": "links:", "site": "site:", "packs": "build_packs:",
+           "figma": "figma check:",
            "notes": "notes regression:", "bundle": "bundle check:",
            "artboards": "artboards:", "studio": "studio:", "engine": "engine:",
            "chrome": "chrome:"}
@@ -33,7 +34,9 @@ def gates(browser, artboards, visual):
     rows = [
         ["palette", [sys.executable, "tools/check_palette.py"]],
         ["assets", [sys.executable, "tools/hash_assets.py", "--check"]],
+        ["links", [sys.executable, "tools/check_links.py"]],
         ["site", [sys.executable, "tools/build_site.py", "--check"]],
+        ["classic", [sys.executable, "tools/archive_classic.py", "--check"]],
         ["catalog", [sys.executable, "tools/build_catalog.py", "--check"]],
         ["packs", [sys.executable, "tools/build_packs.py", "--check"]],
         ["figma", [sys.executable, "tools/check_figma.py"]],

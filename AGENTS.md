@@ -1,5 +1,20 @@
 # Working rules for this repo
 
+## Delivery rule: public links, every time
+
+A visual review is not delivered until the reader can tap it. Every reply that shows
+a UI change must include:
+
+1. a clickable public link to the working page;
+2. a clickable public link to the capture index;
+3. labelled public links to each relevant capture, including phone width.
+
+A Browser-panel reference, a workspace path, an `artifacts/...` path or merely saying
+"the preview is open" is not a link. Use `python3 tools/deploy_review.py review` and
+`python3 tools/deploy_review.py shots`, verify each URL returns 200 (and `image/png`
+for images) before sending, then lead the reply with those links. This is a standing
+rule, not a per-request preference.
+
 ## Renders: only when the change is visual
 
 A change to a page in `docs/` needs image renders **only if it changes what the page
@@ -200,38 +215,24 @@ Screenshots are of a local server over `docs/` (`python3 -m http.server`), viewp
 in one run and prints console errors; it needs the toolchain from
 `tools/render_env.py`.
 
-The site has two modes over one palette: a green band (`#0fbf92`) in both, an off-black
-page (`#131513`) with cream type (`#f2eee3`) in dark, and cream with off-black in light.
-A new visitor opens on the dark page: dark is the default, not a lookup of what the
-system asks for. `site.js` swaps `data-theme` on `<html>` for the sun/moon switch it
-injects into the palette row of the side tab and remembers the choice under
-`site:theme`, so generated pages inherit both. Every page links one stylesheet, `docs/assets/site.css`: it carries the
-`@font-face` block, the band, the pull-down menu and the shared type, and its
-`url()` paths are relative to that file so pages at any depth can use it. The band
-keeps frame 6-27's measured geometry -- 26px page name on the left inside a 40px
-tap target, the 45px mark centred, two 17px lines and the burger on the right, and the theme control living in the side
-tab rather than the band; a phone drops the descriptor for `ADD` over
-`Art • Design • Database` --
-while the glyphs themselves are Coolicons line icons (MIT), which is why every
-page loads `assets/site.js`. Page-specific rules live in a small `<style>` on the page. `docs/icons/index.html` is
+The site is one printed edition now: review paper (`#f0e7d4`), ink (`#1B1212`) and
+plum (`#5b2a4b`), set in Instrument Serif, Spectral and Libre Franklin. There are no
+palette chips and no light/dark switch. The final `html[data-theme], html[data-palette]`
+block in `site.css` is canonical; `site.js` no longer reads `site:theme` or
+`site:palette` and no longer builds the look controls. `tools/sync_edition.py` reads
+that block and generates `app/res/values/colors.xml`,
+`app/studio-assets/edition.css` and the engine's `EngineEdition.kt`; `build.sh` runs
+it before the palette gate, and `check_palette.py` fails when any generated copy is
+stale. Never hand-edit those generated files.
+
+Every page links one stylesheet, `docs/assets/site.css`: it carries the `@font-face`
+block, the masthead, the pull-down menu and the shared type, and its `url()` paths are
+relative to that file so pages at any depth can use it. `site.js` injects the quiet
+`ADD` wordmark on pages that do not carry it, adds the Search row, and keeps the
+navigation. The old ring `.mark` is hidden on the site; the favicon and app icon keep
+it. The header is paper with a red top rule and a black baseline, not a palette band.
+Page-specific rules live in a small `<style>` on the page. `docs/icons/index.html` is
 generated on the same system out of the three icon templates.
-
-Three palettes ride over those two modes: green (the original band, `#0fbf92`), and the
-two sets from the hand-off — Moss (`#005043` band, `#0e2a24` page, `#e7ddce` words,
-`#d6e381` accent) and Navy (`#242d55` band, `#1c1d2f` page, `#a1b0c3` words, `#72b6b4`
-accent). `site.js` swaps `data-palette` on `<html>` and remembers the choice under
-`site:palette`; the three chips sit at the foot of the side tab, under the note, with the
-light/dark switch as the last chip in that row rather than a labelled row of its own.
-Closing the tab writes both choices to the store, so neither is lost by dismissing it. The band holds in both themes and only the page turns over, so a palette
-is its block of values in `site.css` plus one entry in the `PALETTES` list in `site.js`.
-
-The fourth colour of each set is that palette's accent, and it does two jobs: it fills the
-count chips and the live pills (`--accent`, with `--accent-ink` on top, because the accent
-is light and the band ink on it measures 1.03:1), and it colours the two small labels on
-the band (`MORE` and `Palette`, `--label`). Green has no accent of its own -- its band is
-the accent -- so its labels keep the near-black band ink while Moss and Navy get their
-lime and teal. Never spend the accent on body copy or on link words: it sits at 1.03:1
-against the palette's band words and would read as a second, competing ink.
 
 ### The app: native screens render; the emulator is a smoke test
 
@@ -247,9 +248,16 @@ and when it does paint, Filament's `fxaa` shader fails to link or compile and
 `FEngine::loop` raises SIGABRT about five seconds after "first frame drawn". Installs
 also fail with a `PackageManagerInternal.freeStorage` null pointer until the guest has
 settled, `sys.boot_completed` never flips, and `mCurrentFocus` can stay null with an
-activity drawn. So: use it to prove the build installs and starts, and keep a frame when
-one lands with its date and attempt count attached -- do not present it as a render, and
-do not try to make the engine capture scriptable.
+activity drawn. With the seed 3D gem hidden, the Filament `fxaa` abort does not start;
+a saved visible 3D layer can still bring it back.
+
+The engine review now captures its own live windows rather than relying on
+SurfaceFlinger: `WindowManagerGlobal.mViews` is drawn with `View.draw` into
+`files/device-ui-*.png`, including Compose dialogs as their own windows. That is
+runtime proof, not a page render, and it does not replace a physical-phone verdict.
+`tools/device_audit.py` packages the READY, live-window, saved-field and export checks
+so a candidate can be audited before signing. It never drives the editor UI beyond the
+export action.
 
 `am start .../app.add.engine.MainActivity` answers `Activity class ... does not exist`
 because that activity is declared `android:exported="false"` and runs in its own
@@ -276,7 +284,7 @@ The four-way split this settles on:
   390x844, about ten seconds for the shelf, with console errors and horizontal
   overflow reported. Deterministic, and the only path that feeds `docs/renders/`.
 - **Native screens -> Robolectric.** `tools/android-render/` draws the real activities
-  through the app's own resources and audits 54 combinations before it writes
+  through the app's own resources and audits 72 combinations before it writes
   anything.
 - **Emulator -> smoke test** as above, plus an opportunistic engine frame.
 - **Engine screen -> one honest capture with its provenance attached**, or a real
@@ -285,10 +293,10 @@ The four-way split this settles on:
 
 The native screens do render without an emulator. `tools/android-render/` compiles
 `app/res` with `aapt2`, hosts the activities in Robolectric with `NATIVE` graphics,
-and draws their real content views at 1080x2400. It audits every one of the 54
+and draws their real content views at 1080x2400. It audits every one of the 72
 screen/theme combinations in memory and writes only the nine green-dark
 representatives into `artifacts/android/`. It covers Compress, Editor Quick, its
-Photo/Presets/Type/Layers/Colour sheets, Compare and Font packs, in all six themes.
+Photo/Presets/Type/Layers/Colour sheets, Compare and Font packs, in all eight themes.
 The method is the Android-renders handoff: binary resources,
 `android-all-instrumented`, and Skia through the platform runtime. See
 `tools/android-render/README.md`:
@@ -298,10 +306,10 @@ bash tools/android-render/setup.sh
 bash tools/android-render/render.sh
 ```
 
-`render.sh` stages the run and replaces `artifacts/android/` only after all 54
+`render.sh` stages the run and replaces `artifacts/android/` only after all 72
 combinations pass; a failure keeps the previous set. `manifest.json` is the expected
 matrix and names the showcase pair; `review.py` requires exactly the nine showcase
-PNGs, a passing `render-audit.json` with 54 checks, and 1080×2400 dimensions before
+PNGs, a passing `render-audit.json` with 72 checks, and 1080×2400 dimensions before
 it rebuilds `artifacts/shots/` from scratch for the public review. The screenshots
 are a current set, not an archive, and are never committed.
 
@@ -326,8 +334,9 @@ where the notes keep the history they shipped with.Icons, Fonts, Compress and th
   rewrites the origin in
   `tools/site.json` and the two app constants, so a failed deploy leaves the repo
   pointing at the host that still serves. It runs `tools/check_palette.py` before the
-  upload and refuses a palette that drifted, beside its stale-hash and
-  uncommitted-history stops. The deploy token is `VERCEL_ARTBASE_TOKEN` when set,
+  upload and refuses a palette that drifted, and `tools/check_links.py`, which fails
+  when any internal `href` or `src` names a file the shelf does not carry, beside its
+  stale-hash and uncommitted-history stops. The deploy token is `VERCEL_ARTBASE_TOKEN` when set,
   otherwise the `VERCEL_TOKEN` secret; the storage report uses `VERCEL_ADMIN_TOKEN`
   or `VERCEL_TOKEN`. Tokens are read from the environment and never an argument.
   Vercel has no per-deploy size cap.
@@ -345,8 +354,8 @@ where the notes keep the history they shipped with.Icons, Fonts, Compress and th
   split and retention policy for `artbase`, `artbase-handoff`, `artbase-handoff-apk`
   and `artbase-shots`; `deploy_vercel.py` runs it before uploading, so a release that
   would add another full copy shows the result first. It warns above 40 retained
-  deployments, above 512 MiB of estimated output, or any retention window over 7
-  days. A critical count or estimate exits 2, and an unavailable report also stops
+  deployments, above 450 MiB of estimated output as an early warning, above 512 MiB,
+  or any retention window over 7 days. A critical count or estimate exits 2, and an unavailable report also stops
   `deploy_vercel.py` (strict gate). `deploy_review.py apk|handoff|shots|review`
   applies the same gate; `deploy_audit.py` exports deletion and retention events.
   `artbase-handoff-apk` serves the review APK from `artifacts/handoff-apk`, so a
@@ -482,7 +491,7 @@ where the notes keep the history they shipped with.Icons, Fonts, Compress and th
   into `docs/figma/`, which the site does serve, so every artboard can be
   downloaded from a phone at `/figma/<file>`, and writes the listing at `/figma/`.
   Each artboard carries Poppins 400/500/600 as base64 woff2, because a file that
-  only names the family renders in the viewer's fallback sans. `figma/` stays the source. `tools/pantone_sheet.py` writes `figma/pantone.svg`, the colour reference: the nearest Solid Coated chip for every solid colour the three palettes declare, two alternatives for each, and the nearest textile TCX, matched against the vendored `tools/pantone-data.json` by CIEDE2000. It reads `site.css`, so a palette change makes `--check` fail until it is re-run; never hand-edit that sheet. Re-run the
+  only names the family renders in the viewer's fallback sans. `figma/` stays the source. `tools/pantone_sheet.py` writes `figma/pantone.svg`, the colour reference: the nearest Solid Coated chip for every solid colour the four palettes declare, two alternatives for each, and the nearest textile TCX, matched against the vendored `tools/pantone-data.json` by CIEDE2000. It reads `site.css`, so a palette change makes `--check` fail until it is re-run; never hand-edit that sheet. Re-run the
   exporter after a visual change, then the bundle and the publish step; never edit
   the SVGs. `tools/check_figma.py` gates all three: it fails when a text run lacks its
   own family, size or fill, or when a file paints a mark with `<use>`, because Figma
@@ -645,32 +654,33 @@ where the notes keep the history they shipped with.Icons, Fonts, Compress and th
   needs the capture environment exported by hand: `build.sh` hands the check
   `NODE_PATH`, `PLAYWRIGHT_BROWSERS_PATH`, `LD_LIBRARY_PATH` and `FONTCONFIG_FILE`
   itself, and a value already exported still wins.
-- Compress wears the same three palettes as the site, plus the band and the side tab.
-  The colours live in one place, `app/res/values/colors.xml`: a block per palette
-  (band, band ink, dim and line, accent and its ink, label, page, words, rule, card)
-  in a dark and a light page set, taken from `docs/assets/site.css` so the two cannot
-  drift. Nothing in a layout or a drawable names a colour resource directly: every
-  one asks for a theme attribute declared in `app/res/values/attrs.xml`, and
-  `app/res/values/styles.xml` maps those attributes across six themes, `AppTheme`
-  (green, dark page), `AppTheme.Light`, `AppTheme.Moss`, `AppTheme.Moss.Light`,
-  `AppTheme.Navy` and `AppTheme.Navy.Light`.  `ThemePrefs` stores the pair and `applyTheme()` sets the theme before `setContentView()`. Adding a palette is a block
-  of colours, a theme and one entry each in `Palette.IDS`, `LABELS`, `BANDS` and
-  `WORDS` — never a second layout. The band is `res/layout/band.xml` and the side
+- Compress wears the one Review edition, plus the band and the side tab. The site and
+  app share the paper, ink and plum tokens. The Android copy is generated from the
+  site's final token block into `app/res/values/colors.xml`; nothing in a layout or a
+  drawable names a colour resource directly: every one asks for a theme attribute
+  declared in `app/res/values/attrs.xml`, and `app/res/values/styles.xml` maps those
+  attributes in the single `AppTheme`. The band is `res/layout/band.xml` and the side
   panel `res/layout/drawer.xml`, both included by `activity_main.xml`; `CompareActivity`
-  inherits the themes and wears the same colours.
-- `python3 tools/check_palette.py` guards all of the above, site and app together. It
-  compares every palette block in `site.css` with `colors.xml`, requires all six themes
-  to set every attribute, holds the band in both modes, insists the mark on the band
-  wears the band's ink (it is tinted `?attr/ink`, so a themed `ink` is what keeps it
-  visible), refuses a literal colour in a layout or a `bg_` drawable and a glyph drawn
-  without a tint, and measures contrast — 4.5:1 for words, 3:1 for dim words and the
-  band's labels. `--browser http://127.0.0.1:8799/` adds `tools/check_palette.js`, the
-  half a stylesheet cannot prove: all six combinations are driven and it fails when a
-  pull-down paints anything but the page colour, a selected control leaves the band,
-  a disabled control looks enabled, the status-bar meta or the printed colour codes
-  disagree with the palette, or a colour is identical across all three palettes
-  (the preview stage is the one documented exception). `build.sh` runs the static
-  half before staging, so a drifted palette fails a build without a browser.
+  inherits the theme and wears the same colours.
+- `app/studio-assets/edition.css` is generated from the same block, and `studio.css`
+  maps its old shell variable names onto those tokens. The Studio is a paper proof
+  sheet, not a graphite instrument panel.
+- `tools/engine-spike/app/src/main/java/app/add/engine/EngineEdition.kt` is generated
+  from the same block. The engine is still a separate review APK, but its Compose
+  chrome is on the one edition: paper page, ink type, plum selection and actions, and
+  the app's functional warning ink for destructive states.
+- `python3 tools/check_palette.py` guards all of the above, site, app and engine together. It
+  compares the final Review block in `site.css` with `colors.xml` and the generated
+  Studio and engine tokens, requires the one theme to set every attribute, holds the band and page
+  in that edition, insists the mark on the band wears the band's ink (it is tinted
+  `?attr/ink`, so a themed `ink` is what keeps it visible), refuses a literal colour in
+  a layout or a `bg_` drawable and a glyph drawn without a tint, and measures contrast
+  — 4.5:1 for words, 3:1 for dim words and the side-panel labels. `--browser
+  http://127.0.0.1:8799/` adds `tools/check_palette.js`, the half a stylesheet cannot
+  prove: it fails when a pull-down paints anything but the page colour, a selected
+  control leaves the band, a disabled control looks enabled, the status-bar meta or the
+  printed colour codes disagree with the edition. `build.sh` runs the sync and the
+  static half before staging, so a drifted edition fails a build without a browser.
 - `docs/packs/` is generated by `python3 tools/build_packs.py` from
   `docs/data/fonts.json` and the TTFs under `docs/assets/fonts/`: one flat
   `<slug>-<version>.addpack` zip per family (manifest plus TTFs, every file with its
@@ -716,18 +726,21 @@ where the notes keep the history they shipped with.Icons, Fonts, Compress and th
   `PackStore`, which checks the listing's outer SHA-256, then the manifest signature
   against `PackKey`, then a SHA-256 per entry before installing atomically into
   `filesDir/font-packs/<slug>/<version>/`. The manual `.addpack` picker remains as a
-  secondary link for a file already on the phone. The editor's QUICK/STUDIO tabs keep
-  the Fabric Studio in the same activity: a WebView over `assets/www/studio` running
-  vendored Fabric.js 5.3.0 (MIT) with a custom `AddText` class (gradient, outline,
-  shadow and blend), fast-drag mode, grouping, photo import and a 1080x1350 PNG export
-  to `Pictures/Studio`. `overlays.js` draws eight textures locally — light leak, grain,
-  bokeh, paper, dust, vignette, window shadows and lens flare — and the page exposes
-  opacity, blend, shuffle, remove, on-canvas placement handles and X/Y/scale/rotation
-  controls; nothing is fetched and no stock asset is bundled. It is a spike, not wired
-  to saved looks, and it is unverified on a device.
-- `python3 tools/check_all.py` is the single verdict: palette, asset hashes, site tree,
-  catalog, Figma structure, Pantone sheet, note dating and the staged bundle, one line
-  each, all of them run so one pass shows everything. `--browser <url>` adds the
+  secondary link for a file already on the phone. The editor's STUDIO tab now opens
+  first; it keeps the Studio engine in the same activity: a WebView over
+  `assets/www/studio` running vendored Fabric.js 5.3.0 (MIT) with a custom `AddText`
+  class (gradient, outline, shadow and blend), fast-drag mode, grouping, photo import
+  and a 1080x1350 PNG export to `Pictures/Studio`. The paper edition shell is
+  canvas-first: a flat paper masthead, a Move/Type/Style/Texture/Motion bar and a peek
+  inspector, all wearing the generated site tokens. `overlays.js` draws the five press materials — newsprint, wheatpaste,
+  overexposed ink, halftone and rough canvas — beside the eight atmosphere textures
+  (light leak, grain, bokeh, paper, dust, vignette, window shadows and lens flare), and
+  the page exposes opacity, blend, shuffle, remove, on-canvas placement handles and
+  X/Y/scale/rotation controls; nothing is fetched and no stock asset is bundled. It is
+  the first Studio 2 slice, not wired to saved looks, and it is unverified on a device.
+- `python3 tools/check_all.py` is the single verdict: palette, asset hashes, internal
+  links, site tree, catalog, Figma structure, Pantone sheet, note dating and the staged
+  bundle, one line each, all of them run so one pass shows everything. `--browser <url>` adds the
   rendered palette and the menu-focus/ARIA regression; `--artboards` adds the
   re-export diff. Both need Chromium, and `.github/workflows/checks.yml` runs the
   browserless set on every push. The APK build stays local: it needs the JDK, the android-35 platform and the keystore.
@@ -764,6 +777,13 @@ When a domain does exist, the move is already scripted and needs no new tooling:
 3. The APKs still embed the `vercel.app` host. Repointing them at the new one needs a
    version bump (`tools/bump_version.py ... --build`) and a re-capture, because the
    version labels are visible ink.
+
+## Completion notifications
+
+When a task is finished and verified, send one short ntfy notification to
+`https://ntfy.sh/Freebuff-ADD-2805` before the final reply. Say what is ready, the
+pass/fail state, and the one public link to open. Do not notify for progress,
+intermediate milestones, or while blocked; one notification per finished task.
 
 ## Handoff standard
 

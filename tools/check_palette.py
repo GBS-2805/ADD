@@ -1,14 +1,13 @@
 #!/usr/bin/env python3
-"""One palette, two surfaces: the site and the app.
+"""One edition, every surface: the site's Review tokens, the app, Studio and engine.
 
-Fails when a colour stops following the palette:
+Fails when a colour stops following the site's edition:
 
   * a site surface that must take --page, --band or --tint carries a literal
-    colour, or names a custom property nothing defines (the category menu was
-    #35417f, and three disabled states asked for a --mute that never existed);
-  * app/res/values/colors.xml has drifted from the palette blocks in
+    colour, or names a custom property nothing defines;
+  * app/res/values/colors.xml has drifted from the newsprint block in
     docs/assets/site.css;
-  * a theme misses an attribute, or the band turns over with the page;
+  * the one theme misses an attribute, or the band changes ink with the page;
   * the mark on the band does not wear the band's own ink;
   * a layout paints a colour directly instead of asking the theme, or uses a
     mono glyph without tinting it;
@@ -20,7 +19,7 @@ Fails when a colour stops following the palette:
 
 The rendered half is tools/check_palette.js: it needs Playwright and a server over
 docs/, and it is what proves a pull-down takes the palette and a disabled control
-keeps its dim ink. Without --browser those two are not checked, and this says so.
+keeps its dim ink. It checks the active edition, not the Android theme.
 """
 
 import argparse
@@ -31,6 +30,9 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT / "tools"))
+import sync_edition  # noqa: E402
+
 CSS = ROOT / "docs/assets/site.css"
 COLORS = ROOT / "app/res/values/colors.xml"
 ATTRS = ROOT / "app/res/values/attrs.xml"
@@ -49,37 +51,31 @@ STYLED_PAGES = [
 ]
 STYLED_PAGES = [page for page in STYLED_PAGES if page.exists()]
 
-PALETTES = ["green", "moss", "navy"]
-MODES = ["dark", "light"]
-THEMES = {
-    "green": {"dark": "AppTheme", "light": "AppTheme.Light"},
-    "moss": {"dark": "AppTheme.Moss", "light": "AppTheme.Moss.Light"},
-    "navy": {"dark": "AppTheme.Navy", "light": "AppTheme.Navy.Light"},
-}
+THEME = "AppTheme"
 
 # The colours a theme has to resolve; warn/warnBg/shadow are functional, not palette.
 THEMED = ["page", "on", "onDim", "rule", "card", "panel2", "band", "bandInk",
           "bandDim", "bandLine", "accent", "accentInk", "label", "ink"]
-BAND_HELD = ["band", "bandInk", "bandDim", "bandLine", "accent", "accentInk", "label"]
 
 # Set by a page's own markup or script, never by a stylesheet.
 JS_VARS = {"--glyph", "--sw", "--c", "--size", "--w", "--darken", "--str"}
 
-# xml attribute in colors.xml -> custom property in site.css
+# xml attribute in colors.xml -> custom property in the newsprint block
 SITE_OF_APP = {
-    "band": "--pal-band",
-    "band_ink": "--pal-band-ink",
-    "accent": "--pal-accent",
-    "accent_ink": "--pal-accent-ink",
-    "label": "--pal-label",
-    "page": "--pal-page",
-    "on": "--pal-on",
-    "page_light": "--pal-page-light",
-    "on_light": "--pal-on-light",
+    "band": "--band",
+    "band_ink": "--band-ink",
+    "band_dim": "--band-dim",
+    "band_line": "--band-line",
+    "accent": "--accent",
+    "accent_ink": "--accent-ink",
+    "label": "--label",
+    "page": "--page",
+    "on": "--on",
+    "on_dim": "--on-dim",
+    "rule": "--rule",
 }
 
-# Documented exceptions: a scrim is a scrim in every palette, and the launcher disc
-# is a fixed asset rather than a themed surface.
+# Documented exceptions: a scrim is a scrim, and the launcher disc is a fixed asset.
 LAYOUT_LITERALS_OK = {"#99000000"}
 SURFACE_LITERALS_OK = {"bg_primary.xml": {"#33000000"}, "bg_remove.xml": {"#33000000"}}
 GLYPHS_UNTINTED_OK = {"ic_launcher_foreground"}
@@ -96,15 +92,9 @@ def read(path):
     return path.read_text(encoding="utf-8")
 
 
-def palettes_css():
-    """Every html[data-palette="..."] block, as name -> custom property -> value."""
-    found = {}
-    for name, body in re.findall(r'html\[data-palette="(\w+)"\]\s*\{(.*?)\n\}', read(CSS), re.S):
-        values = {}
-        for key, value in re.findall(r"(--[\w-]+)\s*:\s*([^;]+);", body):
-            values[key] = value.strip()
-        found[name] = values
-    return found
+def newsprint_css():
+    """The final Review edition token block, shared with the generator."""
+    return sync_edition.site_tokens()
 
 
 def colours_xml():
@@ -171,67 +161,56 @@ def contrast(fg, bg):
     return round((high + 0.05) / (low + 0.05), 2)
 
 
-# ---------- the palette reaches every surface ----------
+# ---------- one palette reaches every surface ----------
 
-def check_palettes():
-    css = palettes_css()
-    for palette in PALETTES:
-        if palette not in css:
-            fail("site.css", "no html[data-palette=\"%s\"] block" % palette)
-            continue
-        for key in ("--pal-band", "--pal-band-ink", "--pal-page", "--pal-on",
-                    "--pal-accent", "--pal-accent-ink", "--pal-label",
-                    "--pal-page-light", "--pal-on-light"):
-            if key not in css[palette]:
-                fail("site.css", "%s is missing %s" % (palette, key))
+def check_newsprint_tokens():
+    css = newsprint_css()
+    for key in ("--band", "--band-ink", "--page", "--on", "--on-dim",
+                "--accent", "--accent-ink", "--label"):
+        if key not in css:
+            fail("site.css", "newsprint block is missing %s" % key)
 
 
 def check_app_matches_site():
-    css, app = palettes_css(), colours_xml()
-    for palette in PALETTES:
-        if palette not in css:
+    css, app = newsprint_css(), colours_xml()
+    for suffix, site_key in SITE_OF_APP.items():
+        site = css.get(site_key)
+        resource = "newsprint_%s" % suffix
+        if resource not in app:
+            fail("colors.xml", "%s is missing (%s)" % (resource, site_key))
             continue
-        for suffix, site_key in SITE_OF_APP.items():
-            site = css[palette].get(site_key)
-            resource = "%s_%s" % (palette, suffix)
-            if resource not in app:
-                fail("colors.xml", "%s is missing (%s)" % (resource, site_key))
-                continue
-            if site and parse_colour(site) and parse_colour(app[resource]):
-                if parse_colour(site)[:3] != parse_colour(app[resource])[:3]:
-                    fail("colors.xml", "%s is %s but site.css %s is %s"
-                         % (resource, app[resource], site_key, site))
+        if site and parse_colour(site) and parse_colour(app[resource]):
+            if parse_colour(site)[:3] != parse_colour(app[resource])[:3]:
+                fail("colors.xml", "%s is %s but site.css %s is %s"
+                     % (resource, app[resource], site_key, site))
 
 
-def check_themes():
+def check_generated_edition():
+    """The Android, Studio and engine copies must be the exact output for this site."""
+    for path, expected in sync_edition.generated().items():
+        if read(path) != expected:
+            fail("generated", "%s is stale; run python3 tools/sync_edition.py"
+                 % path.relative_to(ROOT))
+
+
+def check_theme():
     themes, attrs, app = themes_xml(), attrs_xml(), colours_xml()
     palette_attrs = [a for a in attrs if a not in ("warn", "warnBg", "shadow")]
-    for palette in PALETTES:
-        for mode in MODES:
-            name = THEMES[palette][mode]
-            if name not in themes:
-                fail("styles.xml", "%s (%s, %s) is missing" % (name, palette, mode))
-                continue
-            theme = themes[name]
-            for attr in palette_attrs:
-                if attr not in theme:
-                    fail("styles.xml", "%s does not set %s" % (name, attr))
-            for attr, value in theme.items():
-                if value.startswith("@color/"):
-                    resource = value.split("/", 1)[1]
-                    if resource not in app:
-                        fail("styles.xml", "%s points at %s, which colors.xml lacks" % (name, resource))
-            # The band holds in both modes.
-            other = themes.get(THEMES[palette]["light" if mode == "dark" else "dark"], {})
-            for attr in BAND_HELD:
-                if attr in theme and attr in other and theme[attr] != other[attr]:
-                    fail("styles.xml", "%s.%s is %s but %s uses %s: the band turned over"
-                         % (name, attr, theme[attr], THEMES[palette][
-                             "light" if mode == "dark" else "dark"], other[attr]))
-            # The mark on the band wears the band's ink, in both modes.
-            if "ink" in theme and "bandInk" in theme and theme["ink"] != theme["bandInk"]:
-                fail("styles.xml", "%s tints the mark %s on a band inked %s"
-                     % (name, theme["ink"], theme["bandInk"]))
+    if THEME not in themes:
+        fail("styles.xml", "%s is missing" % THEME)
+        return
+    theme = themes[THEME]
+    for attr in palette_attrs:
+        if attr not in theme:
+            fail("styles.xml", "%s does not set %s" % (THEME, attr))
+    for attr, value in theme.items():
+        if value.startswith("@color/"):
+            resource = value.split("/", 1)[1]
+            if resource not in app:
+                fail("styles.xml", "%s points at %s, which colors.xml lacks" % (THEME, resource))
+    if "ink" in theme and "bandInk" in theme and theme["ink"] != theme["bandInk"]:
+        fail("styles.xml", "%s tints the mark %s on a band inked %s"
+             % (THEME, theme["ink"], theme["bandInk"]))
 
 
 def check_contrast():
@@ -241,27 +220,24 @@ def check_contrast():
         raw = theme.get(attr, "")
         return app.get(raw.split("/", 1)[1]) if raw.startswith("@color/") else raw
 
-    for palette in PALETTES:
-        for mode in MODES:
-            theme = themes.get(THEMES[palette][mode])
-            if not theme:
-                continue
-            pairs = [
-                ("bandInk", "band", 4.5, "words on the band"),
-                ("on", "page", 4.5, "words on the page"),
-                ("accentInk", "accent", 4.5, "words on the accent"),
-                ("onDim", "page", 3.0, "dim words on the page"),
-                ("label", "band", 3.0, "the band's small labels"),
-            ]
-            for fg, bg, floor, what in pairs:
-                ratio = contrast(value(theme, fg), value(theme, bg))
-                if ratio is None:
-                    fail("contrast", "%s/%s: %s could not be resolved" % (palette, mode, what))
-                elif ratio < floor:
-                    fail("contrast", "%s/%s: %s measures %.2f:1, under %.1f:1"
-                         % (palette, mode, what, ratio, floor))
-                elif what == "words on the band":
-                    notes.append("contrast %s/%s: band words %.2f:1" % (palette, mode, ratio))
+    theme = themes.get(THEME)
+    if not theme:
+        return
+    pairs = [
+        ("bandInk", "band", 4.5, "words on the band"),
+        ("on", "page", 4.5, "words on the page"),
+        ("accentInk", "accent", 4.5, "words on the accent"),
+        ("onDim", "page", 3.0, "dim words on the page"),
+        ("label", "page", 3.0, "the side-panel labels"),
+    ]
+    for fg, bg, floor, what in pairs:
+        ratio = contrast(value(theme, fg), value(theme, bg))
+        if ratio is None:
+            fail("contrast", "%s could not be resolved" % what)
+        elif ratio < floor:
+            fail("contrast", "%s measures %.2f:1, under %.1f:1" % (what, ratio, floor))
+        elif what == "words on the band":
+            notes.append("contrast: band words %.2f:1" % ratio)
 
 
 def check_custom_properties():
@@ -335,9 +311,10 @@ def main():
                         help="also drive the pages (needs Playwright and a server over docs/)")
     args = parser.parse_args()
 
-    check_palettes()
+    check_newsprint_tokens()
     check_app_matches_site()
-    check_themes()
+    check_generated_edition()
+    check_theme()
     check_contrast()
     check_custom_properties()
     check_layouts()
@@ -359,8 +336,7 @@ def main():
         for problem in failures:
             print("  " + problem)
         sys.exit(1)
-    print("palette: OK - %d palettes x %d modes, site and app agree"
-          % (len(PALETTES), len(MODES)))
+    print("palette: OK - one newsprint edition, app and tokens agree")
 
 
 if __name__ == "__main__":

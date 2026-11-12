@@ -120,10 +120,21 @@ async function main() {
     const node = document.querySelector(value);
     return node ? node.getBoundingClientRect().toJSON() : null;
   }, selector);
+  const openTool = async (target, name) => {
+    await target.click(`button[data-tool="${name}"]`);
+    await target.waitForSelector(`[data-sheet="${name}"]`, { state: 'visible' });
+    await target.waitForTimeout(80);
+  };
+  const closeInspector = async (target) => {
+    await target.click('button[data-tool="move"]');
+    await target.waitForFunction(() => document.getElementById('peek').hidden);
+    await target.waitForTimeout(80);
+  };
 
   try {
     await page.goto(`http://127.0.0.1:${port}/index.html`, { waitUntil: 'networkidle' });
-    await page.waitForFunction(() => window.__studioInteraction && window.__studioMotion);
+    await page.waitForFunction(() => window.__studioInteraction && window.__studioMotion && window.StudioSeedReady);
+    await page.evaluate(() => document.fonts.ready);
     await page.waitForTimeout(250);
 
     const initial = await state();
@@ -135,13 +146,25 @@ async function main() {
     assert.deepStrictEqual(plugins, ['core', 'Draggable', 'Observer', 'MotionPathPlugin']);
 
     // A fresh text layer is selected and has a real frame over the canvas.
+    await openTool(page, 'type');
     await page.click('#add');
+    await page.tap('#text');
+    await page.waitForTimeout(120);
+    const field = await page.evaluate(() => ({
+      active: document.activeElement && document.activeElement.id,
+      hidden: document.getElementById('peek').hidden
+    }));
+    assert.strictEqual(field.active, 'text', 'content field must keep focus');
+    assert.strictEqual(field.hidden, false, 'inspector must stay open while editing');
     await page.fill('#text', 'MOVE');
     await page.waitForFunction(() => window.__studioInteraction.state().selected === 'MOVE');
+    await closeInspector(page);
     await page.waitForTimeout(250);
     const before = await state();
     assert.strictEqual(before.selected, 'MOVE');
     assert.strictEqual(before.angle, 0);
+    await page.evaluate(() => document.fonts.ready);
+    await page.waitForTimeout(80);
     const frame = await rect('#selection-frame');
     assert.ok(frame && frame.width > 20 && frame.height > 10, 'selection frame must be visible');
 
@@ -198,6 +221,8 @@ async function main() {
     assertClose(during.horizontal.y, geometry.canvas.y + geometry.targetY * geometry.scale, 'horizontal guide y', 1);
 
     // The evidence and pixel guard are taken while the pointer is still down.
+    await page.evaluate(() => document.fonts.ready);
+    await page.waitForTimeout(60);
     const snapVisual = await visualGuard(page, 'studio-snapped-guides');
 
     await page.mouse.up();
@@ -231,6 +256,7 @@ async function main() {
     assertClose(rotated.center.y, rotateCenter.y, 'final rotation centre y', 2);
 
     // The curve is a real MotionPathPlugin path with four editable handles.
+    await openTool(page, 'motion');
     await page.click('#motionPath');
     await page.waitForTimeout(250);
     const opened = await state();
@@ -267,6 +293,38 @@ async function main() {
     assert.strictEqual(played.path.plays, 1);
     assertClose(played.path.lastEnd.x, played.path.points.end.x, 'path playback end x', 1);
     assertClose(played.path.lastEnd.y, played.path.points.end.y, 'path playback end y', 1);
+
+    // Moving the layer after a curve exists must carry the curve with it. Without
+    // this, PLAY PATH snaps the layer back to the curve's old origin.
+    await page.click('#motionPathReset');
+    await page.waitForTimeout(100);
+    const beforeCarry = await state();
+    const carryFrame = await rect('#selection-frame');
+    const carryX = carryFrame.x + Math.min(28, carryFrame.width / 3);
+    const carryY = carryFrame.y + Math.min(18, carryFrame.height / 2);
+    await page.mouse.move(carryX, carryY);
+    await page.mouse.down();
+    await page.mouse.move(carryX + 28, carryY + 18, { steps: 12 });
+    await page.waitForTimeout(120);
+    await page.mouse.up();
+    await page.waitForTimeout(220);
+    const carried = await state();
+    const carryDx = carried.center.x - beforeCarry.center.x;
+    const carryDy = carried.center.y - beforeCarry.center.y;
+    assert.ok(carryDx > 4 && carryDy > 4, 'carry check needs a real layer move');
+    assertClose(carried.path.points.start.x, beforeCarry.path.points.start.x + carryDx, 'carried curve start x', 2);
+    assertClose(carried.path.points.start.y, beforeCarry.path.points.start.y + carryDy, 'carried curve start y', 2);
+    assertClose(carried.path.points.start.x, carried.center.x, 'curve start follows layer x', 2);
+    assertClose(carried.path.points.start.y, carried.center.y, 'curve start follows layer y', 2);
+    await page.click('#motionPathPlay');
+    await page.waitForTimeout(140);
+    const carryPlaying = await state();
+    assertClose(carryPlaying.motion.lastStart.x, carried.center.x, 'play starts at moved layer x', 1);
+    assertClose(carryPlaying.motion.lastStart.y, carried.center.y, 'play starts at moved layer y', 1);
+    await page.waitForFunction(() => window.__studioInteraction.state().path.playing === false, null, { timeout: 5000 });
+    const carryPlayed = await state();
+    assertClose(carryPlayed.path.lastEnd.x, carryPlayed.path.points.end.x, 'carried playback end x', 1);
+    assertClose(carryPlayed.path.lastEnd.y, carryPlayed.path.points.end.y, 'carried playback end y', 1);
 
     // Drag mid-animation. This must kill the tween, keep one Draggable, and start
     // the next gesture from the layer's real current position (not its pre-tween
@@ -306,7 +364,9 @@ async function main() {
 
     // Observer: pan from the empty stage gutter and wheel-zoom over the canvas.
     await page.evaluate(() => window.__studioInteraction.resetView());
+    await openTool(page, 'motion');
     await page.click('#motionPath'); // hide the curve so its handles cannot intercept stage input
+    await closeInspector(page);
     await page.waitForTimeout(150);
     const stageBox = await rect('#stage');
     const panStartX = stageBox.x + 9;
@@ -339,8 +399,21 @@ async function main() {
     await page.waitForTimeout(150);
 
     // A real touch drag on the layer frame must move the layer, not the stage.
+    // Panning an empty stage is allowed to clear Fabric's selection; reselect the
+    // line so this assertion is about the touch drag, not about pan behaviour.
+    if ((await state()).selected == null) {
+      await page.evaluate(() => {
+        const canvas = window.StudioEngine.canvas;
+        const target = canvas.getObjects().find((object) => object.text === 'MOVE');
+        if (!target) { throw new Error('MOVE layer missing before touch drag'); }
+        canvas.setActiveObject(target);
+        canvas.requestRenderAll();
+      });
+      await page.waitForTimeout(180);
+    }
     const touchFrame = await rect('#selection-frame');
     const touchBefore = await state();
+    assert.ok(touchBefore.selected, 'touch drag needs a selected layer');
     const touchX = touchFrame.x + Math.min(28, touchFrame.width / 3);
     const touchY = touchFrame.y + Math.min(18, touchFrame.height / 2);
     await cdp.send('Input.dispatchTouchEvent', {
@@ -374,8 +447,12 @@ async function main() {
     });
     reducedPage.on('pageerror', (error) => { reducedErrors.push('pageerror: ' + error.message); });
     await reducedPage.goto(`http://127.0.0.1:${port}/index.html`, { waitUntil: 'networkidle' });
-    await reducedPage.waitForFunction(() => window.__studioInteraction && window.__studioMotion);
+    await reducedPage.waitForFunction(() => window.__studioInteraction && window.__studioMotion && window.StudioSeedReady);
+    await reducedPage.evaluate(() => document.fonts.ready);
+    await openTool(reducedPage, 'type');
     await reducedPage.click('#add');
+    await closeInspector(reducedPage);
+    await openTool(reducedPage, 'motion');
     await reducedPage.click('#motionPath');
     await reducedPage.click('#motionPathPlay');
     await reducedPage.waitForTimeout(120);

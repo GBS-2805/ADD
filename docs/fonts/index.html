@@ -3,109 +3,21 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Fonts — Poppins and the seven Redaction grades, one sheet per family</title>
-<meta name="description" content="Poppins and all seven Redaction grades: woff2, woff and TTF, every weight and italic, free under the SIL Open Font License." />
-<meta name="theme-color" content="#0fbf92" />
+<title>Fonts — a type tester for Poppins and Redaction</title>
+<meta name="description" content="Poppins and the seven Redaction grades: 39 styles, one live specimen each, with woff2, woff and TTF downloads under the SIL Open Font License." />
+<meta name="theme-color" content="#f0e7d4" />
 <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml" />
-<link rel="stylesheet" href="../assets/site.a226215efc.css" />
-<style>
-  /* The hero as the hand-off draws it: the page's copy on the left, the typeable
-     box on the right under "Try it!", with Copy CSS below its right corner. */
-  .page-head { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 542px); gap: 56px; align-items: start; }
-  .try-label { display: block; text-align: right; font-size: 24px; margin: 0 0 14px; }
-  .trybox { display: block; width: 100%; height: 106px; margin: 0; padding: 0 20px;
-    font: inherit; font-size: 46px; line-height: 1.1; letter-spacing: -.02em;
-    color: var(--on); background: transparent; border: 1px solid var(--rule); }
-  .trybox:focus-visible { outline: 2px solid var(--band); outline-offset: 2px; }
-  /* One Copy CSS per sheet, in its foot: it copies that sheet's face at the current
-     size, so the rule always names the face the reader is looking at. */
-  .copy-css { margin-left: auto; font: inherit; font-size: 12px; letter-spacing: .04em;
-    text-transform: uppercase; padding: 5px 10px; color: var(--on); background: transparent;
-    border: 1px solid var(--rule); cursor: pointer; }
-  .copy-css:hover { border-color: var(--on-dim); }
-  .copy-css:focus-visible { outline: 2px solid var(--band); outline-offset: -3px; }
-
-  /* The way back out of an opened family without scrolling its grades. */
-  .to-family { position: fixed; right: 20px; bottom: 20px; z-index: 9; display: inline-flex;
-    align-items: center; gap: 8px; height: 44px; padding: 0 16px; font: inherit; font-size: 12px;
-    letter-spacing: .04em; text-transform: uppercase; color: var(--band-ink); background: var(--band);
-    border: 0; cursor: pointer; box-shadow: 0 10px 26px rgba(0, 0, 0, .4); }
-  .to-family:hover { background: var(--band-hover); }
-  .to-family:focus-visible { outline: 2px solid var(--on); outline-offset: 2px; }
-  .to-family[hidden] { display: none; }
-  .to-family svg { width: 14px; height: 14px; }
-  @media (max-width: 600px) { .to-family { right: 12px; bottom: 12px; } }
-
-  /* The size row sits under the family heading and sets every sheet at once. */
-  .trysize { display: flex; align-items: center; flex-wrap: wrap; gap: 14px; max-width: 500px;
-    margin: 20px 0 0; font-size: 13px; letter-spacing: .04em; text-transform: uppercase; color: var(--on-dim); }
-  /* The label owns a fixed column, so the slider starts at the same x in the row. */
-  .trysize label { flex: none; width: 72px; }
-  .trysize input { flex: 1 1 140px; min-width: 0; accent-color: var(--band); }
-  .trypx { text-transform: none; letter-spacing: 0; }
-  @media (max-width: 900px) {
-    .page-head { grid-template-columns: 1fr; gap: 30px; }
-    .try-label { text-align: left; font-size: 18px; margin-bottom: 8px; }
-    .trybox { font-size: 26px; height: 74px; padding: 0 14px; }
-  }
-
-  /* One sheet per family. A family with grades opens like an accordion: closed, it
-     shows its first grade; open, every grade is a sheet of its own. */
-  .families { margin-top: 22px; --specimen-size: 48px; }
-  .family { padding: 24px 0 0; border-top: 1px solid var(--rule); scroll-margin-top: 104px; }
-  .family-head { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; min-height: 44px; }
-  .family-head h3, .family-toggle { margin: 0; font-size: 26px; font-weight: 400; line-height: 1.2; letter-spacing: -.01em; }
-  .family-toggle { display: inline-flex; align-items: center; gap: 10px; padding: 0;
-    color: var(--on); background: none; border: 0; cursor: pointer; }
-  .family-toggle:hover { color: var(--on-dim); }
-  .family-toggle:focus-visible { outline: 2px solid var(--band); outline-offset: 4px; }
-  .family-toggle .chev { width: 15px; height: 15px; transition: transform .16s ease; }
-  .family[data-open="true"] .family-toggle .chev { transform: rotate(180deg); }
-  .family-head .kind, .grade-head .kind { font-size: 12px; font-weight: 500; letter-spacing: .1em;
-    text-transform: uppercase; color: var(--on-dim); }
-  .grades { margin: 6px 0 0; }
-  .grade { padding: 20px 0 24px; border-top: 1px solid var(--rule); }
-  .grade:first-child { border-top: 0; }
-  .family[data-open="false"] .grades > .grade ~ .grade { display: none; }
-  .grade-head { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; min-height: 44px; }
-  .grade-head h4 { margin: 0; font-size: 20px; font-weight: 400; line-height: 1.2; letter-spacing: -.01em; }
-  .stylepick { position: relative; }
-  .style-btn { display: inline-flex; align-items: center; gap: 10px; height: 44px; padding: 0 14px;
-    font: inherit; font-size: 15px; color: var(--band-ink); background: var(--band); border: 0; cursor: pointer; }
-  .style-btn:hover { background: var(--band-hover); }
-  .style-btn:focus-visible { outline: 2px solid var(--on); outline-offset: 2px; }
-  .style-btn svg { flex: none; width: 13px; height: 13px; }
-  /* The menu previews each style in its own face, so a weight is picked by reading it. */
-  .style-menu { position: absolute; z-index: 6; top: calc(100% + 6px); left: 0; margin: 0; padding: 0;
-    list-style: none; min-width: 100%; width: max-content; max-width: 320px;
-    max-height: min(58vh, 420px); overflow-y: auto; overscroll-behavior: contain;
-    background: var(--page); border: 1px solid var(--rule); box-shadow: 0 14px 30px rgba(0, 0, 0, .38); }
-  .style-menu li { padding: 9px 14px; font-size: 17px; line-height: 1.35; white-space: nowrap;
-    cursor: pointer; border-top: 1px solid var(--rule); }
-  .style-menu li:first-child { border-top: 0; }
-  .style-menu li:hover, .style-menu li:focus-visible { background: var(--tint); outline: none; }
-  .style-menu li[aria-selected="true"] { color: var(--ink); background: var(--band); }
-  .style-menu[hidden] { display: none; }
-  .face { display: grid; gap: 9px; padding: 18px 0 0; }
-  .face-top { display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap; }
-  .face-top h3 { margin: 0; font-size: 22px; font-weight: 400; line-height: 1.2; letter-spacing: -.01em; }
-  .face .kind { font-size: 12px; font-weight: 500; letter-spacing: .1em; text-transform: uppercase; color: var(--on-dim); }
-  .specimen { margin: 2px 0 4px; font-size: var(--specimen-size, 48px); line-height: 1.14; letter-spacing: -.02em; overflow-wrap: break-word; }
-  @media (max-width: 700px) { .specimen { font-size: min(var(--specimen-size, 48px), 34px); } }
-  .face-use { margin: 0; font-size: 15px; line-height: 1.55; }
-  .face-foot { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; font-size: 13px; color: var(--on-dim); }
-  .face-foot a { color: var(--on); }
-  .face-foot a:hover { text-decoration: underline; }
-</style>
+<link rel="stylesheet" href="../assets/site.6b1bb724fe.css" />
+<link rel="stylesheet" href="../assets/database.428eeb4e23.css" />
 </head>
-<body>
+<body class="db-page">
 
 <header class="bar">
-  <div class="lead">
+<div class="lead">
     <button class="menu-btn" id="menuBtn" type="button" aria-expanded="false" aria-controls="menu" aria-label="Open sections">
       <svg class="chev" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M8 13L12 17L16 13M8 7L12 11L16 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
     </button>
-    <a class="page-name" href="../">Fonts</a>
+    <a class="page-name" href="./">Fonts</a>
   </div>
 
   <a class="mark" href="../" aria-label="ADD — home">
@@ -117,22 +29,18 @@
       </svg>
   </a>
 
-  <div class="who">
-    <div class="who-lines keep">
-      <p class="big">Art Design Database</p>
-      <p class="big">Icons • Fonts • Tools</p>
-    </div>
-    <button class="burger" id="burger" type="button" aria-expanded="false" aria-controls="drawer" aria-label="Open side tab">
+<div class="who">
+<button class="burger" id="burger" type="button" aria-expanded="false" aria-controls="drawer" aria-label="Open side tab">
       <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 7H19M5 12H19M5 17H19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
     </button>
   </div>
 </header>
 
 <nav class="menu" id="menu" data-open="false" aria-label="Sections">
-  <a href="../">Index<span>shelf</span></a>
-  <a href="../icons/">Icons<span>4,373 icons</span></a>
-  <a href="../fonts/" aria-current="page">Fonts<span>2 families</span></a>
-  <a href="../tools/">Tools<span>4 tools</span></a>
+  <a href="../">Index<span>the shelf</span></a>
+  <a href="../tools/" aria-current="page">Resources<span>icons · fonts · engine</span></a>
+  <a href="../download/">Download<span>one app</span></a>
+  <a href="https://artbase-handoff.vercel.app/">Handoff<span>build handoff</span></a>
 </nav>
 
 <div class="scrim" id="scrim" data-open="false"></div>
@@ -148,534 +56,288 @@
   <p class="drawer-note">ADD · one offline Android app, the icons it uses and the fonts it is set in.</p>
 </aside>
 
-
-<main>
-  <header class="page-head">
-    <div>
-      <h1>Fonts</h1>
-      <p class="lede"><b>Poppins</b> and the seven <b>Redaction</b> grades, from the plain serif in 0 to the fully pixelated 100 — served from this site, no Google Fonts request, with every weight and italic to download.</p>
-      <p class="meta">
-        <span id="fontFamilies">2 families</span>
-        <span id="fontStyles">39 faces</span>
-        <span id="fontBytes">woff2 … total</span>
-        <span>SIL Open Font License 1.1</span>
-      </p>
-      <p class="fine">Setting type in the app? The editor's font packs are on the <a href="../download/#font-packs">download page</a> — the app fetches a pack only when you ask. No account.</p>
-    </div>
-    <div class="try">
-      <label class="try-label" for="tryText">Try it!</label>
-      <input id="tryText" class="trybox" type="text" value="Art Design Database" maxlength="80" autocomplete="off" spellcheck="false" aria-label="The line set in every family" />
+<main class="db-main type-main">
+  <header class="type-head">
+    <h1>Fonts</h1>
+    <div class="type-controls">
+      <input id="tryText" class="type-try" type="text" value="Re" maxlength="48" autocomplete="off" spellcheck="false" placeholder="Type to preview" aria-label="Preview text" />
+      <input id="typeSize" class="type-size" type="range" min="40" max="300" step="4" value="168" aria-label="Preview text size" />
     </div>
   </header>
 
-  <section>
-    <h2>Font families</h2>
-    <p class="kicker">One sheet per family; the seven Redaction grades open inside theirs — each pull-down picks that sheet’s face</p>
-    <div class="trysize">
-      <label for="trySize">Size</label>
-      <input id="trySize" type="range" min="16" max="120" step="1" value="48" />
-      <span class="trypx">px</span>
-    </div>
-    <div class="families" id="families">
-      <p class="fine" id="familyStatus">Loading the families…</p>
-    </div>
-    <p class="fine">Grade 50's capital A has no bar in the typeface itself — the foundry's master carries the same outline. Grades 35 and 70 both keep theirs, which is why the seven grades sit side by side here.</p>
-    <p class="fine">The three app Poppins faces are copied from <code>app/res/font/</code>; the rest come from <code>tools/fetch_fonts.py</code>.</p>
-  </section>
+  <p class="type-status" id="fontStatus">Loading the fonts…</p>
+  <div id="families" class="type-families"></div>
 
-  <section>
-    <h2>How it is wired</h2>
-    <p class="kicker">Two families, seven grades, no network</p>
-    <ul class="rows">
-      <li><b>Site</b><span><code>assets/site.a226215efc.css</code> sets the site's own Poppins faces; this page declares every downloaded style from <code>/data/fonts.json</code>.</span></li>
-      <li><b>App</b><span><code>app/res/font/poppins_regular.ttf</code>, <code>_medium</code> and <code>_semibold</code>, referenced from the layouts.</span></li>
-      <li><b>Downloads</b><span>woff2 for the web at <code>/assets/fonts/</code>, woff for engines older than that, TTF for Android and desktop.</span></li>
-      <li><b>JSON</b><span><code>/data/fonts.json</code> lists each family, its faces, all three paths and their measured sizes.</span></li>
-    </ul>
-    <p class="fine">A face looks like this in CSS:</p>
-    <p class="fine"><code>@font-face { font-family: "Poppins"; src: url("/assets/fonts/poppins-400.woff2") format("woff2"); font-weight: 400; font-display: swap; }</code></p>
-  </section>
-
-  <section>
-    <h2>Licence</h2>
-    <p class="kicker">SIL Open Font License 1.1</p>
-    <p class="kicker" style="max-width:66ch; margin-bottom:0">Both families are SIL OFL 1.1: free to use and bundle. Keep the licence with any copy and do not sell the font on its own. The icons are MIT, on the <a href="../icons/">icons page</a>.</p>
-  </section>
+  <noscript>
+    <p class="type-status">Live type previews need JavaScript. The styles and files are listed in <code>data/fonts.json</code>.</p>
+  </noscript>
 </main>
-
-<button class="to-family" id="toFamily" type="button" hidden><span id="toFamilyName">Family</span><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 19V5M6 11L12 5L18 11" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
 
 <footer>
   <span>Poppins<span class="dot" aria-hidden="true">·</span>Redaction<span class="dot" aria-hidden="true">·</span>SIL OFL 1.1</span>
-  <span><a href="../">Index</a><span class="dot" aria-hidden="true">·</span><a href="../icons/">Icons</a><span class="dot" aria-hidden="true">·</span><a href="../download/">Download</a></span>
+  <span><a href="../">Index</a><span class="dot" aria-hidden="true">·</span><a href="../tools/">Resources</a><span class="dot" aria-hidden="true">·</span><a href="../download/">Download</a></span>
 </footer>
 
 <script>
 (function () {
-  var KEY = "fonts:preview";
-  var MIN = 16, MAX = 120;
+  "use strict";
+
+  var list = document.getElementById("families");
+  var status = document.getElementById("fontStatus");
   var text = document.getElementById("tryText");
-  var size = document.getElementById("trySize");
-  var familiesEl = document.getElementById("families");
-  var status = document.getElementById("familyStatus");
-  var familiesOut = document.getElementById("fontFamilies");
-  var stylesOut = document.getElementById("fontStyles");
-  var bytesOut = document.getElementById("fontBytes");
+  var size = document.getElementById("typeSize");
+  var families = [];
+  var selected = {};
+  var STORE = "add.type.try";
 
-  var data = [];
-  var shown = {};
-  var state = { family: "Poppins", weight: 400, style: "normal" };
-  // Which families the reader left open; a family without grades ignores it.
-  var openPrefs = null;
-
-  function family(name) {
-    return data.filter(function (item) { return item.family === name; })[0];
-  }
-  function face(fam, weight, style) {
-    if (!fam) { return null; }
-    return fam.styles.filter(function (item) {
-      return item.weight === weight && item.style === style;
-    })[0];
-  }
-  function defaultFace(fam) {
-    return face(fam, 400, "normal") || fam.styles[0];
-  }
-  function clamp(px) { return Math.min(MAX, Math.max(MIN, px)); }
-  // Whole MB, whole KB, then bytes: a font file reads better as 18 KB than as
-  // 18,432 bytes, and never as a decimal.
-  // The line in the box is the line in every sheet; the default stands in while the
-  // box is empty.
-  function sampleText() {
-    var line = (text.value || "").trim();
-    return line || "Offline, no account.";
-  }
-
-  function escapeHtml(value) {
-    return String(value).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-  }
-
-  function paintSamples() {
-    var line = sampleText();
-    Array.prototype.forEach.call(familiesEl.querySelectorAll(".specimen"), function (spec) {
-      spec.textContent = line;
+  function esc(value) {
+    return String(value).replace(/[&<>"']/g, function (char) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[char];
     });
   }
 
-  function bytes(value) {
-    if (value >= 1048576) { return Math.round(value / 1048576) + " MB"; }
-    if (value >= 1024) { return Math.round(value / 1024) + " KB"; }
-    return value + " bytes";
+  function line() {
+    return text.value.trim() || "Re";
   }
 
-  function injectFaces() {
-    var css = "";
-    data.forEach(function (fam) {
-      fam.styles.forEach(function (item) {
-        css += '@font-face{font-family:"' + fam.family + '";src:url("' + item.woff2 +
-          '") format("woff2");font-weight:' + item.weight + ";font-style:" + item.style +
-          ";font-display:swap}";
-      });
-    });
-    var tag = document.createElement("style");
-    tag.textContent = css;
-    document.head.appendChild(tag);
-  }
-
-  // In the app the bundle holds the font itself and a WebView has nobody to hand a
-  // download to, so the page asks the bridge to write it instead. On the site
-  // IconsApp is absent and the links download as they always have.
-  document.addEventListener("click", function (event) {
-    var link = event.target && event.target.closest ? event.target.closest("a[download]") : null;
-    if (!link || !window.IconsApp || !window.IconsApp.saveFont) { return; }
-    event.preventDefault();
-    window.IconsApp.saveFont(link.getAttribute("href"));
-  });
-
-  function stats() {
-    if (!data.length) { return; }
-    var styles = data.reduce(function (n, fam) { return n + fam.styles.length; }, 0);
-    var woff2 = data.reduce(function (n, fam) { return n + fam.woff2_bytes; }, 0);
-    familiesOut.textContent = familyGroups().length + " families";
-    stylesOut.textContent = styles + " faces";
-    bytesOut.textContent = "woff2 " + bytes(woff2) + " total";
-  }
-
-  function faceMarkup(fam, item) {
-    return '<div class="face">' +
-      '<p class="specimen" style="font-family:\'' + fam.family + "';font-weight:" + item.weight +
-        ";font-style:" + item.style + '">' + escapeHtml(sampleText()) + "</p>" +
-      (item.use ? '<p class="face-use">' + item.use + "</p>" : "") +
-      '<div class="face-foot"><span class="tag">woff2 ' + bytes(item.woff2_bytes) +
-        " · woff " + bytes(item.woff_bytes) + " · ttf " + bytes(item.ttf_bytes) + "</span>" +
-      '<a href="' + item.woff2 + '" download>woff2</a>' +
-      '<a href="' + item.woff + '" download>woff</a>' +
-      '<a href="' + item.ttf + '" download>ttf</a>' +
-      '<span class="lic">' + fam.licence + "</span>" +
-      '<button class="copy-css" type="button" data-family="' + fam.family + '" data-weight="' + item.weight +
-        '" data-style="' + item.style + '">Copy CSS</button></div></div>';
-  }
-
-  function picked(fam) {
-    var choice = shown[fam.family];
-    var item = choice && face(fam, choice.weight, choice.style);
-    return item || defaultFace(fam);
-  }
-
-  function styleOption(fam, item, choice) {
-    var on = item.weight === choice.weight && item.style === choice.style;
-    return '<li role="option" tabindex="-1" aria-selected="' + on + '"' +
-      ' data-family="' + fam.family + '" data-weight="' + item.weight +
-      '" data-style="' + item.style + '"' +
-      ' style="font-family:\'' + fam.family + '\';font-weight:' + item.weight +
-      ';font-style:' + item.style + '">' + item.name + "</li>";
-  }
-
-  // The button carries the face the sheet is showing; the menu under it lists every
-  // style of that family, each cell set in the face it names.
-  function pickMarkup(fam, choice) {
-    return '<div class="stylepick">' +
-      '<button class="style-btn" type="button" aria-haspopup="listbox" aria-expanded="false"' +
-        ' data-family="' + fam.family + '"><span class="style-name">' + choice.name + "</span>" +
-        '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M8 9L12 5L16 9M8 15L12 19L16 15"' +
-          ' stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>' +
-      '<ul class="style-menu" role="listbox" aria-label="' + fam.family + ' styles" hidden>' +
-        fam.styles.map(function (item) { return styleOption(fam, item, choice); }).join("") +
-      "</ul></div>";
-  }
-
-  // A family is the design; a grade is one step of it. Redaction's grades are one
-  // family in seven steps of degradation, so they live inside its sheet instead of
-  // sitting beside it as seven peers.
-  function familyParts(name) {
-    var match = /^(.*?)\s+(\d+)$/.exec(name);
-    if (!match) { return { group: name, grade: 0 }; }
-    return { group: match[1], grade: Number(match[2]) };
-  }
-
-  function familyGroups() {
-    var order = [], map = {};
-    data.forEach(function (fam) {
-      var parts = familyParts(fam.family);
-      if (!map[parts.group]) {
-        map[parts.group] = { name: parts.group, kind: fam.kind, grades: [] };
-        order.push(parts.group);
+  function defaultFace(family) {
+    var styles = family.styles || [];
+    for (var i = 0; i < styles.length; i++) {
+      if (Number(styles[i].weight) === 400 && styles[i].style === "normal") {
+        return styles[i];
       }
-      map[parts.group].grades.push({ grade: parts.grade, fam: fam });
-    });
-    order.forEach(function (key) {
-      map[key].grades.sort(function (a, b) { return a.grade - b.grade; });
-    });
-    return order.map(function (key) { return map[key]; });
-  }
-
-  function slotMarkup(fam, choice) {
-    return '<div class="face-slot" data-family="' + fam.family + '">' + faceMarkup(fam, choice) + "</div>";
-  }
-
-  function gradeMarkup(entry) {
-    var fam = entry.fam;
-    var choice = picked(fam);
-    shown[fam.family] = { weight: choice.weight, style: choice.style };
-    return '<section class="grade" data-family="' + fam.family + '">' +
-      '<div class="grade-head"><h4>Grade ' + entry.grade + "</h4>" +
-        '<span class="kind">' + fam.kind + " · " + fam.styles.length + " styles</span>" +
-        pickMarkup(fam, choice) + "</div>" + slotMarkup(fam, choice) + "</section>";
-  }
-
-  function renderFamilies() {
-    if (!data.length) { return; }
-    status.hidden = true;
-    familiesEl.innerHTML = familyGroups().map(function (group) {
-      if (group.grades.length === 1) {
-        var only = group.grades[0].fam;
-        var choice = picked(only);
-        shown[only.family] = { weight: choice.weight, style: choice.style };
-        return '<section class="family" data-family="' + only.family + '" data-group="' + group.name +
-          '" data-open="true">' +
-          '<div class="family-head"><h3>' + group.name + '</h3><span class="kind">' + only.kind +
-            " · " + only.styles.length + " styles</span>" + pickMarkup(only, choice) + "</div>" +
-          slotMarkup(only, choice) + "</section>";
-      }
-      // Closed by default: the sheet shows its first grade until asked for the rest.
-      var open = !!(openPrefs && openPrefs[group.name] === true);
-      var faces = group.grades.reduce(function (n, entry) { return n + entry.fam.styles.length; }, 0);
-      var id = "grades-" + group.name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
-      return '<section class="family" data-group="' + group.name + '" data-open="' + (open ? "true" : "false") + '">' +
-        '<div class="family-head"><button class="family-toggle" type="button" data-group="' + group.name +
-          '" aria-expanded="' + (open ? "true" : "false") + '" aria-controls="' + id + '"><span>' + group.name +
-          "</span><svg class='chev' viewBox='0 0 24 24' fill='none' aria-hidden='true'><path d='M6 9L12 15L18 9' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/></svg></button>" +
-          '<span class="kind">' + group.kind + " · " + group.grades.length + " grades · " + faces + " faces</span></div>" +
-        '<div class="grades" id="' + id + '">' + group.grades.map(gradeMarkup).join("") + "</div></section>";
-    }).join("");
-    syncToFamily();
-  }
-
-  function updateSlot(name) {
-    var fam = family(name);
-    if (!fam) { return; }
-    var slot = familiesEl.querySelector('.face-slot[data-family="' + name + '"]');
-    if (slot) { slot.innerHTML = faceMarkup(fam, picked(fam)); }
-    syncPick(name);
-  }
-
-  function closePicks(except) {
-    Array.prototype.forEach.call(document.querySelectorAll(".stylepick"), function (pick) {
-      if (pick === except) { return; }
-      var menu = pick.querySelector(".style-menu");
-      if (menu) { menu.hidden = true; }
-      pick.querySelector(".style-btn").setAttribute("aria-expanded", "false");
-    });
-  }
-
-  function openPick(pick) {
-    var menu = pick.querySelector(".style-menu");
-    closePicks(pick);
-    menu.hidden = false;
-    pick.querySelector(".style-btn").setAttribute("aria-expanded", "true");
-    return menu;
-  }
-
-  function chooseStyle(name, weight, style) {
-    var fam = family(name);
-    if (!fam || !face(fam, weight, style)) { return; }
-    shown[name] = { weight: weight, style: style };
-    state.family = name;
-    state.weight = weight;
-    state.style = style;
-    updateSlot(name);
-    paint();
-    remember();
-  }
-
-  // The picker is rebuilt from `shown`, so its label and its tick follow the sheet.
-  function syncPick(name) {
-    var fam = family(name);
-    var block = fam && familiesEl.querySelector(
-      '.grade[data-family="' + name + '"], .family[data-family="' + name + '"]');
-    if (!block) { return; }
-    var choice = picked(fam);
-    var pick = block.querySelector(".stylepick");
-    block.querySelector(".style-name").textContent = choice.name;
-    pick.querySelector(".style-menu").hidden = true;
-    pick.querySelector(".style-btn").setAttribute("aria-expanded", "false");
-    Array.prototype.forEach.call(pick.querySelectorAll(".style-menu li"), function (li) {
-      var on = Number(li.getAttribute("data-weight")) === choice.weight &&
-        li.getAttribute("data-style") === choice.style;
-      li.setAttribute("aria-selected", on ? "true" : "false");
-    });
-  }
-
-  function paint() {
-    var fam = family(state.family) || data[0];
-    if (!fam) { return; }
-    text.style.fontFamily = '"' + fam.family + '"';
-    text.style.fontWeight = state.weight;
-    text.style.fontStyle = state.style;
-    familiesEl.style.setProperty("--specimen-size", size.value + "px");
-    paintSamples();
-  }
-
-  function openState() {
-    var snap = {};
-    Array.prototype.forEach.call(familiesEl.querySelectorAll(".family[data-group]"), function (block) {
-      snap[block.getAttribute("data-group")] = block.getAttribute("data-open") === "true";
-    });
-    return snap;
-  }
-
-  function remember() {
-    try {
-      localStorage.setItem(KEY, JSON.stringify({
-        text: text.value, size: Number(size.value),
-        family: state.family, weight: Number(state.weight), style: state.style,
-        open: openState()
-      }));
-    } catch (error) {
-      /* private mode or a blocked store: the preview still works, it just forgets */
     }
+    return styles[0];
   }
 
-  function restore() {
-    var saved = null;
-    try {
-      saved = JSON.parse(localStorage.getItem(KEY) || "null");
-    } catch (error) {
-      saved = null;
-    }
-    if (!saved) { return; }
-    if (saved.open && typeof saved.open === "object") { openPrefs = saved.open; }
-    if (typeof saved.text === "string" && saved.text.length <= 80) { text.value = saved.text; }
-    var px = Number(saved.size);
-    if (px >= MIN && px <= MAX) { size.value = String(Math.round(px)); }
-    var fam = family(String(saved.family));
-    if (fam && face(fam, Number(saved.weight), String(saved.style))) {
-      state.family = fam.family;
-      state.weight = Number(saved.weight);
-      state.style = String(saved.style);
-      shown[fam.family] = { weight: state.weight, style: state.style };
-    }
+  function faceFromButton(button, family) {
+    return (family.styles || []).filter(function (face) {
+      return Number(face.weight) === Number(button.getAttribute("data-weight")) &&
+        face.style === button.getAttribute("data-style");
+    })[0] || defaultFace(family);
   }
 
-  function cssFor(fam, weight, style) {
-    var lines = ['font-family: "' + fam.family + '", ' + (fam.fallback || "sans-serif") + ";",
-                 "font-weight: " + weight + ";"];
-    if (style === "italic") { lines.push("font-style: italic;"); }
-    lines.push("font-size: " + size.value + "px;");
-    return lines.join("\n");
+  function stack(family) {
+    var name = String(family.family).replace(/'/g, "\\'");
+    return "'" + name + "', " + (family.fallback || "sans-serif");
+  }
+
+  function cssFor(family, face) {
+    return '@font-face { font-family: "' + family.family + '"; src: url("' +
+      face.woff2 + '") format("woff2"); font-weight: ' + face.weight +
+      '; font-style: ' + face.style + '; font-display: swap; }';
   }
 
   function copyText(value, done) {
+    if (window.IconsApp && typeof window.IconsApp.copy === "function") {
+      window.IconsApp.copy(value);
+      done(true);
+      return;
+    }
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(value).then(function () { done(true); }, function () { done(false); });
       return;
     }
-    var area = document.createElement("textarea");
-    area.value = value;
-    area.setAttribute("readonly", "");
-    area.style.position = "fixed";
-    area.style.opacity = "0";
-    document.body.appendChild(area);
-    area.select();
+    var field = document.createElement("textarea");
+    field.value = value;
+    field.setAttribute("readonly", "");
+    field.style.position = "fixed";
+    field.style.opacity = "0";
+    document.body.appendChild(field);
+    field.select();
     var ok = false;
     try { ok = document.execCommand("copy"); } catch (error) { ok = false; }
-    document.body.removeChild(area);
+    document.body.removeChild(field);
     done(ok);
   }
 
-  function copySheet(button) {
-    var fam = family(button.getAttribute("data-family"));
-    if (!fam) { return; }
-    copyText(cssFor(fam, Number(button.getAttribute("data-weight")), button.getAttribute("data-style")),
-      function (ok) {
-        button.textContent = ok ? "Copied" : "Select the rule";
-        setTimeout(function () { button.textContent = "Copy CSS"; }, 1600);
+  function injectFaces() {
+    var chunks = [];
+    families.forEach(function (family) {
+      (family.styles || []).forEach(function (face) {
+        chunks.push(cssFor(family, face));
       });
-  }
-
-  // Once an opened family's head is off-screen, a floating button offers the way back
-  // to it, which is also where its toggle sits.
-  function syncToFamily() {
-    var button = document.getElementById("toFamily");
-    if (!button) { return; }
-    var target = null;
-    Array.prototype.forEach.call(
-      familiesEl.querySelectorAll('.family[data-open="true"] .family-toggle'),
-      function (toggle) {
-        var block = toggle.closest(".family");
-        if (block.getBoundingClientRect().top < 0) { target = block; }
-      });
-    if (!target) { button.hidden = true; return; }
-    button.hidden = false;
-    button.setAttribute("data-group", target.getAttribute("data-group"));
-    document.getElementById("toFamilyName").textContent = "Back to " + target.getAttribute("data-group");
-  }
-
-  var toFamily = document.getElementById("toFamily");
-  if (toFamily) {
-    toFamily.addEventListener("click", function () {
-      var block = familiesEl.querySelector(
-        '.family[data-group="' + toFamily.getAttribute("data-group") + '"]');
-      if (!block) { return; }
-      block.scrollIntoView({ behavior: "smooth", block: "start" });
-      var toggle = block.querySelector(".family-toggle");
-      if (toggle) { toggle.focus({ preventScroll: true }); }
-      toFamily.hidden = true;
     });
-    window.addEventListener("scroll", syncToFamily, { passive: true });
-    window.addEventListener("resize", syncToFamily);
+    var style = document.createElement("style");
+    style.id = "fontFaces";
+    style.textContent = chunks.join("\n");
+    document.head.appendChild(style);
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(function () {});
+    }
   }
 
-  familiesEl.addEventListener("click", function (event) {
-    var copyBtn = event.target.closest(".copy-css");
-    if (copyBtn) { copySheet(copyBtn); return; }
-    var toggle = event.target.closest(".family-toggle");
-    if (toggle) {
-      var block = toggle.closest(".family");
-      var open = block.getAttribute("data-open") !== "true";
-      block.setAttribute("data-open", open ? "true" : "false");
-      toggle.setAttribute("aria-expanded", open ? "true" : "false");
-      remember();
-      syncToFamily();
-      return;
+  function familyId(family) {
+    return family.slug || String(family.family).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+  }
+
+  function setSpecimen(section, family, face) {
+    var specimen = section.querySelector(".type-specimen");
+    if (!specimen) { return; }
+    specimen.style.fontFamily = stack(family);
+    specimen.style.fontWeight = face.weight;
+    specimen.style.fontStyle = face.style;
+  }
+
+  function selectFace(section, family, face) {
+    selected[family.family] = face;
+    Array.prototype.forEach.call(section.querySelectorAll(".type-style"), function (button) {
+      var on = Number(button.getAttribute("data-weight")) === Number(face.weight) &&
+        button.getAttribute("data-style") === face.style;
+      button.setAttribute("aria-pressed", on ? "true" : "false");
+    });
+    setSpecimen(section, family, face);
+    var link = section.querySelector("[data-download]");
+    if (link) {
+      link.href = face.ttf;
+      link.download = face.ttf.split("/").pop();
+      link.setAttribute("aria-label", "Download " + face.name + " TTF");
     }
-    var option = event.target.closest(".style-menu li");
-    if (option) {
-      chooseStyle(option.getAttribute("data-family"),
-        Number(option.getAttribute("data-weight")), option.getAttribute("data-style"));
-      return;
-    }
-    var styleBtn = event.target.closest(".style-btn");
-    if (styleBtn) {
-      var pick = styleBtn.parentNode;
-      var menu = pick.querySelector(".style-menu");
-      var opening = menu.hidden;
-      closePicks(pick);
-      menu.hidden = !opening;
-      styleBtn.setAttribute("aria-expanded", opening ? "true" : "false");
-      return;
-    }
+  }
+
+  function restore(section, family) {
+    setSpecimen(section, family, selected[family.family] || defaultFace(family));
+  }
+
+  function familyMarkup(family) {
+    var face = defaultFace(family);
+    selected[family.family] = face;
+    var styles = (family.styles || []).map(function (item) {
+      var on = Number(item.weight) === Number(face.weight) && item.style === face.style;
+      return '<button class="type-style" type="button" data-weight="' + item.weight +
+        '" data-style="' + esc(item.style) + '" aria-pressed="' + (on ? "true" : "false") + '">' +
+        esc(item.name) + '</button>';
+    }).join("");
+    return '<section class="type-family" id="' + esc(familyId(family)) + '" data-family="' + esc(family.family) + '">\n' +
+      '  <h2>' + esc(family.family) + '</h2>\n' +
+      '  <div class="type-stage">\n' +
+      '    <p class="type-specimen" style="font-family:' + esc(stack(family)) + ';font-weight:' + face.weight + ';font-style:' + face.style + '">' + esc(line()) + '</p>\n' +
+      '  </div>\n' +
+      '  <div class="type-styles" role="group" aria-label="' + esc(family.family) + ' styles">' + styles + '</div>\n' +
+      '  <div class="type-actions">\n' +
+      '    <a class="type-action" data-download data-save-font href="' + esc(face.ttf) + '" download="' + esc(face.ttf.split("/").pop()) + '" aria-label="Download ' + esc(face.name) + ' TTF">Download</a>\n' +
+      '    <button class="type-action" type="button" data-copy-family="' + esc(family.family) + '">Copy CSS</button>\n' +
+      '  </div>\n' +
+      '</section>';
+  }
+
+  function familyOf(button) {
+    var name = button.closest(".type-family").getAttribute("data-family");
+    return families.filter(function (family) { return family.family === name; })[0];
+  }
+
+  function paint() {
+    var value = line();
+    var pixels = Number(size.value);
+    document.documentElement.style.setProperty("--specimen-size", pixels + "px");
+    size.setAttribute("aria-valuetext", pixels + " pixels");
+    Array.prototype.forEach.call(document.querySelectorAll(".type-specimen"), function (specimen) {
+      specimen.textContent = value;
+    });
+    try {
+      localStorage.setItem(STORE, JSON.stringify({ text: value, size: pixels }));
+    } catch (error) {}
+  }
+
+  function render() {
+    list.innerHTML = families.map(familyMarkup).join("\n");
+    status.hidden = true;
+    paint();
+  }
+
+  function restoreText() {
+    try {
+      var saved = JSON.parse(localStorage.getItem(STORE) || "{}");
+      if (saved.text && saved.text !== "Re") { text.value = saved.text; }
+      if (saved.size) {
+        size.value = saved.size;
+      } else if (window.matchMedia && window.matchMedia("(max-width: 700px)").matches) {
+        size.value = 168;
+      } else {
+        size.value = 280;
+      }
+    } catch (error) {}
+  }
+
+  list.addEventListener("pointerover", function (event) {
+    var button = event.target.closest(".type-style");
+    if (!button) { return; }
+    var family = familyOf(button);
+    setSpecimen(button.closest(".type-family"), family, faceFromButton(button, family));
   });
 
-  familiesEl.addEventListener("keydown", function (event) {
-    var styleBtn = event.target.closest(".style-btn");
-    if (styleBtn) {
-      if (event.key !== "ArrowDown" && event.key !== "ArrowUp") { return; }
-      event.preventDefault();
-      var menu = openPick(styleBtn.parentNode);
-      var items = Array.prototype.slice.call(menu.querySelectorAll("li"));
-      var current = items.filter(function (li) {
-        return li.getAttribute("aria-selected") === "true";
-      })[0];
-      var target = event.key === "ArrowUp" ? items[items.length - 1] : (current || items[0]);
-      if (target) { target.focus(); }
+  list.addEventListener("pointerout", function (event) {
+    var button = event.target.closest(".type-style");
+    if (!button || button.contains(event.relatedTarget)) { return; }
+    restore(button.closest(".type-family"), familyOf(button));
+  });
+
+  list.addEventListener("focusin", function (event) {
+    var button = event.target.closest(".type-style");
+    if (!button) { return; }
+    var family = familyOf(button);
+    setSpecimen(button.closest(".type-family"), family, faceFromButton(button, family));
+  });
+
+  list.addEventListener("focusout", function (event) {
+    var button = event.target.closest(".type-style");
+    if (!button) { return; }
+    var section = button.closest(".type-family");
+    if (section.contains(event.relatedTarget)) { return; }
+    restore(section, familyOf(button));
+  });
+
+  list.addEventListener("click", function (event) {
+    var button = event.target.closest(".type-style");
+    if (button) {
+      var family = familyOf(button);
+      selectFace(button.closest(".type-family"), family, faceFromButton(button, family));
       return;
     }
-    var option = event.target.closest(".style-menu li");
-    if (!option) { return; }
-    var list = Array.prototype.slice.call(option.parentNode.querySelectorAll("li"));
-    var at = list.indexOf(option);
-    if (event.key === "ArrowDown") { event.preventDefault(); (list[at + 1] || list[0]).focus(); }
-    else if (event.key === "ArrowUp") { event.preventDefault(); (list[at - 1] || list[list.length - 1]).focus(); }
-    else if (event.key === "Enter" || event.key === " ") {
-      event.preventDefault();
-      chooseStyle(option.getAttribute("data-family"),
-        Number(option.getAttribute("data-weight")), option.getAttribute("data-style"));
-      var back = option.closest(".stylepick").querySelector(".style-btn");
-      if (back) { back.focus(); }
-    } else if (event.key === "Escape") {
-      event.preventDefault();
-      var backBtn = option.closest(".stylepick").querySelector(".style-btn");
-      closePicks();
-      if (backBtn) { backBtn.focus(); }
-    } else if (event.key === "Tab") {
-      closePicks();
-    }
+    var copy = event.target.closest("[data-copy-family]");
+    if (!copy) { return; }
+    var owner = families.filter(function (family) {
+      return family.family === copy.getAttribute("data-copy-family");
+    })[0];
+    if (!owner) { return; }
+    copyText(cssFor(owner, selected[owner.family] || defaultFace(owner)), function (ok) {
+      copy.textContent = ok ? "Copied" : "Select the rule";
+      setTimeout(function () { copy.textContent = "Copy CSS"; }, 1600);
+    });
   });
 
   document.addEventListener("click", function (event) {
-    if (!event.target.closest(".stylepick")) { closePicks(); }
+    var link = event.target.closest("a[data-save-font]");
+    if (!link || !window.IconsApp || typeof window.IconsApp.saveFont !== "function") { return; }
+    event.preventDefault();
+    window.IconsApp.saveFont(link.getAttribute("href"));
   });
 
-  text.addEventListener("input", function () { paint(); remember(); });
-  size.addEventListener("input", function () { paint(); remember(); });
+  text.addEventListener("input", paint);
+  size.addEventListener("input", paint);
+
+  restoreText();
+  paint();
 
   fetch("../data/fonts.json")
-    .then(function (response) { return response.json(); })
+    .then(function (response) {
+      if (!response.ok) { throw new Error("font catalog"); }
+      return response.json();
+    })
     .then(function (payload) {
-      data = payload.families || [];
+      families = payload.families || [];
       injectFaces();
-      stats();
-      restore();
-      renderFamilies();
-      paint();
-      status.hidden = true;
+      render();
     })
     .catch(function () {
-      status.textContent = "The family catalog did not load; the preview still works.";
-      paint();
+      status.textContent = "The family catalog did not load. The files are still available under assets/fonts.";
     });
+
+  if (window.IconsApp) {
+    document.documentElement.classList.add("in-app");
+  }
 })();
 </script>
-<script src="../assets/site.8e0ef906fa.js" defer></script>
+<script src="../assets/site.520be602d0.js" defer></script>
 </body>
 </html>

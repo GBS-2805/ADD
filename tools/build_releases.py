@@ -146,9 +146,12 @@ def chrome():
     """The band and both panels, taken from a page that already carries them."""
     text = DOWNLOAD.read_text(encoding="utf-8")
     block = text[text.index('<header class="bar">'):text.index("</aside>") + len("</aside>")]
-    block = swap(block, '<a class="page-name" href="../">Download</a>',
-                 '<a class="page-name" href="../">Releases</a>', "page name")
-    block = swap(block, ' aria-current="page"', "", "current row marker")
+    block = swap(block, '<a class="page-name" href="./">Download</a>',
+                 '<a class="page-name" href="./">Releases</a>', "page name")
+    block = swap(block, '<a href="../download/" aria-current="page">Download<span>one app</span></a>',
+                 '<a href="../download/">Download<span>one app</span></a>', "menu row marker")
+    block = swap(block, '<a href="../download/" aria-current="page">Download<span>1 app</span></a>',
+                 '<a href="../download/">Download<span>1 app</span></a>', "drawer row marker")
     block = swap(block, '<a href="../releases/">Releases<span>history</span></a>',
                  '<a href="../releases/" aria-current="page">Releases<span>history</span></a>',
                  "Releases row")

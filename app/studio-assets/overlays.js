@@ -208,7 +208,114 @@
     ctx.globalCompositeOperation = 'source-over';
   }
 
+  /* The five press materials are the brand bridge: each is drawn locally, with
+   * no stock asset, and lands in the same overlay slot as the atmosphere set. */
+  function newsprint(ctx, w, h, rand) {
+    ctx.fillStyle = 'rgba(233,224,203,0.42)';
+    ctx.fillRect(0, 0, w, h);
+    for (var i = 0; i < 760; i++) {
+      var x = rand() * w;
+      var y = rand() * h;
+      var len = 3 + rand() * 22;
+      ctx.strokeStyle = rand() > 0.46 ? 'rgba(92,78,58,0.1)' : 'rgba(255,252,239,0.14)';
+      ctx.lineWidth = 0.45;
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      ctx.lineTo(x + len, y + (rand() - 0.5) * 2.4);
+      ctx.stroke();
+    }
+    for (var j = 0; j < 34; j++) {
+      ctx.fillStyle = 'rgba(54,45,34,' + (0.02 + rand() * 0.05) + ')';
+      ctx.fillRect(rand() * w, rand() * h, 1 + rand() * 2, 1 + rand() * 2);
+    }
+    noise(ctx, w, h, rand, 28);
+  }
+
+  function wheatpaste(ctx, w, h, rand) {
+    for (var i = 0; i < 22; i++) {
+      var x = rand() * w;
+      var y = rand() * h;
+      var radius = 20 + rand() * Math.max(w, h) * 0.24;
+      var blob = ctx.createRadialGradient(x, y, 0, x, y, radius);
+      blob.addColorStop(0, 'rgba(238,226,203,' + (0.08 + rand() * 0.12) + ')');
+      blob.addColorStop(0.62, 'rgba(199,180,151,' + (0.04 + rand() * 0.08) + ')');
+      blob.addColorStop(1, 'rgba(80,68,51,0)');
+      ctx.fillStyle = blob;
+      ctx.beginPath();
+      ctx.arc(x, y, radius, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    for (var j = 0; j < 18; j++) {
+      var sx = rand() * w;
+      var sy = rand() * h;
+      var length = 12 + rand() * 120;
+      ctx.strokeStyle = 'rgba(249,240,220,' + (0.04 + rand() * 0.12) + ')';
+      ctx.lineWidth = 0.6 + rand() * 1.8;
+      ctx.beginPath();
+      ctx.moveTo(sx, sy);
+      ctx.quadraticCurveTo(sx + length * 0.4, sy + (rand() - 0.5) * 22,
+        sx + length, sy + (rand() - 0.5) * 38);
+      ctx.stroke();
+    }
+    noise(ctx, w, h, rand, 34);
+  }
+
+  function overexposed(ctx, w, h, rand) {
+    ctx.globalCompositeOperation = 'lighter';
+    for (var i = 0; i < 5; i++) {
+      var x = w * (0.05 + rand() * 0.9);
+      var y = h * (0.05 + rand() * 0.9);
+      var radius = Math.max(w, h) * (0.2 + rand() * 0.4);
+      var glow = ctx.createRadialGradient(x, y, 0, x, y, radius);
+      glow.addColorStop(0, 'rgba(255,252,239,0.75)');
+      glow.addColorStop(0.25, 'rgba(255,241,210,0.35)');
+      glow.addColorStop(0.7, 'rgba(255,220,170,0.08)');
+      glow.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = glow;
+      ctx.fillRect(0, 0, w, h);
+    }
+    ctx.globalCompositeOperation = 'source-over';
+    specks(ctx, w, h, rand, 28, false);
+    noise(ctx, w, h, rand, 18);
+  }
+
+  function halftone(ctx, w, h, rand) {
+    var gap = 7;
+    var radius = 2.2;
+    for (var y = 0; y < h; y += gap) {
+      for (var x = 0; x < w; x += gap) {
+        var wave = (Math.sin((x + y * 0.35) * 0.025) + 1) / 2;
+        var r = radius * (0.45 + wave * 0.9);
+        ctx.fillStyle = 'rgba(21,18,14,' + (0.16 + wave * 0.2) + ')';
+        ctx.beginPath();
+        ctx.arc(x + (y % (gap * 2) ? gap / 2 : 0), y, r, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+    noise(ctx, w, h, rand, 14);
+  }
+
+  function rough(ctx, w, h, rand) {
+    ctx.fillStyle = 'rgba(128,113,92,0.1)';
+    ctx.fillRect(0, 0, w, h);
+    for (var y = -h; y < h * 2; y += 4) {
+      ctx.strokeStyle = 'rgba(242,238,227,' + (0.03 + rand() * 0.06) + ')';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(0, y + rand() * 3);
+      ctx.lineTo(w, y + h * 0.36 + rand() * 3);
+      ctx.stroke();
+    }
+    specks(ctx, w, h, rand, 140, true);
+    noise(ctx, w, h, rand, 32);
+  }
+
   var builders = {
+    newsprint: newsprint,
+    wheatpaste: wheatpaste,
+    overexposed: overexposed,
+    halftone: halftone,
+    rough: rough,
     light: light,
     grain: grain,
     bokeh: bokeh,
@@ -220,6 +327,11 @@
   };
 
   window.overlayDefaults = {
+    newsprint: { blend: 'multiply', opacity: 0.34 },
+    wheatpaste: { blend: 'overlay', opacity: 0.4 },
+    overexposed: { blend: 'screen', opacity: 0.5 },
+    halftone: { blend: 'multiply', opacity: 0.34 },
+    rough: { blend: 'multiply', opacity: 0.4 },
     light: { blend: 'screen', opacity: 0.55 },
     grain: { blend: 'overlay', opacity: 0.42 },
     bokeh: { blend: 'screen', opacity: 0.45 },

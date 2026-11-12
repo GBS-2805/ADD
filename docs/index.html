@@ -1,110 +1,567 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>A design shelf — icons, type and one offline Android app</title>
-<meta name="description" content="4,373 icons, Poppins and Redaction, three palettes, and one quiet app for making things." />
-<meta name="theme-color" content="#0fbf92" />
-<link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
-<link rel="stylesheet" href="assets/site.a226215efc.css" />
-</head>
-<body>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ADD — 4,373 icons. No account.</title>
+<meta name="description" content="A free design shelf: 4,373 icons, three type families, a photo compressor and one offline Android app. No account, no upload.">
+<meta name="theme-color" content="#f0e7d4">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/site.6b1bb724fe.css">
+<style>
+/* The shelf, not a newspaper about the shelf. One product in the hero, one
+   action, and resources that name what they contain. */
+.home-after {
+  --home-ink: var(--on);
+  --home-page: var(--page);
+  --home-rule: var(--rule);
+  --home-band: var(--band);
+  --home-muted: var(--on-dim);
+  background: var(--home-page);
+  color: var(--home-ink);
+}
+.home-after .bar {
+  min-height: 76px;
+  padding-inline: clamp(20px, 4vw, 52px);
+  border-bottom: 1px solid var(--home-rule);
+  background: var(--home-page);
+  color: var(--home-ink);
+}
+.home-after .bar .mark { display: none; }
+.home-after .lead { align-items: center; min-width: 0; }
+.home-after .brand-lockup {
+  display: flex;
+  align-items: baseline;
+  gap: 11px;
+  min-width: 0;
+}
+.home-after .site-wordmark {
+  color: var(--home-ink);
+  font-family: "Instrument Serif", Georgia, serif;
+  font-size: 31px;
+  font-weight: 400;
+  letter-spacing: -0.045em;
+  line-height: 1;
+  text-decoration: none;
+}
+.home-after .brand-descriptor {
+  color: var(--home-muted);
+  font-family: "Libre Franklin", system-ui, sans-serif;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  line-height: 1.35;
+  text-transform: uppercase;
+}
+.home-after .who {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  margin-left: auto;
+}
+.home-after .quick-nav {
+  display: flex;
+  align-items: center;
+  gap: 23px;
+}
+.home-after .quick-nav a,
+.home-after .quick-nav span {
+  color: var(--home-muted);
+  font-family: "Libre Franklin", system-ui, sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.11em;
+  text-decoration: none;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.home-after .quick-nav a:hover { color: var(--home-band); }
+.home-after .quick-nav .get {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--home-band);
+}
+.home-after .quick-nav .get::after { content: "↗"; font-size: 11px; }
+.home-after .quick-nav .get { text-decoration: none !important; border-bottom: 0 !important; background-image: none !important; }
+.home-after .burger { color: var(--home-ink); }
+.home-after .skip {
+  position: fixed;
+  top: -60px;
+  left: 12px;
+  z-index: 1000;
+  border: 1px solid var(--home-band);
+  border-radius: 4px;
+  padding: 9px 13px;
+  background: var(--home-page);
+  color: var(--home-ink);
+  font-family: "Libre Franklin", system-ui, sans-serif;
+  font-size: 11px;
+  text-decoration: none;
+}
+.home-after .skip:focus { top: 9px; }
 
+.home-wrap {
+  width: min(1180px, calc(100% - 40px));
+  margin-inline: auto;
+}
+
+.home-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
+  align-items: center;
+  gap: clamp(34px, 5vw, 76px);
+  padding-block: clamp(58px, 8vw, 112px) clamp(58px, 7vw, 96px);
+}
+.home-kicker {
+  margin: 0 0 17px;
+  color: var(--home-band);
+  font-family: "Libre Franklin", system-ui, sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+.home-hero h1 {
+  margin: 0;
+  color: var(--home-ink);
+  font-family: "Instrument Serif", Georgia, serif;
+  font-size: clamp(58px, 8.2vw, 116px);
+  font-weight: 400;
+  letter-spacing: -0.055em;
+  line-height: 0.84;
+  text-wrap: balance;
+}
+.home-hero h1 span { color: var(--home-band); }
+.home-lede {
+  max-width: 34ch;
+  margin: 25px 0 0;
+  color: var(--home-muted);
+  font-family: "Spectral", Georgia, serif;
+  font-size: clamp(16px, 1.35vw, 19px);
+  line-height: 1.55;
+}
+.home-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-top: 29px;
+}
+.home-btn {
+  display: inline-flex;
+  min-height: 47px;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border: 1px solid var(--home-band);
+  border-radius: 999px;
+  padding: 0 21px;
+  font-family: "Libre Franklin", system-ui, sans-serif;
+  font-size: 10.5px;
+  font-weight: 650;
+  letter-spacing: 0.09em;
+  line-height: 1;
+  text-decoration: none;
+  text-transform: uppercase;
+  transition: background-color .18s ease-out, color .18s ease-out, transform .12s ease-out;
+}
+.home-btn.primary {
+  background: var(--home-band);
+  color: var(--band-ink, #f5ecd8);
+}
+.home-btn.primary:hover { background: color-mix(in srgb, var(--home-band) 86%, #000); }
+.home-btn.quiet {
+  border-color: var(--home-rule);
+  color: var(--home-ink);
+}
+.home-btn.quiet:hover { border-color: var(--home-band); color: var(--home-band); }
+.home-btn:active { transform: scale(.975); }
+.home-note {
+  margin: 18px 0 0;
+  color: var(--home-muted);
+  font-family: "Libre Franklin", system-ui, sans-serif;
+  font-size: 10px;
+  letter-spacing: 0.02em;
+  line-height: 1.55;
+}
+
+.home-product {
+  position: relative;
+  min-width: 0;
+  margin: 0;
+}
+.home-product-frame {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--home-rule);
+  border-radius: 18px;
+  background: var(--home-page);
+  box-shadow: 0 20px 50px rgba(27, 18, 18, .1);
+}
+.home-product-frame img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.home-product figcaption {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  margin-top: 14px;
+  color: var(--home-muted);
+  font-family: "Libre Franklin", system-ui, sans-serif;
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  line-height: 1.4;
+  text-transform: uppercase;
+}
+.home-product figcaption a { color: var(--home-band); text-decoration: none; }
+.home-product figcaption a:hover { text-decoration: underline; text-underline-offset: 3px; }
+
+.home-section {
+  border-top: 1px solid var(--home-rule);
+  padding-block: clamp(46px, 6vw, 77px);
+}
+.home-section-head {
+  display: grid;
+  grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr);
+  gap: 28px;
+  align-items: start;
+  margin-bottom: 32px;
+}
+.home-section h2 {
+  margin: 0;
+  color: var(--home-ink);
+  font-family: "Instrument Serif", Georgia, serif;
+  font-size: clamp(38px, 4.8vw, 63px);
+  font-weight: 400;
+  letter-spacing: -0.045em;
+  line-height: .92;
+}
+.home-section-head p {
+  max-width: 45ch;
+  margin: 0;
+  color: var(--home-muted);
+  font-family: "Spectral", Georgia, serif;
+  font-size: 16px;
+  line-height: 1.58;
+}
+.home-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+.home-card {
+  display: flex;
+  min-height: 222px;
+  flex-direction: column;
+  justify-content: space-between;
+  border: 1px solid var(--home-rule);
+  border-radius: 15px;
+  padding: 22px;
+  color: var(--home-ink);
+  text-decoration: none;
+  transition: border-color .18s ease-out, background-color .18s ease-out, transform .18s ease-out;
+}
+.home-card:hover {
+  border-color: var(--home-band);
+  background: var(--card, rgba(27,18,18,.035));
+  transform: translateY(-2px);
+}
+.home-card svg {
+  width: 27px;
+  height: 27px;
+  margin-bottom: 26px;
+  fill: none;
+  stroke: var(--home-band);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.45;
+}
+.home-card strong {
+  display: block;
+  margin-bottom: 8px;
+  font-family: "Instrument Serif", Georgia, serif;
+  font-size: 28px;
+  font-weight: 400;
+  letter-spacing: -0.025em;
+  line-height: 1;
+}
+.home-card p {
+  margin: 0;
+  color: var(--home-muted);
+  font-family: "Spectral", Georgia, serif;
+  font-size: 14.5px;
+  line-height: 1.52;
+}
+.home-card span {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 21px;
+  color: var(--home-band);
+  font-family: "Libre Franklin", system-ui, sans-serif;
+  font-size: 9.5px;
+  font-weight: 650;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.home-offline {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr);
+  align-items: center;
+  gap: 34px;
+  border: 1px solid var(--home-band);
+  border-radius: 18px;
+  padding: clamp(25px, 4vw, 43px);
+  background: var(--home-band);
+  color: var(--band-ink, #f5ecd8);
+}
+.home-offline h2 {
+  margin: 0;
+  color: var(--band-ink, #f5ecd8);
+  font-family: "Instrument Serif", Georgia, serif;
+  font-size: clamp(36px, 4.1vw, 57px);
+  font-weight: 400;
+  letter-spacing: -0.045em;
+  line-height: .94;
+}
+.home-offline p {
+  max-width: 47ch;
+  margin: 14px 0 0;
+  color: var(--band-dim, rgba(245,236,216,.72));
+  font-family: "Spectral", Georgia, serif;
+  font-size: 15.5px;
+  line-height: 1.55;
+}
+.home-offline .home-actions { justify-content: flex-end; margin-top: 0; }
+.home-offline .home-btn.primary {
+  border-color: var(--band-ink, #f5ecd8);
+  background: var(--band-ink, #f5ecd8);
+  color: var(--home-band);
+}
+.home-offline .home-btn.quiet {
+  border-color: var(--band-line, rgba(245,236,216,.24));
+  color: var(--band-ink, #f5ecd8);
+}
+.home-offline .home-btn.quiet:hover {
+  border-color: var(--band-ink, #f5ecd8);
+  color: var(--band-ink, #f5ecd8);
+}
+
+.home-foot {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 17px;
+  border-top: 1px solid var(--home-rule);
+  padding: 24px 0 33px;
+  color: var(--home-muted);
+  font-family: "Libre Franklin", system-ui, sans-serif;
+  font-size: 9.5px;
+  letter-spacing: 0.07em;
+  line-height: 1.6;
+  text-transform: uppercase;
+}
+.home-foot nav { display: flex; flex-wrap: wrap; gap: 16px; }
+.home-foot a { color: var(--home-ink); text-decoration: none; }
+.home-foot a:hover { color: var(--home-band); }
+
+.home-after .reveal {
+  animation: home-rise .62s cubic-bezier(.16, 1, .3, 1) both;
+}
+.home-after .reveal.delay-1 { animation-delay: .07s; }
+.home-after .reveal.delay-2 { animation-delay: .14s; }
+.home-after .reveal.delay-3 { animation-delay: .21s; }
+@keyframes home-rise {
+  from { opacity: 0; transform: translateY(13px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 940px) {
+  .home-hero { grid-template-columns: minmax(0, 1fr); gap: 42px; }
+  .home-hero h1 { max-width: 9ch; }
+  .home-product { max-width: 720px; }
+  .home-section-head { grid-template-columns: minmax(0, 1fr); gap: 15px; }
+  .home-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .home-offline { grid-template-columns: minmax(0, 1fr); }
+  .home-offline .home-actions { justify-content: flex-start; }
+}
+@media (max-width: 720px) {
+  .home-after .bar { min-height: 66px; }
+  .home-after .brand-descriptor,
+  .home-after .quick-nav { display: none; }
+  .home-after .who { gap: 0; }
+  .home-wrap { width: min(100% - 32px, 600px); }
+  .home-hero { padding-block: 44px 47px; gap: 33px; }
+  .home-hero h1 { font-size: clamp(57px, 17vw, 84px); }
+  .home-lede { margin-top: 20px; font-size: 16px; }
+  .home-actions { margin-top: 23px; }
+  .home-btn { min-height: 45px; padding-inline: 18px; }
+  .home-product::before { inset: 8px -8px -8px 8px; }
+  .home-product-frame { border-radius: 13px; }
+  .home-product figcaption { align-items: flex-start; flex-direction: column; gap: 5px; }
+  .home-grid { grid-template-columns: minmax(0, 1fr); }
+  .home-card { min-height: 0; }
+  .home-card svg { margin-bottom: 20px; }
+  .home-offline { border-radius: 14px; padding: 25px 21px; }
+  .home-foot { flex-direction: column; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .home-after .reveal { animation: none; }
+  .home-after .home-btn,
+  .home-after .home-card { transition: none; }
+}
+</style>
+</head>
+<body class="home-after">
+
+<a class="skip" href="#main">Skip to content</a>
+
+<!-- The masthead is the same on every page. The wordmark opens the sections;
+     the side tab carries the other routes. -->
 <header class="bar">
+  <a class="site-wordmark" href="./" aria-label="ADD — home">ADD</a>
+  <span class="mark" aria-hidden="true">
+    <svg viewBox="0 0 32 32" width="28" height="28"><circle cx="16" cy="16" r="14.2" fill="none" stroke="currentColor" stroke-width="1.2"/><path d="M10 10.5c3.2-1.8 8.8-1.8 12 0M10 10.5v8.8c0 1.6 2.8 2.5 6 2.5s6-.9 6-2.5v-8.8M16 13.8v9.4M20.5 15.8h4.7M23 13.4v4.8" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.2"/></svg>
+  </span>
   <div class="lead">
     <button class="menu-btn" id="menuBtn" type="button" aria-expanded="false" aria-controls="menu" aria-label="Open sections">
       <svg class="chev" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M8 13L12 17L16 13M8 7L12 11L16 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
     </button>
-    <a class="page-name" href="./">Index</a>
+    <a class="page-name" href="./">index</a>
   </div>
-
-  <a class="mark" href="./" aria-label="ADD — home">
-    <svg viewBox="0 0 120.6 123.11" role="img" aria-label="ADD logo" fill="currentColor">
-        <path d="m29.58,61.92c.11,1.85.17,3.7.36,5.54.11,1.02-.23,1.23-1.19,1.29-4.47.26-5.38,1.22-5.27,5.67.13,5.14,2.74,9.13,6.27,12.56,1.53,1.49,2.96,1.05,3.89-.88.61-1.27.96-2.64,1.04-4.06.06-1.13.53-1.24,1.41-.69,1.72,1.08,2.92,2.71,4.38,4.07,8.66,8.04,18.38,13.89,30.58,14.51.52.03,1.04-.02,1.56,0,1.36.07,1.57-.53.89-1.58-.36-.56-.82-1.05-1.21-1.58-1.5-2.04-.63-4.17,1.89-4.53,3.34-.47,6.44.69,9.57,1.56,4.15,1.15,8.3,2.3,12.65,1.03,2.54-.74,2.78-1.66.84-3.54-.63-.61-1.41-1.08-2.11-1.63-2.43-1.91-2.63-3.35-.64-5.76,2.51-3.05,6.01-4.22,9.75-4.74,4.81-.67,9.26.31,13.25,3.19,1.39,1.01,1.75,1.97.94,3.7-9.48,20.25-25.12,32.69-47.2,36.28-29.25,4.75-57.41-12.11-67.54-39.86C-8.51,49.01,10.62,11.88,44.98,2.31c31.94-8.9,65.21,8.7,75.4,39.81.46,1.42.23,2.38-.66,3.4-4.28,4.87-9.78,6.13-15.92,5.16-4.99-.79-9.16-3.27-12.65-6.88-1.34-1.38-2.66-2.79-3.87-4.28-13.61-16.78-43.35-15.8-54.84,7.54-2.32,4.71-3.19,9.66-2.85,14.86Z"/>
-        <path d="m80.89,57.02c.88-.09,2.06-.21,3.22.13,1.56.46,1.88,1.6.75,2.8-1.16,1.23-2.59,1.52-4.25,1.33-4.23-.48-5.14.47-4.58,4.78.43,3.35,1.88,6.19,4.52,8.36.99.81,1.67.93,2.18-.62,1.55-4.74,1.61-4.72,6.46-4.56,1.28.04,2.56-.04,3.49-1.05.76-.83,1.38-1.54,2.5-.44,1.07,1.05,1.29,2.15.42,3.35-1.18,1.61-2.84,2.29-4.82,2.23-1.25-.04-2.77-.51-3.68.03-.98.58-.39,2.29-.7,3.49-.75,2.89-2.94,3.94-5.77,2.62-5.71-2.66-10.17-13.01-8.12-18.87.86-2.45,2.86-3.21,5.21-3.41.96-.08,1.92-.11,3.18-.18Z"/>
-        <path d="m52.62,58.41c.19-1.57.26-3.23,1.99-3.92,1.62-.65,2.9.23,3.92,1.33,2.41,2.61,3.79,5.64,2.86,9.26-.6,2.33-2.43,2.97-4.42,1.62-2.92-1.97-3.98-4.98-4.35-8.29Z"/>
-        <path d="m44.97,66.78c-.03,1.9-.18,3.24-1.63,3.9-1.5.68-2.61-.25-3.53-1.19-2.06-2.11-3.15-4.68-2.7-7.66.4-2.62,2.46-3.4,4.53-1.73,2.25,1.82,3.29,4.3,3.33,6.68Z"/>
-      </svg>
-  </a>
-
   <div class="who">
-    <div class="who-lines keep">
-      <p class="big">Art Design Database</p>
-      <p class="big">Icons • Fonts • Tools</p>
-    </div>
-    <button class="burger" id="burger" type="button" aria-expanded="false" aria-controls="drawer" aria-label="Open side tab">
-      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 7H19M5 12H19M5 17H19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-    </button>
+    <span class="who-lines">Art Design Database<br>Icons • Fonts • Tools</span>
+    <nav class="quick-nav" aria-label="Primary">
+      <a href="icons/">Icons</a>
+      <a href="fonts/">Type</a>
+      <a href="tools/">Tools</a>
+      <a class="get" href="download/">Get the app</a>
+    </nav>
+    <button class="burger" id="burger" type="button" aria-label="Open side tab" aria-expanded="false" aria-controls="drawer">&#9776;</button>
   </div>
 </header>
 
-<nav class="menu" id="menu" data-open="false" aria-label="Sections">
-  <a href="./" aria-current="page">Index<span>shelf</span></a>
-  <a href="icons/">Icons<span>4,373 icons</span></a>
-  <a href="fonts/">Fonts<span>2 families</span></a>
-  <a href="tools/">Tools<span>4 tools</span></a>
-</nav>
-
-<div class="scrim" id="scrim" data-open="false"></div>
-<aside class="drawer" id="drawer" data-open="false" aria-label="More">
-  <div class="drawer-head">
-    <p>More</p>
-    <button class="drawer-close" id="drawerClose" type="button" aria-label="Close side tab"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 6L18 18M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+<section class="menu" id="menu" data-open="false" aria-label="Sections">
+  <div class="menu-head">
+    <span>Sections</span>
   </div>
-  <a href="download/">Download<span>1 app</span></a>
-  <a href="portfolio/">Portfolio<span>3 projects</span></a>
-  <a href="renders/">Renders<span>gallery</span></a>
-  <a href="releases/">Releases<span>history</span></a>
-  <p class="drawer-note">ADD · a design shelf: icons, type, photos and words, in one quiet place.</p>
+  <nav>
+    <a href="icons/">Icons <span>4,373 symbols</span></a>
+    <a href="fonts/">Fonts <span>three families</span></a>
+    <a href="tools/">Tools <span>one engine</span></a>
+    <a href="download/">Download <span>offline Android</span></a>
+    <a href="renders/">Renders <span>the output</span></a>
+    <a href="releases/">Releases <span>the builds</span></a>
+  </nav>
+</section>
+
+<div class="scrim" id="scrim" hidden></div>
+<aside class="drawer" id="drawer" data-open="false" aria-label="Side tab">
+  <div class="drawer-head">
+    <span>ADD / index</span>
+    <button class="drawer-close" id="drawerClose" type="button" aria-label="Close side tab">×</button>
+  </div>
+  <nav>
+    <a href="icons/">Icons<span>the shelf</span></a>
+    <a href="fonts/">Fonts<span>the type</span></a>
+    <a href="tools/">Tools<span>the engine</span></a>
+    <a href="download/">Download<span>the app</span></a>
+    <a href="renders/">Renders<span>the output</span></a>
+    <a href="releases/">Releases<span>the builds</span></a>
+  </nav>
+  <p class="drawer-note">A free design shelf for people who would rather make the thing than ask permission.</p>
 </aside>
 
-<main>
-  <header class="page-head">
-    <h1>A design shelf.</h1>
-    <p class="lede">Icons, fonts, photos and words — free to browse, with one quiet app for making things.</p>
-    <ul class="stats">
-      <li><span>Icons:</span><b>4,373</b></li>
-      <li><span>Fonts:</span><b>3</b></li>
-      <li><span>Tools:</span><b>4</b></li>
-    </ul>
-    <p class="meta">
-      <span>Free to browse</span>
-      <span>No account</span>
-    </p>
-  </header>
+<main id="main" class="home-wrap">
+  <section class="home-hero" aria-labelledby="home-title">
+    <div>
+      <p class="home-kicker reveal">A free design shelf · no account</p>
+      <h1 class="reveal delay-1" id="home-title">4,373 icons.<br><span>No account.</span></h1>
+      <p class="home-lede reveal delay-2">A real icon browser, three working type families and a photo compressor that runs on your phone. Take what you need; nothing is uploaded.</p>
+      <div class="home-actions reveal delay-3">
+        <a class="home-btn primary" href="icons/">Browse the icons <span aria-hidden="true">→</span></a>
+        <a class="home-btn quiet" href="download/">Get the app</a>
+      </div>
+      <p class="home-note reveal delay-3">Free to use · 24 styles · SVG and PNG · works offline in the app</p>
+    </div>
 
-  <section>
-    <h2>The materials</h2>
-    <p class="kicker">One app, four tools, three projects</p>
-    <div class="cards">
-      <a class="card" href="tools/">
-        <span class="kind">Tools · 4</span>
-        <h3>Tools</h3>
-        <p>Icons, fonts, photos and words — four ways to make something.</p>
-        <span class="tag"><span class="go">Open tools</span></span>
+    <figure class="home-product reveal delay-2">
+      <div class="home-product-frame">
+        <img src="assets/icons-browser.png" width="1298" height="573" alt="The ADD icon browser, showing search, style filters and a grid of outline icons." fetchpriority="high" decoding="async">
+      </div>
+      <figcaption>
+        <span>The actual shelf · search, style, copy</span>
+        <a href="icons/">Open it ↗</a>
+      </figcaption>
+    </figure>
+  </section>
+
+  <section class="home-section" aria-labelledby="shelf-title">
+    <div class="home-section-head">
+      <h2 id="shelf-title">Three shelves.<br>One standard.</h2>
+      <p>Every resource is here because it does a job: a symbol to place, a typeface to set, a tool to finish the file. No account gates and no samples that turn into a paywall.</p>
+    </div>
+    <div class="home-grid">
+      <a class="home-card" href="icons/">
+        <svg viewBox="0 0 28 28" aria-hidden="true"><rect x="3.5" y="3.5" width="8" height="8" rx="1.4"/><rect x="16.5" y="3.5" width="8" height="8" rx="1.4"/><rect x="3.5" y="16.5" width="8" height="8" rx="1.4"/><path d="M16.8 24.2v-7.4h3.5a3.7 3.7 0 0 1 0 7.4z"/></svg>
+        <div>
+          <strong>Icons</strong>
+          <p>4,373 symbols in 24 styles, drawn on one grid. Search by name, filter by style, copy SVG or PNG.</p>
+        </div>
+        <span>Browse icons <span aria-hidden="true">→</span></span>
       </a>
-      <a class="card" href="portfolio/">
-        <span class="kind">Portfolio · 3 projects</span>
-        <h3>Portfolio</h3>
-        <p>The app, the icon browser and this site — the work and the thinking.</p>
-        <span class="tag"><span class="go">See the work</span></span>
+      <a class="home-card" href="fonts/">
+        <svg viewBox="0 0 28 28" aria-hidden="true"><path d="M4 22.5 11.5 5h3L22 22.5M7.4 16h11.2M17.8 5h5.7M17.8 22.5h5.7"/></svg>
+        <div>
+          <strong>Type</strong>
+          <p>Three families with the weights and italics already cut: a display serif, a text serif and a working grotesk.</p>
+        </div>
+        <span>Set something <span aria-hidden="true">→</span></span>
+      </a>
+      <a class="home-card" href="tools/">
+        <svg viewBox="0 0 28 28" aria-hidden="true"><path d="M4.5 8.5h19M4.5 14h19M4.5 19.5h19"/><circle cx="10" cy="8.5" r="2.2" fill="var(--home-page)"/><circle cx="18" cy="14" r="2.2" fill="var(--home-page)"/><circle cx="12.5" cy="19.5" r="2.2" fill="var(--home-page)"/></svg>
+        <div>
+          <strong>Tools</strong>
+          <p>Compress a photo without uploading it. Preview the file, keep the original and save the copy you meant to make.</p>
+        </div>
+        <span>Open the tools <span aria-hidden="true">→</span></span>
       </a>
     </div>
   </section>
 
-  <section>
-    <h2>The app</h2>
-    <p class="kicker">The whole shelf, offline</p>
-    <p class="fine">The app, its size and its install steps are on the <a href="download/">download page</a>. Font packs download only when you choose one; everything else is already on the phone.</p>
+  <section class="home-section" aria-labelledby="app-title">
+    <div class="home-offline">
+      <div>
+        <p class="home-kicker" style="color:var(--band-dim,#d9c7b4)">The same shelf, in your pocket</p>
+        <h2 id="app-title">The app works with the Wi-Fi off.</h2>
+        <p>Icons, fonts and compression live on the phone. No account, no queue, no upload. Compressed copies go to Pictures; originals stay exactly where they were.</p>
+      </div>
+      <div class="home-actions">
+        <a class="home-btn primary" href="download/">Download the app <span aria-hidden="true">↗</span></a>
+        <a class="home-btn quiet" href="renders/">See the renders</a>
+      </div>
+    </div>
   </section>
+
+  <footer class="home-foot">
+    <span>ADD · Art Design Database · made to be used</span>
+    <nav aria-label="Footer">
+      <a href="icons/">Icons</a>
+      <a href="fonts/">Fonts</a>
+      <a href="tools/">Tools</a>
+      <a href="download/">Download</a>
+      <a href="renders/">Renders</a>
+      <a href="releases/">Releases</a>
+    </nav>
+  </footer>
 </main>
 
-<footer>
-  <span>ADD 3.7<span class="dot" aria-hidden="true">·</span>a design shelf</span>
-  <span><a href="download/">Download</a><span class="dot" aria-hidden="true">·</span><a href="renders/">Renders</a><span class="dot" aria-hidden="true">·</span>no account</span>
-</footer>
-
-<script src="assets/site.8e0ef906fa.js" defer></script>
+<script src="assets/site.520be602d0.js"></script>
 </body>
 </html>

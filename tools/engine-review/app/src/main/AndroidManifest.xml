@@ -4,7 +4,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-sdk
-        android:minSdkVersion="26"
+        android:minSdkVersion="33"
         android:targetSdkVersion="35" />
 
     <uses-permission
@@ -84,7 +84,7 @@
         <activity
             android:name="app.add.engine.MainActivity"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|uiMode"
-            android:exported="false"
+            android:exported="${engineExported}"
             android:label="Engine Lab"
             android:process=":engine"
             android:screenOrientation="portrait"
