@@ -518,17 +518,6 @@
     width: 26px; height: 26px; padding: 0; border-radius: 50%;
     border: 1px solid var(--rule); background: var(--sw, transparent); cursor: pointer;
   }
-  /* Auto is one swatch among the colours, not a word among dots: a circle with an A. */
-  .ink.auto {
-    display: grid;
-    place-items: center;
-    padding: 0;
-    background: transparent;
-    font-size: 12px;
-    font-weight: 500;
-    line-height: 1;
-    color: var(--on);
-  }
   .ink[aria-pressed="true"] { outline: 2px solid var(--on); outline-offset: 2px; }
   .ink:focus-visible { outline: 2px solid var(--band); outline-offset: 2px; }
   /* Manual is a swatch as well: a circle with an M that opens the page's own colour
@@ -701,8 +690,10 @@
   .ink-set[disabled] { opacity: .45; cursor: default; }
   .preview-box[data-surface="black"] { color: var(--glyph, #fff); }
   .preview-box[data-surface="white"] { color: var(--glyph, #000); }
-  .icon-card .glyph { color: var(--glyph, inherit); }
-  .sel-chip svg { color: var(--glyph, inherit); }
+  /* The sheet is a browser, not the output: it keeps the page ink so white and
+     black choices stay legible there. The stage, chips and raster use --glyph. */
+  .icon-card .glyph { color: inherit; }
+  .sel-chip svg { color: inherit; }
 
   /* The set is one quiet sheet: a search field and the glyphs, nothing else. */
   .set-panel { margin: 34px 0 0; padding: 0; border: 0; }
@@ -904,13 +895,9 @@
         <div class="ctl-row" role="group" aria-label="Icon colour">
           <span class="ctl-label">Colour</span>
           <div class="inks" id="inks">
-            <button class="ink auto" type="button" data-ink="" aria-pressed="true" title="Auto — follow the background" aria-label="Auto — follow the background">A</button>
-            <button class="ink" type="button" data-ink="#ffffff" style="--sw: #ffffff" aria-label="White" aria-pressed="false"></button>
             <button class="ink" type="button" data-ink="#000000" style="--sw: #000000" aria-label="Black" aria-pressed="false"></button>
-            <button class="ink" type="button" data-ink="#4147d5" style="--sw: #4147d5" aria-label="Indigo" aria-pressed="false"></button>
-            <button class="ink" type="button" data-ink="#0e9f6e" style="--sw: #0e9f6e" aria-label="Green" aria-pressed="false"></button>
-            <button class="ink" type="button" data-ink="#e02424" style="--sw: #e02424" aria-label="Red" aria-pressed="false"></button>
-            <button class="ink manual" id="inkManual" type="button" title="Manual colour — pick your own" aria-label="Manual colour — pick your own">M</button>
+            <button class="ink" type="button" data-ink="#ffffff" style="--sw: #ffffff" aria-label="White" aria-pressed="true"></button>
+            <button class="ink manual" id="inkManual" type="button" title="Manual colour — pick your own" aria-label="Manual colour — pick your own" aria-pressed="false">M</button>
           </div>
         </div>
 
@@ -952,13 +939,9 @@
       </button>
     </div>
     <div class="ink-body">
-      <div class="ink-grid" id="inkGrid" role="group" aria-label="Colours">
-        <button class="ink-cell" type="button" data-c="" title="Auto — follow the background">A</button>
-        <button class="ink-cell" type="button" data-c="#ffffff" style="--c: #ffffff" aria-label="White"></button>
+      <div class="ink-grid" id="inkGrid" role="group" aria-label="Preset colours">
         <button class="ink-cell" type="button" data-c="#000000" style="--c: #000000" aria-label="Black"></button>
-        <button class="ink-cell" type="button" data-c="#4147d5" style="--c: #4147d5" aria-label="Indigo"></button>
-        <button class="ink-cell" type="button" data-c="#0e9f6e" style="--c: #0e9f6e" aria-label="Green"></button>
-        <button class="ink-cell" type="button" data-c="#e02424" style="--c: #e02424" aria-label="Red"></button>
+        <button class="ink-cell" type="button" data-c="#ffffff" style="--c: #ffffff" aria-label="White"></button>
       </div>
       <div class="ink-modes" role="group" aria-label="Colour mode">
         <button class="ink-mode" id="inkCustom" type="button" aria-pressed="false">Custom</button>
@@ -1215,7 +1198,7 @@
   // the toggle asks for them and then kept for the visit.
   // The chosen ink. Ink styles take it as currentColor; Duo and Flat are tinted
   // rather than flattened, so their second tone survives as an opacity.
-  var ink = "";
+  var ink = "#ffffff";
   var tints = {};
   var currentPayload = null;
 
@@ -1754,6 +1737,7 @@
     });
     // M carries the colour it stands for, so a custom choice is visible in the row.
     var custom = ink !== "" && !inks.querySelector('.ink[data-ink="' + ink + '"]');
+    inkManual.setAttribute("aria-pressed", custom ? "true" : "false");
     inkManual.style.setProperty("--sw", custom ? ink : "transparent");
     inkManual.style.color = custom ? readableInk(ink) : "";
   }
@@ -1898,12 +1882,12 @@
   }
 
   function seedCmyk() {
-    var c = hexCmyk(pendingInk || "#4147d5");
+    var c = hexCmyk(pendingInk || "#ffffff");
     inkC.value = c.c; inkM.value = c.m; inkY.value = c.y; inkK.value = c.k;
   }
 
   function seedWheel() {
-    var hsv = hexHsv(pendingInk || "#4147d5");
+    var hsv = hexHsv(pendingInk || "#ffffff");
     wheelH = hsv.h; wheelS = hsv.s; wheelV = hsv.v;
     inkValue.value = Math.round(wheelV * 100);
     paintWheel();
@@ -1917,12 +1901,12 @@
     var reach = wheelS * 50;
     inkWheelDot.style.left = (50 + Math.cos(angle) * reach) + "%";
     inkWheelDot.style.top = (50 + Math.sin(angle) * reach) + "%";
-    inkWheelDot.style.background = pendingInk || "#4147d5";
+    inkWheelDot.style.background = pendingInk || "#ffffff";
   }
 
   function openInk() {
     pendingInk = ink;
-    inkHex.value = (ink || "#4147d5").slice(1).toUpperCase();
+    inkHex.value = (ink || "#ffffff").slice(1).toUpperCase();
     // A colour that is not one of the swatches came from a pane, so open on the
     // field it can be read in rather than a grid that cannot show it.
     var onSwatch = ink === "" || inkGrid.querySelector('.ink-cell[data-c="' + ink + '"]');
@@ -2426,7 +2410,8 @@
       applyExportSize(savedSize, false);
     }
     applySurface(recall(SURFACE_KEY));
-    setInk(recall(INK_KEY), false);
+    var savedInk = recall(INK_KEY);
+    setInk(savedInk || (surface === "white" ? "#000000" : "#ffffff"), false);
   })();
 
   var initial = STYLES.length ? (styleBySlug(recall(STYLE_KEY)) || STYLES[0]) : null;
