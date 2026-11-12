@@ -52,6 +52,13 @@ class HandoffProvenanceTest(unittest.TestCase):
         self.assertEqual(update_handoff.parse_time("2026-11-12T00:00:00Z"),
                          "2026-11-12T00:00:00Z")
 
+    def test_pending_provenance_does_not_claim_a_deploy(self):
+        self.assertIsNone(update_handoff.parse_time("pending"))
+        body = update_handoff.block("abc1234", None, "https://example.test",
+                                    "pending", self.app())
+        self.assertIn("not yet deployed from this tree", body)
+        self.assertNotIn("deployed <time", body)
+
     def test_origin_rejects_a_path(self):
         with self.assertRaises(SystemExit):
             update_handoff.origin_of("https://example.test/path")

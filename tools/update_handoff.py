@@ -2,7 +2,10 @@
 """Refresh the handoff page's provenance block from the published tree.
 
     python3 tools/update_handoff.py --commit SHA --deployed-at ISO
-    python3 tools/update_handoff.py --check --commit SHA --deployed-at ISO
+    python3 tools/update_handoff.py --check --commit SHA --deployed-at pending
+
+`pending` writes an honest "not yet deployed from this tree" line for a committed
+handoff source; the publish job replaces it with the real deployment time.
 
 Only the lines between the provenance markers change. The APK digest and size come
 from the generated `docs/data/tools.json` and are verified against the APK that will
@@ -63,6 +66,8 @@ def verify_apk(app):
 
 def parse_time(value):
     text = value.strip()
+    if text.lower() == "pending":
+        return None
     if text.endswith("Z"):
         text = text[:-1] + "+00:00"
     try:
@@ -84,18 +89,21 @@ def origin_of(value):
 
 def block(commit, deployed_at, origin, gates, app):
     sha = html.escape(commit)
-    when = html.escape(deployed_at)
+    when = html.escape(deployed_at) if deployed_at else None
     url = html.escape(origin)
     gate_text = html.escape(gates)
     version = html.escape(str(app["version"]))
     size = "{:,}".format(int(app["bytes"]))
     digest = html.escape(app["sha256"])
     short = html.escape(app["sha256"][:8] + "…")
+    if when:
+        state = "deployed <time datetime=\"%s\">%s</time> from" % (when, when)
+    else:
+        state = "not yet deployed from this tree; live origin"
     return (
-        "<li><b>Committed:</b> <code>%s</code> — deployed <time datetime=\"%s\">%s</time> "
-        "from <a href=\"%s/\">%s</a>; APK %s, %s B, SHA-256 <code>%s</code> "
-        "(<code>%s</code>); gates: %s.</li>" % (sha, when, when, url, url, version, size,
-                                                digest, short, gate_text)
+        "<li><b>Committed:</b> <code>%s</code> — %s <a href=\"%s/\">%s</a>; "
+        "APK %s, %s B, SHA-256 <code>%s</code> (<code>%s</code>); gates: %s.</li>"
+        % (sha, state, url, url, version, size, digest, short, gate_text)
     )
 
 
@@ -110,7 +118,8 @@ def replace_block(text, body):
 def main():
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--commit", required=True, help="deployed commit")
-    parser.add_argument("--deployed-at", required=True, help="deploy time, ISO 8601 with Z")
+    parser.add_argument("--deployed-at", required=True,
+                        help="deploy time, ISO 8601 with Z, or 'pending'")
     parser.add_argument("--origin", help="live origin (default: tools/site.json url)")
     parser.add_argument("--gates", default="shelf and visual",
                         help="gate state to print (default: shelf and visual)")
