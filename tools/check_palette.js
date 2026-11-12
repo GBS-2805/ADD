@@ -97,10 +97,17 @@ function readSurfaces(page) {
       }
     }
     const meta = document.querySelector('meta[name="theme-color"]');
+    const probe = document.createElement("div");
+    probe.style.background = "var(--band)";
+    probe.style.color = "var(--band-ink)";
+    document.body.appendChild(probe);
+    const band = getComputedStyle(probe).backgroundColor;
+    const bandWords = getComputedStyle(probe).color;
+    probe.remove();
     return {
       meta: meta ? meta.getAttribute("content") : "missing",
-      band: style(".bar", "backgroundColor"),
-      bandWords: style(".page-name", "color"),
+      band,
+      bandWords,
       selected: style(".seg[aria-pressed='true']", "backgroundColor"),
       selectedInk: style(".seg[aria-pressed='true']", "color"),
       disabled: style(".sel-btn[disabled]", "color"),
@@ -116,8 +123,11 @@ function readSurfaces(page) {
   const browser = await chromium.launch();
   const { context, page } = await open(browser, "icons/coolicons/");
 
+  // The panel is open on this page; the old toggle remains in the DOM, hidden.
+  // Only click an opener the reader can actually see, or the check stalls on
+  // an invisible control before it reads a single colour.
   const opener = await page.$('[aria-controls="panel"]');
-  if (opener) {
+  if (opener && await opener.isVisible()) {
     await opener.click();
     await page.waitForTimeout(400);
   }
@@ -170,8 +180,8 @@ function readSurfaces(page) {
     fail("a selected control inks " + surfaces.selectedInk
       + ", not the band's own " + surfaces.bandWords);
   }
-  if (hexToRgb(surfaces.meta) !== surfaces.band) {
-    fail("theme-color is " + surfaces.meta + ", not the band " + surfaces.band);
+  if (hexToRgb(surfaces.meta) !== pageSurface) {
+    fail("theme-color is " + surfaces.meta + ", not the page " + pageSurface);
   }
   if (surfaces.disabled === surfaces.enabled) {
     fail("a disabled control inks " + surfaces.disabled + ", the same as an enabled one");
