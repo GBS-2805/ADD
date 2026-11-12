@@ -44,10 +44,22 @@ BOARDS = ROOT / "figma"
 DERIVED = ("site-figma.svg", "pantone.svg")
 PHONE_ICONS = ("16-icons-lineicons-phone.svg", "17-icons-coolicons-phone.svg",
                "18-icons-streamline-phone.svg")
-SEARCH_BOARDS = ("04-icons-lineicons-desktop.svg", "05-icons-coolicons-desktop.svg",
-                 "06-icons-streamline-desktop.svg", "16-icons-lineicons-phone.svg",
-                 "17-icons-coolicons-phone.svg", "18-icons-streamline-phone.svg")
 SEARCH_PLACEHOLDER = "Search by name"
+SEARCH_PLACEHOLDERS = {
+    "04-icons-lineicons-desktop.svg": {"x": "15", "y": "1046.58", "font-family": "Spectral",
+                                      "font-size": "16", "font-weight": "400"},
+    "05-icons-coolicons-desktop.svg": {"x": "15", "y": "1046.58", "font-family": "Spectral",
+                                      "font-size": "16", "font-weight": "400"},
+    "06-icons-streamline-desktop.svg": {"x": "15", "y": "1046.58", "font-family": "Spectral",
+                                       "font-size": "16", "font-weight": "400"},
+    "16-icons-lineicons-phone.svg": {"x": "35", "y": "1170.78", "font-family": "Spectral",
+                                     "font-size": "15", "font-weight": "400"},
+    "17-icons-coolicons-phone.svg": {"x": "35", "y": "1170.78", "font-family": "Spectral",
+                                     "font-size": "15", "font-weight": "400"},
+    "18-icons-streamline-phone.svg": {"x": "35", "y": "1222.92", "font-family": "Spectral",
+                                      "font-size": "15", "font-weight": "400"},
+}
+SEARCH_BOARDS = tuple(SEARCH_PLACEHOLDERS)
 HOVER_BOARDS = ("25-index-menu-desktop.svg", "26-index-drawer-desktop.svg",
                 "27-index-menu-phone.svg", "28-index-drawer-phone.svg")
 TEXT_RE = re.compile(r"<text\b([^>]*)>(.*?)</text>")
@@ -99,18 +111,24 @@ def unstable_boards(first, second, names=PHONE_ICONS):
             or (first / name).read_bytes() != (second / name).read_bytes()]
 
 
-def placeholder_problems(directory, names=SEARCH_BOARDS, text=SEARCH_PLACEHOLDER):
-    """Icon boards that do not carry exactly one visible search placeholder."""
+def placeholder_problems(directory, expected=SEARCH_PLACEHOLDERS):
+    """Icon boards whose search placeholder is absent, moved or wrong-typed."""
     found = []
-    for name in names:
+    for name, want in expected.items():
         path = directory / name
         if not path.is_file():
             found.append((name, "board missing"))
             continue
-        count = sum(1 for match in TEXT_RE.finditer(path.read_text(encoding="utf-8"))
-                    if html.unescape(match.group(2)).strip() == text)
-        if count != 1:
-            found.append((name, "%d copies" % count))
+        runs = [dict(ATTR_RE.findall(match.group(1)))
+                for match in TEXT_RE.finditer(path.read_text(encoding="utf-8"))
+                if html.unescape(match.group(2)).strip() == SEARCH_PLACEHOLDER]
+        if len(runs) != 1:
+            found.append((name, "%d copies" % len(runs)))
+            continue
+        wrong = ["%s=%r (want %r)" % (key, runs[0].get(key), value)
+                 for key, value in want.items() if runs[0].get(key) != value]
+        if wrong:
+            found.append((name, "; ".join(wrong)))
     return found
 
 

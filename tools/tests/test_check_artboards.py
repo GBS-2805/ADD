@@ -17,13 +17,16 @@ class SearchPlaceholderTest(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
         self.boards = Path(self.tmp.name)
-        for name in check_artboards.SEARCH_BOARDS:
-            (self.boards / name).write_text(
-                '<svg><text x="1" y="2">Search by name</text></svg>\n',
-                encoding="utf-8")
+        for name, attrs in check_artboards.SEARCH_PLACEHOLDERS.items():
+            self.write(name, attrs)
 
     def tearDown(self):
         self.tmp.cleanup()
+
+    def write(self, name, attrs):
+        style = " ".join('%s="%s"' % item for item in attrs.items())
+        (self.boards / name).write_text(
+            '<svg><text %s>Search by name</text></svg>\n' % style, encoding="utf-8")
 
     def test_committed_icon_boards_keep_the_placeholder(self):
         self.assertEqual(check_artboards.placeholder_problems(check_artboards.BOARDS), [])
@@ -44,6 +47,26 @@ class SearchPlaceholderTest(unittest.TestCase):
             encoding="utf-8")
         self.assertEqual(check_artboards.placeholder_problems(self.boards),
                          [(name, "2 copies")])
+
+    def test_moved_placeholder_is_reported(self):
+        name = check_artboards.SEARCH_BOARDS[0]
+        attrs = dict(check_artboards.SEARCH_PLACEHOLDERS[name])
+        attrs["x"] = "0"
+        self.write(name, attrs)
+        problems = check_artboards.placeholder_problems(self.boards)
+        self.assertEqual(len(problems), 1)
+        self.assertEqual(problems[0][0], name)
+        self.assertIn("x='0' (want '15')", problems[0][1])
+
+    def test_wrong_placeholder_font_is_reported(self):
+        name = check_artboards.SEARCH_BOARDS[-1]
+        attrs = dict(check_artboards.SEARCH_PLACEHOLDERS[name])
+        attrs["font-family"] = "Poppins"
+        self.write(name, attrs)
+        problems = check_artboards.placeholder_problems(self.boards)
+        self.assertEqual(len(problems), 1)
+        self.assertEqual(problems[0][0], name)
+        self.assertIn("font-family='Poppins' (want 'Spectral')", problems[0][1])
 
 
 class HiddenHoverTwinTest(unittest.TestCase):
