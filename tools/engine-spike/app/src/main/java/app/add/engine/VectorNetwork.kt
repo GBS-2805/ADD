@@ -163,7 +163,7 @@ fun starNetwork(): VectorNetwork {
     return VectorNetwork(
         points = points,
         segments = segments,
-        regions = listOf(VecRegion("star-region", segments.map { it.id }, 0xFF0FBF92.toInt())),
+        regions = listOf(VecRegion("star-region", segments.map { it.id }, EngineEdition.PlumArgb)),
     )
 }
 
@@ -200,5 +200,5 @@ fun triangleNetwork(): VectorNetwork = VectorNetwork(
         VecSegment("triangle-bc", "triangle-b", "triangle-c"),
         VecSegment("triangle-ca", "triangle-c", "triangle-a"),
     ),
-    regions = listOf(VecRegion("triangle-region", listOf("triangle-ab", "triangle-bc", "triangle-ca"), 0xFFE86A4A.toInt())),
+    regions = listOf(VecRegion("triangle-region", listOf("triangle-ab", "triangle-bc", "triangle-ca"), EngineEdition.PlumHoverArgb)),
 )

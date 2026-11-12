@@ -338,7 +338,7 @@ internal fun ObjectBar(
                     onClick = { onOpen(StudioTab.Style) },
                     shape = RoundedCornerShape(15.dp),
                     background = Paper,
-                    border = BorderStroke(1.dp, Ink.copy(alpha = 0.16f)),
+                    border = BorderStroke(1.dp, Cream.copy(alpha = 0.16f)),
                     modifier = Modifier.size(42.dp).testTag("object-thumb"),
                 ) {
                     Text(layerGlyph(layer), color = layerStickerInk(layer), fontSize = 19.sp, fontWeight = FontWeight.Bold)
@@ -438,16 +438,16 @@ internal fun layerStickerInk(layer: Layer): Color = when (layer) {
     is VectorLayer -> if ((layer.fill ushr 24) == 0) Mint else Color(layer.fill)
     is IconLayer -> Color(layer.tint)
     is ImageLayer -> Mint
-    is ModelLayer -> Color(0xFF7A5A12)
-    is GroupLayer -> Ink
+    is ModelLayer -> Mint
+    is GroupLayer -> Cream
 }
 
 internal fun layerStickerWash(layer: Layer): Color = when (layer) {
     is TextLayer -> MintWash
     is VectorLayer -> MintWash
     is IconLayer -> MintWash
-    is ImageLayer -> Color(0xFFE9F0E8)
-    is ModelLayer -> Color(0xFFF1EBCB)
+    is ImageLayer -> MintWash
+    is ModelLayer -> MintWash
     is GroupLayer -> MintWash
 }
 
@@ -479,7 +479,7 @@ internal fun CreateDeck(
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(Ink.copy(alpha = 0.64f))
+                    .background(Cream.copy(alpha = 0.64f))
                     .clickable(onClick = onClose),
             )
             Column(
@@ -1031,7 +1031,7 @@ internal fun SheetBackgroundScrim(onClose: () -> Unit) {
     Box(
         Modifier
             .fillMaxSize()
-            .background(Ink.copy(alpha = 0.52f))
+            .background(Cream.copy(alpha = 0.52f))
             .clickable(onClick = onClose),
     )
 }

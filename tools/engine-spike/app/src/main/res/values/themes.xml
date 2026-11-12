@@ -3,9 +3,10 @@
     <style name="Theme.EngineSpike" parent="android:style/Theme.Material.NoActionBar">
         <item name="android:fontFamily">sans</item>
         <item name="android:windowLightStatusBar">false</item>
-        <item name="android:statusBarColor">#0C1210</item>
-        <item name="android:navigationBarColor">#0C1210</item>
-        <item name="android:windowBackground">#0C1210</item>
-        <item name="android:colorAccent">#0FBF92</item>
+        <item name="android:windowLightNavigationBar">true</item>
+        <item name="android:statusBarColor">#5B2A4B</item>
+        <item name="android:navigationBarColor">#F0E7D4</item>
+        <item name="android:windowBackground">#F0E7D4</item>
+        <item name="android:colorAccent">#5B2A4B</item>
     </style>
 </resources>

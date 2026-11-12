@@ -233,7 +233,7 @@ fun IconSheet(doc: EngineDocument, onClose: () -> Unit) {
                             ) {
                                 IconThumb(
                                     glyph = glyph,
-                                    tint = 0xFFF2EEE3.toInt(),
+                                    tint = EngineEdition.InkArgb,
                                     modifier = Modifier.fillMaxWidth().height(40.dp),
                                 )
                                 Spacer(Modifier.height(2.dp))

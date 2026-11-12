@@ -27,6 +27,11 @@ or native touch behaviour.
 The autosave label uses a fixed clock in the test, so a captured frame cannot
 change just because the test ran at a different time.
 
+**Review edition re-record (11 Nov 2026):** all fourteen were re-recorded on the
+site's paper, ink and plum tokens. The lab's chrome is light: paper page, ink type,
+plum selection and actions, and the app's functional warning ink for destructive
+states. The artboard is band ink so it still separates from the page.
+
 **Material Ink / blank-artboard re-record (11 Nov 2026):** all fourteen were
 reviewed and re-recorded. The new `ink` capture proves the gesture stroke and HUD;
 the `texture-panel` and `texture` captures cover the recording's blank interval —

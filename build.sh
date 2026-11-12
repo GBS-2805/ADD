@@ -149,6 +149,8 @@ check_fallback() {
 # the attributes, and every layout against the theme. No browser needed, which is why
 # this half runs here; `tools/check_palette.py --browser <url>` adds the rendered one.
 check_palette() {
+    echo "== edition: sync app and Studio from the site =="
+    python3 "$ROOT/tools/sync_edition.py"
     echo "== palette: site and app =="
     python3 "$ROOT/tools/check_palette.py"
 }

@@ -47,6 +47,9 @@ sealed interface PaintSpec {
         val background: Int,
         val scale: Float = 1f,
     ) : PaintSpec
+
+    /** A flow field: colour spots, reach, warp and grain, never a stop list. */
+    data class Field(val field: FieldSpec) : PaintSpec
 }
 
 val PaintSpec.label: String
@@ -55,6 +58,7 @@ val PaintSpec.label: String
         is PaintSpec.Gradient -> kind.label
         is PaintSpec.Image -> "IMAGE"
         is PaintSpec.Pattern -> "PATTERN / ${kind.label}"
+        is PaintSpec.Field -> "FIELD"
     }
 
 val PaintSpec.gradient: PaintSpec.Gradient?

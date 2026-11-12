@@ -364,18 +364,20 @@ public class EditorActivity extends Activity {
         out.putBoolean("editor_studio", studioOpen);
     }
 
-    /** The native chrome yields to the press; system bars follow the Studio graphite. */
+    /** The native chrome yields to the press; system bars follow the paper edition. */
     private void paintSystemBars(boolean studio) {
         View decor = getWindow().getDecorView();
         if (studio) {
             if (quickUiFlags < 0) {
                 quickUiFlags = decor.getSystemUiVisibility();
             }
-            decor.setSystemUiVisibility(quickUiFlags
-                    & ~View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
-                    & ~View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
-            getWindow().setStatusBarColor(Color.parseColor("#131513"));
-            getWindow().setNavigationBarColor(Color.parseColor("#131513"));
+            // The Studio masthead is plum, so the status bar keeps light icons;
+            // the navigation bar is paper and keeps dark icons.
+            decor.setSystemUiVisibility((quickUiFlags
+                    & ~View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR)
+                    | View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
+            getWindow().setStatusBarColor(colour(R.attr.band, Color.BLACK));
+            getWindow().setNavigationBarColor(colour(R.attr.page, Color.BLACK));
         } else {
             if (quickUiFlags >= 0) {
                 decor.setSystemUiVisibility(quickUiFlags);

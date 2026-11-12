@@ -26,7 +26,8 @@ object DocumentCodec {
     // tracking and case are optional v4 fields: a v3 or early-v4 file opens in
     // Poppins with no tracking and no case transform.
     // 5 adds material ink strokes: seeded recipes and normalized points, never pixels.
-    const val VERSION = 5
+    // 6 adds the flow-field background, a recipe with colour spots and dial values.
+    const val VERSION = 6
 
     data class Document(
         val layers: List<Layer>,
@@ -40,6 +41,7 @@ object DocumentCodec {
         /** Non-null when a saved texture reference could not be regenerated. */
         val textureWarning: String? = null,
         val ink: List<TextureInk> = emptyList(),
+        val backgroundField: FieldSpec? = null,
     )
 
     fun encode(
@@ -52,6 +54,7 @@ object DocumentCodec {
         motion: Map<String, MotionPath> = emptyMap(),
         texture: TextureSpec? = null,
         ink: List<TextureInk> = emptyList(),
+        backgroundField: FieldSpec? = null,
     ): String {
         val root = JSONObject()
         root.put("schema", VERSION)
@@ -95,6 +98,7 @@ object DocumentCodec {
         if (ink.isNotEmpty()) {
             root.put("ink", JSONArray().also { array -> ink.forEach { array.put(encodeInk(it)) } })
         }
+        backgroundField?.let { root.put("field", encodeField(it)) }
         return root.toString()
     }
 
@@ -149,6 +153,7 @@ object DocumentCodec {
         val textureRaw = root.opt("texture")
         val texture = decodeTexture(textureRaw as? JSONObject)
         val ink = decodeInk(root.optJSONArray("ink"))
+        val backgroundField = decodeField(root.optJSONObject("field"))
         Document(
             layers = layers,
             selectedId = root.optString("selected").ifBlank { null },
@@ -170,6 +175,7 @@ object DocumentCodec {
                 "TEXTURE DROPPED · unknown family or invalid recipe; paper kept clean"
             } else null,
             ink = ink,
+            backgroundField = backgroundField,
         )
     }.getOrNull()
 
@@ -346,8 +352,8 @@ object DocumentCodec {
                 rotation = rotation,
                 skewX = skew,
                 network = o.optJSONObject("network")?.let { decodeNetwork(it) } ?: starNetwork(),
-                fill = o.optInt("fill", 0xFF0FBF92.toInt()),
-                stroke = o.optInt("stroke", 0xFF11231C.toInt()),
+                fill = o.optInt("fill", EngineEdition.PlumArgb),
+                stroke = o.optInt("stroke", EngineEdition.InkArgb),
                 strokeWidth = o.optDouble("strokeWidth", 4.0).toFloat(),
                 paint = decodePaint(o.optJSONObject("paint")),
                 style = decodeStyle(o.optJSONObject("style")),
@@ -366,7 +372,7 @@ object DocumentCodec {
                 text = o.optString("text", "TYPE"),
                 fontSize = o.optDouble("fontSize", 48.0).toFloat(),
                 lineHeight = o.optDouble("lineHeight", 1.0).toFloat(),
-                color = o.optInt("color", 0xFF11231C.toInt()),
+                color = o.optInt("color", EngineEdition.InkArgb),
                 align = runCatching { TextAlign.valueOf(o.optString("align", "Left")) }
                     .getOrDefault(TextAlign.Left),
                 weight = o.optInt("weight", 600),
@@ -389,7 +395,7 @@ object DocumentCodec {
                 rotation = rotation,
                 skewX = skew,
                 glyph = o.optJSONObject("glyph")?.let { decodeGlyph(it) } ?: return null,
-                tint = o.optInt("tint", 0xFF11231C.toInt()),
+                tint = o.optInt("tint", EngineEdition.InkArgb),
                 style = decodeStyle(o.optJSONObject("style")),
             )
             "image" -> ImageLayer(
@@ -466,13 +472,17 @@ object DocumentCodec {
                 put("background", paint.background)
                 put("scale", paint.scale.toDouble())
             }
+            is PaintSpec.Field -> {
+                put("type", "field")
+                put("field", encodeField(paint.field))
+            }
         }
     }
 
     private fun decodePaint(o: JSONObject?): PaintSpec? {
         if (o == null) return null
         return when (o.optString("type")) {
-            "solid" -> PaintSpec.Solid(o.optInt("color", 0xFF0FBF92.toInt()))
+            "solid" -> PaintSpec.Solid(o.optInt("color", EngineEdition.PlumArgb))
             "gradient" -> {
                 val kind = runCatching { PaintKind.valueOf(o.optString("kind", "Linear")) }
                     .getOrDefault(PaintKind.Linear)
@@ -491,12 +501,62 @@ object DocumentCodec {
             "pattern" -> PaintSpec.Pattern(
                 kind = runCatching { PatternKind.valueOf(o.optString("kind", "Checks")) }
                     .getOrDefault(PatternKind.Checks),
-                foreground = o.optInt("foreground", 0xFF11231C.toInt()),
-                background = o.optInt("background", 0xFFF3EBDD.toInt()),
+                foreground = o.optInt("foreground", EngineEdition.InkArgb),
+                background = o.optInt("background", EngineEdition.PaperArgb),
                 scale = o.optDouble("scale", 1.0).toFloat(),
             )
+            "field" -> o.optJSONObject("field")?.let { decodeField(it) }?.let { PaintSpec.Field(it) }
             else -> null
         }
+    }
+
+    private fun encodeField(field: FieldSpec): JSONObject = JSONObject().apply {
+        val clean = field.normalized()
+        put("colors", JSONArray().also { array ->
+            clean.colors.forEach { spot ->
+                array.put(
+                    JSONObject()
+                        .put("color", spot.color)
+                        .put("x", spot.x.toDouble())
+                        .put("y", spot.y.toDouble())
+                        .put("band", spot.band.toDouble())
+                )
+            }
+        })
+        put("scale", clean.scale.toDouble())
+        put("distortion", clean.distortion.toDouble())
+        put("swirl", clean.swirl.toDouble())
+        put("speed", clean.speed.toDouble())
+        put("soften", clean.soften.toDouble())
+        put("noise", clean.noise.toDouble())
+        put("animated", clean.animated)
+    }
+
+    private fun decodeField(o: JSONObject?): FieldSpec? {
+        if (o == null) return null
+        val colors = o.optJSONArray("colors").orEmpty().mapNotNull { spot ->
+            val x = spot.optDouble("x", Double.NaN)
+            val y = spot.optDouble("y", Double.NaN)
+            val band = spot.optDouble("band", 0.30)
+            if (!x.isFinite() || !y.isFinite() || !band.isFinite()) return@mapNotNull null
+            FieldColor(
+                color = spot.optInt("color", 0xFF000000.toInt()),
+                x = x.toFloat(),
+                y = y.toFloat(),
+                band = band.toFloat(),
+            )
+        }.take(FieldSpec.MAX_FIELD_COLORS)
+        if (colors.size < 2) return null
+        return FieldSpec(
+            colors = colors,
+            scale = o.optDouble("scale", 0.5).toFloat(),
+            distortion = o.optDouble("distortion", 0.6).toFloat(),
+            swirl = o.optDouble("swirl", 0.1).toFloat(),
+            speed = o.optDouble("speed", 0.3).toFloat(),
+            soften = o.optDouble("soften", 0.0).toFloat(),
+            noise = o.optDouble("noise", 0.06).toFloat(),
+            animated = o.optBoolean("animated", true),
+        ).normalized()
     }
 
     private fun encodeStyle(style: LayerStyle): JSONObject = JSONObject().apply {
@@ -592,8 +652,8 @@ object DocumentCodec {
             grain = o.optDouble("grain", 0.0).toFloat(),
             halftone = o.optDouble("halftone", 0.0).toFloat(),
             duotone = o.optBoolean("duotone", false),
-            duotoneDark = o.optInt("duotoneDark", 0xFF11231C.toInt()),
-            duotoneLight = o.optInt("duotoneLight", 0xFFD6E381.toInt()),
+            duotoneDark = o.optInt("duotoneDark", EngineEdition.InkArgb),
+            duotoneLight = o.optInt("duotoneLight", EngineEdition.PaperArgb),
         )
     }
 
@@ -762,6 +822,7 @@ object DocumentStore {
             doc.motion,
             doc.texture,
             doc.ink,
+            doc.backgroundField,
         )
         FileOutputStream(temp).use { out ->
             out.write(text.toByteArray())
@@ -831,6 +892,7 @@ object DocumentStore {
                 doc.motion,
                 doc.texture,
                 doc.ink,
+                doc.backgroundField,
             )
         )
         if (!temp.renameTo(target)) throw IOException("could not save $key")

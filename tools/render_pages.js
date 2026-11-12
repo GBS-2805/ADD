@@ -38,7 +38,7 @@ const shots = [
   { name: "page-menu", page: "", w: 1300, h: 900, open: "#menuBtn", title: "Left pull-down", caption: "Index, resources, download and handoff, one row each." },
   { name: "page-drawer", page: "", w: 1300, h: 900, open: "#burger", title: "Right side tab", caption: "Download, portfolio and renders over the scrim." },
   { name: "page-tools", page: "tools/", w: 1300, h: 900, title: "Resources", caption: "Icons, fonts and the engine, with one quiet line to the app." },
-  { name: "page-icons", page: "icons/", w: 1300, h: 900, title: "Icons app page", caption: "The icon brand landing: four brands and what each set does." },
+  { name: "page-icons", page: "icons/", w: 1300, h: 900, full: true, title: "Icons database", caption: "A two-line serif hero, a searchable outline grid and the four sets, one row each." },
   { name: "page-icons-brand", page: "icons/coolicons/", w: 1300, h: 900, title: "Coolicons · preview", caption: "The stage is the preview: weight, surface and export size beside it." },
   { name: "page-icons-panel", page: "icons/coolicons/", w: 1300, h: 900, panel: true, scroll: "panel", title: "Coolicons · the set", caption: "All 1,258 icons behind one toggle, scrolling in their own sheet." },
   { name: "page-icons-variants", page: "icons/coolicons/", w: 1300, h: 900, panel: true, pick: 6, weight: "2.5", surface: "white", title: "Coolicons · variants", caption: "Heaviest line on the white tile: the same file, repainted live." },
@@ -47,7 +47,7 @@ const shots = [
   { name: "page-icons-ink", page: "icons/streamline/", w: 1300, h: 900, panel: true, ink: "#000000", surface: "white", scroll: "stage", title: "Streamline \u00b7 black ink", caption: "The Colour row at work: black ink on the white stage." },  { name: "page-icons-categories", page: "icons/coolicons/", w: 1300, h: 900, panel: true, category: "System", scroll: "panel", title: "Coolicons · categories", caption: "The vendor's own 30 categories: System narrows the sheet to 102 icons." },
   { name: "page-all", page: "icons/all/", w: 1300, h: 900, full: true, title: "All brands \u00b7 one per category", caption: "Four brands, the three categorized sheets opening with the same three shared categories." },
   { name: "page-lineicons-categories", page: "icons/lineicons/", w: 1300, h: 900, panel: true, category: "Brands & Logos", scroll: "panel", title: "Lineicons · categories", caption: "The other brand's own 51 categories: Brands & Logos holds 244 of its 606 icons." },
-  { name: "page-fonts", page: "fonts/", w: 1300, h: 900, full: true, title: "Fonts", caption: "Poppins 400, 500 and 600 with live specimens, the type-your-own preview and the wiring." },
+  { name: "page-fonts", page: "fonts/", w: 1300, h: 900, full: true, title: "Fonts database", caption: "Eight families, one specimen row each, with a live try line and a size slider." },
   { name: "page-portfolio", page: "portfolio/", w: 1300, h: 900, title: "Portfolio", caption: "Resources, download and handoff: the three ways into the shelf." },
   { name: "page-download", page: "download/", w: 1300, h: 900, full: true, title: "Download", caption: "The signed APK, its measured size and SHA-256, with the font packs below." },
   { name: "phone-download-packs", page: "download/", w: 390, h: 844, scroll: "font-packs", title: "Font packs on a phone", caption: "The signed packs at the foot of Download, the only place a file is handed out." },
@@ -56,11 +56,11 @@ const shots = [
   { name: "phone-home-full", page: "", w: 390, h: 844, full: true, title: "Index, phone, full height", caption: "The whole landing page at phone width." },
   { name: "phone-menu", page: "", w: 390, h: 844, open: "#menuBtn", title: "Phone pull-down", caption: "Index, resources, download and handoff under the band." },
   { name: "phone-drawer", page: "", w: 390, h: 844, open: "#burger", title: "Phone side tab", caption: "The tab keeps the page visible behind it." },
-  { name: "phone-icons", page: "icons/", w: 390, h: 844, title: "Icons on a phone", caption: "The app page at phone width." },
+  { name: "phone-icons", page: "icons/", w: 390, h: 844, full: true, title: "Icons on a phone", caption: "The hero, the searchable five-across icon grid and the four set rows at 390 wide." },
   { name: "phone-icons-brand", page: "icons/coolicons/", w: 390, h: 844, panel: true, pick: 2, scroll: "stage", title: "Coolicons on a phone", caption: "Preview, variant rows, and the set opened below." },
   { name: "phone-icons-streamline", page: "icons/streamline/", w: 390, h: 844, panel: true, pick: 2, style: "flat", scroll: "stage", title: "Streamline on a phone", caption: "Four style buttons above the preview; the set opens below." },
   { name: "phone-all", page: "icons/all/", w: 390, h: 844, full: true, title: "All brands on a phone", caption: "Four sheets stacked at 390 wide, four across." },
-  { name: "phone-fonts", page: "fonts/", w: 390, h: 844, full: true, title: "Fonts on a phone", caption: "The three faces and the type-your-own preview stacked at 390 wide." },
+  { name: "phone-fonts", page: "fonts/", w: 390, h: 844, title: "Fonts on a phone", caption: "The specimen, its size slider and the visible style list at 390 wide." },
   { name: "page-releases", page: "releases/", w: 1300, h: 900, title: "Releases", caption: "Every build the shelf has shipped, newest first, with the day, the size and the note." },
   { name: "phone-releases", page: "releases/", w: 390, h: 844, title: "Releases on a phone", caption: "The newest builds at 390 wide: the fold of a history that runs to 7,398 px." },
   { name: "page-compress", page: "compress/", w: 1300, h: 900, title: "Compress", caption: "The app's compressor as a web tool: photos, format, quality and the longest edge, with nothing uploaded." },
@@ -112,8 +112,11 @@ const escape = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/
       await page.waitForTimeout(320);
     }
     if (s.panel) {
-      await page.click("#panelToggle");
-      await page.waitForTimeout(280);
+      const toggle = page.locator("#panelToggle");
+      if (await toggle.count() && await toggle.isVisible().catch(() => false)) {
+        await toggle.click();
+        await page.waitForTimeout(280);
+      }
     }
     if (s.style) {
       await page.click(`#styleSegs .seg[data-style="${s.style}"]`);
@@ -136,14 +139,17 @@ const escape = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/
       await page.waitForTimeout(320);
     }
     if (s.category) {
-      await page.click("#catBtn");
-      await page.waitForTimeout(120);
-      await page.evaluate((name) => {
-        const hit = Array.from(document.querySelectorAll(".cat-item"))
-          .find((b) => b.textContent.trim().startsWith(name));
-        if (hit) hit.click();
-      }, s.category);
-      await page.waitForTimeout(200);
+      const catBtn = page.locator("#catBtn");
+      if (await catBtn.count() && await catBtn.isVisible().catch(() => false)) {
+        await catBtn.click();
+        await page.waitForTimeout(120);
+        await page.evaluate((name) => {
+          const hit = Array.from(document.querySelectorAll(".cat-item"))
+            .find((b) => b.textContent.trim().startsWith(name));
+          if (hit) hit.click();
+        }, s.category);
+        await page.waitForTimeout(200);
+      }
     }
     if (s.scroll) {
       await page.evaluate((target) => {

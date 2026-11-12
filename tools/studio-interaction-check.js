@@ -121,19 +121,20 @@ async function main() {
     return node ? node.getBoundingClientRect().toJSON() : null;
   }, selector);
   const openTool = async (target, name) => {
-    await target.click(`[data-tool="${name}"]`);
+    await target.click(`button[data-tool="${name}"]`);
     await target.waitForSelector(`[data-sheet="${name}"]`, { state: 'visible' });
     await target.waitForTimeout(80);
   };
   const closeInspector = async (target) => {
-    await target.click('[data-tool="move"]');
+    await target.click('button[data-tool="move"]');
     await target.waitForFunction(() => document.getElementById('peek').hidden);
     await target.waitForTimeout(80);
   };
 
   try {
     await page.goto(`http://127.0.0.1:${port}/index.html`, { waitUntil: 'networkidle' });
-    await page.waitForFunction(() => window.__studioInteraction && window.__studioMotion);
+    await page.waitForFunction(() => window.__studioInteraction && window.__studioMotion && window.StudioSeedReady);
+    await page.evaluate(() => document.fonts.ready);
     await page.waitForTimeout(250);
 
     const initial = await state();
@@ -162,6 +163,8 @@ async function main() {
     const before = await state();
     assert.strictEqual(before.selected, 'MOVE');
     assert.strictEqual(before.angle, 0);
+    await page.evaluate(() => document.fonts.ready);
+    await page.waitForTimeout(80);
     const frame = await rect('#selection-frame');
     assert.ok(frame && frame.width > 20 && frame.height > 10, 'selection frame must be visible');
 
@@ -218,6 +221,8 @@ async function main() {
     assertClose(during.horizontal.y, geometry.canvas.y + geometry.targetY * geometry.scale, 'horizontal guide y', 1);
 
     // The evidence and pixel guard are taken while the pointer is still down.
+    await page.evaluate(() => document.fonts.ready);
+    await page.waitForTimeout(60);
     const snapVisual = await visualGuard(page, 'studio-snapped-guides');
 
     await page.mouse.up();
@@ -442,7 +447,8 @@ async function main() {
     });
     reducedPage.on('pageerror', (error) => { reducedErrors.push('pageerror: ' + error.message); });
     await reducedPage.goto(`http://127.0.0.1:${port}/index.html`, { waitUntil: 'networkidle' });
-    await reducedPage.waitForFunction(() => window.__studioInteraction && window.__studioMotion);
+    await reducedPage.waitForFunction(() => window.__studioInteraction && window.__studioMotion && window.StudioSeedReady);
+    await reducedPage.evaluate(() => document.fonts.ready);
     await openTool(reducedPage, 'type');
     await reducedPage.click('#add');
     await closeInspector(reducedPage);

@@ -413,7 +413,7 @@ if ! adb get-state >/dev/null 2>&1; then
     echo "== booting $AVD windowed (TCG, 3-6 min) =="
     QT_QPA_PLATFORM=offscreen setsid nohup "$SDK/emulator/emulator" -avd "$AVD" \
         -no-audio -no-boot-anim -gpu swiftshader_indirect -no-snapshot -no-metrics \
-        -accel off -memory 2048 -cores 2 -qt-hide-window \
+        -accel off -memory 4096 -cores 4 -qt-hide-window \
         -camera-back none -camera-front none > "$OUT/emulator.log" 2>&1 &
 fi
 

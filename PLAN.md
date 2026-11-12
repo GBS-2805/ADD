@@ -1,6 +1,8 @@
 # ADD — compiled plan
 
-10 November 2026. Engine plan plus the first implemented Studio shell slice; no site code, app theme, release, commit or production deploy is changed by this document.
+12 November 2026.
+
+> **Current decision.** Native Engine v2 is the shipping editor. The Studio sections below are retained as historical and specification reference; where this document conflicts with `NATIVE_EDITOR_V2.md`, native v2 wins. The first field-gradient preview is Android 13+ and ships as a separate review APK beside 3.9.
 
 ## 1. Thesis
 
@@ -14,14 +16,14 @@ The basic bar is the Are.na type/lettering channel: heavy display type, stacked 
 
 These are the defaults for implementation. Any of them can be changed before Phase 0; nothing later should silently reverse them.
 
-1. **Studio is the canonical engine.** The WebView Studio becomes the product surface. The native `tools/engine-spike` is frozen as the 3D and performance lab; it is not shipped as a second editor.
-2. **Native shell, web engine.** Android remains the shell for launch, file I/O, photo picking, fonts, export, sharing, haptics and offline assets. The document, tools, canvas and interface live in the Studio WebView.
-3. **Canvas2D plus WebGL.** Canvas2D keeps text and vectors crisp; WebGL handles raster, brushes, textures, metallic finishes, blending and compositing. Fabric is the starting interaction layer, not the final renderer.
+1. **Native Engine v2 is the canonical engine.** Kotlin, Compose and Skia draw the document; Filament carries the 3D layer. Studio is frozen as reference.
+2. **Native shell, native engine.** Android owns launch, files, photo picking, fonts, export, sharing, haptics, offline assets and the canvas. There is no second WebView editor in the shipped app.
+3. **Skia plus Filament.** Skia keeps text, vectors, fields, textures and compositing deterministic; Filament carries the 3D layer. A field is a document recipe, never a WebGL-only surface.
 4. **GSAP is for the interface first, artwork motion second.** The editor’s chrome and transitions use GSAP now. A per-layer timeline, prototype playback and animated export come after the static poster is excellent.
 5. **Two pages, one artboard at a time.** The document model supports a `pages` array. The UI exposes two pages. v1 creates exactly one artboard per page; the stage shows one artboard, never an infinite canvas.
 6. **Local-first and offline.** No account, no network, no cloud dependency. Project files and assets live on the device and can be exported.
 7. **The archive is newsprint and ink.** One material system; no palette chips and no light/dark switch. Newsprint cream, black ink, one stamp red, halftone grey; graphite for the Studio. The full identity is in `BRAND.md`. This is a site track, parallel to the engine.
-8. **Studio-first launch.** The app opens into the Studio, with the archive one tap away. QUICK remains the simple photo-and-type editor.
+8. **Native-first launch.** The app opens into the native editor, with the archive one tap away. The Studio tab is review-only until parity is removed from the roadmap.
 9. **No commit, deploy or release until a review verdict.** Every visual phase is shown as a working build with public captures and the handoff page before it ships.
 
 ## 3. Where the project stands
@@ -625,7 +627,7 @@ The proof is deliberately small and must be measured, not inferred:
 
 The locked identity is `BRAND.md`; this section records how the archive applies it.
 
-- **Surface:** newsprint `#E9E0CB`, ink `#15120E`, stamp red `#DD4124` for marks, halftone `#8C8476`; graphite `#131513` is Studio only.
+- **Surface:** review paper `#F0E7D4`, ink `#1B1212`, plum `#5B2A4B` for marks; the site, app and Studio share the generated edition.
 - **Law:** clean structure, dirty ink. Grunge lives in display type, paper and images; never in body copy or controls.
 - **Paper:** procedural newsprint fibre and grain; no downloaded texture; one substrate per page.
 - **Type:** Archivo Black for display, Redaction for editorial, Plex Mono for labels, Poppins for body.
@@ -639,9 +641,9 @@ The locked identity is `BRAND.md`; this section records how the archive applies 
 
 ### Frozen
 
-- `tools/engine-spike`: no new feature work except 3D/performance experiments that inform the Studio. Its plan remains the lab plan.
-- Native editor QUICK: stays simple; no canvas, pages, brushes or components.
+- Studio: no new feature work; it remains a reference and a fallback review surface.
 - The dual-engine idea: no second editor in the shipped app.
+- Native editor QUICK: stays simple; no canvas, pages, brushes or components.
 
 ### Kept
 
@@ -708,17 +710,19 @@ The locked identity is `BRAND.md`; this section records how the archive applies 
 - Studio opens first; archive one tap away.
 - Two pages in the UI; one artboard per page in v1; model supports more pages.
 - GSAP interface motion now; artwork timeline in Phase 5.
-- Native engine frozen as the lab; no 3D in the Studio v1.
+- Native Engine v2 is the shipping track; Studio is frozen.
+- Android 13+ for the first field preview; older-device support is a later decision, not a hidden fallback.
 - Reference acceptance: three plates from the Are.na type/lettering channel, selected at the start of Phase 2.
 - Project format `.add` zip; local-first, no account.
 - No commit, deploy or release until a phase verdict.
 
 ## 13. First move
 
-On approval, Phase 0 only:
+Native v2 field preview, in this order:
 
-1. Build the WebGL proof in the Studio: one photo, one type layer, one shape, one brush stroke, one grain/halftone finish.
-2. Measure pan/zoom, brush latency, 30-layer drag, 4K preview, memory and GSAP chrome on the target phone.
-3. Record the numbers here. If they pass, start Phase 1. If they fail, decide the native compositor fallback before writing the shell.
+1. Build the separate Android 13+ review APK with the field background and layer fill.
+2. Verify the field recipe round-trips through schema 6, previews at 24 fps, and exports a deterministic PNG.
+3. Compare it with the reference recipe; keep original preset names and palettes.
+4. Then move to the signed resource-pack foundation: fonts/icons, stickers, SVG and field presets.
 
-No engine feature code, site restyle, app theme change, APK, commit or deploy happens before that decision.
+No production replacement of 3.9, site restyle or release happens before a verdict on the preview.

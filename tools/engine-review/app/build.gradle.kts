@@ -17,7 +17,9 @@ android {
 
     defaultConfig {
         applicationId = "app.offline.compress"
-        minSdk = 26
+        // Field backgrounds use the native software compositor, but the preview
+        // target is Android 13+ while the engine shell settles.
+        minSdk = 33
         targetSdk = 35
         // One above the shipping 3.7 (39): an update installs over it. 40 opened the
         // engine on the editor door; 41 keeps the engine on its own tab and records
@@ -58,8 +60,12 @@ android {
         // as document recipes, rendered through the same Skia artboard as export.
         // It also gives the object bar a readable two-row layout, opens Type controls
         // before Transform, and removes duplicate UNDO rows from History.
-        versionCode = 55
-        versionName = "3.8.5"
+        versionCode = 56
+        versionName = "3.9.1-field-preview"
+        // The emulator harness cannot reach a non-exported activity through the shell
+        // uid. Export it only in the x86_64 review variant; the phone APK stays private.
+        manifestPlaceholders["engineExported"] =
+            if (System.getenv("REVIEW_X86") != null) "true" else "false"
 
         ndk {
             // Review build for a phone. Keeping the x86_64 copy would double the

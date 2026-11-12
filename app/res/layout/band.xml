@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  The Wheatpaste masthead: the ADD wordmark and plus on the page ink, with the
-  orange rule the site uses. It is deliberately not a coloured band: the brand
-  keeps the page dark and lets the rule, the plus and the chips carry the accent.
+  The review masthead: the ADD wordmark and plus in page ink, with the plum
+  rule the site uses. It is deliberately not a coloured band: the page stays
+  paper and the rule, the plus and the chips carry the accent.
 -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"

@@ -25,8 +25,8 @@
     },
     {
       "path": "/fonts/",
-      "title": "Fonts — Poppins and the seven Redaction grades, one sheet per family",
-      "description": "Poppins and all seven Redaction grades: woff2, woff and TTF, every weight and italic, free under the SIL Open Font License.",
+      "title": "Fonts — a type tester for Poppins and Redaction",
+      "description": "Poppins and the seven Redaction grades: 39 styles, one live specimen each, with woff2, woff and TTF downloads under the SIL Open Font License.",
       "heading": "Fonts",
       "section": "fonts"
     },
@@ -48,7 +48,7 @@
       "path": "/icons/",
       "title": "Icons — 4,373 icons in four free brands, offline",
       "description": "The Icons app and its browser: Lineicons, Coolicons, Phosphor and Streamline, 4,373 icons, live preview, copy the SVG. Offline, no account.",
-      "heading": "Icons",
+      "heading": "4,373 free SVG icons",
       "section": "icons"
     },
     {

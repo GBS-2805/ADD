@@ -702,20 +702,134 @@ def menu(root, current):
     return "\n".join(rows)
 
 
+SET_NOTES = {
+    "lineicons": "The free Lineicons set in full, drawn as filled paths on a 24 px grid.",
+    "coolicons": "Stroke drawings with regular corners, the line style kept whole across 30 categories.",
+    "phosphor": "The regular outline weight, whole, with every category drawn on a 256 px grid.",
+    "streamline": "Four styles of the same drawings — Line, Duo, Solid and Flat — from the free Core set.",
+}
+
+HERO_ART = [
+    ("heart", ["heart"]),
+    ("home", ["house", "home", "home-2"]),
+    ("search", ["search"]),
+    ("camera", ["camera"]),
+]
+
+GALLERY_ART = [
+    ("heart", ["heart"]),
+    ("home", ["house", "home", "home-2"]),
+    ("search", ["search"]),
+    ("camera", ["camera"]),
+    ("image", ["image"]),
+    ("folder", ["folder"]),
+    ("file", ["file"]),
+    ("download", ["download"]),
+    ("bell", ["bell"]),
+    ("settings", ["settings"]),
+    ("user", ["user"]),
+    ("mail", ["mail"]),
+    ("message", ["chat", "message"]),
+    ("phone", ["phone"]),
+    ("pin", ["map-pin", "pin"]),
+    ("calendar", ["calendar"]),
+    ("clock", ["clock"]),
+    ("star", ["star"]),
+    ("bookmark", ["bookmark"]),
+    ("lock", ["lock"]),
+    ("key", ["key"]),
+    ("shield", ["shield"]),
+    ("cloud", ["cloud"]),
+    ("sun", ["sun"]),
+    ("moon", ["moon"]),
+    ("leaf", ["leaf"]),
+    ("coffee", ["coffee"]),
+    ("pencil", ["pencil"]),
+    ("brush", ["brush"]),
+    ("palette", ["palette"]),
+]
+
+
+def hub_glyphs(entries):
+    """Resolve the hero and preview names, Coolicons first and whole."""
+    ordered = sorted(entries, key=lambda brand: brand["slug"] != "coolicons")
+    cache = {}
+    picked = {}
+    for slot, candidates in HERO_ART + GALLERY_ART:
+        for brand in ordered:
+            if brand["slug"] not in cache:
+                cache[brand["slug"]] = {icon["name"]: icon
+                                        for icon in load_catalog(brand["data"])["icons"]}
+            for name in candidates:
+                if name in cache[brand["slug"]]:
+                    picked[slot] = cache[brand["slug"]][name]
+                    break
+            if slot in picked:
+                break
+    missing = [slot for slot, _ in HERO_ART + GALLERY_ART if slot not in picked]
+    if missing:
+        raise SystemExit("hub preview is missing: %s" % ", ".join(missing))
+    return picked
+
+
+def icon_svg(icon):
+    return '<svg %s aria-hidden="true" focusable="false">%s</svg>' % (
+        icon.get("attrs", ""), icon.get("body", ""))
+
+
+def hero_markup(icons):
+    return "\n".join(
+        '      <span class="ih-hero-glyph">%s</span>' % icon_svg(icons[slot])
+        for slot, _ in HERO_ART)
+
+
+def gallery_markup(icons):
+    rows = []
+    for index, (slot, _) in enumerate(GALLERY_ART):
+        rows.append(
+            '      <button class="ih-tile" type="button" data-name="%s" '
+            'aria-label="%s" aria-pressed="%s">%s</button>'
+            % (slot, slot, "true" if index == 0 else "false", icon_svg(icons[slot])))
+    return "\n".join(rows)
+
+
+def sample_icons(icons, limit=12):
+    """A dozen readable glyphs: one from each category before any repeats."""
+    picks, seen = [], set()
+    for icon in icons:
+        cat = (icon.get("cat") or "").strip().lower()
+        if cat and cat in seen:
+            continue
+        if cat:
+            seen.add(cat)
+        picks.append(icon)
+        if len(picks) >= limit:
+            return picks
+    if len(picks) < limit:
+        chosen = {id(icon) for icon in picks}
+        for icon in icons:
+            if id(icon) not in chosen:
+                picks.append(icon)
+            if len(picks) >= limit:
+                break
+    return picks
+
+
 def brand_cards(entries):
     cards = []
     for brand in entries:
+        note = SET_NOTES.get(
+            brand["slug"], brand["note"].replace("__COUNT__", fmt(brand["count"])))
         cards.append(
-            '<a class="brand" href="%s/">\n'
-            '        <span class="kind">Brand · %s · %s</span>\n'
-            '        <h3>%s</h3>\n'
-            '        <p>%s</p>\n'
-            '        <span class="go">Open %s</span>\n'
-            '      </a>' % (brand["slug"], brand["licence"], fmt(brand["count"]),
-                             brand["name"],
-                             brand["note"].replace("__COUNT__", fmt(brand["count"])),
-                             brand["name"]))
-    return "\n      ".join(cards)
+            '<a class="ih-set" href="%s/">\n'
+            '  <div class="ih-set-head"><h3>%s</h3>'
+            '<span class="ih-licence">%s</span></div>\n'
+            '  <p class="ih-count"><span class="ih-num">%s</span>'
+            '<span class="ih-unit">icons</span></p>\n'
+            '  <p class="ih-set-note">%s</p>\n'
+            '</a>' % (brand["slug"], brand["name"], brand["licence"],
+                      fmt(brand["count"]), note))
+    return "\n    ".join(cards)
 
 
 def sheet_key(name):

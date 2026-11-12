@@ -25,19 +25,20 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 DOCS = ROOT / "docs"
 ASSETS = DOCS / "assets"
 MAP = DOCS / "data/assets.json"
-SHARED = ("site.css", "site.js")
+SHARED = ("site.css", "site.js", "database.css")
 ARCHIVE = DOCS / "classic"
 
 # Matches a plain or already-hashed reference, at any depth, with an old query.
-REFERENCE = re.compile(r"assets/(site(?:\.\w+)?\.(css|js))(?:\?[^\"']*)?")
+REFERENCE = re.compile(r"assets/((?:site|database)(?:\.\w+)?\.(css|js))(?:\?[^\"']*)?")
 
 
 def names():
     """The hashed filename for each shared asset, from what is on disk now."""
     found = {}
     for name in SHARED:
-        digest = hashlib.sha256((ASSETS / name).read_bytes()).hexdigest()[:10]
-        found[name] = "site.%s%s" % (digest, pathlib.Path(name).suffix)
+        source = pathlib.Path(name)
+        digest = hashlib.sha256((ASSETS / source).read_bytes()).hexdigest()[:10]
+        found[name] = "%s.%s%s" % (source.stem, digest, source.suffix)
     return found
 
 
@@ -51,7 +52,8 @@ def pin(text, mapping=None):
     mapping = mapping or current()
 
     def swap(match):
-        base = "site." + match.group(2)
+        stem = match.group(1).split(".", 1)[0]
+        base = stem + "." + match.group(2)
         return "assets/" + mapping[base]
 
     return REFERENCE.sub(swap, text)
@@ -74,7 +76,7 @@ def pin_all(mapping):
 
 def prune(keep):
     dropped = []
-    for pattern in ("site.*.css", "site.*.js"):
+    for pattern in ("site.*.css", "site.*.js", "database.*.css"):
         for path in ASSETS.glob(pattern):
             if path.name not in keep:
                 path.unlink()

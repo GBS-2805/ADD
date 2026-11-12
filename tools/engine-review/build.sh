@@ -10,7 +10,7 @@ JDK="${JAVA_HOME:-$(cat "$HOME/tools/JDK_PATH" 2>/dev/null || true)}"
 SDK="${ANDROID_SDK_ROOT:-$HOME/android-sdk}"
 HERE="$ROOT/tools/engine-review"
 OUT="$ROOT/artifacts/engine-review"
-APK="$OUT/ADD-3.8.5-engine-review.apk"
+APK="$OUT/ADD-3.9.1-field-preview.apk"
 
 if [ -z "${JDK:-}" ] || [ ! -x "$JDK/bin/java" ]; then
     echo "JAVA_HOME is not set; install a JDK 17 and export JAVA_HOME." >&2

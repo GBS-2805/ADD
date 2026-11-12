@@ -3,7 +3,7 @@ package app.add.engine
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Typography
-import androidx.compose.material.darkColors
+import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
@@ -36,16 +36,19 @@ private val SpikeTypography = Typography(
 @Composable
 fun EngineTheme(content: @Composable () -> Unit) {
     MaterialTheme(
-        colors = darkColors(
+        colors = lightColors(
             primary = Mint,
             primaryVariant = Lime,
             secondary = Clay,
+            secondaryVariant = Clay,
             background = Ink,
             surface = Panel,
-            onPrimary = Ink,
-            onSecondary = Ink,
+            error = Clay,
+            onPrimary = Paper,
+            onSecondary = Paper,
             onBackground = Cream,
             onSurface = Cream,
+            onError = Paper,
         ),
         typography = SpikeTypography,
         content = content,

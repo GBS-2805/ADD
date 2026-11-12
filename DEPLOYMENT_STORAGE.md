@@ -139,6 +139,18 @@ Vercel's [Activity Log](https://vercel.com/docs/activity-log) is available on Ho
 
 ## Change log
 
+- **2026-11-12** — Before publishing the 3.9.1 field preview, the storage report was
+  critical at 1.18 GiB. Pruned the two oldest `artbase-handoff-apk` deployments
+  (`dpl_5GNZWbue7o8pQm7eEUNJQoKhAB3d`, `dpl_B3N6HKs4CT1mGqUFbPiYsp3rSt49`), keeping the
+  deployment that holds `artbase-handoff-apk.vercel.app`. Every historical APK URL on
+  that alias was checked 200 before deletion. The APK and handoff deployments then
+  brought the estimate to 921.1 MiB (warning, below the 1.00 GiB gate). Evidence:
+  `artifacts/audit/prune-2026-11-12-before.json`,
+  `artifacts/audit/prune-2026-11-12-remove.log`,
+  `artifacts/audit/deploy-apk-2026-11-12.log`,
+  `artifacts/audit/deploy-handoff-2026-11-12.log` and
+  `artifacts/audit/vercel-activity-2026-11-12.jsonl`.
+
 - **2026-11-11** — After the 3.9 publication, pruned 4 superseded deployments:
   the 2 oldest `artbase` and the 2 oldest `artbase-handoff-apk`, keeping the newest
   3 site builds and 2 APK builds and every live alias. Estimated storage fell from

@@ -6,10 +6,21 @@
   var W = 540;
   var H = 675;
 
+  // The canvas is a drawing surface, not a separate colour system: read the
+  // generated edition tokens so a site change reaches the engine on reload.
+  var rootStyle = window.getComputedStyle(document.documentElement);
+  function token(name, fallback) {
+    var value = rootStyle.getPropertyValue(name).trim();
+    return value || fallback;
+  }
+  var INK = token('--on', '#1B1212');
+  var PAPER = token('--paper', '#f0e7d4');
+  var ACCENT = token('--accent', '#5b2a4b');
+
   fabric.Object.prototype.set({
-    cornerColor: '#dd4124',
-    cornerStrokeColor: '#f2eee3',
-    borderColor: '#dd4124',
+    cornerColor: ACCENT,
+    cornerStrokeColor: PAPER,
+    borderColor: ACCENT,
     cornerSize: 16,
     transparentCorners: false,
     padding: 4
@@ -18,7 +29,7 @@
   var canvas = new fabric.Canvas('c', {
     width: W,
     height: H,
-    backgroundColor: '#f2eee3',
+    backgroundColor: PAPER,
     preserveObjectStacking: true,
     selection: true,
     allowTouchScrolling: false,
@@ -253,12 +264,12 @@
       fontFamily: 'Instrument Serif, Georgia, serif',
       fontWeight: '400',
       textAlign: 'center',
-      startColour: '#15120e',
-      endColour: '#dd4124',
+      startColour: INK,
+      endColour: ACCENT,
       gradientOn: true,
       gradientAngle: 90,
       outlineOn: false,
-      outlineColour: '#15120e',
+      outlineColour: INK,
       outlineWidth: 6,
       shadowOn: true,
       blendMode: 'source-over'
@@ -556,10 +567,27 @@
     window.addEventListener('resize', fitCanvas);
   }
 
-  addText('ART', { left: 50, top: 150, width: 440, fontSize: 154, fontWeight: '600' }, false);
-  addText('DESIGN', {
-    left: 50, top: 355, width: 440, fontSize: 96, fontWeight: '500', gradientAngle: 0
-  }, false);
-  canvas.requestRenderAll();
-  syncPanel();
+  function seedCanvas() {
+    addText('ART', { left: 50, top: 150, width: 440, fontSize: 154, fontWeight: '600' }, false);
+    addText('DESIGN', {
+      left: 50, top: 355, width: 440, fontSize: 96, fontWeight: '500', gradientAngle: 0
+    }, false);
+    canvas.requestRenderAll();
+    syncPanel();
+    window.StudioSeedReady = true;
+  }
+
+  // Fabric caches glyph widths at creation. Wait for the display face first,
+  // otherwise a cold load seeds DESIGN with Georgia and never re-measures it.
+  function seedWhenFontsReady() {
+    if (!document.fonts || !document.fonts.load) { seedCanvas(); return; }
+    Promise.all([
+      document.fonts.load('600 154px "Instrument Serif"'),
+      document.fonts.load('500 96px "Instrument Serif"')
+    ]).then(function () {
+      if (document.fonts.ready) { document.fonts.ready.then(seedCanvas); } else { seedCanvas(); }
+    }, seedCanvas);
+  }
+
+  seedWhenFontsReady();
 })();

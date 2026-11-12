@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Write the Pantone reference for the newsprint colours, as a Figma-importable sheet.
+"""Write the Pantone reference for the review edition, as a Figma-importable sheet.
 
-`docs/assets/site.css` is the only source: this reads the explicit Newsprint edition
+`docs/assets/site.css` is the only source: this reads the final Review edition
 token block out of it, matches each solid colour to the nearest Pantone chip in two
 directions (Solid Coated for print, TCX for textile), and picks two further
 alternatives for each.
@@ -20,17 +20,23 @@ import re
 import sys
 from html import escape
 
+sys.path.insert(0, str(pathlib.Path(__file__).parent))
+import sync_edition  # noqa: E402
+
 CSS = pathlib.Path("docs/assets/site.css")
 DATA = pathlib.Path("tools/pantone-data.json")
 OUT = pathlib.Path("figma/pantone.svg")
+TOKENS = sync_edition.site_tokens()
 
 # The order a designer reads the roles in, not the order CSS happens to declare them.
 ROLE_ORDER = ["band", "band-ink", "band-hover", "accent", "accent-ink", "label",
               "page", "ink", "on"]
 
 W, PAD, ROW = 1300, 40, 96
-CREAM, INK, DIM, RULE = "#e9e0cb", "#15120e", "#625b4f", "#15120e3d"
-FONT = "Poppins, Helvetica Neue, Arial, sans-serif"
+CREAM, INK = TOKENS["--page"], TOKENS["--on"]
+DIM = TOKENS["--on-dim"]
+RULE = INK + "38"
+FONT = "Libre Franklin, Helvetica Neue, Arial, sans-serif"
 COL_ROLE, COL_MATCH, COL_ALT1, COL_ALT2 = 124, 340, 640, 900
 
 
@@ -87,13 +93,15 @@ def delta_e(a, b):
 
 
 def newsprint():
-    """Every solid colour the newsprint block declares, with the roles it fills."""
+    """Every solid colour the review block declares, with the roles it fills."""
     text = CSS.read_text()
-    marker = text.find("Newsprint edition")
+    marker = text.rfind("Review edition")
+    if marker < 0:
+        marker = text.rfind("Newsprint edition")
     start = text.find(":root,", marker) if marker >= 0 else -1
     end = text.find("\n}", start) if start >= 0 else -1
     if marker < 0 or start < 0 or end < 0:
-        sys.exit("no Newsprint edition token block in %s" % CSS)
+        sys.exit("no Review edition token block in %s" % CSS)
     values = {key: value.strip()
               for key, value in re.findall(r"(--[\w-]+)\s*:\s*([^;]+);", text[start:end])}
     roles = {}
@@ -103,7 +111,7 @@ def newsprint():
             roles.setdefault(value.lower(), []).append(role)
     missing = [role for role in ("band", "band-ink", "page", "on") if not values.get("--" + role)]
     if missing:
-        sys.exit("newsprint block is missing %s" % ", ".join(missing))
+        sys.exit("review block is missing %s" % ", ".join(missing))
     return roles
 
 
@@ -145,7 +153,7 @@ def text(x, y, s, size=14, weight=400, fill=INK, anchor="start", opacity=None):
 
 def chip(x, y, size, hexv, radius=0):
     return ('<rect x="%g" y="%g" width="%g" height="%g" rx="%g" fill="%s" '
-            'stroke="#131513" stroke-opacity=".17"/>' % (x, y, size, size, radius, hexv))
+            'stroke="%s" stroke-opacity=".17"/>' % (x, y, size, size, radius, hexv, INK))
 
 
 def build(pantone):
@@ -153,7 +161,7 @@ def build(pantone):
     blocks = []
     y = PAD
     blocks.append(text(PAD, y + 44, "Pantone reference", 40, 400))
-    blocks.append(text(PAD, y + 78, "Nearest chip for every colour the newsprint edition declares, and two alternatives for each.",
+    blocks.append(text(PAD, y + 78, "Nearest chip for every colour the review edition declares, and two alternatives for each.",
                        16, 400, DIM))
     blocks.append(text(PAD, y + 102, "ΔE00 is CIEDE2000 distance from the screen colour: 0 is the same colour, under 3 is indistinguishable.",
                        13, 400, DIM))
@@ -162,7 +170,7 @@ def build(pantone):
     y += 168
 
     roles = newsprint()
-    blocks.append(text(PAD, y + 24, "Newsprint", 22, 500))
+    blocks.append(text(PAD, y + 24, "Review edition", 22, 500))
     y += 38
     blocks.append('<rect x="%g" y="%g" width="%g" height="1" fill="%s"/>' % (PAD, y, W - 2 * PAD, RULE))
     labels = [(COL_ROLE, "Colour"), (COL_MATCH, "Nearest Pantone"),
@@ -204,8 +212,8 @@ def build(pantone):
 
     height = y + PAD - 6
     head = ('<svg xmlns="http://www.w3.org/2000/svg" width="%d" height="%d" viewBox="0 0 %d %d">'
-            '<title>Pantone reference — newsprint</title>'
-            '<desc>Every newsprint colour with its nearest Pantone Solid Coated chip, two alternatives, '
+            '<title>Pantone reference — review edition</title>'
+            '<desc>Every review-edition colour with its nearest Pantone Solid Coated chip, two alternatives, '
             'and the nearest textile TCX chip.</desc>' % (W, height, W, height))
     return head + '<rect width="%d" height="%d" fill="%s"/>' % (W, height, CREAM) + "".join(blocks) + "</svg>\n"
 
@@ -217,11 +225,11 @@ def main():
     if check:
         if not OUT.exists() or OUT.read_text() != svg:
             sys.exit("figma/%s is stale - run python3 tools/pantone_sheet.py" % OUT.name)
-        print("figma/%s matches the newsprint edition" % OUT.name)
+        print("figma/%s matches the review edition" % OUT.name)
         return
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(svg)
-    print("figma/%s: %d KB, %d newsprint colours" % (OUT.name, len(svg) / 1024, len(newsprint())))
+    print("figma/%s: %d KB, %d review-edition colours" % (OUT.name, len(svg) / 1024, len(newsprint())))
 
 
 if __name__ == "__main__":

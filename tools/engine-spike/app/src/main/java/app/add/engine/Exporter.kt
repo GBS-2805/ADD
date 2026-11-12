@@ -65,7 +65,61 @@ object Exporter {
         scale: Int = 1,
         texture: TextureSpec? = null,
         ink: List<TextureInk> = emptyList(),
+        backgroundField: FieldSpec? = null,
+        fieldPhase: Float = 0f,
     ): ExportResult {
+        val artboard = renderArtboard(
+            context = context,
+            layers = layers,
+            typefaces = typefaces,
+            sceneViews = sceneViews,
+            scale = scale,
+            texture = texture,
+            ink = ink,
+            backgroundField = backgroundField,
+            fieldPhase = fieldPhase,
+        )
+        val saved = withContext(Dispatchers.IO) { save(context, artboard.bitmap) }
+        return ExportResult(
+            status = buildString {
+                append(saved.message)
+                if (artboard.missing > 0) append(" · 3D CAPTURE UNAVAILABLE")
+                if (artboard.black > 0) append(" · ${artboard.black} 3D BLACK")
+            },
+            width = artboard.bitmap.width,
+            height = artboard.bitmap.height,
+            bytes = saved.bytes,
+            models = artboard.models,
+            missing = artboard.missing,
+            black = artboard.black,
+            litPercent = artboard.litPercent,
+        )
+    }
+
+    internal class RenderedArtboard(
+        val bitmap: Bitmap,
+        val models: Int,
+        val missing: Int,
+        val black: Int,
+        val litPercent: Int,
+    )
+
+    /**
+     * The exact pixel path export writes: same painter, bounds, captures and field phase.
+     * Keeping this separate from MediaStore makes the export compositor testable without
+     * turning a storage permission into a rendering test.
+     */
+    internal suspend fun renderArtboard(
+        context: Context,
+        layers: List<Layer>,
+        typefaces: Typefaces,
+        sceneViews: Map<String, SceneView?>,
+        scale: Int = 1,
+        texture: TextureSpec? = null,
+        ink: List<TextureInk> = emptyList(),
+        backgroundField: FieldSpec? = null,
+        fieldPhase: Float = 0f,
+    ): RenderedArtboard {
         val factor = scale.coerceIn(1, 4)
         // A 2x export is the same page at twice the pixels: the painter draws in
         // artboard units, so the canvas carries the multiplier and nothing else moves.
@@ -110,20 +164,13 @@ object Exporter {
             scale = factor.toFloat(),
             texture = texture,
             ink = ink,
+            backgroundField = backgroundField,
+            fieldPhase = fieldPhase,
         )
-        captures.values.forEach { it.recycle() }
         val missing = visibleModels.count { it.id !in captures }
-
-        val saved = withContext(Dispatchers.IO) { save(context, artboard) }
-        return ExportResult(
-            status = buildString {
-                append(saved.message)
-                if (missing > 0) append(" · 3D CAPTURE UNAVAILABLE")
-                if (black > 0) append(" · ${black} 3D BLACK")
-            },
-            width = artboard.width,
-            height = artboard.height,
-            bytes = saved.bytes,
+        captures.values.forEach { it.recycle() }
+        return RenderedArtboard(
+            bitmap = artboard,
             models = visibleModels.size,
             missing = missing,
             black = black,

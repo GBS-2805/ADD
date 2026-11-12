@@ -171,8 +171,8 @@ class LayerCompositor(
 
     private fun cacheable(layer: Layer): Boolean = when (layer) {
         is IconLayer -> true
-        is TextLayer -> layer.paint !is PaintSpec.Image
-        is VectorLayer -> layer.paint !is PaintSpec.Image
+        is TextLayer -> layer.paint !is PaintSpec.Image && layer.paint !is PaintSpec.Field
+        is VectorLayer -> layer.paint !is PaintSpec.Image && layer.paint !is PaintSpec.Field
         is GroupLayer -> false
         else -> false
     }

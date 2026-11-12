@@ -10,9 +10,11 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -23,6 +25,7 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -34,6 +37,7 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Slider
 import androidx.compose.material.SliderDefaults
@@ -49,8 +53,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.nativeCanvas
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
@@ -61,11 +71,13 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlin.math.abs
+import kotlin.math.hypot
 
 @Composable
 internal fun StyleTab(
@@ -92,6 +104,9 @@ internal fun StyleTab(
             Spacer(Modifier.height(18.dp))
             return@Column
         }
+        Spacer(Modifier.height(8.dp))
+        ArtboardFieldCard(doc)
+        Spacer(Modifier.height(10.dp))
         val layer = doc.selected
         if (layer == null) {
             Text("Nothing selected yet.", color = Cream, fontSize = 13.sp)
@@ -253,12 +268,23 @@ private fun PaintAndBlend(doc: EngineDocument, layer: Layer) {
                                     is PaintSpec.Gradient -> paint.kind == kind
                                     is PaintSpec.Image -> kind == PaintKind.Image
                                     is PaintSpec.Pattern -> kind == PaintKind.Pattern
+                                    is PaintSpec.Field -> false
                                 },
                                 onClick = { doc.setPaintKind(kind) },
                             )
                         }
+                        ActionChip(
+                            label = "FIELD",
+                            active = paint is PaintSpec.Field,
+                            onClick = {
+                                doc.setFieldPreset(FieldTarget.Layer, FieldPresets.all.first().field)
+                            },
+                        )
                     }
                     (paint as? PaintSpec.Gradient)?.let { GradientStops(doc, layer.id, it) }
+                    (paint as? PaintSpec.Field)?.let { field ->
+                        FieldEditor(doc, field.field, FieldTarget.Layer)
+                    }
                     (paint as? PaintSpec.Image)?.let { image ->
                         val photos = doc.layers.filterIsInstance<ImageLayer>()
                         Spacer(Modifier.height(4.dp))
@@ -340,6 +366,291 @@ private fun PaintAndBlend(doc: EngineDocument, layer: Layer) {
             }
         }
     }
+}
+
+@Composable
+private fun ArtboardFieldCard(doc: EngineDocument) {
+    var open by remember { mutableStateOf(doc.backgroundField != null) }
+    val field = doc.backgroundField
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(CardShape)
+            .background(PanelRaised)
+            .border(1.dp, Rule, CardShape)
+            .padding(10.dp),
+    ) {
+        TactileBox(
+            onClick = { open = !open },
+            shape = RoundedCornerShape(12.dp),
+            background = Color.Transparent,
+            contentPadding = PaddingValues(horizontal = 2.dp, vertical = 3.dp),
+            modifier = Modifier.fillMaxWidth().testTag("field-artboard-card"),
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Column(Modifier.weight(1f)) {
+                    Text("ARTBOARD FIELD", color = Cream, fontSize = 11.5.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 0.7.sp)
+                    Text(
+                        field?.let { "${it.colors.size} COLOURS · ${if (it.animated) "FLOWING" else "STILL"}" }
+                            ?: "CLEAN PAPER · ADD A FLOW FIELD",
+                        color = Dim,
+                        fontSize = 9.5.sp,
+                    )
+                }
+                Text(if (open) "▴" else "▾", color = Mint, fontSize = 12.sp)
+            }
+        }
+        AnimatedVisibility(visible = open) {
+            Column(Modifier.padding(top = 7.dp)) {
+                if (field == null) {
+                    ActionChip("ADD FIELD BACKGROUND", active = true) {
+                        doc.setFieldPreset(FieldTarget.Background, FieldPresets.all.first().field)
+                        open = true
+                    }
+                } else {
+                    FieldEditor(doc, field, FieldTarget.Background)
+                    Spacer(Modifier.height(5.dp))
+                    ActionChip(
+                        label = "REMOVE BACKGROUND FIELD",
+                        warn = true,
+                        onClick = {
+                            doc.clearField(FieldTarget.Background)
+                            open = false
+                        },
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+internal fun FieldEditor(doc: EngineDocument, field: FieldSpec, target: FieldTarget) {
+    var chosen by remember(target, field.colors.size) { mutableStateOf(0) }
+    val index = chosen.coerceIn(0, field.colors.lastIndex)
+    val spot = field.colors.getOrNull(index) ?: return
+    var hex by remember(index, spot.color) {
+        mutableStateOf(String.format("%06X", spot.color and 0xFFFFFF))
+    }
+    Column(Modifier.fillMaxWidth()) {
+        FieldPreview(doc, field, target)
+        Spacer(Modifier.height(6.dp))
+        Row(
+            modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
+            FieldPresets.all.forEach { preset ->
+                ActionChip(
+                    label = preset.name,
+                    active = preset.field == field,
+                    onClick = { doc.setFieldPreset(target, preset.field) },
+                )
+            }
+        }
+        Spacer(Modifier.height(5.dp))
+        Row(
+            modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
+            field.colors.forEachIndexed { i, item ->
+                ActionChip(
+                    label = "${i + 1}",
+                    active = i == index,
+                    onClick = { chosen = i },
+                )
+            }
+            ActionChip(
+                label = "+ COLOUR",
+                enabled = field.colors.size < FieldSpec.MAX_FIELD_COLORS,
+                onClick = {
+                    doc.addFieldColor(target)
+                    chosen = (doc.fieldFor(target)?.colors?.size ?: 1) - 1
+                },
+            )
+            ActionChip(
+                label = "− COLOUR",
+                enabled = field.colors.size > 2,
+                warn = field.colors.size > 2,
+                onClick = {
+                    doc.removeFieldColor(target, index)
+                    chosen = 0
+                },
+            )
+        }
+        Spacer(Modifier.height(5.dp))
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Box(
+                Modifier.size(22.dp).clip(CircleShape).background(Color(spot.color))
+                    .border(1.dp, Cream.copy(alpha = 0.5f), CircleShape),
+            )
+            Spacer(Modifier.width(6.dp))
+            FieldSwatches { color -> doc.setFieldColor(target, index, color) }
+            Spacer(Modifier.width(5.dp))
+            BasicTextField(
+                value = hex,
+                onValueChange = { raw ->
+                    hex = raw.filter { it.isLetterOrDigit() }.take(6).uppercase()
+                    if (hex.length == 6) {
+                        hex.toIntOrNull(16)?.let { doc.setFieldColor(target, index, 0xFF000000.toInt() or it) }
+                    }
+                },
+                textStyle = TextStyle(color = Cream, fontSize = 8.sp),
+                cursorBrush = SolidColor(Mint),
+                singleLine = true,
+                modifier = Modifier
+                    .width(56.dp)
+                    .clip(RoundedCornerShape(3.dp))
+                    .background(Panel)
+                    .padding(horizontal = 4.dp, vertical = 3.dp),
+            )
+        }
+        FieldSlider(doc, target, "REACH", spot.band, FieldSpec.MIN_BAND..FieldSpec.MAX_BAND, { "${(it * 100).toInt()}%" }) { band ->
+            doc.setFieldBand(target, index, band)
+        }
+        FieldSlider(doc, target, "SCALE", field.scale, 0f..1f, { "${(it * 100).toInt()}%" }) { doc.setFieldScale(target, it) }
+        FieldSlider(doc, target, "DISTORTION", field.distortion, 0f..1f, { "${(it * 100).toInt()}%" }) { doc.setFieldDistortion(target, it) }
+        FieldSlider(doc, target, "SWIRL", field.swirl, 0f..1f, { "${(it * 100).toInt()}%" }) { doc.setFieldSwirl(target, it) }
+        FieldSlider(doc, target, "SPEED", field.speed, 0f..1f, { "${(it * 100).toInt()}%" }) { doc.setFieldSpeed(target, it) }
+        FieldSlider(doc, target, "SOFTEN", field.soften, 0f..1f, { "${(it * 100).toInt()}%" }) { doc.setFieldSoften(target, it) }
+        FieldSlider(doc, target, "NOISE", field.noise, 0f..1f, { "${(it * 100).toInt()}%" }) { doc.setFieldNoise(target, it) }
+        Row(horizontalArrangement = Arrangement.spacedBy(4.dp), verticalAlignment = Alignment.CenterVertically) {
+            ActionChip(
+                label = if (field.animated) "MOTION ON" else "MOTION OFF",
+                active = field.animated,
+                onClick = {
+                    doc.beginGesture()
+                    doc.setFieldAnimated(target, !field.animated)
+                    doc.endGesture()
+                },
+            )
+            Text("DRAG A RING TO PLACE A COLOUR", color = Dim, fontSize = 8.sp)
+        }
+    }
+}
+
+@Composable
+private fun FieldPreview(doc: EngineDocument, field: FieldSpec, target: FieldTarget) {
+    var active by remember { mutableStateOf(-1) }
+    val hitRadius = with(LocalDensity.current) { 28.dp.toPx() }
+    Canvas(
+        modifier = Modifier
+            .fillMaxWidth()
+            .aspectRatio(16f / 9f)
+            .clip(RoundedCornerShape(10.dp))
+            .background(Panel)
+            .pointerInput(target, field.colors) {
+                detectDragGestures(
+                    onDragStart = { point ->
+                        val nearest = field.colors.indices.minByOrNull { i ->
+                            val spot = field.colors[i]
+                            hypot(
+                                (point.x - spot.x * size.width).toDouble(),
+                                (point.y - spot.y * size.height).toDouble(),
+                            )
+                        }
+                        active = if (nearest != null && hypot(
+                                (point.x - field.colors[nearest].x * size.width).toDouble(),
+                                (point.y - field.colors[nearest].y * size.height).toDouble(),
+                            ) <= hitRadius
+                        ) nearest else -1
+                        if (active >= 0) doc.beginGesture()
+                    },
+                    onDragEnd = {
+                        if (active >= 0) doc.endGesture()
+                        active = -1
+                    },
+                    onDragCancel = {
+                        if (active >= 0) doc.endGesture()
+                        active = -1
+                    },
+                ) { change, _ ->
+                    val i = active
+                    if (i >= 0) {
+                        doc.setFieldSpot(
+                            target,
+                            i,
+                            (change.position.x / size.width).coerceIn(0f, 1f),
+                            (change.position.y / size.height).coerceIn(0f, 1f),
+                        )
+                    }
+                }
+            },
+    ) {
+        drawIntoCanvas { canvas ->
+            FieldRenderer.draw(
+                canvas.nativeCanvas,
+                field,
+                size.width,
+                size.height,
+                maxWidth = FieldBudget.previewWidth,
+            )
+        }
+        field.colors.forEachIndexed { i, spot ->
+            val center = Offset(spot.x * size.width, spot.y * size.height)
+            drawCircle(
+                color = if (i == active) Lime else Color.White,
+                radius = (if (i == active) 12.dp else 9.dp).toPx(),
+                center = center,
+                style = Stroke(2f),
+            )
+            drawCircle(Color(spot.color), radius = 5.dp.toPx(), center = center)
+        }
+    }
+}
+
+@Composable
+private fun FieldSwatches(onPick: (Int) -> Unit) {
+    Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+        listOf(
+            0xFFF3E9DA.toInt(),
+            0xFF9CD3C4.toInt(),
+            0xFFC89DBB.toInt(),
+            0xFFFFD37A.toInt(),
+            0xFF3767B1.toInt(),
+            0xFF6C7A4A.toInt(),
+        ).forEach { color ->
+            Box(
+                Modifier
+                    .size(16.dp)
+                    .clip(CircleShape)
+                    .background(Color(color))
+                    .border(1.dp, Rule, CircleShape)
+                    .clickable { onPick(color) },
+            )
+        }
+    }
+}
+
+@Composable
+private fun FieldSlider(
+    doc: EngineDocument,
+    target: FieldTarget,
+    label: String,
+    value: Float,
+    range: ClosedFloatingPointRange<Float>,
+    display: (Float) -> String,
+    onChange: (Float) -> Unit,
+) {
+    var tracking by remember { mutableStateOf(false) }
+    SliderRow(
+        label = label,
+        value = value,
+        range = range,
+        display = display,
+        onChange = {
+            if (!tracking) {
+                doc.beginGesture()
+                tracking = true
+            }
+            onChange(it)
+        },
+        onChangeFinished = {
+            if (tracking) {
+                doc.endGesture()
+                tracking = false
+            }
+        },
+    )
 }
 
 private enum class EffectKind(val label: String, val glyph: String) {
@@ -460,7 +771,7 @@ internal fun FxTab(doc: EngineDocument, modifier: Modifier = Modifier) {
             TactileBox(
                 onClick = { fineTune = !fineTune },
                 shape = RoundedCornerShape(10.dp),
-                background = Ink.copy(alpha = 0.08f),
+                background = Cream.copy(alpha = 0.08f),
                 contentPadding = PaddingValues(horizontal = 10.dp),
                 modifier = Modifier.height(40.dp),
             ) {
@@ -574,7 +885,7 @@ private enum class EffectPreset(val label: String, val note: String, val dot: Co
     Film("Film", "Soft contrast", Lime),
     Print("Print", "Halftone ink", Clay),
     Faded("Faded", "Low contrast", Dim),
-    Punch("Punch", "Bright + bold", Color(0xFFFFC857)),
+    Punch("Punch", "Bright + bold", Lime),
     ;
 
     fun result(current: LayerEffects): LayerEffects = when (this) {
@@ -693,7 +1004,7 @@ private fun EffectCard(
         Column {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Box(
-                    modifier = Modifier.size(35.dp).clip(CircleShape).background(if (on) MintWash else Ink.copy(alpha = 0.05f)),
+                    modifier = Modifier.size(35.dp).clip(CircleShape).background(if (on) MintWash else Cream.copy(alpha = 0.05f)),
                     contentAlignment = Alignment.Center,
                 ) {
                     Text(glyph, color = if (on) StudioOutline else StudioOutline.copy(alpha = 0.38f), fontSize = 18.sp, fontWeight = FontWeight.SemiBold)

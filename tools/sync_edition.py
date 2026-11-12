@@ -1,0 +1,281 @@
+#!/usr/bin/env python3
+"""One edition: the site's final token block is the source for the app and Studio.
+
+docs/assets/site.css is the canonical edition. This script reads its last
+"Review edition" :root block and writes:
+
+  * app/res/values/colors.xml, the Android copy of the same paper, ink and accent;
+  * app/studio-assets/edition.css, the Studio WebView's generated token block;
+  * the Studio document's theme-color meta tag;
+  * tools/engine-spike/.../EngineEdition.kt, the native engine lab's Compose palette.
+
+Run it after changing the edition. build.sh runs it before check_palette.py, and
+check_palette.py fails when the generated files are stale.
+
+    python3 tools/sync_edition.py
+    python3 tools/sync_edition.py --check
+"""
+
+import argparse
+import re
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent.parent
+CSS = ROOT / "docs/assets/site.css"
+COLORS = ROOT / "app/res/values/colors.xml"
+STUDIO_CSS = ROOT / "app/studio-assets/edition.css"
+STUDIO_HTML = ROOT / "app/studio-assets/index.html"
+ENGINE_EDITION = (ROOT / "tools/engine-spike/app/src/main/java/app/add/engine/EngineEdition.kt")
+
+# Android resource suffix -> site custom property.
+SITE_OF_APP = {
+    "band": "--band",
+    "band_ink": "--band-ink",
+    "band_dim": "--band-dim",
+    "band_line": "--band-line",
+    "accent": "--accent",
+    "accent_ink": "--accent-ink",
+    "label": "--label",
+    "page": "--page",
+    "on": "--on",
+    "on_dim": "--on-dim",
+    "rule": "--rule",
+}
+
+# The Studio and Android surfaces need a card tone even though the site does not
+# declare one. These are the site's old page/ink mix rule, evaluated from the
+# current page and ink so they follow a change instead of being copied by hand.
+CARD_MIX = {"card": 0.07, "panel2": 0.12}
+
+
+def read(path):
+    return path.read_text(encoding="utf-8")
+
+
+def parse_colour(value):
+    """#RRGGBB, #AARRGGBB or rgba(r, g, b, a) -> (r, g, b, a)."""
+    value = value.strip()
+    if value.startswith("#"):
+        digits = value[1:]
+        if len(digits) == 8:
+            return (int(digits[2:4], 16), int(digits[4:6], 16), int(digits[6:8], 16),
+                    int(digits[0:2], 16) / 255.0)
+        if len(digits) == 6:
+            return (int(digits[0:2], 16), int(digits[2:4], 16), int(digits[4:6], 16), 1.0)
+        raise ValueError("not a colour: %s" % value)
+    match = re.match(r"rgba?\(([^)]+)\)", value)
+    if not match:
+        raise ValueError("not a colour: %s" % value)
+    parts = [part.strip() for part in match.group(1).split(",")]
+    if len(parts) < 3:
+        raise ValueError("not a colour: %s" % value)
+    alpha = float(parts[3]) if len(parts) > 3 else 1.0
+    return (int(float(parts[0])), int(float(parts[1])), int(float(parts[2])), alpha)
+
+
+def argb(value):
+    """A CSS colour as Android #AARRGGBB."""
+    red, green, blue, alpha = parse_colour(value)
+    return "#%02X%02X%02X%02X" % (round(alpha * 255), red, green, blue)
+
+
+def rgb_hex(value):
+    red, green, blue, _alpha = parse_colour(value)
+    return "#%02X%02X%02X" % (red, green, blue)
+
+
+def mix(page, ink, fraction):
+    """The page with `fraction` of the ink mixed in, as the old card rule did."""
+    page_rgb, ink_rgb = parse_colour(page), parse_colour(ink)
+    return "#%02X%02X%02X" % tuple(
+        round(page_rgb[index] * (1 - fraction) + ink_rgb[index] * fraction)
+        for index in range(3))
+
+
+def site_tokens():
+    """The final token block in site.css, the edition every surface must match."""
+    text = read(CSS)
+    marker = text.rfind("Review edition")
+    if marker < 0:
+        marker = text.rfind("Newsprint edition")
+    if marker < 0:
+        raise SystemExit("site.css: no Review edition token block")
+    start = text.find(":root,", marker)
+    end = text.find("\n}", start)
+    if start < 0 or end < 0:
+        raise SystemExit("site.css: the edition marker has no token block")
+    tokens = {key: value.strip()
+              for key, value in re.findall(r"(--[\w-]+)\s*:\s*([^;]+);", text[start:end])}
+    if not tokens:
+        raise SystemExit("site.css: the edition token block is empty")
+    return tokens
+
+
+def colours():
+    tokens = site_tokens()
+    values = {suffix: argb(tokens[key]) for suffix, key in SITE_OF_APP.items()}
+    for suffix, fraction in CARD_MIX.items():
+        values[suffix] = argb(mix(tokens["--page"], tokens["--on"], fraction))
+    # Functional, not decorative: these keep their own warning semantics.
+    values["warn"] = "#FF8A3B00"
+    values["iconBg"] = "#FFD9D9D9"
+    return values
+
+
+def colors_xml():
+    values = colours()
+    order = ["band", "band_ink", "band_dim", "band_line", "accent", "accent_ink",
+             "label", "page", "on", "on_dim", "rule", "card", "panel2", "warn"]
+    lines = [
+        '<?xml version="1.0" encoding="utf-8"?>',
+        "<!--",
+        "  One edition: the site's Review edition. The source is the final token",
+        "  block in docs/assets/site.css; this file is generated by",
+        "  tools/sync_edition.py and must not be edited by hand.",
+        "",
+        "  A card is the page with 7% of the ink mixed in, and a panel is 12%.",
+        "  The band ink is the light paper colour so words on the plum band keep",
+        "  their contrast; the page ink is the site's #1B1212.",
+        "-->",
+        "<resources>",
+        "",
+    ]
+    for suffix in order:
+        lines.append('    <color name="newsprint_%s">%s</color>' % (suffix, values[suffix]))
+    lines.extend([
+        "",
+        "    <!-- The launcher's own disc. The icon is a fixed asset, not a themed surface. -->",
+        '    <color name="iconBg">%s</color>' % values["iconBg"],
+        "</resources>",
+        "",
+    ])
+    return "\n".join(lines)
+
+
+def studio_css():
+    tokens = site_tokens()
+    card = mix(tokens["--page"], tokens["--on"], CARD_MIX["card"])
+    panel = mix(tokens["--page"], tokens["--on"], CARD_MIX["panel2"])
+    lines = [
+        "/* Generated by tools/sync_edition.py from docs/assets/site.css.",
+        "   Do not hand-edit: change the site's Review edition block and re-run it. */",
+        ":root {",
+        "  color-scheme: light;",
+        "  --page: %s;" % tokens["--page"],
+        "  --paper: %s;" % tokens["--paper"],
+        "  --on: %s;" % tokens["--on"],
+        "  --ink: %s;" % tokens["--ink"],
+        "  --on-dim: %s;" % tokens["--on-dim"],
+        "  --rule: %s;" % tokens["--rule"],
+        "  --tint: %s;" % tokens["--tint"],
+        "  --band: %s;" % tokens["--band"],
+        "  --band-ink: %s;" % tokens["--band-ink"],
+        "  --band-dim: %s;" % tokens["--band-dim"],
+        "  --band-line: %s;" % tokens["--band-line"],
+        "  --band-hover: %s;" % tokens["--band-hover"],
+        "  --accent: %s;" % tokens["--accent"],
+        "  --accent-ink: %s;" % tokens["--accent-ink"],
+        "  --label: %s;" % tokens["--label"],
+        "  --card: %s;" % card,
+        "  --panel2: %s;" % panel,
+        "  --warn: #8a3b00;",
+        "}",
+        "",
+    ]
+    return "\n".join(lines)
+
+
+def engine_edition():
+    tokens = site_tokens()
+    values = {
+        "Page": tokens["--page"],
+        "Card": mix(tokens["--page"], tokens["--on"], CARD_MIX["card"]),
+        "Panel": mix(tokens["--page"], tokens["--on"], CARD_MIX["panel2"]),
+        "Ink": tokens["--on"],
+        "Dim": tokens["--on-dim"],
+        "Plum": tokens["--band"],
+        "PlumHover": tokens["--band-hover"],
+        "BandInk": tokens["--band-ink"],
+        "Rule": tokens["--rule"],
+    }
+    lines = [
+        "package app.add.engine",
+        "",
+        "import androidx.compose.ui.graphics.Color",
+        "import androidx.compose.ui.graphics.toArgb",
+        "",
+        "/**",
+        " * Generated by tools/sync_edition.py from docs/assets/site.css.",
+        " * Do not hand-edit: change the site's Review edition block and re-run it.",
+        " */",
+        "internal object EngineEdition {",
+    ]
+    for name, value in values.items():
+        lines.append("    val %s = Color(0x%s)" % (name, argb(value).lstrip("#")))
+    lines.extend([
+        "",
+        "    /** Functional failure ink, shared with the app and Studio. */",
+        "    val Warn = Color(0xFF8A3B00)",
+        "",
+        "    val InkArgb = Ink.toArgb()",
+        "    val PlumArgb = Plum.toArgb()",
+        "    val PlumHoverArgb = PlumHover.toArgb()",
+        "    val PaperArgb = BandInk.toArgb()",
+        "    val CardArgb = Card.toArgb()",
+        "    val DimArgb = Dim.toArgb()",
+        "}",
+        "",
+    ])
+    return "\n".join(lines)
+
+
+def studio_html(source):
+    return re.sub(
+        r'<meta name="theme-color" content="[^"]*">',
+        '<meta name="theme-color" content="%s">' % rgb_hex(site_tokens()["--page"]),
+        source,
+        count=1,
+    )
+
+
+def generated():
+    return {
+        COLORS: colors_xml(),
+        STUDIO_CSS: studio_css(),
+        STUDIO_HTML: studio_html(read(STUDIO_HTML)),
+        ENGINE_EDITION: engine_edition(),
+    }
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    parser.add_argument("--check", action="store_true",
+                        help="fail if the generated files do not match site.css")
+    args = parser.parse_args()
+
+    stale = []
+    for path, text in generated().items():
+        current = read(path) if path.exists() else None
+        if current == text:
+            continue
+        stale.append(path.relative_to(ROOT))
+        if not args.check:
+            path.write_text(text, encoding="utf-8")
+
+    if args.check:
+        if stale:
+            print("edition: STALE - run python3 tools/sync_edition.py: %s"
+                  % ", ".join(str(path) for path in stale))
+            sys.exit(1)
+        print("edition: OK - site, app, Studio and engine tokens agree")
+        return
+
+    for path in stale:
+        print("edition: wrote %s" % path)
+    if not stale:
+        print("edition: already current")
+
+
+if __name__ == "__main__":
+    main()

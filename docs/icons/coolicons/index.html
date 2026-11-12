@@ -130,6 +130,7 @@
   .preview .preview-box svg {
     width: calc(var(--size, 64px) * 3.375);
     height: calc(var(--size, 64px) * 3.375);
+    transform-origin: 50% 50%;
   }
   .preview-meta {
     position: absolute;
@@ -1164,8 +1165,40 @@
     }
   }
 
-  function paint() {
+  // A size change carries the old glyph into the new one; a weight change gives
+  // the same size a small settle. Both stop entirely for reduced motion.
+  function stageMotion(kind, before) {
+    var svg = box.querySelector("svg");
+    if (!svg || !svg.animate) { return; }
+    if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) { return; }
+    var frames;
+    if (kind === "size" && before && before.width) {
+      var after = svg.getBoundingClientRect();
+      var x = before.left + before.width / 2 - (after.left + after.width / 2);
+      var y = before.top + before.height / 2 - (after.top + after.height / 2);
+      var scale = before.width / after.width;
+      frames = [
+        { transform: "translate(" + x + "px," + y + "px) scale(" + scale + ")" },
+        { transform: "translate(0,0) scale(1.02)", offset: .7 },
+        { transform: "translate(0,0) scale(1)" }
+      ];
+    } else {
+      frames = [
+        { transform: "scale(.94)" },
+        { transform: "scale(1.03)", offset: .6 },
+        { transform: "scale(1)" }
+      ];
+    }
+    svg.animate(frames, {
+      duration: kind === "size" ? 320 : 240,
+      easing: "cubic-bezier(.2,.8,.3,1)"
+    });
+  }
+
+  function paint(motion) {
     if (!selected) { return; }
+    var old = motion ? box.querySelector("svg") : null;
+    var before = old ? old.getBoundingClientRect() : null;
     var svg = markup(selected);
     box.innerHTML = svg;
     box.style.setProperty("--size", size + "px");
@@ -1176,6 +1209,7 @@
       box.style.setProperty("--w", w);
       tune(box.querySelector("svg"), w, MODE !== "stroke");
     }
+    if (motion) { stageMotion(motion, before); }
     box.setAttribute("data-surface", surface);
     box.closest(".preview").setAttribute("data-surface", surface);
     // The style rides on the name, where the file label used to say it twice.
@@ -1649,22 +1683,26 @@
   weights.addEventListener("click", function (event) {
     var btn = event.target.closest(".seg");
     if (!btn) { return; }
-    weight = btn.getAttribute("data-weight");
+    var next = btn.getAttribute("data-weight");
+    var changed = next !== weight;
+    weight = next;
     Array.prototype.forEach.call(weights.children, function (other) {
       other.setAttribute("aria-pressed", other === btn ? "true" : "false");
     });
-    paint();
+    paint(changed ? "weight" : "");
     queueEstimate();
   });
 
   sizes.addEventListener("click", function (event) {
     var btn = event.target.closest(".seg");
     if (!btn) { return; }
-    size = Number(btn.getAttribute("data-size"));
+    var next = Number(btn.getAttribute("data-size"));
+    var changed = next !== size;
+    size = next;
     Array.prototype.forEach.call(sizes.children, function (other) {
       other.setAttribute("aria-pressed", other === btn ? "true" : "false");
     });
-    paint();
+    paint(changed ? "size" : "");
   });
 
   function applySurface(value) {

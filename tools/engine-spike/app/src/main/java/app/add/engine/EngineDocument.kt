@@ -40,6 +40,7 @@ data class EditorSnapshot(
     val locked: Set<String> = emptySet(),
     val texture: TextureSpec? = null,
     val ink: List<TextureInk> = emptyList(),
+    val backgroundField: FieldSpec? = null,
 )
 
 sealed interface Layer {
@@ -210,14 +211,14 @@ fun diamondNetwork(): VectorNetwork = VectorNetwork(
         VecRegion(
             "diamond-region",
             listOf("diamond-ab", "diamond-bc", "diamond-cd", "diamond-da"),
-            0xFFE86A4A.toInt(),
+            EngineEdition.InkArgb,
         )
     ),
 )
 
 /**
  * The first page is also the engine's own test plate: a gradient star, a
- * Difference layer carrying a paint mask and a grade, a diamond clipped to it,
+ * Difference layer carrying a paint mask and grain, a diamond clipped to it,
  * gradient type and a duotone caption. The 3D layer is off so a device without
  * a working Filament context still paints the whole composition.
  */
@@ -232,7 +233,7 @@ fun seedLayers(): List<Layer> = listOf(
         text = "ADD / NATIVE ENGINE / 001",
         fontSize = 22f,
         lineHeight = 1f,
-        color = 0xFF11231C.toInt(),
+        color = EngineEdition.InkArgb,
         weight = 500,
     ),
     VectorLayer(
@@ -243,49 +244,48 @@ fun seedLayers(): List<Layer> = listOf(
         w = 0.44f,
         h = squareFrameHeight(0.44f),
         network = starNetwork(),
-        fill = 0xFF0FBF92.toInt(),
-        stroke = 0xFF11231C.toInt(),
+        fill = EngineEdition.PlumArgb,
+        stroke = EngineEdition.InkArgb,
         strokeWidth = 5f,
         paint = PaintSpec.Gradient(
             kind = PaintKind.Linear,
             stops = listOf(
-                PaintStop(0f, 0xFF11231C.toInt()),
-                PaintStop(0.42f, 0xFF0FBF92.toInt()),
-                PaintStop(0.78f, colorWithAlpha(0xFFD6E381.toInt(), 0.86f)),
-                PaintStop(1f, colorWithAlpha(0xFFF2EEE3.toInt(), 0.55f)),
+                PaintStop(0f, EngineEdition.InkArgb),
+                PaintStop(0.42f, EngineEdition.PlumArgb),
+                PaintStop(0.78f, colorWithAlpha(EngineEdition.PlumHoverArgb, 0.86f)),
+                PaintStop(1f, colorWithAlpha(EngineEdition.PaperArgb, 0.55f)),
             ),
         ),
     ),
     VectorLayer(
         id = "vector-orbit",
-        name = "VECTOR / ORBIT",
-        x = 0.55f,
-        y = 0.09f,
-        w = 0.38f,
-        h = squareFrameHeight(0.38f),
+        name = "VECTOR / BLEND DISC",
+        x = 0.54f,
+        y = 0.075f,
+        w = 0.40f,
+        h = squareFrameHeight(0.40f),
         network = orbitNetwork(),
-        fill = 0x00000000,
-        stroke = 0xFF11231C.toInt(),
+        // True black lets Difference return the exact paper token; the ink
+        // stroke keeps the disc edge in the Review palette.
+        fill = 0xFF000000.toInt(),
+        stroke = EngineEdition.InkArgb,
         strokeWidth = 4f,
     ),
     VectorLayer(
         id = "vector-blend",
         name = "VECTOR / DIFFERENCE + MASK",
-        x = 0.46f,
-        y = 0.14f,
-        w = 0.42f,
-        h = squareFrameHeight(0.42f),
+        x = 0.55f,
+        y = 0.09f,
+        w = 0.38f,
+        h = squareFrameHeight(0.38f),
         network = diamondNetwork(),
-        fill = 0xFFE86A4A.toInt(),
-        stroke = 0xFF11231C.toInt(),
+        fill = EngineEdition.PaperArgb,
+        stroke = EngineEdition.PlumHoverArgb,
         strokeWidth = 4f,
         style = LayerStyle(
             blend = BlendKind.Difference,
             effects = LayerEffects(
                 enabled = true,
-                exposure = 0.25f,
-                contrast = 0.4f,
-                saturation = 0.2f,
                 grain = 0.22f,
             ),
             mask = LayerMask(
@@ -310,8 +310,8 @@ fun seedLayers(): List<Layer> = listOf(
         w = 0.17f,
         h = squareFrameHeight(0.17f),
         network = diamondNetwork(),
-        fill = 0xFFD6E381.toInt(),
-        stroke = 0xFF11231C.toInt(),
+        fill = EngineEdition.PlumArgb,
+        stroke = EngineEdition.PaperArgb,
         strokeWidth = 2f,
         style = LayerStyle(clipToBelow = true),
     ),
@@ -325,15 +325,15 @@ fun seedLayers(): List<Layer> = listOf(
         text = "FORM\nFOLLOWS\nPLAY.",
         fontSize = 104f,
         lineHeight = 0.88f,
-        color = 0xFF11231C.toInt(),
+        color = EngineEdition.InkArgb,
         weight = 600,
         paint = PaintSpec.Gradient(
             kind = PaintKind.Sweep,
             stops = listOf(
-                PaintStop(0f, 0xFF0FBF92.toInt()),
-                PaintStop(0.35f, 0xFFE86A4A.toInt()),
-                PaintStop(0.7f, 0xFFD6E381.toInt()),
-                PaintStop(1f, 0xFF0FBF92.toInt()),
+                PaintStop(0f, EngineEdition.PlumArgb),
+                PaintStop(0.35f, EngineEdition.PlumHoverArgb),
+                PaintStop(0.7f, EngineEdition.InkArgb),
+                PaintStop(1f, EngineEdition.PlumArgb),
             ),
         ),
         style = LayerStyle(effects = LayerEffects(contrast = 0.12f, grain = 0.18f)),
@@ -348,13 +348,13 @@ fun seedLayers(): List<Layer> = listOf(
         text = "DUOTONE / GRAIN",
         fontSize = 28f,
         lineHeight = 1f,
-        color = 0xFF11231C.toInt(),
+        color = EngineEdition.InkArgb,
         weight = 600,
         style = LayerStyle(
             effects = LayerEffects(
                 duotone = true,
-                duotoneDark = 0xFF0C1210.toInt(),
-                duotoneLight = 0xFFD6E381.toInt(),
+                duotoneDark = EngineEdition.InkArgb,
+                duotoneLight = EngineEdition.PaperArgb,
                 grain = 0.18f,
             ),
         ),
@@ -377,6 +377,7 @@ class EngineDocument(
     initialTexture: TextureSpec? = null,
     initialTextureWarning: String? = null,
     initialInk: List<TextureInk> = emptyList(),
+    initialField: FieldSpec? = null,
 ) {
     var layers by mutableStateOf(initial ?: seedLayers())
         private set
@@ -400,6 +401,10 @@ class EngineDocument(
         private set
     /** A saved texture that could not be regenerated, reported without blocking the page. */
     var textureWarning by mutableStateOf(initialTextureWarning)
+        private set
+
+    /** An optional flow-field background; layers always paint above it. */
+    var backgroundField by mutableStateOf(initialField)
         private set
 
     /** Seeded material strokes, kept as recipes and normalized points, never bitmaps. */
@@ -1015,6 +1020,7 @@ class EngineDocument(
         lockedIds = restored.locked
         texture = restored.texture
         textureWarning = restored.textureWarning
+        backgroundField = restored.backgroundField
         ink = restored.ink
         inkMode = false
         motion = restored.motion.filterKeys { layers.findLayer(it) != null }
@@ -1203,7 +1209,9 @@ class EngineDocument(
         gestureStart = null
         val after = snapshot()
         // A tap that only selects leaves no history entry and keeps redo alive.
-        if (before.layers != after.layers || before.motion != after.motion) {
+        if (before.layers != after.layers || before.motion != after.motion ||
+            before.backgroundField != after.backgroundField
+        ) {
             record(before)
             syncHistory()
             status = "EDITED · UNDO READY"
@@ -1292,7 +1300,7 @@ class EngineDocument(
             text = "NEW LINE",
             fontSize = 58f,
             lineHeight = 0.95f,
-            color = 0xFF11231C.toInt(),
+            color = EngineEdition.InkArgb,
         )
         commit { it + layer }
         selectedId = id
@@ -1314,8 +1322,8 @@ class EngineDocument(
             w = 0.32f,
             h = squareFrameHeight(0.32f),
             network = triangleNetwork(),
-            fill = 0xFFE86A4A.toInt(),
-            stroke = 0xFF11231C.toInt(),
+            fill = EngineEdition.PlumHoverArgb,
+            stroke = EngineEdition.InkArgb,
             strokeWidth = 4f,
         )
         commit { it + layer }
@@ -1361,7 +1369,7 @@ class EngineDocument(
             w = 0.22f,
             h = squareFrameHeight(0.22f),
             glyph = glyph,
-            tint = 0xFF11231C.toInt(),
+            tint = EngineEdition.InkArgb,
         )
         commit { it + layer }
         selectedId = id
@@ -1608,12 +1616,131 @@ class EngineDocument(
         else -> null
     }
 
+    /** The field currently shown for a target, or null when that target has none. */
+    fun fieldFor(target: FieldTarget): FieldSpec? {
+        return when (target) {
+            FieldTarget.Background -> backgroundField
+            FieldTarget.Layer -> (paintOf(selected ?: return null) as? PaintSpec.Field)?.field
+        }
+    }
+
+    fun fieldTargetName(target: FieldTarget): String = when (target) {
+        FieldTarget.Background -> "ARTBOARD"
+        FieldTarget.Layer -> selected?.name ?: "NO LAYER"
+    }
+
+    /**
+     * Applies a complete field recipe as one undo step. The inspector's sliders call
+     * [updateField] between beginGesture/endGesture so a drag is still one step.
+     */
+    fun setFieldPreset(target: FieldTarget, preset: FieldSpec) {
+        if (target == FieldTarget.Layer && paintable() == null) {
+            status = "PICK A TYPE OR VECTOR LAYER FOR A FIELD FILL"
+            return
+        }
+        beginGesture()
+        updateField(target) { preset.normalized() }
+        endGesture()
+        status = "FIELD · ${fieldTargetName(target)} · ${preset.colors.size} COLOURS"
+    }
+
+    fun clearField(target: FieldTarget) {
+        if (target == FieldTarget.Background) {
+            if (backgroundField == null) return
+            beginGesture()
+            backgroundField = null
+            action = "FIELD OFF"
+            actionId++
+            endGesture()
+            status = "ARTBOARD FIELD REMOVED"
+        } else {
+            if (fieldFor(FieldTarget.Layer) == null) return
+            beginGesture()
+            updateSelected { it.withPaint(null) }
+            action = "FIELD OFF"
+            actionId++
+            endGesture()
+            status = "LAYER FIELD REMOVED"
+        }
+    }
+
+    /** Mutates the field without pushing history; the caller owns the gesture. */
+    fun updateField(target: FieldTarget, transform: (FieldSpec) -> FieldSpec) {
+        when (target) {
+            FieldTarget.Background -> {
+                val current = backgroundField ?: defaultField()
+                val next = transform(current).normalized()
+                if (next != current || backgroundField == null) {
+                    backgroundField = next
+                    action = "FIELD"
+                    actionSubject = "ARTBOARD"
+                    actionId++
+                }
+            }
+            FieldTarget.Layer -> {
+                val layer = paintable() ?: return
+                val current = (paintOf(layer) as? PaintSpec.Field)?.field ?: defaultField()
+                val next = transform(current).normalized()
+                if (next != current || paintOf(layer) !is PaintSpec.Field) {
+                    updateSelected { it.withPaint(PaintSpec.Field(next)) }
+                    action = "FIELD"
+                    actionSubject = layer.name
+                    actionId++
+                }
+            }
+        }
+    }
+
+    fun addFieldColor(target: FieldTarget) {
+        val current = fieldFor(target) ?: defaultField()
+        if (current.colors.size >= FieldSpec.MAX_FIELD_COLORS) {
+            status = "A FIELD KEEPS AT MOST ${FieldSpec.MAX_FIELD_COLORS} COLOURS"
+            return
+        }
+        beginGesture()
+        updateField(target) { it.addColor(defaultFieldColors()[current.colors.size % defaultFieldColors().size].color) }
+        endGesture()
+        status = "FIELD · ${fieldFor(target)?.colors?.size ?: 0} COLOURS"
+    }
+
+    fun removeFieldColor(target: FieldTarget, index: Int) {
+        val current = fieldFor(target) ?: return
+        if (current.colors.size <= 2) {
+            status = "A FIELD KEEPS AT LEAST TWO COLOURS"
+            return
+        }
+        beginGesture()
+        updateField(target) { it.removeColor(index) }
+        endGesture()
+        status = "FIELD · ${fieldFor(target)?.colors?.size ?: 0} COLOURS"
+    }
+
+    fun setFieldColor(target: FieldTarget, index: Int, color: Int) {
+        updateField(target) { it.withSpot(index) { spot -> spot.copy(color = color) } }
+    }
+
+    fun setFieldSpot(target: FieldTarget, index: Int, x: Float, y: Float) {
+        updateField(target) { it.withSpot(index) { spot -> spot.copy(x = x, y = y) } }
+    }
+
+    fun setFieldBand(target: FieldTarget, index: Int, band: Float) {
+        updateField(target) { it.withSpot(index) { spot -> spot.copy(band = band) } }
+    }
+
+    fun setFieldScale(target: FieldTarget, value: Float) = updateField(target) { it.copy(scale = value) }
+    fun setFieldDistortion(target: FieldTarget, value: Float) = updateField(target) { it.copy(distortion = value) }
+    fun setFieldSwirl(target: FieldTarget, value: Float) = updateField(target) { it.copy(swirl = value) }
+    fun setFieldSpeed(target: FieldTarget, value: Float) = updateField(target) { it.copy(speed = value) }
+    fun setFieldSoften(target: FieldTarget, value: Float) = updateField(target) { it.copy(soften = value) }
+    fun setFieldNoise(target: FieldTarget, value: Float) = updateField(target) { it.copy(noise = value) }
+    fun setFieldAnimated(target: FieldTarget, value: Boolean) = updateField(target) { it.copy(animated = value) }
+
     fun setPaintKind(kind: PaintKind) {
         val layer = paintable() ?: return
         val base = when (layer) {
             is VectorLayer -> layer.fill
             is TextLayer -> layer.color
-            else -> 0xFF0FBF92.toInt()
+            else -> EngineEdition.PlumArgb
         }
         val spec: PaintSpec? = when (kind) {
             PaintKind.Solid -> null
@@ -1622,7 +1749,7 @@ class EngineDocument(
             PaintKind.Pattern -> PaintSpec.Pattern(
                 kind = PatternKind.Checks,
                 foreground = base,
-                background = 0xFFF3EBDD.toInt(),
+                background = EngineEdition.PaperArgb,
             )
             PaintKind.Image -> layers.filterIsInstance<ImageLayer>().firstOrNull()
                 ?.let { PaintSpec.Image(it.path) }
@@ -1999,6 +2126,7 @@ class EngineDocument(
         locked = lockedIds,
         texture = texture,
         ink = ink,
+        backgroundField = backgroundField,
     )
 
     private fun restore(value: EditorSnapshot) {
@@ -2012,6 +2140,7 @@ class EngineDocument(
         lockedIds = value.locked
         texture = value.texture
         ink = value.ink
+        backgroundField = value.backgroundField
         playingLayerId = null
         motionProgress = 0f
     }

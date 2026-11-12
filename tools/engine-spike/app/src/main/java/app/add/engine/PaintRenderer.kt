@@ -31,6 +31,7 @@ object PaintRenderer {
         layer: Layer,
         rect: RectF,
         images: Map<String, Bitmap>,
+        fieldPhase: Float = 0f,
     ): Shader? {
         if (spec == null || rect.width() <= 0f || rect.height() <= 0f) return null
         return when (spec) {
@@ -38,6 +39,7 @@ object PaintRenderer {
             is PaintSpec.Gradient -> gradientShader(spec, rect)
             is PaintSpec.Image -> imageShader(spec, rect, images)
             is PaintSpec.Pattern -> patternShader(spec, rect)
+            is PaintSpec.Field -> FieldRenderer.shader(spec.field, rect, fieldPhase)
         }
     }
 

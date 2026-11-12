@@ -51,6 +51,8 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -67,6 +69,7 @@ import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.SolidColor
@@ -103,7 +106,13 @@ fun EngineScreen() {
     BootTrace.mark(context, "engine screen composed")
     val restored = remember { DocumentStore.restore(context) }
     val doc = remember {
-        EngineDocument(restored?.layers, restored?.texture, restored?.textureWarning, restored?.ink ?: emptyList()).also { document ->
+        EngineDocument(
+            restored?.layers,
+            restored?.texture,
+            restored?.textureWarning,
+            restored?.ink ?: emptyList(),
+            restored?.backgroundField,
+        ).also { document ->
             restored?.let {
                 (it.selectedId ?: it.layers.firstOrNull()?.id)?.let { id -> document.select(id) }
                 document.zoom = it.zoom
@@ -140,6 +149,7 @@ fun EngineScreen() {
         doc.lockedIds,
         doc.texture,
         doc.ink,
+        doc.backgroundField,
     ) {
         doc.markSaving()
         delay(300)
@@ -147,6 +157,35 @@ fun EngineScreen() {
             doc.markSaved(SimpleDateFormat("HH:mm", Locale.UK).format(Date(EngineClock.nowMillis())))
         } else {
             doc.markSaveFailed()
+        }
+    }
+    // A field runs on the same software compositor as the page. The phase is a
+    // draw-state, not document data, so it never enters undo or the saved file.
+    val animatedField = doc.backgroundField?.takeIf { it.animated && it.speed > 0f }
+        ?: doc.layers.flattenTree().firstNotNullOfOrNull { layer ->
+            val paint = when (layer) {
+                is VectorLayer -> layer.paint
+                is TextLayer -> layer.paint
+                else -> null
+            }
+            (paint as? PaintSpec.Field)?.field?.takeIf { it.animated && it.speed > 0f }
+        }
+    val fieldSpeed = animatedField?.speed ?: 0f
+    val fieldPhase = remember { mutableFloatStateOf(0f) }
+    LaunchedEffect(animatedField != null, fieldSpeed) {
+        if (animatedField == null) return@LaunchedEffect
+        var last = withFrameNanos { it }
+        var accumulated = 0f
+        while (true) {
+            withFrameNanos { now ->
+                val seconds = ((now - last) / 1_000_000_000f).coerceAtMost(0.1f)
+                last = now
+                accumulated += seconds * (0.15f + fieldSpeed * 1.8f)
+                if (accumulated >= 1f / 24f) {
+                    fieldPhase.floatValue = (fieldPhase.floatValue + accumulated) % 60f
+                    accumulated = 0f
+                }
+            }
         }
     }
     val sceneHandles = remember { mutableMapOf<String, SceneHandle>() }
@@ -257,9 +296,11 @@ fun EngineScreen() {
                     val result = Exporter.export(
                         context, doc.layers, typefaces,
                         doc.modelLayers.associate { it.id to handleFor(it).view },
-                        scale,
-                        doc.texture,
-                        doc.ink,
+                        scale = scale,
+                        texture = doc.texture,
+                        ink = doc.ink,
+                        backgroundField = doc.backgroundField,
+                        fieldPhase = fieldPhase.value,
                     )
                     doc.status = result.status
                     Toast.makeText(context, result.status, Toast.LENGTH_SHORT).show()
@@ -287,6 +328,7 @@ fun EngineScreen() {
             sceneHandles = sceneHandles,
             typefaces = typefaces,
             images = images,
+            fieldPhase = fieldPhase,
             onCanvasTouch = {
                 chrome = false
                 // Touching the stage means the reader is done reading the add
@@ -753,6 +795,7 @@ private fun Stage(
     sceneHandles: MutableMap<String, SceneHandle>,
     typefaces: Typefaces,
     images: Map<String, android.graphics.Bitmap>,
+    fieldPhase: State<Float>,
     onCanvasTouch: () -> Unit,
     sheetOpen: Boolean = false,
     focusRequester: FocusRequester? = null,
@@ -1099,6 +1142,8 @@ contentAlignment = Alignment.Center,
                         preview = true,
                         texture = doc.texture,
                         ink = doc.ink,
+                        backgroundField = doc.backgroundField,
+                        fieldPhase = fieldPhase.value,
                     )
                     restore()
                 }
@@ -1265,7 +1310,7 @@ contentAlignment = Alignment.Center,
             doc.guides?.let { guides ->
                 Canvas(Modifier.matchParentSize()) {
                     val line = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply {
-                        color = 0xFFE86A4A.toInt()
+                        color = Mint.toArgb()
                         strokeWidth = 2f
                     }
                     guides.vertical.forEach { x ->
@@ -2743,10 +2788,16 @@ private fun CompositeInspector(doc: EngineDocument, layer: Layer) {
                         is PaintSpec.Gradient -> paint.kind == kind
                         is PaintSpec.Image -> kind == PaintKind.Image
                         is PaintSpec.Pattern -> kind == PaintKind.Pattern
+                        is PaintSpec.Field -> false
                     },
                     onClick = { doc.setPaintKind(kind) },
                 )
             }
+            ActionChip(
+                label = "FIELD",
+                active = layerPaint is PaintSpec.Field,
+                onClick = { doc.setFieldPreset(FieldTarget.Layer, FieldPresets.all.first().field) },
+            )
         }
         (layerPaint as? PaintSpec.Gradient)?.let { gradient ->
             GradientStops(doc, layer.id, gradient)
@@ -2774,6 +2825,9 @@ private fun CompositeInspector(doc: EngineDocument, layer: Layer) {
                     ActionChip("FIT INSIDE", active = !image.fill, onClick = { doc.setPaintImageFill(false) })
                 }
             }
+        }
+        (layerPaint as? PaintSpec.Field)?.let { field ->
+            FieldEditor(doc, field.field, FieldTarget.Layer)
         }
         (layerPaint as? PaintSpec.Pattern)?.let { pattern ->
             Spacer(Modifier.height(3.dp))
@@ -2950,11 +3004,11 @@ internal fun GradientStops(doc: EngineDocument, layerId: String, gradient: Paint
     )
     Row(horizontalArrangement = Arrangement.spacedBy(5.dp)) {
         listOf(
-            0xFF0FBF92.toInt(),
-            0xFFE86A4A.toInt(),
-            0xFFD6E381.toInt(),
-            0xFF11231C.toInt(),
-            0xFFF2EEE3.toInt(),
+            Mint.toArgb(),
+            Lime.toArgb(),
+            Clay.toArgb(),
+            Cream.toArgb(),
+            Paper.toArgb(),
         ).forEach { value ->
             Box(
                 modifier = Modifier
@@ -3002,11 +3056,11 @@ private fun Swatches(doc: EngineDocument, selected: Int) {
     LaunchedEffect(selected) { hex = String.format("%06X", selected and 0xFFFFFF) }
     Row(horizontalArrangement = Arrangement.spacedBy(5.dp)) {
         listOf(
-            0xFF0FBF92.toInt(),
-            0xFFE86A4A.toInt(),
-            0xFFD6E381.toInt(),
-            0xFF11231C.toInt(),
-            0xFFF2EEE3.toInt(),
+            Mint.toArgb(),
+            Lime.toArgb(),
+            Clay.toArgb(),
+            Cream.toArgb(),
+            Paper.toArgb(),
         ).forEach { value ->
             Box(
                 modifier = Modifier

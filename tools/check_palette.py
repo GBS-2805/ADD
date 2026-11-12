@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""One edition, two surfaces: the site's newsprint tokens and the app.
+"""One edition, every surface: the site's Review tokens, the app, Studio and engine.
 
-Fails when a colour stops following the newsprint palette:
+Fails when a colour stops following the site's edition:
 
   * a site surface that must take --page, --band or --tint carries a literal
     colour, or names a custom property nothing defines;
@@ -30,6 +30,9 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT / "tools"))
+import sync_edition  # noqa: E402
+
 CSS = ROOT / "docs/assets/site.css"
 COLORS = ROOT / "app/res/values/colors.xml"
 ATTRS = ROOT / "app/res/values/attrs.xml"
@@ -61,12 +64,15 @@ JS_VARS = {"--glyph", "--sw", "--c", "--size", "--w", "--darken", "--str"}
 SITE_OF_APP = {
     "band": "--band",
     "band_ink": "--band-ink",
+    "band_dim": "--band-dim",
+    "band_line": "--band-line",
     "accent": "--accent",
     "accent_ink": "--accent-ink",
     "label": "--label",
     "page": "--page",
     "on": "--on",
     "on_dim": "--on-dim",
+    "rule": "--rule",
 }
 
 # Documented exceptions: a scrim is a scrim, and the launcher disc is a fixed asset.
@@ -87,19 +93,8 @@ def read(path):
 
 
 def newsprint_css():
-    """The explicit newsprint token block, not whichever token block comes last."""
-    text = read(CSS)
-    marker = text.find("Newsprint edition")
-    if marker < 0:
-        fail("site.css", "no Newsprint edition token block")
-        return {}
-    start = text.find(":root,", marker)
-    end = text.find("\n}", start)
-    if start < 0 or end < 0:
-        fail("site.css", "the Newsprint edition marker has no token block")
-        return {}
-    return {key: value.strip()
-            for key, value in re.findall(r"(--[\w-]+)\s*:\s*([^;]+);", text[start:end])}
+    """The final Review edition token block, shared with the generator."""
+    return sync_edition.site_tokens()
 
 
 def colours_xml():
@@ -190,6 +185,14 @@ def check_app_matches_site():
                      % (resource, app[resource], site_key, site))
 
 
+def check_generated_edition():
+    """The Android, Studio and engine copies must be the exact output for this site."""
+    for path, expected in sync_edition.generated().items():
+        if read(path) != expected:
+            fail("generated", "%s is stale; run python3 tools/sync_edition.py"
+                 % path.relative_to(ROOT))
+
+
 def check_theme():
     themes, attrs, app = themes_xml(), attrs_xml(), colours_xml()
     palette_attrs = [a for a in attrs if a not in ("warn", "warnBg", "shadow")]
@@ -225,7 +228,7 @@ def check_contrast():
         ("on", "page", 4.5, "words on the page"),
         ("accentInk", "accent", 4.5, "words on the accent"),
         ("onDim", "page", 3.0, "dim words on the page"),
-        ("label", "band", 3.0, "the band's small labels"),
+        ("label", "page", 3.0, "the side-panel labels"),
     ]
     for fg, bg, floor, what in pairs:
         ratio = contrast(value(theme, fg), value(theme, bg))
@@ -310,6 +313,7 @@ def main():
 
     check_newsprint_tokens()
     check_app_matches_site()
+    check_generated_edition()
     check_theme()
     check_contrast()
     check_custom_properties()

@@ -51,8 +51,10 @@ public class ShelfActivity extends Activity {
 
     private static final String ORIGIN = "https://icons.local";
 
-    /** The page's own colour before any page reports it: the shelf opens on paper. */
-    private static final String PAGE = "#e9e0cb";
+    /** The page colour before any page reports it: the one edition, not a copy. */
+    private int pageColour() {
+        return getResources().getColor(R.color.newsprint_page);
+    }
 
     /**
      * Asked of the page once loaded and again whenever the look changes, so the system
@@ -77,11 +79,11 @@ public class ShelfActivity extends Activity {
     protected void onCreate(Bundle state) {
         super.onCreate(state);
 
-        getWindow().setStatusBarColor(Color.parseColor(PAGE));
-        getWindow().setNavigationBarColor(Color.parseColor(PAGE));
+        getWindow().setStatusBarColor(pageColour());
+        getWindow().setNavigationBarColor(pageColour());
 
         web = new WebView(this);
-        web.setBackgroundColor(Color.parseColor(PAGE));
+        web.setBackgroundColor(pageColour());
         WebSettings settings = web.getSettings();
         settings.setJavaScriptEnabled(true);
         settings.setDomStorageEnabled(true);
@@ -100,7 +102,7 @@ public class ShelfActivity extends Activity {
         web.setWebViewClient(new LocalClient());
 
         root = new FrameLayout(this);
-        root.setBackgroundColor(Color.parseColor(PAGE));
+        root.setBackgroundColor(pageColour());
         root.addView(web, new FrameLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         root.setOnApplyWindowInsetsListener(new View.OnApplyWindowInsetsListener() {
@@ -437,6 +439,10 @@ public class ShelfActivity extends Activity {
         return "application/octet-stream";
     }
 
+    private static String hex(int colour) {
+        return String.format("#%06X", 0xFFFFFF & colour);
+    }
+
     private static String encodingOf(String asset) {
         if (asset.endsWith(".woff2") || asset.endsWith(".woff") || asset.endsWith(".ttf")
                 || asset.endsWith(".png")) {
@@ -468,8 +474,12 @@ public class ShelfActivity extends Activity {
                     new HashMap<String, String>(), new ByteArrayInputStream(new byte[0]));
         }
         String address = "https://artbase-olive.vercel.app" + sitePathFor(asset);
+        String pageHex = hex(getResources().getColor(R.color.newsprint_page));
+        String inkHex = hex(getResources().getColor(R.color.newsprint_on));
+        String accentHex = hex(getResources().getColor(R.color.newsprint_accent));
+        String accentInkHex = hex(getResources().getColor(R.color.newsprint_accent_ink));
         String page = "<!doctype html><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">"
-                + "<body style=\"margin:0;padding:56px 24px;background:#e9e0cb;color:#15120e;"
+                + "<body style=\"margin:0;padding:56px 24px;background:var(--page);color:var(--on);"
                 + "font-family:'Libre Franklin',system-ui,sans-serif;line-height:1.6\">"
                 + "<p style=\"margin:0 0 10px;font-size:13px;letter-spacing:.12em;"
                 + "text-transform:uppercase;opacity:.65\">ADD \u00b7 offline</p>"
@@ -480,10 +490,12 @@ public class ShelfActivity extends Activity {
                 + "<p style=\"margin:0 0 26px\"><code style=\"font-size:13px;word-break:break-all\">"
                 + address + "</code></p>"
                 + "<a href=\"" + address + "\" style=\"display:inline-block;padding:14px 20px;margin:0 10px 12px 0;"
-                + "background:#dd4124;color:#f2eee3;text-decoration:none\">Open on the web</a>"
+                + "background:var(--accent);color:var(--accent-ink);text-decoration:none\">Open on the web</a>"
                 + "<a href=\"/icons/index.html\" style=\"display:inline-block;padding:14px 20px;margin:0 0 12px 0;"
-                + "background:transparent;color:#15120e;text-decoration:none;border:1px solid rgba(21,18,14,.35)\">"
-                + "Back to the icons</a></body>";
+                + "background:transparent;color:var(--on);text-decoration:none;border:1px solid rgba(27,18,18,.35)\">"
+                + "Back to the icons</a>"
+                + "<style>:root{--page:" + pageHex + ";--on:" + inkHex + ";--accent:" + accentHex
+                + ";--accent-ink:" + accentInkHex + ";}</style></body>";
         Map<String, String> headers = new HashMap<String, String>();
         headers.put("Cache-Control", "no-store");
         return new WebResourceResponse("text/html", "utf-8", 404, "Not bundled", headers,

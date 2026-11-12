@@ -56,10 +56,10 @@ public final class StudioPane extends FrameLayout {
     public StudioPane(Activity host) {
         super(host);
         this.host = host;
-        setBackgroundColor(Color.parseColor("#131513"));
+        setBackgroundColor(host.getResources().getColor(R.color.newsprint_page));
 
         web = new WebView(host);
-        web.setBackgroundColor(Color.parseColor("#131513"));
+        web.setBackgroundColor(host.getResources().getColor(R.color.newsprint_page));
         web.setLayerType(View.LAYER_TYPE_HARDWARE, null);
         WebSettings settings = web.getSettings();
         settings.setJavaScriptEnabled(true);

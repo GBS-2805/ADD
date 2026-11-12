@@ -295,7 +295,7 @@ fun DiagnosticsDialog(
                         ) {
                             samples.forEach { glyph ->
                                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                    IconThumb(glyph, 0xFFF2EEE3.toInt(), Modifier.size(26.dp))
+                                    IconThumb(glyph, EngineEdition.InkArgb, Modifier.size(26.dp))
                                     Text(glyph.brandSlug.uppercase(), color = Dim, fontSize = 5.sp)
                                 }
                             }

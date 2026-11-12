@@ -1,0 +1,1212 @@
+/* ADD — the asset database pages.
+
+   One quiet layout for the two catalogs: a large title, a short count, then
+   full-width rows with room for the work itself. Icons show real glyphs; fonts
+   show real specimens. Nothing here changes the shared band or footer. */
+
+.db-page .db-main {
+  width: 100%;
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 0 40px 96px;
+}
+
+.db-kicker {
+  margin: 0 0 22px;
+  color: var(--on-dim);
+  font: 500 12px/1.4 "Poppins", "Helvetica Neue", sans-serif;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.db-hero {
+  padding: 64px 0 38px;
+  border-bottom: 1px solid var(--rule);
+}
+
+.db-title-row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 32px;
+}
+
+.db-hero h1 {
+  max-width: none;
+  margin: 0;
+  color: var(--on);
+  font-family: "Poppins", "Helvetica Neue", Arial, sans-serif;
+  font-size: clamp(84px, 12.2vw, 184px);
+  font-weight: 500;
+  line-height: .78;
+  letter-spacing: -.085em;
+  text-transform: none;
+}
+
+.db-stats {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  margin: 0 0 8px;
+  color: var(--on-dim);
+  font: 400 16px/1.5 "Poppins", "Helvetica Neue", sans-serif;
+  letter-spacing: -.01em;
+  text-align: right;
+  text-transform: none;
+}
+
+.db-stats span { display: block; }
+
+.db-stats b {
+  display: inline;
+  color: var(--on);
+  font-size: 27px;
+  font-weight: 500;
+  line-height: 1.1;
+}
+
+.db-intro {
+  max-width: 58ch;
+  margin: 30px 0 0;
+  color: var(--on);
+  font: 400 19px/1.55 "Poppins", "Helvetica Neue", sans-serif;
+  letter-spacing: -.01em;
+}
+
+.db-inline-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  margin-top: 14px;
+  color: var(--band);
+  font: 500 15px/1.4 "Poppins", "Helvetica Neue", sans-serif;
+  text-decoration: none;
+}
+
+.db-inline-link::after {
+  content: " \2197";
+  margin-left: 5px;
+}
+
+.db-inline-link:hover,
+.db-inline-link:focus-visible {
+  text-decoration: underline;
+  text-underline-offset: 5px;
+}
+
+.db-section-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+  padding: 30px 0 10px;
+}
+
+.db-section-head h2 {
+  margin: 0;
+  color: var(--on);
+  font: 500 17px/1.3 "Poppins", "Helvetica Neue", sans-serif;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.db-section-head p {
+  max-width: 52ch;
+  margin: 0;
+  color: var(--on-dim);
+  font: 400 15px/1.5 "Poppins", "Helvetica Neue", sans-serif;
+}
+
+/* ---------- icons: one readable row per set ---------- */
+
+.db-set-list {
+  border-top: 1px solid var(--rule);
+}
+
+.db-set {
+  display: block;
+  margin: 0 -18px;
+  padding: 28px 18px 26px;
+  border-bottom: 1px solid var(--rule);
+  color: inherit;
+  text-decoration: none;
+}
+
+.db-set:hover {
+  background: var(--tint);
+}
+
+.db-set:focus-visible {
+  outline: 2px solid var(--band);
+  outline-offset: 3px;
+}
+
+.db-set-top {
+  display: flex;
+  align-items: baseline;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+
+.db-set-no {
+  flex: none;
+  width: 32px;
+  color: var(--on-dim);
+  font: 500 12px/1.4 "Poppins", "Helvetica Neue", sans-serif;
+  letter-spacing: .06em;
+}
+
+.db-set h3 {
+  margin: 0;
+  color: var(--on);
+  font: 400 clamp(38px, 5vw, 62px)/1 "Poppins", "Helvetica Neue", sans-serif;
+  letter-spacing: -.055em;
+  text-transform: none;
+}
+
+.db-set-meta {
+  margin-left: auto;
+  color: var(--on-dim);
+  font: 400 15px/1.5 "Poppins", "Helvetica Neue", sans-serif;
+  letter-spacing: -.01em;
+  text-transform: none;
+}
+
+.db-set-go {
+  flex: none;
+  width: 28px;
+  color: var(--band);
+  font: 400 26px/1 "Poppins", sans-serif;
+  text-align: right;
+}
+
+.db-set-note {
+  max-width: 66ch;
+  margin: 9px 0 21px 50px;
+  color: var(--on-dim);
+  font: 400 17px/1.55 "Poppins", "Helvetica Neue", sans-serif;
+  letter-spacing: -.01em;
+}
+
+.db-set-glyphs {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 22px;
+  padding-left: 50px;
+}
+
+.db-glyph {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 42px;
+  height: 42px;
+  color: var(--on);
+}
+
+.db-glyph svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.db-app-note {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+  margin: 48px 0 0;
+  padding: 22px 0;
+  border-top: 1px solid var(--band);
+  border-bottom: 1px solid var(--rule);
+}
+
+.db-app-note p {
+  max-width: 70ch;
+  margin: 0;
+  color: var(--on-dim);
+  font: 400 16px/1.55 "Poppins", "Helvetica Neue", sans-serif;
+}
+
+.db-app-note a {
+  flex: none;
+  color: var(--band);
+  font: 500 15px/1.4 "Poppins", "Helvetica Neue", sans-serif;
+  text-decoration: none;
+}
+
+.db-app-note a:hover,
+.db-app-note a:focus-visible {
+  text-decoration: underline;
+  text-underline-offset: 5px;
+}
+
+/* ---------- fonts: family rows with real specimens ---------- */
+
+.db-try {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 16px 30px;
+  max-width: 1000px;
+  margin: 32px 0 0;
+  padding-top: 20px;
+  border-top: 1px solid var(--rule);
+}
+
+.db-try > label {
+  display: block;
+  grid-column: 1 / -1;
+  margin: 0;
+  color: var(--on-dim);
+  font: 500 12px/1.3 "Poppins", "Helvetica Neue", sans-serif;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+
+.db-try input[type="text"] {
+  width: 100%;
+  height: 62px;
+  margin: 0;
+  padding: 0 2px;
+  border: 0;
+  border-bottom: 1px solid var(--on);
+  border-radius: 0;
+  background: transparent;
+  color: var(--on);
+  font: 400 25px/1.2 "Poppins", "Helvetica Neue", sans-serif;
+  letter-spacing: -.03em;
+}
+
+.db-try input[type="text"]:focus-visible {
+  outline: 2px solid var(--band);
+  outline-offset: 4px;
+}
+
+.db-size {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 250px;
+  color: var(--on-dim);
+  font: 400 14px/1.4 "Poppins", "Helvetica Neue", sans-serif;
+}
+
+.db-size label {
+  color: var(--on-dim);
+  font-size: 12px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+
+.db-size input {
+  width: 128px;
+  accent-color: var(--band);
+}
+
+.db-size output {
+  min-width: 48px;
+  color: var(--on);
+  font-variant-numeric: tabular-nums;
+}
+
+.db-jump {
+  display: flex;
+  gap: 20px;
+  align-items: baseline;
+  overflow-x: auto;
+  margin: 0;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--rule);
+  scrollbar-width: none;
+}
+
+.db-jump::-webkit-scrollbar { display: none; }
+
+.db-jump a {
+  flex: none;
+  color: var(--on-dim);
+  font: 400 15px/1.4 "Poppins", "Helvetica Neue", sans-serif;
+  text-decoration: none;
+}
+
+.db-jump a span {
+  margin-left: 4px;
+  color: var(--on-dim);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.db-jump a:hover,
+.db-jump a:focus-visible {
+  color: var(--on);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.db-font-list {
+  --specimen-size: 72px;
+  border-bottom: 1px solid var(--rule);
+}
+
+.db-family {
+  padding: 38px 0 42px;
+  border-top: 1px solid var(--rule);
+  scroll-margin-top: 72px;
+}
+
+.db-family:first-child {
+  border-top: 0;
+}
+
+.db-family-head {
+  display: flex;
+  align-items: baseline;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+
+.db-family-no {
+  flex: none;
+  width: 32px;
+  color: var(--on-dim);
+  font: 500 12px/1.4 "Poppins", "Helvetica Neue", sans-serif;
+  letter-spacing: .06em;
+}
+
+.db-family h2 {
+  margin: 0;
+  color: var(--on);
+  font-size: clamp(34px, 4.2vw, 50px);
+  font-weight: 400;
+  line-height: 1.05;
+  letter-spacing: -.04em;
+  text-transform: none;
+}
+
+.db-family-meta {
+  margin-left: auto;
+  color: var(--on-dim);
+  font: 400 15px/1.5 "Poppins", "Helvetica Neue", sans-serif;
+  letter-spacing: -.01em;
+  text-transform: none;
+}
+
+.db-family-tools {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin: 17px 0 0 50px;
+}
+
+.db-style-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--on-dim);
+  font: 400 14px/1.4 "Poppins", "Helvetica Neue", sans-serif;
+}
+
+.db-style-wrap label {
+  color: var(--on-dim);
+  font-size: 12px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+
+.db-style {
+  min-height: 44px;
+  max-width: 240px;
+  padding: 0 38px 0 12px;
+  border: 1px solid var(--rule);
+  border-radius: 0;
+  background-color: transparent;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none'%3E%3Cpath d='M6 9L12 15L18 9' stroke='%235b2a4b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 13px center;
+  color: var(--on);
+  font: 400 16px/1.3 "Poppins", "Helvetica Neue", sans-serif;
+  appearance: none;
+  cursor: pointer;
+}
+
+.db-style:focus-visible {
+  outline: 2px solid var(--band);
+  outline-offset: 2px;
+}
+
+.db-download {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 15px;
+  background: var(--band);
+  color: var(--band-ink);
+  font: 500 13px/1.3 "Poppins", "Helvetica Neue", sans-serif;
+  letter-spacing: .04em;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.db-download:hover {
+  background: var(--band-hover);
+}
+
+.db-download:focus-visible {
+  outline: 2px solid var(--on);
+  outline-offset: 3px;
+}
+
+.db-copy {
+  min-height: 44px;
+  padding: 0 0 2px;
+  border: 0;
+  border-bottom: 1px solid var(--rule);
+  background: transparent;
+  color: var(--on);
+  font: 400 15px/1.4 "Poppins", "Helvetica Neue", sans-serif;
+  cursor: pointer;
+}
+
+.db-copy:hover {
+  border-bottom-color: var(--on);
+}
+
+.db-copy:focus-visible {
+  outline: 2px solid var(--band);
+  outline-offset: 3px;
+}
+
+.db-specimen {
+  max-width: 100%;
+  margin: 24px 0 0;
+  color: var(--on);
+  font-size: var(--specimen-size, 72px);
+  font-weight: 400;
+  line-height: 1.06;
+  letter-spacing: -.045em;
+  overflow-wrap: anywhere;
+}
+
+.db-family-use {
+  max-width: 68ch;
+  margin: 18px 0 0 50px;
+  color: var(--on-dim);
+  font: 400 16px/1.6 "Poppins", "Helvetica Neue", sans-serif;
+  letter-spacing: -.01em;
+}
+
+.db-licence {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+  padding: 30px 0 0;
+}
+
+.db-licence p {
+  max-width: 76ch;
+  margin: 0;
+  color: var(--on-dim);
+  font: 400 15px/1.6 "Poppins", "Helvetica Neue", sans-serif;
+}
+
+.db-licence a {
+  color: var(--on);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.db-status {
+  margin: 26px 0;
+  color: var(--on-dim);
+  font: 400 17px/1.5 "Poppins", "Helvetica Neue", sans-serif;
+}
+
+@media (max-width: 900px) {
+  .db-page .db-main { padding-left: 24px; padding-right: 24px; }
+  .db-hero { padding-top: 48px; }
+  .db-title-row { align-items: flex-start; flex-direction: column; gap: 22px; }
+  .db-stats { align-items: flex-start; text-align: left; }
+  .db-stats b { display: inline; margin-right: 4px; font-size: 23px; }
+  .db-set-note, .db-set-glyphs, .db-family-tools, .db-family-use {
+    margin-left: 0;
+    padding-left: 0;
+  }
+  .db-set-meta { margin-left: 0; }
+  .db-family-meta { margin-left: 0; }
+  .db-family-tools { margin-top: 16px; }
+}
+
+@media (max-width: 700px) {
+  .db-page .db-main { padding-left: 20px; padding-right: 20px; padding-bottom: 64px; }
+  .db-hero { padding: 38px 0 30px; }
+  .db-hero h1 { font-size: clamp(72px, 20vw, 110px); }
+  .db-intro { margin-top: 24px; font-size: 17px; }
+  .db-try { grid-template-columns: 1fr; gap: 12px; margin-top: 26px; }
+  .db-try input[type="text"] { height: 54px; font-size: 21px; }
+  .db-size { min-width: 0; }
+  .db-size input { flex: 1; width: auto; max-width: 150px; }
+  .db-jump { gap: 16px; }
+  .db-set { margin: 0; padding: 24px 0 22px; }
+  .db-set-top { gap: 10px 12px; }
+  .db-set-no { width: 24px; }
+  .db-set h3 { font-size: clamp(34px, 11vw, 46px); }
+  .db-set-meta { width: 100%; padding-left: 36px; }
+  .db-set-go { position: absolute; right: 20px; }
+  .db-set { position: relative; }
+  .db-set-note { margin-top: 12px; font-size: 16px; }
+  .db-set-glyphs { gap: 14px; margin-top: 4px; }
+  .db-glyph { width: 31px; height: 31px; }
+  .db-app-note { margin-top: 36px; align-items: flex-start; flex-direction: column; gap: 10px; }
+  .db-family { padding: 30px 0 34px; }
+  .db-family-no { width: 24px; }
+  .db-family h2 { font-size: 34px; }
+  .db-family-meta { width: 100%; padding-left: 36px; }
+  .db-family-tools { gap: 10px; }
+  .db-style-wrap { width: 100%; }
+  .db-style { flex: 1; max-width: none; }
+  .db-specimen { margin-top: 20px; font-size: min(var(--specimen-size, 72px), 44px); line-height: 1.08; }
+  .db-family-use { margin-top: 14px; font-size: 15px; }
+  .db-licence { flex-direction: column; gap: 12px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .db-page * { scroll-behavior: auto !important; }
+}
+
+/* ---------- fonts: a quiet specimen sheet ---------- */
+
+.type-main {
+  padding-top: 0;
+}
+
+.type-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 28px;
+  padding: 30px 0 78px;
+}
+
+.type-head h1 {
+  max-width: none;
+  margin: 0;
+  color: var(--on);
+  font: 500 42px/1 "Poppins", "Helvetica Neue", sans-serif;
+  letter-spacing: -.045em;
+  text-transform: none;
+}
+
+.type-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  width: clamp(210px, 28vw, 340px);
+}
+
+.type-try {
+  width: 100%;
+  margin: 0;
+  padding: 7px 0 9px;
+  border: 0;
+  border-bottom: 1px solid var(--rule);
+  border-radius: 0;
+  background: transparent;
+  color: var(--on);
+  font: 400 18px/1.3 "Poppins", "Helvetica Neue", sans-serif;
+  letter-spacing: -.02em;
+}
+
+.type-try::placeholder { color: var(--on-dim); }
+
+.type-try:focus-visible {
+  outline: 2px solid var(--band);
+  outline-offset: 4px;
+}
+
+.type-size {
+  width: 100%;
+  height: 20px;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.type-size::-webkit-slider-runnable-track {
+  height: 2px;
+  background: var(--rule);
+}
+
+.type-size::-moz-range-track {
+  height: 2px;
+  background: var(--rule);
+}
+
+.type-size::-webkit-slider-thumb {
+  width: 14px;
+  height: 14px;
+  margin-top: -6px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--band);
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.type-size::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--band);
+}
+
+.type-size:focus-visible {
+  outline: 2px solid var(--band);
+  outline-offset: 3px;
+}
+
+.type-size:focus-visible::-webkit-slider-thumb { outline: 2px solid var(--on); outline-offset: 2px; }
+.type-size:focus-visible::-moz-range-thumb { outline: 2px solid var(--on); outline-offset: 2px; }
+
+.type-status {
+  margin: 0 0 36px;
+  color: var(--on-dim);
+  font: 400 16px/1.5 "Poppins", "Helvetica Neue", sans-serif;
+}
+
+.type-families {
+  display: block;
+}
+
+.type-family {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  grid-template-areas:
+    "name stage"
+    "styles stage"
+    "actions stage";
+  column-gap: clamp(34px, 6vw, 88px);
+  align-items: start;
+  margin: 0 0 clamp(64px, 8vw, 104px);
+  padding: 0;
+  border-top: 0;
+}
+
+.type-family h2 {
+  grid-area: name;
+  margin: 0 0 13px;
+  color: var(--on);
+  font: 500 17px/1.35 "Poppins", "Helvetica Neue", sans-serif;
+  letter-spacing: -.015em;
+  text-transform: none;
+}
+
+.type-stage {
+  grid-area: stage;
+  min-width: 0;
+  align-self: start;
+}
+
+.type-specimen {
+  max-width: 100%;
+  margin: -.035em 0 0;
+  color: var(--on);
+  font-size: var(--specimen-size, 168px);
+  font-weight: 400;
+  line-height: .76;
+  letter-spacing: -.085em;
+  overflow-wrap: anywhere;
+}
+
+.type-styles {
+  grid-area: styles;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.type-style {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+  width: 100%;
+  min-height: 32px;
+  padding: 3px 0;
+  border: 0;
+  background: transparent;
+  color: var(--on-dim);
+  font: 400 16px/1.4 "Poppins", "Helvetica Neue", sans-serif;
+  letter-spacing: -.01em;
+  text-align: left;
+  cursor: pointer;
+}
+
+.type-style::before {
+  content: "";
+  flex: none;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: transparent;
+}
+
+.type-style:hover,
+.type-style:focus-visible {
+  color: var(--on);
+  opacity: 1;
+}
+
+.type-style:focus-visible {
+  outline: 2px solid var(--band);
+  outline-offset: 3px;
+}
+
+.type-style[aria-pressed="true"] {
+  color: var(--on);
+  opacity: 1;
+}
+
+.type-style[aria-pressed="true"]::before {
+  background: var(--on);
+}
+
+.type-actions {
+  grid-area: actions;
+  display: flex;
+  gap: 17px;
+  align-items: center;
+  margin-top: 20px;
+}
+
+.type-action {
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--on-dim);
+  font: 400 14px/1.4 "Poppins", "Helvetica Neue", sans-serif;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.type-action:hover,
+.type-action:focus-visible {
+  color: var(--on);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.type-action:focus-visible {
+  outline: 2px solid var(--band);
+  outline-offset: 3px;
+}
+
+@media (max-width: 900px) {
+  .type-family { grid-template-columns: 190px minmax(0, 1fr); column-gap: 36px; }
+}
+
+@media (max-width: 700px) {
+  .type-head { align-items: flex-start; flex-direction: column; gap: 18px; padding: 28px 0 52px; }
+  .type-head h1 { font-size: 36px; }
+  .type-controls { width: 100%; }
+  .type-family {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "name"
+      "stage"
+      "styles"
+      "actions";
+    row-gap: 0;
+    margin-bottom: 64px;
+  }
+  .type-family h2 { margin-bottom: 0; }
+  .type-stage { margin: 13px 0 20px; }
+  .type-specimen { line-height: .78; }
+  .type-styles { display: grid; grid-template-columns: 1fr 1fr; column-gap: 24px; }
+  .type-style { font-size: 15px; }
+  .type-actions { margin-top: 14px; }
+}
+
+/* ---------- icons: the screenshot-led landing ---------- */
+
+.ih-page .ih-main {
+  max-width: 1320px;
+  padding: 0 clamp(20px, 4.6vw, 56px) 96px;
+}
+
+/* --pad is only declared on phones, so the shared footer collapses to the edge
+   on desktop; align it with the Icons page's own gutter instead. */
+.ih-page footer {
+  padding: 20px clamp(20px, 4.6vw, 56px) 40px;
+}
+
+.ih-hero {
+  padding: clamp(50px, 7.5vw, 92px) 0 clamp(34px, 4vw, 50px);
+  border: 0;
+  text-align: center;
+}
+
+.ih-hero h1 {
+  max-width: 1100px;
+  margin: 0 auto;
+  color: var(--on);
+  font-family: var(--wheat-display), Georgia, serif;
+  font-size: clamp(54px, 9.8vw, 132px);
+  font-weight: 400;
+  line-height: .91;
+  letter-spacing: -.035em;
+  text-transform: none;
+  text-wrap: balance;
+}
+
+.ih-lede {
+  max-width: 36ch;
+  margin: 26px auto 0;
+  color: var(--on);
+  font-family: var(--wheat-body), Georgia, serif;
+  font-size: clamp(17px, 1.55vw, 20px);
+  line-height: 1.5;
+}
+
+.ih-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  width: min(100%, 340px);
+  margin: 34px auto 0;
+}
+
+.ih-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 56px;
+  padding: 0 22px;
+  border: 1px solid var(--on);
+  background: transparent;
+  color: var(--on);
+  font: 500 13px/1.2 "Poppins", "Helvetica Neue", sans-serif;
+  letter-spacing: .055em;
+  text-decoration: none;
+  text-transform: uppercase;
+  transition: background-color .16s ease, transform .16s ease, box-shadow .16s ease;
+}
+
+.ih-btn-primary {
+  border-color: var(--on);
+  background: var(--on);
+  color: var(--page);
+  box-shadow: 7px 7px 0 var(--band);
+}
+
+.ih-btn-primary:hover,
+.ih-btn-primary:focus-visible {
+  transform: translate(2px, 2px);
+  box-shadow: 5px 5px 0 var(--band);
+}
+
+.ih-btn:not(.ih-btn-primary):hover,
+.ih-btn:not(.ih-btn-primary):focus-visible {
+  background: var(--tint);
+}
+
+.ih-btn:focus-visible {
+  outline: 2px solid var(--band);
+  outline-offset: 3px;
+}
+
+.ih-hero-icons {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  width: min(100%, 650px);
+  margin: clamp(38px, 5.5vw, 58px) auto 0;
+}
+
+.ih-hero-glyph {
+  display: block;
+  flex: none;
+  width: clamp(38px, 4.2vw, 52px);
+  height: clamp(38px, 4.2vw, 52px);
+  color: var(--on);
+}
+
+.ih-hero-glyph svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.ih-browse {
+  padding: 26px 0 46px;
+  border-top: 0;
+}
+
+.ih-search-label {
+  display: block;
+  margin: 0 0 10px;
+  color: var(--on);
+  font-family: var(--wheat-body), Georgia, serif;
+  font-size: 20px;
+  line-height: 1.3;
+}
+
+.ih-search {
+  width: 100%;
+  height: 58px;
+  margin: 0;
+  padding: 0 14px;
+  border: 1px solid var(--on);
+  border-radius: 0;
+  background: transparent;
+  color: var(--on);
+  font: 400 16px/1.3 var(--wheat-body), Georgia, serif;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.ih-search::placeholder {
+  color: var(--on-dim);
+  opacity: 1;
+}
+
+.ih-search:focus-visible {
+  outline: 2px solid var(--band);
+  outline-offset: 3px;
+}
+
+.ih-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 32px;
+}
+
+.ih-tile {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  aspect-ratio: 1;
+  padding: 10px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--on);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.ih-tile svg {
+  display: block;
+  width: 34px;
+  height: 34px;
+}
+
+.ih-tile:hover,
+.ih-tile:focus-visible {
+  background: var(--tint);
+}
+
+.ih-tile:focus-visible {
+  outline: 2px solid var(--band);
+  outline-offset: 2px;
+}
+
+.ih-tile[aria-pressed="true"] {
+  background: var(--band);
+  color: var(--band-ink);
+}
+
+.ih-tile[hidden] { display: none; }
+
+.ih-empty {
+  margin: 28px 0 0;
+  color: var(--on-dim);
+  font-family: var(--wheat-body), Georgia, serif;
+  font-size: 17px;
+  line-height: 1.5;
+}
+
+.ih-empty[hidden] { display: none; }
+
+.ih-sets {
+  padding: 0;
+  border-top: 0;
+}
+
+.ih-sets-head {
+  max-width: 780px;
+  padding: 0 0 34px;
+}
+
+.ih-sets-head h2 {
+  margin: 0 0 14px;
+  color: var(--on);
+  font-family: var(--wheat-display), Georgia, serif;
+  font-size: clamp(34px, 4.9vw, 56px);
+  font-weight: 400;
+  line-height: 1.04;
+  letter-spacing: -.025em;
+}
+
+.ih-sets-head p {
+  max-width: 45ch;
+  margin: 0;
+  color: var(--on-dim);
+  font-family: var(--wheat-body), Georgia, serif;
+  font-size: 18px;
+  line-height: 1.55;
+}
+
+.ih-set-list {
+  border-top: 1px solid var(--on);
+}
+
+.ih-set {
+  display: block;
+  padding: 30px 0 36px;
+  border-bottom: 1px solid var(--rule);
+  color: var(--on);
+  text-decoration: none;
+}
+
+.ih-set-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.ih-set h3 {
+  margin: 0;
+  color: var(--on);
+  font-family: var(--wheat-display), Georgia, serif;
+  font-size: clamp(30px, 3.6vw, 42px);
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: -.02em;
+  transition: color .16s ease;
+}
+
+.ih-set:hover h3,
+.ih-set:focus-visible h3 { color: var(--band); }
+
+.ih-set:focus-visible {
+  outline: 2px solid var(--band);
+  outline-offset: 5px;
+}
+
+.ih-licence {
+  display: inline-block;
+  padding: 5px 7px;
+  background: rgba(91, 42, 75, .10);
+  color: var(--band);
+  font: 500 12px/1 "Poppins", "Helvetica Neue", sans-serif;
+  letter-spacing: .02em;
+  white-space: nowrap;
+}
+
+.ih-count {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin: 18px 0 0;
+  color: var(--on);
+  line-height: .8;
+}
+
+.ih-num {
+  font-family: var(--wheat-display), Georgia, serif;
+  font-size: clamp(76px, 9vw, 108px);
+  font-weight: 400;
+  letter-spacing: -.06em;
+}
+
+.ih-unit {
+  color: var(--on-dim);
+  font-family: var(--wheat-body), Georgia, serif;
+  font-size: 18px;
+  line-height: 1;
+  letter-spacing: 0;
+}
+
+.ih-set-note {
+  max-width: 54ch;
+  margin: 18px 0 0;
+  color: var(--on);
+  font-family: var(--wheat-body), Georgia, serif;
+  font-size: 17px;
+  line-height: 1.55;
+}
+
+@media (min-width: 760px) {
+  .ih-grid {
+    grid-template-columns: repeat(8, minmax(0, 1fr));
+    gap: 20px;
+  }
+}
+
+@media (min-width: 1100px) {
+  .ih-grid { grid-template-columns: repeat(10, minmax(0, 1fr)); }
+  .ih-tile svg { width: 38px; height: 38px; }
+}
+
+@media (min-width: 900px) {
+  .ih-set {
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(190px, .7fr) minmax(0, 1.35fr);
+    align-items: start;
+    column-gap: 48px;
+  }
+  .ih-count { margin: 0; }
+  .ih-set-note { max-width: 42ch; margin: 0; }
+}
+
+@media (max-width: 700px) {
+  .ih-page .ih-main { padding-bottom: 60px; }
+  .ih-hero { padding: 38px 0 26px; }
+  .ih-hero h1 {
+    font-size: clamp(48px, 13.8vw, 62px);
+    line-height: .94;
+    letter-spacing: -.04em;
+  }
+  .ih-lede { max-width: 34ch; margin-top: 20px; font-size: 17px; }
+  .ih-actions { margin-top: 28px; }
+  .ih-btn { min-height: 54px; }
+  .ih-hero-icons { margin-top: 40px; }
+  .ih-hero-glyph { width: 36px; height: 36px; }
+  .ih-browse { padding: 22px 0 30px; }
+  .ih-search-label { font-size: 19px; }
+  .ih-search { height: 54px; font-size: 15px; }
+  .ih-grid { gap: 10px; margin-top: 26px; }
+  .ih-tile { padding: 8px; }
+  .ih-tile svg { width: 32px; height: 32px; }
+  .ih-sets { padding-top: 0; }
+  .ih-sets-head { padding-bottom: 26px; }
+  .ih-sets-head h2 { font-size: 34px; }
+  .ih-sets-head p { font-size: 16px; }
+  .ih-set { padding: 24px 0 28px; }
+  .ih-set h3 { font-size: 30px; }
+  .ih-count { margin-top: 16px; }
+  .ih-num { font-size: 80px; }
+  .ih-unit { font-size: 17px; }
+  .ih-set-note { margin-top: 16px; font-size: 16px; }
+}

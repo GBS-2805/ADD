@@ -10,13 +10,35 @@ exists only to put the engine on a phone for review.
 bash tools/engine-review/build.sh
 ```
 
-The APK lands at `artifacts/engine-review/ADD-3.8.5-engine-review.apk`. It is a debug
-build, same applicationId (`app.offline.compress`) and version `3.8.5`, with a review-only
-versionCode (`55`), so it replaces an installed ADD copy. This build carries the Task 8
-procedural texture library and its TEXTURE inspector section, plus Material Ink and the
-recording-driven chrome fixes. It uses the existing ADD signing key when
-`$KEYSTORE` (or the default `$HOME/tools/compress-keystore.jks`) is present; without
-that key Gradle falls back to its debug key, which requires uninstalling ADD first.
+The APK lands at `artifacts/engine-review/ADD-3.9.1-field-preview.apk`. It is a debug
+build, same applicationId (`app.offline.compress`) and version `3.9.1-field-preview`,
+with review-only versionCode `56`, so it replaces an installed ADD copy. It targets
+Android 13+ (`minSdk 33`). This build carries the artboard/layer colour field with its
+recipe editor, on top of the Task 8 procedural texture library, Material Ink and the
+recording-driven chrome fixes. It uses the existing ADD
+signing key when `$KEYSTORE` (or the default `$HOME/tools/compress-keystore.jks`) is
+present; without that key Gradle falls back to its debug key, which requires
+uninstalling ADD first.
+
+## Device audit
+
+The app can capture its own live windows on a connected Android runtime. This is the
+pre-signing gate for the parts unit tests cannot prove:
+
+```bash
+python3 tools/device_audit.py --serial emulator-5554 \
+  --fixture artifacts/field-proof/device/document.json --reopen
+```
+
+It waits for `READY`, captures every window through `WindowManagerGlobal.mViews`,
+verifies the saved artboard/layer field, then exports a PNG and requires 1080×1350. It writes `artifacts/field-proof/device/audit/audit.json` and exits non-zero
+when any gate is missing. `--reopen` force-stops and relaunches the engine, then
+requires the same field colours and field-painted layers. Use `--no-launch` to audit
+the running activity and `--skip-export` for the shorter UI-only pass.
+
+This x86 proof build is not a phone verdict: the harness exports the engine activity,
+uses a 32/64 px field raster budget and a non-focusable first 40 s for software TCG.
+Run the final gate on the arm64 candidate over a physical phone before shipping.
 
 ## Open the engine
 

@@ -508,3 +508,178 @@ input[type="range"] {
   .peek-body { padding: 14px 16px 10px; }
   #selection-bar { left: 26px; bottom: 88px; }
 }
+
+/* ==========================================================================
+   Paper edition
+
+   The Studio is the same printed object as the site, not a dark instrument
+   panel. edition.css is generated from the final Review edition block in
+   docs/assets/site.css; this block only maps the old shell names onto those
+   tokens and replaces the graphite surfaces.
+   ========================================================================== */
+:root {
+  --graphite: var(--page);
+  --graphite-2: var(--page);
+  --graphite-3: var(--card);
+  --cream: var(--on);
+  --overexposed: var(--band);
+  --red: var(--accent);
+  --halftone: var(--on-dim);
+  --rule-soft: var(--tint);
+  --dim: var(--on-dim);
+  --quiet: var(--on-dim);
+}
+
+body {
+  background-color: var(--page);
+  background-image: none;
+  color: var(--on);
+  font: 13px/1.35 "Spectral", Georgia, serif;
+}
+button:focus-visible, textarea:focus-visible, select:focus-visible, input:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Masthead: the same paper rule, wordmark and flat actions as the site. */
+.chrome-top {
+  top: 0;
+  left: 0;
+  right: 0;
+  min-height: 60px;
+  padding: 9px 12px 8px;
+  background: var(--page);
+  color: var(--on);
+  border-top: 5px solid var(--band);
+  border-bottom: 1px solid var(--on);
+}
+.brand { gap: 8px; }
+.ring { background: var(--on); }
+.wordmark b {
+  color: var(--on);
+  font-size: 21px;
+  letter-spacing: -.035em;
+  text-transform: uppercase;
+}
+.wordmark em { color: var(--on-dim); }
+.icon-button, .action-button {
+  height: 36px;
+  border: 1px solid var(--rule);
+  background: var(--page);
+  color: var(--on);
+}
+.icon-button { width: 36px; font: 400 24px/1 "Instrument Serif", Georgia, serif; }
+.icon-button:active { background: var(--accent); color: var(--accent-ink); }
+.action-button { background: transparent; }
+.action-button:active { background: var(--accent); color: var(--accent-ink); }
+.action-accent { background: var(--band); border-color: var(--band); color: var(--band-ink); }
+.action-accent:active { background: var(--band-hover); border-color: var(--band-hover); color: var(--band-ink); }
+.document-chip { top: 68px; left: 18px; }
+.document-chip b { color: var(--on); }
+.document-chip span { color: var(--on-dim); }
+
+/* The artboard is a printed sheet on the same stock, framed by ink and plum. */
+#stage { inset: 92px 14px 90px; }
+#stage .canvas-container {
+  background: var(--paper);
+  box-shadow: 6px 6px 0 var(--band), 0 0 0 1px var(--on);
+}
+#c { background: var(--paper); }
+#selection-frame { border: 2px solid var(--accent); box-shadow: 0 0 0 1px var(--paper); }
+#selection-tag { background: var(--accent); color: var(--accent-ink); }
+#rotate-handle, .path-handle {
+  border-color: var(--accent);
+  background: var(--paper);
+  box-shadow: 1px 1px 0 var(--on);
+}
+.path-handle[data-point="start"], .path-handle[data-point="end"] {
+  background: var(--accent);
+  border-color: var(--on);
+}
+.guide, #motion-path path { background-color: var(--accent); }
+#motion-path path { stroke: var(--accent); }
+#selection-bar { color: var(--on-dim); }
+.status-dot { background: var(--accent); }
+
+/* Tool bar: a flat paper strip, not a floating dark pill. */
+.chrome-bottom { left: 12px; right: 12px; bottom: calc(10px + env(safe-area-inset-bottom)); }
+.tool-pill {
+  width: 100%;
+  gap: 0;
+  padding: 0;
+  border: 1px solid var(--on);
+  border-radius: 0;
+  background: var(--page);
+  box-shadow: 4px 4px 0 var(--band);
+}
+.tool-pill button {
+  flex: 1 1 0;
+  height: 44px;
+  padding: 0 6px;
+  border-right: 1px solid var(--rule);
+  border-radius: 0;
+  color: var(--on);
+}
+.tool-pill button:last-child { border-right: 0; }
+.tool-pill button.is-active { background: var(--on); color: var(--page); }
+.tool-pill button:active { background: var(--accent); color: var(--accent-ink); }
+
+/* Inspector: a paper proof sheet over the stage. */
+.peek {
+  left: 12px;
+  right: 12px;
+  bottom: calc(68px + env(safe-area-inset-bottom));
+  border: 1px solid var(--on);
+  border-top: 5px solid var(--accent);
+  background: var(--paper);
+  box-shadow: 5px 5px 0 var(--band);
+}
+.peek-head { border-bottom-color: var(--rule); }
+.peek-title strong { color: var(--on); }
+#peekSelection { color: var(--on-dim); }
+.quiet-button { color: var(--on); }
+.quiet-button:active { color: var(--accent); border-color: var(--accent); }
+.peek-body::-webkit-scrollbar-thumb { background: var(--band); }
+.section-label { color: var(--accent); }
+button { background: var(--card); color: var(--on); border-color: var(--rule); }
+button.primary { background: var(--on); border-color: var(--on); color: var(--page); }
+button.primary:active { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+button.quiet { background: transparent; color: var(--on-dim); }
+.field > span { color: var(--on-dim); }
+textarea, select { background: var(--paper); color: var(--on); border-color: var(--rule); }
+.control-block { border-color: var(--rule); }
+.toggle { color: var(--on); }
+.toggle input { accent-color: var(--accent); }
+.range { color: var(--on-dim); }
+.range b { color: var(--on); }
+input[type="color"] { border-color: var(--rule); }
+input[type="range"] { accent-color: var(--accent); }
+
+@media (max-width: 430px) {
+  .chrome-top { padding: 8px 10px 7px; }
+  .document-chip { top: 64px; left: 12px; }
+  #stage { inset: 86px 10px 82px; }
+  .chrome-bottom { left: 10px; right: 10px; }
+  .peek { left: 6px; right: 6px; bottom: calc(64px + env(safe-area-inset-bottom)); }
+  #selection-bar { left: 12px; bottom: 72px; }
+}
+
+@media (min-width: 900px) {
+  .chrome-top { padding: 12px 24px 10px; }
+  .document-chip { top: 80px; left: 28px; }
+  .chrome-bottom { left: 28px; right: 28px; bottom: 18px; }
+  #stage { inset: 102px 28px 96px; }
+  #selection-bar { left: 30px; bottom: 94px; }
+  .peek {
+    left: auto;
+    right: 24px;
+    top: 102px;
+    bottom: 24px;
+    width: 322px;
+    max-height: none;
+  }
+  .peek-body { max-height: none; }
+  body.peek-open #stage { right: 370px; }
+  body.peek-open .chrome-bottom { right: 370px; }
+}

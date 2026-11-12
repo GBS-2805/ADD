@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  The app wears the site's newsprint tokens. Nothing in a layout or a drawable
+  The app wears the site's Review edition tokens. Nothing in a layout or a drawable
   names a colour resource directly any more: each one asks for one of these
   attributes, and the one theme supplies the value.
 -->

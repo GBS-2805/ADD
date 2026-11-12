@@ -13,14 +13,20 @@
       options = options || {};
       this.callSuper('initialize', text, options);
 
+      var rootStyle = window.getComputedStyle(document.documentElement);
+      var token = function (name, fallback) {
+        return rootStyle.getPropertyValue(name).trim() || fallback;
+      };
+      var ink = token('--on', '#1B1212');
+      var accent = token('--accent', '#5b2a4b');
       var base = typeof options.startColour === 'string' ? options.startColour
-        : (typeof options.fill === 'string' ? options.fill : '#15120e');
+        : (typeof options.fill === 'string' ? options.fill : ink);
       this.startColour = base;
-      this.endColour = options.endColour || '#dd4124';
+      this.endColour = options.endColour || accent;
       this.gradientOn = options.gradientOn !== false;
       this.gradientAngle = options.gradientAngle == null ? 90 : options.gradientAngle;
       this.outlineOn = options.outlineOn === true;
-      this.outlineColour = options.outlineColour || '#15120e';
+      this.outlineColour = options.outlineColour || ink;
       this.outlineWidth = options.outlineWidth == null ? 6 : options.outlineWidth;
       this.shadowOn = options.shadowOn !== false;
       this.blendMode = options.blendMode || 'source-over';

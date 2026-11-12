@@ -137,16 +137,16 @@ def write_index(screens: list[dict[str, str]], showcase: str, matrix: int) -> No
 <title>ADD · native screens</title>
 <style>
 :root{color-scheme:light}
-body{margin:0;background:#e9e0cb;color:#15120e;font:16px/1.45 ui-sans-serif,system-ui,sans-serif}
+body{margin:0;background:#f0e7d4;color:#1B1212;font:16px/1.45 ui-sans-serif,system-ui,sans-serif}
 main{max-width:1180px;margin:auto;padding:28px 18px 56px}
 h1{font-size:clamp(28px,6vw,48px);margin:0 0 8px}
-p.lede{max-width:840px;color:#625b4f;margin:0 0 22px}
-h2{font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:#dd4124;margin:30px 0 10px}
+p.lede{max-width:840px;color:#5f5550;margin:0 0 22px}
+h2{font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:#5b2a4b;margin:30px 0 10px}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:12px}
-.shot{display:block;background:#dad2be;border:1px solid rgba(21,18,14,.24);border-radius:10px;padding:7px;color:#15120e;text-decoration:none}
+.shot{display:block;background:#e1d8c6;border:1px solid rgba(27,18,18,.24);border-radius:10px;padding:7px;color:#1B1212;text-decoration:none}
 .shot img{display:block;width:100%;height:auto;border-radius:6px}
-.shot span{display:block;font-size:12px;color:#625b4f;padding:7px 2px 2px}
-a{color:#15120e}code{background:rgba(21,18,14,.07);padding:2px 5px;border-radius:4px}
+.shot span{display:block;font-size:12px;color:#5f5550;padding:7px 2px 2px}
+a{color:#1B1212}code{background:rgba(27,18,18,.07);padding:2px 5px;border-radius:4px}
 </style></head><body><main>
 <h1>ADD · native screens</h1>
 <p class="lede">__LEDE__</p>
@@ -155,10 +155,10 @@ a{color:#15120e}code{background:rgba(21,18,14,.07);padding:2px 5px;border-radius
 <p style="margin-top:30px"><a href="https://artbase-handoff.vercel.app/">App handoff</a> · <a href="https://artbase-olive.vercel.app/">Site</a></p>
 </main></body></html>"""
     lede = (
-        f"Ten newsprint screenshots from {matrix} in-memory checks across ten native "
+        f"Ten review-edition screenshots from {matrix} in-memory checks across ten native "
         "screen states. Nine are 1080x2400 phone frames; Compress is captured at the "
         "ScrollView's full height so the complete form and action row are visible. The "
-        "layouts, the one newsprint theme, drawables, type and the Editor/Compare paint "
+        "layouts, the one review edition, drawables, type and the Editor/Compare paint "
         "code are the app's own. Palette, containment, text-fit, composition and "
         "cross-screen position gates run before these images are written. The default "
         "Studio editor is a Chromium WebView and is not captured; the five editor frames "
@@ -186,7 +186,7 @@ def main() -> None:
         shutil.rmtree(SHOTS)
     os.replace(STAGE, SHOTS)
     shutil.copy2(SHOTS / CONTACT, RENDERS / CONTACT)
-    print(f"review: {len(expected)} newsprint PNGs from {matrix} checks in {SHOTS}")
+    print(f"review: {len(expected)} review-edition PNGs from {matrix} checks in {SHOTS}")
 
 
 if __name__ == "__main__":

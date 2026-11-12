@@ -3,8 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<meta name="theme-color" content="#131513">
+<meta name="theme-color" content="#F0E7D4">
 <title>ADD Studio</title>
+<link rel="stylesheet" href="edition.css">
 <link rel="stylesheet" href="studio.css">
 </head>
 <body data-tool="move">
@@ -29,16 +30,16 @@
     <div class="brand">
       <button id="back" class="icon-button" aria-label="Back to Quick editor" title="Back to Quick editor">&#8249;</button>
       <span class="ring" aria-hidden="true"></span>
-      <span class="wordmark"><b>ADD</b><em>STUDIO / PRESS</em></span>
+      <span class="wordmark"><b>ADD</b><em>STUDIO / EDITION</em></span>
     </div>
     <div class="actions">
       <button id="photo" class="action-button">PHOTO</button>
-      <button id="export" class="action-button action-red">EXPORT 2&times;</button>
+      <button id="export" class="action-button action-accent">EXPORT 2&times;</button>
     </div>
   </header>
 
   <div class="document-chip" aria-label="Current document">
-    <b>POSTER 01</b><span>540 &times; 675 / ED. 3.8</span>
+    <b>POSTER 01</b><span>540 &times; 675 / ED. 3.9</span>
   </div>
 
   <div id="selection-bar" aria-live="polite">
@@ -90,15 +91,15 @@
         <div class="control-block">
           <div class="row">
             <label class="toggle"><input id="gradient" type="checkbox"> GRADIENT</label>
-            <input id="start" type="color" value="#15120e" aria-label="Gradient start">
-            <input id="end" type="color" value="#dd4124" aria-label="Gradient end">
+            <input id="start" type="color" value="#1B1212" aria-label="Gradient start">
+            <input id="end" type="color" value="#5b2a4b" aria-label="Gradient end">
           </div>
           <label class="range">ANGLE <input id="angle" type="range" min="0" max="360" value="90"><b id="angleValue">90&deg;</b></label>
         </div>
         <div class="control-block">
           <div class="row">
             <label class="toggle"><input id="outline" type="checkbox"> OUTLINE</label>
-            <input id="outlineColour" type="color" value="#15120e" aria-label="Outline colour">
+            <input id="outlineColour" type="color" value="#1B1212" aria-label="Outline colour">
           </div>
           <label class="range">WIDTH <input id="outlineWidth" type="range" min="0" max="16" value="6"><b id="outlineValue">6</b></label>
         </div>

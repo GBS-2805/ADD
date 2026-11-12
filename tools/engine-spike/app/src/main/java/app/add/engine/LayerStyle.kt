@@ -74,8 +74,8 @@ data class LayerEffects(
     val grain: Float = 0f,
     val halftone: Float = 0f,
     val duotone: Boolean = false,
-    val duotoneDark: Int = 0xFF11231C.toInt(),
-    val duotoneLight: Int = 0xFFD6E381.toInt(),
+    val duotoneDark: Int = EngineEdition.InkArgb,
+    val duotoneLight: Int = EngineEdition.PaperArgb,
 ) {
     /**
      * The passes the compositor should run, in stack order. A disabled pass is

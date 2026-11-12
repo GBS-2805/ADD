@@ -1,5 +1,20 @@
 # Working rules for this repo
 
+## Delivery rule: public links, every time
+
+A visual review is not delivered until the reader can tap it. Every reply that shows
+a UI change must include:
+
+1. a clickable public link to the working page;
+2. a clickable public link to the capture index;
+3. labelled public links to each relevant capture, including phone width.
+
+A Browser-panel reference, a workspace path, an `artifacts/...` path or merely saying
+"the preview is open" is not a link. Use `python3 tools/deploy_review.py review` and
+`python3 tools/deploy_review.py shots`, verify each URL returns 200 (and `image/png`
+for images) before sending, then lead the reply with those links. This is a standing
+rule, not a per-request preference.
+
 ## Renders: only when the change is visual
 
 A change to a page in `docs/` needs image renders **only if it changes what the page
@@ -200,13 +215,15 @@ Screenshots are of a local server over `docs/` (`python3 -m http.server`), viewp
 in one run and prints console errors; it needs the toolchain from
 `tools/render_env.py`.
 
-The site is one printed edition now: newsprint cream (`#e9e0cb`), ink (`#15120e`) and
-stamp red (`#dd4124`). There are no palette chips and no light/dark switch. The four
-`html[data-palette]` blocks stay in `site.css` because the Android app still uses them,
-but a final `html[data-theme], html[data-palette]` block pins every route to the paper
-tokens; `site.js` no longer reads `site:theme` or `site:palette` and no longer builds
-the look controls. `check_palette.py` continues to guard the app and those legacy
-blocks.
+The site is one printed edition now: review paper (`#f0e7d4`), ink (`#1B1212`) and
+plum (`#5b2a4b`), set in Instrument Serif, Spectral and Libre Franklin. There are no
+palette chips and no light/dark switch. The final `html[data-theme], html[data-palette]`
+block in `site.css` is canonical; `site.js` no longer reads `site:theme` or
+`site:palette` and no longer builds the look controls. `tools/sync_edition.py` reads
+that block and generates `app/res/values/colors.xml`,
+`app/studio-assets/edition.css` and the engine's `EngineEdition.kt`; `build.sh` runs
+it before the palette gate, and `check_palette.py` fails when any generated copy is
+stale. Never hand-edit those generated files.
 
 Every page links one stylesheet, `docs/assets/site.css`: it carries the `@font-face`
 block, the masthead, the pull-down menu and the shared type, and its `url()` paths are
@@ -231,9 +248,16 @@ and when it does paint, Filament's `fxaa` shader fails to link or compile and
 `FEngine::loop` raises SIGABRT about five seconds after "first frame drawn". Installs
 also fail with a `PackageManagerInternal.freeStorage` null pointer until the guest has
 settled, `sys.boot_completed` never flips, and `mCurrentFocus` can stay null with an
-activity drawn. So: use it to prove the build installs and starts, and keep a frame when
-one lands with its date and attempt count attached -- do not present it as a render, and
-do not try to make the engine capture scriptable.
+activity drawn. With the seed 3D gem hidden, the Filament `fxaa` abort does not start;
+a saved visible 3D layer can still bring it back.
+
+The engine review now captures its own live windows rather than relying on
+SurfaceFlinger: `WindowManagerGlobal.mViews` is drawn with `View.draw` into
+`files/device-ui-*.png`, including Compose dialogs as their own windows. That is
+runtime proof, not a page render, and it does not replace a physical-phone verdict.
+`tools/device_audit.py` packages the READY, live-window, saved-field and export checks
+so a candidate can be audited before signing. It never drives the editor UI beyond the
+export action.
 
 `am start .../app.add.engine.MainActivity` answers `Activity class ... does not exist`
 because that activity is declared `android:exported="false"` and runs in its own
@@ -630,33 +654,33 @@ where the notes keep the history they shipped with.Icons, Fonts, Compress and th
   needs the capture environment exported by hand: `build.sh` hands the check
   `NODE_PATH`, `PLAYWRIGHT_BROWSERS_PATH`, `LD_LIBRARY_PATH` and `FONTCONFIG_FILE`
   itself, and a value already exported still wins.
-- Compress wears the app's four palettes, plus the band and the side tab. The site is fixed newsprint.
-  The colours live in one place, `app/res/values/colors.xml`: a block per palette
-  (band, band ink, dim and line, accent and its ink, label, page, words, rule, card)
-  in a dark and a light page set, taken from `docs/assets/site.css` so the two cannot
-  drift. Nothing in a layout or a drawable names a colour resource directly: every
-  one asks for a theme attribute declared in `app/res/values/attrs.xml`, and
-  `app/res/values/styles.xml` maps those attributes across eight themes, `AppTheme`
-  (green, dark page), `AppTheme.Light`, `AppTheme.Moss`, `AppTheme.Moss.Light`,
-  `AppTheme.Navy`, `AppTheme.Navy.Light`, `AppTheme.Ash` and `AppTheme.Ash.Light`.
-  `ThemePrefs` stores the pair and `applyTheme()` sets the theme before `setContentView()`. Adding a palette is a block
-  of colours, a theme and one entry each in `Palette.IDS`, `LABELS`, `BANDS` and
-  `WORDS` — never a second layout. The band is `res/layout/band.xml` and the side
+- Compress wears the one Review edition, plus the band and the side tab. The site and
+  app share the paper, ink and plum tokens. The Android copy is generated from the
+  site's final token block into `app/res/values/colors.xml`; nothing in a layout or a
+  drawable names a colour resource directly: every one asks for a theme attribute
+  declared in `app/res/values/attrs.xml`, and `app/res/values/styles.xml` maps those
+  attributes in the single `AppTheme`. The band is `res/layout/band.xml` and the side
   panel `res/layout/drawer.xml`, both included by `activity_main.xml`; `CompareActivity`
-  inherits the themes and wears the same colours.
-- `python3 tools/check_palette.py` guards all of the above, site and app together. It
-  compares every palette block in `site.css` with `colors.xml`, requires all eight themes
-  to set every attribute, holds the band in both modes, insists the mark on the band
-  wears the band's ink (it is tinted `?attr/ink`, so a themed `ink` is what keeps it
-  visible), refuses a literal colour in a layout or a `bg_` drawable and a glyph drawn
-  without a tint, and measures contrast — 4.5:1 for words, 3:1 for dim words and the
-  band's labels. `--browser http://127.0.0.1:8799/` adds `tools/check_palette.js`, the
-  half a stylesheet cannot prove: all eight combinations are driven and it fails when a
-  pull-down paints anything but the page colour, a selected control leaves the band,
-  a disabled control looks enabled, the status-bar meta or the printed colour codes
-  disagree with the palette, or a colour is identical across all four palettes
-  (the preview stage is the one documented exception). `build.sh` runs the static
-  half before staging, so a drifted palette fails a build without a browser.
+  inherits the theme and wears the same colours.
+- `app/studio-assets/edition.css` is generated from the same block, and `studio.css`
+  maps its old shell variable names onto those tokens. The Studio is a paper proof
+  sheet, not a graphite instrument panel.
+- `tools/engine-spike/app/src/main/java/app/add/engine/EngineEdition.kt` is generated
+  from the same block. The engine is still a separate review APK, but its Compose
+  chrome is on the one edition: paper page, ink type, plum selection and actions, and
+  the app's functional warning ink for destructive states.
+- `python3 tools/check_palette.py` guards all of the above, site, app and engine together. It
+  compares the final Review block in `site.css` with `colors.xml` and the generated
+  Studio and engine tokens, requires the one theme to set every attribute, holds the band and page
+  in that edition, insists the mark on the band wears the band's ink (it is tinted
+  `?attr/ink`, so a themed `ink` is what keeps it visible), refuses a literal colour in
+  a layout or a `bg_` drawable and a glyph drawn without a tint, and measures contrast
+  — 4.5:1 for words, 3:1 for dim words and the side-panel labels. `--browser
+  http://127.0.0.1:8799/` adds `tools/check_palette.js`, the half a stylesheet cannot
+  prove: it fails when a pull-down paints anything but the page colour, a selected
+  control leaves the band, a disabled control looks enabled, the status-bar meta or the
+  printed colour codes disagree with the edition. `build.sh` runs the sync and the
+  static half before staging, so a drifted edition fails a build without a browser.
 - `docs/packs/` is generated by `python3 tools/build_packs.py` from
   `docs/data/fonts.json` and the TTFs under `docs/assets/fonts/`: one flat
   `<slug>-<version>.addpack` zip per family (manifest plus TTFs, every file with its
@@ -706,9 +730,9 @@ where the notes keep the history they shipped with.Icons, Fonts, Compress and th
   first; it keeps the Studio engine in the same activity: a WebView over
   `assets/www/studio` running vendored Fabric.js 5.3.0 (MIT) with a custom `AddText`
   class (gradient, outline, shadow and blend), fast-drag mode, grouping, photo import
-  and a 1080x1350 PNG export to `Pictures/Studio`. The graphite press shell is
-  canvas-first: floating chrome, a Move/Type/Style/Texture/Motion pill and a peek
-  inspector. `overlays.js` draws the five press materials — newsprint, wheatpaste,
+  and a 1080x1350 PNG export to `Pictures/Studio`. The paper edition shell is
+  canvas-first: a flat paper masthead, a Move/Type/Style/Texture/Motion bar and a peek
+  inspector, all wearing the generated site tokens. `overlays.js` draws the five press materials — newsprint, wheatpaste,
   overexposed ink, halftone and rough canvas — beside the eight atmosphere textures
   (light leak, grain, bokeh, paper, dust, vignette, window shadows and lens flare), and
   the page exposes opacity, blend, shuffle, remove, on-canvas placement handles and

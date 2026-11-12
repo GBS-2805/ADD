@@ -8,6 +8,12 @@ It is deliberately **not** wired into `build.sh` or the ADD release. ADD's raw
 Kotlin 2.0, Compose and Filament's native libraries. Keeping the spike here proves
 the engine without putting a 28 MB debug dependency set into the shipping APK.
 
+The chrome is on the same Review edition as the site, app and Studio. `EngineEdition.kt`
+is generated from the site's final token block by `tools/sync_edition.py`; do not hand-
+edit it. The engine's old semantic names remain aliases in `EngineTokens.kt`: `Ink` is
+the page, `Cream` the words, `Mint` the plum selection, `Lime` the plum-hover action,
+and `Clay` the app's functional warning ink.
+
 ## Run
 
 Requirements: JDK 17, Android SDK 35, Node 20+ (only for the asset pipeline).
@@ -138,6 +144,10 @@ deployed to the handoff from this workspace.
 
 ## Verification
 
+- `python3 tools/sync_edition.py --check` proves `EngineEdition.kt` still matches the
+  site's Review block.
+- `bash verify-chrome.sh` compares the 14 Compose goldens; use `--update` only after
+  reviewing a deliberate visual change.
 - `:app:assembleDebug` compiles the Kotlin/Compose/SceneView app and packages the
   GLB and Filament native libraries.
 - `:app:testDebugUnitTest` exercises the network topology and undo/redo without a

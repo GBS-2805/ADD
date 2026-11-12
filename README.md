@@ -21,15 +21,16 @@ the pages.
 - **Icons browser** — live at `docs/icons/`: four free brands — 606 Lineicons,
   1,258 Coolicons, 1,512 Phosphor and 997 Streamline — each on its own page with a preview, variant controls and the
   set folded into a scrolling sheet. Copy-on-tap, no account.
-- Theme: **four palettes over two modes** — green (`#0fbf92` band), Moss, Navy and
-  Ash (`#dd4124` band, `#2c2722` page) — each in a dark page and a light one. A new
-  visitor opens dark. Surfaces are flat: `shadow` is fully transparent.
-- Type: Poppins, self-hosted. The site serves woff2 from `docs/assets/fonts/`; both
-  app bundles Poppins (the compressor from `res/font/`, the web tools inside the
-  bundle).
-- **Dark and light**, on the site and in the app, remembered under `site:theme`. The
-  compressor reads the same choice: `ThemePrefs` stores the palette pair and
-  `applyTheme()` sets it before `setContentView()`.
+- Theme: **one Review edition** — paper `#f0e7d4`, ink `#1B1212`, plum
+  `#5b2a4b`, with flat surfaces and no palette or light/dark switch. The site's final
+  token block is canonical; `tools/sync_edition.py` generates the Android colours,
+  the Studio WebView tokens and the native engine palette from it so they cannot drift.
+- Type: **Instrument Serif, Spectral and Libre Franklin**, self-hosted. The site
+  serves woff2 from `docs/assets/fonts/`; the app carries the three faces in
+  `res/font/` and the Studio bundle carries its own copies.
+- **One edition**, on the site, in the app, Studio and the native engine lab. `build.sh`
+  runs the edition sync before the palette gate, so a site token change reaches every
+  surface on the next build.
 
 `dist/` keeps every older build as history; only the current APK is copied into
 `docs/`.
@@ -159,7 +160,7 @@ app/src/add/ThemePrefs.java       forces night mode off (one palette)
 app/res/                                           27 resources: 3 layouts, 14 drawables,
                                                    Poppins, one values/ (no values-night)
 app/src/add/ShelfActivity.java     WebView tool surface (icons or fonts page)
-app/src/add/Palette.java           four palettes, one entry each
+app/src/add/StudioPane.java        the paper Studio WebView in the editor
 app/src/add/ThemePrefs.java        stores the palette and theme pair
 app/assets/www/                                     staged at build time from docs/ (not committed)
 build.sh                                           SDK-tools build: ./build.sh [add|stage]

@@ -148,7 +148,7 @@ internal fun EngineSplitButton(
                 letterSpacing = 0.4.sp,
             )
         }
-        Box(Modifier.width(1.dp).height(22.dp).background(Ink.copy(alpha = 0.2f)))
+        Box(Modifier.width(1.dp).height(22.dp).background(Cream.copy(alpha = 0.2f)))
         Box {
             Box(
                 modifier = Modifier
