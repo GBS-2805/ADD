@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-11",
+  "generated": "2026-11-12",
   "tools": [
     {
       "id": "add",
@@ -31,8 +31,8 @@
           "href": "/ADD-3.9.apk"
         }
       ],
-      "bytes": 17234552,
-      "sha256": "340810238ee240fdf897e0c1f5d17f29df98710d9fec18cf1a9bace821fc231b"
+      "bytes": 17387029,
+      "sha256": "1120bd53af07239861e555ed5f756dd791bcdbf119e92ac5ad178e03485065b1"
     }
   ]
 }

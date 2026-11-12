@@ -26,7 +26,7 @@ ROOT = Path(__file__).resolve().parent.parent
 API = "https://api.vercel.com"
 PROJECTS = (
     ("artbase", ROOT / "docs"),
-    ("artbase-handoff", ROOT / "artifacts" / "handoff"),
+    ("artbase-handoff", ROOT / "handoff"),
     ("artbase-handoff-apk", ROOT / "artifacts" / "handoff-apk"),
     ("artbase-shots", ROOT / "artifacts" / "shots"),
 )
@@ -129,7 +129,7 @@ def _size(value):
     return "%d B" % value
 
 
-def report(early_warning=SIZE_EARLY_WARN):
+def report(early_warning=SIZE_EARLY_WARN, as_json=False):
     """Print the report; return an OK, UNAVAILABLE or CRITICAL status."""
     rows = []
     try:
@@ -152,8 +152,26 @@ def report(early_warning=SIZE_EARLY_WARN):
                 "estimate": _output_bytes(output) * len(deployments),
             })
     except ReportError as error:
-        print("deployment storage: unavailable (%s)" % error)
+        if as_json:
+            print(json.dumps({"status": "unavailable", "error": str(error)}))
+        else:
+            print("deployment storage: unavailable (%s)" % error)
         return UNAVAILABLE
+
+    if as_json:
+        print(json.dumps({
+            "status": "ok",
+            "rows": rows,
+            "total": {"deployments": sum(row["count"] for row in rows),
+                      "estimate": sum(row["estimate"] for row in rows)},
+            "thresholds": {"count_warn": COUNT_WARN, "count_crit": COUNT_CRIT,
+                           "early_warning": early_warning, "warning": SIZE_WARN,
+                           "critical": SIZE_CRIT,
+                           "retention_warn_days": RETENTION_WARN_DAYS},
+        }, indent=2))
+        critical = any(row["count"] > COUNT_CRIT or row["estimate"] > SIZE_CRIT
+                       for row in rows)
+        return CRITICAL if critical else OK
 
     print("deployment storage (estimated from current output)")
     print("%-20s %5s %5s %7s %18s %12s" %
@@ -230,6 +248,8 @@ def main():
                         help="exit non-zero when storage is critical or unavailable")
     parser.add_argument("--early-warning-mib", type=int, metavar="MIB",
                         help="test-only override for the 450 MiB early-warning threshold")
+    parser.add_argument("--json", action="store_true",
+                        help="print one machine-readable report for the job summary")
     args = parser.parse_args()
     early_warning = SIZE_EARLY_WARN
     if args.early_warning_mib is not None:
@@ -237,7 +257,14 @@ def main():
         if not 0 < args.early_warning_mib <= limit:
             parser.error("--early-warning-mib must be between 1 and %d" % limit)
         early_warning = args.early_warning_mib * 1024 ** 2
-    raise SystemExit(check(strict=args.gate, early_warning=early_warning))
+    status = report(early_warning=early_warning, as_json=args.json)
+    if args.gate and status == CRITICAL:
+        raise SystemExit("deployment storage: critical threshold crossed; prune old "
+                         "deployments or lower retention before deploying")
+    if args.gate and status == UNAVAILABLE:
+        raise SystemExit("deployment storage: report unavailable; refusing to deploy "
+                         "without a storage check")
+    raise SystemExit(status)
 
 
 if __name__ == "__main__":

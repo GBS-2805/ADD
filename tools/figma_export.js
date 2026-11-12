@@ -414,10 +414,27 @@ async function capture() {
       page.on("pageerror", (e) => errors.push(`${page_.slug}/${width.tag}: ${e.message}`));
       await page.goto(base + page_.url.replace(/^\//, ""), { waitUntil: "networkidle" });
       await page.evaluate(() => document.fonts.ready);
+      // The icon pages print a loading line while their catalog is parsed; measuring
+      // before that swap changes the sheet's height. The render capture waits too.
+      await page.waitForFunction(() => {
+        const el = document.querySelector("#status") || document.querySelector(".status");
+        return !el || !/^\s*loading\b/i.test(el.textContent || "");
+      }, null, { timeout: 20000 }).catch(() => {});
+      // Trigger lazy images, then wait for every one to decode before measuring.
+      // The two phone icon pages otherwise move by a few pixels between runs as
+      // their long sheets settle, which makes the artboard diff non-deterministic.
+      // A single scroll leaves the middle of a 1,000-icon sheet unloaded, so force
+      // every lazy image eager before asking the browser to finish the set.
+      await page.evaluate(() => document.querySelectorAll('img[loading="lazy"]').forEach((img) => { img.loading = "eager"; }));
       await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
-      await page.waitForTimeout(150);
+      await page.waitForFunction(() => Array.from(document.images).every((img) => img.complete), null, { timeout: 30000 }).catch(() => {});
+      await page.evaluate(async () => {
+        await Promise.all(Array.from(document.images).map((img) => img.decode().catch(() => {})));
+        await document.fonts.ready;
+      });
+      await page.waitForTimeout(300);
       await page.evaluate(() => window.scrollTo(0, 0));
-      await page.waitForTimeout(150);
+      await page.waitForTimeout(300);
 
       const shot = await page.evaluate(capture);
       // Number by position in the full run, so --pages/--widths filters still
@@ -469,6 +486,11 @@ async function capture() {
       page.on("pageerror", (e) => errors.push(`${state.slug}/${width.tag}: ${e.message}`));
       await page.goto(base + state.url.replace(/^\//, ""), { waitUntil: "networkidle" });
       await page.evaluate(() => document.fonts.ready);
+      await page.waitForFunction(() => {
+        const el = document.querySelector("#status") || document.querySelector(".status");
+        return !el || !/^\s*loading\b/i.test(el.textContent || "");
+      }, null, { timeout: 20000 }).catch(() => {});
+      await page.waitForFunction(() => Array.from(document.images).every((img) => img.complete), null, { timeout: 30000 }).catch(() => {});
       await page.click(state.open);
       await page.waitForTimeout(420);
 

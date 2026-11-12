@@ -2,6 +2,10 @@
 
 12 November 2026.
 
+> **Operating rules:** `AGENTS.md` is the current delivery, verification and
+> publish contract. This document remains the product/engine roadmap; where an
+> old instruction here conflicts with `AGENTS.md`, `AGENTS.md` wins.
+
 > **Current decision.** Native Engine v2 is the shipping editor. The Studio sections below are retained as historical and specification reference; where this document conflicts with `NATIVE_EDITOR_V2.md`, native v2 wins. The first field-gradient preview is Android 13+ and ships as a separate review APK beside 3.9.
 
 ## 1. Thesis

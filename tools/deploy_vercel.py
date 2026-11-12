@@ -16,6 +16,7 @@ through the environment, never a command line.
 """
 
 import argparse
+import datetime
 import json
 import os
 import re
@@ -29,10 +30,11 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 SITE = ROOT / "tools/site.json"
 PROJECT = "artbase"          # created on first deploy if the account has no project by this name
-CLI = ("npx", "-y", "vercel@latest")
+CLI = ("npx", "-y", "vercel@65.14.0")
 
 sys.path.insert(0, str(ROOT / "tools"))
 from build_site import routes as site_routes  # noqa: E402 - the tools directory is on the path above
+from check_live import check as check_live  # noqa: E402 - the tools directory is on the path above
 from deploy_storage import check as storage_check  # noqa: E402 - the tools directory is on the path above
 
 # Text files that can hold the origin. The generated trees are skipped: they are
@@ -44,6 +46,24 @@ TEXT_SUFFIXES = {".json", ".java", ".html", ".md", ".py", ".js", ".css", ".xml",
 
 def site():
     return json.loads(SITE.read_text(encoding="utf-8"))
+
+
+def commit():
+    return subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip()
+
+
+def write_receipt(sha):
+    """Write the small receipt that travels with this upload."""
+    data = {
+        "schema": 1,
+        "commit": sha,
+        "deployedAt": datetime.datetime.now(datetime.timezone.utc)
+        .replace(microsecond=0).isoformat().replace("+00:00", "Z"),
+        "project": PROJECT,
+    }
+    (ROOT / "docs/_deploy.json").write_text(
+        json.dumps(data, indent=2) + "\n", encoding="utf-8")
+    return data
 
 
 def deploy_token():
@@ -210,6 +230,7 @@ def deploy():
     assets_current()
     links_current()
     refresh_history()
+    write_receipt(commit())
     cmd = [*CLI, "deploy", "docs", "--prod", "--yes",
            "--project", PROJECT, "--create-if-missing"]
     print("$ " + " ".join(cmd), flush=True)
@@ -330,6 +351,13 @@ def main():
         for problem in problems:
             print("  FAIL " + problem)
         sys.exit(1)
+    if not args.links_only:
+        parity = check_live(new, ROOT / "docs", commit(), receipt="local")
+        if parity:
+            print("\nlive bytes do not match this checkout; not rewriting any link:")
+            for problem in parity:
+                print("  FAIL " + problem)
+            sys.exit(1)
     if same:
         print("\nthe links already point at this host; nothing rewritten")
         return

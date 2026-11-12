@@ -23,7 +23,9 @@ ROOT = Path(__file__).resolve().parent.parent
 # The summary line each gate ends with, so a pass prints its verdict and not its
 # working. A gate whose last line is the interesting one has no entry here.
 VERDICT = {"palette": "palette:", "menu": "menu:", "assets": "assets:",
-           "links": "links:", "site": "site:", "packs": "build_packs:",
+           "links": "links:", "rules": "rules:", "seo": "seo_meta:",
+           "renders": "renders:",
+           "site": "site:", "packs": "build_packs:",
            "figma": "figma check:",
            "notes": "notes regression:", "bundle": "bundle check:",
            "artboards": "artboards:", "studio": "studio:", "engine": "engine:",
@@ -35,6 +37,9 @@ def gates(browser, artboards, visual):
         ["palette", [sys.executable, "tools/check_palette.py"]],
         ["assets", [sys.executable, "tools/hash_assets.py", "--check"]],
         ["links", [sys.executable, "tools/check_links.py"]],
+        ["rules", [sys.executable, "tools/check_agent_rules.py", "--check"]],
+        ["seo", [sys.executable, "tools/seo_meta.py", "--check"]],
+        ["renders", [sys.executable, "tools/check_renders.py", "--check"]],
         ["site", [sys.executable, "tools/build_site.py", "--check"]],
         ["classic", [sys.executable, "tools/archive_classic.py", "--check"]],
         ["catalog", [sys.executable, "tools/build_catalog.py", "--check"]],

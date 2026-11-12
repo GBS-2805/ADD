@@ -20,7 +20,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-CLI = ("npx", "-y", "vercel@latest")
+CLI = ("npx", "-y", "vercel@65.14.0")
 EVENT_TYPES = ("deployment-delete", "project-deployment-retention-updated")
 PROJECTS = ("artbase", "artbase-handoff", "artbase-handoff-apk", "artbase-shots")
 _PROJECT_TEXT = re.compile(r"\bon project ([A-Za-z0-9._-]+)\s*$")

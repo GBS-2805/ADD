@@ -114,6 +114,12 @@ build_app() {
         --out "$OUT/$apk" "$build/aligned.apk"
 
     "$BT/apksigner" verify --print-certs "$OUT/$apk" | head -4
+    echo "== $name: APK manifest and signature =="
+    python3 "$ROOT/tools/check_apk.py" \
+        --apk "$OUT/$apk" \
+        --catalog "$ROOT/tools/catalog.json" \
+        --aapt2 "$BT/aapt2" \
+        --apksigner "$BT/apksigner"
     echo "== $name: done =="
     ls -lh "$OUT/$apk"
 }

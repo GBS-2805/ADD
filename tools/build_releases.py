@@ -26,6 +26,7 @@ import sys
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "tools"))
 from hash_assets import pin  # noqa: E402 - the tools directory is on the path above
+import seo_meta  # noqa: E402 - same directory
 
 CATALOG = ROOT / "tools/catalog.json"
 NOTES = ROOT / "tools/release_notes.json"
@@ -201,6 +202,7 @@ def main():
 
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(pin(page), encoding="utf-8")
+    seo_meta.write_pages()
     print("wrote %-32s %6d bytes" % (OUT.relative_to(ROOT), OUT.stat().st_size))
     noted = sum(1 for r in everything if written.get((r["id"], r["version"])))
     print("  %2d releases, %2d with a note, %s to %s" % (

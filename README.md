@@ -9,6 +9,8 @@ The site is a general design shelf: `docs/` carries the icons, the fonts, the wo
 and the downloads, all served from one palette and all published as JSON alongside
 the pages.
 
+Agents and contributors: read [`AGENTS.md`](AGENTS.md).
+
 ## Status
 
 - **ADD 3.9** — APK [`dist/ADD-3.9.apk`](dist/ADD-3.9.apk) (6 MB, signed v1+v2),
@@ -224,7 +226,7 @@ console errors and horizontal overflow.
 in Robolectric's `NATIVE` graphics mode, so the layouts, themes, drawables, Poppins
 faces and the `EditorView`/`ComparisonView` paint code are the app's own. It audits
 Compress, Editor Quick, the Photo/Presets/Type/Layers/Colour sheets, Compare and
-Font packs in all eight themes at 1080x2400, then writes only the nine green-dark
+Font packs in the current edition at 1080x2400, then writes only the green
 representatives into `artifacts/android/`; `render-audit.json` records the 72
 palette and layout checks behind them:
 

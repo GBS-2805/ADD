@@ -1,0 +1,29 @@
+name: live drift
+
+on:
+  schedule:
+    - cron: "47 6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  parity:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Compare the live bytes with main
+        run: |
+          ORIGIN="$(python3 -c 'import json; print(json.load(open("tools/site.json"))["url"])')"
+          python3 tools/check_live.py \
+            --origin "$ORIGIN" \
+            --docs docs \
+            --expect-commit "$(git rev-parse HEAD)" \
+            --receipt live

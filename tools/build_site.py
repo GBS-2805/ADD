@@ -25,6 +25,7 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 
 sys.path.insert(0, str(ROOT / "tools"))
 import hash_assets  # noqa: E402 - the tools directory is on the path above
+import seo_meta  # noqa: E402 - same directory
 DOCS = ROOT / "docs"
 ARCHIVE = DOCS / "classic"
 SITE = ROOT / "tools/site.json"
@@ -147,8 +148,9 @@ def search_page():
     """One box and a section filter over pages.json, so the shelf stays findable."""
     assets = hash_assets.current()
     template = (ROOT / "tools/search_template.html").read_text(encoding="utf-8")
-    return (template.replace("__CSS__", assets["site.css"])
+    page = (template.replace("__CSS__", assets["site.css"])
                     .replace("__JS__", assets["site.js"]))
+    return seo_meta.insert(page, seo_meta.block(SEARCH, seo_meta.origin(), page))
 
 
 def outputs():

@@ -3,6 +3,7 @@
 //   node tools/render_pages.js <baseUrl> <outDir>
 // Needs the toolchain from tools/render_env.py, served over python3 -m http.server.
 const { chromium } = require("playwright");
+const crypto = require("crypto");
 const fs = require("fs");
 const path = require("path");
 const { execFileSync } = require("child_process");
@@ -73,6 +74,26 @@ const shots = [
 const extras = [];
 
 const escape = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;");
+
+const sha256 = (data) => crypto.createHash("sha256").update(data).digest("hex");
+
+function sourceHash(pagePath) {
+  // The capture is stale when the page, the asset manifest or either shared file
+  // changes. Hashing only index.html misses a stylesheet-only change.
+  const root = path.join(__dirname, "..", "docs");
+  const files = [
+    path.join(root, pagePath, "index.html"),
+    path.join(root, "data", "assets.json"),
+    path.join(root, "assets", assetNames["site.css"] || "site.css"),
+    path.join(root, "assets", assetNames["site.js"] || "site.js"),
+  ];
+  const hash = crypto.createHash("sha256");
+  for (const file of files) {
+    hash.update(path.relative(root, file).split(path.sep).join("/"));
+    hash.update(fs.readFileSync(file));
+  }
+  return hash.digest("hex");
+}
 
 (async () => {
   // The site is one fixed newsprint edition now, so there is no theme to seed.
@@ -205,6 +226,26 @@ const escape = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/
     path.join(__dirname, "to_webp.py"), out, gallery,
     ...shots.map((s) => s.name),
   ], { stdio: "inherit" });
+
+  // The manifest records the inputs and the final WebP bytes. It is deliberately
+  // timestamp-free so a no-op run produces the same file.
+  const manifest = { schema: 1, shots: {} };
+  for (const s of [...shots, ...extras]) {
+    const file = path.join(gallery, `${s.name}.webp`);
+    if (!fs.existsSync(file)) {
+      throw new Error(`${s.name} has no published webp, so the manifest cannot name it`);
+    }
+    manifest.shots[s.name] = {
+      page: s.page,
+      width: s.w,
+      full: Boolean(s.full),
+      source: sourceHash(s.page),
+      image: `${s.name}.webp`,
+      imageSha: sha256(fs.readFileSync(file)),
+    };
+  }
+  fs.writeFileSync(path.join(gallery, "manifest.json"),
+    JSON.stringify(manifest, null, 2) + "\n");
   // The extras are not shot by this run, so a listed file is kept only if it is
   // already published -- an entry pointing at nothing fails here, not on the page.
   for (const s of extras) {
@@ -378,5 +419,9 @@ const escape = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/
   const pinned = page.replace(/\.\.\/assets\/(site\.(?:css|js))/g,
     (match, name) => "../assets/" + (assetNames[name] || name));
   fs.writeFileSync(path.join(gallery, "index.html"), pinned);
+  // The gallery is a modern page too; keep its metadata block in the same source
+  // hash as every other page, even when only the capture list changed.
+  execFileSync("python3", [path.join(__dirname, "seo_meta.py"), "--write"],
+    { stdio: "inherit" });
   console.log(`gallery: ${shots.length + extras.length} figures, ${shots.length} captured + ${extras.length} extra`);
 })().catch((e) => { console.error("FAIL:", e.message); process.exit(1); });
