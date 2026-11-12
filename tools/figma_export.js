@@ -50,19 +50,24 @@ const STATES = [
   { slug: "index-drawer", url: "/", label: "Index · side tab", open: "#burger", n: 26, nPhone: 28 },
 ];
 
-// A file that only names Poppins renders in whatever sans the viewer happens to
-// have, which is not the page's type. The three faces are 8 KB each, so they
-// travel inside the artboard as base64 and it looks the same in any browser.
+// A file that only names a family renders in whatever the viewer happens to
+// have, which is not the page's type. Embed the faces the site itself ships:
+// Poppins for the bulk of the text, Spectral for the review-edition body, and
+// Archivo/Plex Mono for controls that use them. The files are small enough to
+// travel inside every artboard, so the board looks the same in any browser.
+const FONT_FACES = [
+  ["Poppins", "400", "poppins-400.woff2"],
+  ["Poppins", "500", "poppins-500.woff2"],
+  ["Poppins", "600", "poppins-600.woff2"],
+  ["Spectral", "400", "spectral-400.woff2"],
+  ["Archivo", "400", "archivo-400.woff2"],
+  ["Plex Mono", "400", "plex-mono-400.woff2"],
+];
 const FONT_CSS =
   "<defs><style type=\"text/css\">" +
-  [
-    ["400", "poppins-400.woff2"],
-    ["500", "poppins-500.woff2"],
-    ["600", "poppins-600.woff2"],
-  ]
-    .map(([weight, file]) => {
+  FONT_FACES.map(([family, weight, file]) => {
       const b64 = fs.readFileSync(path.join("docs/assets/fonts", file)).toString("base64");
-      return `@font-face{font-family:"Poppins";font-style:normal;font-weight:${weight};src:url(data:font/woff2;base64,${b64}) format("woff2")}`;
+      return `@font-face{font-family:"${family}";font-style:normal;font-weight:${weight};src:url(data:font/woff2;base64,${b64}) format("woff2")}`;
     })
     .join("") +
   "</style></defs>";
@@ -73,6 +78,7 @@ const FONT_CSS =
 
 async function capture() {
   const SKIP = new Set(["SCRIPT", "STYLE", "NOSCRIPT", "TEMPLATE", "HEAD", "META", "LINK"]);
+  const EMBEDDED_FAMILIES = new Set(["Poppins", "Spectral", "Archivo", "Plex Mono"]);
   const round = (v) => Math.round(v * 100) / 100;
   const esc = (s) =>
     s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
@@ -183,6 +189,56 @@ async function capture() {
     return cv.toDataURL("image/png");
   };
 
+  // Placeholders are painted by the input's anonymous text box, not by a DOM
+  // text node, so the tree walker never sees them. Measure the empty control's
+  // content box and emit the placeholder with the same font and baseline rules
+  // as normal text; otherwise every search field loses its label in Figma.
+  const placeholderRun = (el) => {
+    const tag = el.tagName.toLowerCase();
+    if (tag !== "input" && tag !== "textarea") return null;
+    const text = el.getAttribute("placeholder");
+    if (!text || !text.trim() || el.value) return null;
+    const type = (el.getAttribute("type") || "text").toLowerCase();
+    if (["hidden", "checkbox", "radio", "range", "color", "file"].includes(type)) return null;
+    const g = getComputedStyle(el);
+    const pg = getComputedStyle(el, "::placeholder");
+    const r = el.getBoundingClientRect();
+    const borderLeft = parseFloat(g.borderLeftWidth) || 0;
+    const borderRight = parseFloat(g.borderRightWidth) || 0;
+    const borderTop = parseFloat(g.borderTopWidth) || 0;
+    const borderBottom = parseFloat(g.borderBottomWidth) || 0;
+    const padLeft = parseFloat(g.paddingLeft) || 0;
+    const padRight = parseFloat(g.paddingRight) || 0;
+    const padTop = parseFloat(g.paddingTop) || 0;
+    const padBottom = parseFloat(g.paddingBottom) || 0;
+    const value = g.textTransform === "uppercase" ? text.toUpperCase()
+      : g.textTransform === "lowercase" ? text.toLowerCase()
+      : g.textTransform === "capitalize" ? text.replace(/(^|\s)(\p{L})/gu, (m, s, c) => s + c.toUpperCase())
+      : text;
+    const font = `${g.fontStyle} ${g.fontWeight} ${g.fontSize} ${g.fontFamily}`;
+    const m = metrics(font, value);
+    const contentLeft = r.left + borderLeft + padLeft;
+    const contentWidth = Math.max(0, r.width - borderLeft - borderRight - padLeft - padRight);
+    const contentTop = r.top + borderTop + padTop;
+    const contentHeight = Math.max(0, r.height - borderTop - borderBottom - padTop - padBottom);
+    let x = contentLeft;
+    if (g.textAlign === "center" || g.textAlign === "-webkit-center") {
+      x += (contentWidth - m.w) / 2;
+    } else if (g.textAlign === "right" || g.textAlign === "end") {
+      x += contentWidth - m.w;
+    }
+    const baseline = contentTop + (contentHeight - (m.asc + m.desc)) / 2 + m.asc;
+    const color = pg.color && pg.color !== "rgba(0, 0, 0, 0)" ? pg.color : g.color;
+    const ls = g.letterSpacing && g.letterSpacing !== "normal"
+      ? ` letter-spacing="${round(parseFloat(g.letterSpacing))}"` : "";
+    const family = (g.fontFamily || "").split(",")[0].trim().replace(/^["']|["']$/g, "");
+    const fontFamily = EMBEDDED_FAMILIES.has(family) ? family : "Poppins";
+    return `<text x="${round(x)}" y="${round(baseline + scrollY)}" ${paint(color)} ` +
+      `font-family="${fontFamily}" font-size="${round(parseFloat(g.fontSize))}" ` +
+      `font-weight="${g.fontWeight}"${g.fontStyle === "italic" ? ' font-style="italic"' : ""}` +
+      `${ls} xml:space="preserve">${esc(value.trim())}</text>`;
+  };
+
   const out = [];
   let rects = 0, texts = 0, images = 0;
 
@@ -246,6 +302,13 @@ async function capture() {
       // fragment. Inline boxes already sit on the line box, block ones are
       // centred inside their line-height.
       const tagName = node.tagName.toLowerCase();
+      if (tagName === "input" || tagName === "textarea") {
+        const placeholder = placeholderRun(node);
+        if (placeholder) {
+          out.push(placeholder);
+          texts++;
+        }
+      }
       if (tagName !== "svg" && tagName !== "img" && tagName !== "canvas") {
         const box = getComputedStyle(node);
         for (const which of ["::before", "::after"]) {
