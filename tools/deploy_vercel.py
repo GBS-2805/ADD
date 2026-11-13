@@ -35,6 +35,7 @@ CLI = ("npx", "-y", "vercel@65.14.0")
 sys.path.insert(0, str(ROOT / "tools"))
 from build_site import routes as site_routes  # noqa: E402 - the tools directory is on the path above
 from check_live import check as check_live  # noqa: E402 - the tools directory is on the path above
+from check_upload import problems as upload_problems  # noqa: E402 - the tools directory is on the path above
 from deploy_storage import check as storage_check  # noqa: E402 - the tools directory is on the path above
 
 # Text files that can hold the origin. The generated trees are skipped: they are
@@ -219,12 +220,23 @@ def storage_gate():
     storage_check(strict=True)
 
 
+def upload_gate():
+    """Refuse an upload Vercel will reject for size or file count."""
+    problems = upload_problems()
+    if problems:
+        sys.exit("docs/ cannot be uploaded; nothing was sent:\n  "
+                 + "\n  ".join(problems)
+                 + "\n  run python3 tools/check_upload.py for the current count")
+    print("  upload: docs/ is under the 100 MB and 15,000-file limits")
+
+
 def deploy():
     token = deploy_token()
     if not token:
         sys.exit("VERCEL_ARTBASE_TOKEN (or VERCEL_TOKEN) is not set. Add it in this "
                  "project under Settings -> Secrets, then run again; --check works "
                  "without it.")
+    upload_gate()
     storage_gate()
     palette_current()
     assets_current()
