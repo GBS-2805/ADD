@@ -72,10 +72,11 @@ jobs:
           "$TOOLS/sdkmanager" "platforms;android-35" "build-tools;35.0.0"
       - name: Playwright's Chromium, pinned to the build the baselines were recorded on
         run: |
-          # The Studio page falls back from Poppins to system-ui, which is DejaVu on
-          # Linux; a runner without it would render different pixels on a clean tree.
+          # The pages fall back from Poppins to system-ui and Arial for glyphs the
+          # bundled faces do not carry. On Linux those resolve to DejaVu and
+          # Liberation; a runner missing either shifts inline text by a few pixels.
           sudo apt-get update
-          sudo apt-get install -y fonts-dejavu-core
+          sudo apt-get install -y fonts-dejavu-core fonts-liberation
           npm install --prefix /tmp/pw "playwright@1.65.0"
           /tmp/pw/node_modules/.bin/playwright install --with-deps chromium
       - name: Gradle, wrapper and Robolectric caches
