@@ -12,74 +12,74 @@
 <image x="180" y="18" width="30" height="30" href="data:image/png;base64,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"/>
 <image x="345" y="22" width="22" height="22" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEIAAABCCAYAAADjVADoAAACeElEQVR4AeyZTWpUQRSFqxqcRenXA9Fk4goUdAG6gPZnA8kajMaxcd4St2DcgGIy1wUo6ApESBQH/Rp/RmKX5zZnZgJ9AubVC+fxbt/mcbn31FdnUtQg+VkQMIgFhpQMwiBIgMmOMAgSYLIjDIIEmOwIgyABJjvCIEiAyY4wCBJgsiO6BsH51STZEReb5uraaPRwdTTarjFCW2hUCUsgsPCtczl/wJBJTulxjRHaQmMAwf+lXwkEFr65dOfuCx8oEiQQJaVh6skDrRcUqRKIVMo7pXmntaW8V+ZLIOalbJRSXoH2L2XIadZC28/QiJnriKVfCcTX2ezTYdveO5xOVw6m01xjQNv5hca2/bw0BRRKIFB/Zl+D4NYahEGQAJMdYRAkwGRHnBTE5eHw/mrTvF5rmjc1RmgLjVzfv+mYL5IjsPAXg8FgJ+c8TjnfrDFCW2iE1t1j1nzkZwlEyfnOkV3q/DhWZEkgcil/lOZ9qpVAYGH7iL68e4pQCcRB267P5/NNHMf3EW9rDJw890IjtG78NxDR+Mts9gxDxohbNQZOnrdDY2hVQnKE0rhvtQbBHTMIgyABJjvCIEiAyY44CYhLw+EVnO5e4urvB67USo0R2kJjaE3CIzlikPMuTnd3cfW3Isw41dLQFhqh9bkyWAKBY/cNpfmitqufnK8royUQoD1TmndZC63flfkSCFyn7SjNO66dKPMlELhOm/wu5RqAPEI8qTGw+K3QiOtIadMkEBiSvrXtxwCC2K4xAOBpaAytSsgglOZ9qjUI7pZBGAQJMNkRBkECTHaEQZAAkx1hECTAdIYdwRUumQyCoAzCIEiAyY4giL8AAAD//xJV9XYAAAAGSURBVAMA0+sMsq7u3/QAAAAASUVORK5CYII="/>
 <rect x="0" y="61" width="390" height="1" fill="#1b1212"/>
-<text x="120.75" y="143" fill="#1b1212" font-family="Poppins" font-size="53.82" font-weight="400" letter-spacing="-2.15" xml:space="preserve">4,373 free</text>
-<text x="116.19" y="193.58" fill="#1b1212" font-family="Poppins" font-size="53.82" font-weight="400" letter-spacing="-2.15" xml:space="preserve">SVG icons</text>
-<text x="47" y="238.16" fill="#1b1212" font-family="Poppins" font-size="17" font-weight="400" xml:space="preserve">Four free sets, taken whole. Preview any</text>
-<text x="111.5" y="263.66" fill="#1b1212" font-family="Poppins" font-size="17" font-weight="400" xml:space="preserve">icon and copy its SVG.</text>
+<text x="121" y="143" fill="#1b1212" font-family="Poppins" font-size="53.82" font-weight="400" letter-spacing="-2.15" xml:space="preserve">4,373 free</text>
+<text x="116.45" y="193.58" fill="#1b1212" font-family="Poppins" font-size="53.82" font-weight="400" letter-spacing="-2.15" xml:space="preserve">SVG icons</text>
+<text x="60.22" y="238.16" fill="#1b1212" font-family="Poppins" font-size="17" font-weight="400" xml:space="preserve">Four free sets, taken whole. Preview</text>
+<text x="95.03" y="263.66" fill="#1b1212" font-family="Poppins" font-size="17" font-weight="400" xml:space="preserve">any icon and copy its SVG.</text>
 <rect x="25" y="300.16" width="340" height="54" fill="#1b1212"/>
 <rect x="25" y="300.16" width="340" height="1" fill="#1b1212"/>
 <rect x="364" y="300.16" width="1" height="54" fill="#1b1212"/>
 <rect x="25" y="353.16" width="340" height="1" fill="#1b1212"/>
 <rect x="25" y="300.16" width="1" height="54" fill="#1b1212"/>
-<text x="124.77" y="331.36" fill="#f0e7d4" font-family="Poppins" font-size="13" font-weight="500" letter-spacing="0.72" xml:space="preserve">BROWSE THE ICONS</text>
+<text x="126.67" y="331.36" fill="#f0e7d4" font-family="Poppins" font-size="13" font-weight="500" letter-spacing="0.72" xml:space="preserve">BROWSE THE ICONS</text>
 <rect x="25" y="366.16" width="340" height="1" fill="#1b1212"/>
 <rect x="364" y="366.16" width="1" height="54" fill="#1b1212"/>
 <rect x="25" y="419.16" width="340" height="1" fill="#1b1212"/>
 <rect x="25" y="366.16" width="1" height="54" fill="#1b1212"/>
-<text x="122.77" y="397.36" fill="#1b1212" font-family="Poppins" font-size="13" font-weight="500" letter-spacing="0.72" xml:space="preserve">DOWNLOAD THE APP</text>
+<text x="123.97" y="397.36" fill="#1b1212" font-family="Poppins" font-size="13" font-weight="500" letter-spacing="0.72" xml:space="preserve">DOWNLOAD THE APP</text>
 <text x="20" y="475.16" fill="#1b1212" font-family="Poppins" font-size="34" font-weight="400" letter-spacing="-0.85" xml:space="preserve">Four sets, nothing sampled</text>
-<text x="20" y="512.52" fill="#5f5550" font-family="Poppins" font-size="16" font-weight="400" xml:space="preserve">Each set comes whole, with no Pro tier held</text>
-<text x="20" y="537.31" fill="#5f5550" font-family="Poppins" font-size="16" font-weight="400" xml:space="preserve">back. Mix styles or stay with one.</text>
+<text x="20" y="511.52" fill="#5f5550" font-family="Poppins" font-size="16" font-weight="400" xml:space="preserve">Each set comes whole, with no Pro tier held</text>
+<text x="20" y="536.31" fill="#5f5550" font-family="Poppins" font-size="16" font-weight="400" xml:space="preserve">back. Mix styles or stay with one.</text>
 <rect x="20" y="571.11" width="350" height="1" fill="#1b1212"/>
 <rect x="20" y="799.7" width="350" height="1" fill="#1b1212" fill-opacity="0.22"/>
-<text x="20" y="621.11" fill="#1b1212" font-family="Poppins" font-size="30" font-weight="400" letter-spacing="-0.6" xml:space="preserve">Lineicons</text>
-<rect x="124.61" y="600.11" width="35.73" height="22" fill="#5b2a4b" fill-opacity="0.1"/>
-<text x="131.61" y="615.11" fill="#5b2a4b" font-family="Poppins" font-size="12" font-weight="500" letter-spacing="0.24" xml:space="preserve">MIT</text>
+<text x="20" y="620.11" fill="#1b1212" font-family="Poppins" font-size="30" font-weight="400" letter-spacing="-0.6" xml:space="preserve">Lineicons</text>
+<rect x="124.88" y="600.11" width="35.25" height="22" fill="#5b2a4b" fill-opacity="0.1"/>
+<text x="131.88" y="614.11" fill="#5b2a4b" font-family="Poppins" font-size="12" font-weight="500" letter-spacing="0.24" xml:space="preserve">MIT</text>
 <text x="20" y="701.11" fill="#1b1212" font-family="Poppins" font-size="80" font-weight="400" letter-spacing="-4.8" xml:space="preserve">606</text>
-<text x="114.61" y="701.11" fill="#5f5550" font-family="Poppins" font-size="17" font-weight="400" xml:space="preserve">icons</text>
-<text x="20" y="739.11" fill="#1b1212" font-family="Poppins" font-size="16" font-weight="400" xml:space="preserve">The free Lineicons set in full, drawn as filled</text>
-<text x="20" y="763.91" fill="#1b1212" font-family="Poppins" font-size="16" font-weight="400" xml:space="preserve">paths on a 24 px grid.</text>
+<text x="115.05" y="701.11" fill="#5f5550" font-family="Poppins" font-size="17" font-weight="400" xml:space="preserve">icons</text>
+<text x="20" y="738.11" fill="#1b1212" font-family="Poppins" font-size="16" font-weight="400" xml:space="preserve">The free Lineicons set in full, drawn as filled</text>
+<text x="20" y="762.91" fill="#1b1212" font-family="Poppins" font-size="16" font-weight="400" xml:space="preserve">paths on a 24 px grid.</text>
 <rect x="20" y="1028.3" width="350" height="1" fill="#1b1212" fill-opacity="0.22"/>
-<text x="20" y="849.7" fill="#1b1212" font-family="Poppins" font-size="30" font-weight="400" letter-spacing="-0.6" xml:space="preserve">Coolicons</text>
-<rect x="125.61" y="828.7" width="35.73" height="22" fill="#5b2a4b" fill-opacity="0.1"/>
-<text x="132.61" y="843.7" fill="#5b2a4b" font-family="Poppins" font-size="12" font-weight="500" letter-spacing="0.24" xml:space="preserve">MIT</text>
+<text x="20" y="848.7" fill="#1b1212" font-family="Poppins" font-size="30" font-weight="400" letter-spacing="-0.6" xml:space="preserve">Coolicons</text>
+<rect x="126.53" y="828.7" width="35.25" height="22" fill="#5b2a4b" fill-opacity="0.1"/>
+<text x="133.53" y="842.7" fill="#5b2a4b" font-family="Poppins" font-size="12" font-weight="500" letter-spacing="0.24" xml:space="preserve">MIT</text>
 <text x="20" y="929.7" fill="#1b1212" font-family="Poppins" font-size="80" font-weight="400" letter-spacing="-4.8" xml:space="preserve">1,258</text>
-<text x="139.02" y="929.7" fill="#5f5550" font-family="Poppins" font-size="17" font-weight="400" xml:space="preserve">icons</text>
-<text x="20" y="967.7" fill="#1b1212" font-family="Poppins" font-size="16" font-weight="400" xml:space="preserve">Stroke drawings with regular corners, the line</text>
-<text x="20" y="992.5" fill="#1b1212" font-family="Poppins" font-size="16" font-weight="400" xml:space="preserve">style kept whole across 30 categories.</text>
+<text x="138.81" y="929.7" fill="#5f5550" font-family="Poppins" font-size="17" font-weight="400" xml:space="preserve">icons</text>
+<text x="20" y="966.7" fill="#1b1212" font-family="Poppins" font-size="16" font-weight="400" xml:space="preserve">Stroke drawings with regular corners, the line</text>
+<text x="20" y="991.5" fill="#1b1212" font-family="Poppins" font-size="16" font-weight="400" xml:space="preserve">style kept whole across 30 categories.</text>
 <rect x="20" y="1256.89" width="350" height="1" fill="#1b1212" fill-opacity="0.22"/>
-<text x="20" y="1078.3" fill="#1b1212" font-family="Poppins" font-size="30" font-weight="400" letter-spacing="-0.6" xml:space="preserve">Phosphor</text>
-<rect x="127.2" y="1057.3" width="35.73" height="22" fill="#5b2a4b" fill-opacity="0.1"/>
-<text x="134.2" y="1072.3" fill="#5b2a4b" font-family="Poppins" font-size="12" font-weight="500" letter-spacing="0.24" xml:space="preserve">MIT</text>
+<text x="20" y="1077.3" fill="#1b1212" font-family="Poppins" font-size="30" font-weight="400" letter-spacing="-0.6" xml:space="preserve">Phosphor</text>
+<rect x="127.97" y="1057.3" width="35.25" height="22" fill="#5b2a4b" fill-opacity="0.1"/>
+<text x="134.97" y="1071.3" fill="#5b2a4b" font-family="Poppins" font-size="12" font-weight="500" letter-spacing="0.24" xml:space="preserve">MIT</text>
 <text x="20" y="1158.3" fill="#1b1212" font-family="Poppins" font-size="80" font-weight="400" letter-spacing="-4.8" xml:space="preserve">1,512</text>
-<text x="124.02" y="1158.3" fill="#5f5550" font-family="Poppins" font-size="17" font-weight="400" xml:space="preserve">icons</text>
-<text x="20" y="1196.3" fill="#1b1212" font-family="Poppins" font-size="16" font-weight="400" xml:space="preserve">The regular outline weight, whole, with every</text>
-<text x="20" y="1221.09" fill="#1b1212" font-family="Poppins" font-size="16" font-weight="400" xml:space="preserve">category drawn on a 256 px grid.</text>
+<text x="124.09" y="1158.3" fill="#5f5550" font-family="Poppins" font-size="17" font-weight="400" xml:space="preserve">icons</text>
+<text x="20" y="1195.3" fill="#1b1212" font-family="Poppins" font-size="16" font-weight="400" xml:space="preserve">The regular outline weight, whole, with every</text>
+<text x="20" y="1220.09" fill="#1b1212" font-family="Poppins" font-size="16" font-weight="400" xml:space="preserve">category drawn on a 256 px grid.</text>
 <rect x="20" y="1485.48" width="350" height="1" fill="#1b1212" fill-opacity="0.22"/>
-<text x="20" y="1306.89" fill="#1b1212" font-family="Poppins" font-size="30" font-weight="400" letter-spacing="-0.6" xml:space="preserve">Streamline</text>
-<rect x="141.02" y="1285.89" width="77.17" height="22" fill="#5b2a4b" fill-opacity="0.1"/>
-<text x="148.02" y="1300.89" fill="#5b2a4b" font-family="Poppins" font-size="12" font-weight="500" letter-spacing="0.24" xml:space="preserve">CC BY 4.0</text>
+<text x="20" y="1305.89" fill="#1b1212" font-family="Poppins" font-size="30" font-weight="400" letter-spacing="-0.6" xml:space="preserve">Streamline</text>
+<rect x="139.13" y="1285.89" width="74.13" height="22" fill="#5b2a4b" fill-opacity="0.1"/>
+<text x="146.13" y="1299.89" fill="#5b2a4b" font-family="Poppins" font-size="12" font-weight="500" letter-spacing="0.24" xml:space="preserve">CC BY 4.0</text>
 <text x="20" y="1386.89" fill="#1b1212" font-family="Poppins" font-size="80" font-weight="400" letter-spacing="-4.8" xml:space="preserve">997</text>
-<text x="105.61" y="1386.89" fill="#5f5550" font-family="Poppins" font-size="17" font-weight="400" xml:space="preserve">icons</text>
-<text x="20" y="1424.89" fill="#1b1212" font-family="Poppins" font-size="16" font-weight="400" xml:space="preserve">Four styles of the same drawings — Line, Duo,</text>
-<text x="20" y="1449.69" fill="#1b1212" font-family="Poppins" font-size="16" font-weight="400" xml:space="preserve">Solid and Flat — from the free Core set.</text>
+<text x="105.77" y="1386.89" fill="#5f5550" font-family="Poppins" font-size="17" font-weight="400" xml:space="preserve">icons</text>
+<text x="20" y="1423.89" fill="#1b1212" font-family="Poppins" font-size="16" font-weight="400" xml:space="preserve">Four styles of the same drawings — Line, Duo,</text>
+<text x="20" y="1448.69" fill="#1b1212" font-family="Poppins" font-size="16" font-weight="400" xml:space="preserve">Solid and Flat — from the free Core set.</text>
 <rect x="0" y="1570.48" width="390" height="4" fill="#5b2a4b"/>
-<text x="20" y="1615.48" fill="#5f5550" font-family="Poppins" font-size="10" font-weight="400" letter-spacing="0.55" xml:space="preserve">ICONS 3.9</text>
-<text x="79.95" y="1616.83" fill="#5f5550" font-family="Poppins" font-size="10" font-weight="400" letter-spacing="0.55" xml:space="preserve">·</text>
-<text x="88.52" y="1615.48" fill="#5f5550" font-family="Poppins" font-size="10" font-weight="400" letter-spacing="0.55" xml:space="preserve">ONE APP</text>
-<text x="143.38" y="1616.83" fill="#5f5550" font-family="Poppins" font-size="10" font-weight="400" letter-spacing="0.55" xml:space="preserve">·</text>
-<text x="151.94" y="1615.48" fill="#5f5550" font-family="Poppins" font-size="10" font-weight="400" letter-spacing="0.55" xml:space="preserve">LINEICONS, COOLICONS, PHOSPHOR</text>
-<text x="20" y="1630.98" fill="#5f5550" font-family="Poppins" font-size="10" font-weight="400" letter-spacing="0.55" xml:space="preserve">AND STREAMLINE. EVERY SET IS MIT EXCEPT STREAMLINE,</text>
-<text x="20" y="1646.48" fill="#5f5550" font-family="Poppins" font-size="10" font-weight="400" letter-spacing="0.55" xml:space="preserve">WHICH IS CC BY 4.0. THE PAID ICONS SOLD ON THE VENDORS'</text>
-<text x="20" y="1661.98" fill="#5f5550" font-family="Poppins" font-size="10" font-weight="400" letter-spacing="0.55" xml:space="preserve">SITES ARE NEITHER INCLUDED NOR COPIED.</text>
-<text x="20" y="1709.48" fill="#5f5550" font-family="Poppins" font-size="10" font-weight="400" letter-spacing="0.55" xml:space="preserve">INDEX</text>
-<text x="59.75" y="1710.23" fill="#5f5550" font-family="Poppins" font-size="10" font-weight="400" letter-spacing="0.55" xml:space="preserve">·</text>
-<text x="68.31" y="1709.48" fill="#5f5550" font-family="Poppins" font-size="10" font-weight="400" letter-spacing="0.55" xml:space="preserve">RESOURCES</text>
-<text x="139.27" y="1710.23" fill="#5f5550" font-family="Poppins" font-size="10" font-weight="400" letter-spacing="0.55" xml:space="preserve">·</text>
-<text x="147.83" y="1709.48" fill="#5f5550" font-family="Poppins" font-size="10" font-weight="400" letter-spacing="0.55" xml:space="preserve">FONTS</text>
-<text x="190.58" y="1710.23" fill="#5f5550" font-family="Poppins" font-size="10" font-weight="400" letter-spacing="0.55" xml:space="preserve">·</text>
-<text x="199.14" y="1709.48" fill="#5f5550" font-family="Poppins" font-size="10" font-weight="400" letter-spacing="0.55" xml:space="preserve">DOWNLOAD</text>
-<text x="269.55" y="1710.23" fill="#5f5550" font-family="Poppins" font-size="10" font-weight="400" letter-spacing="0.55" xml:space="preserve">·</text>
-<text x="278.11" y="1709.48" fill="#5f5550" font-family="Poppins" font-size="10" font-weight="400" letter-spacing="0.55" xml:space="preserve">RENDERS</text>
+<text x="20" y="1614.48" fill="#5f5550" font-family="Poppins" font-size="10" font-weight="400" letter-spacing="0.55" xml:space="preserve">ICONS 3.9</text>
+<text x="79.77" y="1614.83" fill="#5f5550" font-family="Poppins" font-size="10" font-weight="400" letter-spacing="0.55" xml:space="preserve">·</text>
+<text x="88.33" y="1614.48" fill="#5f5550" font-family="Poppins" font-size="10" font-weight="400" letter-spacing="0.55" xml:space="preserve">ONE APP</text>
+<text x="142.89" y="1614.83" fill="#5f5550" font-family="Poppins" font-size="10" font-weight="400" letter-spacing="0.55" xml:space="preserve">·</text>
+<text x="151.45" y="1614.48" fill="#5f5550" font-family="Poppins" font-size="10" font-weight="400" letter-spacing="0.55" xml:space="preserve">LINEICONS, COOLICONS, PHOSPHOR</text>
+<text x="20" y="1629.98" fill="#5f5550" font-family="Poppins" font-size="10" font-weight="400" letter-spacing="0.55" xml:space="preserve">AND STREAMLINE. EVERY SET IS MIT EXCEPT STREAMLINE,</text>
+<text x="20" y="1645.48" fill="#5f5550" font-family="Poppins" font-size="10" font-weight="400" letter-spacing="0.55" xml:space="preserve">WHICH IS CC BY 4.0. THE PAID ICONS SOLD ON THE VENDORS'</text>
+<text x="20" y="1660.98" fill="#5f5550" font-family="Poppins" font-size="10" font-weight="400" letter-spacing="0.55" xml:space="preserve">SITES ARE NEITHER INCLUDED NOR COPIED.</text>
+<text x="20" y="1708.48" fill="#5f5550" font-family="Poppins" font-size="10" font-weight="400" letter-spacing="0.55" xml:space="preserve">INDEX</text>
+<text x="59.61" y="1709.23" fill="#5f5550" font-family="Poppins" font-size="10" font-weight="400" letter-spacing="0.55" xml:space="preserve">·</text>
+<text x="68.17" y="1708.48" fill="#5f5550" font-family="Poppins" font-size="10" font-weight="400" letter-spacing="0.55" xml:space="preserve">RESOURCES</text>
+<text x="139.95" y="1709.23" fill="#5f5550" font-family="Poppins" font-size="10" font-weight="400" letter-spacing="0.55" xml:space="preserve">·</text>
+<text x="148.52" y="1708.48" fill="#5f5550" font-family="Poppins" font-size="10" font-weight="400" letter-spacing="0.55" xml:space="preserve">FONTS</text>
+<text x="190.89" y="1709.23" fill="#5f5550" font-family="Poppins" font-size="10" font-weight="400" letter-spacing="0.55" xml:space="preserve">·</text>
+<text x="199.45" y="1708.48" fill="#5f5550" font-family="Poppins" font-size="10" font-weight="400" letter-spacing="0.55" xml:space="preserve">DOWNLOAD</text>
+<text x="269.36" y="1709.23" fill="#5f5550" font-family="Poppins" font-size="10" font-weight="400" letter-spacing="0.55" xml:space="preserve">·</text>
+<text x="277.92" y="1708.48" fill="#5f5550" font-family="Poppins" font-size="10" font-weight="400" letter-spacing="0.55" xml:space="preserve">RENDERS</text>
 </g>
 </svg>

@@ -14,17 +14,17 @@
 <rect x="0" y="61" width="390" height="1" fill="#1b1212"/>
 <rect x="20" y="62" width="350" height="1" fill="#5b2a4b"/>
 <text x="20" y="133" fill="#1b1212" font-family="Poppins" font-size="46.8" font-weight="400" letter-spacing="-1.87" xml:space="preserve">Compress</text>
-<text x="20" y="182.11" fill="#5f5550" font-family="Poppins" font-size="18" font-weight="400" xml:space="preserve">A quiet photo compressor: pick a size,</text>
-<text x="20" y="209.11" fill="#5f5550" font-family="Poppins" font-size="18" font-weight="400" xml:space="preserve">judge the result on the slider, and save a</text>
-<text x="20" y="236.11" fill="#5f5550" font-family="Poppins" font-size="18" font-weight="400" xml:space="preserve">copy. No upload, no account.</text>
-<text x="20" y="280.11" fill="#5f5550" font-family="Poppins" font-size="14" font-weight="400" letter-spacing="0.77" xml:space="preserve">JPEG · WEBP · PNG</text>
-<text x="186.09" y="280.11" fill="#5f5550" font-family="Poppins" font-size="14" font-weight="400" letter-spacing="0.77" xml:space="preserve">UP TO 40 AT ONCE</text>
-<text x="20" y="309.8" fill="#5f5550" font-family="Poppins" font-size="14" font-weight="400" letter-spacing="0.77" xml:space="preserve">NO UPLOAD</text>
-<text x="134.94" y="309.8" fill="#5f5550" font-family="Poppins" font-size="14" font-weight="400" letter-spacing="0.77" xml:space="preserve">IN THE BROWSER</text>
+<text x="20" y="181.11" fill="#5f5550" font-family="Poppins" font-size="18" font-weight="400" xml:space="preserve">A quiet photo compressor: pick a size,</text>
+<text x="20" y="208.11" fill="#5f5550" font-family="Poppins" font-size="18" font-weight="400" xml:space="preserve">judge the result on the slider, and save a</text>
+<text x="20" y="235.11" fill="#5f5550" font-family="Poppins" font-size="18" font-weight="400" xml:space="preserve">copy. No upload, no account.</text>
+<text x="20" y="279.11" fill="#5f5550" font-family="Poppins" font-size="14" font-weight="400" letter-spacing="0.77" xml:space="preserve">JPEG · WEBP · PNG</text>
+<text x="184.31" y="279.11" fill="#5f5550" font-family="Poppins" font-size="14" font-weight="400" letter-spacing="0.77" xml:space="preserve">UP TO 40 AT ONCE</text>
+<text x="20" y="308.8" fill="#5f5550" font-family="Poppins" font-size="14" font-weight="400" letter-spacing="0.77" xml:space="preserve">NO UPLOAD</text>
+<text x="134.69" y="308.8" fill="#5f5550" font-family="Poppins" font-size="14" font-weight="400" letter-spacing="0.77" xml:space="preserve">IN THE BROWSER</text>
 <rect x="20" y="343.48" width="350" height="1" fill="#1b1212" fill-opacity="0.22"/>
-<text x="20" y="412.48" fill="#1b1212" font-family="Poppins" font-size="30" font-weight="400" letter-spacing="-1.05" xml:space="preserve">The tool</text>
-<text x="20" y="440.98" fill="#5f5550" font-family="Poppins" font-size="14" font-weight="400" letter-spacing="0.77" xml:space="preserve">PICK PHOTOS, SET THE CEILING, JUDGE IT ON</text>
-<text x="20" y="462.67" fill="#5f5550" font-family="Poppins" font-size="14" font-weight="400" letter-spacing="0.77" xml:space="preserve">THE SLIDER</text>
+<text x="20" y="411.48" fill="#1b1212" font-family="Poppins" font-size="30" font-weight="400" letter-spacing="-1.05" xml:space="preserve">The tool</text>
+<text x="20" y="439.98" fill="#5f5550" font-family="Poppins" font-size="14" font-weight="400" letter-spacing="0.77" xml:space="preserve">PICK PHOTOS, SET THE CEILING, JUDGE IT ON</text>
+<text x="20" y="461.67" fill="#5f5550" font-family="Poppins" font-size="14" font-weight="400" letter-spacing="0.77" xml:space="preserve">THE SLIDER</text>
 <rect x="20" y="494.36" width="350" height="591.05" fill="#1b1212" fill-opacity="0.06" rx="8"/>
 <rect x="20" y="494.36" width="350" height="1" fill="#1b1212" fill-opacity="0.22"/>
 <rect x="369" y="494.36" width="1" height="591.05" fill="#1b1212" fill-opacity="0.22"/>
@@ -34,44 +34,44 @@
 <rect x="352" y="511.36" width="1" height="140.13" fill="#1b1212" fill-opacity="0.22"/>
 <rect x="37" y="650.48" width="316" height="1" fill="#1b1212" fill-opacity="0.22"/>
 <rect x="37" y="511.36" width="1" height="140.13" fill="#1b1212" fill-opacity="0.22"/>
-<text x="139" y="558.36" fill="#1b1212" font-family="Poppins" font-size="19" font-weight="500" xml:space="preserve">Select photos</text>
-<text x="60.5" y="589.8" fill="#5f5550" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">JPG, PNG or WebP · multiple allowed · up</text>
-<text x="179.5" y="616.14" fill="#5f5550" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">to 40</text>
+<text x="138.84" y="558.36" fill="#1b1212" font-family="Poppins" font-size="19" font-weight="500" xml:space="preserve">Select photos</text>
+<text x="64.91" y="589.8" fill="#5f5550" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">JPG, PNG or WebP · multiple allowed · up</text>
+<text x="179.98" y="616.14" fill="#5f5550" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">to 40</text>
 <text x="37" y="683.48" fill="#5f5550" font-family="Poppins" font-size="12" font-weight="400" letter-spacing="0.96" xml:space="preserve">FORMAT</text>
-<rect x="37" y="698.08" width="201" height="1" fill="#1b1212" fill-opacity="0.22"/>
-<rect x="237" y="698.08" width="1" height="39.69" fill="#1b1212" fill-opacity="0.22"/>
-<rect x="37" y="736.77" width="201" height="1" fill="#1b1212" fill-opacity="0.22"/>
+<rect x="37" y="698.08" width="200.03" height="1" fill="#1b1212" fill-opacity="0.22"/>
+<rect x="236.03" y="698.08" width="1" height="39.69" fill="#1b1212" fill-opacity="0.22"/>
+<rect x="37" y="736.77" width="200.03" height="1" fill="#1b1212" fill-opacity="0.22"/>
 <rect x="37" y="698.08" width="1" height="39.69" fill="#1b1212" fill-opacity="0.22"/>
-<text x="54" y="722.08" fill="#5f5550" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">JPEG</text>
-<rect x="104" y="699.08" width="70" height="37.69" fill="#5b2a4b"/>
-<text x="120" y="722.08" fill="#f5ecd8" font-family="Poppins" font-size="14" font-weight="600" xml:space="preserve">WebP</text>
-<text x="190" y="722.08" fill="#5f5550" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">PNG</text>
-<text x="37" y="759.77" fill="#5f5550" font-family="Poppins" font-size="13" font-weight="400" xml:space="preserve">WebP: the same quality, about 40% smaller than JPEG</text>
+<text x="54" y="721.08" fill="#5f5550" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">JPEG</text>
+<rect x="104.14" y="699.08" width="69.02" height="37.69" fill="#5b2a4b"/>
+<text x="120.14" y="721.08" fill="#f5ecd8" font-family="Poppins" font-size="14" font-weight="600" xml:space="preserve">WebP</text>
+<text x="189.16" y="721.08" fill="#5f5550" font-family="Poppins" font-size="14" font-weight="400" xml:space="preserve">PNG</text>
+<text x="37" y="758.77" fill="#5f5550" font-family="Poppins" font-size="13" font-weight="400" xml:space="preserve">WebP: the same quality, about 40% smaller than JPEG</text>
 <text x="37" y="793.91" fill="#5f5550" font-family="Poppins" font-size="12" font-weight="400" letter-spacing="0.96" xml:space="preserve">QUALITY</text>
-<rect x="39" y="813.67" width="280" height="16" fill="#ffffff"/>
-<text x="335" y="826.5" fill="#1b1212" font-family="Poppins" font-size="17" font-weight="400" xml:space="preserve">78</text>
-<text x="37" y="862.84" fill="#5f5550" font-family="Poppins" font-size="13" font-weight="400" xml:space="preserve">Excellent quality</text>
+<rect x="39" y="813.67" width="281" height="16" fill="#ffffff"/>
+<text x="336" y="826.5" fill="#1b1212" font-family="Poppins" font-size="17" font-weight="400" xml:space="preserve">78</text>
+<text x="37" y="861.84" fill="#5f5550" font-family="Poppins" font-size="13" font-weight="400" xml:space="preserve">Excellent quality</text>
 <text x="37" y="896.98" fill="#5f5550" font-family="Poppins" font-size="12" font-weight="400" letter-spacing="0.96" xml:space="preserve">LONGEST EDGE</text>
 <rect x="37" y="911.58" width="316" height="41" fill="#f0e7d4" rx="6"/>
 <rect x="37" y="911.58" width="316" height="1" fill="#1b1212" fill-opacity="0.22"/>
 <rect x="352" y="911.58" width="1" height="41" fill="#1b1212" fill-opacity="0.22"/>
 <rect x="37" y="951.58" width="316" height="1" fill="#1b1212" fill-opacity="0.22"/>
 <rect x="37" y="911.58" width="1" height="41" fill="#1b1212" fill-opacity="0.22"/>
-<rect x="37" y="972.58" width="101" height="43.69" fill="#5b2a4b" rx="6"/>
-<rect x="37" y="972.58" width="101" height="1" fill="#5b2a4b"/>
-<rect x="137" y="972.58" width="1" height="43.69" fill="#5b2a4b"/>
-<rect x="37" y="1015.27" width="101" height="1" fill="#5b2a4b"/>
+<rect x="37" y="972.58" width="100" height="43.69" fill="#5b2a4b" rx="6"/>
+<rect x="37" y="972.58" width="100" height="1" fill="#5b2a4b"/>
+<rect x="136" y="972.58" width="1" height="43.69" fill="#5b2a4b"/>
+<rect x="37" y="1015.27" width="100" height="1" fill="#5b2a4b"/>
 <rect x="37" y="972.58" width="1" height="43.69" fill="#5b2a4b"/>
-<text x="56" y="998.58" fill="#f5ecd8" font-family="Poppins" font-size="14" font-weight="600" xml:space="preserve">Compress</text>
-<rect x="148" y="972.58" width="89" height="1" fill="#1b1212" fill-opacity="0.22"/>
-<rect x="236" y="972.58" width="1" height="43.69" fill="#1b1212" fill-opacity="0.22"/>
-<rect x="148" y="1015.27" width="89" height="1" fill="#1b1212" fill-opacity="0.22"/>
-<rect x="148" y="972.58" width="1" height="43.69" fill="#1b1212" fill-opacity="0.22"/>
-<text x="167" y="998.58" fill="#1b1212" font-family="Poppins" font-size="14" font-weight="500" xml:space="preserve">Preview</text>
-<text x="37" y="1044.27" fill="#5f5550" font-family="Poppins" font-size="13" font-weight="400" xml:space="preserve">Nothing selected yet.</text>
+<text x="56" y="997.58" fill="#f5ecd8" font-family="Poppins" font-size="14" font-weight="600" xml:space="preserve">Compress</text>
+<rect x="147" y="972.58" width="87.55" height="1" fill="#1b1212" fill-opacity="0.22"/>
+<rect x="233.55" y="972.58" width="1" height="43.69" fill="#1b1212" fill-opacity="0.22"/>
+<rect x="147" y="1015.27" width="87.55" height="1" fill="#1b1212" fill-opacity="0.22"/>
+<rect x="147" y="972.58" width="1" height="43.69" fill="#1b1212" fill-opacity="0.22"/>
+<text x="166" y="997.58" fill="#1b1212" font-family="Poppins" font-size="14" font-weight="500" xml:space="preserve">Preview</text>
+<text x="37" y="1043.27" fill="#5f5550" font-family="Poppins" font-size="13" font-weight="400" xml:space="preserve">Nothing selected yet.</text>
 <rect x="20" y="1129.41" width="350" height="1" fill="#1b1212" fill-opacity="0.22"/>
-<text x="20" y="1198.41" fill="#1b1212" font-family="Poppins" font-size="30" font-weight="400" letter-spacing="-1.05" xml:space="preserve">What it does</text>
-<text x="20" y="1226.91" fill="#5f5550" font-family="Poppins" font-size="14" font-weight="400" letter-spacing="0.77" xml:space="preserve">A SMALLER FILE, STILL YOUR PHOTO</text>
+<text x="20" y="1197.41" fill="#1b1212" font-family="Poppins" font-size="30" font-weight="400" letter-spacing="-1.05" xml:space="preserve">What it does</text>
+<text x="20" y="1225.91" fill="#5f5550" font-family="Poppins" font-size="14" font-weight="400" letter-spacing="0.77" xml:space="preserve">A SMALLER FILE, STILL YOUR PHOTO</text>
 <text x="20" y="1276.59" fill="#1b1212" font-family="Poppins" font-size="17" font-weight="500" xml:space="preserve">Smaller files</text>
 <text x="20" y="1304.94" fill="#1b1212" font-family="Poppins" font-size="17" font-weight="400" xml:space="preserve">Pick a quality level and compare the result on</text>
 <text x="20" y="1331.28" fill="#1b1212" font-family="Poppins" font-size="17" font-weight="400" xml:space="preserve">the slider before you save.</text>
@@ -96,29 +96,29 @@
 <text x="20" y="1865.09" fill="#1b1212" font-family="Poppins" font-size="17" font-weight="400" xml:space="preserve">Every result reopens on the slider so you can</text>
 <text x="20" y="1891.44" fill="#1b1212" font-family="Poppins" font-size="17" font-weight="400" xml:space="preserve">see what changed.</text>
 <rect x="20" y="1958.78" width="350" height="1" fill="#1b1212" fill-opacity="0.22"/>
-<text x="20" y="2027.78" fill="#1b1212" font-family="Poppins" font-size="30" font-weight="400" letter-spacing="-1.05" xml:space="preserve">Also on the shelf</text>
-<text x="20" y="2056.28" fill="#5f5550" font-family="Poppins" font-size="14" font-weight="400" letter-spacing="0.77" xml:space="preserve">SAME SYSTEM, SAME PALETTE</text>
+<text x="20" y="2026.78" fill="#1b1212" font-family="Poppins" font-size="30" font-weight="400" letter-spacing="-1.05" xml:space="preserve">Also on the shelf</text>
+<text x="20" y="2055.28" fill="#5f5550" font-family="Poppins" font-size="14" font-weight="400" letter-spacing="0.77" xml:space="preserve">SAME SYSTEM, SAME PALETTE</text>
 <text x="20" y="2105.97" fill="#1b1212" font-family="Poppins" font-size="17" font-weight="500" xml:space="preserve">In the app</text>
 <text x="20" y="2134.31" fill="#1b1212" font-family="Poppins" font-size="17" font-weight="400" text-decoration="underline" xml:space="preserve">Resources</text>
-<text x="95" y="2134.31" fill="#1b1212" font-family="Poppins" font-size="17" font-weight="400" xml:space="preserve">shows the four tools, and</text>
-<text x="289" y="2134.31" fill="#1b1212" font-family="Poppins" font-size="17" font-weight="400" text-decoration="underline" xml:space="preserve">Download</text>
+<text x="96" y="2134.31" fill="#1b1212" font-family="Poppins" font-size="17" font-weight="400" xml:space="preserve">shows the four tools, and</text>
+<text x="292.08" y="2134.31" fill="#1b1212" font-family="Poppins" font-size="17" font-weight="400" text-decoration="underline" xml:space="preserve">Download</text>
 <text x="20" y="2160.66" fill="#1b1212" font-family="Poppins" font-size="17" font-weight="400" xml:space="preserve">has the app.</text>
 <rect x="20" y="2184" width="350" height="1" fill="#1b1212" fill-opacity="0.22"/>
 <text x="20" y="2218" fill="#1b1212" font-family="Poppins" font-size="17" font-weight="500" xml:space="preserve">The rest of the shelf</text>
 <text x="20" y="2246.34" fill="#1b1212" font-family="Poppins" font-size="17" font-weight="400" text-decoration="underline" xml:space="preserve">Icons</text>
-<text x="61" y="2246.34" fill="#1b1212" font-family="Poppins" font-size="17" font-weight="400" xml:space="preserve">,</text>
-<text x="69" y="2246.34" fill="#1b1212" font-family="Poppins" font-size="17" font-weight="400" text-decoration="underline" xml:space="preserve">Fonts</text>
-<text x="110" y="2246.34" fill="#1b1212" font-family="Poppins" font-size="17" font-weight="400" xml:space="preserve">and the</text>
-<text x="174" y="2246.34" fill="#1b1212" font-family="Poppins" font-size="17" font-weight="400" text-decoration="underline" xml:space="preserve">portfolio</text>
-<text x="240" y="2246.34" fill="#1b1212" font-family="Poppins" font-size="17" font-weight="400" xml:space="preserve">.</text>
+<text x="61.03" y="2246.34" fill="#1b1212" font-family="Poppins" font-size="17" font-weight="400" xml:space="preserve">,</text>
+<text x="69.53" y="2246.34" fill="#1b1212" font-family="Poppins" font-size="17" font-weight="400" text-decoration="underline" xml:space="preserve">Fonts</text>
+<text x="111.91" y="2246.34" fill="#1b1212" font-family="Poppins" font-size="17" font-weight="400" xml:space="preserve">and the</text>
+<text x="176.52" y="2246.34" fill="#1b1212" font-family="Poppins" font-size="17" font-weight="400" text-decoration="underline" xml:space="preserve">portfolio</text>
+<text x="242.52" y="2246.34" fill="#1b1212" font-family="Poppins" font-size="17" font-weight="400" xml:space="preserve">.</text>
 <rect x="0" y="2337.69" width="390" height="4" fill="#5b2a4b"/>
-<text x="20" y="2372.69" fill="#5f5550" font-family="Poppins" font-size="10" font-weight="400" letter-spacing="0.55" xml:space="preserve">ADD</text>
-<text x="48.66" y="2373.44" fill="#5f5550" font-family="Poppins" font-size="10" font-weight="400" letter-spacing="0.55" xml:space="preserve">·</text>
-<text x="57.22" y="2372.69" fill="#5f5550" font-family="Poppins" font-size="10" font-weight="400" letter-spacing="0.55" xml:space="preserve">ONE APP, FOUR TOOLS</text>
-<text x="20" y="2400.19" fill="#5f5550" font-family="Poppins" font-size="10" font-weight="400" letter-spacing="0.55" xml:space="preserve">INDEX</text>
-<text x="59.75" y="2400.94" fill="#5f5550" font-family="Poppins" font-size="10" font-weight="400" letter-spacing="0.55" xml:space="preserve">·</text>
-<text x="68.31" y="2400.19" fill="#5f5550" font-family="Poppins" font-size="10" font-weight="400" letter-spacing="0.55" xml:space="preserve">RESOURCES</text>
-<text x="139.27" y="2400.94" fill="#5f5550" font-family="Poppins" font-size="10" font-weight="400" letter-spacing="0.55" xml:space="preserve">·</text>
-<text x="147.83" y="2400.19" fill="#5f5550" font-family="Poppins" font-size="10" font-weight="400" letter-spacing="0.55" xml:space="preserve">DOWNLOAD</text>
+<text x="20" y="2371.69" fill="#5f5550" font-family="Poppins" font-size="10" font-weight="400" letter-spacing="0.55" xml:space="preserve">ADD</text>
+<text x="49.38" y="2372.44" fill="#5f5550" font-family="Poppins" font-size="10" font-weight="400" letter-spacing="0.55" xml:space="preserve">·</text>
+<text x="57.94" y="2371.69" fill="#5f5550" font-family="Poppins" font-size="10" font-weight="400" letter-spacing="0.55" xml:space="preserve">ONE APP, FOUR TOOLS</text>
+<text x="20" y="2399.19" fill="#5f5550" font-family="Poppins" font-size="10" font-weight="400" letter-spacing="0.55" xml:space="preserve">INDEX</text>
+<text x="59.61" y="2399.94" fill="#5f5550" font-family="Poppins" font-size="10" font-weight="400" letter-spacing="0.55" xml:space="preserve">·</text>
+<text x="68.17" y="2399.19" fill="#5f5550" font-family="Poppins" font-size="10" font-weight="400" letter-spacing="0.55" xml:space="preserve">RESOURCES</text>
+<text x="139.95" y="2399.94" fill="#5f5550" font-family="Poppins" font-size="10" font-weight="400" letter-spacing="0.55" xml:space="preserve">·</text>
+<text x="148.52" y="2399.19" fill="#5f5550" font-family="Poppins" font-size="10" font-weight="400" letter-spacing="0.55" xml:space="preserve">DOWNLOAD</text>
 </g>
 </svg>

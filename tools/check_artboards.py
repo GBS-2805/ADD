@@ -46,11 +46,11 @@ PHONE_ICONS = ("16-icons-lineicons-phone.svg", "17-icons-coolicons-phone.svg",
                "18-icons-streamline-phone.svg")
 SEARCH_PLACEHOLDER = "Search by name"
 SEARCH_PLACEHOLDERS = {
-    "04-icons-lineicons-desktop.svg": {"x": "15", "y": "1046.58", "font-family": "Spectral",
+    "04-icons-lineicons-desktop.svg": {"x": "15", "y": "1045.58", "font-family": "Spectral",
                                       "font-size": "16", "font-weight": "400"},
-    "05-icons-coolicons-desktop.svg": {"x": "15", "y": "1046.58", "font-family": "Spectral",
+    "05-icons-coolicons-desktop.svg": {"x": "15", "y": "1045.58", "font-family": "Spectral",
                                       "font-size": "16", "font-weight": "400"},
-    "06-icons-streamline-desktop.svg": {"x": "15", "y": "1046.58", "font-family": "Spectral",
+    "06-icons-streamline-desktop.svg": {"x": "15", "y": "1045.58", "font-family": "Spectral",
                                        "font-size": "16", "font-weight": "400"},
     "16-icons-lineicons-phone.svg": {"x": "35", "y": "1170.78", "font-family": "Spectral",
                                      "font-size": "15", "font-weight": "400"},

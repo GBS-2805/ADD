@@ -486,7 +486,12 @@ async function settle(page) {
   const preview = previewArg ? (previewArg.includes("=") ? previewArg.split("=")[1] : true) : false;
   fs.mkdirSync(outDir, { recursive: true });
 
-  const browser = await chromium.launch();
+  const browser = await chromium.launch({
+    // Keep text advances independent of the host's FreeType hinting and subpixel
+    // positioning. Without these, the same page lays out a glyph or two differently
+    // on a CI runner and makes a current board look stale.
+    args: ["--font-render-hinting=none", "--disable-font-subpixel-positioning", "--disable-lcd-text"],
+  });
   const errors = [];
   const written = [];
 
