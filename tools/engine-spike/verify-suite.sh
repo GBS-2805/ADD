@@ -59,10 +59,10 @@ for path in glob.glob(sys.argv[1] + "/*.xml"):
 if tests == 0:
     print("engine: no tests ran")
     raise SystemExit(1)
-for classname, name, message in failed:
-    print(f"engine: FAIL {classname}.{name}: {message}")
 if int(sys.argv[2]) or failures or errors:
     print(f"engine: {tests} tests, {failures} failures, {errors} errors")
+    for classname, name, message in failed:
+        print(f"engine: FAIL {classname}.{name}: {message}")
     raise SystemExit(1)
 print(f"engine: {tests} tests, 0 failures, 0 errors, {skipped} skipped")
 PY

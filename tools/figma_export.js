@@ -463,6 +463,22 @@ async function capture() {
 
 /* ------------------------------------------------------------------ */
 
+// A fixed delay can catch a menu transition or a scroll reveal halfway through on a
+// slower runner, which changes the measured position by a few pixels. Wait for the
+// document's animations to finish (with a cap for any looping one), then give layout
+// one more frame to settle.
+async function settle(page) {
+  await page.evaluate(async () => {
+    await document.fonts.ready;
+    const done = (animation) => Promise.race([
+      animation.finished.catch(() => {}),
+      new Promise((resolve) => setTimeout(resolve, 1500)),
+    ]);
+    await Promise.all(document.getAnimations().map(done));
+  });
+  await page.waitForTimeout(150);
+}
+
 (async () => {
   const base = (process.argv[2] || "http://127.0.0.1:8321/").replace(/\/?$/, "/");
   const outDir = path.resolve(process.argv[3] || "figma");
@@ -515,7 +531,7 @@ async function capture() {
       });
       await page.waitForTimeout(300);
       await page.evaluate(() => window.scrollTo(0, 0));
-      await page.waitForTimeout(300);
+      await settle(page);
 
       const shot = await page.evaluate(capture);
       // Number by position in the full run, so --pages/--widths filters still
@@ -573,7 +589,7 @@ async function capture() {
       }, null, { timeout: 20000 }).catch(() => {});
       await page.waitForFunction(() => Array.from(document.images).every((img) => img.complete), null, { timeout: 30000 }).catch(() => {});
       await page.click(state.open);
-      await page.waitForTimeout(420);
+      await settle(page);
 
       const shot = await page.evaluate(capture);
       const n = String(width.tag === "desktop" ? state.n : state.nPhone).padStart(2, "0");

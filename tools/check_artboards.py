@@ -184,6 +184,24 @@ def hover_twins(svg):
     return found
 
 
+def text_runs(path):
+    return [(html.unescape(match.group(2)).strip(),)
+            + tuple(dict(ATTR_RE.findall(match.group(1))).get(key)
+                    for key in ("x", "y", "font-family", "font-size", "font-weight"))
+            for match in TEXT_RE.finditer(path.read_text(encoding="utf-8"))]
+
+
+def first_difference(expected, actual):
+    """The first text run that moved or changed, with its page and export values."""
+    want, got = text_runs(expected), text_runs(actual)
+    for index, (a, b) in enumerate(zip(want, got)):
+        if a != b:
+            return "text %d expected %r got %r" % (index, a, b)
+    if len(want) != len(got):
+        return "%d text runs expected, %d exported" % (len(want), len(got))
+    return "no text run differs; layout only"
+
+
 def main():
     scratch = Path(tempfile.mkdtemp(prefix="artboards-"))
     port = free_port()
@@ -213,6 +231,8 @@ def main():
               for name in HOVER_BOARDS if (scratch / name).is_file()]
     hidden = [(name, found) for name, found in hidden if found]
     placeholders = placeholder_problems(scratch)
+    differences = [(name, first_difference(kept[name], written[name]))
+                   for name in stale]
     shutil.rmtree(scratch, ignore_errors=True)
 
     if stale or missing or unknown or unstable or hidden or placeholders:
@@ -224,6 +244,8 @@ def main():
                  len(placeholders)))
         for name in stale:
             print("  stale    figma/%s" % name)
+        for name, problem in differences[:4]:
+            print("  diff     figma/%s: %s" % (name, problem[:220]))
         for name in missing:
             print("  missing  figma/%s (the exporter wrote no board by that name)" % name)
         for name in unknown:
