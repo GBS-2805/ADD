@@ -33,27 +33,35 @@ export ANDROID_SDK_ROOT="$SDK"
 # Deleting the reports makes the task out of date, so the suite always runs rather than
 # reporting totals left behind by an earlier run.
 rm -rf "$RESULTS"
-if ! ./gradlew --no-daemon :app:testDebugUnitTest; then
-    echo "engine: suite failed"
-    exit 1
-fi
+status=0
+./gradlew --no-daemon :app:testDebugUnitTest || status=$?
 
-python3 - "$RESULTS" <<'PY'
+python3 - "$RESULTS" "$status" <<'PY'
 import glob
 import sys
 import xml.etree.ElementTree as ET
 
 tests = failures = errors = skipped = 0
+failed = []
 for path in glob.glob(sys.argv[1] + "/*.xml"):
     root = ET.parse(path).getroot()
     tests += int(root.get("tests", 0))
     failures += int(root.get("failures", 0))
     errors += int(root.get("errors", 0))
     skipped += int(root.get("skipped", 0))
+    for case in root.iter("testcase"):
+        for child in case:
+            if child.tag not in ("failure", "error"):
+                continue
+            message = (child.get("message") or child.text or child.tag).strip()
+            failed.append((case.get("classname", "?"), case.get("name", "?"),
+                           message.splitlines()[0]))
 if tests == 0:
     print("engine: no tests ran")
     raise SystemExit(1)
-if failures or errors:
+for classname, name, message in failed:
+    print(f"engine: FAIL {classname}.{name}: {message}")
+if int(sys.argv[2]) or failures or errors:
     print(f"engine: {tests} tests, {failures} failures, {errors} errors")
     raise SystemExit(1)
 print(f"engine: {tests} tests, 0 failures, 0 errors, {skipped} skipped")

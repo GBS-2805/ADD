@@ -73,7 +73,7 @@ https://artbase-olive.vercel.app/. Pinned CLI: `vercel@65.14.0`.
 A visual change needs a public review URL and a phone-width capture before merge. Use
 `python3 tools/deploy_review.py review` and `python3 tools/deploy_review.py shots`;
 verify each URL returns 200 (and `image/png` for images). A Browser-panel reference, a
-workspace path or an `artifacts/...` path is not a review link. Wait for the verdict
+workspace path or a local artifact path is not a review link. Wait for the verdict
 before committing or deploying a visual change.
 
 ## Handoff

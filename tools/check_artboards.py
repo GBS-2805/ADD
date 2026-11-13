@@ -67,15 +67,30 @@ ATTR_RE = re.compile(r'([\w:-]+)="([^"]*)"')
 
 # Chromium lives outside node's own lookup path on a bare box: the module and the
 # browsers are installed under /tmp by tools/render_env.py, with their libs unpacked
-# rootlessly beside them. A value already exported still wins.
-BROWSER_ENV = {
-    "NODE_PATH": os.environ.get("NODE_PATH", str(ROOT / "node_modules")),
-    "PLAYWRIGHT_BROWSERS_PATH": os.environ.get("PLAYWRIGHT_BROWSERS_PATH", "/tmp/pw"),
-    "LD_LIBRARY_PATH": os.environ.get(
-        "LD_LIBRARY_PATH",
-        "/tmp/rootfs/usr/lib/x86_64-linux-gnu:/tmp/rootfs/lib/x86_64-linux-gnu"),
-    "FONTCONFIG_FILE": os.environ.get("FONTCONFIG_FILE", "/tmp/rootfs/fonts.conf"),
-}
+# rootlessly beside them. A value already exported still wins. On a CI runner the
+# browser is installed in Playwright's normal cache instead, so only add a fallback
+# when that path actually exists; forcing a missing /tmp here makes the export stop
+# before it opens a page.
+def browser_env():
+    env = {}
+    node_path = os.environ.get("NODE_PATH") or str(ROOT / "node_modules")
+    if Path(node_path).is_dir():
+        env["NODE_PATH"] = node_path
+    for name, fallback in (
+        ("PLAYWRIGHT_BROWSERS_PATH", "/tmp/pw"),
+        ("LD_LIBRARY_PATH",
+         "/tmp/rootfs/usr/lib/x86_64-linux-gnu:/tmp/rootfs/lib/x86_64-linux-gnu"),
+        ("FONTCONFIG_FILE", "/tmp/rootfs/fonts.conf"),
+    ):
+        value = os.environ.get(name)
+        if value:
+            env[name] = value
+        elif Path(fallback).exists():
+            env[name] = fallback
+    return env
+
+
+BROWSER_ENV = browser_env()
 
 
 def free_port():
