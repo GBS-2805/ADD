@@ -71,6 +71,10 @@ ATTR_RE = re.compile(r'([\w:-]+)="([^"]*)"')
 # browser is installed in Playwright's normal cache instead, so only add a fallback
 # when that path actually exists; forcing a missing /tmp here makes the export stop
 # before it opens a page.
+def chromium_installed(path):
+    return Path(path).is_dir() and any(Path(path).glob("chromium-*"))
+
+
 def browser_env():
     env = {}
     node_path = os.environ.get("NODE_PATH") or str(ROOT / "node_modules")
@@ -85,6 +89,9 @@ def browser_env():
         value = os.environ.get(name)
         if value:
             env[name] = value
+        elif name == "PLAYWRIGHT_BROWSERS_PATH":
+            if chromium_installed(fallback):
+                env[name] = fallback
         elif Path(fallback).exists():
             env[name] = fallback
     return env
