@@ -236,13 +236,18 @@ def deploy():
         sys.exit("VERCEL_ARTBASE_TOKEN (or VERCEL_TOKEN) is not set. Add it in this "
                  "project under Settings -> Secrets, then run again; --check works "
                  "without it.")
-    upload_gate()
     storage_gate()
     palette_current()
     assets_current()
     links_current()
     refresh_history()
     write_receipt(commit())
+    try:
+        upload_gate()
+    except SystemExit:
+        # A failed upload gate must not leave a receipt claiming this tree shipped.
+        (ROOT / "docs/_deploy.json").unlink(missing_ok=True)
+        raise
     cmd = [*CLI, "deploy", "docs", "--prod", "--yes",
            "--project", PROJECT, "--create-if-missing"]
     print("$ " + " ".join(cmd), flush=True)
