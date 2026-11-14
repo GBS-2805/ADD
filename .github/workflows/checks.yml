@@ -142,6 +142,9 @@ jobs:
       - name: Deploy the checked main tree
         env:
           VERCEL_ARTBASE_TOKEN: ${{ secrets.VERCEL_ARTBASE_TOKEN }}
+          # deploy_vercel.py runs the same strict storage gate before it uploads;
+          # the token is stripped again before the Vercel CLI child is spawned.
+          VERCEL_ADMIN_TOKEN: ${{ secrets.VERCEL_ADMIN_TOKEN }}
         run: |
           test -n "$VERCEL_ARTBASE_TOKEN"
           python3 tools/deploy_vercel.py
@@ -198,6 +201,9 @@ jobs:
       - name: Deploy the tracked handoff
         env:
           VERCEL_HANDOFF_TOKEN: ${{ secrets.VERCEL_HANDOFF_TOKEN }}
+          # deploy_review.py gates the handoff on the same storage report;
+          # the token is stripped again before the Vercel CLI child is spawned.
+          VERCEL_ADMIN_TOKEN: ${{ secrets.VERCEL_ADMIN_TOKEN }}
         run: |
           test -n "$VERCEL_HANDOFF_TOKEN"
           python3 tools/deploy_review.py handoff
