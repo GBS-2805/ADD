@@ -29,7 +29,7 @@ certificate is the ADD key, and `app.add.engine.MainActivity` is present on the
 | `cd tools/engine-review && ../engine-spike/gradlew :app:testReleaseUnitTest --tests add.EngineRoutingTest` | **6/6 route/absence tests pass** |
 | `python3 tools/check_all.py` | **23 gates green in 11.0s** |
 | `python3 tools/check_all.py --visual` (with the workspace Playwright environment) | **26 gates green in 78.0s**, including 209 engine tests, chrome and engine claims |
-| `python3 -m unittest discover -s tools/tests` | **169 tests OK** |
+| `python3 -m unittest discover -s tools/tests` | **171 tests OK** |
 | `python3 tools/check_claims.py --check --engine` | **OK — 16 modern pages, 16 classic pages, APK size and engine baseline** |
 
 The 209-test suite includes the new shell, command, plugin, responsive, capture,
@@ -51,14 +51,18 @@ report is estimated or inferred from Robolectric.
 ```text
 python3 tools/check_headers.py --origin https://artbase-olive.vercel.app \
   --handoff-origin https://artbase-handoff.vercel.app
-headers: OK - site and handoff carry CSP, HSTS, frame denial and cache policy
+headers: OK - site and handoff carry enforcing CSP, HSTS, frame denial and cache policy
 ```
 
-Both deployments are live. `docs/vercel.json` and `handoff/vercel.json` carry the
-report-only CSP, HSTS, CORP, X-Permitted-Cross-Domain-Policies and the frame,
-referrer, COOP and permissions headers. The refreshed deployment token authenticates
-as `ghost-0`; `tools/deploy_vercel.py` and `tools/deploy_review.py handoff` now fail
-the deploy if a required live header disappears.
+Both deployments are live at `1e45f85`. `docs/vercel.json` and `handoff/vercel.json`
+carry the enforcing CSP, HSTS, CORP, X-Permitted-Cross-Domain-Policies and the frame,
+referrer, COOP and permissions headers. All 21 inline scripts, including the ten
+executable classic-archive scripts, are hashed; the handoff's `img-src` allows the site
+origin for its screenshots. A Chromium report against the report-only policy was clean
+across 32 docs pages and the handoff, and the live enforcing browser pass was clean too.
+`style-src 'unsafe-inline'` remains the recorded residual risk. The refreshed deployment
+token authenticates as `ghost-0`; `tools/deploy_vercel.py` and
+`tools/deploy_review.py handoff` fail the deploy if a required live header disappears.
 
 ### Shipping `check_apk.py` — **NOT APPLICABLE**
 
@@ -92,7 +96,7 @@ treatments map to text layers by document order.
 ## Known limitations
 
 - No physical-device evidence; Tasks 8/11 device steps remain open.
-- Live CSP/header enforcement remains undeployed.
+- `style-src 'unsafe-inline'` remains a residual CSP risk; the policy is not claimed strict.
 - 3D transparency remains a renderer limitation while the preview uses a
   `SurfaceView`.
 - The migration lives in `app.add.engine.LegacyLookMigration` (the engine module)

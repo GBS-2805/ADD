@@ -14,7 +14,7 @@
 - `docs/superpowers/plans/2026-11-14-rules-gates-automation.md`
 - `NATIVE_EDITOR_V2.md`, `AGENTS.md`, `docs/agent-reference.md`, and the 14 November 2026 audit.
 
-**Status:** Phase 1 implementation is complete on `main`, except for the hardware and staged-CSP gates named below. A1–A7.1 are implemented; A3 report-only headers are live and verified on the site and handoff, while CSP enforcement remains staged behind a clean browser report. C0–C4 are complete. B1–B7, B9–B10 and B12 are implemented, including the Studio deletion; B11 has a signed review APK. B8 and the B11 install-over remain blocked on a real device. Device numbers and A7 full sign-off still wait on A4/A6 and B11.
+**Status:** Phase 1 implementation is complete on `main`, except for the hardware gates named below. A1–A7.1 are implemented; A3's enforcing CSP is live and verified on the site and handoff after a clean browser report, with `style-src 'unsafe-inline'` recorded as residual risk. C0–C4 are complete. B1–B7, B9–B10 and B12 are implemented, including the Studio deletion; B11 has a signed review APK. B8 and the B11 install-over remain blocked on a real device. Device numbers and A7 full sign-off still wait on A4/A6 and B11.
 
 ---
 
@@ -134,7 +134,7 @@ All tasks below are in **Phase 1**. Lane A is expanded below so this control pla
 |---|---|---|---|---|
 | **A1** | Claims gate — **DONE 2026-11-14** | `check_claims.py` + tests; README/page/engine claims | Unit tests; deliberate stale claim fails | C2 not needed for the gate |
 | **A2** | Secret/workflow/dependency gates — **DONE 2026-11-14** | `check_secrets.py`, `check_workflows.py`, `check_dependencies.py` + tests; pinned actions | Unit tests; fake token/workflow failure | C2 not needed for the gate |
-| **A3** | Headers and CSP — **IMPLEMENTED (report-only) 2026-11-14; live VERIFIED 2026-11-14; enforcement STAGED** | `check_headers.py`, `build_csp.py`, report-only CSP, HSTS/CORP | Header fixture tests; live site and handoff report | A1/A2 done; clean browser report for enforcement |
+| **A3** | Headers and CSP — **IMPLEMENTED (enforcing) 2026-11-14; live VERIFIED 2026-11-14** | `check_headers.py`, `build_csp.py`, enforcing CSP, HSTS/CORP | Header fixture tests; clean browser report; live site and handoff report | A1/A2 done; clean browser report |
 | **A4** | APK/WebView hardening — **IMPLEMENTED (APK/WebView) 2026-11-14; device smoke BLOCKED: B8 (NO DEVICE)** | APK identity/cert checks; blocked WebView network escapes | `check_apk` tests; WebView checklist | B8 for device smoke |
 | **A5** | Static web/image/motion budgets — **DONE 2026-11-14** | `check_web_budget.py`, `check_images.py`, `check_motion.py`, baseline JSON | Baseline + deliberate regression failures | A1 |
 | **A6** | Runtime/engine performance evidence — **IMPLEMENTED (harness) 2026-11-14; device numbers BLOCKED: B8/B11** | `check_web_perf.js`, `bench.sh`, device report link | Three-run report; device-only engine numbers | B8/B11 |
@@ -199,7 +199,7 @@ python3 tools/check_all.py
 
 **Result 2026-11-14:** DONE. Secret scan: `secrets: OK - 953 files, no credential-shaped values`; workflow scan: `workflows: OK - 4 workflow(s), action pins and permissions are safe`; dependency scan: `dependencies: OK - Vercel 65.14.0, Playwright 1.65.0, Gradle wrapper checksummed`; `python3 -m unittest tools.tests.test_check_secrets tools.tests.test_check_workflows tools.tests.test_check_dependencies -v` -> 16 tests OK. All external action refs are full SHAs, every checkout sets `persist-credentials: false`, and the Gradle 8.9 wrapper has its SHA-256.
 
-#### A3 — Headers and staged CSP
+#### A3 — Headers and enforcing CSP
 
 **Files:** `tools/check_headers.py`, `tools/build_csp.py`, their tests, `docs/vercel.json`, `handoff/vercel.json`; deploy scripts only to call the live check; CI for the live job.
 
@@ -218,9 +218,9 @@ python3 -m unittest tools.tests.test_check_headers tools.tests.test_build_csp -v
 python3 tools/check_headers.py --origin https://artbase-olive.vercel.app
 python3 tools/check_headers.py --origin https://artbase-handoff.vercel.app
 ```
-**Acceptance:** report-only is clean first; enforcement is staged; a weaker header or missing hash fails.
+**Acceptance:** a clean browser report precedes enforcement; the enforcing header is required; a weaker header or missing hash fails.
 
-**Result 2026-11-14:** report-only implementation complete. `python3 tools/build_csp.py --check` -> `csp: OK - 11 inline script(s), hashes present in both configs`; `python3 -m unittest tools.tests.test_build_csp tools.tests.test_check_headers -v` -> 11 tests OK. `docs/vercel.json` and `handoff/vercel.json` carry report-only CSP, HSTS, CORP, X-Permitted-Cross-Domain-Policies, frame, referrer, COOP and permissions headers. The deployed probe passes both origins: `headers: OK - site and handoff carry CSP, HSTS, frame denial and cache policy`; `deploy_vercel.py` and `deploy_review.py handoff` now run that probe as a deploy gate. Enforcement remains staged behind one clean browser CSP report; B9 is done. No enforcement is claimed.
+**Result 2026-11-14:** enforcing implementation complete and deployed at `1e45f85`. `python3 tools/build_csp.py --check` -> `csp: OK - 21 inline script(s), hashes present in both configs`; `python3 -m unittest tools.tests.test_build_csp tools.tests.test_check_headers` -> 13 tests OK. Both configs now carry `Content-Security-Policy` (no report-only header), HSTS, CORP, X-Permitted-Cross-Domain-Policies, frame, referrer, COOP and permissions headers. The generator hashes all 21 inline scripts, including the ten executable classic-archive scripts; the handoff's `img-src` additionally allows the site origin for its screenshots, while the site remains same-origin. A Chromium ReportingObserver report against the exact report-only policy, with a deliberate unhashed probe, was clean across 32 docs pages and the handoff. After deploy, `headers: OK - site and handoff carry enforcing CSP, HSTS, frame denial and cache policy`; the enforcing live browser pass was clean across the same 32 pages plus handoff. No `unsafe-eval`; `style-src 'unsafe-inline'` remains the recorded residual risk.
 
 #### A4 — APK and WebView hardening
 
@@ -280,24 +280,23 @@ checks: 23 gates, all green in 9.6s
 NODE_PATH=/tmp/pwshot/node_modules PLAYWRIGHT_BROWSERS_PATH=/tmp/pw \
 LD_LIBRARY_PATH=/tmp/rootfs/usr/lib/x86_64-linux-gnu:/tmp/rootfs/lib/x86_64-linux-gnu \
 FONTCONFIG_FILE=/tmp/rootfs/fonts.conf python3 tools/check_all.py --visual
-checks: 27 gates, all green in 91.9s
+checks: 26 gates, all green in 78.0s
 
 python3 tools/check_all.py --perf --browser http://127.0.0.1:8799/
 checks: 25 gates, all green in 36.0s
 ```
 
-The visual path includes `studio: 2 baselines match (0 px differ, 0 console errors)`,
-`engine: 209 tests, 0 failures, 0 errors, 0 skipped`, `engine-claims: claims: OK - 16 modern pages,
-16 classic pages, APK size and engine baseline`, and `chrome: goldens match`. The perf path
-includes `web-perf: OK - 4 pages, 3 runs each`.
+The visual path includes `engine: 209 tests, 0 failures, 0 errors, 0 skipped`,
+`engine-claims: claims: OK - 16 modern pages, 16 classic pages, APK size and engine baseline`,
+and `chrome: goldens match`. The perf path includes `web-perf: OK - 4 pages, 3 runs each`.
 
 ```text
 python3 -m unittest discover -s tools/tests -v
-Ran 164 tests in 8.6s
+Ran 171 tests in 8.8s
 OK
 ```
 
-The 164 tests include the deliberate A3/A4/A6 fixtures, the rules coverage and nine
+The 171 tests include the deliberate A3/A4/A6 fixtures, the rules coverage and nine
 cleanup safety tests; no fixture is marked complete from a status note. The visual command needs the workspace Playwright
 environment shown above; without it only the pre-existing Studio import fails, not the
 new gates, engine suite or chrome goldens.
@@ -347,7 +346,7 @@ python3 tools/check_agent_rules.py --check
 ```
 **Acceptance:** all new gates are in the real command path; CI permissions and pins are enforced; the compact rules are present; a deliberate failure is proven for each gate; `check_all` stays offline.
 
-**Result 2026-11-14:** wiring complete. `python3 tools/check_all.py` -> `checks: 23 gates, all green in 9.6s`; `python3 tools/check_all.py --visual` -> `checks: 27 gates, all green in 91.9s`; `python3 tools/check_all.py --perf --browser http://127.0.0.1:8799/` -> 25 gates green; `python3 tools/check_agent_rules.py --check` -> 143-line contract; 28 rules tests pass. The delivery matrix row and live-header jobs are present. `--live` passes on the site and handoff, and both deploy paths now gate on it; A7 sign-off waits on A4/A6 and B11, not on missing wiring or an A3 deployment.
+**Result 2026-11-14:** wiring complete. `python3 tools/check_all.py` -> `checks: 23 gates, all green in 9.6s`; `python3 tools/check_all.py --visual` -> `checks: 26 gates, all green in 78.0s`; `python3 tools/check_all.py --perf --browser http://127.0.0.1:8799/` -> 25 gates green; `python3 tools/check_agent_rules.py --check` -> 143-line contract; 28 rules tests pass. The delivery matrix row and live-header jobs are present. `--live` passes on the site and handoff, and both deploy paths now gate on it; A7 sign-off waits on A4/A6 and B11, not on missing wiring or an A3 deployment.
 
 ##### A7.1 — Compact agent-context rules (required inside A7)
 
@@ -519,11 +518,11 @@ Expected: all offline gates green; 209 engine tests and 24 chrome goldens; live 
 
 - C2–C4 complete (C0/C1 done); current APKs, BMO plan, docs, handoff, figma and `artifacts/bmo/` survive.
 - B1–B7, B9–B10 and B12 complete; B8/B11 device steps blocked and recorded; BMO tests and chrome goldens pass.
-- A1–A7 implemented; each new gate is in the real command path and has a failing fixture. A7 sign-off remains blocked on A4/A6/B11, and A3 enforcement remains staged behind a clean browser report.
+- A1–A7 implemented; each new gate is in the real command path and has a failing fixture. A7 sign-off remains blocked on A4/A6/B11. A3 enforcement is deployed and verified; `style-src 'unsafe-inline'` remains residual risk.
 - A7.1 complete; all 15 best rules are represented and `AGENTS.md` is at or below 160 lines.
 - `check_all` remains offline and under the agreed time budget.
 - `check_all --visual` is green at 209 tests / 24 goldens.
-- Live site and handoff headers are clean; A3 report-only headers are deployed and verified, with CSP enforcement still staged.
+- Live site and handoff headers are clean; A3 enforcing CSP is deployed and verified after a clean browser report, with `style-src 'unsafe-inline'` recorded as residual risk.
 - The review APK is non-debuggable and ADD-cert signed; it does not replace the shipped catalog digest or pass the shipping `check_apk` identity gate.
 - The final report lists every changed file, command, result, limitation and assumption.
 - No Vercel deployment was deleted by this phase.
@@ -550,7 +549,7 @@ Expected: all offline gates green; 209 engine tests and 24 chrome goldens; live 
 - **Rules coverage:** 7 already active + 8 represented by A7.1 = all 15; no second rulebook.
 - **No fake parallel work:** same-file and build-tree tasks are ordered; only independent lanes overlap.
 - **No hidden cleanup:** protected paths and the “stop, do not delete more” rule are explicit.
-- **No fake evidence:** device, runtime performance and CSP enforcement remain staged or blocked until measured.
+- **No fake evidence:** device and runtime-performance evidence remain blocked until measured; CSP enforcement was verified by a clean browser report and live header check.
 
 ---
 
@@ -575,7 +574,7 @@ pass.
 | B12 | Done | thumbnails, JPEG quality 92, share chooser, weight 100–900, family search, 3D resets; tests + goldens |
 
 **Final commands:** `check_all` 23/23 green (11.0s); `check_all --visual` 26/26 green
-(78.0s, 209 engine tests, 24 goldens); Python suite 169 tests OK; release route suite
+(78.0s, 209 engine tests, 24 goldens); Python suite 171 tests OK; release route suite
 6/6. Live headers pass on the site and handoff after the 14 Nov deploy, and the
 deployment token is valid. The review APK does not match the shipped catalog
 identity, so `check_apk --release` is recorded as not applicable rather than passed.

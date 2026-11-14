@@ -5,11 +5,11 @@ the A7.1 sub-task and the three source plans.
 
 **Verdict:** the plan is structurally coherent and the implemented lanes are closed. A1,
 A2, A4–A7 and A7.1 are implemented and verified within their hardware limits; A3's
-report-only headers are live and verified on the site and handoff. C0–C4 are complete.
-B1–B7 and B9–B12 are implemented, including the Studio deletion and the final signed APK.
-B8 and B11's install-over remain blocked on a real device, and A3 enforcement remains
-staged pending a clean browser report. Device numbers and the full A7 sign-off therefore
-remain open, and this audit does not claim those.
+enforcing CSP is live and verified on the site and handoff after a clean browser report.
+C0–C4 are complete. B1–B7 and B9–B12 are implemented, including the Studio deletion and
+the final signed APK. B8 and B11's install-over remain blocked on a real device. Device
+numbers and the full A7 sign-off therefore remain open, and this audit does not claim
+those.
 
 ## Structure audit
 
@@ -68,7 +68,7 @@ The plan register now records it as done with no cleanup dependency.
 |---|---|---|
 | A1 | **Done** | Claims gate implemented, tested and wired into the fast path and after the engine gate |
 | A2 | **Done** | Secret, workflow and dependency gates implemented; actions SHA-pinned; Gradle wrapper checksummed |
-| A3 | **Report-only live; enforcement staged** | `check_headers.py`, `build_csp.py` and configs implemented; site and handoff pass live; enforcement waits for a clean browser CSP report |
+| A3 | **Enforced and live** | `check_headers.py`, `build_csp.py` and configs implemented; clean Chromium report; site and handoff enforce CSP live; `style-src 'unsafe-inline'` is residual risk |
 | A4 | **Static done** | APK identity/certificate checks and WebView hardening implemented; device smoke blocked on B8 (no device) |
 | A5 | **Done** | Static budget, image and motion gates implemented with a measured baseline |
 | A6 | **Harness done** | Web timing and benchmark harnesses implemented; device numbers blocked on B8/B11 |
@@ -115,14 +115,11 @@ chrome: goldens match
 1. **B8/B11 require a device.** The plan itself says a VM/Robolectric number is not a
    device pass. `adb devices` lists no device, so the device gate and install-over test
    cannot run; the emulator is not a legal substitute.
-2. **CSP enforcement is staged.** The live report-only set passes, but enforcement waits
-   for a clean browser CSP report and remains a planned step; no enforcement is claimed.
-3. **Device evidence cannot be synthesized.** B8, the install-over and full A7 sign-off
+2. **Device evidence cannot be synthesized.** B8, the install-over and full A7 sign-off
    need a real device, not another code change.
-4. **A1–A7 are implemented to their verified limits but do not make the phase complete.**
-   A3 enforcement is staged behind that report, A4 device smoke needs B8, A6 device
-   numbers need B8/B11, and A7 sign-off inherits those plus B11. BMO and cleanup are
-   still separate lanes.
+3. **A1–A7 are implemented to their verified limits but do not make the phase complete.**
+   A4 device smoke needs B8, A6 device numbers need B8/B11, and A7 sign-off inherits
+   those plus B11. BMO and cleanup are still separate lanes.
 
 ## A1–A7 implementation evidence
 
@@ -130,17 +127,17 @@ chrome: goldens match
 |---|---|---|
 | A1 | `tools/check_claims.py`, `tools/tests/test_check_claims.py` | `claims:` pass; 7 tests; stale claims fail |
 | A2 | `tools/check_secrets.py`, `tools/check_workflows.py`, `tools/check_dependencies.py`, three test modules, workflow pins, Gradle checksum | three `OK` gates; 16 tests; fake token/workflow fixtures fail |
-| A3 | `tools/check_headers.py`, `tools/build_csp.py`, their tests, both `vercel.json` files | 11 inline hashes; 11 tests; live site and handoff pass; enforcement staged |
+| A3 | `tools/check_headers.py`, `tools/build_csp.py`, their tests, both `vercel.json` files | 21 inline scripts / 18 hashes; 13 tests; clean browser report; live enforcing headers and browser pass |
 | A4 | `tools/check_apk.py`, `tools/tests/test_check_apk.py`, `app/src/add/ShelfActivity.java`, `tools/apk-signing.json` | release APK OK; 12 tests; device smoke blocked |
 | A5 | `tools/check_web_budget.py`, `tools/check_images.py`, `tools/check_motion.py`, three test modules, `tools/web_budget.json` | 16-page measured baseline; 33 images; motion <=500 ms; 16 tests |
 | A6 | `tools/check_web_perf.js`, its smoke test, `tools/engine-spike/bench.sh` | three-run web report; `bench.sh` BLOCKED with no device |
 | A7 | `tools/check_all.py`, CI headers, `AGENTS.md`, reference/examples, rules test | 23 fast / 26 visual / 25 perf gates; 28 rules tests |
 
 **Full verdicts:** `python3 tools/check_all.py` -> 23 gates green in 9.1s;
-`python3 tools/check_all.py --visual` (with the workspace Playwright environment) -> 27
+`python3 tools/check_all.py --visual` (with the workspace Playwright environment) -> 26
 gates green in 78.0s, including 209 engine tests, chrome goldens and engine claims;
-`python3 -m unittest discover -s tools/tests -v` -> 169 tests OK. The live header probe
-passes on both origins and is recorded in the phasing plan. The
+`python3 -m unittest discover -s tools/tests -v` -> 171 tests OK. The live enforcing
+header probe and browser pass are recorded in the phasing plan. The
 signed review APK is recorded in `FINAL-TEST.md`; `check_apk --release` is not claimed
 because it validates the shipping catalog identity, not the review candidate.
 
