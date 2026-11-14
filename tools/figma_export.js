@@ -50,19 +50,24 @@ const STATES = [
   { slug: "index-drawer", url: "/", label: "Index · side tab", open: "#burger", n: 26, nPhone: 28 },
 ];
 
-// A file that only names Poppins renders in whatever sans the viewer happens to
-// have, which is not the page's type. The three faces are 8 KB each, so they
-// travel inside the artboard as base64 and it looks the same in any browser.
+// A file that only names a family renders in whatever the viewer happens to
+// have, which is not the page's type. Embed the faces the site itself ships:
+// Poppins for the bulk of the text, Spectral for the review-edition body, and
+// Archivo/Plex Mono for controls that use them. The files are small enough to
+// travel inside every artboard, so the board looks the same in any browser.
+const FONT_FACES = [
+  ["Poppins", "400", "poppins-400.woff2"],
+  ["Poppins", "500", "poppins-500.woff2"],
+  ["Poppins", "600", "poppins-600.woff2"],
+  ["Spectral", "400", "spectral-400.woff2"],
+  ["Archivo", "400", "archivo-400.woff2"],
+  ["Plex Mono", "400", "plex-mono-400.woff2"],
+];
 const FONT_CSS =
   "<defs><style type=\"text/css\">" +
-  [
-    ["400", "poppins-400.woff2"],
-    ["500", "poppins-500.woff2"],
-    ["600", "poppins-600.woff2"],
-  ]
-    .map(([weight, file]) => {
+  FONT_FACES.map(([family, weight, file]) => {
       const b64 = fs.readFileSync(path.join("docs/assets/fonts", file)).toString("base64");
-      return `@font-face{font-family:"Poppins";font-style:normal;font-weight:${weight};src:url(data:font/woff2;base64,${b64}) format("woff2")}`;
+      return `@font-face{font-family:"${family}";font-style:normal;font-weight:${weight};src:url(data:font/woff2;base64,${b64}) format("woff2")}`;
     })
     .join("") +
   "</style></defs>";
@@ -73,12 +78,29 @@ const FONT_CSS =
 
 async function capture() {
   const SKIP = new Set(["SCRIPT", "STYLE", "NOSCRIPT", "TEMPLATE", "HEAD", "META", "LINK"]);
+  const EMBEDDED_FAMILIES = new Set(["Poppins", "Spectral", "Archivo", "Plex Mono"]);
   const round = (v) => Math.round(v * 100) / 100;
   const esc = (s) =>
     s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
   const scrollY = window.scrollY;
   const W = document.documentElement.clientWidth;
   const H = Math.max(document.documentElement.scrollHeight, document.body.scrollHeight);
+
+  // The icon sheet is an 18,000 px grid inside a 506 px scroll box. Its offscreen
+  // cards are not on the page, but they still have layout boxes; measuring them
+  // both bloats the SVG and lets fractional grid layout shift the bytes between
+  // runs. Reject anything wholly outside an ancestor's clipping rectangle.
+  const clipped = (el) => {
+    const r = el.getBoundingClientRect();
+    for (let p = el.parentElement; p && p !== document.body; p = p.parentElement) {
+      const s = getComputedStyle(p);
+      if (s.overflowX === "visible" && s.overflowY === "visible") continue;
+      const clip = p.getBoundingClientRect();
+      if (r.bottom <= clip.top || r.top >= clip.bottom ||
+          r.right <= clip.left || r.left >= clip.right) return true;
+    }
+    return false;
+  };
 
   const color = (c) => {
     if (!c) return null;
@@ -167,6 +189,56 @@ async function capture() {
     return cv.toDataURL("image/png");
   };
 
+  // Placeholders are painted by the input's anonymous text box, not by a DOM
+  // text node, so the tree walker never sees them. Measure the empty control's
+  // content box and emit the placeholder with the same font and baseline rules
+  // as normal text; otherwise every search field loses its label in Figma.
+  const placeholderRun = (el) => {
+    const tag = el.tagName.toLowerCase();
+    if (tag !== "input" && tag !== "textarea") return null;
+    const text = el.getAttribute("placeholder");
+    if (!text || !text.trim() || el.value) return null;
+    const type = (el.getAttribute("type") || "text").toLowerCase();
+    if (["hidden", "checkbox", "radio", "range", "color", "file"].includes(type)) return null;
+    const g = getComputedStyle(el);
+    const pg = getComputedStyle(el, "::placeholder");
+    const r = el.getBoundingClientRect();
+    const borderLeft = parseFloat(g.borderLeftWidth) || 0;
+    const borderRight = parseFloat(g.borderRightWidth) || 0;
+    const borderTop = parseFloat(g.borderTopWidth) || 0;
+    const borderBottom = parseFloat(g.borderBottomWidth) || 0;
+    const padLeft = parseFloat(g.paddingLeft) || 0;
+    const padRight = parseFloat(g.paddingRight) || 0;
+    const padTop = parseFloat(g.paddingTop) || 0;
+    const padBottom = parseFloat(g.paddingBottom) || 0;
+    const value = g.textTransform === "uppercase" ? text.toUpperCase()
+      : g.textTransform === "lowercase" ? text.toLowerCase()
+      : g.textTransform === "capitalize" ? text.replace(/(^|\s)(\p{L})/gu, (m, s, c) => s + c.toUpperCase())
+      : text;
+    const font = `${g.fontStyle} ${g.fontWeight} ${g.fontSize} ${g.fontFamily}`;
+    const m = metrics(font, value);
+    const contentLeft = r.left + borderLeft + padLeft;
+    const contentWidth = Math.max(0, r.width - borderLeft - borderRight - padLeft - padRight);
+    const contentTop = r.top + borderTop + padTop;
+    const contentHeight = Math.max(0, r.height - borderTop - borderBottom - padTop - padBottom);
+    let x = contentLeft;
+    if (g.textAlign === "center" || g.textAlign === "-webkit-center") {
+      x += (contentWidth - m.w) / 2;
+    } else if (g.textAlign === "right" || g.textAlign === "end") {
+      x += contentWidth - m.w;
+    }
+    const baseline = contentTop + (contentHeight - (m.asc + m.desc)) / 2 + m.asc;
+    const color = pg.color && pg.color !== "rgba(0, 0, 0, 0)" ? pg.color : g.color;
+    const ls = g.letterSpacing && g.letterSpacing !== "normal"
+      ? ` letter-spacing="${round(parseFloat(g.letterSpacing))}"` : "";
+    const family = (g.fontFamily || "").split(",")[0].trim().replace(/^["']|["']$/g, "");
+    const fontFamily = EMBEDDED_FAMILIES.has(family) ? family : "Poppins";
+    return `<text x="${round(x)}" y="${round(baseline + scrollY)}" ${paint(color)} ` +
+      `font-family="${fontFamily}" font-size="${round(parseFloat(g.fontSize))}" ` +
+      `font-weight="${g.fontWeight}"${g.fontStyle === "italic" ? ' font-style="italic"' : ""}` +
+      `${ls} xml:space="preserve">${esc(value.trim())}</text>`;
+  };
+
   const out = [];
   let rects = 0, texts = 0, images = 0;
 
@@ -177,11 +249,13 @@ async function capture() {
         const g = getComputedStyle(n);
         if (g.display === "none" || g.visibility === "hidden") return NodeFilter.FILTER_REJECT;
         if (parseFloat(g.opacity) === 0) return NodeFilter.FILTER_REJECT;
+        if (clipped(n)) return NodeFilter.FILTER_REJECT;
         // An <svg> is visited so it can be rasterised as a whole; its own
         // children are zero-size boxes and emit nothing.
         return NodeFilter.FILTER_ACCEPT;
       }
       if (!n.nodeValue || !n.nodeValue.trim()) return NodeFilter.FILTER_REJECT;
+      if (!n.parentElement || clipped(n.parentElement)) return NodeFilter.FILTER_REJECT;
       return NodeFilter.FILTER_ACCEPT;
     },
   });
@@ -228,6 +302,13 @@ async function capture() {
       // fragment. Inline boxes already sit on the line box, block ones are
       // centred inside their line-height.
       const tagName = node.tagName.toLowerCase();
+      if (tagName === "input" || tagName === "textarea") {
+        const placeholder = placeholderRun(node);
+        if (placeholder) {
+          out.push(placeholder);
+          texts++;
+        }
+      }
       if (tagName !== "svg" && tagName !== "img" && tagName !== "canvas") {
         const box = getComputedStyle(node);
         for (const which of ["::before", "::after"]) {
@@ -382,6 +463,22 @@ async function capture() {
 
 /* ------------------------------------------------------------------ */
 
+// A fixed delay can catch a menu transition or a scroll reveal halfway through on a
+// slower runner, which changes the measured position by a few pixels. Wait for the
+// document's animations to finish (with a cap for any looping one), then give layout
+// one more frame to settle.
+async function settle(page) {
+  await page.evaluate(async () => {
+    await document.fonts.ready;
+    const done = (animation) => Promise.race([
+      animation.finished.catch(() => {}),
+      new Promise((resolve) => setTimeout(resolve, 1500)),
+    ]);
+    await Promise.all(document.getAnimations().map(done));
+  });
+  await page.waitForTimeout(150);
+}
+
 (async () => {
   const base = (process.argv[2] || "http://127.0.0.1:8321/").replace(/\/?$/, "/");
   const outDir = path.resolve(process.argv[3] || "figma");
@@ -389,7 +486,12 @@ async function capture() {
   const preview = previewArg ? (previewArg.includes("=") ? previewArg.split("=")[1] : true) : false;
   fs.mkdirSync(outDir, { recursive: true });
 
-  const browser = await chromium.launch();
+  const browser = await chromium.launch({
+    // Keep text advances independent of the host's FreeType hinting and subpixel
+    // positioning. Without these, the same page lays out a glyph or two differently
+    // on a CI runner and makes a current board look stale.
+    args: ["--font-render-hinting=none", "--disable-font-subpixel-positioning", "--disable-lcd-text"],
+  });
   const errors = [];
   const written = [];
 
@@ -414,10 +516,27 @@ async function capture() {
       page.on("pageerror", (e) => errors.push(`${page_.slug}/${width.tag}: ${e.message}`));
       await page.goto(base + page_.url.replace(/^\//, ""), { waitUntil: "networkidle" });
       await page.evaluate(() => document.fonts.ready);
+      // The icon pages print a loading line while their catalog is parsed; measuring
+      // before that swap changes the sheet's height. The render capture waits too.
+      await page.waitForFunction(() => {
+        const el = document.querySelector("#status") || document.querySelector(".status");
+        return !el || !/^\s*loading\b/i.test(el.textContent || "");
+      }, null, { timeout: 20000 }).catch(() => {});
+      // Trigger lazy images, then wait for every one to decode before measuring.
+      // The two phone icon pages otherwise move by a few pixels between runs as
+      // their long sheets settle, which makes the artboard diff non-deterministic.
+      // A single scroll leaves the middle of a 1,000-icon sheet unloaded, so force
+      // every lazy image eager before asking the browser to finish the set.
+      await page.evaluate(() => document.querySelectorAll('img[loading="lazy"]').forEach((img) => { img.loading = "eager"; }));
       await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
-      await page.waitForTimeout(150);
+      await page.waitForFunction(() => Array.from(document.images).every((img) => img.complete), null, { timeout: 30000 }).catch(() => {});
+      await page.evaluate(async () => {
+        await Promise.all(Array.from(document.images).map((img) => img.decode().catch(() => {})));
+        await document.fonts.ready;
+      });
+      await page.waitForTimeout(300);
       await page.evaluate(() => window.scrollTo(0, 0));
-      await page.waitForTimeout(150);
+      await settle(page);
 
       const shot = await page.evaluate(capture);
       // Number by position in the full run, so --pages/--widths filters still
@@ -469,8 +588,13 @@ async function capture() {
       page.on("pageerror", (e) => errors.push(`${state.slug}/${width.tag}: ${e.message}`));
       await page.goto(base + state.url.replace(/^\//, ""), { waitUntil: "networkidle" });
       await page.evaluate(() => document.fonts.ready);
+      await page.waitForFunction(() => {
+        const el = document.querySelector("#status") || document.querySelector(".status");
+        return !el || !/^\s*loading\b/i.test(el.textContent || "");
+      }, null, { timeout: 20000 }).catch(() => {});
+      await page.waitForFunction(() => Array.from(document.images).every((img) => img.complete), null, { timeout: 30000 }).catch(() => {});
       await page.click(state.open);
-      await page.waitForTimeout(420);
+      await settle(page);
 
       const shot = await page.evaluate(capture);
       const n = String(width.tag === "desktop" ? state.n : state.nPhone).padStart(2, "0");

@@ -185,7 +185,13 @@
 
   fetch("../data/pages.json")
     .then(function (response) { return response.json(); })
-    .then(function (data) { pages = data.pages; renderChips(); render(); })
+    .then(function (data) {
+      pages = data.pages;
+      var initial = new URLSearchParams(location.search).get("q");
+      if (initial) { input.value = initial; }
+      renderChips();
+      render();
+    })
     .catch(function () {
       count.textContent = "The index did not load.";
       none.hidden = true;

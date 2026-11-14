@@ -30,7 +30,7 @@ so a machine without them stops the release instead of leaving it half done.
 
   Before any of that it runs tools/check_palette.py and refuses to bump while the
   site and the app disagree about a colour, or a page has a colour of its own. It then
-  runs the same verdict the push checks run, `tools/check_all.py --visual` -- both pixel
+  runs the same verdict the push checks run, `tools/check_all.py --visual --artboards` -- both pixel
   baselines, the whole engine suite and the shelf's python gates -- and refuses to move
   a label while any of them is red. --dry-run passes that gate too: a plan for a tree
   that would not pass is not a plan.
@@ -566,7 +566,8 @@ def verdict_preflight():
     with a version number on it. --dry-run is gated too, for the same reason.
     """
     print("the release gate", flush=True)
-    done = subprocess.run([sys.executable, str(ROOT / "tools/check_all.py"), "--visual"],
+    done = subprocess.run([sys.executable, str(ROOT / "tools/check_all.py"),
+                           "--visual", "--artboards"],
                           cwd=ROOT, env=capture_env())
     if done.returncode != 0:
         raise SystemExit("refusing to bump: the checks are red, and nothing has been moved.\n"

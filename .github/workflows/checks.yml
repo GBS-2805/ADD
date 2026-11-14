@@ -34,6 +34,8 @@ jobs:
           python-version: "3.12"
       - name: Every gate that needs nothing but python
         run: python3 tools/check_all.py
+      - name: Checker self-tests
+        run: python3 -m unittest discover -s tools/tests -v
 
   visual:
     # 24.04, not ubuntu-latest: on the 26.04 image android-actions/setup-android fails
@@ -70,12 +72,20 @@ jobs:
           "$TOOLS/sdkmanager" "platforms;android-35" "build-tools;35.0.0"
       - name: Playwright's Chromium, pinned to the build the baselines were recorded on
         run: |
-          # The Studio page falls back from Poppins to system-ui, which is DejaVu on
-          # Linux; a runner without it would render different pixels on a clean tree.
-          sudo apt-get update
-          sudo apt-get install -y fonts-dejavu-core
           npm install --prefix /tmp/pw "playwright@1.65.0"
           /tmp/pw/node_modules/.bin/playwright install --with-deps chromium
+      # The artboards are byte-compared with baselines recorded against the rootless
+      # render stack from tools/render_env.py: its pinned FreeType, fontconfig and
+      # DejaVu/Liberation faces are part of the measurement, not just the browser.
+      - name: Pinned render libraries and fonts
+        uses: actions/cache@v4
+        with:
+          path: |
+            /tmp/pkgs
+            /tmp/rootfs
+          key: render-rootfs-${{ runner.os }}-${{ hashFiles('tools/render_env.py') }}
+      - name: Rebuild the pinned render libraries and fonts
+        run: python3 tools/render_env.py --libs
       - name: Gradle, wrapper and Robolectric caches
         uses: actions/cache@v4
         with:
@@ -88,13 +98,15 @@ jobs:
       - name: The engine suite, both pixel guards, and the rest of the verdict
         env:
           NODE_PATH: /tmp/pw/node_modules
+          LD_LIBRARY_PATH: /tmp/rootfs/usr/lib/x86_64-linux-gnu:/tmp/rootfs/lib/x86_64-linux-gnu
+          FONTCONFIG_FILE: /tmp/rootfs/fonts.conf
           # Chromium's glyph anti-aliasing is renderer-dependent, not tree-dependent:
           # the same baselines drift ~5k px on a stock runner (run 42637567824) while
           # every geometry assertion passes. Keep the strict 40 px guard local; on CI
           # allow 1.5% so glyph edges do not fail every push, while a moved layer,
           # missing guide or colour change still does.
           STUDIO_VISUAL_MAX_DIFF: "19750"
-        run: python3 tools/check_all.py --visual
+        run: python3 tools/check_all.py --visual --artboards
       # A red Studio guard is only actionable with the pixels the runner produced;
       # the diff image alone does not say which element moved. Keep both on failure.
       - name: Keep the Studio evidence when the verdict is red
@@ -105,3 +117,163 @@ jobs:
           path: artifacts/studio-*.png
           if-no-files-found: ignore
           retention-days: 7
+
+  publish:
+    needs: [shelf, visual]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    environment: production
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    concurrency:
+      group: publish-production
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Deploy the checked main tree
+        env:
+          VERCEL_ARTBASE_TOKEN: ${{ secrets.VERCEL_ARTBASE_TOKEN }}
+        run: |
+          test -n "$VERCEL_ARTBASE_TOKEN"
+          python3 tools/deploy_vercel.py
+      - name: Record the storage report
+        if: always()
+        continue-on-error: true
+        env:
+          VERCEL_ADMIN_TOKEN: ${{ secrets.VERCEL_ADMIN_TOKEN }}
+        run: |
+          echo "### Deployment storage" >> "$GITHUB_STEP_SUMMARY"
+          python3 tools/deploy_storage.py --json >> "$GITHUB_STEP_SUMMARY" || \
+            echo '{"status":"unavailable"}' >> "$GITHUB_STEP_SUMMARY"
+      - name: Keep the deploy receipt
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: deploy-receipt-${{ github.sha }}
+          path: docs/_deploy.json
+          if-no-files-found: warn
+          retention-days: 30
+      - name: Summarise the deployed commit
+        if: always()
+        run: |
+          echo "### Publish" >> "$GITHUB_STEP_SUMMARY"
+          echo "- commit: \`${{ github.sha }}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "- origin: https://artbase-olive.vercel.app" >> "$GITHUB_STEP_SUMMARY"
+          echo "- receipt: \`docs/_deploy.json\`" >> "$GITHUB_STEP_SUMMARY"
+
+  # Kept out of `publish` on purpose: the site is already live by the time this runs.
+  # A handoff failure must turn the workflow red without rolling back or failing the
+  # publish job.
+  handoff:
+    needs: publish
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    environment: production
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Write the published provenance
+        run: |
+          python3 tools/update_handoff.py \
+            --commit "$GITHUB_SHA" \
+            --deployed-at "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+            --gates "shelf + visual"
+      - name: Deploy the tracked handoff
+        env:
+          VERCEL_HANDOFF_TOKEN: ${{ secrets.VERCEL_HANDOFF_TOKEN }}
+        run: |
+          test -n "$VERCEL_HANDOFF_TOKEN"
+          python3 tools/deploy_review.py handoff
+      - name: Verify the handoff page and its local assets
+        run: |
+          python3 - <<'PY'
+          import re
+          import urllib.request
+
+          base = "https://artbase-handoff.vercel.app"
+          page = urllib.request.urlopen(base + "/", timeout=30).read().decode("utf-8")
+          if "provenance" not in page and "Committed:" not in page:
+              raise SystemExit("handoff page has no provenance line")
+          paths = set()
+          for match in re.findall(r'(?:href|src)="([^"]+)"', page):
+              if match.startswith(("http://", "https://", "#", "mailto:", "data:")):
+                  continue
+              paths.add("/" + match.lstrip("./"))
+          failed = []
+          for path in sorted(paths):
+              request = urllib.request.Request(base + path, method="GET")
+              try:
+                  with urllib.request.urlopen(request, timeout=30) as response:
+                      if response.status != 200:
+                          failed.append("%s -> %s" % (path, response.status))
+              except Exception as exc:
+                  failed.append("%s -> %s" % (path, exc))
+          if failed:
+              raise SystemExit("handoff assets failed: " + "; ".join(failed))
+          print("handoff: %d local assets return 200" % len(paths))
+          PY
+      - name: Summarise the handoff
+        if: always()
+        run: |
+          echo "### Handoff" >> "$GITHUB_STEP_SUMMARY"
+          echo "- commit: \`${{ github.sha }}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "- origin: https://artbase-handoff.vercel.app" >> "$GITHUB_STEP_SUMMARY"
+          if [ "${{ job.status }}" = "success" ]; then
+            echo "- handoff: ok" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "- handoff: FAILED" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+  # Same-repo pull requests only. A fork never reaches the Vercel secret.
+  review:
+    needs: [shelf, visual]
+    if: >-
+      github.event_name == 'pull_request' &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-24.04
+    environment: review
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Deploy the review surface
+        env:
+          VERCEL_REVIEW_TOKEN: ${{ secrets.VERCEL_REVIEW_TOKEN }}
+        run: |
+          test -n "$VERCEL_REVIEW_TOKEN"
+          python3 tools/deploy_review.py review
+      - name: Comment the review URL and head SHA
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          gh pr comment "$PR_NUMBER" --body \
+            "Review build for ${HEAD_SHA}: https://artbase-review.vercel.app — the newest same-repo review replaces the previous one at this URL."

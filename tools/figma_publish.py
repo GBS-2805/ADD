@@ -20,7 +20,8 @@ import sys
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 from hash_assets import pin  # noqa: E402 - the tools directory is on the path above
 from check_figma import check as figma_problems  # noqa: E402 - same directory
-from pantone_sheet import DATA, nearest, order_roles, palettes, pretty  # noqa: E402 - same directory
+from pantone_sheet import DATA, nearest, order_roles, newsprint, pretty  # noqa: E402 - same directory
+import seo_meta  # noqa: E402 - same directory
 
 SRC = pathlib.Path("figma")
 DST = pathlib.Path("docs/figma")
@@ -87,7 +88,7 @@ def human(n):
 
 
 def palette_cards():
-    """Every solid colour of the four palettes, built the way the sheet builds them.
+    """Every solid colour of the one edition, built the way the sheet builds it.
 
     Each row opens with the site's own colour, then the nearest Pantone chip and two
     alternatives side by side, every one carrying a square of its own colour so the eye
@@ -97,7 +98,7 @@ def palette_cards():
     data = json.loads(DATA.read_text())
     coated, tcx = data["coated"], data["tcx"]
     cards = []
-    for name, roles in palettes():
+    for name, roles in [("Review", newsprint())]:
         rows = []
         for hexv, role_list in roles.items():
             done = order_roles(role_list)
@@ -139,7 +140,7 @@ def listing(names):
     facts = {n: describe(DST / n) + (human((DST / n).stat().st_size),) for n in names}
     count = len([n for n in names if n.endswith(".svg") and n not in (BUNDLE, SHEET)])
     lede = ("%s sketch artboards of this site, the desktop set on one canvas, and every colour the "
-            "four palettes declare.") % WORDS.get(count, count)
+            "one edition declares.") % WORDS.get(count, count)
 
     def item(name):
         title, dims, size = facts[name]
@@ -345,14 +346,19 @@ def main():
             (DST / name).write_text(one_payload(artboard.read_text()))
 
     (DST / "index.html").write_text(pin(listing(list(wanted))))
+    seo_meta.write_pages()
     total = sum(p.stat().st_size for p in DST.glob("*.svg"))
     print("docs/figma: %d files, %.0f MB, listing written%s" % (
         len(wanted), total / 1e6, (", dropped " + ", ".join(dropped)) if dropped else ""))
 
-    budget = 10485760
-    docs = sum(p.stat().st_size for p in pathlib.Path("docs").rglob("*") if p.is_file())
-    note = "OVER BUDGET - the host will refuse this deploy" if docs > budget else "ok"
-    print("docs: %s of 10.0 MiB, %s left - %s" % (human(docs), human(abs(budget - docs)), note))
+    # Vercel's Hobby CLI limit is 100 MB of source per deployment (and 15,000 files).
+    budget = 100_000_000
+    files = [p for p in pathlib.Path("docs").rglob("*") if p.is_file()]
+    docs = sum(p.stat().st_size for p in files)
+    note = ("OVER 100 MB - the CLI will reject this deploy"
+            if docs > budget else "under the 100 MB limit")
+    print("docs: %.1f MB of 100.0 MB, %d files - %s"
+          % (docs / 1e6, len(files), note))
 
 
 if __name__ == "__main__":

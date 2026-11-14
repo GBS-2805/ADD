@@ -20,7 +20,7 @@ not a compliance certificate.
 ```bash
 python3 tools/deploy_vercel.py                 # docs / artbase
 python3 tools/deploy_review.py apk             # artifacts/handoff-apk
-python3 tools/deploy_review.py handoff         # artifacts/handoff
+python3 tools/deploy_review.py handoff         # handoff/
 python3 tools/deploy_review.py shots           # artifacts/shots
 python3 tools/deploy_review.py review          # docs / artbase-review
 ```
@@ -31,6 +31,27 @@ is not part of the storage report, so delete that project after the verdict.
 
 Use `--check` on `deploy_vercel.py` or `deploy_review.py` to print the plan without
 deploying. `deploy_review.py --check` does not need a token.
+
+## Manual boundaries
+
+These remain manual on purpose; do not turn them into a green CI step that claims
+they happened.
+
+- **APK signing stays local.** The keystore is outside the repository. CI may compile
+  and test, but the release APK is built and signed by the release owner.
+- **Drive refresh stays manual or integration-driven.** It needs Google OAuth and
+  happens after the publish verdict.
+- **A physical arm64 phone verdict stays manual.** The x86_64 emulator is a smoke
+  test, not the renderer of record.
+- **Deployment deletion is not automated.** The audit's deletion events require a
+  recorded reason.
+
+The publish job can include the machine-readable storage report without deleting
+anything:
+
+```bash
+python3 tools/deploy_storage.py --json
+```
 
 ## Credentials
 

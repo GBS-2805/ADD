@@ -19,14 +19,14 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-CLI = ("npx", "-y", "vercel@latest")
+CLI = ("npx", "-y", "vercel@65.14.0")
 
 sys.path.insert(0, str(ROOT / "tools"))
 from deploy_storage import check as storage_check  # noqa: E402 - the tools directory is on the path above
 
 TARGETS = {
     "apk": ("artifacts/handoff-apk", "artbase-handoff-apk", "VERCEL_APK_TOKEN"),
-    "handoff": ("artifacts/handoff", "artbase-handoff", "VERCEL_HANDOFF_TOKEN"),
+    "handoff": ("handoff", "artbase-handoff", "VERCEL_HANDOFF_TOKEN"),
     "review": ("docs", "artbase-review", "VERCEL_REVIEW_TOKEN"),
     "shots": ("artifacts/shots", "artbase-shots", "VERCEL_SHOTS_TOKEN"),
 }

@@ -1,0 +1,261 @@
+{
+  "schema": 1,
+  "shots": {
+    "page-home-full": {
+      "page": "",
+      "width": 1300,
+      "full": true,
+      "source": "8d7c158e2b2901906c9198ede4c91e5d5508777fda0a5210602199469f8db5fb",
+      "image": "page-home-full.webp",
+      "imageSha": "ce00e28d914ab22663484be030d5eae469802758a340058d78f55d31093bc5be"
+    },
+    "page-menu": {
+      "page": "",
+      "width": 1300,
+      "full": false,
+      "source": "8d7c158e2b2901906c9198ede4c91e5d5508777fda0a5210602199469f8db5fb",
+      "image": "page-menu.webp",
+      "imageSha": "d9b1895b281787f8e8704bd831ac5a8c60b893bd0603e10ca799de2a6e600bc2"
+    },
+    "page-drawer": {
+      "page": "",
+      "width": 1300,
+      "full": false,
+      "source": "8d7c158e2b2901906c9198ede4c91e5d5508777fda0a5210602199469f8db5fb",
+      "image": "page-drawer.webp",
+      "imageSha": "bade94a0065073ae7f7030216010a9b6555b2bcd1fec5ea2d5c823e2cb994c81"
+    },
+    "page-tools": {
+      "page": "tools/",
+      "width": 1300,
+      "full": false,
+      "source": "c0c29dfa27f02f74c55262404f506bb0b5a6b96e1bf6c39c34be1f53f0dc2a4e",
+      "image": "page-tools.webp",
+      "imageSha": "e26aed35532d04fddcc11188b9a9a61748d2e53c7771a4ab4c0a3c71eaade00b"
+    },
+    "page-icons": {
+      "page": "icons/",
+      "width": 1300,
+      "full": true,
+      "source": "49468b71947fb387bef779efd7319aba78b1f4ef8aa41f4b38c2fa3bf537835d",
+      "image": "page-icons.webp",
+      "imageSha": "800b25ff8f0aba1da97d1e37d03df91a3546015792762f52a6338f6ac8d818e0"
+    },
+    "page-icons-brand": {
+      "page": "icons/coolicons/",
+      "width": 1300,
+      "full": false,
+      "source": "f7675a5d76ab17dbb5f3baecb662423209c9fb3e1ab75b6354bc6eaadd7aadec",
+      "image": "page-icons-brand.webp",
+      "imageSha": "35b69644c2434acb6a297a20d83ca523175419abfaf43b9ad06996df841af2ea"
+    },
+    "page-icons-panel": {
+      "page": "icons/coolicons/",
+      "width": 1300,
+      "full": false,
+      "source": "f7675a5d76ab17dbb5f3baecb662423209c9fb3e1ab75b6354bc6eaadd7aadec",
+      "image": "page-icons-panel.webp",
+      "imageSha": "188473c68b27f430b71e48e8be9abe3d30b322d1eef5879bfb6d3bc194ebcff1"
+    },
+    "page-icons-variants": {
+      "page": "icons/coolicons/",
+      "width": 1300,
+      "full": false,
+      "source": "f7675a5d76ab17dbb5f3baecb662423209c9fb3e1ab75b6354bc6eaadd7aadec",
+      "image": "page-icons-variants.webp",
+      "imageSha": "98632526e840833377bd5c6ddcca6454dcc4e6018948c0a482830ceadbe3f348"
+    },
+    "page-icons-streamline": {
+      "page": "icons/streamline/",
+      "width": 1300,
+      "full": false,
+      "source": "65ddb38d7722274d7035b0289f01266c61ef566fd20ee40ca8bfdbe37cf09551",
+      "image": "page-icons-streamline.webp",
+      "imageSha": "d023f93e8d52585cad0c37f13ac45a0ff4ec883e6c19224970df78cf18d9aa3e"
+    },
+    "page-icons-streamline-duo": {
+      "page": "icons/streamline/",
+      "width": 1300,
+      "full": false,
+      "source": "65ddb38d7722274d7035b0289f01266c61ef566fd20ee40ca8bfdbe37cf09551",
+      "image": "page-icons-streamline-duo.webp",
+      "imageSha": "26c016992f57b82b12ce173dd7adc119e6279aa304c731379ab2461faab7e43e"
+    },
+    "page-icons-ink": {
+      "page": "icons/streamline/",
+      "width": 1300,
+      "full": false,
+      "source": "65ddb38d7722274d7035b0289f01266c61ef566fd20ee40ca8bfdbe37cf09551",
+      "image": "page-icons-ink.webp",
+      "imageSha": "ea71800e9d5c36a6f209897c5a7ad50fe4883ddc0b0db72057e35ee517bbc724"
+    },
+    "page-icons-categories": {
+      "page": "icons/coolicons/",
+      "width": 1300,
+      "full": false,
+      "source": "f7675a5d76ab17dbb5f3baecb662423209c9fb3e1ab75b6354bc6eaadd7aadec",
+      "image": "page-icons-categories.webp",
+      "imageSha": "4301b82299d8ec9e2de1d71444dec913fd0ac8643eff60c443aea3394831aeee"
+    },
+    "page-all": {
+      "page": "icons/all/",
+      "width": 1300,
+      "full": true,
+      "source": "5acf697eed20afedac098edfced17e0037a4d905a6b30662c44a3a5f3e8bcee8",
+      "image": "page-all.webp",
+      "imageSha": "7c82d99cc05c2f4375499a61123a05fe7e9cd0a6427e0cd588b0640d34a47c72"
+    },
+    "page-lineicons-categories": {
+      "page": "icons/lineicons/",
+      "width": 1300,
+      "full": false,
+      "source": "6e8c1325cce54eb6e3f9b898a8026016b293e0263362b06d02b20067a7f98634",
+      "image": "page-lineicons-categories.webp",
+      "imageSha": "cab1671987a881bb210ba8082759d53b4b844a506a550391c1ba1678e058a070"
+    },
+    "page-fonts": {
+      "page": "fonts/",
+      "width": 1300,
+      "full": true,
+      "source": "2a27f44138a71577ea2be5d545966d634ccd79420b80d6b674fe60251ab0fd02",
+      "image": "page-fonts.webp",
+      "imageSha": "09d194b9117841c59ad43910041cf90776d3d495897f857b4161101508440b8a"
+    },
+    "page-portfolio": {
+      "page": "portfolio/",
+      "width": 1300,
+      "full": false,
+      "source": "dbcef87c17ecd397b3d92698515ae5d20957796dea156d419f7f4707f305563a",
+      "image": "page-portfolio.webp",
+      "imageSha": "04d33e26222c4d31e9e0b25f4ce82d4cf315ef5c148c28bb6986913f57c352bd"
+    },
+    "page-download": {
+      "page": "download/",
+      "width": 1300,
+      "full": true,
+      "source": "61baf152e86156b46a63dc9d765166c0553fdce7868db4ca821185dcf8526c48",
+      "image": "page-download.webp",
+      "imageSha": "458dcf37cf53c500913f1ce81e72381928a85f6b786587068b2d057b22e80b25"
+    },
+    "phone-download-packs": {
+      "page": "download/",
+      "width": 390,
+      "full": false,
+      "source": "61baf152e86156b46a63dc9d765166c0553fdce7868db4ca821185dcf8526c48",
+      "image": "phone-download-packs.webp",
+      "imageSha": "a0e242ca2ec9bf4e1df8013e48bb7cbe3746abe4c6399d0e4404b1ac4aaf6866"
+    },
+    "phone-icons-sheet": {
+      "page": "icons/coolicons/",
+      "width": 390,
+      "full": false,
+      "source": "f7675a5d76ab17dbb5f3baecb662423209c9fb3e1ab75b6354bc6eaadd7aadec",
+      "image": "phone-icons-sheet.webp",
+      "imageSha": "60a7b66633a86c6519dd81728b411c68207baeb03b505100e60d9a59c061f12f"
+    },
+    "phone-lineicons-sheet": {
+      "page": "icons/lineicons/",
+      "width": 390,
+      "full": false,
+      "source": "6e8c1325cce54eb6e3f9b898a8026016b293e0263362b06d02b20067a7f98634",
+      "image": "phone-lineicons-sheet.webp",
+      "imageSha": "2c1be74bebba48c2ffeb24b11b3942c458c1ca7f12fbb3a23da58b66c1962929"
+    },
+    "phone-home-full": {
+      "page": "",
+      "width": 390,
+      "full": true,
+      "source": "8d7c158e2b2901906c9198ede4c91e5d5508777fda0a5210602199469f8db5fb",
+      "image": "phone-home-full.webp",
+      "imageSha": "ab2304cc3ade837eeaee414804fdb8778114b55725b189ec308d7b0feda0b54c"
+    },
+    "phone-menu": {
+      "page": "",
+      "width": 390,
+      "full": false,
+      "source": "8d7c158e2b2901906c9198ede4c91e5d5508777fda0a5210602199469f8db5fb",
+      "image": "phone-menu.webp",
+      "imageSha": "f212606e9b2868eca29b035098c24014a3fdf35c00ef0791a5c4e35174b495ef"
+    },
+    "phone-drawer": {
+      "page": "",
+      "width": 390,
+      "full": false,
+      "source": "8d7c158e2b2901906c9198ede4c91e5d5508777fda0a5210602199469f8db5fb",
+      "image": "phone-drawer.webp",
+      "imageSha": "df7da9c69a00fd5db156d7586166ed73bf76e78aa97b3bb9de15387762994029"
+    },
+    "phone-icons": {
+      "page": "icons/",
+      "width": 390,
+      "full": true,
+      "source": "49468b71947fb387bef779efd7319aba78b1f4ef8aa41f4b38c2fa3bf537835d",
+      "image": "phone-icons.webp",
+      "imageSha": "0e9045c8842d22e64dc62905296169c2e1303a72176547bcd3821ac6f5e79637"
+    },
+    "phone-icons-brand": {
+      "page": "icons/coolicons/",
+      "width": 390,
+      "full": false,
+      "source": "f7675a5d76ab17dbb5f3baecb662423209c9fb3e1ab75b6354bc6eaadd7aadec",
+      "image": "phone-icons-brand.webp",
+      "imageSha": "4c06c786072fa7ec5095f39fb2172964d401e64bea58f9d8fd7e2e99955d9fe3"
+    },
+    "phone-icons-streamline": {
+      "page": "icons/streamline/",
+      "width": 390,
+      "full": false,
+      "source": "65ddb38d7722274d7035b0289f01266c61ef566fd20ee40ca8bfdbe37cf09551",
+      "image": "phone-icons-streamline.webp",
+      "imageSha": "4156232695098f867ba54cb707e47e2560f2afc8595f6b1dffb3d693e62ea922"
+    },
+    "phone-all": {
+      "page": "icons/all/",
+      "width": 390,
+      "full": true,
+      "source": "5acf697eed20afedac098edfced17e0037a4d905a6b30662c44a3a5f3e8bcee8",
+      "image": "phone-all.webp",
+      "imageSha": "66a005aa768773ee62f445e68ef0857ddc68b553a1b495443d105c1e224e12cd"
+    },
+    "phone-fonts": {
+      "page": "fonts/",
+      "width": 390,
+      "full": false,
+      "source": "2a27f44138a71577ea2be5d545966d634ccd79420b80d6b674fe60251ab0fd02",
+      "image": "phone-fonts.webp",
+      "imageSha": "d4b0fbe5c9d05da96be379901cd950d95f630dd52a38ae9ed9623fec52af9cdf"
+    },
+    "page-releases": {
+      "page": "releases/",
+      "width": 1300,
+      "full": false,
+      "source": "ed41f673788d678588eea437cdd05866e9daa23e79be398e5c4d10241c70bbab",
+      "image": "page-releases.webp",
+      "imageSha": "4731413b886e088755a0c15af1b2aaf7c5b11484eba3f98c51c7163cafe9ab9c"
+    },
+    "phone-releases": {
+      "page": "releases/",
+      "width": 390,
+      "full": false,
+      "source": "ed41f673788d678588eea437cdd05866e9daa23e79be398e5c4d10241c70bbab",
+      "image": "phone-releases.webp",
+      "imageSha": "cb819b1c14e68c3fc54a500af2a400657f768d8e064bc38a2dfb0d89524c9c32"
+    },
+    "page-compress": {
+      "page": "compress/",
+      "width": 1300,
+      "full": false,
+      "source": "6aae035275c3c9d7e346f9f6f7143074b5eb4b5bbeee6dc1bff8d57d3bbf6c8d",
+      "image": "page-compress.webp",
+      "imageSha": "6b6c90c77027abb16ae35339ee65bd8c8a35953bd55420152f10734ac8ad3052"
+    },
+    "phone-compress": {
+      "page": "compress/",
+      "width": 390,
+      "full": false,
+      "source": "6aae035275c3c9d7e346f9f6f7143074b5eb4b5bbeee6dc1bff8d57d3bbf6c8d",
+      "image": "phone-compress.webp",
+      "imageSha": "f299188f05326933a1a99fd4ec10df71b1d6fcc3302316596298d456e57176b1"
+    }
+  }
+}

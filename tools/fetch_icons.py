@@ -1127,6 +1127,8 @@ def main():
         write_brand(brand, entries)
     write_sheets(entries)
     write_all(entries)
+    import seo_meta  # noqa: PLC0415 - same directory, only needed after pages exist
+    seo_meta.write_pages()
     print("brands: %s | total %d icons"
           % (", ".join("%s %d" % (b["name"], b["count"]) for b in entries),
              sum(b["count"] for b in entries)))

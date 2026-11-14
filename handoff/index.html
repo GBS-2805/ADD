@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ADD 3.9.1 field preview — build handoff and archive</title>
+<meta name="description" content="The shipped ADD 3.9 site and APK, the archived 3.8 and 3.7 releases, the 3.9.1 field-preview engine with an Android 14 runtime proof, the 12 Nov verification rebuilds, and the old palette shelf that still stands.">
+<meta name="theme-color" content="#e9e0cb">
+<style>
+  @font-face { font-family: "Spectral"; src: url("fonts/spectral-400.woff2") format("woff2"); font-weight: 400; font-style: normal; font-display: swap; }
+  @font-face { font-family: "Spectral"; src: url("fonts/spectral-400-italic.woff2") format("woff2"); font-weight: 400; font-style: italic; font-display: swap; }
+  @font-face { font-family: "Plex Mono"; src: url("fonts/plex-mono-400.woff2") format("woff2"); font-weight: 400; font-style: normal; font-display: swap; }
+  @font-face { font-family: "Plex Mono"; src: url("fonts/plex-mono-600.woff2") format("woff2"); font-weight: 600; font-style: normal; font-display: swap; }
+  :root {
+    --page: #e9e0cb;
+    --paper: #f3ecdc;
+    --ink: #15120e;
+    --dim: #4c463a;
+    --rule: rgba(21, 18, 14, .25);
+    --accent: #c53a1d;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--page);
+    color: var(--ink);
+    font-family: "Spectral", Georgia, "Times New Roman", serif;
+    font-size: 17px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--accent); text-underline-offset: 3px; }
+  a:hover { color: var(--ink); }
+  .wrap { width: min(100% - 36px, 820px); margin: 0 auto; padding: 22px 0 46px; }
+  .mono, .kicker, .badge, .meta, dt, .gate b, nav.jump a, .links span, footer, h2 .num {
+    font-family: "Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+  .skip { position: absolute; left: -999px; top: 6px; padding: 10px 12px; background: var(--ink); color: var(--page); }
+  .skip:focus { left: 6px; }
+  header.hero { border-top: 6px solid var(--ink); padding-top: 16px; }
+  .kicker { margin: 0; font-size: 10px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; }
+  h1 {
+    margin: 14px 0 0;
+    font-size: clamp(2.5rem, 9.5vw, 4.7rem);
+    font-weight: 400;
+    line-height: .94;
+    letter-spacing: -.035em;
+  }
+  h1 em { color: var(--accent); font-style: italic; }
+  .lede { max-width: 60ch; margin: 16px 0 0; color: var(--dim); font-size: 17px; }
+  nav.jump { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+  nav.jump a {
+    display: inline-flex; align-items: center; min-height: 40px; padding: 8px 12px;
+    border: 1px solid var(--ink); background: transparent; color: var(--ink);
+    font-size: 10px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase;
+    text-decoration: none;
+  }
+  nav.jump a.primary { background: var(--ink); color: var(--page); }
+  nav.jump a:hover { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .section { margin-top: 34px; padding-top: 14px; border-top: 1px solid var(--rule); }
+  h2 { margin: 0 0 12px; font-size: 26px; font-weight: 400; letter-spacing: -.02em; line-height: 1.1; }
+  h2 .num { display: inline-block; margin-right: 8px; color: var(--accent); font-size: 11px; vertical-align: 6px; }
+  h3 { margin: 0; font-size: 21px; font-weight: 400; letter-spacing: -.01em; }
+  .status { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  .status ul { margin: 0; padding-left: 18px; color: var(--dim); font-size: 15px; }
+  .status li { margin: 0 0 9px; padding-left: 2px; }
+  .status b { color: var(--ink); }
+  .builds { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 14px; }
+  .build { display: flex; flex-direction: column; padding: 16px; border: 1px solid var(--ink); background: var(--paper); }
+  .build.archive { border-top: 3px solid var(--accent); }
+  .build-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .badge { padding: 3px 7px; background: var(--ink); color: var(--page); font-size: 9px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; }
+  .archive .badge { background: var(--accent); color: #fff; }
+  .meta { color: var(--dim); font-size: 9.5px; text-align: right; }
+  .build p { margin: 10px 0 0; color: var(--dim); font-size: 14px; }
+  .button {
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    min-height: 44px; margin-top: 14px; padding: 9px 12px;
+    border: 1px solid var(--ink); background: var(--ink); color: var(--page);
+    font-family: "Plex Mono", ui-monospace, monospace; font-size: 10px; font-weight: 600;
+    letter-spacing: .06em; text-transform: uppercase; text-decoration: none;
+  }
+  .button:hover { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .button.ghost { background: transparent; color: var(--ink); }
+  .button.ghost:hover { background: var(--ink); color: var(--page); }
+  .button .size { font-weight: 400; opacity: .8; white-space: nowrap; }
+  dl.facts { margin: 12px 0 0; padding: 0; }
+  dl.facts div { display: flex; justify-content: space-between; gap: 10px; padding: 6px 0; border-top: 1px solid var(--rule); }
+  dt { color: var(--dim); font-size: 9.5px; text-transform: uppercase; letter-spacing: .06em; white-space: nowrap; }
+  dd { margin: 0; font-size: 11.5px; text-align: right; overflow-wrap: anywhere; }
+  code { padding: 1px 4px; background: rgba(21, 18, 14, .08); font-family: "Plex Mono", monospace; font-size: .82em; overflow-wrap: anywhere; }
+  .archive-block { margin-top: 20px; padding: 20px; background: var(--ink); color: var(--page); }
+  .archive-block .kicker { color: #f0b9a6; }
+  .archive-block h3 { color: var(--page); font-size: 24px; }
+  .archive-block p { margin: 8px 0 0; color: rgba(233, 224, 203, .78); font-size: 15px; }
+  .archive-block a { color: #f0b9a6; }
+  .archive-block a:hover { color: #fff; }
+  .archive-links { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+  .archive-links a {
+    display: inline-block; padding: 7px 10px; border: 1px solid rgba(233, 224, 203, .4);
+    color: var(--page); font-family: "Plex Mono", monospace; font-size: 9.5px;
+    letter-spacing: .06em; text-transform: uppercase; text-decoration: none;
+  }
+  .archive-links a:hover { background: var(--paper); color: var(--ink); }
+  .gallery { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 14px; }
+  .gallery figure { margin: 0; border: 1px solid var(--ink); background: var(--paper); }
+  .gallery a { display: block; background: #dcd2bb; }
+  .gallery img { display: block; width: 100%; height: 150px; object-fit: cover; object-position: top; }
+  .gallery figcaption { padding: 7px 9px 9px; color: var(--dim); font-size: 11.5px; line-height: 1.35; }
+  .gallery figcaption b { color: var(--ink); }
+  .fine { margin: 10px 0 0; color: var(--dim); font-size: 13px; }
+  .gates { margin: 0; padding: 0; list-style: none; }
+  .gates li { display: flex; gap: 12px; padding: 9px 0; border-top: 1px solid var(--rule); color: var(--dim); font-size: 14.5px; }
+  .gates .gate { flex: 0 0 74px; color: var(--accent); font-size: 9.5px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; padding-top: 3px; }
+  .gates b { color: var(--ink); }
+  .words li { margin: 0 0 8px; color: var(--dim); font-size: 14.5px; }
+  .words b { color: var(--ink); }
+  .words { margin: 0; padding-left: 18px; }
+  .links { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .links a {
+    display: block; padding: 10px 11px; border: 1px solid var(--ink);
+    background: var(--paper); color: var(--ink); font-size: 14px; text-decoration: none;
+  }
+  .links a:hover { background: var(--ink); color: var(--page); }
+  .links span { display: block; margin-top: 2px; color: var(--dim); font-size: 9px; letter-spacing: .04em; text-transform: uppercase; }
+  .links a:hover span { color: rgba(233, 224, 203, .7); }
+  details { margin-top: 22px; padding-top: 12px; border-top: 1px solid var(--rule); }
+  summary { cursor: pointer; font-size: 14px; font-weight: 600; }
+  details ul { margin: 10px 0 0; padding-left: 18px; color: var(--dim); font-size: 13.5px; }
+  details li { margin-bottom: 7px; }
+  footer { margin-top: 34px; padding-top: 12px; border-top: 1px solid var(--rule); color: var(--dim); font-size: 10.5px; line-height: 1.6; }
+  @media (max-width: 680px) {
+    body { font-size: 16px; }
+    .wrap { width: min(100% - 28px, 820px); padding-top: 18px; }
+    .status, .builds, .links { grid-template-columns: 1fr; }
+    .gallery { grid-template-columns: 1fr 1fr; }
+    .gallery img { height: 130px; }
+    h2 { font-size: 23px; }
+  }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to the handoff</a>
+<main id="main" class="wrap">
+  <header class="hero">
+    <p class="kicker">ADD · build handoff · 12 Nov 2026</p>
+    <h1>3.9 is live.<br><em>The old shelf still stands.</em></h1>
+    <p class="lede">The official site and the app share the new type system: Instrument Serif, Spectral and Libre Franklin across the native screens, Studio and Shelf. The 3.9 APK remains the release of record. The <b>3.9.1 field preview</b> is the new engine review: a multicolour field as a document recipe, applied to the artboard background or a text/vector fill. Its proof includes a real Android 14 runtime pass — frame, in-app export, undo/redo and reopen — while the arm64 phone verdict remains open. Every internal link on all 32 pages resolves.</p>
+    <nav class="jump" aria-label="Handoff">
+      <a class="primary" href="#builds">Official build</a>
+      <a href="#archive">Archive shelf</a>
+      <a href="#gates">Checks</a>
+      <a href="#links">Links</a>
+    </nav>
+  </header>
+
+  <section class="section" id="status" aria-labelledby="status-title">
+    <h2 id="status-title"><span class="num">01</span>Where this stands</h2>
+    <div class="status">
+      <ul>
+        <li><b>Live:</b> the official 3.9 site at <a href="https://artbase-olive.vercel.app/">artbase-olive.vercel.app</a>, with the new type system on all 16 pages, the refreshed icons landing page and every route checked.</li>
+        <li><b>Archived:</b> the old palette shelf at <a href="https://artbase-olive.vercel.app/classic/">/classic/</a> — its own 16 pages, data, packs and APKs. The 3.8 and 3.7 release APKs are there too.</li>
+        <li><b>Review only:</b> the 3.9.1 field-preview engine APK is on its own host; it is not a release and needs Android 13+.</li>
+        <li><b>Rebuilt 12 Nov:</b> a signed 3.9 verification APK and the 3.8.5 engine harness with <code>x86_64</code> remain listed below; both are verification files, not new releases.</li>
+        <!-- provenance:start -->
+        <li><b>Committed:</b> <code>8f12960</code> — not yet deployed from this tree; live origin <a href="https://artbase-olive.vercel.app/">https://artbase-olive.vercel.app</a>; APK 3.9, 17,387,029 B, SHA-256 <code>1120bd53af07239861e555ed5f756dd791bcdbf119e92ac5ad178e03485065b1</code> (<code>1120bd53…</code>); gates: 17/17 local checks.</li>
+        <!-- provenance:end -->
+        <li><b>Field-preview build:</b> <code>ae3f1a5</code> passed 166 engine tests and all 14 audit gates.</li>
+        <li><b>This page:</b> public, no sign-in, and the reference for every file below.</li>
+      </ul>
+      <ul>
+        <li><b>To do on a phone:</b> install 3.9.1, open <b>Tools → Editor</b>, then <b>STYLE → ARTBOARD FIELD</b>. Apply a field, select a text or vector layer and choose <b>FIELD</b>, export a PNG, save, force-close and reopen. The field recipe and colours should return.</li>
+        <li><b>To do in the archive:</b> open <a href="https://artbase-olive.vercel.app/classic/">/classic/</a> and confirm the moss-green palette and the others still switch; its downloads must stay 3.7 and 3.8.</li>
+        <li><b>Android runtime, 12 Nov:</b> the field preview ran on an Android 14 (API 34) x86_64 TCG guest: the field survived save/reopen, the in-app export wrote a 1080×1350 PNG, and undo/redo restored the selected star. This is a real runtime, not a physical phone; the arm64 APK still needs a phone verdict.</li>
+        <li><b>Harness note:</b> that proof build exports the engine activity and lowers the field raster to 32/64 px for software CPU. The arm64 APK keeps 360/1080 and keeps the engine activity private.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="section" id="builds" aria-labelledby="builds-title">
+    <h2 id="builds-title"><span class="num">02</span>The build, and the ones kept behind it</h2>
+    <div class="builds">
+      <article class="build">
+        <div class="build-head"><span class="badge">Official</span><span class="meta">Shipped 11 Nov</span></div>
+        <h3>ADD 3.9</h3>
+        <p>The release of record, served by the live download page. New type system, corrected icon snippet field, same offline app.</p>
+        <a class="button" href="https://artbase-olive.vercel.app/ADD-3.9.apk">Download 3.9 <span class="size">17,387,029 B</span></a>
+        <dl class="facts">
+          <div><dt>Version</dt><dd>3.9 (41)</dd></div>
+          <div><dt>SHA-256</dt><dd><code>1120bd53af07239861e555ed5f756dd791bcdbf119e92ac5ad178e03485065b1</code></dd></div>
+          <div><dt>Shelf</dt><dd>Current site + /classic/</dd></div>
+        </dl>
+      </article>
+
+      <article class="build archive">
+        <div class="build-head"><span class="badge">Archived</span><span class="meta">Previous release</span></div>
+        <h3>ADD 3.7</h3>
+        <p>The release that preceded 3.8, kept byte-for-byte on the archive shelf. Use it only to compare against the old build.</p>
+        <a class="button ghost" href="https://artbase-olive.vercel.app/classic/ADD-3.7.apk">Download 3.7 <span class="size">5,979,036 B</span></a>
+        <dl class="facts">
+          <div><dt>Version</dt><dd>3.7 (39)</dd></div>
+          <div><dt>SHA-256</dt><dd><code>3bc5bcada95c4cd5c6193cb5879e602c7943aa9a3c9d3e4eb1c2abfd52ad2206</code></dd></div>
+          <div><dt>Shelf</dt><dd>/classic/ADD-3.7.apk</dd></div>
+        </dl>
+      </article>
+    </div>
+
+    <article class="build" style="margin-top:12px">
+      <div class="build-head"><span class="badge">Field preview</span><span class="meta">Built 12 Nov · 12:17 UTC</span></div>
+      <h3>ADD 3.9.1 field preview</h3>
+      <p>The native engine review now carries a <b>field</b> as a document recipe: four or more colour spots, Gaussian reach, domain-warped flow, swirl, soften and grain. Apply it as the <b>artboard background</b> or as the fill of a selected text/vector layer; every stop, band, reach, dial and phase survives undo, autosave and document reopen. The field renders through the same software Skia path in preview and export, so the PNG carries the background field and field-filled type/vector, not just a look on screen. Build 3.9.1 (56), Android 13+, debuggable, arm64, not a release.</p>
+      <a class="button ghost" href="https://artbase-handoff-apk.vercel.app/ADD-3.9.1-field-preview.apk" download>Download field preview <span class="size">56,005,852 B</span></a>
+      <dl class="facts">
+        <div><dt>Version</dt><dd>3.9.1-field-preview (56)</dd></div>
+        <div><dt>SHA-256</dt><dd><code>a395349b4548fed490f487b3d462618c1f218a798ae6aada1d98de65db656468</code></dd></div>
+        <div><dt>Proof</dt><dd>Android 14 x86_64 runtime frame + export; physical phone open</dd></div>
+        <div><dt>Notes</dt><dd>Same package and signing key as 3.9; uninstall before returning to the release</dd></div>
+      </dl>
+    </article>
+
+    <article class="build" style="margin-top:12px">
+      <div class="build-head"><span class="badge">Rebuilt</span><span class="meta">12 Nov · verification only</span></div>
+      <h3>3.9 and x86_64 engine harness</h3>
+      <p>Two verification builds from the current tree. The 3.9 APK is signed with the same key as the release, is version 3.9 (41), and contains no preview engine code. The engine harness is the 3.8.5 review with <code>arm64-v8a</code> plus <code>x86_64</code>, so it installs on the TCG emulator as well as a phone. Neither file replaces the live release or the phone review build above.</p>
+      <div class="links" style="margin-top:12px">
+        <a href="https://artbase-handoff-apk.vercel.app/ADD-3.9-rebuild.apk" download>3.9 verification build<span>17,279,927 B · 2c8ee4d1…</span></a>
+        <a href="https://artbase-handoff-apk.vercel.app/ADD-3.8.5-engine-review-x86_64.apk" download>Engine x86_64 harness<span>49,121,890 B · 0ea4d88e…</span></a>
+      </div>
+      <dl class="facts">
+        <div><dt>3.9 SHA-256</dt><dd><code>2c8ee4d16c400e407ca15054f3d30b48871272056ae6e10b28667785caaebb8e</code></dd></div>
+        <div><dt>Harness SHA-256</dt><dd><code>0ea4d88e83bbb170646f268bfe4085881eb53856c7a39e5e4ed57e4bb5a05c4b</code></dd></div>
+        <div><dt>Checks</dt><dd>3.9 v2/v3, harness v2, both zipaligned</dd></div>
+      </dl>
+    </article>
+
+    <div class="archive-block" id="archive">
+      <p class="kicker">Kept, not rewritten</p>
+      <h3>The old palette shelf, still standing.</h3>
+      <p><b>/classic/</b> is the old ADD site exactly as it was: moss green, and the other palettes, with its own data, packs, fonts and downloads. It does not carry the newsprint masthead. The 3.8 and 3.7 APKs sit there too, so the old shelf can still hand over its own builds.</p>
+      <div class="archive-links">
+        <a href="https://artbase-olive.vercel.app/classic/">Open the archive</a>
+        <a href="https://artbase-olive.vercel.app/classic/download/">Old download page</a>
+        <a href="https://artbase-olive.vercel.app/classic/ADD-3.8.apk">3.8 on the shelf</a>
+        <a href="https://artbase-olive.vercel.app/classic/ADD-3.7.apk">3.7 on the shelf</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="gallery-title">
+    <h2 id="gallery-title"><span class="num">03</span>What shipped</h2>
+    <div class="gallery">
+      <figure>
+        <a href="field-391-device-export.png"><img src="field-391-device-export.png" alt="PNG exported on Android with a field background and field-filled vector" loading="lazy"></a>
+        <figcaption><b>Device export.</b> The in-app PNG written on Android: 1080×1350, field background and field-filled vector.</figcaption>
+      </figure>
+      <figure>
+        <a href="https://artbase-olive.vercel.app/renders/page-home-full.webp"><img src="https://artbase-olive.vercel.app/renders/page-home-full.webp" alt="The shipped home page at desktop width" loading="lazy"></a>
+        <figcaption><b>Home, desktop.</b> New serif type, centred seal, ADD lockup left, pull-down.</figcaption>
+      </figure>
+      <figure>
+        <a href="https://artbase-olive.vercel.app/renders/phone-home-full.webp"><img src="https://artbase-olive.vercel.app/renders/phone-home-full.webp" alt="The shipped home page at phone width" loading="lazy"></a>
+        <figcaption><b>Home, phone.</b> New type at phone width; one row, 30 px seal, same menu.</figcaption>
+      </figure>
+      <figure>
+        <a href="https://artbase-olive.vercel.app/renders/page-menu.webp"><img src="https://artbase-olive.vercel.app/renders/page-menu.webp" alt="The opened pull-down menu" loading="lazy"></a>
+        <figcaption><b>The pull-down.</b> The wordmark is the handle; Releases stays marked.</figcaption>
+      </figure>
+      <figure>
+        <a href="field-391-export.png"><img src="field-391-export.png" alt="Exported PNG with a multicolour field background and field-filled type" loading="lazy"></a>
+        <figcaption><b>Exported PNG.</b> The real export compositor wrote the background field and field-filled type/vector, not a uniform page.</figcaption>
+      </figure>
+    </div>
+    <p class="fine">32 page captures (desktop and phone) are in the <a href="https://artbase-olive.vercel.app/renders/">renders gallery</a>, with 30 matching Figma artboards.</p>
+  </section>
+
+  <section class="section" id="gates" aria-labelledby="gates-title">
+    <h2 id="gates-title"><span class="num">04</span>Checks before shipping</h2>
+    <ul class="gates">
+      <li><span class="gate">Links</span><div><b>0 broken.</b> All internal hrefs and srcs across the 32 HTML pages resolve to a file or route.</div></li>
+      <li><span class="gate">Routes</span><div><b>32 pages + 500 files checked</b> by the deploy script, including <code>/classic/</code> and both APK paths.</div></li>
+      <li><span class="gate">Engine</span><div><b>166 tests, 0 failures; chrome 14/14.</b> Field recipes, background/layer fill, export parity, schema-six reopen and undo/redo pass.</div></li>
+      <li><span class="gate">Palette</span><div><b>OK</b> — 4 palettes × 2 modes, site and app agree; the classic shelf keeps its own.</div></li>
+      <li><span class="gate">Assets</span><div><b>OK.</b> Content-hashed CSS and JS match what the 16 pages request; no stale hash.</div></li>
+      <li><span class="gate">Boards</span><div><b>30 files</b> exported, bundled and published; 28 page boards match the pages.</div></li>
+      <li><span class="gate">APKs</span><div><b>Verified.</b> 3.9 live hash matches <code>1120bd53…</code>; 3.7 matches; the field preview is version 56, SHA-256 <code>a395349b…</code>, signed v2 and zipaligned. The 12 Nov verification builds match <code>2c8ee4d1…</code> (3.9) and <code>0ea4d88e…</code> (x86_64 harness).</div></li>
+      <li><span class="gate">Runtime</span><div><b>Pass on Android 14 x86_64 TCG.</b> First frame reached <code>READY</code>; the field recipe survived reopen, in-app export wrote a 1080×1350 PNG, and undo/redo restored the layer. Physical arm64 phone still open.</div></li>
+      <li><span class="gate">Audit</span><div><b>14/14 green.</b> Palette, assets, 792 links, site, classic, catalog, packs, figma, pantone, notes, studio, 166 engine tests, chrome goldens and bundle all pass at <code>ae3f1a5</code>.</div></li>
+    </ul>
+  </section>
+
+  <section class="section" aria-labelledby="words-title">
+    <h2 id="words-title"><span class="num">05</span>Words used here</h2>
+    <ul class="words">
+      <li><b>Archive shelf.</b> The old palette site at <code>/classic/</code>. Kept as it was, with its own APKs; not rebuilt in the new design.</li>
+      <li><b>Release of record.</b> The APK the live download page serves. Everything else is a review build or an archived file.</li>
+      <li><b>Review build.</b> A signed test APK, debuggable and arm64; never listed in the release history.</li>
+      <li><b>Gate.</b> A check that must pass before shipping. A skipped gate is not a pass.</li>
+    </ul>
+  </section>
+
+  <section class="section" id="links" aria-labelledby="links-title">
+    <h2 id="links-title"><span class="num">06</span>Links and files</h2>
+    <div class="links">
+      <a href="https://artbase-olive.vercel.app/">Open the site<span>new design</span></a>
+      <a href="https://artbase-olive.vercel.app/renders/">Renders gallery<span>32 captures</span></a>
+      <a href="https://artbase-handoff-apk.vercel.app/ADD-3.9.1-field-preview.apk">Field preview APK<span>3.9.1 · field preview</span></a>
+      <a href="https://artbase-handoff-apk.vercel.app/ADD-3.9-rebuild.apk">3.9 verification APK<span>12 Nov · 2c8ee4d1…</span></a>
+      <a href="https://artbase-handoff-apk.vercel.app/ADD-3.8.5-engine-review-x86_64.apk">Engine x86_64 harness<span>12 Nov · 0ea4d88e…</span></a>
+      <a href="https://artbase-handoff-apk.vercel.app/ADD-3.8.5-engine-review.apk">Previous engine review<span>3.8.5 · Material Ink</span></a>
+      <a href="https://artbase-olive.vercel.app/download/">Download page<span>official 3.9</span></a>
+      <a href="https://artbase-olive.vercel.app/releases/">Release history<span>every dated build</span></a>
+      <a href="https://artbase-olive.vercel.app/classic/">Archive shelf<span>old palettes</span></a>
+      <a href="https://artbase-olive.vercel.app/classic/download/">Archive download<span>3.8 + 3.7</span></a>
+    </div>
+    <details>
+      <summary>Exact file inventory</summary>
+      <ul>
+        <li>Official APK: <code>docs/ADD-3.9.apk</code>, 17,387,029 bytes, SHA-256 <code>1120bd53af07239861e555ed5f756dd791bcdbf119e92ac5ad178e03485065b1</code>; served at <code>/ADD-3.9.apk</code>.</li>
+        <li>Archived 3.7 APK: <code>docs/classic/ADD-3.7.apk</code>, 5,979,036 bytes, SHA-256 <code>3bc5bcada95c4cd5c6193cb5879e602c7943aa9a3c9d3e4eb1c2abfd52ad2206</code>; served at <code>/classic/ADD-3.7.apk</code>.</li>
+        <li>Archive shelf: <code>docs/classic/</code>, 16 pages with its own assets and a copy of the 3.8 APK at <code>/classic/ADD-3.8.apk</code>.</li>
+        <li>Field preview APK: <code>ADD-3.9.1-field-preview.apk</code>, 56,005,852 bytes, SHA-256 <code>a395349b4548fed490f487b3d462618c1f218a798ae6aada1d98de65db656468</code>, version 3.9.1-field-preview (56), minSdk 33, arm64, signed v2 and zipaligned; built 2026-11-12 12:17 UTC, on <code>artbase-handoff-apk.vercel.app</code>.</li>
+        <li>Previous engine review: <code>ADD-3.8.5-engine-review.apk</code>, 42,128,223 bytes, SHA-256 <code>81e74e3cb2df7a8a742b8082592bc80f900c06932a6daec6f468ad8e983878a7</code>, version 3.8.5 (55); kept at its existing URL.</li>
+        <li>3.9 verification APK: <code>ADD-3.9-rebuild.apk</code>, 17,279,927 bytes, SHA-256 <code>2c8ee4d16c400e407ca15054f3d30b48871272056ae6e10b28667785caaebb8e</code>, version 3.9 (41), signed v2/v3 and zipaligned; built 2026-11-12, on <code>artbase-handoff-apk.vercel.app</code>.</li>
+        <li>Engine x86_64 harness: <code>ADD-3.8.5-engine-review-x86_64.apk</code>, 49,121,890 bytes, SHA-256 <code>0ea4d88e83bbb170646f268bfe4085881eb53856c7a39e5e4ed57e4bb5a05c4b</code>, version 3.8.5 (55), <code>arm64-v8a</code> + <code>x86_64</code>, signed v2 and zipaligned; built 2026-11-12, on <code>artbase-handoff-apk.vercel.app</code>.</li>
+        <li>New site: 16 pages, hashed assets, 32 pages plus 500 files verified; commit <code>8e6a759</code> plus the history page <code>8701362</code>.</li>
+        <li>Renders: 32 WebP captures plus gallery; Figma: 30 published files, 28 boards matching pages.</li>
+      </ul>
+    </details>
+  </section>
+
+  <footer>
+    <p>ADD · one offline Android app · no account, no analytics. This handoff page is public and needs no sign-in.</p>
+    <p>Updated 12 Nov 2026: the live 3.9 site now serves the current 3.9 edition and refreshed captures; the official 3.9 release APK is unchanged. The field preview is a separate 3.9.1 review build, rebuilt from commit <code>ae3f1a5</code>; its proof includes a real Android 14 runtime export and reopen on x86_64 TCG, with the arm64 phone verdict still open. All 14 audit gates pass. The old palette site is preserved at /classic/ and was not modified.</p>
+  </footer>
+</main>
+</body>
+</html>
