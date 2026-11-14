@@ -63,15 +63,7 @@ SEARCH_BOARDS = tuple(SEARCH_PLACEHOLDERS)
 HOVER_BOARDS = ("25-index-menu-desktop.svg", "26-index-drawer-desktop.svg",
                 "27-index-menu-phone.svg", "28-index-drawer-phone.svg")
 TEXT_RE = re.compile(r"<text\b([^>]*)>(.*?)</text>")
-TEXT_ELEMENT_RE = re.compile(r"<text\b[^>]*>.*?</text>", re.S)
 ATTR_RE = re.compile(r'([\w:-]+)="([^"]*)"')
-
-# Text is measured by the host's Chromium. Its advance widths can differ by a
-# fraction of a pixel between a workstation and a CI runner, and the home-page
-# buttons use a synthetic bold that moves their arrow by up to about 2.1 px.
-# Compare those positions with a small tolerance; every other byte, including
-# the phone icon exports, stays exact.
-TEXT_POSITION_TOLERANCE = 2.5
 
 # Chromium lives outside node's own lookup path on a bare box: the module and the
 # browsers are installed under /tmp by tools/render_env.py, with their libs unpacked
@@ -199,40 +191,6 @@ def text_runs(path):
             for match in TEXT_RE.finditer(path.read_text(encoding="utf-8"))]
 
 
-def board_parts(path):
-    """Text runs with their full type/paint attributes, plus the non-text SVG."""
-    svg = path.read_text(encoding="utf-8")
-    runs = []
-    for match in TEXT_RE.finditer(svg):
-        attrs = dict(ATTR_RE.findall(match.group(1)))
-        runs.append((html.unescape(match.group(2)).strip(), attrs))
-    return runs, TEXT_ELEMENT_RE.sub("", svg)
-
-
-def boards_match(expected, actual):
-    """Whether a board is current apart from host text-advance differences."""
-    if expected.read_bytes() == actual.read_bytes():
-        return True
-    want_runs, want_rest = board_parts(expected)
-    got_runs, got_rest = board_parts(actual)
-    if want_rest != got_rest or len(want_runs) != len(got_runs):
-        return False
-    for (want_text, want), (got_text, got) in zip(want_runs, got_runs):
-        if want_text != got_text:
-            return False
-        if {key: value for key, value in want.items() if key not in ("x", "y")} != \
-                {key: value for key, value in got.items() if key not in ("x", "y")}:
-            return False
-        for axis in ("x", "y"):
-            try:
-                if abs(float(want[axis]) - float(got[axis])) > TEXT_POSITION_TOLERANCE:
-                    return False
-            except (KeyError, ValueError):
-                if want.get(axis) != got.get(axis):
-                    return False
-    return True
-
-
 def first_difference(expected, actual):
     """The first text run that moved or changed, with its page and export values."""
     want, got = text_runs(expected), text_runs(actual)
@@ -265,7 +223,7 @@ def main():
     written = {path.name: path for path in scratch.glob("*.svg")}
     kept = {path.name: path for path in BOARDS.glob("*.svg") if path.name not in DERIVED}
     stale = [name for name in sorted(kept)
-             if name in written and not boards_match(kept[name], written[name])]
+             if name in written and written[name].read_bytes() != kept[name].read_bytes()]
     missing = [name for name in sorted(kept) if name not in written]
     unknown = [name for name in sorted(written) if name not in kept]
     unstable = unstable_boards(scratch, scratch / "rerun")
