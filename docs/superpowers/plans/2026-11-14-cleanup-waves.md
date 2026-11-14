@@ -334,10 +334,16 @@ wave 3: artifacts/{brand,paparazzi,reference-src,renderer,screen-review}
   originals plus `reference-src`, `paparazzi` and `renderer` were then removed. The
   Drive upload was not possible through the connector's 5 MB/S3 staging path; the
   archive hashes above are the durable record, and the archives remain in the workspace.
-- **C3 remains blocked:** its plan dependency is B8, and the engine build trees are what
-  the 209-test suite and chrome goldens use. They were left in place.
+- **C3 ran after the final BMO gates:** it removed 62 MB of root `build/`, 192 MB of
+  `tools/engine-spike/app/build`, 519 MB of `tools/engine-review/app/build` and the
+  36 MB staged `app/assets/www`. The tool initially refused an external Robolectric
+  symlink under `build/android-render/deps`; deleting the link (not its target) let the
+  guarded wave finish. The bundle gate restages `app/assets/www`, so it was removed once
+  more after the last green `check_all`. The APK and all tracked sources are untouched.
+- The workspace fell from roughly 3 GB to 602 MB.
 
-`python3 tools/check_all.py` is 23/23 green after the waves and the tree is committed.
+`python3 tools/check_all.py` is 23/23 green after C2/C4 and after the build-tree wave,
+before the final staged-copy removal.
 
 ## Execution order
 

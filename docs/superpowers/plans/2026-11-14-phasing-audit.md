@@ -150,7 +150,7 @@ because it validates the shipping catalog identity, not the review candidate.
 
 1. Connect a real device to run the BMO shell/plugin checklist, `bench.sh`, and the
    release install-over; then complete B8/B11 device evidence.
-2. C2 and C4 have run. C3 remains gated on B8 because its build trees are the ones the
-   engine suite needs; do not delete them until the device lane is closed.
+2. C2, C3 and C4 have run; the workspace is 602 MB. C3 was removed after the last
+   green engine suite and chrome goldens.
 3. `check_apk --release` still targets the shipping `3.9` catalog identity, not this
    review candidate; do not repoint it or claim it as a pass for `4.0-bmo`.
