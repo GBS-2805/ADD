@@ -229,17 +229,17 @@
       "page": "releases/",
       "width": 1300,
       "full": false,
-      "source": "ed41f673788d678588eea437cdd05866e9daa23e79be398e5c4d10241c70bbab",
+      "source": "78459d7cf2e2a740dfc63ca9e908939396b01d640424b07e630df27d6e1d79bb",
       "image": "page-releases.webp",
-      "imageSha": "4731413b886e088755a0c15af1b2aaf7c5b11484eba3f98c51c7163cafe9ab9c"
+      "imageSha": "3f9291677c966863973950a4c709df7232b844fdbfc7309c116fc1feaa42ad02"
     },
     "phone-releases": {
       "page": "releases/",
       "width": 390,
       "full": false,
-      "source": "ed41f673788d678588eea437cdd05866e9daa23e79be398e5c4d10241c70bbab",
+      "source": "78459d7cf2e2a740dfc63ca9e908939396b01d640424b07e630df27d6e1d79bb",
       "image": "phone-releases.webp",
-      "imageSha": "cb819b1c14e68c3fc54a500af2a400657f768d8e064bc38a2dfb0d89524c9c32"
+      "imageSha": "1fcd087f2ff41658729a6ba54e8f7b06ad0c8f80aa116fab0278eb57cae57dab"
     },
     "page-compress": {
       "page": "compress/",
