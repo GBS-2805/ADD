@@ -569,13 +569,14 @@ pass.
 | B6 | Done | `EnginePluginHost.kt`, `EnginePluginShelf.kt`, `TonePlugin.kt`; host/shelf/Tone tests and `bmo-plugin` capture |
 | B7 | Done | `EngineBmoLayout.kt`; responsive test; compact/expanded captures |
 | B8 | **BLOCKED** | No device: `adb devices` empty; `artifacts/bmo/DEVICE-REPORT.md` |
-| B9 | Done, device candidate blocked | Release Gradle config, engine route, 4 `EngineRoutingTest` assertions |
-| B10 | Migration done; deletion **BLOCKED** | `LegacyLookMigration.kt`, `LEGACY LOOKS` library, 5 tests; Studio files retained |
+| B9 | Done, device candidate blocked | Release Gradle config, engine route, 6 `EngineRoutingTest` assertions |
+| B10 | Done | `LegacyLookMigration.kt`, `LEGACY LOOKS` library, 5 tests; Studio files, route and build hooks deleted |
 | B11 | APK built; install-over **BLOCKED** | `artifacts/ADD-4.0-bmo.apk`, 49,834,215 bytes, SHA-256 `d74f7112…960bc`; `FINAL-TEST.md` |
 | B12 | Done | thumbnails, JPEG quality 92, share chooser, weight 100–900, family search, 3D resets; tests + goldens |
 
-**Final commands:** `check_all` 23/23 green (9.6s); `check_all --visual` 27/27 green
-(91.9s, 209 engine tests, 24 goldens); Python suite 164 tests OK; release route test
-4/4. Live headers remain red (3 problems, config not deployed). The review APK does
-not match the shipped catalog identity, so `check_apk --release` is recorded as not
-applicable rather than passed. No commit was made.
+**Final commands:** `check_all` 23/23 green (11.0s); `check_all --visual` 26/26 green
+(78.0s, 209 engine tests, 24 goldens); Python suite 164 tests OK; release route suite
+6/6. Live headers remain red (3 problems) because the Vercel token is rejected before
+the deploy storage gate. The review APK does not match the shipped catalog identity,
+so `check_apk --release` is recorded as not applicable rather than passed. Everything
+is committed as `edde672`; the deploy is blocked on a valid Vercel token, not on code.

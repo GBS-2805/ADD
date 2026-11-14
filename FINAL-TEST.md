@@ -1,7 +1,8 @@
 # Final BMO gate — 2026-11-14
 
-**Scope:** the BMO lane, Tasks 1–12, implemented in the working tree. No commit was
-made because the owner did not ask for one.
+**Scope:** the BMO lane, Tasks 1–12, committed as `edde672`; Studio retirement and
+C2/C4 cleanup are included. The Vercel deploy is blocked by an invalid token, so no
+live-header pass is claimed.
 
 ## Candidate
 
@@ -25,9 +26,9 @@ certificate is the ADD key, and `app.add.engine.MainActivity` is present on the
 |---|---|
 | `bash tools/engine-spike/verify-suite.sh` | **209 tests, 0 failures, 0 errors, 0 skipped** |
 | `bash tools/engine-spike/verify-chrome.sh` | **24/24 goldens match** |
-| `cd tools/engine-review && ../engine-spike/gradlew :app:testReleaseUnitTest --tests add.EngineRoutingTest` | **4/4 route/manifest tests pass** |
-| `python3 tools/check_all.py` | **23 gates green in 9.6s** |
-| `python3 tools/check_all.py --visual` (with the workspace Playwright environment) | **27 gates green in 91.9s**, including 209 engine tests, chrome and engine claims |
+| `cd tools/engine-review && ../engine-spike/gradlew :app:testReleaseUnitTest --tests add.EngineRoutingTest` | **6/6 route/absence tests pass** |
+| `python3 tools/check_all.py` | **23 gates green in 11.0s** |
+| `python3 tools/check_all.py --visual` (with the workspace Playwright environment) | **26 gates green in 78.0s**, including 209 engine tests, chrome and engine claims |
 | `python3 -m unittest discover -s tools/tests` | **164 tests OK** |
 | `python3 tools/check_claims.py --check --engine` | **OK — 16 modern pages, 16 classic pages, APK size and engine baseline** |
 
@@ -45,16 +46,18 @@ real cold-start, frame-time, pinch-latency, export, 3D-orbit, install-over or
 process-death results. See `artifacts/bmo/DEVICE-REPORT.md`. No device number in this
 report is estimated or inferred from Robolectric.
 
-### Live headers — **FAIL (not deployed)**
+### Live headers — **BLOCKED (deploy credential invalid)**
 
 ```text
 python3 tools/check_headers.py --origin https://artbase-olive.vercel.app
 headers: 3 problem(s)
 ```
 
-The live site still lacks cross-origin-resource-policy,
-x-permitted-cross-domain-policies and CSP/CSP-Report-Only. The checked-in Vercel
-configuration was not deployed by this work; A3 remains report-only.
+The checked-in `docs/vercel.json` and `handoff/vercel.json` carry the report-only
+CSP, CORP and X-Permitted-Cross-Domain-Policies headers. `tools/deploy_vercel.py`
+refused to upload before its storage gate because the configured `VERCEL_TOKEN` is
+rejected by `api.vercel.com` as `invalidToken`; the live site therefore still lacks
+those three headers. A valid Vercel admin token is the only remaining step for A3.
 
 ### Shipping `check_apk.py` — **NOT APPLICABLE**
 

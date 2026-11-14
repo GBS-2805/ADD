@@ -135,13 +135,14 @@ chrome: goldens match
 | A4 | `tools/check_apk.py`, `tools/tests/test_check_apk.py`, `app/src/add/ShelfActivity.java`, `tools/apk-signing.json` | release APK OK; 12 tests; device smoke blocked |
 | A5 | `tools/check_web_budget.py`, `tools/check_images.py`, `tools/check_motion.py`, three test modules, `tools/web_budget.json` | 16-page measured baseline; 33 images; motion <=500 ms; 16 tests |
 | A6 | `tools/check_web_perf.js`, its smoke test, `tools/engine-spike/bench.sh` | three-run web report; `bench.sh` BLOCKED with no device |
-| A7 | `tools/check_all.py`, CI headers, `AGENTS.md`, reference/examples, rules test | 23 fast / 27 visual / 25 perf gates; 28 rules tests |
+| A7 | `tools/check_all.py`, CI headers, `AGENTS.md`, reference/examples, rules test | 23 fast / 26 visual / 25 perf gates; 28 rules tests |
 
 **Full verdicts:** `python3 tools/check_all.py` -> 23 gates green in 9.1s;
 `python3 tools/check_all.py --visual` (with the workspace Playwright environment) -> 27
-gates green in 91.9s, including 209 engine tests, chrome goldens and engine claims;
+gates green in 78.0s, including 209 engine tests, chrome goldens and engine claims;
 `python3 -m unittest discover -s tools/tests -v` -> 164 tests OK. The live header probe
-is recorded in the phasing plan; it remains red (3 problems) until deployment. The
+is recorded in the phasing plan; it remains red (3 problems) because the Vercel token
+is rejected before deployment. The
 signed review APK is recorded in `FINAL-TEST.md`; `check_apk --release` is not claimed
 because it validates the shipping catalog identity, not the review candidate.
 
