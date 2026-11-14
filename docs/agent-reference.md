@@ -172,8 +172,8 @@ where the notes keep the history they shipped with.Icons, Fonts, Compress and th
   rented, not owned** at the end of this file). Deploy with
   `python3 tools/deploy_vercel.py`: it uploads `docs/`, checks every route on the new
   host -- the list comes from the tree itself (`tools/build_site.py`), so a page or
-  capture added to the shelf is checked without being added here -- and only then
-  rewrites the origin in
+  capture added to the shelf is checked without being added here -- checks the live
+  response's security headers, and only then rewrites the origin in
   `tools/site.json` and the two app constants, so a failed deploy leaves the repo
   pointing at the host that still serves. It runs `tools/check_palette.py` before the
   upload and refuses a palette that drifted, and `tools/check_links.py`, which fails

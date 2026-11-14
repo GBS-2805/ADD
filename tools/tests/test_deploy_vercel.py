@@ -7,6 +7,19 @@ from unittest import mock
 from tools import deploy_vercel
 
 
+class HeaderGateTest(unittest.TestCase):
+    def test_clean_headers_pass(self):
+        with mock.patch.object(deploy_vercel, "live_header_problems", return_value=[]):
+            self.assertIsNone(deploy_vercel.headers_current("https://example.test"))
+
+    def test_missing_header_stops_and_names_the_problem(self):
+        with mock.patch.object(deploy_vercel, "live_header_problems",
+                               return_value=["site: missing x-frame-options"]):
+            with self.assertRaises(SystemExit) as stopped:
+                deploy_vercel.headers_current("https://example.test")
+        self.assertIn("x-frame-options", str(stopped.exception))
+
+
 class UploadGateTest(unittest.TestCase):
     def test_clean_upload_passes(self):
         with mock.patch.object(deploy_vercel, "upload_problems", return_value=[]):

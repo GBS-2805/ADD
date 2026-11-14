@@ -34,6 +34,7 @@ CLI = ("npx", "-y", "vercel@65.14.0")
 
 sys.path.insert(0, str(ROOT / "tools"))
 from build_site import routes as site_routes  # noqa: E402 - the tools directory is on the path above
+from check_headers import problems as header_problems  # noqa: E402 - the tools directory is on the path above
 from check_live import check as check_live  # noqa: E402 - the tools directory is on the path above
 from check_upload import problems as upload_problems  # noqa: E402 - the tools directory is on the path above
 from deploy_storage import check as storage_check  # noqa: E402 - the tools directory is on the path above
@@ -230,6 +231,28 @@ def upload_gate():
     print("  upload: docs/ is under the 100 MB and 15,000-file limits")
 
 
+def live_header_problems(origin):
+    """Return the live security-header problems for a deployed origin."""
+    asset = None
+    try:
+        names = json.loads((ROOT / "docs/data/assets.json").read_text(encoding="utf-8"))
+        asset = "/assets/" + names["files"]["site.css"]
+    except (OSError, ValueError, KeyError):
+        pass
+    return header_problems(origin, asset_path=asset)
+
+
+def headers_current(origin):
+    """Fail the deploy when the live response has lost a required header."""
+    problems = live_header_problems(origin)
+    if problems:
+        for problem in problems:
+            print("  " + problem)
+        sys.exit("live header check failed on %s; the links were not rewritten:\n  "
+                 % origin + "\n  ".join(problems))
+    print("  headers: OK - live response carries CSP, HSTS, frame denial and cache policy")
+
+
 def deploy():
     token = deploy_token()
     if not token:
@@ -375,6 +398,7 @@ def main():
             for problem in parity:
                 print("  FAIL " + problem)
             sys.exit(1)
+    headers_current(new)
     if same:
         print("\nthe links already point at this host; nothing rewritten")
         return

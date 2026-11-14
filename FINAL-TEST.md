@@ -1,8 +1,8 @@
 # Final BMO gate — 2026-11-14
 
 **Scope:** the BMO lane, Tasks 1–12, plus C2–C4 cleanup, committed on `main`; Studio
-retirement is included. The Vercel deploy is blocked by an invalid token, so no
-live-header pass is claimed.
+retirement is included. The Vercel site and handoff are deployed, and their live
+security-header gates pass.
 
 ## Candidate
 
@@ -29,7 +29,7 @@ certificate is the ADD key, and `app.add.engine.MainActivity` is present on the
 | `cd tools/engine-review && ../engine-spike/gradlew :app:testReleaseUnitTest --tests add.EngineRoutingTest` | **6/6 route/absence tests pass** |
 | `python3 tools/check_all.py` | **23 gates green in 11.0s** |
 | `python3 tools/check_all.py --visual` (with the workspace Playwright environment) | **26 gates green in 78.0s**, including 209 engine tests, chrome and engine claims |
-| `python3 -m unittest discover -s tools/tests` | **164 tests OK** |
+| `python3 -m unittest discover -s tools/tests` | **169 tests OK** |
 | `python3 tools/check_claims.py --check --engine` | **OK — 16 modern pages, 16 classic pages, APK size and engine baseline** |
 
 The 209-test suite includes the new shell, command, plugin, responsive, capture,
@@ -46,18 +46,19 @@ real cold-start, frame-time, pinch-latency, export, 3D-orbit, install-over or
 process-death results. See `artifacts/bmo/DEVICE-REPORT.md`. No device number in this
 report is estimated or inferred from Robolectric.
 
-### Live headers — **BLOCKED (deploy credential invalid)**
+### Live headers — **PASS**
 
 ```text
-python3 tools/check_headers.py --origin https://artbase-olive.vercel.app
-headers: 3 problem(s)
+python3 tools/check_headers.py --origin https://artbase-olive.vercel.app \
+  --handoff-origin https://artbase-handoff.vercel.app
+headers: OK - site and handoff carry CSP, HSTS, frame denial and cache policy
 ```
 
-The checked-in `docs/vercel.json` and `handoff/vercel.json` carry the report-only
-CSP, CORP and X-Permitted-Cross-Domain-Policies headers. `tools/deploy_vercel.py`
-refused to upload before its storage gate because the configured `VERCEL_TOKEN` is
-rejected by `api.vercel.com` as `invalidToken`; the live site therefore still lacks
-those three headers. A valid Vercel admin token is the only remaining step for A3.
+Both deployments are live. `docs/vercel.json` and `handoff/vercel.json` carry the
+report-only CSP, HSTS, CORP, X-Permitted-Cross-Domain-Policies and the frame,
+referrer, COOP and permissions headers. The refreshed deployment token authenticates
+as `ghost-0`; `tools/deploy_vercel.py` and `tools/deploy_review.py handoff` now fail
+the deploy if a required live header disappears.
 
 ### Shipping `check_apk.py` — **NOT APPLICABLE**
 

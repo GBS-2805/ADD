@@ -22,6 +22,7 @@ ROOT = Path(__file__).resolve().parent.parent
 CLI = ("npx", "-y", "vercel@65.14.0")
 
 sys.path.insert(0, str(ROOT / "tools"))
+from check_headers import problems as header_problems  # noqa: E402 - the tools directory is on the path above
 from deploy_storage import check as storage_check  # noqa: E402 - the tools directory is on the path above
 
 TARGETS = {
@@ -32,8 +33,28 @@ TARGETS = {
 }
 
 
+LIVE_ORIGINS = {
+    "handoff": "https://artbase-handoff.vercel.app",
+}
+
+
 def deploy_token(env_name):
     return os.environ.get(env_name) or os.environ.get("VERCEL_TOKEN")
+
+
+def headers_current(target):
+    """Return 0 when a target's live headers pass; 1 when they do not."""
+    origin = LIVE_ORIGINS.get(target)
+    if not origin:
+        return 0
+    problems = header_problems(origin)
+    if problems:
+        for problem in problems:
+            print("  " + problem)
+        print("headers: %d problem(s) on %s" % (len(problems), origin))
+        return 1
+    print("headers: OK - %s carries CSP, HSTS, frame denial and cache policy" % origin)
+    return 0
 
 
 def main():
@@ -74,6 +95,8 @@ def main():
     env["VERCEL_TOKEN"] = token
     proc = subprocess.run(cmd, cwd=ROOT, capture_output=True, text=True, env=env)
     print((proc.stdout + proc.stderr).rstrip())
+    if proc.returncode == 0:
+        return headers_current(args.target)
     return proc.returncode
 
 

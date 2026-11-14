@@ -14,7 +14,7 @@
 - `docs/superpowers/plans/2026-11-14-rules-gates-automation.md`
 - `NATIVE_EDITOR_V2.md`, `AGENTS.md`, `docs/agent-reference.md`, and the 14 November 2026 audit.
 
-**Status:** Phase 1 implementation complete on `main` (`edde672`, evidence through `187ee9f`), except for the environmental gates named below. A1–A7.1 are implemented and verified; A3 live enforcement is blocked because the configured Vercel token is rejected before upload. C0–C4 are complete. B1–B7 and B9–B12 are implemented, including the Studio deletion and the signed review APK. B8 and the B11 install-over remain blocked on a real device. Device numbers and A7 full sign-off are not claimed.
+**Status:** Phase 1 implementation is complete on `main`, except for the hardware and staged-CSP gates named below. A1–A7.1 are implemented; A3 report-only headers are live and verified on the site and handoff, while CSP enforcement remains staged behind a clean browser report. C0–C4 are complete. B1–B7, B9–B10 and B12 are implemented, including the Studio deletion; B11 has a signed review APK. B8 and the B11 install-over remain blocked on a real device. Device numbers and A7 full sign-off still wait on A4/A6 and B11.
 
 ---
 
@@ -107,9 +107,9 @@ All tasks below are in **Phase 1**. Lane A is expanded below so this control pla
 |---|---|---|---|---|
 | **C0** | Freeze protected set — **DONE 2026-11-14** | Keep-list record; hashes and sizes | `sha256sum`, `du`, `git status`; BMO stat | — |
 | **C1** | Build guarded cleanup tool — **DONE 2026-11-14** | `tools/cleanup_waves.py` + tests | Unit tests; Wave 1 dry-run | C0 |
-| **C2** | Execute Wave 1 | Old APKs and old engine/emulator copies removed | `check_apk`, `check_all`, `git status`, APK hashes | C1 |
-| **C3** | Execute Wave 2 | Engine/root build trees and staged assets removed | `verify-suite`, `check_all`, `git status` | B8, C1 |
-| **C4** | Execute Wave 3 | Reference/test/evidence scratch removed after archive | `du`, `check_all`, `git status`, BMO stat | C1, B2, owner approval |
+| **C2** | Execute Wave 1 — **DONE 2026-11-14** | Old APKs and old engine/emulator copies removed | `check_apk`, `check_all`, `git status`, APK hashes | C1 |
+| **C3** | Execute Wave 2 — **DONE 2026-11-14** | Engine/root build trees and staged assets removed | `verify-suite`, `check_all`, `git status` | B8, C1 |
+| **C4** | Execute Wave 3 — **DONE 2026-11-14** | Reference/test/evidence scratch removed after archive | `du`, `check_all`, `git status`, BMO stat | C1, B2, owner approval |
 
 ### Lane B — BMO
 
@@ -134,11 +134,11 @@ All tasks below are in **Phase 1**. Lane A is expanded below so this control pla
 |---|---|---|---|---|
 | **A1** | Claims gate — **DONE 2026-11-14** | `check_claims.py` + tests; README/page/engine claims | Unit tests; deliberate stale claim fails | C2 not needed for the gate |
 | **A2** | Secret/workflow/dependency gates — **DONE 2026-11-14** | `check_secrets.py`, `check_workflows.py`, `check_dependencies.py` + tests; pinned actions | Unit tests; fake token/workflow failure | C2 not needed for the gate |
-| **A3** | Headers and CSP — **IMPLEMENTED (report-only) 2026-11-14; live BLOCKED: B9/deploy** | `check_headers.py`, `build_csp.py`, report-only CSP, HSTS/CORP | Header fixture tests; live report | A1/A2 done; B9 for enforcement |
-| **A4** | APK/WebView hardening — **IMPLEMENTED (APK/WebView) 2026-11-14; device smoke BLOCKED: B8/B9** | APK identity/cert checks; blocked WebView network escapes | `check_apk` tests; WebView checklist | B9 |
+| **A3** | Headers and CSP — **IMPLEMENTED (report-only) 2026-11-14; live VERIFIED 2026-11-14; enforcement STAGED** | `check_headers.py`, `build_csp.py`, report-only CSP, HSTS/CORP | Header fixture tests; live site and handoff report | A1/A2 done; clean browser report for enforcement |
+| **A4** | APK/WebView hardening — **IMPLEMENTED (APK/WebView) 2026-11-14; device smoke BLOCKED: B8 (NO DEVICE)** | APK identity/cert checks; blocked WebView network escapes | `check_apk` tests; WebView checklist | B8 for device smoke |
 | **A5** | Static web/image/motion budgets — **DONE 2026-11-14** | `check_web_budget.py`, `check_images.py`, `check_motion.py`, baseline JSON | Baseline + deliberate regression failures | A1 |
 | **A6** | Runtime/engine performance evidence — **IMPLEMENTED (harness) 2026-11-14; device numbers BLOCKED: B8/B11** | `check_web_perf.js`, `bench.sh`, device report link | Three-run report; device-only engine numbers | B8/B11 |
-| **A7** | Wire CI and rules, including **A7.1** compact agent-context rules — **WIRED 2026-11-14; full sign-off BLOCKED: A3 live/A4/A6 + B11** | `check_all` flags, CI jobs, AGENTS/reference/examples, engine-local rules when supported | `check_all`, `--visual`, `check_headers`, all self-tests, `check_agent_rules` | A1–A6, B11 |
+| **A7** | Wire CI and rules, including **A7.1** compact agent-context rules — **WIRED 2026-11-14; full sign-off BLOCKED: A4/A6 + B11** | `check_all` flags, CI jobs, AGENTS/reference/examples, engine-local rules when supported | `check_all`, `--visual`, `check_headers`, all self-tests, `check_agent_rules` | A1–A6, B11 |
 | **A7.1** | Compact agent-context rules (required sub-task of A7) | `AGENTS.md`, reference/examples, rule test; engine `AGENTS.md` | `check_agent_rules`, rules tests, `check_all`, 160-line cap | Done 2026-11-14; no cleanup dependency |
 
 **Task total:** 5 cleanup + 12 BMO + 7 automation = **24 tasks**, plus **A7.1 as a required sub-task of A7**, all in one phase.
@@ -220,7 +220,7 @@ python3 tools/check_headers.py --origin https://artbase-handoff.vercel.app
 ```
 **Acceptance:** report-only is clean first; enforcement is staged; a weaker header or missing hash fails.
 
-**Result 2026-11-14:** report-only implementation complete. `python3 tools/build_csp.py --check` -> `csp: OK - 11 inline script(s), hashes present in both configs`; `python3 -m unittest tools.tests.test_build_csp tools.tests.test_check_headers -v` -> 11 tests OK. `docs/vercel.json` and `handoff/vercel.json` now carry report-only CSP, HSTS, CORP, X-Permitted-Cross-Domain-Policies and the existing frame/referrer/permissions headers. The live probe against the current deployment fails because those config changes are not deployed: `headers: 11 problem(s)` (missing CSP/CORP/X-Permitted, and the handoff's missing frame/referrer/COOP set). Enforcement remains blocked on B9 plus one clean live report; no enforcement is claimed.
+**Result 2026-11-14:** report-only implementation complete. `python3 tools/build_csp.py --check` -> `csp: OK - 11 inline script(s), hashes present in both configs`; `python3 -m unittest tools.tests.test_build_csp tools.tests.test_check_headers -v` -> 11 tests OK. `docs/vercel.json` and `handoff/vercel.json` carry report-only CSP, HSTS, CORP, X-Permitted-Cross-Domain-Policies, frame, referrer, COOP and permissions headers. The deployed probe passes both origins: `headers: OK - site and handoff carry CSP, HSTS, frame denial and cache policy`; `deploy_vercel.py` and `deploy_review.py handoff` now run that probe as a deploy gate. Enforcement remains staged behind one clean browser CSP report; B9 is done. No enforcement is claimed.
 
 #### A4 — APK and WebView hardening
 
@@ -243,7 +243,7 @@ python3 -m unittest tools.tests.test_check_apk -v
 ```
 **Acceptance:** release APK is non-debuggable, certificate-allowlisted, version-monotonic and matches the published digest; WebView cannot escape its local boundary.
 
-**Result 2026-11-14:** static/APK implementation complete. `python3 tools/check_apk.py --apk dist/ADD-3.9.apk --catalog tools/catalog.json --published docs/data/tools.json --release ...` -> `check_apk: OK - app.offline.compress 3.9 (41), 17387029 B ...`; `python3 -m unittest tools.tests.test_check_apk -v` -> 12 tests OK. `tools/apk-signing.json` records the public certificate SHA-256 `960b...fd6`; `ShelfActivity` now blocks network loads, enables safe browsing, disables release debugging, blocks non-`icons.local` requests and rejects `file://`/`content://` navigation. The device smoke/install-over stays BLOCKED on B8/B9; it was not run.
+**Result 2026-11-14:** static/APK implementation complete. `python3 tools/check_apk.py --apk dist/ADD-3.9.apk --catalog tools/catalog.json --published docs/data/tools.json --release ...` -> `check_apk: OK - app.offline.compress 3.9 (41), 17387029 B ...`; `python3 -m unittest tools.tests.test_check_apk -v` -> 12 tests OK. `tools/apk-signing.json` records the public certificate SHA-256 `960b...fd6`; `ShelfActivity` now blocks network loads, enables safe browsing, disables release debugging, blocks non-`icons.local` requests and rejects `file://`/`content://` navigation. The device smoke/install-over stays BLOCKED on B8 (no device); it was not run.
 
 #### A5 — Static web, image and motion budgets
 
@@ -347,7 +347,7 @@ python3 tools/check_agent_rules.py --check
 ```
 **Acceptance:** all new gates are in the real command path; CI permissions and pins are enforced; the compact rules are present; a deliberate failure is proven for each gate; `check_all` stays offline.
 
-**Result 2026-11-14:** wiring complete. `python3 tools/check_all.py` -> `checks: 23 gates, all green in 9.6s`; `python3 tools/check_all.py --visual` -> `checks: 27 gates, all green in 91.9s`; `python3 tools/check_all.py --perf --browser http://127.0.0.1:8799/` -> 25 gates green; `python3 tools/check_agent_rules.py --check` -> 143-line contract; 28 rules tests pass. The delivery matrix row and live-header jobs are present. `--live` is implemented but the current deployment still fails its header check; A7 sign-off therefore waits on the A3 deployment and B11, not on missing wiring.
+**Result 2026-11-14:** wiring complete. `python3 tools/check_all.py` -> `checks: 23 gates, all green in 9.6s`; `python3 tools/check_all.py --visual` -> `checks: 27 gates, all green in 91.9s`; `python3 tools/check_all.py --perf --browser http://127.0.0.1:8799/` -> 25 gates green; `python3 tools/check_agent_rules.py --check` -> 143-line contract; 28 rules tests pass. The delivery matrix row and live-header jobs are present. `--live` passes on the site and handoff, and both deploy paths now gate on it; A7 sign-off waits on A4/A6 and B11, not on missing wiring or an A3 deployment.
 
 ##### A7.1 — Compact agent-context rules (required inside A7)
 
@@ -499,7 +499,7 @@ python3 tools/check_apk.py --apk dist/ADD-3.9.apk \
   --catalog tools/catalog.json --published docs/data/tools.json
 ```
 
-Expected: all offline gates green; 209 engine tests and 24 chrome goldens; live headers clean; APK accepted. Every new gate also has a deliberate-failure fixture. Current exception: the live headers are still red (3 problems) and the review APK is not the shipping catalog APK; see `FINAL-TEST.md`.
+Expected: all offline gates green; 209 engine tests and 24 chrome goldens; live headers clean; APK accepted. Every new gate also has a deliberate-failure fixture. Current exception: the review APK is not the shipping catalog APK; live headers pass on both origins. See `FINAL-TEST.md`.
 
 ---
 
@@ -518,12 +518,12 @@ Expected: all offline gates green; 209 engine tests and 24 chrome goldens; live 
 ## 9. Final acceptance
 
 - C2–C4 complete (C0/C1 done); current APKs, BMO plan, docs, handoff, figma and `artifacts/bmo/` survive.
-- B1–B7, B9 and B12 complete; B10 migration complete with Studio deletion blocked; B8/B11 device steps blocked and recorded; BMO tests and chrome goldens pass.
-- A1–A7 complete; each new gate is in the real command path and has a failing fixture.
+- B1–B7, B9–B10 and B12 complete; B8/B11 device steps blocked and recorded; BMO tests and chrome goldens pass.
+- A1–A7 implemented; each new gate is in the real command path and has a failing fixture. A7 sign-off remains blocked on A4/A6/B11, and A3 enforcement remains staged behind a clean browser report.
 - A7.1 complete; all 15 best rules are represented and `AGENTS.md` is at or below 160 lines.
 - `check_all` remains offline and under the agreed time budget.
 - `check_all --visual` is green at 209 tests / 24 goldens.
-- Live site and handoff headers are clean; currently **3 problems remain** until A3 is deployed.
+- Live site and handoff headers are clean; A3 report-only headers are deployed and verified, with CSP enforcement still staged.
 - The review APK is non-debuggable and ADD-cert signed; it does not replace the shipped catalog digest or pass the shipping `check_apk` identity gate.
 - The final report lists every changed file, command, result, limitation and assumption.
 - No Vercel deployment was deleted by this phase.
@@ -575,8 +575,9 @@ pass.
 | B12 | Done | thumbnails, JPEG quality 92, share chooser, weight 100–900, family search, 3D resets; tests + goldens |
 
 **Final commands:** `check_all` 23/23 green (11.0s); `check_all --visual` 26/26 green
-(78.0s, 209 engine tests, 24 goldens); Python suite 164 tests OK; release route suite
-6/6. Live headers remain red (3 problems) because the Vercel token is rejected before
-the deploy storage gate. The review APK does not match the shipped catalog identity,
-so `check_apk --release` is recorded as not applicable rather than passed. Everything
-is committed on `main` (`edde672`, evidence through `187ee9f`); the deploy is blocked on a valid Vercel token, not on code.
+(78.0s, 209 engine tests, 24 goldens); Python suite 169 tests OK; release route suite
+6/6. Live headers pass on the site and handoff after the 14 Nov deploy, and the
+deployment token is valid. The review APK does not match the shipped catalog
+identity, so `check_apk --release` is recorded as not applicable rather than passed.
+The BMO and cleanup phase commits are on `main` (`edde672`, evidence through
+`187ee9f`).
