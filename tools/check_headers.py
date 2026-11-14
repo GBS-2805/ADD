@@ -6,8 +6,8 @@
         --handoff-origin https://artbase-handoff.vercel.app
 
 This is an explicit network step; it is not part of the offline fast path. The
-policy starts report-only, so either the report-only or enforcing CSP header is
-accepted, but neither may contain unsafe-eval.
+policy is enforced, so a report-only header alone does not pass: the response
+must carry Content-Security-Policy, and it may not contain unsafe-eval.
 """
 
 from __future__ import annotations
@@ -51,10 +51,11 @@ def _hsts(value: str) -> tuple[bool, str]:
 
 
 def _csp(headers: dict[str, str]) -> tuple[str | None, str]:
-    value = headers.get("content-security-policy") or headers.get(
-        "content-security-policy-report-only")
+    value = headers.get("content-security-policy")
     if not value:
-        return None, "missing CSP or CSP-Report-Only"
+        if headers.get("content-security-policy-report-only"):
+            return None, "CSP is report-only, not enforcing"
+        return None, "missing enforcing CSP"
     if "unsafe-eval" in value.lower():
         return value, "CSP contains unsafe-eval"
     for directive in ("default-src 'self'", "object-src 'none'", "frame-ancestors 'none'"):
@@ -144,7 +145,7 @@ def main(argv: list[str] | None = None) -> int:
         print("headers: %d problem(s)" % len(found))
         return 1
     where = "site and handoff" if args.handoff_origin else "site"
-    print("headers: OK - %s carry CSP, HSTS, frame denial and cache policy" % where)
+    print("headers: OK - %s carry enforcing CSP, HSTS, frame denial and cache policy" % where)
     return 0
 
 

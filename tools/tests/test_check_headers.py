@@ -7,7 +7,7 @@ from tools import check_headers
 
 def good_headers() -> dict[str, str]:
     return {
-        "content-security-policy-report-only": (
+        "content-security-policy": (
             "default-src 'self'; object-src 'none'; frame-ancestors 'none'; "
             "script-src 'self' 'sha256-abc'; style-src 'self' 'unsafe-inline'"),
         "strict-transport-security": "max-age=31536000; includeSubDomains",
@@ -31,12 +31,17 @@ class HeaderTests(unittest.TestCase):
 
     def test_missing_csp_fails(self):
         headers = good_headers()
-        headers.pop("content-security-policy-report-only")
-        self.assertTrue(any("missing CSP" in item for item in self.check(headers)))
+        headers.pop("content-security-policy")
+        self.assertTrue(any("missing enforcing CSP" in item for item in self.check(headers)))
+
+    def test_report_only_is_not_enforcement(self):
+        headers = good_headers()
+        headers["content-security-policy-report-only"] = headers.pop("content-security-policy")
+        self.assertTrue(any("report-only" in item for item in self.check(headers)))
 
     def test_unsafe_eval_fails(self):
         headers = good_headers()
-        headers["content-security-policy-report-only"] += " 'unsafe-eval'"
+        headers["content-security-policy"] += " 'unsafe-eval'"
         self.assertTrue(any("unsafe-eval" in item for item in self.check(headers)))
 
     def test_short_hsts_fails(self):

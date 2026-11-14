@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-"""Generate and check the report-only CSP for the site and handoff.
+"""Generate and check the enforcing CSP for the site and handoff.
 
     python3 tools/build_csp.py --check
     python3 tools/build_csp.py --write
 
-The policy is report-only on purpose. It carries a SHA-256 for every inline
-script in the modern site; `style-src 'unsafe-inline'` remains a recorded
-residual risk until inline style attributes are extracted.
+The policy carries a SHA-256 for every inline script in the shipped site and
+handoff. `style-src 'unsafe-inline'` remains a recorded residual risk until
+inline style attributes are extracted; it is not a script-src exception.
 """
 
 from __future__ import annotations
@@ -21,7 +21,9 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 CONFIGS = ("docs/vercel.json", "handoff/vercel.json")
-CSP_HEADER = "Content-Security-Policy-Report-Only"
+CSP_HEADER = "Content-Security-Policy"
+REPORT_ONLY_HEADER = "Content-Security-Policy-Report-Only"
+SITE_ORIGIN = "https://artbase-olive.vercel.app"
 
 
 class InlineScripts(HTMLParser):
@@ -53,9 +55,7 @@ class InlineScripts(HTMLParser):
 
 
 def _pages(root: Path) -> list[Path]:
-    docs = root / "docs"
-    return sorted(path for path in docs.rglob("index.html")
-                  if "classic" not in path.relative_to(docs).parts)
+    return sorted((root / "docs").rglob("index.html"))
 
 
 def inline_scripts(root: Path = ROOT) -> list[tuple[Path, str]]:
@@ -75,13 +75,19 @@ def script_hash(script: str) -> str:
     return "sha256-" + base64.b64encode(digest).decode("ascii")
 
 
-def policy(root: Path = ROOT) -> str:
+def policy(root: Path = ROOT, *, handoff: bool = False) -> str:
     hashes = sorted({script_hash(script) for _, script in inline_scripts(root)})
     script_src = "script-src 'self'" + "".join(" '%s'" % item for item in hashes)
+    # The handoff intentionally embeds screenshots served by the site origin.
+    # Keep that exception on the handoff only; the site itself stays same-origin.
+    img_src = "img-src 'self' data:"
+    if handoff:
+        img_src += " " + SITE_ORIGIN
     return (
         "default-src 'self'; base-uri 'none'; object-src 'none'; "
         "frame-ancestors 'none'; form-action 'self'; "
-        "img-src 'self' data:; font-src 'self'; connect-src 'self'; "
+        + img_src
+        + "; font-src 'self'; connect-src 'self'; "
         + script_src
         + "; style-src 'self' 'unsafe-inline'"
     )
@@ -102,16 +108,16 @@ def _set_csp(data: dict, value: str) -> None:
         entry = {"source": "/(.*)", "headers": []}
         entries.append(entry)
     headers = entry.setdefault("headers", [])
-    item = next((header for header in headers if header.get("key") == CSP_HEADER), None)
-    if item is None:
-        headers.append({"key": CSP_HEADER, "value": value})
-    else:
-        item["value"] = value
+    # Replace the staging header rather than keeping both; two policies on one
+    # response would leave the old report-only one looking active forever.
+    headers[:] = [header for header in headers
+                  if header.get("key") not in {CSP_HEADER, REPORT_ONLY_HEADER}]
+    headers.append({"key": CSP_HEADER, "value": value})
 
 
 def write_configs(root: Path = ROOT) -> None:
-    value = policy(root)
     for relative in CONFIGS:
+        value = policy(root, handoff=relative.startswith("handoff/"))
         path = root / relative
         data = json.loads(path.read_text(encoding="utf-8"))
         _set_csp(data, value)
@@ -120,11 +126,12 @@ def write_configs(root: Path = ROOT) -> None:
 
 def problems(root: Path = ROOT) -> list[str]:
     root = Path(root)
-    expected = policy(root)
-    hashes = {part for part in expected.split() if part.startswith("'sha256-")}
     found = []
     for relative in CONFIGS:
         path = root / relative
+        expected = policy(root, handoff=relative.startswith("handoff/"))
+        hashes = {part for part in expected.split() if part.startswith("'sha256-")}
+        expected_img = next(part for part in expected.split(";") if part.strip().startswith("img-src"))
         try:
             data = json.loads(path.read_text(encoding="utf-8"))
         except (OSError, ValueError) as error:
@@ -132,8 +139,18 @@ def problems(root: Path = ROOT) -> list[str]:
             continue
         value = _csp_value(data)
         if not value:
-            found.append("%s: missing %s" % (path, CSP_HEADER))
+            found.append("%s: missing enforcing %s" % (path, CSP_HEADER))
+        if any(header.get("key") == REPORT_ONLY_HEADER
+               for entry in data.get("headers", [])
+               for header in entry.get("headers", [])):
+            found.append("%s: still carries %s" % (path, REPORT_ONLY_HEADER))
+        if not value:
             continue
+        actual_img = next((part for part in value.split(";")
+                           if part.strip().startswith("img-src")), "")
+        if actual_img.strip() != expected_img.strip():
+            found.append("%s: CSP img-src is %r, expected %r"
+                         % (path, actual_img.strip(), expected_img.strip()))
         for item in sorted(hashes):
             if item not in value:
                 found.append("%s: CSP is missing inline-script hash %s" % (path, item))
