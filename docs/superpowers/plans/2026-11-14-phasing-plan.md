@@ -14,7 +14,7 @@
 - `docs/superpowers/plans/2026-11-14-rules-gates-automation.md`
 - `NATIVE_EDITOR_V2.md`, `AGENTS.md`, `docs/agent-reference.md`, and the 14 November 2026 audit.
 
-**Status:** Phase 1 in progress. Audit complete 2026-11-14; A1, A2, A5 and A7.1 are implemented and verified. A3 is implemented report-only, A4 is implemented for the APK/WebView boundary, A6 has its measurement harness, and A7 is wired. C0/C1 and B1–B7/B9/B12 are implemented; B10 migration is implemented but its Studio deletion is blocked on owner approval; B8 and the B11 install-over step are blocked on a real device. A3 live enforcement, A4/A6/B8/B11 device evidence, A7 full sign-off and C2–C4 remain. The specific prerequisites are recorded below. A1/A2/A5 did not need C2 because their gates read the current tree only; C2 remains blocked as destructive cleanup.
+**Status:** Phase 1 implementation complete on `main` (`edde672`, evidence through `187ee9f`), except for the environmental gates named below. A1–A7.1 are implemented and verified; A3 live enforcement is blocked because the configured Vercel token is rejected before upload. C0–C4 are complete. B1–B7 and B9–B12 are implemented, including the Studio deletion and the signed review APK. B8 and the B11 install-over remain blocked on a real device. Device numbers and A7 full sign-off are not claimed.
 
 ---
 
@@ -123,7 +123,7 @@ All tasks below are in **Phase 1**. Lane A is expanded below so this control pla
 | **B6** | Plugin contract/host/shelf — **DONE 2026-11-14** | First-party plugin and one-plugin host | Plugin host/Tone/shelf tests + golden | B5 |
 | **B7** | Responsive/accessibility — **DONE 2026-11-14** | Compact/expanded panel host, 48 dp targets, reduced motion | Responsive/focus/a11y tests + captures | B4–B6 |
 | **B8** | Device gate — **BLOCKED: NO DEVICE 2026-11-14** | `artifacts/bmo/DEVICE-REPORT.md` records the empty `adb devices` result; no numbers invented | Device checklist not run | B4–B7 |
-| **B9** | Promote review build and route one editor — **DONE (device candidate BLOCKED)** | Release Gradle config, engine route, `EngineRoutingTest` | 4/4 route tests; suite, chrome | B8 |
+| **B9** | Promote review build and route one editor — **DONE (device candidate BLOCKED)** | Release Gradle config, engine route, `EngineRoutingTest` | 6/6 route/absence tests; suite, chrome | B8 |
 | **B10** | Migrate saved looks, retire Studio — **DONE** | Migration and `LEGACY LOOKS` library implemented; `StudioPane`, assets and build hooks removed; ENGINE route keeps Quick fallback | 5 migration tests + routing absence tests | B9 |
 | **B11** | Signed final APK — **IMPLEMENTED (install-over BLOCKED)** | `FINAL-TEST.md`, signed `ADD-4.0-bmo.apk`, SHA-256 | Signature/aapt verified; device install-over not run | B10 |
 | **B12** | Post-integration polish — **DONE 2026-11-14** | Thumbnails, JPG export, share chooser, type weight/family search, 3D resets | New tests + goldens + suite | B11 |
@@ -579,4 +579,4 @@ pass.
 6/6. Live headers remain red (3 problems) because the Vercel token is rejected before
 the deploy storage gate. The review APK does not match the shipped catalog identity,
 so `check_apk --release` is recorded as not applicable rather than passed. Everything
-is committed as `edde672`; the deploy is blocked on a valid Vercel token, not on code.
+is committed on `main` (`edde672`, evidence through `187ee9f`); the deploy is blocked on a valid Vercel token, not on code.
