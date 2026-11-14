@@ -322,8 +322,22 @@ wave 2: app/assets/www, build, tools/engine-{spike,review}/app/build
 wave 3: artifacts/{brand,paparazzi,reference-src,renderer,screen-review}
 ```
 
-No `--yes` command was run and no file was deleted. C2–C4 remain blocked on explicit
-owner approval; Wave 3 additionally needs the recording and brand sheets archived first.
+## C2–C4 result 2026-11-14
+
+- **C2 ran:** `python3 tools/cleanup_waves.py --wave 1 --yes` removed 59 files / 356,419,245
+  bytes of old APKs and scratch. `dist/ADD-3.9.apk` (17 MB) and
+  `artifacts/handoff-apk/ADD-3.9.1-field-preview.apk` (54 MB) survive.
+- **C4 ran:** `artifacts/screen-review` and `artifacts/brand` were archived first into
+  `artifacts/archive/screen-review-2026-11-14.tar.gz` (155,832,484 bytes,
+  SHA-256 `dfeaf0e0…b18255`) and `artifacts/archive/brand-2026-11-14.tar.gz`
+  (66,534,954 bytes, SHA-256 `cd325da4…449aa78`). Both archives list cleanly. The local
+  originals plus `reference-src`, `paparazzi` and `renderer` were then removed. The
+  Drive upload was not possible through the connector's 5 MB/S3 staging path; the
+  archive hashes above are the durable record, and the archives remain in the workspace.
+- **C3 remains blocked:** its plan dependency is B8, and the engine build trees are what
+  the 209-test suite and chrome goldens use. They were left in place.
+
+`python3 tools/check_all.py` is 23/23 green after the waves and the tree is committed.
 
 ## Execution order
 
