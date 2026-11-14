@@ -6,6 +6,7 @@ import android.content.ClipboardManager;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
@@ -91,7 +92,12 @@ public class ShelfActivity extends Activity {
         settings.setAllowContentAccess(false);
         settings.setAllowFileAccessFromFileURLs(false);
         settings.setAllowUniversalAccessFromFileURLs(false);
+        settings.setBlockNetworkLoads(true);
+        settings.setSafeBrowsingEnabled(true);
         settings.setMixedContentMode(WebSettings.MIXED_CONTENT_NEVER_ALLOW);
+        if ((getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE) == 0) {
+            WebView.setWebContentsDebuggingEnabled(false);
+        }
         settings.setSupportZoom(false);
         settings.setBuiltInZoomControls(false);
         settings.setTextZoom(100);
@@ -383,7 +389,8 @@ public class ShelfActivity extends Activity {
         public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
             Uri url = request.getUrl();
             if (url == null || url.getHost() == null || !url.getHost().equals("icons.local")) {
-                return null;
+                return new WebResourceResponse("text/plain", "utf-8", 403, "Forbidden",
+                        new HashMap<String, String>(), new ByteArrayInputStream(new byte[0]));
             }
             String asset = assetFor(url.getPath());
             try {
@@ -397,10 +404,17 @@ public class ShelfActivity extends Activity {
         @Override
         public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
             Uri url = request.getUrl();
-            if (url != null && "icons.local".equals(url.getHost())) {
+            if (url == null) {
+                return true;
+            }
+            String scheme = url.getScheme();
+            if ("file".equals(scheme) || "content".equals(scheme)) {
+                return true;
+            }
+            if ("icons.local".equals(url.getHost())) {
                 return false;
             }
-            if (url != null && ("http".equals(url.getScheme()) || "https".equals(url.getScheme()))) {
+            if ("http".equals(scheme) || "https".equals(scheme)) {
                 startActivity(new Intent(Intent.ACTION_VIEW, url));
                 return true;
             }

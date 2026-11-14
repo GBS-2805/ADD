@@ -228,21 +228,21 @@ class EngineChromeFocusTest {
         compose.onNodeWithTag("engine-stage").assertIsFocused()
 
         compose.onNodeWithTag("engine-stage").performKeyInput { pressKey(Key.Tab) }
-        compose.onNodeWithTag("engine-toolbar").assertIsFocused()
+        compose.onNodeWithTag("bmo-tool-dock").assertIsFocused()
 
         // Open the real inspector from the Create flow, then continue the same
         // keyboard traversal. The toolbar's explicit next target is the sheet.
         compose.onNodeWithTag("engine-artboard").performTouchInput {
             click(androidx.compose.ui.geometry.Offset(width * 0.9f, height * 0.7f))
         }
-        compose.onNodeWithTag("studio-peek").performClick()
-        compose.onNodeWithTag("engine-add").performClick()
+        compose.onNodeWithTag("bmo-page-chip").performClick()
+        compose.onNodeWithTag("bmo-add").performScrollTo().performClick()
         compose.onNodeWithTag("create-type").performClick()
         compose.onNodeWithTag("notice-inspect").performClick()
         compose.waitForIdle()
 
-        compose.onNodeWithTag("engine-toolbar").requestFocus()
-        compose.onNodeWithTag("engine-toolbar").performKeyInput { pressKey(Key.Tab) }
+        compose.onNodeWithTag("bmo-tool-dock").requestFocus()
+        compose.onNodeWithTag("bmo-tool-dock").performKeyInput { pressKey(Key.Tab) }
         compose.onNodeWithTag("inspector-sheet").assertIsFocused()
     }
 }

@@ -1243,7 +1243,11 @@ private fun LayerCard(
                 Spacer(Modifier.width(6.dp))
             }
             Box(
-                modifier = Modifier.size(38.dp).clip(RoundedCornerShape(12.dp)).background(layerStickerWash(layer)),
+                modifier = Modifier
+                    .size(38.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(layerStickerWash(layer))
+                    .testTag("layer-thumb-${layer.id}"),
                 contentAlignment = Alignment.Center,
             ) {
                 Text(layerGlyph(layer), color = layerStickerInk(layer), fontSize = 18.sp, fontWeight = FontWeight.Bold)

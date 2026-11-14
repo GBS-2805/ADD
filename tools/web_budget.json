@@ -1,0 +1,330 @@
+{
+  "schema": 1,
+  "headroom": 0.1,
+  "pages": {
+    "compress/index.html": {
+      "measured": {
+        "html": 51078,
+        "css": 53871,
+        "js": 82750,
+        "fonts": 254932,
+        "first_viewport": 0,
+        "images": 0,
+        "total": 442631
+      },
+      "budget": {
+        "html": 56186,
+        "css": 59259,
+        "js": 91026,
+        "fonts": 280426,
+        "first_viewport": 0,
+        "images": 0,
+        "total": 486895
+      }
+    },
+    "download/index.html": {
+      "measured": {
+        "html": 12816,
+        "css": 53871,
+        "js": 82750,
+        "fonts": 254932,
+        "first_viewport": 0,
+        "images": 0,
+        "total": 404369
+      },
+      "budget": {
+        "html": 14098,
+        "css": 59259,
+        "js": 91026,
+        "fonts": 280426,
+        "first_viewport": 0,
+        "images": 0,
+        "total": 444806
+      }
+    },
+    "figma/index.html": {
+      "measured": {
+        "html": 16439,
+        "css": 53871,
+        "js": 10536,
+        "fonts": 254932,
+        "first_viewport": 0,
+        "images": 0,
+        "total": 335778
+      },
+      "budget": {
+        "html": 18083,
+        "css": 59259,
+        "js": 11590,
+        "fonts": 280426,
+        "first_viewport": 0,
+        "images": 0,
+        "total": 369356
+      }
+    },
+    "fonts/index.html": {
+      "measured": {
+        "html": 16421,
+        "css": 79047,
+        "js": 10536,
+        "fonts": 254932,
+        "first_viewport": 0,
+        "images": 0,
+        "total": 360936
+      },
+      "budget": {
+        "html": 18064,
+        "css": 86952,
+        "js": 11590,
+        "fonts": 280426,
+        "first_viewport": 0,
+        "images": 0,
+        "total": 397030
+      }
+    },
+    "icons/all/index.html": {
+      "measured": {
+        "html": 21783,
+        "css": 53871,
+        "js": 10536,
+        "fonts": 254932,
+        "first_viewport": 0,
+        "images": 0,
+        "total": 341122
+      },
+      "budget": {
+        "html": 23962,
+        "css": 59259,
+        "js": 11590,
+        "fonts": 280426,
+        "first_viewport": 0,
+        "images": 0,
+        "total": 375235
+      }
+    },
+    "icons/coolicons/index.html": {
+      "measured": {
+        "html": 103117,
+        "css": 53871,
+        "js": 10536,
+        "fonts": 254932,
+        "first_viewport": 0,
+        "images": 0,
+        "total": 422456
+      },
+      "budget": {
+        "html": 113429,
+        "css": 59259,
+        "js": 11590,
+        "fonts": 280426,
+        "first_viewport": 0,
+        "images": 0,
+        "total": 464702
+      }
+    },
+    "icons/index.html": {
+      "measured": {
+        "html": 8857,
+        "css": 79047,
+        "js": 10536,
+        "fonts": 254932,
+        "first_viewport": 0,
+        "images": 0,
+        "total": 353372
+      },
+      "budget": {
+        "html": 9743,
+        "css": 86952,
+        "js": 11590,
+        "fonts": 280426,
+        "first_viewport": 0,
+        "images": 0,
+        "total": 388710
+      }
+    },
+    "icons/lineicons/index.html": {
+      "measured": {
+        "html": 104010,
+        "css": 53871,
+        "js": 10536,
+        "fonts": 254932,
+        "first_viewport": 0,
+        "images": 0,
+        "total": 423349
+      },
+      "budget": {
+        "html": 114412,
+        "css": 59259,
+        "js": 11590,
+        "fonts": 280426,
+        "first_viewport": 0,
+        "images": 0,
+        "total": 465684
+      }
+    },
+    "icons/phosphor/index.html": {
+      "measured": {
+        "html": 102796,
+        "css": 53871,
+        "js": 10536,
+        "fonts": 254932,
+        "first_viewport": 0,
+        "images": 0,
+        "total": 422135
+      },
+      "budget": {
+        "html": 113076,
+        "css": 59259,
+        "js": 11590,
+        "fonts": 280426,
+        "first_viewport": 0,
+        "images": 0,
+        "total": 464349
+      }
+    },
+    "icons/streamline/index.html": {
+      "measured": {
+        "html": 103340,
+        "css": 53871,
+        "js": 10536,
+        "fonts": 254932,
+        "first_viewport": 0,
+        "images": 0,
+        "total": 422679
+      },
+      "budget": {
+        "html": 113675,
+        "css": 59259,
+        "js": 11590,
+        "fonts": 280426,
+        "first_viewport": 0,
+        "images": 0,
+        "total": 464947
+      }
+    },
+    "index.html": {
+      "measured": {
+        "html": 20351,
+        "css": 53871,
+        "js": 10536,
+        "fonts": 254932,
+        "first_viewport": 35197,
+        "images": 35197,
+        "total": 410084
+      },
+      "budget": {
+        "html": 22387,
+        "css": 59259,
+        "js": 11590,
+        "fonts": 280426,
+        "first_viewport": 38717,
+        "images": 38717,
+        "total": 451093
+      }
+    },
+    "portfolio/index.html": {
+      "measured": {
+        "html": 8045,
+        "css": 53871,
+        "js": 82750,
+        "fonts": 254932,
+        "first_viewport": 0,
+        "images": 0,
+        "total": 399598
+      },
+      "budget": {
+        "html": 8850,
+        "css": 59259,
+        "js": 91026,
+        "fonts": 280426,
+        "first_viewport": 0,
+        "images": 0,
+        "total": 439558
+      }
+    },
+    "releases/index.html": {
+      "measured": {
+        "html": 29632,
+        "css": 53871,
+        "js": 10536,
+        "fonts": 254932,
+        "first_viewport": 0,
+        "images": 0,
+        "total": 348971
+      },
+      "budget": {
+        "html": 32596,
+        "css": 59259,
+        "js": 11590,
+        "fonts": 280426,
+        "first_viewport": 0,
+        "images": 0,
+        "total": 383869
+      }
+    },
+    "renders/index.html": {
+      "measured": {
+        "html": 22667,
+        "css": 53871,
+        "js": 10536,
+        "fonts": 254932,
+        "first_viewport": 138412,
+        "images": 1723874,
+        "total": 2204292
+      },
+      "budget": {
+        "html": 24934,
+        "css": 59259,
+        "js": 11590,
+        "fonts": 280426,
+        "first_viewport": 152254,
+        "images": 1896262,
+        "total": 2424722
+      }
+    },
+    "search/index.html": {
+      "measured": {
+        "html": 12809,
+        "css": 53871,
+        "js": 10536,
+        "fonts": 254932,
+        "first_viewport": 0,
+        "images": 0,
+        "total": 332148
+      },
+      "budget": {
+        "html": 14090,
+        "css": 59259,
+        "js": 11590,
+        "fonts": 280426,
+        "first_viewport": 0,
+        "images": 0,
+        "total": 365363
+      }
+    },
+    "tools/index.html": {
+      "measured": {
+        "html": 8202,
+        "css": 53871,
+        "js": 82750,
+        "fonts": 254932,
+        "first_viewport": 0,
+        "images": 0,
+        "total": 399755
+      },
+      "budget": {
+        "html": 9023,
+        "css": 59259,
+        "js": 91026,
+        "fonts": 280426,
+        "first_viewport": 0,
+        "images": 0,
+        "total": 439731
+      }
+    }
+  },
+  "classic_ceiling": {
+    "html": 100677,
+    "total": 1852862
+  }
+}

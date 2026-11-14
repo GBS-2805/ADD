@@ -5,6 +5,8 @@
     python3 tools/check_all.py --browser http://127.0.0.1:8799/  # + palette and menu rendering
     python3 tools/check_all.py --artboards                       # + a re-export diff
     python3 tools/check_all.py --visual                          # + pixel baselines and engine tests
+    python3 tools/check_all.py --live https://artbase-olive.vercel.app/
+    python3 tools/check_all.py --perf                            # report-only browser timing
 
 Every gate runs even after one fails, so a single pass shows the whole picture rather
 than the first thing to break, and the exit status is 1 when anything failed. The one
@@ -24,22 +26,35 @@ ROOT = Path(__file__).resolve().parent.parent
 # working. A gate whose last line is the interesting one has no entry here.
 VERDICT = {"palette": "palette:", "menu": "menu:", "assets": "assets:",
            "upload": "upload:",
-           "links": "links:", "rules": "rules:", "seo": "seo_meta:",
+           "links": "links:", "rules": "rules:", "claims": "claims:",
+           "secrets": "secrets:", "workflows": "workflows:",
+           "dependencies": "dependencies:", "budget": "budget:",
+           "images": "images:", "motion": "motion:", "csp": "csp:",
+           "seo": "seo_meta:",
            "renders": "renders:",
            "site": "site:", "packs": "build_packs:",
            "figma": "figma check:",
            "notes": "notes regression:", "bundle": "bundle check:",
-           "artboards": "artboards:", "studio": "studio:", "engine": "engine:",
-           "chrome": "chrome:"}
+           "artboards": "artboards:", "engine": "engine:",
+           "engine-claims": "claims:", "chrome": "chrome:",
+           "headers": "headers:", "perf": "web-perf:"}
 
 
-def gates(browser, artboards, visual):
+def gates(browser, artboards, visual, live=None, handoff=None, perf=False):
     rows = [
         ["palette", [sys.executable, "tools/check_palette.py"]],
         ["assets", [sys.executable, "tools/hash_assets.py", "--check"]],
         ["upload", [sys.executable, "tools/check_upload.py"]],
         ["links", [sys.executable, "tools/check_links.py"]],
         ["rules", [sys.executable, "tools/check_agent_rules.py", "--check"]],
+        ["claims", [sys.executable, "tools/check_claims.py", "--check"]],
+        ["secrets", [sys.executable, "tools/check_secrets.py", "--check"]],
+        ["workflows", [sys.executable, "tools/check_workflows.py", "--check"]],
+        ["dependencies", [sys.executable, "tools/check_dependencies.py", "--check"]],
+        ["budget", [sys.executable, "tools/check_web_budget.py", "--check"]],
+        ["images", [sys.executable, "tools/check_images.py", "--check"]],
+        ["motion", [sys.executable, "tools/check_motion.py", "--check"]],
+        ["csp", [sys.executable, "tools/build_csp.py", "--check"]],
         ["seo", [sys.executable, "tools/seo_meta.py", "--check"]],
         ["renders", [sys.executable, "tools/check_renders.py", "--check"]],
         ["site", [sys.executable, "tools/build_site.py", "--check"]],
@@ -60,10 +75,20 @@ def gates(browser, artboards, visual):
         # Both compare against PNGs committed under tools/, so a drift in either is a
         # push failure rather than something someone has to remember to run.
         rows[-1:-1] = [
-            ["studio", ["node", "tools/studio-interaction-check.js"]],
             ["engine", ["bash", "tools/engine-spike/verify-suite.sh"]],
+            # The engine gate writes the XML this claim check reads; keep it here,
+            # before the chrome gate replaces the result directory with its own run.
+            ["engine-claims", [sys.executable, "tools/check_claims.py", "--check", "--engine"]],
             ["chrome", ["bash", "tools/engine-spike/verify-chrome.sh"]],
         ]
+    if live:
+        command = [sys.executable, "tools/check_headers.py", "--origin", live]
+        if handoff:
+            command.extend(["--handoff-origin", handoff])
+        rows.append(["headers", command])
+    if perf:
+        url = browser or "http://127.0.0.1:8799/"
+        rows.append(["perf", ["node", "tools/check_web_perf.js", "--url", url]])
     return rows
 
 
@@ -85,14 +110,21 @@ def main():
     parser.add_argument("--artboards", action="store_true",
                         help="also re-export the artboards and diff them against figma/")
     parser.add_argument("--visual", action="store_true",
-                        help="also run the visual and engine gates: the Studio baselines "
-                             "in tools/studio-baseline/, the Robolectric engine chrome "
-                             "goldens and the whole engine test suite. Needs Playwright's "
-                             "Chromium, a JDK 17 and the android-35 platform; "
+                        help="also run the visual and engine gates: the Robolectric engine chrome "
+                             "goldens and the whole engine test suite. Needs a JDK 17 "
+                             "and the android-35 platform; "
                              ".github/workflows/checks.yml installs them")
+    parser.add_argument("--live", metavar="ORIGIN",
+                        help="also check live security headers at ORIGIN")
+    parser.add_argument("--handoff-origin", metavar="ORIGIN",
+                        help="handoff origin to include with --live")
+    parser.add_argument("--perf", action="store_true",
+                        help="also run the report-only browser timing measurement; "
+                             "uses --browser as the base URL or the local port 8799")
     args = parser.parse_args()
 
-    rows = gates(args.browser, args.artboards, args.visual)
+    rows = gates(args.browser, args.artboards, args.visual, args.live,
+                 args.handoff_origin, args.perf)
     print("the checks")
     failures = []
     began = time.monotonic()

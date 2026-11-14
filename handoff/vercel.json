@@ -3,7 +3,31 @@
     {
       "source": "/fonts/(.*)",
       "headers": [
-        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "Content-Security-Policy-Report-Only",
+          "value": "default-src 'self'; base-uri 'none'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'; script-src 'self' 'sha256-/Nnu/Rlc1KnmO0P/sRKM2rW/8CSg00VsfpSWyQkenfI=' 'sha256-/mSjp2Q6/9353kwUCqsID5VY/1oKaBWnvRx46UyFsBQ=' 'sha256-0JSnJvPeUN6XwR1Yjsc/Z4DCHIWzdmMSLhs6jJFQUfc=' 'sha256-KTLQUb2Rio5NpcJ788Ze4Nl4FYg0hCJoYUXUhykLrZE=' 'sha256-MVNq7NPIHtT6KwVLCh7+HVbYmR3DGijzKFLMrK9LBy0=' 'sha256-R+eh8VTCm6EcbX4dTdxAmU/+7BYfls2VBKSL6EX58/M=' 'sha256-RbKU/HNBzIy+sw81SrtwuvfyiD2SdRsR61WQMwVU/Fo=' 'sha256-YWBmXgDymGXqAKDcUj2Yc2X5MXRFFwPJhMcBx+9eOqc=' 'sha256-jNbsW1jD2s+JKSZiz1smOwRhbyJkRDLNtcB5IjiP+2o=' 'sha256-yeQgChpEtT9IHm1BlvIe/uv98/4X0GGuc6FsNXDTCpo=' 'sha256-zPQZNZnwvx+dzLRfCpjZEUff4VcQQjrXOStHAcVDSWs='; style-src 'self' 'unsafe-inline'"
+        },
+        {
+          "key": "Strict-Transport-Security",
+          "value": "max-age=31536000; includeSubDomains"
+        },
+        {
+          "key": "Cross-Origin-Resource-Policy",
+          "value": "same-origin"
+        },
+        {
+          "key": "X-Permitted-Cross-Domain-Policies",
+          "value": "none"
+        }
       ]
     }
   ]

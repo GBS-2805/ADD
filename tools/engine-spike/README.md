@@ -135,9 +135,10 @@ undo/redo, deterministic pixels, seed divergence and the frame budget; measured 
 render time is **1.18 ms**. The reviewed capture is
 `artifacts/material-ink.png`.
 
-Full suite: **160 tests, 0 failures, 0 errors, 0 skipped**. Chrome: **14/14 goldens
-match**, including the Material Ink capture and the Marble-under-layers repair. No
-bitmap assets or network calls were added.
+Full suite at the 3.8.5 cut: **160 tests, 0 failures, 0 errors, 0 skipped**. Chrome:
+**24/24 goldens match**, including the Material Ink capture and the Marble-under-layers
+repair. No bitmap assets or network calls were added. Current baseline: **209 tests, 0
+failures, 0 errors, 0 skipped**; current field preview: **3.9.1 (56)**.
 Task 9–11, Studio and `app.offline.compress` were not touched. The review is built as
 **3.8.5 (55)** at `artifacts/engine-review/ADD-3.8.5-engine-review.apk`; it has not been
 deployed to the handoff from this workspace.

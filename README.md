@@ -13,7 +13,7 @@ Agents and contributors: read [`AGENTS.md`](AGENTS.md).
 
 ## Status
 
-- **ADD 3.9** — APK [`dist/ADD-3.9.apk`](dist/ADD-3.9.apk) (6 MB, signed v1+v2),
+- **ADD 3.9** — APK [`dist/ADD-3.9.apk`](dist/ADD-3.9.apk) (17 MB, signed v1+v2),
   published as `docs/ADD-3.9.apk`. Install id `app.offline.compress` — kept so
   installed copies update in place — source namespace `add` — minSdk 26 · targetSdk 35 ·
   versionCode 41. One package, four tools: the whole shelf rides inside it — every
@@ -25,12 +25,12 @@ Agents and contributors: read [`AGENTS.md`](AGENTS.md).
   set folded into a scrolling sheet. Copy-on-tap, no account.
 - Theme: **one Review edition** — paper `#f0e7d4`, ink `#1B1212`, plum
   `#5b2a4b`, with flat surfaces and no palette or light/dark switch. The site's final
-  token block is canonical; `tools/sync_edition.py` generates the Android colours,
-  the Studio WebView tokens and the native engine palette from it so they cannot drift.
+  token block is canonical; `tools/sync_edition.py` generates the Android colours and
+  the native engine palette from it so they cannot drift.
 - Type: **Instrument Serif, Spectral and Libre Franklin**, self-hosted. The site
   serves woff2 from `docs/assets/fonts/`; the app carries the three faces in
-  `res/font/` and the Studio bundle carries its own copies.
-- **One edition**, on the site, in the app, Studio and the native engine lab. `build.sh`
+  `res/font/`.
+- **One edition**, on the site, in the app and the native engine. `build.sh`
   runs the edition sync before the palette gate, so a site token change reaches every
   surface on the next build.
 
@@ -39,12 +39,13 @@ Agents and contributors: read [`AGENTS.md`](AGENTS.md).
 
 ## The shelf
 
-Fifteen pages, one stylesheet, no framework:
+Sixteen pages, one stylesheet, no framework:
 
 | Page | What it is |
 | --- | --- |
 | `docs/index.html` | Index: the material, the app, the palette, the JSON list |
 | `docs/tools/` | The four tools in detail, with one line to the Download page |
+| `docs/compress/` | Browser compressor: up to 40 photos, JPEG/WebP/PNG, no upload |
 | `docs/icons/` | Icons landing: the four brands, what each set does, one line to Download |
 | `docs/icons/lineicons/` | Lineicons: preview tab, variants, the set (generated) |
 | `docs/icons/coolicons/` | Coolicons: preview tab, variants, the set (generated) |
@@ -162,7 +163,6 @@ app/src/add/ThemePrefs.java       forces night mode off (one palette)
 app/res/                                           27 resources: 3 layouts, 14 drawables,
                                                    Poppins, one values/ (no values-night)
 app/src/add/ShelfActivity.java     WebView tool surface (icons or fonts page)
-app/src/add/StudioPane.java        the paper Studio WebView in the editor
 app/src/add/ThemePrefs.java        stores the palette and theme pair
 app/assets/www/                                     staged at build time from docs/ (not committed)
 build.sh                                           SDK-tools build: ./build.sh [add|stage]
@@ -235,8 +235,8 @@ bash tools/android-render/setup.sh
 bash tools/android-render/render.sh
 ```
 
-The Shelf and the Studio tab are Chromium WebViews; Robolectric has no Chromium
-compositor, so those remain uncaptured rather than reconstructed. The emulator is
+The Shelf is a Chromium WebView; Robolectric has no Chromium compositor, so it
+remains uncaptured rather than reconstructed. The emulator is
 still unusable here: `/dev/kvm` exists but the account is not in the `kvm` group and
 `sudo` is blocked by `no_new_privs`, so it runs under TCG, `system_server` sits in a
 permanent "Application Not Responding" state, and every screencap is a flat black

@@ -80,6 +80,7 @@ def inspect_xml(xml_text):
         "permissions": permissions,
         "allowBackup": (app.get(A + "allowBackup") if app is not None else None),
         "usesCleartextTraffic": (app.get(A + "usesCleartextTraffic") if app is not None else None),
+        "debuggable": (app.get(A + "debuggable") if app is not None else None),
         "activities": activities,
     }
 
@@ -90,7 +91,7 @@ def inspect_dump(text):
     found = {"permissions": [], "activities": [], "package": None,
              "versionCode": None, "versionName": None, "minSdkVersion": None,
              "targetSdkVersion": None, "allowBackup": None,
-             "usesCleartextTraffic": None}
+             "usesCleartextTraffic": None, "debuggable": None}
     current = None
     current_indent = -1
     for line in lines:
@@ -122,14 +123,14 @@ def inspect_dump(text):
             continue
         if key in found and found[key] is None:
             found[key] = value
-        elif key in ("allowBackup", "usesCleartextTraffic") and found[key] is None:
+        elif key in ("allowBackup", "usesCleartextTraffic", "debuggable") and found[key] is None:
             found[key] = value
     for activity in found["activities"]:
         activity["exported"] = str(activity.get("exported")).lower() == "true"
     return found
 
 
-def validate(info, app, published=None):
+def validate(info, app, published=None, *, cert=None, signing=None, release=False):
     errors = []
     if info.get("package") != PACKAGE:
         errors.append("package is %r, expected %s" % (info.get("package"), PACKAGE))
@@ -137,6 +138,11 @@ def validate(info, app, published=None):
                        "versionCode": app.get("version_code", app.get("versionCode"))}
     for key, expected in wanted_versions.items():
         if str(info.get(key)) != str(expected):
+            if key == "versionCode" and str(info.get(key)).isdigit() and str(expected).isdigit():
+                if int(info.get(key)) < int(expected):
+                    errors.append("versionCode %s is below the catalog %s"
+                                  % (info.get(key), expected))
+                    continue
             errors.append("%s is %r, catalog says %r"
                           % (key, info.get(key), expected))
     if str(info.get("minSdkVersion")) != str(MIN_SDK):
@@ -157,6 +163,17 @@ def validate(info, app, published=None):
     if str(info.get("usesCleartextTraffic")).lower() != "false":
         errors.append("usesCleartextTraffic is %r, expected false"
                       % info.get("usesCleartextTraffic"))
+    if str(info.get("debuggable")).lower() == "true":
+        errors.append("debuggable is true, release must be non-debuggable")
+    if cert is not None and signing is not None:
+        allowed = {item.get("sha256", "").lower()
+                    for item in signing.get("certificates", [])}
+        if cert.lower() not in allowed:
+            errors.append("signing certificate %s is not in the public allowlist" % cert)
+    elif cert is not None and signing is None:
+        errors.append("no signing allowlist was supplied")
+    if release and published is None:
+        errors.append("release verification requires --published")
     for activity in info.get("activities", []):
         if activity.get("exported") and not activity.get("intent_filters"):
             errors.append("exported activity %r has no intent filter"
@@ -209,6 +226,8 @@ def main():
     parser.add_argument("--apk", required=True)
     parser.add_argument("--catalog", required=True)
     parser.add_argument("--published")
+    parser.add_argument("--signing", default="tools/apk-signing.json")
+    parser.add_argument("--release", action="store_true")
     parser.add_argument("--aapt2", default=None)
     parser.add_argument("--apksigner", default=None)
     args = parser.parse_args()
@@ -225,8 +244,14 @@ def main():
                           if item.get("id") == "add"), None)
         if not published:
             raise SystemExit("check_apk: %s has no add tool" % args.published)
-    errors = validate(info, app, published)
+    signing = load_json(args.signing) if Path(args.signing).is_file() else None
     signature = verify_signature(apk, args.apksigner or find_tool("apksigner", "APKSIGNER"))
+    match = re.search(r"certificate SHA-256 digest:\s*([0-9a-fA-F]{64})", signature)
+    cert = match.group(1).lower() if match else None
+    if cert is None:
+        raise SystemExit("check_apk: apksigner did not print a certificate SHA-256")
+    errors = validate(info, app, published, cert=cert, signing=signing,
+                      release=args.release)
     if errors:
         for error in errors:
             print("  " + error)

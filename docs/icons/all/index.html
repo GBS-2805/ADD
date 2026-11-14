@@ -85,6 +85,15 @@
     .cell .name { font-size: 9.5px; }
     .cell .cat { font-size: 8px; letter-spacing: .05em; }
   }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
 </style>
 <!-- seo:start -->
 <link rel="canonical" href="https://artbase-olive.vercel.app/icons/all/" />

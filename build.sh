@@ -155,7 +155,7 @@ check_fallback() {
 # the attributes, and every layout against the theme. No browser needed, which is why
 # this half runs here; `tools/check_palette.py --browser <url>` adds the rendered one.
 check_palette() {
-    echo "== edition: sync app and Studio from the site =="
+    echo "== edition: sync app and engine from the site =="
     python3 "$ROOT/tools/sync_edition.py"
     echo "== palette: site and app =="
     python3 "$ROOT/tools/check_palette.py"
@@ -188,25 +188,12 @@ stage_shelf_assets() {
     du -sh "$www"
 }
 
-# The Studio engine shell lives beside the shelf rather than inside it: it is not a
-# site page, so it is copied into the bundle after the shelf staging has finished.
-stage_studio_assets() {
-    local dst="$ROOT/app/assets/www/studio"
-    echo "== ADD: staging the Studio engine shell =="
-    rm -rf "$dst"
-    mkdir -p "$dst"
-    cp -R "$ROOT/app/studio-assets/." "$dst/"
-    test -s "$dst/fabric.min.js"
-    test -s "$dst/index.html"
-}
-
 # One app, one case. The old `compress` and `icons` cases are gone with the merge:
 # ADD ships the shelf's web tools and the native compressor in one package.
 case "${1:-add}" in
     add)
         check_palette
         stage_shelf_assets
-        stage_studio_assets
         build_app app ADD ADD-3.9.apk 41 3.9
         # The newest build, not a hard-coded one: a stale path silently proved a copy
         # the release had already replaced.
@@ -216,7 +203,6 @@ case "${1:-add}" in
         # Stage only: no JDK or SDK needed, which is how the bundle harness runs.
         check_palette
         stage_shelf_assets
-        stage_studio_assets
         ;;
     *)
         echo "usage: $0 [add|stage]" >&2

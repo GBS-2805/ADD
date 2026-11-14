@@ -1,4 +1,0 @@
-GSAP 3.12.5
-Copyright 2024, GreenSock. All rights reserved.
-Licensed under the GreenSock Standard License: https://gsap.com/standard-license
-Bundled offline for ADD Studio; no network or CDN is used at runtime.

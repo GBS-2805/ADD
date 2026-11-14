@@ -60,8 +60,10 @@ android {
         // as document recipes, rendered through the same Skia artboard as export.
         // It also gives the object bar a readable two-row layout, opens Type controls
         // before Transform, and removes duplicate UNDO rows from History.
-        versionCode = 56
-        versionName = "3.9.1-field-preview"
+        // 56 is the canvas-first BMO shell; 57 completes commands, plugins,
+        // responsive panels, legacy-look import and the one-editor release route.
+        versionCode = 57
+        versionName = "4.0-bmo"
         // The emulator harness cannot reach a non-exported activity through the shell
         // uid. Export it only in the x86_64 review variant; the phone APK stays private.
         manifestPlaceholders["engineExported"] =
@@ -87,12 +89,20 @@ android {
             keyAlias = System.getenv("KEYSTORE_ALIAS") ?: "compress"
             keyPassword = System.getenv("KEY_PASSWORD") ?: "android"
         }
+        // The release path reads the shipping ADD key from the documented names; the
+        // release build exposes the same ENGINE route as the debug review.
+        create("addRelease") {
+            storeFile = addKeystore
+            storePassword = System.getenv("STORE_PASSWORD") ?: "android"
+            keyAlias = System.getenv("KEY_ALIAS") ?: "compress"
+            keyPassword = System.getenv("KEY_PASSWORD") ?: "android"
+        }
     }
 
     buildTypes {
         getByName("debug") {
-            // The development flag is the debug build itself. The release build
-            // never exposes the engine entry, and build.sh does not carry the code.
+            // The development flag is the debug build itself. Both variants carry the
+            // engine now; the release is non-debuggable and signed for install-over.
             isDebuggable = true
             if (addKeystore.exists()) {
                 signingConfig = signingConfigs.getByName("addReview")
@@ -100,6 +110,8 @@ android {
         }
         getByName("release") {
             isMinifyEnabled = false
+            isDebuggable = false
+            signingConfig = signingConfigs.getByName("addRelease")
         }
     }
 
@@ -157,4 +169,6 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0")
 
     implementation("io.github.sceneview:sceneview:2.3.0")
+
+    testImplementation("junit:junit:4.13.2")
 }

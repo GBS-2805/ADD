@@ -108,6 +108,20 @@ This proves the shipped copy renders and its two links resolve; which asset maps
 which site path inside the WebViewClient, and the clipboard/MediaStore bridge, still
 need a device.
 
+## 5. Release boundary cases
+
+The WebView is deliberately a local bundle, not a browser. Add these to the device
+smoke run when one is available:
+
+- an external `https://` link opens the system browser, not the WebView;
+- `file://` and `content://` navigation is refused;
+- an off-origin subresource gets the blocked empty response and no network traffic;
+- `window.IconsApp` is present only while the `icons.local` page is loaded;
+- a release build has WebView debugging off, while a debug build may opt in.
+
+The static checks can prove the settings and branches are present; they cannot prove
+the native window, bridge or network behaviour without a device.
+
 ## What this proves, and what it does not
 
 Proves: the exact HTML, CSS, JS and JSON the APK ships load and work offline — the tabs

@@ -9,8 +9,13 @@ ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 JDK="${JAVA_HOME:-$(cat "$HOME/tools/JDK_PATH" 2>/dev/null || true)}"
 SDK="${ANDROID_SDK_ROOT:-$HOME/android-sdk}"
 HERE="$ROOT/tools/engine-review"
+MODE="${1:-debug}"
 OUT="$ROOT/artifacts/engine-review"
-APK="$OUT/ADD-3.9.1-field-preview.apk"
+if [ "$MODE" = "release" ]; then
+    APK="$ROOT/artifacts/ADD-4.0-bmo.apk"
+else
+    APK="$OUT/ADD-3.9.1-field-preview.apk"
+fi
 
 if [ -z "${JDK:-}" ] || [ ! -x "$JDK/bin/java" ]; then
     echo "JAVA_HOME is not set; install a JDK 17 and export JAVA_HOME." >&2
@@ -32,10 +37,15 @@ mkdir -p "$OUT"
 echo "== ADD engine review: icon catalog =="
 python3 "$ROOT/tools/engine-spike/scripts/prepare_icons.py"
 
-echo "== ADD engine review: assembleDebug =="
-"$ROOT/tools/engine-spike/gradlew" --no-daemon -p "$HERE" :app:assembleDebug
-
-cp "$HERE/app/build/outputs/apk/debug/app-debug.apk" "$APK"
+if [ "$MODE" = "release" ]; then
+    echo "== ADD engine review: assembleRelease =="
+    "$ROOT/tools/engine-spike/gradlew" --no-daemon -p "$HERE" :app:assembleRelease
+    cp "$HERE/app/build/outputs/apk/release/app-release.apk" "$APK"
+else
+    echo "== ADD engine review: assembleDebug =="
+    "$ROOT/tools/engine-spike/gradlew" --no-daemon -p "$HERE" :app:assembleDebug
+    cp "$HERE/app/build/outputs/apk/debug/app-debug.apk" "$APK"
+fi
 
 echo "== ADD engine review: signature =="
 "$SDK/build-tools/35.0.0/apksigner" verify --print-certs "$APK" | head -4

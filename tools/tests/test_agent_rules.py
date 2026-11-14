@@ -10,7 +10,7 @@ class AgentRulesShapeTest(unittest.TestCase):
         self.text = (ROOT / "AGENTS.md").read_text(encoding="utf-8")
 
     def test_contract_is_short_and_has_required_headings_in_order(self):
-        self.assertLessEqual(len(self.text.splitlines()), 260)
+        self.assertLessEqual(len(self.text.splitlines()), 160)
         headings = re.findall(r"^##\s+(.+)$", self.text, re.M)
         wanted = ["Mission and current state", "Work loop", "Skills", "Scope",
                   "Delivery matrix", "Verification", "Publish", "Visual review",

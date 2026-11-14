@@ -1,8 +1,12 @@
 package app.add.engine
 
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.assertHasClickAction
+import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.click
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
@@ -55,6 +59,7 @@ class EngineFrameCaptureTest {
     fun captureStudioShellDeckAndInspector() {
         compose.waitForIdle()
         capture("engine-studio-stage.png")
+        capture("bmo-full.png")
 
         // Bare stage is the way back to the Create dock. The scrim-free top pill
         // appears after the tap; reopen it so the dock is shown in its real frame.
@@ -62,17 +67,29 @@ class EngineFrameCaptureTest {
             click(Offset(width * 0.9f, height * 0.7f))
         }
         compose.waitForIdle()
-        compose.onNodeWithTag("studio-peek").performClick()
+        capture("bmo-peek.png")
+        // Peek is the page chip only: the zoom pill belongs to Full chrome.
+        compose.onAllNodesWithTag("stage-zoom").assertCountEquals(0)
+        compose.onNodeWithTag("bmo-page-chip").performClick()
         compose.waitForIdle()
         capture("engine-studio-dock.png")
 
-        compose.onNodeWithTag("engine-add").performClick()
+        compose.onNodeWithTag("bmo-page-chip").performClick()
+        compose.onNodeWithText("Hide chrome").performClick()
+        compose.waitForIdle()
+        capture("bmo-canvas.png")
+        compose.onNodeWithTag("bmo-restore").performClick()
+        compose.waitForIdle()
+
+        compose.onNodeWithTag("bmo-add").performClick()
         compose.waitForIdle()
         capture("engine-studio-create.png")
 
         compose.onNodeWithTag("create-type").performClick()
         compose.waitForIdle()
         capture("engine-studio-landed.png")
+        capture("bmo-selection.png")
+        capture("bmo-compact-full.png")
 
         compose.onNodeWithTag("notice-inspect").performClick()
         compose.waitForIdle()
@@ -114,10 +131,15 @@ class EngineFrameCaptureTest {
         // The Material Ink path: arm from Texture, draw on the stage, and keep the
         // compact HUD visible. This is the artifact that proves the gesture path is
         // wired through the real activity, not just the renderer unit test.
-        compose.onNodeWithText("DONE").performClick()
+        compose.onNodeWithTag("mask-done").performClick()
         compose.waitForIdle()
-        compose.onNodeWithTag("object-texture").performClick()
+        compose.onNodeWithTag("object-style").assertHasClickAction()
+        compose.onNodeWithTag("object-style").performClick()
         compose.waitForIdle()
+        compose.onNodeWithTag("inspector-sheet").assertExists()
+        compose.onNodeWithTag("tab-texture").performClick()
+        compose.waitForIdle()
+        compose.onNodeWithTag("tab-texture").assertIsSelected()
         compose.onNodeWithTag("texture-ink-arm").performScrollTo().performClick()
         compose.waitForIdle()
         compose.onNodeWithTag("engine-artboard").performTouchInput {
@@ -132,7 +154,7 @@ class EngineFrameCaptureTest {
 
         // The recording's blank interval was a Marble material painted over the
         // layers. Keep the applied recipe and the still-readable page in the set.
-        compose.onNodeWithText("DONE").performClick()
+        compose.onNodeWithTag("ink-done").performClick()
         compose.waitForIdle()
         compose.onNodeWithTag("object-texture").performClick()
         compose.waitForIdle()
@@ -142,5 +164,28 @@ class EngineFrameCaptureTest {
         compose.onNodeWithTag("sheet-done").performClick()
         compose.waitForIdle()
         capture("engine-studio-texture.png")
+
+        // A first-party plugin on the same panel surface.
+        compose.onNodeWithTag("bmo-plugins").performScrollTo().performClick()
+        compose.waitForIdle()
+        compose.onNodeWithTag("bmo-plugin-tone").performClick()
+        compose.waitForIdle()
+        capture("bmo-plugin.png")
+        capture("bmo-compact-plugin.png")
+    }
+
+    @Test
+    @Config(sdk = [35], qualifiers = "w840dp-h1000dp-xxhdpi")
+    fun captureExpandedShell() {
+        compose.waitForIdle()
+        capture("bmo-expanded.png")
+
+        compose.onNodeWithTag("bmo-add").performScrollTo().performClick()
+        compose.waitForIdle()
+        compose.onNodeWithTag("create-type").performClick()
+        compose.waitForIdle()
+        compose.onNodeWithTag("notice-inspect").performClick()
+        compose.waitForIdle()
+        capture("bmo-expanded-inspector.png")
     }
 }

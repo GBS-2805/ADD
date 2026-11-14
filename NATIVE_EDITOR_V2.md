@@ -32,7 +32,9 @@ The field is a document recipe: up to eight colour spots with Gaussian reach, sc
 - Integration is a task, not an assumption: Task 10 merges the engine into `app.offline.compress` and deletes Studio; Task 11 produces the signed final testing APK, which is the only release artifact.
 - Performance is a gate, not polish: 50 layers, three nested groups and one 2048 px photo must hold a 16 ms median frame time at 1080×1350 on the target phone. Record the number; do not estimate it.
 - Keep Kotlin 2.0.21, Compose BOM `2025.02.00`, SceneView 2.3.0 and Filament 1.56 unless a time-boxed compatibility spike proves an upgrade.
-- All existing engine tests must stay green. Current baseline: **166 tests, 0 failures, 0 errors**.
+- All existing engine tests must stay green. Current baseline: **209 tests, 0 failures, 0 errors**.
+- Web timing is report-only (`python3 tools/check_all.py --perf`). Engine frame-time
+  evidence stays blocked until `tools/engine-spike/bench.sh` has a real device report.
 - No visual claim without a capture; no device claim without a device check.
 - No third-party texture is bundled without a per-file source, licence and SHA-256 entry.
 - No Material dynamic colour; ADD keeps graphite/cream/newsprint/stamp red.
@@ -59,7 +61,7 @@ The field is a document recipe: up to eight colour spots with Gaussian reach, sc
 
 **Delivery rule:** a task is done only when `verify-suite.sh` and `verify-chrome.sh` pass and, for anything that renders, a capture exists. The final testing APK is the deliverable, not a review build with a go/no-go note.
 
-**Foundation already landed:** `LayerAffine.kt` (matrix composition, skew-aware decomposition, `grouped`/`flatten`, inverse hit-testing) and `MotionPath.kt` (cubic sampling, rigid clamping, group-local mapping) are in the engine with 14 JVM tests. The suite is 166 tests, 0 failures. Tasks 2 and 3 consume these helpers; they must not grow a second matrix or path implementation.
+**Foundation already landed:** `LayerAffine.kt` (matrix composition, skew-aware decomposition, `grouped`/`flatten`, inverse hit-testing) and `MotionPath.kt` (cubic sampling, rigid clamping, group-local mapping) are in the engine with 14 JVM tests. The suite is 209 tests, 0 failures. Tasks 2 and 3 consume these helpers; they must not grow a second matrix or path implementation.
 
 ---
 
@@ -244,7 +246,7 @@ These are references, not dependencies. Licence is a gate: Apache-2.0 and MIT co
 
 No new top-level editor. No second `MainActivity`. No new app package until Task 10, which owns the merge.
 
-`EngineStudioChrome.kt` (952 lines) and `EngineStudioInspector.kt` (928 lines) already hold chrome and sheets. Task 1 merges them into `EngineChrome.kt` and `EngineSheets.kt` and deletes the old pair. Leaving both pairs alive does not count as a split.
+`EngineStudioChrome.kt` (1,038 lines) and `EngineStudioInspector.kt` (1,295 lines) already hold chrome and sheets. Task 1 merges them into `EngineChrome.kt` and `EngineSheets.kt` and deletes the old pair. Leaving both pairs alive does not count as a split.
 
 ## Tasks
 
@@ -789,7 +791,8 @@ after a reviewed re-record for the fourth `TEXTURE` segment. No bitmap or networ
 asset was added. The review build was carried through as **3.8.4 (54)** and is live
 at `https://artbase-handoff-apk.vercel.app/ADD-3.8.4-engine-review.apk`; the public
 handoff is `https://artbase-handoff.vercel.app/`. Task 9–11 remain untouched, and
-this work is uncommitted by request.
+this work is uncommitted by request. The counts and build above are the Task 8 cut;
+the current baseline is **209 tests** and the field preview is **4.0-bmo (57)**.
 
 ### Task 9: Device gate on the candidate build
 

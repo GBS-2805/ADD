@@ -200,6 +200,8 @@ function sourceHash(pagePath) {
         doc: [document.documentElement.scrollWidth, document.documentElement.scrollHeight],
       };
     });
+    s.cssWidth = s.w;
+    s.cssHeight = s.full ? info.doc[1] : s.h;
     console.log(
       `${s.name}: bg ${info.bg} | ${info.fam.split(",")[0]} | poppins ${info.poppins}` +
       ` | hscroll ${info.hscroll} | menu ${info.menu} | drawer ${info.drawer}/${info.drawerVisible}` +
@@ -278,7 +280,7 @@ function sourceHash(pagePath) {
   const card = (s) => `
       <figure>
         <h3>${escape(s.title)}</h3>
-        <a href="${s.name}.webp"><img src="${s.name}.webp" alt="${escape(s.title)}" loading="lazy" /></a>
+        <a href="${s.name}.webp"><img src="${s.name}.webp" width="${s.cssWidth}" height="${s.cssHeight}" alt="${escape(s.title)}" loading="lazy" decoding="async" /></a>
         <p class="cap">${escape(s.caption)}</p>
       </figure>`;
   const chips = [`<button class="chip" type="button" data-group="all" aria-pressed="true">All <span>${all.length}</span></button>`]

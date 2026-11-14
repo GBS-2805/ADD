@@ -129,12 +129,12 @@
             android:layout_weight="1"
             android:background="@drawable/bg_ghost"
             android:clickable="true"
-            android:contentDescription="Studio canvas tools"
+            android:contentDescription="Engine editor"
             android:focusable="true"
             android:fontFamily="@font/libre_franklin"
             android:gravity="center"
             android:letterSpacing="0.08"
-            android:text="STUDIO"
+            android:text="ENGINE"
             android:textColor="?attr/on"
             android:textSize="10sp" />
     </LinearLayout>
@@ -170,11 +170,6 @@
             android:textSize="10sp"
             android:visibility="gone" />
 
-        <FrameLayout
-            android:id="@+id/studioHost"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:visibility="gone" />
     </FrameLayout>
 
     <LinearLayout

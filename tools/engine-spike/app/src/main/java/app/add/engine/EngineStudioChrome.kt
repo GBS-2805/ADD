@@ -24,6 +24,7 @@ import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -608,6 +609,7 @@ internal fun InspectorSheet(
     onClose: () -> Unit,
     onMask: () -> Unit,
     onTurn3D: () -> Unit,
+    layout: EngineLayout = EngineLayout.Compact,
     focusRequester: FocusRequester? = null,
 ) {
     val density = LocalDensity.current
@@ -623,16 +625,7 @@ internal fun InspectorSheet(
     // Keep the type prefix in the sheet header: "NEW" alone loses the fact that
     // this is a text layer. The object bar shows the shorter leaf name.
     val displayName = layer?.name ?: "The page"
-    EngineSheet(
-        title = displayName,
-        accessibilityTitle = layer?.name ?: "The page",
-        onDismiss = onClose,
-        focusRequester = focusRequester,
-        modifier = Modifier
-            .fillMaxWidth()
-            .fillMaxHeight(StudioMotion.SheetFraction)
-            .graphicsLayer { translationY = with(density) { dragPx.dp.toPx() } },
-    ) {
+    val content: @Composable ColumnScope.() -> Unit = {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -734,6 +727,22 @@ internal fun InspectorSheet(
             }
         }
     }
+    if (layout == EngineLayout.Expanded) {
+        EnginePanelHost(layout = layout, title = displayName, onDismiss = onClose) {
+            content()
+        }
+    } else {
+        EngineSheet(
+            title = displayName,
+            accessibilityTitle = layer?.name ?: "The page",
+            onDismiss = onClose,
+            focusRequester = focusRequester,
+            modifier = Modifier
+                .fillMaxWidth()
+                .fillMaxHeight(StudioMotion.SheetFraction)
+                .graphicsLayer { translationY = with(density) { dragPx.dp.toPx() } },
+        ) { content() }
+    }
 }
 
 @Composable
@@ -828,7 +837,7 @@ internal fun MaskHud(doc: EngineDocument, onDone: () -> Unit, modifier: Modifier
                 background = Lime,
                 contentPadding = PaddingValues(horizontal = 12.dp),
                 haptic = true,
-                modifier = Modifier.height(40.dp),
+                modifier = Modifier.height(40.dp).testTag("mask-done"),
             ) {
                 Text("DONE", color = Ink, fontSize = 9.sp, fontWeight = FontWeight.Bold)
             }

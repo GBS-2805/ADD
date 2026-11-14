@@ -18,7 +18,7 @@ internal object EngineEdition {
     val BandInk = Color(0xFFF5ECD8)
     val Rule = Color(0x381B1212)
 
-    /** Functional failure ink, shared with the app and Studio. */
+    /** Functional failure ink, shared with the app and engine. */
     val Warn = Color(0xFF8A3B00)
 
     val InkArgb = Ink.toArgb()

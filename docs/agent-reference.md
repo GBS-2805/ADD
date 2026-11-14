@@ -62,8 +62,8 @@ plum (`#5b2a4b`), set in Instrument Serif, Spectral and Libre Franklin. There ar
 palette chips and no light/dark switch. The final `html[data-theme], html[data-palette]`
 block in `site.css` is canonical; `site.js` no longer reads `site:theme` or
 `site:palette` and no longer builds the look controls. `tools/sync_edition.py` reads
-that block and generates `app/res/values/colors.xml`,
-`app/studio-assets/edition.css` and the engine's `EngineEdition.kt`; `build.sh` runs
+that block and generates `app/res/values/colors.xml` and the engine's
+`EngineEdition.kt`; `build.sh` runs
 it before the palette gate, and `check_palette.py` fails when any generated copy is
 stale. Never hand-edit those generated files.
 
@@ -155,9 +155,9 @@ PNGs, a passing `render-audit.json` with 72 checks, and 1080×2400 dimensions be
 it rebuilds `artifacts/shots/` from scratch for the public review. The screenshots
 are a current set, not an archive, and are never committed.
 
-This verifies drawing, not touch behaviour, and not a WebView. The Shelf and the
-Studio tab are Chromium surfaces; Robolectric has no Chromium compositor, so report
-those as uncaptured rather than faking a screenshot. On-device interaction remains
+This verifies drawing, not touch behaviour, and not a WebView. The Shelf is a
+Chromium surface; Robolectric has no Chromium compositor, so report it as uncaptured
+rather than faking a screenshot. On-device interaction remains
 unverified.
 
 ## Project shape
@@ -504,16 +504,13 @@ where the notes keep the history they shipped with.Icons, Fonts, Compress and th
   attributes in the single `AppTheme`. The band is `res/layout/band.xml` and the side
   panel `res/layout/drawer.xml`, both included by `activity_main.xml`; `CompareActivity`
   inherits the theme and wears the same colours.
-- `app/studio-assets/edition.css` is generated from the same block, and `studio.css`
-  maps its old shell variable names onto those tokens. The Studio is a paper proof
-  sheet, not a graphite instrument panel.
 - `tools/engine-spike/app/src/main/java/app/add/engine/EngineEdition.kt` is generated
   from the same block. The engine is still a separate review APK, but its Compose
   chrome is on the one edition: paper page, ink type, plum selection and actions, and
   the app's functional warning ink for destructive states.
 - `python3 tools/check_palette.py` guards all of the above, site, app and engine together. It
   compares the final Review block in `site.css` with `colors.xml` and the generated
-  Studio and engine tokens, requires the one theme to set every attribute, holds the band and page
+  engine tokens, requires the one theme to set every attribute, holds the band and page
   in that edition, insists the mark on the band wears the band's ink (it is tinted
   `?attr/ink`, so a themed `ink` is what keeps it visible), refuses a literal colour in
   a layout or a `bg_` drawable and a glyph drawn without a tint, and measures contrast
@@ -568,18 +565,12 @@ where the notes keep the history they shipped with.Icons, Fonts, Compress and th
   `PackStore`, which checks the listing's outer SHA-256, then the manifest signature
   against `PackKey`, then a SHA-256 per entry before installing atomically into
   `filesDir/font-packs/<slug>/<version>/`. The manual `.addpack` picker remains as a
-  secondary link for a file already on the phone. The editor's STUDIO tab now opens
-  first; it keeps the Studio engine in the same activity: a WebView over
-  `assets/www/studio` running vendored Fabric.js 5.3.0 (MIT) with a custom `AddText`
-  class (gradient, outline, shadow and blend), fast-drag mode, grouping, photo import
-  and a 1080x1350 PNG export to `Pictures/Studio`. The paper edition shell is
-  canvas-first: a flat paper masthead, a Move/Type/Style/Texture/Motion bar and a peek
-  inspector, all wearing the generated site tokens. `overlays.js` draws the five press materials — newsprint, wheatpaste,
-  overexposed ink, halftone and rough canvas — beside the eight atmosphere textures
-  (light leak, grain, bokeh, paper, dust, vignette, window shadows and lens flare), and
-  the page exposes opacity, blend, shuffle, remove, on-canvas placement handles and
-  X/Y/scale/rotation controls; nothing is fetched and no stock asset is bundled. It is
-  the first Studio 2 slice, not wired to saved looks, and it is unverified on a device.
+  secondary link for a file already on the phone. The editor's ENGINE tab opens the
+  native engine activity on its own `:engine` process; the old Studio WebView, Fabric
+  bundle and 1080x1350 Studio exporter are gone. The native Quick editor remains the
+  fallback when the engine class is unavailable, and both surfaces wear the generated
+  site tokens. Engine parity and the device gate live in `FINAL-TEST.md`; no WebView
+  editor remains to drift from the one edition.
 - `python3 tools/check_all.py` is the single verdict: palette, asset hashes, internal
   links, site tree, catalog, Figma structure, Pantone sheet, note dating and the staged
   bundle, one line each, all of them run so one pass shows everything. `--browser <url>` adds the
@@ -591,6 +582,38 @@ where the notes keep the history they shipped with.Icons, Fonts, Compress and th
   satisfied by one late re-export. `python3 tools/check_artboards.py` therefore
   re-exports the boards into a scratch folder and fails when any file differs from
   `figma/`; it reads `site-figma.svg` and `pantone.svg` as derived and skips them.
+
+## Engine-local rules
+
+`tools/engine-spike/AGENTS.md` is the engine lab's local contract. Read root
+`AGENTS.md` first; the engine file adds only local commands and traps, never a policy
+override.
+
+## Verified commands
+
+These are the commands the contract relies on. They were checked against this tree on
+2026-11-14; if a command is absent, write `none` rather than inventing one.
+
+| Need | Command |
+|---|---|
+| Fast verdict | `python3 tools/check_all.py` |
+| Visual verdict | `python3 tools/check_all.py --visual` |
+| Release verdict | `python3 tools/check_all.py --visual --artboards` |
+| Live headers | `python3 tools/check_headers.py --origin https://artbase-olive.vercel.app --handoff-origin https://artbase-handoff.vercel.app` |
+| Report-only performance | `python3 tools/check_all.py --perf` |
+| Rules lint | `python3 tools/check_agent_rules.py --check` |
+| Checker self-tests | `python3 -m unittest discover -s tools/tests -v` |
+| APK verify | `python3 tools/check_apk.py --apk dist/ADD-3.9.apk --catalog tools/catalog.json --published docs/data/tools.json` |
+| Site deploy | `python3 tools/deploy_vercel.py` |
+| Review surface | `python3 tools/deploy_review.py review` |
+| Review shots | `python3 tools/deploy_review.py shots` |
+| Handoff deploy | `python3 tools/deploy_review.py handoff` |
+| APK handoff | `python3 tools/deploy_review.py apk` |
+| Handoff provenance | `python3 tools/update_handoff.py --commit <sha> --deployed-at <iso>` |
+| Engine suite | `bash tools/engine-spike/verify-suite.sh` |
+| Chrome goldens | `bash tools/engine-spike/verify-chrome.sh` |
+| Site build | `./build.sh stage` |
+| APK build | `./build.sh add` |
 
 ## The address is rented, not owned
 

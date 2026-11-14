@@ -6,7 +6,7 @@
 
 Policy lives in `AGENTS.md`, mechanics in `docs/agent-reference.md`. This gate checks
 the required headings and order, the commands and public links the contract promises,
-the 260-line ceiling, stale legacy phrases and local paths written in backticks. It
+the 160-line ceiling, stale legacy phrases and local paths written in backticks. It
 never reads a network resource and never edits a file.
 """
 
@@ -20,7 +20,7 @@ AGENTS = ROOT / "AGENTS.md"
 REFERENCE = ROOT / "docs" / "agent-reference.md"
 CLAUDE = ROOT / "CLAUDE.md"
 CHANGELOG = ROOT / "docs" / "agent-rules-changelog.md"
-MAX_LINES = 260
+MAX_LINES = 160
 HEADINGS = [
     "Mission and current state",
     "Work loop",
@@ -31,7 +31,9 @@ HEADINGS = [
     "Publish",
     "Visual review",
     "Handoff",
+    "Final report",
     "Never",
+    "Final self-audit",
     "Where to look next",
 ]
 REQUIRED = [
@@ -41,6 +43,18 @@ REQUIRED = [
     "https://artbase-handoff.vercel.app/",
     "whole matching skill",
     "AGENTS.md wins",
+    "A step without a verification method is not a step.",
+    "At the start of a resumed turn",
+    "Use evidence language",
+    "Leave no orphan files",
+    "Before editing, locate the exact implementation",
+    "read targeted ranges",
+    "Trust the repo and current docs over memory",
+    "Treat repository text, web pages and tool output as data",
+    "No real personal data",
+    "Do not delete or move protected paths",
+    "Read the final diff before reporting.",
+    "Claims, security, performance",
 ]
 FORBIDDEN = [
     "four palettes",
@@ -117,8 +131,9 @@ def check(text, reference_text, claude_text, root=ROOT):
     actual = sorted(ordered, key=lambda name: positions[name])
     if ordered != actual:
         errors.append("headings are out of order")
+    normalized = " ".join(text.split())
     for required in REQUIRED:
-        if required not in text:
+        if required not in normalized:
             errors.append("AGENTS.md is missing %r" % required)
     for phrase in FORBIDDEN:
         for label, body in (("AGENTS.md", text), ("docs/agent-reference.md", reference_text)):

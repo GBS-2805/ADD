@@ -1,12 +1,18 @@
 # ADD Engine Lab — device checklist
 
-Use a real Android 8.0+ device. The APK is debug-signed and contains `arm64-v8a`
-and `x86_64` libraries.
+Use a real Android 13+ device. The BMO release candidate is
+`artifacts/ADD-4.0-bmo.apk` (`4.0-bmo`, code 57), signed with the ADD release key
+and containing `arm64-v8a`.
 
 ```bash
-adb install -r artifacts/engine-spike/ADD-Engine-Spike-0.1.apk
-adb shell am start -n app.add.engine/.MainActivity
+ADB="${ANDROID_HOME:-$HOME/android-sdk}/platform-tools/adb"
+"$ADB" install -r artifacts/ADD-4.0-bmo.apk
+"$ADB" shell am start -n app.offline.compress/app.add.engine.MainActivity
 ```
+
+For the BMO shell, also check: canvas tap → Peek; page chip → Full; Hide UI →
+Canvas; restore handle; dock scroll; selection rail; sheet drag; plugin shelf
+run/hide/reopen/close; and that only one plugin panel can be active.
 
 Open **DIAG** in the status bar or **DIAGNOSTICS** in the info panel. The screen
 reports SceneView attachment, model state, asset size, device/ABI, and lets you run
@@ -22,6 +28,14 @@ the same PixelCopy capture used by export without writing a file.
 6. Open the **STICKER** tool, add one sticker and one icon, then **EXPORT**.
 7. **EXPORT** writes a PNG to `Pictures/Engine Spike`.
 8. Opening that PNG shows all visible gems and stickers, not the dark 3D placeholder.
+
+## Performance evidence
+
+Run `bash tools/engine-spike/bench.sh` only with a real device attached. It writes
+`artifacts/bmo/bench.json`; with no device it records `status: blocked` and exits 2.
+Do not turn a JVM/Robolectric suite result into a device number. The device benchmark
+uses 50 layers, three nested groups and one 2048 px photo, and records cold start,
+median pan frame time, pinch latency, 1x/2x export time and peak bitmap allocation.
 
 ## Pass / fail
 

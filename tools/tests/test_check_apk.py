@@ -61,6 +61,30 @@ class CheckApkTest(unittest.TestCase):
                                                            'targetSdkVersion="34"')), APP)
         self.assertTrue(any("targetSdkVersion" in error for error in errors))
 
+    def test_rejects_debuggable_release(self):
+        errors = check_apk.validate(self.info(GOOD.replace(
+            'allowBackup="false"', 'allowBackup="false" android:debuggable="true"')), APP)
+        self.assertTrue(any("debuggable" in error for error in errors), errors)
+
+    def test_rejects_a_non_allowlisted_signing_certificate(self):
+        signing = {"certificates": [{"sha256": "a" * 64}]}
+        errors = check_apk.validate(self.info(), APP, cert="b" * 64, signing=signing)
+        self.assertTrue(any("not in the public allowlist" in error for error in errors), errors)
+
+    def test_accepts_the_current_manifest_and_certificate(self):
+        signing = {"certificates": [{"sha256": "a" * 64}]}
+        self.assertEqual(check_apk.validate(self.info(), APP, cert="a" * 64,
+                                            signing=signing), [])
+
+    def test_rejects_a_version_code_below_the_catalog(self):
+        errors = check_apk.validate(self.info(GOOD.replace('android:versionCode="41"',
+                                                           'android:versionCode="40"')), APP)
+        self.assertTrue(any("below the catalog" in error for error in errors), errors)
+
+    def test_release_requires_published_digest(self):
+        errors = check_apk.validate(self.info(), APP, release=True)
+        self.assertTrue(any("--published" in error for error in errors), errors)
+
 
 if __name__ == "__main__":
     unittest.main()

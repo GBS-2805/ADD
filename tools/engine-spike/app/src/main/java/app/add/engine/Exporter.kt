@@ -2,12 +2,14 @@ package app.add.engine
 
 import android.content.ContentValues
 import android.content.Context
+import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
 import android.os.Build
 import android.os.Environment
 import android.os.Handler
+import android.net.Uri
 import android.os.Looper
 import android.provider.MediaStore
 import android.view.PixelCopy
@@ -47,7 +49,14 @@ data class ExportResult(
     val missing: Int,
     val black: Int,
     val litPercent: Int,
+    val uri: Uri? = null,
+    val mime: String = "image/png",
 )
+
+enum class ExportFormat(val mime: String, val extension: String) {
+    Png("image/png", "png"),
+    Jpeg("image/jpeg", "jpg"),
+}
 
 private data class CaptureAttempt(
     val bitmap: Bitmap?,
@@ -67,6 +76,7 @@ object Exporter {
         ink: List<TextureInk> = emptyList(),
         backgroundField: FieldSpec? = null,
         fieldPhase: Float = 0f,
+        format: ExportFormat = ExportFormat.Png,
     ): ExportResult {
         val artboard = renderArtboard(
             context = context,
@@ -79,7 +89,7 @@ object Exporter {
             backgroundField = backgroundField,
             fieldPhase = fieldPhase,
         )
-        val saved = withContext(Dispatchers.IO) { save(context, artboard.bitmap) }
+        val saved = withContext(Dispatchers.IO) { save(context, artboard.bitmap, format) }
         return ExportResult(
             status = buildString {
                 append(saved.message)
@@ -93,6 +103,8 @@ object Exporter {
             missing = artboard.missing,
             black = artboard.black,
             litPercent = artboard.litPercent,
+            uri = saved.uri,
+            mime = format.mime,
         )
     }
 
@@ -314,38 +326,66 @@ object Exporter {
         else -> "CODE $result"
     }
 
-    private data class Saved(val message: String, val bytes: Long)
+    private data class Saved(val message: String, val bytes: Long, val uri: Uri? = null)
 
-    private fun save(context: Context, bitmap: Bitmap): Saved {
-        val stamp = SimpleDateFormat("yyyyMMdd-HHmmss", Locale.US).format(Date())
-        val name = "add-engine-$stamp.png"
-        // One encode, so the size reported is the size written.
-        val png = ByteArrayOutputStream().also {
-            bitmap.compress(Bitmap.CompressFormat.PNG, 100, it)
+    /** The one share intent for an export; null when storage produced no readable URI. */
+    internal fun shareIntent(result: ExportResult): Intent? {
+        val uri = result.uri ?: return null
+        return Intent(Intent.ACTION_SEND).apply {
+            type = result.mime
+            putExtra(Intent.EXTRA_STREAM, uri)
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        }
+    }
+
+    /** The one encode path: JPEG is flattened on white so no alpha is written. */
+    internal fun encode(bitmap: Bitmap, format: ExportFormat): ByteArray {
+        val source = if (format == ExportFormat.Jpeg) {
+            Bitmap.createBitmap(bitmap.width, bitmap.height, Bitmap.Config.ARGB_8888).also { flat ->
+                val canvas = Canvas(flat)
+                canvas.drawColor(Color.WHITE)
+                canvas.drawBitmap(bitmap, 0f, 0f, null)
+            }
+        } else bitmap
+        val out = ByteArrayOutputStream().also { stream ->
+            source.compress(
+                if (format == ExportFormat.Jpeg) Bitmap.CompressFormat.JPEG else Bitmap.CompressFormat.PNG,
+                if (format == ExportFormat.Jpeg) 92 else 100,
+                stream,
+            )
         }.toByteArray()
+        if (source !== bitmap) source.recycle()
+        return out
+    }
+
+    private fun save(context: Context, bitmap: Bitmap, format: ExportFormat): Saved {
+        val stamp = SimpleDateFormat("yyyyMMdd-HHmmss", Locale.US).format(Date())
+        val name = "add-engine-$stamp.${format.extension}"
+        // One encode, so the size reported is the size written.
+        val bytes = encode(bitmap, format)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             val values = ContentValues().apply {
                 put(MediaStore.Images.Media.DISPLAY_NAME, name)
-                put(MediaStore.Images.Media.MIME_TYPE, "image/png")
+                put(MediaStore.Images.Media.MIME_TYPE, format.mime)
                 put(MediaStore.Images.Media.RELATIVE_PATH, "${Environment.DIRECTORY_PICTURES}/Engine Spike")
                 put(MediaStore.Images.Media.IS_PENDING, 1)
             }
             val uri = context.contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values)
                 ?: return Saved("EXPORT FAILED · could not create a MediaStore entry", 0L)
             context.contentResolver.openOutputStream(uri)?.use { stream ->
-                stream.write(png)
+                stream.write(bytes)
             } ?: return Saved("EXPORT FAILED · could not open the destination", 0L)
             values.clear()
             values.put(MediaStore.Images.Media.IS_PENDING, 0)
             context.contentResolver.update(uri, values, null, null)
-            return Saved("SAVED · Pictures/Engine Spike/$name", png.size.toLong())
+            return Saved("SAVED · Pictures/Engine Spike/$name", bytes.size.toLong(), uri)
         }
 
         val dir = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES) ?: context.filesDir
         val file = File(dir, name)
         FileOutputStream(file).use { stream ->
-            stream.write(png)
+            stream.write(bytes)
         }
-        return Saved("SAVED · ${file.absolutePath}", png.size.toLong())
+        return Saved("SAVED · ${file.absolutePath}", bytes.size.toLong(), Uri.fromFile(file))
     }
 }

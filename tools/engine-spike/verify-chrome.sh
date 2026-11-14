@@ -10,7 +10,23 @@ ROOT="$(cd "$(dirname "$0")" && pwd)"
 JDK="${JAVA_HOME:-$(cat "$HOME/tools/JDK_PATH" 2>/dev/null || true)}"
 SDK="${ANDROID_SDK_ROOT:-$HOME/android-sdk}"
 BASELINE="${ENGINE_CHROME_DIR:-$ROOT/app/src/test/screenshots}"
+RESULTS="$ROOT/app/build/test-results/testDebugUnitTest"
 TASK=verifyRoborazziDebug
+BACKUP=""
+
+# This script runs one test class; Gradle replaces the shared result directory with
+# that class's XML. Keep a full-suite result set intact for the engine-claims gate.
+restore_results() {
+    if [ -n "${BACKUP:-}" ] && [ -d "$BACKUP" ]; then
+        rm -rf "$RESULTS"
+        mkdir -p "$RESULTS"
+        cp -a "$BACKUP/." "$RESULTS/"
+    fi
+    if [ -n "${BACKUP:-}" ]; then
+        rm -rf "$BACKUP"
+    fi
+}
+trap restore_results EXIT
 
 if [ "${1:-}" = "--update" ]; then
     TASK=recordRoborazziDebug
@@ -33,6 +49,11 @@ export JAVA_HOME="$JDK"
 export ANDROID_HOME="$SDK"
 export ANDROID_SDK_ROOT="$SDK"
 export ENGINE_RENDER_OUT="$BASELINE"
+
+if [ -d "$RESULTS" ]; then
+    BACKUP="$(mktemp -d)"
+    cp -a "$RESULTS/." "$BACKUP/"
+fi
 
 ./gradlew --no-daemon :app:"$TASK" \
     --tests app.add.engine.EngineFrameCaptureTest "$@"

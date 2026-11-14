@@ -27,7 +27,6 @@ import android.view.Window;
 import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.widget.EditText;
-import android.widget.FrameLayout;
 import android.widget.GridLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -46,9 +45,8 @@ import java.util.Locale;
 /**
  * The editor: a photo, type set in the bundled faces or an imported pack, seven photo
  * presets and the reader's own saved looks, five live adjustments, reorderable
- * layers, and an export to Pictures/Editor. QUICK and STUDIO are tabs in this one
- * activity; STUDIO opens first and its WebView takes the canvas while the native band
- * and tabs recede, so the native tools and the Studio never open a second editor.
+ * layers, and an export to Pictures/Editor. QUICK is the native editor; the ENGINE tab
+ * routes to the one native engine activity. There is no second WebView editor.
  *
  * Nothing here needs a permission. The photo and the pack arrive through the system
  * picker, which hands over one document at a time, and the export goes through
@@ -85,10 +83,6 @@ public class EditorActivity extends Activity {
     private View dock;
     private View editorBand;
     private View editorTabs;
-    private FrameLayout studioHost;
-    private StudioPane studioPane;
-    private boolean studioOpen;
-    private int quickUiFlags = -1;
     /** The look application still reversible from the stage, if any. */
     private LookUndo pendingUndo;
 
@@ -126,23 +120,17 @@ public class EditorActivity extends Activity {
         studioTab = findViewById(R.id.studioTab);
         editorSubtitle = findViewById(R.id.editorSubtitle);
         dock = findViewById(R.id.dock);
-        studioHost = findViewById(R.id.studioHost);
         quickTab.setOnClickListener(v -> showQuick());
+        studioTab.setText("ENGINE");
+        studioTab.setContentDescription("Engine editor");
         studioTab.setOnClickListener(v -> showStudio());
-        installEngineTab();
 
         faces = FontStore.faces(this);
         currentFace = FontStore.defaultFace(this);
         stage.setSelectionColour(colour(R.attr.accent, Color.WHITE));
         showFace();
 
-        findViewById(R.id.backButton).setOnClickListener(v -> {
-            if (studioOpen) {
-                showQuick();
-            } else {
-                finish();
-            }
-        });
+        findViewById(R.id.backButton).setOnClickListener(v -> finish());
         photoButton.setOnClickListener(v -> photoDialog());
         findViewById(R.id.addTextButton).setOnClickListener(v -> textDialog(null));
         exportButton.setOnClickListener(v -> exportDialog());
@@ -201,54 +189,18 @@ public class EditorActivity extends Activity {
     }
 
     /**
-     * The Editor entry. Review builds go straight to the engine so the lab is the
-     * destination; the basic editor stays one tap away in the engine's info sheet.
-     * Shipping builds, and any build without the engine class, keep this activity.
+     * The one editor door. The integrated build always starts the engine; a raw
+     * build without the engine classes keeps the basic editor rather than opening
+     * a dead route.
      */
     public static void open(Activity from) {
-        if (DevFlags.engineLab(from) && openEngineLab(from)) {
+        if (openEngineLab(from)) {
             return;
         }
         from.startActivity(new Intent(from, EditorActivity.class));
     }
 
-    /**
-     * The engine's own door, in review builds only: a third tab beside QUICK and STUDIO.
-     * It used to open whenever the editor opened, which is why one crash in the lab took
-     * the editor with it; now the editor is always the editor and the engine is one
-     * deliberate tap. Absent from the shipping build, which has no engine classes.
-     */
-    private void installEngineTab() {
-        if (!DevFlags.engineLab(this)) {
-            return;
-        }
-        View tabs = findViewById(R.id.editorTabs);
-        if (!(tabs instanceof LinearLayout)) {
-            return;
-        }
-        float density = getResources().getDisplayMetrics().density;
-        TextView engine = new TextView(this);
-        engine.setText("ENGINE");
-        engine.setContentDescription("Engine lab");
-        engine.setTextSize(TypedValue.COMPLEX_UNIT_SP, 10);
-        engine.setLetterSpacing(0.08f);
-        engine.setGravity(Gravity.CENTER);
-        engine.setTextColor(colour(R.attr.accentInk, Color.WHITE));
-        engine.setBackgroundResource(R.drawable.bg_chip);
-        engine.setClickable(true);
-        engine.setFocusable(true);
-        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(0, Math.round(36 * density), 0.7f);
-        params.setMarginStart(Math.round(6 * density));
-        engine.setLayoutParams(params);
-        engine.setOnClickListener(v -> {
-            if (!openEngineLab(this)) {
-                Toast.makeText(this, "The engine is not in this build", Toast.LENGTH_SHORT).show();
-            }
-        });
-        ((LinearLayout) tabs).addView(engine);
-    }
-
-    /** Reaches the engine by class name so the shipping build still compiles. */
+    /** Reaches the engine by class name so a build without it still compiles. */
     private static boolean openEngineLab(Context context) {
         try {
             Class<?> engine = Class.forName("app.add.engine.MainActivity");
@@ -259,7 +211,7 @@ public class EditorActivity extends Activity {
         }
     }
 
-    /** Studio is the default editor; Quick is one tap away through the Studio back control. */
+    /** The engine is the default editor; Quick remains the native fallback. */
     private void restoreTab(Bundle state) {
         boolean basic = getIntent().getBooleanExtra(EXTRA_BASIC_EDITOR, false);
         boolean studio = state != null ? state.getBoolean("editor_studio", false) : !basic;
@@ -278,16 +230,10 @@ public class EditorActivity extends Activity {
     }
 
     private void showQuick() {
-        studioOpen = false;
-        if (studioPane != null) {
-            studioPane.pause();
-        }
         if (editorBand != null) { editorBand.setVisibility(View.VISIBLE); }
         if (editorTabs != null) { editorTabs.setVisibility(View.VISIBLE); }
-        paintSystemBars(false);
         stage.setVisibility(View.VISIBLE);
         dock.setVisibility(View.VISIBLE);
-        studioHost.setVisibility(View.GONE);
         photoButton.setVisibility(View.VISIBLE);
         exportButton.setVisibility(View.VISIBLE);
         undoLookButton.setVisibility(pendingUndo == null ? View.GONE : View.VISIBLE);
@@ -296,33 +242,16 @@ public class EditorActivity extends Activity {
     }
 
     private void showStudio() {
-        studioOpen = true;
-        if (editorBand != null) { editorBand.setVisibility(View.GONE); }
-        if (editorTabs != null) { editorTabs.setVisibility(View.GONE); }
-        paintSystemBars(true);
-        stage.setVisibility(View.GONE);
-        dock.setVisibility(View.GONE);
-        photoButton.setVisibility(View.GONE);
-        exportButton.setVisibility(View.GONE);
-        undoLookButton.setVisibility(View.GONE);
-        studioHost.setVisibility(View.VISIBLE);
-        if (studioPane == null) {
-            studioPane = new StudioPane(this);
-            studioPane.setCloseListener(this::showQuick);
-            studioHost.addView(studioPane, new FrameLayout.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        // One editor: the native engine. A raw build without it keeps the native
+        // Quick surface rather than opening a second, legacy editor.
+        if (!openEngineLab(this)) {
+            showQuick();
         }
-        studioPane.resume();
-        editorSubtitle.setText("STUDIO \u00b7 FABRIC+");
-        paintTabs(false);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        if (studioPane != null) {
-            studioPane.resume();
-        }
         List<FontStore.Face> refreshed = FontStore.faces(this);
         faces = refreshed;
         if (currentFace != null && currentFace.imported()
@@ -334,58 +263,14 @@ public class EditorActivity extends Activity {
 
     @Override
     protected void onPause() {
-        if (studioPane != null) {
-            studioPane.pause();
-        }
         super.onPause();
     }
 
     @Override
     protected void onDestroy() {
-        if (studioPane != null) {
-            studioPane.destroy();
-            studioPane = null;
-        }
         super.onDestroy();
     }
 
-    @Override
-    public void onBackPressed() {
-        if (studioOpen) {
-            showQuick();
-            return;
-        }
-        super.onBackPressed();
-    }
-
-    @Override
-    protected void onSaveInstanceState(Bundle out) {
-        super.onSaveInstanceState(out);
-        out.putBoolean("editor_studio", studioOpen);
-    }
-
-    /** The native chrome yields to the press; system bars follow the paper edition. */
-    private void paintSystemBars(boolean studio) {
-        View decor = getWindow().getDecorView();
-        if (studio) {
-            if (quickUiFlags < 0) {
-                quickUiFlags = decor.getSystemUiVisibility();
-            }
-            // The Studio masthead is plum, so the status bar keeps light icons;
-            // the navigation bar is paper and keeps dark icons.
-            decor.setSystemUiVisibility((quickUiFlags
-                    & ~View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR)
-                    | View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
-            getWindow().setStatusBarColor(colour(R.attr.band, Color.BLACK));
-            getWindow().setNavigationBarColor(colour(R.attr.page, Color.BLACK));
-        } else {
-            if (quickUiFlags >= 0) {
-                decor.setSystemUiVisibility(quickUiFlags);
-            }
-            getWindow().setStatusBarColor(colour(R.attr.band, Color.BLACK));
-            getWindow().setNavigationBarColor(colour(R.attr.page, Color.BLACK));
-        }
-    }
 
     private void applyInsets() {
         final View root = findViewById(R.id.editorRoot);
@@ -1928,9 +1813,6 @@ public class EditorActivity extends Activity {
     @Override
     protected void onActivityResult(int request, int result, Intent data) {
         super.onActivityResult(request, result, data);
-        if (studioPane != null && studioPane.onActivityResult(request, result, data)) {
-            return;
-        }
         if (request == REQ_PACKS) {
             // Reopen the list after the shelf closes, even on Cancel: a pack may have
             // been installed while it was open, and the old dialog would still show

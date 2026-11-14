@@ -1,0 +1,9 @@
+{
+  "schema": 1,
+  "certificates": [
+    {
+      "sha256": "960b76985fb74b50ebe7fb3f368a586aa51f31ea59ab0d94be215e9441dd7fd6",
+      "dn": "CN=Offline Compress, OU=Apps, O=Offline, L=NA, ST=NA, C=US"
+    }
+  ]
+}
