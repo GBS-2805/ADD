@@ -116,5 +116,42 @@ class PhoneIconDeterminismTest(unittest.TestCase):
         self.assertEqual(check_artboards.unstable_boards(self.first, self.second), [name])
 
 
+class BoardMatchTest(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.dir = Path(self.tmp.name)
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def board(self, name, x, text="ICONS", rect="<rect x=\"1\" y=\"2\" width=\"3\" height=\"4\"/>"):
+        path = self.dir / name
+        path.write_text(
+            '<svg>%s<text x="%s" y="10" font-family="Poppins" font-size="12" '
+            'font-weight="400">%s</text></svg>\n' % (rect, x, text), encoding="utf-8")
+        return path
+
+    def test_identical_board_matches(self):
+        self.assertTrue(check_artboards.boards_match(self.board("a", "10"), self.board("b", "10")))
+
+    def test_subpixel_text_shift_is_accepted(self):
+        self.assertTrue(check_artboards.boards_match(self.board("a", "10.22"), self.board("b", "10")))
+
+    def test_two_pixel_text_shift_is_accepted(self):
+        self.assertTrue(check_artboards.boards_match(self.board("a", "12.11"), self.board("b", "10")))
+
+    def test_text_shift_beyond_tolerance_is_reported(self):
+        self.assertFalse(check_artboards.boards_match(self.board("a", "12.6"), self.board("b", "10")))
+
+    def test_changed_text_is_reported(self):
+        self.assertFalse(check_artboards.boards_match(
+            self.board("a", "10"), self.board("b", "10", text="TYPE")))
+
+    def test_changed_non_text_layout_is_reported(self):
+        self.assertFalse(check_artboards.boards_match(
+            self.board("a", "10"),
+            self.board("b", "10", rect="<rect x=\"2\" y=\"2\" width=\"3\" height=\"4\"/>")))
+
+
 if __name__ == "__main__":
     unittest.main()
