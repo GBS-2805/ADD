@@ -10,6 +10,23 @@ import org.junit.Test
  * renderer. No Robolectric bitmap or device is involved in determinism.
  */
 class TexturePresetTest {
+    // Reflective because the Android test compile classpath does not expose
+    // java.lang.management, while the JVM that runs these tests does.
+    private val cpuBean: Any? = runCatching {
+        Class.forName("java.lang.management.ManagementFactory")
+            .getMethod("getThreadMXBean").invoke(null)
+    }.getOrNull()
+
+    /**
+     * CPU time, not wall time: a shared CI runner can deschedule the test thread
+     * mid-render, and a frame budget is about the work, not the wait.
+     */
+    private fun cpuNow(): Long {
+        val bean = cpuBean ?: return System.nanoTime()
+        return runCatching {
+            bean.javaClass.getMethod("getCurrentThreadCpuTime").invoke(bean) as Long
+        }.getOrDefault(System.nanoTime())
+    }
 
     @Test
     fun tenFamiliesArePresentAndStable() {
@@ -105,9 +122,9 @@ class TexturePresetTest {
     private fun bestPreviewMs(family: TextureFamily, width: Int, height: Int): Double {
         TexturePresets.render(family, TexturePresets.seedFor(family), 48, 60)
         val samples = (1..5).map {
-            val started = System.nanoTime()
+            val started = cpuNow()
             TexturePresets.render(family, TexturePresets.seedFor(family), width, height)
-            (System.nanoTime() - started) / 1_000_000.0
+            (cpuNow() - started) / 1_000_000.0
         }
         val best = samples.min()
         println(
@@ -136,7 +153,7 @@ class TexturePresetTest {
         }
         val times = (0 until 5).map { pass ->
             var checksum = 0
-            val started = System.nanoTime()
+            val started = cpuNow()
             TextureFamily.entries.forEach { family ->
                 checksum += TexturePresets.render(
                     family,
@@ -145,7 +162,7 @@ class TexturePresetTest {
                     120,
                 ).argb[0]
             }
-            val elapsedMs = (System.nanoTime() - started) / 1_000_000.0
+            val elapsedMs = (cpuNow() - started) / 1_000_000.0
             println("texture ten-family thumbnails pass=$pass elapsedMs=$elapsedMs checksum=$checksum")
             elapsedMs
         }
