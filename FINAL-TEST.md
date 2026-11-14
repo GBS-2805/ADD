@@ -1,7 +1,7 @@
 # Final BMO gate — 2026-11-14
 
-**Scope:** the BMO lane, Tasks 1–12, committed as `edde672`; Studio retirement and
-C2/C4 cleanup are included. The Vercel deploy is blocked by an invalid token, so no
+**Scope:** the BMO lane, Tasks 1–12, plus C2–C4 cleanup, committed on `main`; Studio
+retirement is included. The Vercel deploy is blocked by an invalid token, so no
 live-header pass is claimed.
 
 ## Candidate

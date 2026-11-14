@@ -3,13 +3,12 @@
 **Scope:** `docs/superpowers/plans/2026-11-14-phasing-plan.md`, all 553 lines, 24 tasks,
 the A7.1 sub-task and the three source plans.
 
-**Verdict:** the plan is structurally coherent, but Phase 1 is **not fully executable in
-this environment**. A1, A2, A5 and A7.1 are implemented and verified; A3 is report-only,
-A4 is implemented for the APK/WebView boundary, A6 has its harness, and A7 is wired.
-C0/C1 are done. B1–B7, B9 and B12 are implemented; B10 migration is implemented while
-its Studio deletion is blocked on owner approval; B8 and B11 install-over are blocked
-on a real device. Live enforcement, device numbers, full A7 sign-off and C2–C4 remain
-open. This audit does not claim a full-phase pass.
+**Verdict:** the plan is structurally coherent and the implemented lanes are closed. A1,
+A2, A4–A7 and A7.1 are implemented and verified; A3's headers are checked in but the
+live deploy is blocked by an invalid Vercel token. C0–C4 are complete. B1–B7 and B9–B12
+are implemented, including the Studio deletion and the final signed APK. B8 and B11's
+install-over remain blocked on a real device. Device numbers, live header evidence and
+the full A7 sign-off therefore remain open, and this audit does not claim those.
 
 ## Structure audit
 
@@ -36,9 +35,9 @@ The plan register now records it as done with no cleanup dependency.
 |---|---|---|
 | C0 | **Done** | Protected set, hashes and sizes recorded in ignored `artifacts/cleanup/README.md` |
 | C1 | **Done** | Guarded planner implemented; 9 tests and all three dry-runs pass; no deletion |
-| C2 | Blocked | Destructive Waves 1; needs explicit owner approval and a dry-run review |
-| C3 | Blocked | Depends on B8 and removes build trees; no device gate yet |
-| C4 | Blocked | Destructive archive/delete; needs B2 and per-folder approval |
+| C2 | **Done** | Wave 1 removed 59 files / 356,419,245 bytes; protected APKs survive |
+| C3 | **Done** | Root and engine build trees plus staged assets removed; workspace 602 MB |
+| C4 | **Done** | Screen-review and brand archived with hashes; reference/scratch trees removed |
 
 ### Lane B — BMO
 
@@ -115,11 +114,10 @@ chrome: goldens match
 1. **B8/B11 require a device.** The plan itself says a VM/Robolectric number is not a
    device pass. `adb devices` lists no device, so the device gate and install-over test
    cannot run; the emulator is not a legal substitute.
-2. **C2–C4 are destructive.** No cleanup wave was approved or executed; deleting
-   `reference-src`, `docs`-adjacent evidence or build trees without a dry-run review
-   would violate the plan’s own invariants.
-3. **A3/A4/A7 depend on the release route.** The live header and signed-APK checks
-   cannot be completed while B9–B11 are blocked.
+2. **A3 needs a valid deploy credential.** The tree is committed and the header config
+   is checked in, but `VERCEL_TOKEN` is rejected by Vercel before the storage gate.
+3. **Device evidence cannot be synthesized.** A3's live proof, B8, the install-over and
+   full A7 sign-off need a real device and a working deploy, not another code change.
 4. **A1–A7 are implemented to their verified limits but do not make the phase complete.**
    A3 live enforcement still needs a deploy/B9, A4 device smoke needs B8/B9, A6 device
    numbers need B8/B11, and A7 sign-off inherits those plus B11. BMO and cleanup are
