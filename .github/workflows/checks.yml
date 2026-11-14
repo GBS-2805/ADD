@@ -72,13 +72,20 @@ jobs:
           "$TOOLS/sdkmanager" "platforms;android-35" "build-tools;35.0.0"
       - name: Playwright's Chromium, pinned to the build the baselines were recorded on
         run: |
-          # The pages fall back from Poppins to system-ui and Arial for glyphs the
-          # bundled faces do not carry. On Linux those resolve to DejaVu and
-          # Liberation; a runner missing either shifts inline text by a few pixels.
-          sudo apt-get update
-          sudo apt-get install -y fonts-dejavu-core fonts-liberation
           npm install --prefix /tmp/pw "playwright@1.65.0"
           /tmp/pw/node_modules/.bin/playwright install --with-deps chromium
+      # The artboards are byte-compared with baselines recorded against the rootless
+      # render stack from tools/render_env.py: its pinned FreeType, fontconfig and
+      # DejaVu/Liberation faces are part of the measurement, not just the browser.
+      - name: Pinned render libraries and fonts
+        uses: actions/cache@v4
+        with:
+          path: |
+            /tmp/pkgs
+            /tmp/rootfs
+          key: render-rootfs-${{ runner.os }}-${{ hashFiles('tools/render_env.py') }}
+      - name: Rebuild the pinned render libraries and fonts
+        run: python3 tools/render_env.py --libs
       - name: Gradle, wrapper and Robolectric caches
         uses: actions/cache@v4
         with:
@@ -91,6 +98,8 @@ jobs:
       - name: The engine suite, both pixel guards, and the rest of the verdict
         env:
           NODE_PATH: /tmp/pw/node_modules
+          LD_LIBRARY_PATH: /tmp/rootfs/usr/lib/x86_64-linux-gnu:/tmp/rootfs/lib/x86_64-linux-gnu
+          FONTCONFIG_FILE: /tmp/rootfs/fonts.conf
           # Chromium's glyph anti-aliasing is renderer-dependent, not tree-dependent:
           # the same baselines drift ~5k px on a stock runner (run 42637567824) while
           # every geometry assertion passes. Keep the strict 40 px guard local; on CI

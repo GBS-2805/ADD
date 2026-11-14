@@ -34,6 +34,11 @@ PKG_DIR = "/tmp/pkgs"
 BROWSERS = "/tmp/pw"
 PROJ = "/tmp/pwshot"
 
+# FreeType participates in glyph advances. Pin the build the artboards were
+# recorded against so a later security update cannot make a current board look
+# stale; libarchive still serves this exact noble pool package.
+PINS = {"libfreetype6": "2.13.2+dfsg-1build3"}
+
 # Chromium's shared-object closure plus two text faces for the renders.
 DEPS = """
 libnspr4 libnss3 libasound2t64 libatk1.0-0t64 libatk-bridge2.0-0t64
@@ -60,9 +65,9 @@ def fetch(url: str, dest: str) -> str:
     return dest
 
 
-def package_index() -> dict[str, str]:
-    """Map pool-relative .deb path -> package name, for every suite/component."""
-    index: dict[str, str] = {}
+def package_index() -> dict[str, tuple[str, str]]:
+    """Map pool-relative .deb path -> (package name, version) for every suite."""
+    index: dict[str, tuple[str, str]] = {}
     for suite in SUITES:
         for comp in COMPONENTS:
             url = f"{ARCHIVE}/dists/{suite}/{comp}/binary-amd64/Packages.gz"
@@ -73,12 +78,14 @@ def package_index() -> dict[str, str]:
                 log(f"skip {suite}/{comp}: {exc}")
                 continue
             with gzip.open(dest, "rt", errors="replace") as f:
-                name = ""
+                name = version = ""
                 for line in f:
                     if line.startswith("Package: "):
                         name = line[9:].strip()
+                    elif line.startswith("Version: "):
+                        version = line[9:].strip()
                     elif line.startswith("Filename: "):
-                        index[line[10:].strip()] = name
+                        index[line[10:].strip()] = (name, version)
     return index
 
 
@@ -91,7 +98,9 @@ def install_libs() -> None:
     wanted = set(DEPS)
     picks: dict[str, str] = {}
     # Longest name wins so libatk1.0-0t64 does not shadow libatk1.0-0t64-dev.
-    for path, name in sorted(index.items(), key=lambda kv: -len(kv[1])):
+    for path, (name, version) in sorted(index.items(), key=lambda kv: -len(kv[1][0])):
+        if name in PINS and version != PINS[name]:
+            continue
         if name in wanted and name not in picks:
             picks[name] = path
 

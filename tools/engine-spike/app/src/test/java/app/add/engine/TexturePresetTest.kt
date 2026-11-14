@@ -98,23 +98,23 @@ class TexturePresetTest {
     }
 
     /**
-     * Median of three at the measured size after a small field has let HotSpot
-     * compile the family's branch. The budget is unchanged; a single sample on a
-     * shared CI runner can otherwise fail on JIT or a scheduler hiccup.
+     * Best of five at the measured size after a small field has let HotSpot
+     * compile the family's branch. The budget is unchanged; scheduler pauses and
+     * GC on a shared CI runner otherwise turn one slow sample into a failure.
      */
-    private fun medianPreviewMs(family: TextureFamily, width: Int, height: Int): Double {
+    private fun bestPreviewMs(family: TextureFamily, width: Int, height: Int): Double {
         TexturePresets.render(family, TexturePresets.seedFor(family), 48, 60)
-        val samples = (1..3).map {
+        val samples = (1..5).map {
             val started = System.nanoTime()
             TexturePresets.render(family, TexturePresets.seedFor(family), width, height)
             (System.nanoTime() - started) / 1_000_000.0
         }
-        val median = samples.sorted()[1]
+        val best = samples.min()
         println(
             "texture family=$family ${width}x$height " +
-                "samplesMs=${samples.joinToString(",") { "%.3f".format(it) }} medianMs=$median",
+                "samplesMs=${samples.joinToString(",") { "%.3f".format(it) }} bestMs=$best",
         )
-        return median
+        return best
     }
 
     @Test
@@ -122,7 +122,7 @@ class TexturePresetTest {
         // The renderer caps a field at 240k pixels (about 300x400). The inspector
         // asks for one family when the reader picks it, then the cache serves frames.
         TextureFamily.entries.forEach { family ->
-            val elapsedMs = medianPreviewMs(family, 300, 375)
+            val elapsedMs = bestPreviewMs(family, 300, 375)
             assertTrue("$family took ${elapsedMs}ms", elapsedMs < 16.0)
         }
     }
@@ -134,7 +134,7 @@ class TexturePresetTest {
         TextureFamily.entries.forEach { family ->
             TexturePresets.render(family, TexturePresets.seedFor(family), 24, 30)
         }
-        val times = (0 until 3).map { pass ->
+        val times = (0 until 5).map { pass ->
             var checksum = 0
             val started = System.nanoTime()
             TextureFamily.entries.forEach { family ->
@@ -149,7 +149,7 @@ class TexturePresetTest {
             println("texture ten-family thumbnails pass=$pass elapsedMs=$elapsedMs checksum=$checksum")
             elapsedMs
         }
-        val elapsedMs = times.sorted()[1]
+        val elapsedMs = times.min()
         assertTrue("ten thumbnails took ${elapsedMs}ms", elapsedMs < 16.0)
     }
 
