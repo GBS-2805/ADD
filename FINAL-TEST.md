@@ -54,7 +54,7 @@ python3 tools/check_headers.py --origin https://artbase-olive.vercel.app \
 headers: OK - site and handoff carry enforcing CSP, HSTS, frame denial and cache policy
 ```
 
-Both deployments are live at `1e45f85`. `docs/vercel.json` and `handoff/vercel.json`
+The CSP change deployed at `1e45f85`; the plan record was redeployed at `51a0221`. `docs/vercel.json` and `handoff/vercel.json`
 carry the enforcing CSP, HSTS, CORP, X-Permitted-Cross-Domain-Policies and the frame,
 referrer, COOP and permissions headers. All 21 inline scripts, including the ten
 executable classic-archive scripts, are hashed; the handoff's `img-src` allows the site
