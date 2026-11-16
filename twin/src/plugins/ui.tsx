@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { useTwinStore } from "../twin/store";
 import type { EffectTarget } from "../twin/types";
 
 export function PluginIntro({ children }: { children: ReactNode }) {
@@ -12,14 +13,25 @@ export function TargetSwitch({
   value: EffectTarget;
   onChange: (target: EffectTarget) => void;
 }) {
+  const store = useTwinStore();
+  const layerAvailable = store.state.doc.selectedLayerIds.length === 1;
   return (
-    <div className="segmented" role="group" aria-label="Apply to">
-      <button type="button" aria-pressed={value === "artboard"} onClick={() => onChange("artboard")}>
-        Artboard
-      </button>
-      <button type="button" aria-pressed={value === "layer"} onClick={() => onChange("layer")}>
-        Layer
-      </button>
+    <div className="ed-target-switch">
+      <div className="segmented" role="group" aria-label="Apply to">
+        <button type="button" aria-pressed={value === "artboard"} onClick={() => onChange("artboard")}>
+          Artboard
+        </button>
+        <button
+          type="button"
+          aria-pressed={value === "layer"}
+          disabled={!layerAvailable}
+          title={layerAvailable ? "Apply to the selected layer" : "Select one layer for a layer effect."}
+          onClick={() => onChange("layer")}
+        >
+          Layer
+        </button>
+      </div>
+      {!layerAvailable ? <p className="ed-target-hint">Select one layer for a layer effect.</p> : null}
     </div>
   );
 }

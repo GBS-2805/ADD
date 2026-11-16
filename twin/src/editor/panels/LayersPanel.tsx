@@ -40,7 +40,7 @@ function LayerGrip({ rowId, name, onReorder }: { rowId: string; name: string; on
   );
 }
 
-export function LayersPanel({ collapsed = false }: { collapsed?: boolean }) {
+export function LayersPanel({ collapsed = false, compact = false }: { collapsed?: boolean; compact?: boolean }) {
   const store = useTwinStore();
   const { doc } = store.state;
   const [renaming, setRenaming] = useState<RenameState>(null);
@@ -126,7 +126,7 @@ export function LayersPanel({ collapsed = false }: { collapsed?: boolean }) {
       return;
     }
 
-    if (event.key === "Delete" || event.key === "Backspace") {
+    if (!compact && (event.key === "Delete" || event.key === "Backspace")) {
       event.preventDefault();
       event.stopPropagation();
       const focusedId = row.dataset.layerRow;
@@ -210,6 +210,7 @@ export function LayersPanel({ collapsed = false }: { collapsed?: boolean }) {
               className="ed-layer-name"
               title={layer.name}
               onDoubleClick={(event) => {
+                if (compact) return;
                 event.stopPropagation();
                 setRenaming({ id: layer.id, value: layer.name });
               }}
@@ -231,7 +232,7 @@ export function LayersPanel({ collapsed = false }: { collapsed?: boolean }) {
             {layer.visible ? <Eye size={13} strokeWidth={1.7} /> : <EyeOff size={13} strokeWidth={1.7} />}
           </button>
 
-          <Menu.Root positioning={{ placement: "bottom-end", gutter: 4 }}>
+          {compact ? null : <Menu.Root positioning={{ placement: "bottom-end", gutter: 4 }}>
             <Menu.Trigger asChild>
               <button
                 type="button"
@@ -263,9 +264,9 @@ export function LayersPanel({ collapsed = false }: { collapsed?: boolean }) {
                 </Menu.Content>
               </Menu.Positioner>
             </Portal>
-          </Menu.Root>
+          </Menu.Root>}
 
-          <LayerGrip rowId={layer.id} name={layer.name} onReorder={reorderToTarget} />
+          {compact ? null : <LayerGrip rowId={layer.id} name={layer.name} onReorder={reorderToTarget} />}
         </TreeView.Item>
       </TreeView.NodeProvider>
     );
@@ -278,6 +279,9 @@ export function LayersPanel({ collapsed = false }: { collapsed?: boolean }) {
       data-collapsed={collapsed ? "true" : "false"}
       aria-label="Layers panel"
     >
+      {compact ? (
+        <p className="ed-cover-limit">Quick Mode · select and show/hide layers here. Use the unfolded editor for transforms, reorder and delete.</p>
+      ) : null}
       <div className="ed-panel-heading">
         <span>Layers</span>
         <span>{doc.layers.length} layer{doc.layers.length === 1 ? "" : "s"}</span>

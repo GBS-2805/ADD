@@ -1,21 +1,37 @@
 import { fireEvent, render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 import App from "./App";
 
-describe("BMO Twin", () => {
-  it("renders the app root and the BMO Twin heading", () => {
-    render(<App />);
+function renderApp() {
+  Object.defineProperty(window, "innerWidth", { configurable: true, value: 1440 });
+  Object.defineProperty(window, "innerHeight", { configurable: true, value: 900 });
+  window.history.replaceState({}, "", "/");
+  return render(<App />);
+}
 
-    expect(screen.getByRole("heading", { name: "BMO Twin" })).toBeInTheDocument();
-    expect(document.getElementById("bmo-twin")).toBeInTheDocument();
+describe("BMO Twin", () => {
+  beforeEach(() => {
+    window.history.replaceState({}, "", "/");
   });
 
-  it("opens the plugin catalogue from the dock", () => {
-    render(<App />);
+  it("renders the editor shell by default", () => {
+    renderApp();
 
-    fireEvent.click(screen.getByRole("button", { name: "Open the plugin catalogue" }));
+    expect(screen.getByTestId("editor-shell")).toBeInTheDocument();
+    expect(screen.getByTestId("editor-splitter")).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "BMO Twin" })).toBeNull();
+  });
 
-    expect(screen.getByRole("heading", { name: "Eight ways to make a mark" })).toBeInTheDocument();
-    expect(screen.getByTestId("catalogue-search")).toBeInTheDocument();
+  it("opens the command palette with the keyboard", async () => {
+    renderApp();
+
+    fireEvent.keyDown(screen.getByRole("region", { name: "Artboard canvas" }), {
+      key: "k",
+      code: "KeyK",
+      metaKey: true,
+    });
+
+    expect(await screen.findByTestId("command-palette")).toBeInTheDocument();
+    expect(screen.getByRole("textbox", { name: "Search actions" })).toHaveFocus();
   });
 });

@@ -1,7 +1,11 @@
 import { act, render } from "@testing-library/react";
 import { useEffect } from "react";
 import { describe, expect, it, vi } from "vitest";
+
+const pngMocks = vi.hoisted(() => ({ renderArtboardPng: vi.fn() }));
+vi.mock("./pngExport", () => ({ renderArtboardPng: pngMocks.renderArtboardPng }));
 import { commitHistory, createHistory } from "./history";
+import { serializeProject } from "./project";
 import { TwinProvider, useTwinStore, type TwinActions } from "./store";
 import type { TwinDocument } from "./types";
 
@@ -75,6 +79,62 @@ describe("Twin store layers", () => {
     expect(revoke).not.toHaveBeenCalledWith("blob:one");
     revoke.mockRestore();
     vi.unstubAllGlobals();
+  });
+
+  it("saveExportAndPrintIgnoreTransientTransforms", async () => {
+    const store = renderStore();
+    const orbit = current!.state.doc.layers.find((layer) => layer.id === "shape-orbit");
+    if (!orbit) throw new Error("Orbit missing.");
+    const committed = orbit.transform.x;
+    const blobs: Blob[] = [];
+    const create = vi.spyOn(URL, "createObjectURL").mockImplementation((blob) => {
+      blobs.push(blob as Blob);
+      return "blob:saved";
+    });
+    const revoke = vi.spyOn(URL, "revokeObjectURL").mockImplementation(() => undefined);
+    const print = vi.spyOn(window, "print").mockImplementation(() => undefined);
+    const exported: { doc: TwinDocument | null } = { doc: null };
+    pngMocks.renderArtboardPng.mockImplementation(async (document: TwinDocument) => {
+      exported.doc = document;
+      return {
+        blob: new Blob(["png"]),
+        width: 1530,
+        height: 2000,
+        bytes: 3,
+        filename: "open-studio.png",
+        signature: "89504e470d0a1a0a",
+      };
+    });
+
+    act(() => store.setTransientTransforms({
+      "shape-orbit": { ...orbit.transform, x: committed + 400 },
+    }));
+    expect(current!.state.transientTransforms?.["shape-orbit"].x).toBe(committed + 400);
+    expect(current!.state.doc.layers.find((layer) => layer.id === "shape-orbit")?.transform.x).toBe(committed);
+
+    await act(async () => {
+      await store.saveProject();
+    });
+    await act(async () => {
+      await store.exportPng();
+      store.printStage();
+    });
+
+    const savedText = await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result));
+      reader.onerror = () => reject(reader.error);
+      reader.readAsText(blobs[0]);
+    });
+    const saved = JSON.parse(savedText) as { document: TwinDocument };
+    expect(saved.document.layers.find((layer) => layer.id === "shape-orbit")?.transform.x).toBe(committed);
+    expect(exported.doc?.layers.find((layer) => layer.id === "shape-orbit")?.transform.x).toBe(committed);
+    expect(print).toHaveBeenCalledOnce();
+    expect(current!.state.doc.layers.find((layer) => layer.id === "shape-orbit")?.transform.x).toBe(committed);
+    act(() => store.setTransientTransforms(null));
+    create.mockRestore();
+    revoke.mockRestore();
+    print.mockRestore();
   });
 
   it("historyEvictionRevokesUnusedImageUrl", () => {

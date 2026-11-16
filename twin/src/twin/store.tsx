@@ -18,7 +18,7 @@ import {
   serializeProject,
 } from "./project";
 import { renderArtboardPng, type PngExportResult } from "./pngExport";
-import { canAddLayer, fitImageInsideArtboard } from "../editor/model/geometry";
+import { canAddLayer, fitImageInsideArtboard, type Size } from "../editor/model/geometry";
 import { reorderLayerIds } from "../editor/model/layerTree";
 import { nextSelection, pruneSelection, selectAllIds, type SelectionMode } from "../editor/model/selection";
 import type { EditorTool, RightTab, Viewport } from "../editor/types";
@@ -123,6 +123,8 @@ export interface TwinState {
   rulersVisible: boolean;
   rightTab: RightTab;
   viewport: Viewport;
+  canvasSize: Size;
+  panels: { layers: boolean; inspector: boolean };
 }
 
 export interface TwinActions {
@@ -171,6 +173,8 @@ export interface TwinActions {
   setRulersVisible: (visible: boolean) => void;
   setRightTab: (tab: RightTab) => void;
   setViewport: (viewport: Viewport) => void;
+  setCanvasSize: (size: Size) => void;
+  togglePanel: (panel: "layers" | "inspector") => void;
   removeLayer: (id: string) => void;
   saveProject: () => Promise<void>;
   openProject: () => void;
@@ -213,6 +217,8 @@ export function TwinProvider({ children }: { children: ReactNode }) {
   const [rulersVisible, setRulersVisibleState] = useState(false);
   const [rightTab, setRightTabState] = useState<RightTab>("design");
   const [viewport, setViewportState] = useState<Viewport>({ zoom: 1, panX: 0, panY: 0 });
+  const [canvasSize, setCanvasSizeState] = useState<Size>({ width: 0, height: 0 });
+  const [panels, setPanels] = useState({ layers: true, inspector: true });
   const toastTimer = useRef<number | null>(null);
   const pulseSequence = useRef(0);
   const stateRef = useRef(history);
@@ -240,6 +246,7 @@ export function TwinProvider({ children }: { children: ReactNode }) {
     setActivePluginId(id);
     setCatalogueOpen(false);
     setPluginHidden(false);
+    setRightTabState("effects");
     if (id === "native-parity") setNativeTabState("tone");
   }, []);
 
@@ -248,6 +255,7 @@ export function TwinProvider({ children }: { children: ReactNode }) {
     setActivePluginId("native-parity");
     setCatalogueOpen(false);
     setPluginHidden(false);
+    setRightTabState("effects");
     setNativeTabState(tab);
   }, []);
 
@@ -257,11 +265,13 @@ export function TwinProvider({ children }: { children: ReactNode }) {
     setSurface("plugins");
     setCatalogueOpen(true);
     setPluginHidden(false);
+    setRightTabState("effects");
   }, []);
 
   const hidePlugin = useCallback(() => {
     if (!activePluginId) return;
     setPluginHidden(true);
+    setCatalogueOpen(true);
     setSurface("none");
   }, [activePluginId]);
 
@@ -279,6 +289,7 @@ export function TwinProvider({ children }: { children: ReactNode }) {
 
   const openInspector = useCallback(() => {
     setSurface("inspector");
+    setRightTabState("design");
   }, []);
 
   const closeSurface = useCallback(() => {
@@ -296,6 +307,10 @@ export function TwinProvider({ children }: { children: ReactNode }) {
   const setRulersVisible = useCallback((visible: boolean) => setRulersVisibleState(visible), []);
   const setRightTab = useCallback((tab: RightTab) => setRightTabState(tab), []);
   const setViewport = useCallback((next: Viewport) => setViewportState(next), []);
+  const setCanvasSize = useCallback((size: Size) => setCanvasSizeState(size), []);
+  const togglePanel = useCallback((panel: "layers" | "inspector") => {
+    setPanels((current) => ({ ...current, [panel]: !current[panel] }));
+  }, []);
 
   const commit = useCallback((update: (doc: TwinDocument) => TwinDocument) => {
     setHistory((current) => {
@@ -308,8 +323,8 @@ export function TwinProvider({ children }: { children: ReactNode }) {
   const applyEffect = useCallback((effect: TwinEffect, nextTarget: EffectTarget = target) => {
     const currentDoc = stateRef.current.present;
     const primary = currentDoc.selectedLayerIds[0];
-    if (nextTarget === "layer" && !primary) {
-      showToast("Select a layer for a layer effect.");
+    if (nextTarget === "layer" && currentDoc.selectedLayerIds.length !== 1) {
+      showToast("Select one layer for a layer effect.");
       return;
     }
     const currentEffect = nextTarget === "artboard"
@@ -677,13 +692,6 @@ export function TwinProvider({ children }: { children: ReactNode }) {
   }, [showToast]);
 
   const printStage = useCallback(() => {
-    document.body.classList.add("is-printing");
-    const cleanup = () => {
-      document.body.classList.remove("is-printing");
-      window.removeEventListener("afterprint", cleanup);
-    };
-    window.addEventListener("afterprint", cleanup);
-    window.setTimeout(cleanup, 60_000);
     window.print();
   }, []);
 
@@ -711,6 +719,8 @@ export function TwinProvider({ children }: { children: ReactNode }) {
       rulersVisible,
       rightTab,
       viewport,
+      canvasSize,
+      panels,
     },
     canUndo: history.past.length > 0,
     canRedo: history.future.length > 0,
@@ -756,6 +766,8 @@ export function TwinProvider({ children }: { children: ReactNode }) {
     setRulersVisible,
     setRightTab,
     setViewport,
+    setCanvasSize,
+    togglePanel,
     removeLayer,
     saveProject,
     openProject,
@@ -784,6 +796,8 @@ export function TwinProvider({ children }: { children: ReactNode }) {
     rulersVisible,
     rightTab,
     viewport,
+    canvasSize,
+    panels,
     openPlugin,
     openNative,
     setNativeTab,

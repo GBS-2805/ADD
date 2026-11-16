@@ -1,8 +1,24 @@
-import type { TwinCommand } from "./types";
+import { fitViewport } from "../editor/model/viewport";
+import { alignTransforms, distributeTransforms } from "../editor/model/align";
 import type { TwinActions } from "./store";
+import type { TwinCommand } from "./types";
 import { ARTBOARD_EXPORT_HEIGHT, ARTBOARD_EXPORT_WIDTH } from "./pngExport";
 
 export function buildCommands(store: TwinActions): TwinCommand[] {
+  const { doc, canvasSize, panels } = store.state;
+  const selected = doc.selectedLayerIds;
+  const hasSelection = selected.length > 0;
+  const canDistribute = selected.length >= 3;
+
+  const align = (edge: "left" | "hcenter" | "right" | "top" | "vcenter" | "bottom") => () => {
+    if (!hasSelection) return;
+    store.setLayerTransforms(alignTransforms(doc.layers, selected, edge));
+  };
+  const distribute = (axis: "x" | "y") => () => {
+    if (!canDistribute) return;
+    store.setLayerTransforms(distributeTransforms(doc.layers, selected, axis));
+  };
+
   return [
     {
       id: "save-project",
@@ -31,6 +47,157 @@ export function buildCommands(store: TwinActions): TwinCommand[] {
       group: "File",
       hint: "Print the artboard from the browser",
       run: store.printStage,
+    },
+    {
+      id: "undo",
+      label: "Undo last edit",
+      group: "Edit",
+      hint: "Document history",
+      shortcut: "⌘Z",
+      disabled: !store.canUndo,
+      run: store.undo,
+    },
+    {
+      id: "redo",
+      label: "Redo edit",
+      group: "Edit",
+      hint: "Document history",
+      shortcut: "⇧⌘Z",
+      disabled: !store.canRedo,
+      run: store.redo,
+    },
+    {
+      id: "select-all",
+      label: "Select all layers",
+      group: "Edit",
+      hint: "Select every layer on the artboard",
+      shortcut: "⌘A",
+      disabled: doc.layers.length === 0,
+      run: store.selectAllLayers,
+    },
+    {
+      id: "clear-selection",
+      label: "Clear selection",
+      group: "Edit",
+      hint: "Leave the document and its history untouched",
+      disabled: !hasSelection,
+      run: store.clearSelection,
+    },
+    {
+      id: "align-left",
+      label: "Align left",
+      group: "Arrange",
+      hint: "Align to the artboard or selection bounds",
+      disabled: !hasSelection,
+      run: align("left"),
+    },
+    {
+      id: "align-hcenter",
+      label: "Align horizontal centers",
+      group: "Arrange",
+      disabled: !hasSelection,
+      run: align("hcenter"),
+    },
+    {
+      id: "align-right",
+      label: "Align right",
+      group: "Arrange",
+      disabled: !hasSelection,
+      run: align("right"),
+    },
+    {
+      id: "align-top",
+      label: "Align top",
+      group: "Arrange",
+      disabled: !hasSelection,
+      run: align("top"),
+    },
+    {
+      id: "align-vcenter",
+      label: "Align vertical centers",
+      group: "Arrange",
+      disabled: !hasSelection,
+      run: align("vcenter"),
+    },
+    {
+      id: "align-bottom",
+      label: "Align bottom",
+      group: "Arrange",
+      disabled: !hasSelection,
+      run: align("bottom"),
+    },
+    {
+      id: "distribute-horizontal",
+      label: "Distribute horizontally",
+      group: "Arrange",
+      disabled: !canDistribute,
+      run: distribute("x"),
+    },
+    {
+      id: "distribute-vertical",
+      label: "Distribute vertically",
+      group: "Arrange",
+      disabled: !canDistribute,
+      run: distribute("y"),
+    },
+    {
+      id: "zoom-fit",
+      label: "Zoom to fit",
+      group: "View",
+      hint: "Center the whole artboard",
+      disabled: canvasSize.width <= 0 || canvasSize.height <= 0,
+      run: () => store.setViewport(fitViewport(canvasSize)),
+    },
+    {
+      id: "zoom-100",
+      label: "Zoom to 100%",
+      group: "View",
+      run: () => store.setViewport({ zoom: 1, panX: 0, panY: 0 }),
+    },
+    {
+      id: "toggle-rulers",
+      label: "Toggle rulers",
+      group: "View",
+      hint: store.state.rulersVisible ? "Hide the rulers" : "Show the rulers",
+      run: () => store.setRulersVisible(!store.state.rulersVisible),
+    },
+    {
+      id: "toggle-snap",
+      label: "Toggle snapping",
+      group: "View",
+      hint: store.state.snapEnabled ? "Disable snapping while moving" : "Enable snapping while moving",
+      run: () => store.setSnapEnabled(!store.state.snapEnabled),
+    },
+    {
+      id: "toggle-layers-panel",
+      label: `${panels.layers ? "Hide" : "Show"} layers panel`,
+      group: "View",
+      run: () => store.togglePanel("layers"),
+    },
+    {
+      id: "toggle-inspector-panel",
+      label: `${panels.inspector ? "Hide" : "Show"} inspector panel`,
+      group: "View",
+      run: () => store.togglePanel("inspector"),
+    },
+    {
+      id: "open-inspector",
+      label: "Open design inspector",
+      group: "View",
+      run: store.openInspector,
+    },
+    {
+      id: "open-effect-catalogue",
+      label: "Open effects catalogue",
+      group: "View",
+      run: store.openCatalogue,
+    },
+    {
+      id: "preview",
+      label: "Preview the stage",
+      group: "View",
+      hint: "Read-only device preview",
+      run: store.openPresentation,
     },
     {
       id: "open-shader",
@@ -103,43 +270,10 @@ export function buildCommands(store: TwinActions): TwinCommand[] {
       run: () => store.openPlugin("native-parity"),
     },
     {
-      id: "open-commands",
-      label: "Open actions",
-      group: "View",
-      run: store.openCommands,
-    },
-    {
       id: "open-plugins",
       label: "Open the plugin catalogue",
       group: "View",
       run: store.openCatalogue,
-    },
-    {
-      id: "undo",
-      label: "Undo last edit",
-      group: "Edit",
-      hint: "Document history · Cmd/Ctrl+Z",
-      run: store.undo,
-    },
-    {
-      id: "redo",
-      label: "Redo edit",
-      group: "Edit",
-      hint: "Document history · Cmd/Ctrl+Shift+Z",
-      run: store.redo,
-    },
-    {
-      id: "present-stage",
-      label: "Present the stage",
-      group: "View",
-      hint: "Focus the artboard",
-      run: store.openPresentation,
-    },
-    {
-      id: "close",
-      label: "Close the surface",
-      group: "View",
-      run: store.closeSurface,
     },
   ];
 }

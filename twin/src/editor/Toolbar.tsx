@@ -32,6 +32,7 @@ export function Toolbar() {
               className="ed-tool-button"
               aria-label={tool.label}
               title={`${tool.label} · ${tool.shortcut}`}
+              tabIndex={0}
               style={{ minWidth: 44, minHeight: 44 }}
             >
               <Icon size={18} strokeWidth={1.7} />

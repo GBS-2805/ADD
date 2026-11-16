@@ -12,7 +12,7 @@ const setViewport = (width: number, height: number) => {
 
 const renderWorkbench = (width = 1440, height = 900) => {
   setViewport(width, height);
-  window.history.pushState({}, "", "/?workbench=1");
+  window.history.pushState({}, "", "/");
   return render(<App />);
 };
 
@@ -21,15 +21,15 @@ describe("EditorShell", () => {
     window.history.replaceState({}, "", "/");
   });
 
-  it("workbenchContainsLayersInspectorAndCanvas", () => {
+  it("defaultRouteContainsLayersInspectorAndCanvas", () => {
     renderWorkbench();
     expect(screen.getByTestId("editor-shell")).toBeInTheDocument();
     expect(screen.getByTestId("layers-panel")).toBeInTheDocument();
     expect(screen.getByTestId("inspector-panel")).toBeInTheDocument();
-    expect(screen.getByTestId("canvas-surface")).toBeInTheDocument();
+    expect(screen.getByTestId("canvas")).toBeInTheDocument();
   });
 
-  it("workbenchHasNoDeviceFrame", () => {
+  it("editorHasNoDeviceFrame", () => {
     const { container } = renderWorkbench();
     expect(container.querySelector(".device-frame")).toBeNull();
     expect(screen.queryByTestId("stage")).toBeNull();
@@ -62,7 +62,8 @@ describe("EditorShell", () => {
     renderWorkbench(900, 900);
     expect(screen.getByTestId("editor-shell")).toHaveAttribute("data-mode", "tablet");
     expect(screen.queryByTestId("editor-splitter")).toBeNull();
-    expect(screen.getByTestId("mode-placeholder")).toHaveTextContent("Tablet");
+    expect(screen.getByTestId("tablet-shell")).toBeInTheDocument();
+    expect(screen.getByTestId("canvas")).toBeInTheDocument();
   });
 
   it("breakpointSelectsPhone", () => {
@@ -75,7 +76,8 @@ describe("EditorShell", () => {
     renderWorkbench(349, 316);
     expect(screen.getByTestId("editor-shell")).toHaveAttribute("data-mode", "cover");
     expect(screen.queryByTestId("editor-splitter")).toBeNull();
-    expect(screen.getByTestId("mode-placeholder")).toHaveTextContent("Cover");
+    expect(screen.getByTestId("cover-shell")).toBeInTheDocument();
+    expect(screen.getByTestId("canvas")).toBeInTheDocument();
   });
 
   it("toolbarHasMoveHandZoomAndAdd", () => {
@@ -119,12 +121,12 @@ describe("EditorShell", () => {
     expect(status).toHaveTextContent("3 layers");
   });
 
-  it("workbenchFlagDoesNotChangeDefaultShell", () => {
+  it("defaultRouteRendersTheEditorShell", () => {
     setViewport(1280, 1000);
     window.history.replaceState({}, "", "/");
     render(<App />);
-    expect(screen.getByRole("heading", { name: "BMO Twin" })).toBeInTheDocument();
-    expect(screen.queryByTestId("editor-shell")).toBeNull();
+    expect(screen.getByTestId("editor-shell")).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "BMO Twin" })).toBeNull();
   });
 
   it("editorFontsAreLocal", () => {

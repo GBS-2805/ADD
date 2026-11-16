@@ -3,7 +3,6 @@ import { ArrowDown, ArrowUp, Eye, EyeOff, Plus, Trash2 } from "lucide-react";
 import { BLEND_MODES, type BlendMode, type PluginPanelProps } from "../twin/types";
 import { useTwinStore } from "../twin/store";
 import { ActionRow, EmptyState, PluginIntro, RangeField } from "./ui";
-import { fromLegacy, toLegacy } from "../shell/legacy";
 
 const BLEND_LABELS: Record<BlendMode, string> = {
   normal: "Normal",
@@ -113,8 +112,8 @@ export default function OverlayLabPlugin({
           </label>
           <RangeField label="Opacity" value={Math.round(selected.opacity * 100)} min={0} max={100} onChange={(value) => store.setLayerOpacity(selected.id, value / 100)} suffix="%" />
           <div className="pair-grid">
-            <RangeField label="X" value={Math.round(toLegacy(selected.transform.x))} min={-180} max={180} onChange={(value) => store.setLayerTransform(selected.id, { x: fromLegacy(value) })} />
-            <RangeField label="Y" value={Math.round(toLegacy(selected.transform.y))} min={-180} max={180} onChange={(value) => store.setLayerTransform(selected.id, { y: fromLegacy(value) })} />
+            <RangeField label="X" value={Math.round(selected.transform.x)} min={-400} max={400} onChange={(value) => store.setLayerTransform(selected.id, { x: value })} />
+            <RangeField label="Y" value={Math.round(selected.transform.y)} min={-400} max={400} onChange={(value) => store.setLayerTransform(selected.id, { y: value })} />
             <RangeField label="Scale" value={selected.transform.scaleX} min={0.1} max={4} step={0.05} onChange={(value) => store.setLayerTransform(selected.id, { scaleX: value, scaleY: value })} />
             <RangeField label="Rotation" value={Math.round(selected.transform.rotation)} min={-180} max={180} onChange={(value) => store.setLayerTransform(selected.id, { rotation: value })} suffix="°" />
           </div>

@@ -25,11 +25,32 @@ const importedProject = {
   },
 };
 
-test("exports a portable .twin project file", async ({ page }) => {
+const emptyProject = {
+  format: "bmo-twin-project",
+  version: 2,
+  savedAt: "2026-11-16T00:00:00.000Z",
+  document: {
+    background: { kind: "solid", hex: "#fafaf7" },
+    layers: [],
+    selectedLayerIds: [],
+  },
+};
+
+async function openEditor(page: import("@playwright/test").Page, width = 1440, height = 900) {
+  await page.setViewportSize({ width, height });
   await page.goto("/");
+  await expect(page.getByTestId("editor-shell")).toBeVisible();
+}
+
+async function openDocumentMenu(page: import("@playwright/test").Page) {
+  await page.getByRole("button", { name: "Open document menu" }).click();
+}
+
+test("exports a portable .twin project file", async ({ page }) => {
+  await openEditor(page);
   const downloadPromise = page.waitForEvent("download");
-  await page.getByRole("button", { name: "Open actions" }).click();
-  await page.getByRole("button", { name: /Save project file/ }).click();
+  await openDocumentMenu(page);
+  await page.getByRole("menuitem", { name: "Save .twin" }).click();
   const download = await downloadPromise;
   expect(download.suggestedFilename()).toBe("open-studio.twin");
   const path = await download.path();
@@ -37,7 +58,14 @@ test("exports a portable .twin project file", async ({ page }) => {
   const project = JSON.parse(await readFile(path, "utf8")) as {
     format: string;
     version: number;
-    document: { layers: Array<{ id: string; kind: string }> };
+    document: {
+      selectedLayerIds: string[];
+      layers: Array<{
+        id: string;
+        kind: string;
+        transform: { x: number; y: number; scaleX: number; scaleY: number; rotation: number };
+      }>;
+    };
   };
   expect(project.format).toBe("bmo-twin-project");
   expect(project.version).toBe(2);
@@ -46,17 +74,21 @@ test("exports a portable .twin project file", async ({ page }) => {
     "shape-star",
     "shape-orbit",
   ]);
+  expect(project.document.selectedLayerIds).toEqual(["type-open-studio"]);
+  const headline = project.document.layers[0].transform;
+  expect(headline.scaleX).toBe(1);
+  expect(headline.scaleY).toBe(1);
+  expect("scale" in headline).toBe(false);
 });
 
 test("embeds imported PNG layers in the project file", async ({ page }) => {
-  await page.goto("/");
-  await page.getByRole("button", { name: "Add a layer" }).click();
-  await page.getByRole("menuitem", { name: /^PNG/ }).click();
-  await page.getByTestId("overlay-import-input").setInputFiles("e2e/fixtures/layer.png");
+  await openEditor(page);
+  await page.getByTestId("editor-image-input").setInputFiles("e2e/fixtures/layer.png");
+  await expect(page.locator(".ed-canvas .ed-layer-image")).toHaveCount(1);
 
   const downloadPromise = page.waitForEvent("download");
-  await page.getByRole("button", { name: "Open actions" }).click();
-  await page.getByRole("button", { name: /Save project file/ }).click();
+  await openDocumentMenu(page);
+  await page.getByRole("menuitem", { name: "Save .twin" }).click();
   const download = await downloadPromise;
   const path = await download.path();
   if (!path) throw new Error("The project download has no path.");
@@ -67,12 +99,11 @@ test("embeds imported PNG layers in the project file", async ({ page }) => {
   expect(image?.image?.src).toMatch(/^data:image\/png;base64,/);
 });
 
-test("exports a flattened PNG of the full artboard", async ({ page }) => {
-  await page.goto("/");
+test("exports a flattened PNG of the full 765 x 1000 artboard", async ({ page }) => {
+  await openEditor(page);
   const downloadPromise = page.waitForEvent("download");
-  await page.getByRole("button", { name: "Open actions" }).click();
-  await expect(page.getByRole("button", { name: /Export PNG/ })).toBeVisible();
-  await page.getByRole("button", { name: /Export PNG/ }).click();
+  await openDocumentMenu(page);
+  await page.getByRole("menuitem", { name: "Export PNG" }).click();
 
   const status = page.getByTestId("png-export-result");
   await expect(status).toHaveAttribute("data-filename", "open-studio.png");
@@ -111,38 +142,41 @@ test("exports a flattened PNG of the full artboard", async ({ page }) => {
   expect(decoded.height).toBe(2000);
   expect(decoded.opaque).toBeGreaterThan(100);
 
-  await expect(page.locator(".art-layer")).toHaveCount(3);
+  await expect(page.locator(".ed-canvas .art-layer")).toHaveCount(3);
   await page.keyboard.press("Control+z");
-  await expect(page.locator(".art-layer")).toHaveCount(3);
-  await expect(page.getByRole("status")).toContainText("PNG exported");
+  await expect(page.locator(".ed-canvas .art-layer")).toHaveCount(3);
+  await expect(page.locator(".ed-toast")).toContainText("PNG exported");
 });
 
-test("print isolates the artboard and invokes the browser print flow", async ({ page }) => {
+test("print uses the dedicated artboard and never the editor chrome", async ({ page }) => {
   await page.addInitScript(() => {
     window.print = () => {
       (window as { __printCalled?: boolean }).__printCalled = true;
     };
   });
-  await page.goto("/");
-  await page.getByRole("button", { name: "Open actions" }).click();
-  await page.getByRole("button", { name: /Print \/ Save PDF/ }).click();
-  await expect(page.locator("body")).toHaveClass(/is-printing/);
+  await openEditor(page);
+  await openDocumentMenu(page);
+  await page.getByRole("menuitem", { name: "Print / Save PDF" }).click();
+  await expect(page.locator("body")).not.toHaveClass(/is-printing/);
   expect(await page.evaluate(() => (window as { __printCalled?: boolean }).__printCalled)).toBe(true);
 
   await page.emulateMedia({ media: "print" });
-  await expect(page.getByTestId("artboard")).toHaveCSS("position", "fixed");
-  expect(await page.locator(".twin-header").evaluate((element) => getComputedStyle(element).visibility)).toBe("hidden");
-  expect(await page.getByTestId("artboard").evaluate((element) => getComputedStyle(element).visibility)).toBe("visible");
+  await expect(page.locator(".ed-shell")).toBeHidden();
+  await expect(page.getByTestId("print-root")).toBeVisible();
+  const box = await page.getByTestId("print-artboard").boundingBox();
+  if (!box) throw new Error("The print artboard has no layout box.");
+  expect(Math.round(box.width)).toBe(765);
+  expect(Math.round(box.height)).toBe(1000);
 });
 
 test("opens a .twin project, replaces the document and resets edit history", async ({ page }) => {
-  await page.goto("/");
-  await page.getByRole("button", { name: "Add a layer" }).click();
-  await page.getByRole("menuitem", { name: /^Text/ }).click();
-  await expect(page.locator(".art-layer-text")).toHaveCount(2);
+  await openEditor(page);
+  await page.getByRole("button", { name: "Add layer" }).click();
+  await page.getByRole("menuitem", { name: "Text" }).click();
+  await expect(page.locator(".ed-canvas .ed-layer-text")).toHaveCount(2);
   const chooserPromise = page.waitForEvent("filechooser");
-  await page.getByRole("button", { name: "Open actions" }).click();
-  await page.getByRole("button", { name: /Open project file/ }).click();
+  await openDocumentMenu(page);
+  await page.getByRole("menuitem", { name: "Open .twin" }).click();
   const chooser = await chooserPromise;
   await chooser.setFiles({
     name: "imported.twin",
@@ -150,13 +184,45 @@ test("opens a .twin project, replaces the document and resets edit history", asy
     buffer: Buffer.from(JSON.stringify(importedProject)),
   });
 
-  await expect(page.getByText("IMPORTED", { exact: true })).toBeVisible();
-  await expect(page.getByText("PROJECT", { exact: true })).toBeVisible();
-  await expect(page.locator(".artboard-ground .effect-solid")).toBeVisible();
-  await expect(page.locator(".art-layer")).toHaveCount(1);
-  await expect(page.getByRole("status")).toContainText("Project opened.");
+  await expect(page.locator(".ed-canvas").getByText("IMPORTED", { exact: true })).toBeVisible();
+  await expect(page.locator(".ed-canvas").getByText("PROJECT", { exact: true })).toBeVisible();
+  await expect(page.locator(".ed-canvas .artboard-ground .effect-solid")).toBeVisible();
+  await expect(page.locator(".ed-canvas .art-layer")).toHaveCount(1);
+  await expect(page.locator(".ed-toast")).toContainText("Project opened.");
 
   await page.keyboard.press("Control+z");
-  await expect(page.locator(".art-layer")).toHaveCount(1);
-  await expect(page.getByText("IMPORTED", { exact: true })).toBeVisible();
+  await expect(page.locator(".ed-canvas .art-layer")).toHaveCount(1);
+  await expect(page.locator(".ed-canvas").getByText("IMPORTED", { exact: true })).toBeVisible();
+});
+
+test("round-trips an empty document and keeps it printable", async ({ page }) => {
+  await openEditor(page);
+  const chooserPromise = page.waitForEvent("filechooser");
+  await openDocumentMenu(page);
+  await page.getByRole("menuitem", { name: "Open .twin" }).click();
+  const chooser = await chooserPromise;
+  await chooser.setFiles({
+    name: "empty.twin",
+    mimeType: "application/json",
+    buffer: Buffer.from(JSON.stringify(emptyProject)),
+  });
+
+  await expect(page.locator(".ed-canvas .art-layer")).toHaveCount(0);
+  await expect(page.getByText("No layers. Add text, a shape or a PNG.")).toBeVisible();
+
+  const downloadPromise = page.waitForEvent("download");
+  await openDocumentMenu(page);
+  await page.getByRole("menuitem", { name: "Save .twin" }).click();
+  const download = await downloadPromise;
+  const path = await download.path();
+  if (!path) throw new Error("The empty project download has no path.");
+  const saved = JSON.parse(await readFile(path, "utf8")) as { document: { layers: unknown[]; selectedLayerIds: string[] } };
+  expect(saved.document.layers).toEqual([]);
+  expect(saved.document.selectedLayerIds).toEqual([]);
+
+  await page.emulateMedia({ media: "print" });
+  await expect(page.locator(".ed-print-root .artboard-ground")).toBeVisible();
+  const box = await page.getByTestId("print-artboard").boundingBox();
+  expect(Math.round(box?.width ?? 0)).toBe(765);
+  expect(Math.round(box?.height ?? 0)).toBe(1000);
 });

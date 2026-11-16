@@ -8,7 +8,7 @@ export interface FoldInsets {
   top: number;
   bottom: number;
   gap: number;
-  source: "segments" | "posture" | "none";
+  source?: "segments" | "posture";
 }
 
 export const TOUCH_TARGET = 44;

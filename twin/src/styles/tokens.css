@@ -72,7 +72,7 @@
   --accent: #111111;
   --accent-hover: #2e2e2c;
   --on-accent: #fafaf7;
-  /* Legacy names kept as monochrome aliases for the existing rules. */
+  /* Legacy aliases retained for shared plugin rules. */
   --plum: var(--accent);
   --plum-hover: var(--accent-hover);
   --rule: rgba(17, 17, 17, 0.24);

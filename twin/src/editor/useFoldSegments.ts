@@ -34,7 +34,7 @@ export function readFoldInsets(): FoldInsets {
   if (posture?.type === "folded") {
     return { orientation: null, top: 0, bottom: 0, gap: 0, source: "posture" };
   }
-  return { orientation: null, top: 0, bottom: 0, gap: 0, source: "none" };
+  return { orientation: null, top: 0, bottom: 0, gap: 0 };
 }
 
 const sameInsets = (a: FoldInsets, b: FoldInsets) =>

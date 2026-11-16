@@ -8,6 +8,9 @@ export interface LayerViewProps {
   transform?: LayerTransform;
   selected?: boolean;
   readOnly?: boolean;
+  /** null omits duplicate ids on read-only preview/print surfaces. */
+  testId?: string | null;
+  layerId?: string | null;
   onLayerSelect?: (id: string, event: MouseEvent<HTMLElement> | KeyboardEvent<HTMLElement>) => void;
 }
 
@@ -16,8 +19,12 @@ export function LayerView({
   transform = layer.transform,
   selected = false,
   readOnly = false,
+  testId,
+  layerId,
   onLayerSelect,
 }: LayerViewProps) {
+  const resolvedTestId = testId === undefined ? `art-layer-${layer.id}` : testId;
+  const resolvedLayerId = layerId === undefined ? layer.id : layerId;
   const frame = layerFrame(layer, transform);
   const variant = layer.shape?.variant ?? (layer.id.includes("orbit") ? "orbit" : layer.id.includes("star") ? "star" : "block");
   const style: CSSProperties = {
@@ -37,8 +44,8 @@ export function LayerView({
     <div
       className={`art-layer ed-layer ${selected && !readOnly ? "is-selected" : ""} ${layer.kind === "text" ? "art-layer-text" : ""}`}
       style={style}
-      data-layer-id={layer.id}
-      data-testid={`art-layer-${layer.id}`}
+      data-layer-id={resolvedLayerId ?? undefined}
+      data-testid={resolvedTestId ?? undefined}
       role={readOnly ? undefined : "button"}
       tabIndex={readOnly ? undefined : 0}
       aria-label={readOnly ? undefined : `Select ${layer.name}`}
@@ -95,7 +102,7 @@ export function LayerView({
       ) : null}
 
       {layer.effect ? (
-        <span className="ed-layer-effect" data-testid="layer-effect-clip" aria-hidden="true" style={{ overflow: "hidden", position: "absolute", inset: 0, pointerEvents: "none" }}>
+        <span className="ed-layer-effect" data-testid={resolvedTestId ? "layer-effect-clip" : undefined} aria-hidden="true" style={{ overflow: "hidden", position: "absolute", inset: 0, pointerEvents: "none" }}>
           <EffectSurface effect={layer.effect} />
         </span>
       ) : null}

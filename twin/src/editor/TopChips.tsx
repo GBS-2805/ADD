@@ -63,6 +63,7 @@ export function TopChips() {
           type="button"
           className="ed-preview-button"
           aria-label="Preview"
+          data-testid="preview-trigger"
           title="Preview · read-only stage"
           onClick={store.openPresentation}
         >

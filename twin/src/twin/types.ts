@@ -130,6 +130,8 @@ export interface TwinCommand {
   label: string;
   group: string;
   hint?: string;
+  shortcut?: string;
+  disabled?: boolean;
   run: () => void;
 }
 

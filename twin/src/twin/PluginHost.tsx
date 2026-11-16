@@ -1,17 +1,23 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type RefObject } from "react";
 import { getPlugin } from "./registry";
 import { useTwinStore } from "./store";
 import { NATIVE_LENS_LABELS } from "./types";
 
-export function PluginHost({ isHidden = false }: { isHidden?: boolean }) {
+export function PluginHost({
+  isHidden = false,
+  scrollContainerRef,
+}: {
+  isHidden?: boolean;
+  scrollContainerRef?: RefObject<HTMLElement | null>;
+}) {
   const store = useTwinStore();
   const plugin = getPlugin(store.state.activePluginId);
   const sessionRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
-    const scroller = sessionRef.current?.closest(".panel-content");
+    const scroller = scrollContainerRef?.current ?? null;
     if (scroller instanceof HTMLElement) scroller.scrollTop = 0;
-  }, [plugin?.id, isHidden]);
+  }, [plugin?.id, isHidden, scrollContainerRef]);
 
   if (!plugin) {
     if (isHidden) return null;

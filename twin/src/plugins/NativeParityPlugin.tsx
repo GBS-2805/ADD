@@ -3,7 +3,7 @@ import type { PluginPanelProps } from "../twin/types";
 import { useTwinStore } from "../twin/store";
 import { ActionRow, PluginIntro, TargetSwitch } from "./ui";
 
-// The native shelf is the deliberate colour exception in the monochrome twin.
+// The native shelf is the deliberate colour exception in the neutral twin.
 const TONES = [
   { id: "plum", name: "Plum", hex: "#5B2A4B" },
   { id: "rose", name: "Rose", hex: "#6D3558" },
