@@ -1,0 +1,145 @@
+import type { TwinCommand } from "./types";
+import type { TwinActions } from "./store";
+import { ARTBOARD_EXPORT_HEIGHT, ARTBOARD_EXPORT_WIDTH } from "./pngExport";
+
+export function buildCommands(store: TwinActions): TwinCommand[] {
+  return [
+    {
+      id: "save-project",
+      label: "Save project file",
+      group: "File",
+      hint: "Download a portable .twin document",
+      run: () => void store.saveProject(),
+    },
+    {
+      id: "open-project",
+      label: "Open project file",
+      group: "File",
+      hint: "Replace this document from a .twin file",
+      run: store.openProject,
+    },
+    {
+      id: "export-png",
+      label: "Export PNG",
+      group: "File",
+      hint: `Download a flattened artboard PNG · ${ARTBOARD_EXPORT_WIDTH} × ${ARTBOARD_EXPORT_HEIGHT}`,
+      run: () => void store.exportPng(),
+    },
+    {
+      id: "print-stage",
+      label: "Print / Save PDF",
+      group: "File",
+      hint: "Print the artboard from the browser",
+      run: store.printStage,
+    },
+    {
+      id: "open-shader",
+      label: "Open Shader Lab",
+      group: "Plugins",
+      hint: "Mesh, grain, warp and six more",
+      run: () => store.openPlugin("shader-lab"),
+    },
+    {
+      id: "open-overlay",
+      label: "Open Overlay Lab",
+      group: "Add",
+      hint: "PNG layers and blend modes",
+      run: () => store.openPlugin("overlay-lab"),
+    },
+    {
+      id: "open-tone",
+      label: "Open Tone",
+      group: "Plugins",
+      hint: "Native fill swatches",
+      run: () => store.openNative("tone"),
+    },
+    {
+      id: "open-prism",
+      label: "Open Prism",
+      group: "Plugins",
+      hint: "Native field presets",
+      run: () => store.openNative("prism"),
+    },
+    {
+      id: "open-texture",
+      label: "Open Texture Lab",
+      group: "Plugins",
+      hint: "Paper, glass and fur",
+      run: () => store.openPlugin("texture-lab"),
+    },
+    {
+      id: "open-pattern",
+      label: "Open Pattern Library",
+      group: "Plugins",
+      hint: "Eight printed grounds",
+      run: () => store.openPlugin("pattern-library"),
+    },
+    {
+      id: "open-particles",
+      label: "Open Particle Field",
+      group: "Plugins",
+      hint: "Dust, sparks, orbit, confetti",
+      run: () => store.openPlugin("particle-field"),
+    },
+    {
+      id: "open-assets",
+      label: "Open Asset Shelf",
+      group: "Plugins",
+      hint: "Paper and Lucide samples",
+      run: () => store.openPlugin("asset-shelf"),
+    },
+    {
+      id: "open-spatial",
+      label: "Open Spatial Dock",
+      group: "Plugins",
+      hint: "Local 3D and motion presets",
+      run: () => store.openPlugin("spatial-dock"),
+    },
+    {
+      id: "open-native",
+      label: "Open Native Parity",
+      group: "Plugins",
+      hint: "Tone and Prism",
+      run: () => store.openPlugin("native-parity"),
+    },
+    {
+      id: "open-commands",
+      label: "Open actions",
+      group: "View",
+      run: store.openCommands,
+    },
+    {
+      id: "open-plugins",
+      label: "Open the plugin catalogue",
+      group: "View",
+      run: store.openCatalogue,
+    },
+    {
+      id: "undo",
+      label: "Undo last edit",
+      group: "Edit",
+      hint: "Document history · Cmd/Ctrl+Z",
+      run: store.undo,
+    },
+    {
+      id: "redo",
+      label: "Redo edit",
+      group: "Edit",
+      hint: "Document history · Cmd/Ctrl+Shift+Z",
+      run: store.redo,
+    },
+    {
+      id: "present-stage",
+      label: "Present the stage",
+      group: "View",
+      hint: "Focus the artboard",
+      run: store.openPresentation,
+    },
+    {
+      id: "close",
+      label: "Close the surface",
+      group: "View",
+      run: store.closeSurface,
+    },
+  ];
+}

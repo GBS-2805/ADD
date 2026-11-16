@@ -1,0 +1,84 @@
+{
+  "generated": "2026-11-16",
+  "notes": "Runtime assets are local files with a recorded source, licence and SHA-256. Third-party JavaScript is pinned in package-lock.json and documented in THIRD_PARTY.md.",
+  "assets": [
+    {
+      "path": "src/assets/fonts/libre-franklin-400.woff2",
+      "kind": "font",
+      "family": "Libre Franklin",
+      "source": "https://fonts.google.com/specimen/Libre+Franklin",
+      "licence": "OFL-1.1",
+      "sha256": "52e605852c72cc2df1473df1fb7f26a3a0be58e31835bc8f33f29b1918c82cbd"
+    },
+    {
+      "path": "src/assets/fonts/instrument-serif-400.woff2",
+      "kind": "font",
+      "family": "Instrument Serif",
+      "source": "https://fonts.google.com/specimen/Instrument+Serif",
+      "licence": "OFL-1.1",
+      "sha256": "5eb09b5ac0e28b67c2f041c8ba6d244604ca0c0980d65912ab2d47fed84ddc31"
+    },
+    {
+      "path": "src/assets/fonts/poppins-400.woff2",
+      "kind": "font",
+      "family": "Poppins",
+      "source": "https://fonts.google.com/specimen/Poppins",
+      "licence": "OFL-1.1",
+      "sha256": "3dc5d0c52428fe1696264907a1054ebbaac07f8cbe45832c105f819c2ae397c0"
+    },
+    {
+      "path": "src/assets/fonts/poppins-500.woff2",
+      "kind": "font",
+      "family": "Poppins",
+      "source": "https://fonts.google.com/specimen/Poppins",
+      "licence": "OFL-1.1",
+      "sha256": "289e0afc8be731a86822349e54557296f145926496bd2138db1bac0db77f77a2"
+    },
+    {
+      "path": "src/assets/fonts/poppins-600.woff2",
+      "kind": "font",
+      "family": "Poppins",
+      "source": "https://fonts.google.com/specimen/Poppins",
+      "licence": "OFL-1.1",
+      "sha256": "872e862918591a9e824dc03ed92f05729435ffbb8ebbb10eff7eda26592b1798"
+    },
+    {
+      "path": "src/assets/fonts/spectral-regular.ttf",
+      "kind": "font",
+      "family": "Spectral",
+      "source": "https://fonts.google.com/specimen/Spectral",
+      "licence": "OFL-1.1",
+      "sha256": "21ace73529979b11abeab22f42674cb30b88a6ab76dd37b4efa13ba06162f68d"
+    },
+    {
+      "path": "src/assets/fonts/archivo-600.woff2",
+      "kind": "font",
+      "family": "Archivo",
+      "source": "https://fonts.google.com/specimen/Archivo",
+      "licence": "OFL-1.1",
+      "sha256": "d9e8c29fdd348edde2a4f9aae438e569dd165bbbdebda78495824a2d9aaa67e8"
+    },
+    {
+      "path": "src/assets/fonts/plex-mono-400.woff2",
+      "kind": "font",
+      "family": "IBM Plex Mono",
+      "source": "https://fonts.google.com/specimen/IBM+Plex+Mono",
+      "licence": "OFL-1.1",
+      "sha256": "08949f728dc52d528e69b1667d15c89a5686a4ee9a296ff90983985f99c380f7"
+    },
+    {
+      "path": "src/assets/fonts/plex-mono-600.woff2",
+      "kind": "font",
+      "family": "IBM Plex Mono",
+      "source": "https://fonts.google.com/specimen/IBM+Plex+Mono",
+      "licence": "OFL-1.1",
+      "sha256": "0d1f0b8d0722224e32e9f28261bdc86c79115be73444ae5eceb73976a1bcdf83"
+    }
+  ],
+  "exemptions": [
+    {
+      "path": "e2e/fixtures/layer.png",
+      "reason": "First-party synthetic transparent PNG used by Playwright only; it is never a runtime asset."
+    }
+  ]
+}

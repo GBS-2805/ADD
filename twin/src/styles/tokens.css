@@ -1,0 +1,159 @@
+@font-face {
+  font-family: "Archivo";
+  src: url("../assets/fonts/archivo-600.woff2") format("woff2");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "IBM Plex Mono";
+  src: url("../assets/fonts/plex-mono-400.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "IBM Plex Mono";
+  src: url("../assets/fonts/plex-mono-600.woff2") format("woff2");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Poppins";
+  src: url("../assets/fonts/poppins-400.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Poppins";
+  src: url("../assets/fonts/poppins-500.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Poppins";
+  src: url("../assets/fonts/poppins-600.woff2") format("woff2");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Libre Franklin";
+  src: url("../assets/fonts/libre-franklin-400.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Instrument Serif";
+  src: url("../assets/fonts/instrument-serif-400.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Spectral";
+  src: url("../assets/fonts/spectral-regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --paper: #f2f1ed;
+  --sheet: #fafaf7;
+  --card: #e7e6e1;
+  --raised: #d8d7d1;
+  --ink: #111111;
+  --dim: #5a5a56;
+  --accent: #111111;
+  --accent-hover: #2e2e2c;
+  --on-accent: #fafaf7;
+  /* Legacy names kept as monochrome aliases for the existing rules. */
+  --plum: var(--accent);
+  --plum-hover: var(--accent-hover);
+  --rule: rgba(17, 17, 17, 0.24);
+  --soft-rule: rgba(17, 17, 17, 0.12);
+  --focus: #111111;
+  --chrome: "Poppins", system-ui, sans-serif;
+  --serif: "Instrument Serif", Georgia, serif;
+  --meta: "Libre Franklin", system-ui, sans-serif;
+  --editorial: "Spectral", Georgia, serif;
+  --shadow: 0 18px 46px rgba(17, 17, 17, 0.18);
+  --radius: 4px;
+  --motion-press: 90ms;
+  --motion-state: 160ms;
+  --motion-enter: 240ms;
+  --motion-sheet: 280ms;
+  --motion-stage: 360ms;
+  --motion-stagger: 32ms;
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-soft: cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* Workbench: graphite shell, cream controls, paper artboard, red active. */
+  --ed-studio: #131513;
+  --ed-panel: #1b1d1a;
+  --ed-raised: #232622;
+  --ed-rule: #343832;
+  --ed-cream: #f2eee3;
+  --ed-muted: #a9aa9f;
+  --ed-red: #dd4124;
+  --ed-paper: #e9e0cb;
+  --ed-sheet: #fafaf7;
+  --ed-ink: #111111;
+  --ed-chrome: "Archivo", system-ui, sans-serif;
+  --ed-mono: "IBM Plex Mono", ui-monospace, monospace;
+  color-scheme: light;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--chrome);
+  -webkit-font-smoothing: antialiased;
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
+
+button {
+  color: inherit;
+}
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+[role="button"]:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0ms !important;
+  }
+}
