@@ -266,14 +266,10 @@ fun EngineScreen() {
         add(EngineCommand("inspector", "Inspector", "View", "i") { openSheet(StudioTab.Style) })
         add(EngineCommand("focus", "Focus canvas", "View", "◎") { doc.settle() })
         add(EngineCommand("documents", "Documents", "Page", "▧") { showLibrary = true })
-        EnginePlugins.builtIn.forEach { plugin ->
-            plugin.commands.forEach { command ->
-                add(EngineCommand(command.id, command.label, "Plugins", plugin.glyph, command.keywords) {
-                    showPlugins = false
-                    shell = shell.reduce(ShellEvent.OpenPlugin(plugin.id))
-                })
-            }
-        }
+        addAll(enginePluginCommands(EnginePlugins.builtIn) { id ->
+            showPlugins = false
+            shell = shell.reduce(ShellEvent.OpenPlugin(id))
+        })
     }
     val activePlugin = EnginePlugins.builtIn.firstOrNull { it.id == shell.pluginId }
     // The dialog/host surface lives outside the shell Box, so the same width

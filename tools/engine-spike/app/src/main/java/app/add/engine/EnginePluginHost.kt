@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.SaveableStateHolder
 import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.ui.Alignment
@@ -33,6 +34,7 @@ fun EnginePluginHost(
     layout: EngineLayout = EngineLayout.Compact,
     stateHolder: SaveableStateHolder = rememberSaveableStateHolder(),
 ) {
+    val effects = remember(doc) { EngineDocumentEffects(doc) }
     val content: @Composable androidx.compose.foundation.layout.ColumnScope.() -> Unit = {
         Row(
             modifier = Modifier.fillMaxWidth().padding(horizontal = 14.dp),
@@ -73,6 +75,7 @@ fun EnginePluginHost(
             plugin.Panel(
                 EnginePluginScope(
                     doc = doc,
+                    effects = effects,
                     close = onClose,
                     hide = onHide,
                     toast = onToast,

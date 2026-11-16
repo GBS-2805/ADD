@@ -32,7 +32,7 @@ The field is a document recipe: up to eight colour spots with Gaussian reach, sc
 - Integration is a task, not an assumption: Task 10 merges the engine into `app.offline.compress` and deletes Studio; Task 11 produces the signed final testing APK, which is the only release artifact.
 - Performance is a gate, not polish: 50 layers, three nested groups and one 2048 px photo must hold a 16 ms median frame time at 1080×1350 on the target phone. Record the number; do not estimate it.
 - Keep Kotlin 2.0.21, Compose BOM `2025.02.00`, SceneView 2.3.0 and Filament 1.56 unless a time-boxed compatibility spike proves an upgrade.
-- All existing engine tests must stay green. Current baseline: **209 tests, 0 failures, 0 errors**.
+- All existing engine tests must stay green. Current baseline: **231 tests, 0 failures, 0 errors**.
 - Web timing is report-only (`python3 tools/check_all.py --perf`). Engine frame-time
   evidence stays blocked until `tools/engine-spike/bench.sh` has a real device report.
 - No visual claim without a capture; no device claim without a device check.

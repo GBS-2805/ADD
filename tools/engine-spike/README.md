@@ -57,6 +57,8 @@ saved PNG by itself; those remain manual checks.
 | Native screen | `EngineScreen.kt` — tool rail, stage, layer stack, inspector, export |
 | Procedural artboard textures | `TexturePresets.kt` — ten seeded families, bounded downsample cache, recipe-only document storage |
 | Material Ink | `TextureInk.kt` — seeded material strokes authored by drag, stored as v5 recipes and rendered through the same Skia artboard/export path |
+| Plugin catalogue | `EnginePluginShelf.kt` — searchable, recent-first compiled plugin list |
+| Prism field gradients | `PrismPlugin.kt`, `EnginePlugin.kt` — artboard/layer presets through one undoable document seam |
 | Device diagnostics | `DiagnosticsScreen.kt` — live SceneView/model state, PixelCopy test, manual checklist |
 | Asset pipeline | `scripts/make_gem.py`, `scripts/prepare-assets.mjs` |
 
@@ -135,9 +137,24 @@ undo/redo, deterministic pixels, seed divergence and the frame budget; measured 
 render time is **1.18 ms**. The reviewed capture is
 `artifacts/material-ink.png`.
 
+### Plugin catalogue and Prism (3.9.1 / 56)
+
+The Plugins sheet is now a searchable catalogue: it filters id, name, summary and
+command text, keeps recent-first order, exposes a 48dp clear control and shows an
+explicit empty state. `PluginCatalogueTest` covers ordering, multi-term matching and
+no-match filtering.
+
+Prism is the second compiled-in plugin. It routes eight field-gradient presets to the
+artboard or a text/vector selection through `EngineDocumentEffects`, disables the layer
+target for unsupported selections, treats re-applying the same recipe as a no-op, and
+makes apply/clear one undo step. `PrismPluginTest`, `PrismPluginPanelTest` and the
+host/shelf tests cover routing, 48dp controls, saved target state and the command entry.
+Reviewed captures: `artifacts/bmo/bmo-plugin-catalogue.png` and
+`artifacts/bmo/bmo-plugin-prism.png`.
+
 Full suite at the 3.8.5 cut: **160 tests, 0 failures, 0 errors, 0 skipped**. Chrome:
 **24/24 goldens match**, including the Material Ink capture and the Marble-under-layers
-repair. No bitmap assets or network calls were added. Current baseline: **209 tests, 0
+repair. No bitmap assets or network calls were added. Current baseline: **231 tests, 0
 failures, 0 errors, 0 skipped**; current field preview: **3.9.1 (56)**.
 Task 9–11, Studio and `app.offline.compress` were not touched. The review is built as
 **3.8.5 (55)** at `artifacts/engine-review/ADD-3.8.5-engine-review.apk`; it has not been

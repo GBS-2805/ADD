@@ -91,6 +91,25 @@ class EngineCommandSheetTest {
     }
 
     @Test
+    fun pluginCommandOpensItsPlugin() {
+        var opened: String? = null
+        val pluginCommands = enginePluginCommands(EnginePlugins.builtIn) { opened = it }
+        compose.setContent {
+            EngineTheme {
+                EngineCommandSheet(
+                    commands = pluginCommands,
+                    onRun = { it.run() },
+                    onClose = {},
+                )
+            }
+        }
+
+        compose.onNodeWithTag("bmo-command-prism.open").performClick()
+
+        assertEquals("prism", opened)
+    }
+
+    @Test
     fun disabledCommandsCannotRun() {
         var ran = 0
         compose.setContent {

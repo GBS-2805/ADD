@@ -15,6 +15,7 @@ import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -129,6 +130,49 @@ class EnginePluginHostTest {
         compose.runOnUiThread { visible = true }
         compose.waitForIdle()
         compose.onNodeWithText("COUNT 0").assertExists()
+    }
+
+    @Test
+    fun prismTargetSurvivesHideAndResetsOnClose() {
+        lateinit var holder: SaveableStateHolder
+        var visible by mutableStateOf(true)
+        compose.setContent {
+            EngineTheme {
+                val stateHolder = rememberSaveableStateHolder()
+                val doc = remember { EngineDocument().apply { addVector() } }
+                SideEffect { holder = stateHolder }
+                if (visible) {
+                    EnginePluginHost(
+                        plugin = PrismPlugin,
+                        doc = doc,
+                        onHide = {},
+                        onClose = {},
+                        stateHolder = stateHolder,
+                    )
+                }
+            }
+        }
+
+        compose.onNodeWithTag("prism-target-layer").performClick()
+        compose.waitForIdle()
+        compose.onNodeWithTag("prism-target-layer").assertIsSelected()
+
+        compose.runOnUiThread { visible = false }
+        compose.waitForIdle()
+        compose.onNodeWithTag("bmo-plugin-host").assertDoesNotExist()
+
+        compose.runOnUiThread { visible = true }
+        compose.waitForIdle()
+        compose.onNodeWithTag("prism-target-layer").assertIsSelected()
+
+        compose.runOnUiThread { visible = false }
+        compose.waitForIdle()
+        compose.runOnUiThread {
+            holder.removeState(PrismPlugin.id)
+            visible = true
+        }
+        compose.waitForIdle()
+        compose.onNodeWithTag("prism-target-artboard").assertIsSelected()
     }
 
     @Test
