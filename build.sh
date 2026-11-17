@@ -174,12 +174,21 @@ stage_shelf_assets() {
     # the 8.9 MB APK -- and a gallery without its images is only a grid of broken
     # cells. They are the one pair of destinations the app leaves to the site, through
     # the "That page lives on the site" fallback in ShelfActivity.
+    #
+    # docs/classic/ is a snapshot of the whole 3.8 tree, so it carries the same three
+    # directories a second time: 6.7 MB of captures, artboards and packs inside an
+    # archive whose own pages reference the galleries only through their page
+    # registry. The top-level excludes are anchored at ./ and miss them, so they are
+    # named here too; the archive's galleries are the same destinations, left to the
+    # site by the same fallback.
     tar -C "$ROOT/docs" -cf - --exclude='ADD-*.apk' --exclude='vercel.json' \
         --exclude='sitemap.xml' --exclude='robots.txt' \
-        --exclude='./renders' --exclude='./figma' --exclude='./packs' . | tar -C "$www" -xf -
+        --exclude='./renders' --exclude='./figma' --exclude='./packs' \
+        --exclude='./classic/renders' --exclude='./classic/figma' \
+        --exclude='./classic/packs' . | tar -C "$www" -xf -
     python3 "$ROOT/tools/check_bundle.py" "$www"
     # Guard the trim: a future staging edit that quietly brings 3.2 MB back fails here.
-    for absent in renders figma packs; do
+    for absent in renders figma packs classic/renders classic/figma classic/packs; do
         if [ -e "$www/$absent" ]; then
             echo "stage_shelf_assets: $absent is staged; the galleries and the packs stay on the site" >&2
             exit 1
