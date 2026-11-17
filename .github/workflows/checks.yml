@@ -202,8 +202,10 @@ jobs:
           python3 tools/deploy_review.py handoff
       - name: Check live handoff security headers
         run: |
+          # The handoff deploy carries no site assets, so skip the hashed-asset probe here.
           python3 tools/check_headers.py \
-            --origin https://artbase-handoff.vercel.app/
+            --origin https://artbase-handoff.vercel.app/ \
+            --asset ""
       - name: Verify the handoff page and its local assets
         run: |
           python3 - <<'PY'
