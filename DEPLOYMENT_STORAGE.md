@@ -160,6 +160,19 @@ Vercel's [Activity Log](https://vercel.com/docs/activity-log) is available on Ho
 
 ## Change log
 
+- **2026-11-17** — Before the next release, the estimate was 511.2 MiB, over the
+  450 MiB early warning, so pruned 3 `artbase` deployments: the 2 oldest
+  (`dpl_CK1WTRmbXuMXPZZx1Nh6SoNozTkG`, `dpl_6tV3Nff78Mh7p89ArwhWdRCaph8w`) and the
+  blocked build `dpl_2c79VLmGw5wx4dp6EDck2mFgNZ82`, keeping the newest 3 site builds
+  and the deployment that holds `artbase-olive.vercel.app`
+  (`dpl_8tkDYWZxfBqDBLYQxpm1qHK4yasc`). Estimated storage fell from 511.2 MiB to
+  292.1 MiB with no warnings, and the live site still matched `651d2c1` on 103 files
+  afterwards. Two verification deployments made while testing the project-scoped
+  tokens were removed the same day, so the one-day audit export holds 5 deletions for
+  this window rather than 3. Evidence: `artifacts/audit/prune-2026-11-17-remove.log`,
+  `artifacts/audit/prune-2026-11-17-after.json` and
+  `artifacts/audit/vercel-activity-2026-11-17.jsonl`.
+
 - **2026-11-12** — Before publishing the 3.9.1 field preview, the storage report was
   critical at 1.18 GiB. Pruned the two oldest `artbase-handoff-apk` deployments
   (`dpl_5GNZWbue7o8pQm7eEUNJQoKhAB3d`, `dpl_B3N6HKs4CT1mGqUFbPiYsp3rSt49`), keeping the
