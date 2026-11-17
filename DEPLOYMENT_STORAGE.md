@@ -6,7 +6,8 @@ not a compliance certificate.
 
 ## Current baseline
 
-- Keep the newest **10** production deployments per project.
+- Keep the newest **5** production deployments per project. This is a derived floor,
+  not a preference; see "Why five" below before changing it.
 - Retention is **1 day** for preview, production, canceled and errored deployments.
   Vercel rejected `3d`; `1d` is the shortest accepted value.
 - The gate warns above 40 deployments per project, 450 MiB estimated total (early
@@ -14,6 +15,41 @@ not a compliance certificate.
   deployments per project, 1 GiB per project, or 1 GiB estimated total.
 - The size figure is an estimate: current output folder x retained deployments. Exact
   Deployment Storage bytes are dashboard-only on Hobby.
+
+### Why five
+
+The earlier runbook kept a fixed 10. That floor stopped being reachable once the site
+payload grew: the deploy payload measured on 2026-11-17 is 76,556,654 bytes
+(73.01 MiB across 571 files) for `docs/`. Ten retained copies of just that project
+estimate 730.1 MiB, already 280 MiB over the 450 MiB early warning before the other
+three projects contribute anything. The count is therefore derived from the budget:
+
+1. `docs/` payload is **73.01 MiB** per retained `artbase` deployment. Re-measure it
+   with `du -sb docs` or by summing file sizes; `python3 tools/check_upload.py`
+   reports the same tree as 76.6 MB, which is the same bytes in decimal units.
+2. The team-wide budget is **450 MiB**, `SIZE_EARLY_WARN` in `tools/deploy_storage.py`:
+   the point where the storage report starts warning, so staying under it keeps
+   releases free of storage warnings.
+3. The other three projects share that budget. At the 2026-11-17 baseline their
+   retained copies estimate 73.1 MiB together, which leaves 376.9 MiB for `artbase`.
+   Actual depth stays low because retention expires copies after 1 day; the floor is a
+   protection minimum for pruning, not a target count to reach.
+4. 376.9 / 73.01 = 5.16, so **5** deployments: 365.1 MiB for `artbase` and about
+   438.2 MiB in total, under 450. Six would be 438.1 MiB for `artbase` alone and about
+   511.2 MiB in total, which crosses the early warning and sits at the 512 MiB gate.
+
+Recompute the floor instead of copying the 5 when the payload or another project's
+depth changes:
+
+```text
+floor((450 MiB - estimate of the other projects) / current docs payload)
+```
+
+`python3 tools/deploy_storage.py` is the authority: if its report and this arithmetic
+disagree, the report wins and the floor is lowered until the estimate is under budget.
+The five-copy floor protects the newest five production builds plus every live alias.
+It is a prune floor, not a claim that Vercel's `deploymentsToKeep` setting is 5;
+changing that setting stays a separate approved action.
 
 ## Normal releases
 
@@ -79,7 +115,8 @@ roles, Enterprise adds project roles.
 
 1. Record the reason, date and proposed values in the change log below (or an issue /
    pull request for a multi-person project).
-2. Keep at least 10 production deployments; do not go below the current keep floor.
+2. Keep at least the derived floor (currently 5) of production deployments; do not go
+   below it. Lowering it is a policy change and needs its own change-log entry.
 3. Apply the dedicated endpoint, not a project PATCH:
 
    ```text
@@ -101,7 +138,8 @@ the project back.
 
 1. Get approval (owner entry in the change log for a personal project; issue/PR for a
    team).
-2. Protect the current production aliases and the newest 10 production deployments.
+2. Protect the current production aliases and the newest deployments covered by the
+   derived floor (currently 5). Recompute that floor first when the payload changed.
    Never delete the deployment holding `artbase-olive.vercel.app`,
    `artbase-handoff.vercel.app`, `artbase-handoff-apk.vercel.app` or
    `artbase-shots.vercel.app`.
@@ -159,6 +197,15 @@ Vercel's [Activity Log](https://vercel.com/docs/activity-log) is available on Ho
 [Audit Logs](https://vercel.com/docs/audit-log) are Enterprise-only.
 
 ## Change log
+
+- **2026-11-17** — Replaced the fixed 10-deployment floor with a derived floor of 5.
+  The `docs/` payload is 76,556,654 bytes (73.01 MiB), so 10 copies would estimate
+  730.1 MiB against the 450 MiB budget and the old floor could not be honoured without
+  deleting the archive. With the other three projects at 73.1 MiB together, the budget
+  allows 5 copies (365.1 MiB for `artbase`, about 438.2 MiB in total); 6 would be about
+  511.2 MiB. Documentation and prune-policy only: no retention setting,
+  `deploymentsToKeep` value, deployment or token changed. Derivation and the recompute
+  formula are in "Why five" above.
 
 - **2026-11-17** — Before the next release, the estimate was 511.2 MiB, over the
   450 MiB early warning, so pruned 3 `artbase` deployments: the 2 oldest
@@ -221,9 +268,9 @@ Vercel's [Activity Log](https://vercel.com/docs/activity-log) is available on Ho
 
 ## What a personal project can skip
 
-Worth keeping: the strict gate, the 10-deployment floor, the runbook, and the daily
-scheduled audit export. Those are cheap and cover the realistic failure: accidental
-storage growth or an unexplained deletion.
+Worth keeping: the strict gate, the derived deployment floor, the runbook, and the
+daily scheduled audit export. Those are cheap and cover the realistic failure:
+accidental storage growth or an unexplained deletion.
 
 Worth skipping until there is another person or a compliance requirement: Enterprise
 Audit Logs/SIEM streaming, formal RBAC, and a separate approval system. Use a
