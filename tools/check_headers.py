@@ -7,7 +7,9 @@
 
 This is an explicit network step; it is not part of the offline fast path. The
 policy is enforced, so a report-only header alone does not pass: the response
-must carry Content-Security-Policy, and it may not contain unsafe-eval.
+must carry Content-Security-Policy, and it may not contain unsafe-eval. The
+hashed-asset cache check runs only against the shelf origin recorded in
+tools/site.json, because the other hosts serve no /assets tree.
 """
 
 from __future__ import annotations
@@ -37,6 +39,32 @@ def fetch(url: str) -> Fetched:
     with urllib.request.urlopen(request, timeout=30) as response:
         return Fetched(response.geturl(), response.status,
                        {key.lower(): value for key, value in response.headers.items()})
+
+
+def shelf_origin() -> str | None:
+    """The host whose docs/ tree carries the hashed CSS, from tools/site.json."""
+    try:
+        site = json.loads((ROOT / "tools" / "site.json").read_text(encoding="utf-8"))
+        return str(site["url"]).rstrip("/")
+    except (OSError, ValueError, KeyError, TypeError):
+        return None
+
+
+def default_asset(origin: str) -> str | None:
+    """The hashed stylesheet to check, or None when origin is not the shelf host.
+
+    handoff/ is deployed to its own host and checked with this tool, but it serves no
+    /assets tree, so asking it for the shelf's hashed CSS reported a 404 as a header
+    problem (run 44204986190). The cache check belongs to the origin docs/ reaches;
+    an explicit --asset still overrides this.
+    """
+    if origin.rstrip("/") != shelf_origin():
+        return None
+    try:
+        names = json.loads((ROOT / "docs" / "data" / "assets.json").read_text(encoding="utf-8"))
+        return "/assets/" + names["files"]["site.css"]
+    except (OSError, ValueError, KeyError, TypeError):
+        return None
 
 
 def _hsts(value: str) -> tuple[bool, str]:
@@ -133,11 +161,10 @@ def main(argv: list[str] | None = None) -> int:
 
     asset = args.asset
     if asset is None:
-        try:
-            names = (ROOT / "docs" / "data" / "assets.json").read_text(encoding="utf-8")
-            asset = "/assets/" + json.loads(names)["files"]["site.css"]
-        except (OSError, ValueError, KeyError):
-            asset = None
+        asset = default_asset(args.origin)
+        if asset is None:
+            print("asset: skipped - %s does not serve the shelf's hashed CSS"
+                  % args.origin.rstrip("/"))
     found = problems(args.origin, handoff_origin=args.handoff_origin, asset_path=asset)
     if found:
         for item in found:

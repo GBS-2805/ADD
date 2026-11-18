@@ -58,6 +58,15 @@ class HeaderTests(unittest.TestCase):
         self.assertTrue(any("insecure" in item for item in self.check(
             good_headers(), url="http://example.test/")))
 
+    def test_handoff_origin_does_not_borrow_the_shelf_asset(self):
+        self.assertIsNone(check_headers.default_asset("https://artbase-handoff.vercel.app"))
+
+    def test_shelf_origin_gets_its_hashed_css(self):
+        shelf = check_headers.shelf_origin()
+        self.assertIsNotNone(shelf)
+        asset = check_headers.default_asset(shelf + "/")
+        self.assertRegex(asset or "", r"^/assets/site\.[0-9a-f]+\.css$")
+
     def test_wrong_hashed_asset_cache_fails(self):
         headers = good_headers()
         headers["cache-control"] = "public, max-age=60"
