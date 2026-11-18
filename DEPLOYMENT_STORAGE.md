@@ -198,6 +198,20 @@ Vercel's [Activity Log](https://vercel.com/docs/activity-log) is available on Ho
 
 ## Change log
 
+- **2026-11-18** — After approval, pruned the blocked `artbase` build left by the
+  publish that timed out (run #84), keeping the newest five production builds and the
+  deployment that holds `artbase-olive.vercel.app`
+  (`dpl_5jMgZLFzvBq25Z47xofyYcrN9BK6`, `e86cff5`). The CI report at the run #86 handoff
+  deploy was 458.1 MiB, over the 450 MiB early warning, and the next deploy would have
+  crossed the 512 MiB warning. After: `artbase` 365.1 MiB over 5 deployments, 446.2 MiB
+  estimated in this checkout, no warnings; the live site still matched `e86cff5` on 103
+  files. The local estimate reads higher than CI's before and after because it carries
+  `artifacts/handoff-apk` (53.4 MiB) and `artifacts/shots`, which a CI checkout does not.
+  Evidence: `artifacts/audit/prune-2026-11-18-before.json`,
+  `artifacts/audit/prune-2026-11-18-before-deployments.json`,
+  `artifacts/audit/prune-2026-11-18-remove.log` and
+  `artifacts/audit/prune-2026-11-18-after.json`.
+
 - **2026-11-17** — Replaced the fixed 10-deployment floor with a derived floor of 5.
   The `docs/` payload is 76,556,654 bytes (73.01 MiB), so 10 copies would estimate
   730.1 MiB against the 450 MiB budget and the old floor could not be honoured without
