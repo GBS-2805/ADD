@@ -115,23 +115,31 @@ class TexturePresetTest {
     }
 
     /**
-     * Best of five at the measured size after a small field has let HotSpot
-     * compile the family's branch. The budget is unchanged; scheduler pauses and
-     * GC on a shared CI runner otherwise turn one slow sample into a failure.
+     * Best of nine at the measured size, after three untimed renders at that same
+     * size. Warming on a small field was not enough: the measured loop is compiled
+     * lazily, and on a shared runner the compiler threads are starving, so the first
+     * samples came from interpreted code and read at roughly twice the real cost.
+     * The warm passes are untimed and the samples are min-based, so the budget stays
+     * at one frame; only a family that is slow once compiled can fail.
      */
-    private fun bestPreviewMs(family: TextureFamily, width: Int, height: Int): Double {
-        TexturePresets.render(family, TexturePresets.seedFor(family), 48, 60)
-        val samples = (1..5).map {
+    private fun previewSamplesMs(family: TextureFamily, width: Int, height: Int): List<Double> {
+        val seed = TexturePresets.seedFor(family)
+        repeat(WARMUP_PASSES) { TexturePresets.render(family, seed, width, height) }
+        val samples = (1..SAMPLES).map {
             val started = cpuNow()
-            TexturePresets.render(family, TexturePresets.seedFor(family), width, height)
+            TexturePresets.render(family, seed, width, height)
             (cpuNow() - started) / 1_000_000.0
         }
-        val best = samples.min()
         println(
-            "texture family=$family ${width}x$height " +
-                "samplesMs=${samples.joinToString(",") { "%.3f".format(it) }} bestMs=$best",
+            "texture family=$family ${width}x$height passes=$WARMUP_PASSES " +
+                "samplesMs=${samples.joinToString(",") { "%.3f".format(it) }}",
         )
-        return best
+        return samples
+    }
+
+    private companion object {
+        const val WARMUP_PASSES = 3
+        const val SAMPLES = 9
     }
 
     @Test
@@ -139,8 +147,15 @@ class TexturePresetTest {
         // The renderer caps a field at 240k pixels (about 300x400). The inspector
         // asks for one family when the reader picks it, then the cache serves frames.
         TextureFamily.entries.forEach { family ->
-            val elapsedMs = bestPreviewMs(family, 300, 375)
-            assertTrue("$family took ${elapsedMs}ms", elapsedMs < 16.0)
+            val samples = previewSamplesMs(family, 300, 375)
+            val best = samples.min()
+            // The samples travel with the failure: a CI log otherwise says only
+            // "took Nms", which cannot tell a cold compiler from a slow family.
+            assertTrue(
+                "$family took ${"%.2f".format(best)}ms over $SAMPLES samples " +
+                    "(${samples.joinToString(",") { "%.2f".format(it) }})",
+                best < 16.0,
+            )
         }
     }
 
