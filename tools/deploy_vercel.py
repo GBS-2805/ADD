@@ -20,8 +20,10 @@ import datetime
 import json
 import os
 import re
+import signal
 import subprocess
 import sys
+import threading
 import urllib.error
 import urllib.request
 from concurrent.futures import ThreadPoolExecutor
@@ -31,6 +33,7 @@ ROOT = Path(__file__).resolve().parent.parent
 SITE = ROOT / "tools/site.json"
 PROJECT = "artbase"          # created on first deploy if the account has no project by this name
 CLI = ("npx", "-y", "vercel@65.14.0")
+CLI_TIMEOUT = 600           # seconds the upload gets before the step gives up
 
 sys.path.insert(0, str(ROOT / "tools"))
 from build_site import routes as site_routes  # noqa: E402 - the tools directory is on the path above
@@ -253,6 +256,55 @@ def headers_current(origin):
     print("  headers: OK - live response carries CSP, HSTS, frame denial and cache policy")
 
 
+def run_deploy_cli(cmd, env):
+    """Run the Vercel CLI with its output streaming and a deadline.
+
+    The upload is the only step that can sit on the network for minutes, and it used
+    to run with its output captured and no deadline. When the CLI stalled, the job
+    printed nothing after the command itself, stayed silent for the whole job budget,
+    and was cancelled at the 15-minute limit with the CLI still running. Streaming
+    shows the last line the upload reached, and the deadline turns a stall into a
+    named failure that leaves the verification below some of the job's time.
+    """
+    print("$ " + " ".join(cmd), flush=True)
+    proc = subprocess.Popen(cmd, cwd=ROOT, stdout=subprocess.PIPE,
+                            stderr=subprocess.STDOUT, text=True, env=env,
+                            start_new_session=True)
+    stalled = threading.Event()
+
+    def stop():
+        """Kill the whole CLI session: npx exits, the node child must not linger."""
+        stalled.set()
+        try:
+            if hasattr(os, "killpg"):
+                os.killpg(os.getpgid(proc.pid), signal.SIGKILL)
+            else:
+                proc.kill()
+        except (ProcessLookupError, PermissionError):
+            proc.kill()
+
+    watchdog = threading.Timer(CLI_TIMEOUT, stop)
+    watchdog.start()
+    lines = []
+    try:
+        assert proc.stdout is not None
+        for line in proc.stdout:
+            lines.append(line)
+            print(line, end="", flush=True)
+        code = proc.wait()
+    finally:
+        watchdog.cancel()
+        if proc.stdout:
+            proc.stdout.close()
+    out = "".join(lines)
+    if stalled.is_set():
+        sys.exit("the Vercel CLI stopped responding for %d seconds and was killed; "
+                 "nothing was rewritten. The last line it printed is above; run "
+                 "python3 tools/deploy_vercel.py again once Vercel answers.\n%s"
+                 % (CLI_TIMEOUT, out.rstrip()[-2_000:]))
+    return code, out
+
+
 def deploy():
     token = deploy_token()
     if not token:
@@ -273,17 +325,14 @@ def deploy():
         raise
     cmd = [*CLI, "deploy", "docs", "--prod", "--yes",
            "--project", PROJECT, "--create-if-missing"]
-    print("$ " + " ".join(cmd), flush=True)
     # The deploy child gets only the project-scoped token, never the admin token.
     env = {key: value for key, value in os.environ.items()
            if key not in {"VERCEL_ADMIN_TOKEN", "VERCEL_HANDOFF_TOKEN",
                           "VERCEL_REVIEW_TOKEN", "VERCEL_SHOTS_TOKEN"}}
     env["VERCEL_TOKEN"] = token
-    proc = subprocess.run(cmd, cwd=ROOT, capture_output=True, text=True, env=env)
-    out = proc.stdout + proc.stderr
-    print(out.rstrip())
-    if proc.returncode != 0:
-        sys.exit(f"deploy failed (exit {proc.returncode}); nothing was rewritten")
+    code, out = run_deploy_cli(cmd, env)
+    if code != 0:
+        sys.exit(f"deploy failed (exit {code}); nothing was rewritten")
     # Prefer the production alias: the per-deployment host changes on every upload,
     # and the alias is the address the repo should hold.
     alias = re.findall(r"Aliased\s+(https://\S+)", out)
