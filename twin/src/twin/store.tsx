@@ -18,6 +18,7 @@ import {
   serializeProject,
 } from "./project";
 import { renderArtboardPng, type PngExportResult } from "./pngExport";
+import { saveArtboardNatively } from "./nativeExport";
 import { canAddLayer, fitImageInsideArtboard, type Size } from "../editor/model/geometry";
 import { reorderLayerIds } from "../editor/model/layerTree";
 import { nextSelection, pruneSelection, selectAllIds, type SelectionMode } from "../editor/model/selection";
@@ -179,6 +180,7 @@ export interface TwinActions {
   saveProject: () => Promise<void>;
   openProject: () => void;
   exportPng: () => Promise<PngExportResult | null>;
+  exportNativePng: () => Promise<void>;
   printStage: () => void;
   toast: (message: string) => void;
 }
@@ -691,7 +693,42 @@ export function TwinProvider({ children }: { children: ReactNode }) {
     }
   }, [showToast]);
 
+  /**
+   * The engine's painter, in the app. Kept beside the canvas export rather than
+   * in front of it: the two can be compared on the same document, and a document
+   * carrying an effect the native painter does not know is refused by name.
+   */
+  const exportNativePng = useCallback(async () => {
+    try {
+      const native = await saveArtboardNatively(stateRef.current.present);
+      if (!native) {
+        showToast("The native export runs inside ADD.");
+        return;
+      }
+      if (native.status === "saved") {
+        const { status: _status, message, ...details } = native;
+        setLastExport(details);
+        showToast(message);
+        return;
+      }
+      if (native.status === "canvas") {
+        showToast(`${native.reason} stays on the canvas renderer.`);
+        return;
+      }
+      setLastExport(null);
+      showToast(native.message);
+    } catch {
+      setLastExport(null);
+      showToast("The native export could not run.");
+    }
+  }, [showToast]);
+
   const printStage = useCallback(() => {
+    const host = (window as unknown as { IconsApp?: { print?: () => void } }).IconsApp;
+    if (host && typeof host.print === "function") {
+      host.print();
+      return;
+    }
     window.print();
   }, []);
 
@@ -772,6 +809,7 @@ export function TwinProvider({ children }: { children: ReactNode }) {
     saveProject,
     openProject,
     exportPng,
+    exportNativePng,
     printStage,
     toast: showToast,
   }), [
@@ -839,6 +877,7 @@ export function TwinProvider({ children }: { children: ReactNode }) {
     saveProject,
     openProject,
     exportPng,
+    exportNativePng,
     printStage,
     showToast,
   ]);

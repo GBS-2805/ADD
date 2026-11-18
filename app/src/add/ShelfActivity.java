@@ -1,17 +1,20 @@
 package add;
 
 import android.app.Activity;
+import android.content.ActivityNotFoundException;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.print.PrintManager;
 import android.provider.MediaStore;
 import android.util.Base64;
 import android.view.DisplayCutout;
@@ -21,6 +24,8 @@ import android.view.WindowInsets;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
+import android.webkit.ValueCallback;
+import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -34,8 +39,13 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * The shelf's web tools, offline: the icon browser and the fonts page, served to the
@@ -73,8 +83,11 @@ public class ShelfActivity extends Activity {
             + "{attributes:true,attributeFilter:['data-palette','data-theme']});"
             + "})()";
 
+    private static final int PICK_FILE = 41;
+
     private WebView web;
     private FrameLayout root;
+    private ValueCallback<Uri[]> fileCallback;
 
     @Override
     protected void onCreate(Bundle state) {
@@ -83,13 +96,17 @@ public class ShelfActivity extends Activity {
         getWindow().setStatusBarColor(pageColour());
         getWindow().setNavigationBarColor(pageColour());
 
+        final boolean twinPage = "twin".equals(
+                getIntent() == null ? null : getIntent().getStringExtra(EXTRA_PAGE));
         web = new WebView(this);
         web.setBackgroundColor(pageColour());
         WebSettings settings = web.getSettings();
         settings.setJavaScriptEnabled(true);
         settings.setDomStorageEnabled(true);
         settings.setAllowFileAccess(false);
-        settings.setAllowContentAccess(false);
+        // The twin imports PNG and .twin files the system picker hands back as
+        // content:// URIs; nothing else in the shelf reads content URIs.
+        settings.setAllowContentAccess(twinPage);
         settings.setAllowFileAccessFromFileURLs(false);
         settings.setAllowUniversalAccessFromFileURLs(false);
         settings.setBlockNetworkLoads(true);
@@ -106,6 +123,7 @@ public class ShelfActivity extends Activity {
         // every tool instead of each page needing to know which app it is inside.
         web.addJavascriptInterface(new Bridge(), "IconsApp");
         web.setWebViewClient(new LocalClient());
+        web.setWebChromeClient(new Picker());
 
         root = new FrameLayout(this);
         root.setBackgroundColor(pageColour());
@@ -141,6 +159,9 @@ public class ShelfActivity extends Activity {
         if ("fonts".equals(tool)) {
             return ORIGIN + "/fonts/index.html";
         }
+        if ("twin".equals(tool)) {
+            return ORIGIN + "/twin/index.html";
+        }
         return ORIGIN + "/index.html";
     }
 
@@ -151,11 +172,88 @@ public class ShelfActivity extends Activity {
     }
 
     @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode != PICK_FILE) {
+            super.onActivityResult(requestCode, resultCode, data);
+            return;
+        }
+        ValueCallback<Uri[]> callback = fileCallback;
+        fileCallback = null;
+        if (callback == null) {
+            return;
+        }
+        Uri[] picked = null;
+        if (resultCode == RESULT_OK && data != null) {
+            ClipData clip = data.getClipData();
+            if (clip != null) {
+                picked = new Uri[clip.getItemCount()];
+                for (int i = 0; i < clip.getItemCount(); i++) {
+                    picked[i] = clip.getItemAt(i).getUri();
+                }
+            } else if (data.getData() != null) {
+                picked = new Uri[] { data.getData() };
+            }
+        }
+        callback.onReceiveValue(picked);
+    }
+
+    @Override
     public void onBackPressed() {
         if (web.canGoBack()) {
             web.goBack();
         } else {
             super.onBackPressed();
+        }
+    }
+
+    /**
+     * A file input opened by the twin (a PNG layer or a .twin project). The page waits
+     * on the callback; the system picker returns a content:// URI the WebView reads.
+     */
+    private class Picker extends WebChromeClient {
+        @Override
+        public boolean onShowFileChooser(WebView view, ValueCallback<Uri[]> callback,
+                                         FileChooserParams params) {
+            if (fileCallback != null) {
+                fileCallback.onReceiveValue(null);
+            }
+            fileCallback = callback;
+            Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+            intent.addCategory(Intent.CATEGORY_OPENABLE);
+            intent.setType("*/*");
+            ArrayList<String> mimes = new ArrayList<>();
+            String[] accept = params == null ? null : params.getAcceptTypes();
+            if (accept != null) {
+                for (String value : accept) {
+                    if (value == null) {
+                        continue;
+                    }
+                    for (String part : value.split(",")) {
+                        String mime = part.trim();
+                        if (mime.startsWith(".")) {
+                            mime = "*/*";
+                        }
+                        if (!mime.isEmpty() && !mimes.contains(mime)) {
+                            mimes.add(mime);
+                        }
+                    }
+                }
+            }
+            if (!mimes.isEmpty()) {
+                intent.putExtra(Intent.EXTRA_MIME_TYPES, mimes.toArray(new String[0]));
+            }
+            if (params != null && params.getMode() == FileChooserParams.MODE_OPEN_MULTIPLE) {
+                intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+            }
+            try {
+                startActivityForResult(intent, PICK_FILE);
+            } catch (ActivityNotFoundException none) {
+                fileCallback = null;
+                callback.onReceiveValue(null);
+                Toast.makeText(ShelfActivity.this, "No file picker installed",
+                        Toast.LENGTH_SHORT).show();
+            }
+            return true;
         }
     }
 
@@ -178,6 +276,64 @@ public class ShelfActivity extends Activity {
         @JavascriptInterface
         public void saveFile(final String dataUrl, final String mime, final String name) {
             toast(writeFile(dataUrl, mime, name, false));
+        }
+
+        /**
+         * The twin's PNG export, painted by the app rather than the page: the
+         * project's artboard is drawn with Skia from the same recipe the canvas
+         * exporter uses, then written where every twin file lands. The page keeps
+         * its own renderer for effects this one cannot draw; the reply says which
+         * ran, so the page never claims a file it did not get.
+         */
+        @JavascriptInterface
+        public String saveTwin(final String project, final String name, final int scale) {
+            JSONObject reply = new JSONObject();
+            try {
+                Bitmap page = TwinRenderer.render(ShelfActivity.this, project, scale);
+                ByteArrayOutputStream png = new ByteArrayOutputStream();
+                page.compress(Bitmap.CompressFormat.PNG, 100, png);
+                page.recycle();
+                byte[] bytes = png.toByteArray();
+                String file = pngName(name);
+                String message = saveBytes(bytes, "image/png", file,
+                        Environment.DIRECTORY_DOWNLOADS + "/Shelf", false, "Downloads");
+                if (message.startsWith("Saved")) {
+                    put(reply, "status", "saved");
+                    put(reply, "bytes", bytes.length);
+                    put(reply, "filename", file);
+                    put(reply, "message", message);
+                } else {
+                    put(reply, "status", "error");
+                    put(reply, "message", message);
+                }
+            } catch (TwinRenderer.Unsupported unsupported) {
+                put(reply, "status", "canvas");
+                put(reply, "reason", unsupported.getMessage());
+            } catch (JSONException unreadable) {
+                put(reply, "status", "error");
+                put(reply, "message", "The native export could not read that project.");
+            } catch (OutOfMemoryError tooLarge) {
+                put(reply, "status", "error");
+                put(reply, "message", "That artboard is too large to render here.");
+            }
+            return reply.toString();
+        }
+
+        /** The twin's Print / Save PDF: a WebView has no window.print dialog. */
+        @JavascriptInterface
+        public void print() {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    PrintManager manager =
+                            (PrintManager) getSystemService(Context.PRINT_SERVICE);
+                    if (manager == null) {
+                        toast("Printing is not available");
+                        return;
+                    }
+                    manager.print("ADD Twin", web.createPrintDocumentAdapter("ADD Twin"), null);
+                }
+            });
         }
 
         /**
@@ -337,6 +493,34 @@ public class ShelfActivity extends Activity {
         } catch (IOException error) {
             return "Could not save: " + error.getMessage();
         }
+    }
+
+    /** A reply field. Strings and ints always serialise, so this cannot fail. */
+    private static void put(JSONObject object, String key, Object value) {
+        try {
+            object.put(key, value);
+        } catch (JSONException impossible) {
+            object.remove(key);
+        }
+    }
+
+    /** A picture name for whatever the page asked to save, never a path. */
+    private static String pngName(String name) {
+        String base = name == null ? "" : name.trim();
+        int slash = Math.max(base.lastIndexOf('/'), base.lastIndexOf('\\'));
+        if (slash >= 0) {
+            base = base.substring(slash + 1);
+        }
+        if (base.toLowerCase(Locale.ROOT).endsWith(".twin")) {
+            base = base.substring(0, base.length() - ".twin".length());
+        }
+        if (base.isEmpty()) {
+            base = "twin-project";
+        }
+        if (!base.toLowerCase(Locale.ROOT).endsWith(".png")) {
+            base = base + ".png";
+        }
+        return base;
     }
 
     /** A computed CSS colour as an ARGB int, or 0 when it cannot be read. */

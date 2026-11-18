@@ -4,6 +4,9 @@ import react from "@vitejs/plugin-react";
 const allowedHost = process.env.VITE_ALLOWED_HOST;
 
 export default defineConfig({
+  // The APK serves the built twin from /twin/, so assets must resolve relative to
+  // index.html instead of the origin root.
+  base: "./",
   plugins: [react()],
   server: {
     host: "0.0.0.0",

@@ -1,10 +1,12 @@
 import { Menu, Portal } from "@ark-ui/react";
-import { Eye, FileDown, FolderOpen, Printer, Redo2, Save, Undo2 } from "lucide-react";
+import { Cpu, Eye, FileDown, FolderOpen, Printer, Redo2, Save, Undo2 } from "lucide-react";
 import { useTwinStore } from "../twin/store";
+import { nativeExportAvailable } from "../twin/nativeExport";
 
 export function TopChips() {
   const store = useTwinStore();
   const { nativeLens } = store.state;
+  const nativeExport = nativeExportAvailable();
 
   return (
     <div className="ed-top-chips">
@@ -31,6 +33,11 @@ export function TopChips() {
               <Menu.Item value="export" onSelect={() => void store.exportPng()}>
                 <FileDown size={15} strokeWidth={1.7} /> Export PNG
               </Menu.Item>
+              {nativeExport ? (
+                <Menu.Item value="export-native" onSelect={() => void store.exportNativePng()}>
+                  <Cpu size={15} strokeWidth={1.7} /> Export PNG · native
+                </Menu.Item>
+              ) : null}
             </Menu.Content>
           </Menu.Positioner>
         </Portal>

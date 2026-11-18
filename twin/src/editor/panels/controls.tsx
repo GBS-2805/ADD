@@ -59,7 +59,9 @@ export function FillPicker({ layer }: { layer: TwinLayer }) {
       <ColorPicker.Control>
         <ColorPicker.Trigger className="color-trigger" aria-label={`Fill ${layer.name}`}>
           <ColorPicker.ValueSwatch className="color-value-swatch" />
-          <ColorPicker.ValueText />
+          {/* The picker's own value text formats as rgba(); a hex is what the
+              swatches above actually set, and what a beginner can read. */}
+          <span className="color-value-text">{value.toUpperCase()}</span>
           <ChevronDown size={13} strokeWidth={1.7} />
         </ColorPicker.Trigger>
       </ColorPicker.Control>

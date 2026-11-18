@@ -87,6 +87,10 @@ export function blendOperation(mode: BlendMode): GlobalCompositeOperation {
   return mode === "normal" ? "source-over" : (mode as GlobalCompositeOperation);
 }
 
+export function artboardFilename(doc: TwinDocument): string {
+  return `${projectFilename(doc).slice(0, -PROJECT_EXTENSION.length)}.png`;
+}
+
 export function buildArtboardRenderPlan(doc: TwinDocument): ArtboardRenderPlan {
   return {
     width: ARTBOARD_EXPORT_WIDTH,
@@ -94,7 +98,7 @@ export function buildArtboardRenderPlan(doc: TwinDocument): ArtboardRenderPlan {
     designWidth: ARTBOARD_DESIGN_WIDTH,
     designHeight: ARTBOARD_DESIGN_HEIGHT,
     scale: ARTBOARD_PIXEL_SCALE,
-    filename: `${projectFilename(doc).slice(0, -PROJECT_EXTENSION.length)}.png`,
+    filename: artboardFilename(doc),
     background: doc.background,
     layers: doc.layers.filter((layer) => layer.visible),
   };

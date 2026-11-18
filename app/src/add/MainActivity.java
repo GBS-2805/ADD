@@ -29,6 +29,7 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -414,6 +415,16 @@ public class MainActivity extends Activity {
         closeDrawer();
     }
 
+    /** True when this build carries the twin bundle, rather than the shipping shelf. */
+    private boolean twinBundled() {
+        try {
+            getAssets().open("www/twin/index.html").close();
+            return true;
+        } catch (IOException missing) {
+            return false;
+        }
+    }
+
     private void openInBrowser(String url) {
         try {
             startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
@@ -451,6 +462,15 @@ public class MainActivity extends Activity {
             closeDrawer();
             EditorActivity.open(this);
         });
+
+        // The browser twin travels only in the research build. Without its assets the
+        // row would open the shelf's "lives on the site" fallback, so hide it instead.
+        final View twinLink = findViewById(R.id.linkTwin);
+        if (twinBundled()) {
+            twinLink.setOnClickListener(v -> openShelf("twin"));
+        } else {
+            twinLink.setVisibility(View.GONE);
+        }
 
         link(R.id.linkDownload, "download/");
         link(R.id.linkPortfolio, "portfolio/");
