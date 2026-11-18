@@ -234,9 +234,11 @@
 }
 
 .ed-layer-name {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  line-height: 1.25;
+  padding: 4px 0;
 }
 
 .ed-inspector-placeholder {
@@ -665,9 +667,8 @@
 .ed-layer-name {
   min-width: 0;
   flex: 1;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  overflow-wrap: anywhere;
+  line-height: 1.25;
   padding: 2px 0;
 }
 

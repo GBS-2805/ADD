@@ -1,4 +1,3 @@
-import { ToggleGroup } from "@ark-ui/react";
 import { Hand, MousePointer2, SlidersHorizontal, ZoomIn } from "lucide-react";
 import { useEditorStore } from "../editor-core/store";
 import type { EditorTool } from "./types";
@@ -15,31 +14,27 @@ export function Toolbar() {
 
   return (
     <nav className="ed-tool-pill" aria-label="Editor tools">
-      <ToggleGroup.Root
-        multiple
-        className="ed-tool-group"
-        value={[store.state.tool]}
-        onValueChange={({ value }) => {
-          if (value[0]) store.setTool(value[0] as EditorTool);
-        }}
-      >
+      {/* One tool at a time, so these are pressed buttons rather than a
+          multi-select group; the pressed style already lives on aria-pressed. */}
+      <div className="ed-tool-group" role="group" aria-label="Active tool">
         {tools.map((tool) => {
           const Icon = tool.icon;
           return (
-            <ToggleGroup.Item
+            <button
               key={tool.value}
-              value={tool.value}
+              type="button"
               className="ed-tool-button"
               aria-label={tool.label}
+              aria-pressed={store.state.tool === tool.value}
               title={`${tool.label} · ${tool.shortcut}`}
-              tabIndex={0}
               style={{ minWidth: 44, minHeight: 44 }}
+              onClick={() => store.setTool(tool.value as EditorTool)}
             >
               <Icon size={18} strokeWidth={1.7} />
-            </ToggleGroup.Item>
+            </button>
           );
         })}
-      </ToggleGroup.Root>
+      </div>
       <span className="ed-tool-seam" aria-hidden="true" />
       <AddLayerMenu />
       <button

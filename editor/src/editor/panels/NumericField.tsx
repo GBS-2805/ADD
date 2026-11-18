@@ -13,7 +13,9 @@ export interface NumericFieldProps {
 
 const format = (value: number) => {
   if (!Number.isFinite(value)) return "0";
-  return String(Math.round(value * 100) / 100);
+  // One decimal is the precision a field needs to read cleanly; the model keeps
+  // the full value, so snapping and export do not lose accuracy.
+  return String(Math.round(value * 10) / 10);
 };
 
 export function NumericField({ label, value, min, max, step = 1, suffix, onCommit }: NumericFieldProps) {

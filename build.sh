@@ -2,6 +2,7 @@
 # Builds the offline Android APKs with the raw SDK tools (no Gradle).
 #
 #   ./build.sh            # the ADD app
+#   ./build.sh editor     # the ADD research build with the browser editor
 #   ./build.sh stage      # stage the web bundle only
 #
 # ADD is one package: a native compressor plus a WebView over the site's web tools,
@@ -60,8 +61,14 @@ ensure_key() {
 
 build_app() {
     local dir="$1" name="$2" apk="$3" code="$4" version="$5"
+    local kind="${6:-release}"
     local app="$ROOT/$dir" build="$ROOT/build/$name"
     local assets=()
+    local version_args=()
+    if [ "$kind" = "research" ]; then
+        # A research build has its own version; check_apk still checks everything else.
+        version_args=(--expect-version "$version" --expect-code "$code")
+    fi
 
     rm -rf "$build"
     mkdir -p "$build/gen" "$build/classes" "$build/dex" "$OUT"
@@ -118,6 +125,7 @@ build_app() {
     python3 "$ROOT/tools/check_apk.py" \
         --apk "$OUT/$apk" \
         --catalog "$ROOT/tools/catalog.json" \
+        ${version_args[@]+"${version_args[@]}"} \
         --aapt2 "$BT/aapt2" \
         --apksigner "$BT/apksigner"
     echo "== $name: done =="
@@ -181,9 +189,9 @@ stage_shelf_assets() {
     # registry. The top-level excludes are anchored at ./ and miss them, so they are
     # named here too; the archive's galleries are the same destinations, left to the
     # site by the same fallback.
-    # editor/ is the browser canvas editor. It is a web app, not a bundled tool: the
-    # app already ships its own native editor, and its 2.5 MB would buy nothing but
-    # a second, worse editor inside the APK. Leave it to the site, like the galleries.
+    # editor/ is the browser canvas editor. The release build leaves it to the site,
+    # like the galleries; the research build stages it below, where the app paints its
+    # projects with Skia.
     tar -C "$ROOT/docs" -cf - --exclude='ADD-*.apk' --exclude='vercel.json' \
         --exclude='sitemap.xml' --exclude='robots.txt' \
         --exclude='./renders' --exclude='./figma' --exclude='./packs' \
@@ -201,6 +209,28 @@ stage_shelf_assets() {
     du -sh "$www"
 }
 
+# The browser editor, built here so the asset tree and the APK cannot drift. Its dist is
+# gitignored; the research build is the only case that stages it, and the shipped app
+# keeps its native editor.
+stage_editor() {
+    local dist="$ROOT/editor/dist"
+    local www="$ROOT/app/assets/www/editor"
+    if ! command -v npm >/dev/null 2>&1; then
+        echo "npm is needed to build the editor; install Node and run ./build.sh editor" >&2
+        exit 1
+    fi
+    echo "== ADD: building the editor =="
+    ( cd "$ROOT/editor" && npm run build )
+    if [ ! -f "$dist/index.html" ] || [ ! -d "$dist/assets" ]; then
+        echo "editor build left no dist/index.html or dist/assets" >&2
+        exit 1
+    fi
+    rm -rf "$www"
+    mkdir -p "$www"
+    tar -C "$dist" -cf - . | tar -C "$www" -xf -
+    du -sh "$www"
+}
+
 # One app, one case. The old `compress` and `icons` cases are gone with the merge:
 # ADD ships the shelf's web tools and the native compressor in one package.
 case "${1:-add}" in
@@ -212,13 +242,23 @@ case "${1:-add}" in
         # the release had already replaced.
         check_fallback "$(ls -t "$OUT"/ADD-*.apk | head -1)"
         ;;
+    editor)
+        # A research build beside 3.9: same package, so it installs over the old one.
+        # Code 58 clears the engine-lane review builds (3.9.1 preview 56, BMO 57),
+        # so it also installs over either of those without a downgrade refusal.
+        check_palette
+        stage_shelf_assets
+        stage_editor
+        build_app app ADD ADD-4.0-editor.apk 58 4.0-editor research
+        check_fallback "$(ls -t "$OUT"/ADD-*.apk | head -1)"
+        ;;
     stage)
         # Stage only: no JDK or SDK needed, which is how the bundle harness runs.
         check_palette
         stage_shelf_assets
         ;;
     *)
-        echo "usage: $0 [add|stage]" >&2
+        echo "usage: $0 [add|editor|stage]" >&2
         exit 2
         ;;
 esac

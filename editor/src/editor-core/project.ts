@@ -436,7 +436,18 @@ export function projectFilename(doc: EditorDocument): string {
   return `${slug || "editor-project"}${PROJECT_EXTENSION}`;
 }
 
-export function downloadBlob(blob: Blob, filename: string): void {
+/** The app's WebView host, present only when the twin runs inside ADD. */
+interface SaveHost {
+  saveFile?: (dataUrl: string, mime: string, name: string) => void;
+}
+
+function saveHost(): SaveHost | null {
+  if (typeof window === "undefined") return null;
+  const host = (window as unknown as { IconsApp?: SaveHost }).IconsApp;
+  return host && typeof host.saveFile === "function" ? host : null;
+}
+
+function anchorDownload(blob: Blob, filename: string): void {
   const url = URL.createObjectURL(blob);
   const anchor = document.createElement("a");
   anchor.href = url;
@@ -446,4 +457,21 @@ export function downloadBlob(blob: Blob, filename: string): void {
   anchor.click();
   anchor.remove();
   window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+/**
+ * A WebView has no download shelf, so inside ADD the bytes go through the host's
+ * save bridge (Downloads/Shelf); a browser keeps the ordinary anchor download.
+ */
+export function downloadBlob(blob: Blob, filename: string): void {
+  const host = saveHost();
+  if (host?.saveFile) {
+    const reader = new FileReader();
+    reader.onload = () =>
+      host.saveFile?.(String(reader.result), blob.type || "application/octet-stream", filename);
+    reader.onerror = () => anchorDownload(blob, filename);
+    reader.readAsDataURL(blob);
+    return;
+  }
+  anchorDownload(blob, filename);
 }

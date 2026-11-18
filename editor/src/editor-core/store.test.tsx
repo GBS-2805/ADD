@@ -3,7 +3,10 @@ import { useEffect } from "react";
 import { describe, expect, it, vi } from "vitest";
 
 const pngMocks = vi.hoisted(() => ({ renderArtboardPng: vi.fn() }));
-vi.mock("./pngExport", () => ({ renderArtboardPng: pngMocks.renderArtboardPng }));
+vi.mock("./pngExport", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("./pngExport")>()),
+  renderArtboardPng: pngMocks.renderArtboardPng,
+}));
 import { commitHistory, createHistory } from "./history";
 import { serializeProject } from "./project";
 import { EditorProvider, useEditorStore, type EditorActions } from "./store";
@@ -135,6 +138,65 @@ describe("Editor store layers", () => {
     create.mockRestore();
     revoke.mockRestore();
     print.mockRestore();
+  });
+
+  it("nativeExportWritesThroughTheBridge", async () => {
+    const store = renderStore();
+    pngMocks.renderArtboardPng.mockClear();
+    const saveTwin = vi.fn(() => JSON.stringify({
+      status: "saved",
+      bytes: 4096,
+      filename: "open-studio.png",
+      message: "Saved to Downloads/Shelf/open-studio.png",
+    }));
+    Object.defineProperty(window, "IconsApp", {
+      value: { saveTwin },
+      configurable: true,
+    });
+    try {
+      await act(async () => {
+        await store.exportNativePng();
+      });
+      expect(saveTwin).toHaveBeenCalledOnce();
+      expect(pngMocks.renderArtboardPng).not.toHaveBeenCalled();
+      expect(current!.state.lastExport?.filename).toBe("open-studio.png");
+      expect(current!.state.lastExport?.bytes).toBe(4096);
+      expect(current!.state.toast).toContain("Downloads/Shelf");
+    } finally {
+      delete (window as unknown as { IconsApp?: unknown }).IconsApp;
+    }
+  });
+
+  it("defaultExportStaysOnCanvasInsideTheApp", async () => {
+    const store = renderStore();
+    const saveTwin = vi.fn(() => JSON.stringify({ status: "saved", bytes: 1, filename: "x.png" }));
+    const create = vi.spyOn(URL, "createObjectURL").mockReturnValue("blob:png");
+    const revoke = vi.spyOn(URL, "revokeObjectURL").mockImplementation(() => undefined);
+    Object.defineProperty(window, "IconsApp", {
+      value: { saveTwin },
+      configurable: true,
+    });
+    pngMocks.renderArtboardPng.mockClear();
+    pngMocks.renderArtboardPng.mockResolvedValue({
+      blob: new Blob(["png"]),
+      width: 1530,
+      height: 2000,
+      bytes: 3,
+      filename: "open-studio.png",
+      signature: "89504e470d0a1a0a",
+    });
+    try {
+      await act(async () => {
+        await store.exportPng();
+      });
+      expect(pngMocks.renderArtboardPng).toHaveBeenCalledOnce();
+      expect(saveTwin).not.toHaveBeenCalled();
+      expect(current!.state.toast).toContain("PNG exported");
+    } finally {
+      delete (window as unknown as { IconsApp?: unknown }).IconsApp;
+      create.mockRestore();
+      revoke.mockRestore();
+    }
   });
 
   it("historyEvictionRevokesUnusedImageUrl", () => {

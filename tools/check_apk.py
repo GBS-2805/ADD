@@ -9,6 +9,11 @@ The source catalog supplies the package and version. The generated
 `docs/data/tools.json` supplies the measured SHA-256 and byte size; the source catalog
 has neither. `--published` is optional for a fresh local build, because the generated
 file still describes the previous release until `build_catalog.py` runs.
+
+A research build (the twin spike) carries its own version, so `--expect-version` and
+`--expect-code` replace the catalog's version for that one check. Every other gate --
+package, SDK range, permissions, exported activities, signature -- still applies, and
+`--release` refuses the override outright.
 """
 
 import argparse
@@ -45,6 +50,18 @@ def catalog_app(path):
     if not app:
         raise SystemExit("check_apk: %s has no add tool" % path)
     return app
+
+
+def expected_app(app, version=None, code=None):
+    """The catalog entry, with a research build's own version when one is given."""
+    expected = dict(app)
+    if version is not None:
+        expected["version"] = version
+        expected.pop("versionName", None)
+    if code is not None:
+        expected["version_code"] = code
+        expected.pop("versionCode", None)
+    return expected
 
 
 def version_tuple(value):
@@ -228,13 +245,19 @@ def main():
     parser.add_argument("--published")
     parser.add_argument("--signing", default="tools/apk-signing.json")
     parser.add_argument("--release", action="store_true")
+    parser.add_argument("--expect-version", default=None,
+                        help="research build: expected versionName instead of the catalog's")
+    parser.add_argument("--expect-code", type=int, default=None,
+                        help="research build: expected versionCode instead of the catalog's")
     parser.add_argument("--aapt2", default=None)
     parser.add_argument("--apksigner", default=None)
     args = parser.parse_args()
     apk = Path(args.apk)
     if not apk.is_file():
         raise SystemExit("check_apk: %s is missing" % apk)
-    app = catalog_app(args.catalog)
+    if args.release and (args.expect_version is not None or args.expect_code is not None):
+        raise SystemExit("check_apk: --release cannot use --expect-version or --expect-code")
+    app = expected_app(catalog_app(args.catalog), args.expect_version, args.expect_code)
     info = dump_manifest(apk, args.aapt2 or find_tool("aapt2", "AAPT2"))
     info["bytes"] = apk.stat().st_size
     info["sha256"] = hashlib.sha256(apk.read_bytes()).hexdigest()
