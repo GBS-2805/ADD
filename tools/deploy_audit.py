@@ -14,7 +14,6 @@ import argparse
 import json
 import os
 import re
-import subprocess
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -27,6 +26,8 @@ _PROJECT_TEXT = re.compile(r"\bon project ([A-Za-z0-9._-]+)\s*$")
 
 sys.path.insert(0, str(ROOT / "tools"))
 from deploy_storage import ReportError, admin_token  # noqa: E402 - the tools directory is on the path above
+from vercel_cli import Timeout as CliTimeout  # noqa: E402 - the tools directory is on the path above
+from vercel_cli import capture  # noqa: E402 - the tools directory is on the path above
 
 
 def _activity(token, since, scope, project=None, cursor=None):
@@ -41,12 +42,16 @@ def _activity(token, since, scope, project=None, cursor=None):
     if cursor:
         cmd += ["--next", str(cursor)]
     env = {**os.environ, "VERCEL_TOKEN": token}
-    done = subprocess.run(cmd, cwd=ROOT, capture_output=True, text=True, env=env)
-    if done.returncode:
-        detail = (done.stderr or done.stdout).strip()
-        raise RuntimeError("vercel activity failed (exit %d): %s" % (done.returncode, detail))
     try:
-        return json.loads(done.stdout)
+        code, out, err = capture(cmd, env, cwd=ROOT)
+    except CliTimeout as error:
+        raise RuntimeError("vercel activity stopped responding for %d seconds and was "
+                           "killed; the window is incomplete" % error.timeout) from None
+    if code:
+        detail = (err or out).strip()
+        raise RuntimeError("vercel activity failed (exit %d): %s" % (code, detail))
+    try:
+        return json.loads(out)
     except json.JSONDecodeError as error:
         raise RuntimeError("vercel activity returned invalid JSON: %s" % error) from error
 

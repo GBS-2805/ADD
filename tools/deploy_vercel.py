@@ -20,10 +20,8 @@ import datetime
 import json
 import os
 import re
-import signal
 import subprocess
 import sys
-import threading
 import urllib.error
 import urllib.request
 from concurrent.futures import ThreadPoolExecutor
@@ -33,7 +31,6 @@ ROOT = Path(__file__).resolve().parent.parent
 SITE = ROOT / "tools/site.json"
 PROJECT = "artbase"          # created on first deploy if the account has no project by this name
 CLI = ("npx", "-y", "vercel@65.14.0")
-CLI_TIMEOUT = 600           # seconds the upload gets before the step gives up
 
 sys.path.insert(0, str(ROOT / "tools"))
 from build_site import routes as site_routes  # noqa: E402 - the tools directory is on the path above
@@ -41,6 +38,8 @@ from check_headers import problems as header_problems  # noqa: E402 - the tools 
 from check_live import check as check_live  # noqa: E402 - the tools directory is on the path above
 from check_upload import problems as upload_problems  # noqa: E402 - the tools directory is on the path above
 from deploy_storage import check as storage_check  # noqa: E402 - the tools directory is on the path above
+from vercel_cli import Timeout as CliTimeout  # noqa: E402 - the tools directory is on the path above
+from vercel_cli import run as run_cli  # noqa: E402 - the tools directory is on the path above
 
 # Text files that can hold the origin. The generated trees are skipped: they are
 # rebuilt from templates or from git and never carry a link back to the host.
@@ -266,43 +265,13 @@ def run_deploy_cli(cmd, env):
     shows the last line the upload reached, and the deadline turns a stall into a
     named failure that leaves the verification below some of the job's time.
     """
-    print("$ " + " ".join(cmd), flush=True)
-    proc = subprocess.Popen(cmd, cwd=ROOT, stdout=subprocess.PIPE,
-                            stderr=subprocess.STDOUT, text=True, env=env,
-                            start_new_session=True)
-    stalled = threading.Event()
-
-    def stop():
-        """Kill the whole CLI session: npx exits, the node child must not linger."""
-        stalled.set()
-        try:
-            if hasattr(os, "killpg"):
-                os.killpg(os.getpgid(proc.pid), signal.SIGKILL)
-            else:
-                proc.kill()
-        except (ProcessLookupError, PermissionError):
-            proc.kill()
-
-    watchdog = threading.Timer(CLI_TIMEOUT, stop)
-    watchdog.start()
-    lines = []
     try:
-        assert proc.stdout is not None
-        for line in proc.stdout:
-            lines.append(line)
-            print(line, end="", flush=True)
-        code = proc.wait()
-    finally:
-        watchdog.cancel()
-        if proc.stdout:
-            proc.stdout.close()
-    out = "".join(lines)
-    if stalled.is_set():
+        return run_cli(cmd, env, cwd=ROOT)
+    except CliTimeout as error:
         sys.exit("the Vercel CLI stopped responding for %d seconds and was killed; "
                  "nothing was rewritten. The last line it printed is above; run "
                  "python3 tools/deploy_vercel.py again once Vercel answers.\n%s"
-                 % (CLI_TIMEOUT, out.rstrip()[-2_000:]))
-    return code, out
+                 % (error.timeout, error.tail))
 
 
 def deploy():

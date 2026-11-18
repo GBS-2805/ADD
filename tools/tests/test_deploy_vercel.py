@@ -1,7 +1,6 @@
 import tempfile
 import unittest
 from pathlib import Path
-from types import SimpleNamespace
 from unittest import mock
 
 from tools import deploy_vercel
@@ -34,8 +33,6 @@ class UploadGateTest(unittest.TestCase):
 
     def test_receipt_then_gate_then_vercel(self):
         events = []
-        proc = SimpleNamespace(returncode=0, stdout="Aliased https://artbase-test.vercel.app\n",
-                               stderr="")
 
         def receipt(_sha):
             events.append("receipt")
@@ -45,7 +42,7 @@ class UploadGateTest(unittest.TestCase):
 
         def run(*_args, **_kwargs):
             events.append("vercel")
-            return proc
+            return 0, "Aliased https://artbase-test.vercel.app\n"
 
         with mock.patch.object(deploy_vercel, "deploy_token", return_value="token"), \
              mock.patch.object(deploy_vercel, "commit", return_value="abc123"), \
@@ -56,7 +53,7 @@ class UploadGateTest(unittest.TestCase):
              mock.patch.object(deploy_vercel, "refresh_history"), \
              mock.patch.object(deploy_vercel, "write_receipt", side_effect=receipt), \
              mock.patch.object(deploy_vercel, "upload_gate", side_effect=gate), \
-             mock.patch.object(deploy_vercel.subprocess, "run", side_effect=run):
+             mock.patch.object(deploy_vercel, "run_deploy_cli", side_effect=run):
             deploy_vercel.deploy()
         self.assertEqual(events, ["receipt", "gate", "vercel"])
 
@@ -81,11 +78,21 @@ class UploadGateTest(unittest.TestCase):
                  mock.patch.object(deploy_vercel, "refresh_history"), \
                  mock.patch.object(deploy_vercel, "write_receipt", side_effect=receipt), \
                  mock.patch.object(deploy_vercel, "upload_gate", side_effect=gate), \
-                 mock.patch.object(deploy_vercel.subprocess, "run") as run:
+                 mock.patch.object(deploy_vercel, "run_deploy_cli") as run:
                 with self.assertRaises(SystemExit):
                     deploy_vercel.deploy()
             self.assertFalse((root / "docs/_deploy.json").exists())
             run.assert_not_called()
+
+
+class DeployCliTest(unittest.TestCase):
+    def test_a_stalled_upload_stops_with_a_named_failure(self):
+        with mock.patch.object(deploy_vercel, "run_cli",
+                               side_effect=deploy_vercel.CliTimeout(600, "last line")):
+            with self.assertRaises(SystemExit) as stopped:
+                deploy_vercel.run_deploy_cli(["vercel"], {})
+        self.assertIn("stopped responding", str(stopped.exception))
+        self.assertIn("last line", str(stopped.exception))
 
 
 if __name__ == "__main__":

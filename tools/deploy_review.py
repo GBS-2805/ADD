@@ -14,7 +14,6 @@ It reaches the CLI through the environment, never a command line.
 
 import argparse
 import os
-import subprocess
 import sys
 from pathlib import Path
 
@@ -24,6 +23,8 @@ CLI = ("npx", "-y", "vercel@65.14.0")
 sys.path.insert(0, str(ROOT / "tools"))
 from check_headers import problems as header_problems  # noqa: E402 - the tools directory is on the path above
 from deploy_storage import check as storage_check  # noqa: E402 - the tools directory is on the path above
+from vercel_cli import Timeout as CliTimeout  # noqa: E402 - the tools directory is on the path above
+from vercel_cli import run as run_cli  # noqa: E402 - the tools directory is on the path above
 
 TARGETS = {
     "apk": ("artifacts/handoff-apk", "artbase-handoff-apk", "VERCEL_APK_TOKEN"),
@@ -86,18 +87,22 @@ def main():
 
     cmd = [*CLI, "deploy", source.relative_to(ROOT).as_posix(), "--prod", "--yes",
            "--project", project, "--create-if-missing"]
-    print("$ " + " ".join(cmd), flush=True)
     # The child gets only this target's deploy token, never the admin token.
     env = {key: value for key, value in os.environ.items()
            if key not in {"VERCEL_ADMIN_TOKEN", "VERCEL_ARTBASE_TOKEN",
                           "VERCEL_APK_TOKEN", "VERCEL_HANDOFF_TOKEN",
                           "VERCEL_REVIEW_TOKEN", "VERCEL_SHOTS_TOKEN"}}
     env["VERCEL_TOKEN"] = token
-    proc = subprocess.run(cmd, cwd=ROOT, capture_output=True, text=True, env=env)
-    print((proc.stdout + proc.stderr).rstrip())
-    if proc.returncode == 0:
+    try:
+        code, _ = run_cli(cmd, env, cwd=ROOT)
+    except CliTimeout as error:
+        print("the Vercel CLI stopped responding for %d seconds and was killed; nothing "
+              "was uploaded for %s. The last line it printed is above.\n%s"
+              % (error.timeout, args.target, error.tail))
+        return 1
+    if code == 0:
         return headers_current(args.target)
-    return proc.returncode
+    return code
 
 
 if __name__ == "__main__":
