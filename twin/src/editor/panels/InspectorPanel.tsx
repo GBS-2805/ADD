@@ -12,6 +12,7 @@ function backgroundLabel(effect: TwinEffect | null | undefined): string {
   if (!effect) return "None";
   if (effect.kind === "solid") return effect.hex;
   if (effect.kind === "field") return "Field";
+  if (effect.kind === "unsupported") return `${effect.originalKind} (unsupported)`;
   return effect.preset;
 }
 
@@ -90,6 +91,19 @@ function SingleInspector({ layer }: { layer: TwinLayer }) {
       {layer.kind === "shape" ? (
         <Section title="Shape">
           <p className="ed-panel-empty">{layer.shape?.variant ?? "star"} shape · every edit is undoable.</p>
+        </Section>
+      ) : null}
+      {layer.effect ? (
+        <Section title="Effect">
+          <div className="ed-document-readout">
+            <span>Preset</span><strong>{backgroundLabel(layer.effect)}</strong>
+          </div>
+          {layer.effect.kind === "unsupported" ? (
+            <p className="ed-panel-empty">
+              This effect comes from a newer library than this build. It is kept exactly as
+              saved and will draw when this build learns it.
+            </p>
+          ) : null}
         </Section>
       ) : null}
       {layer.kind !== "image" ? (

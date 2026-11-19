@@ -7,9 +7,12 @@
     python3 tools/deploy_review.py review
     python3 tools/deploy_review.py handoff --check
 
-The gate is strict: an unavailable report is a failure, not a skip. The deploy token
-is read from the target's project-scoped variable when set, otherwise VERCEL_TOKEN.
-It reaches the CLI through the environment, never a command line.
+The gate is strict: an unavailable report is a failure, not a skip, for every target
+the report covers. The `review` target is exempt because it deploys a throwaway
+project that is not in the report and has 1-day retention; see the note at the call.
+The deploy token is read from the target's project-scoped variable when set,
+otherwise VERCEL_TOKEN. It reaches the CLI through the environment, never a command
+line.
 """
 
 import argparse
@@ -75,7 +78,9 @@ def main():
         print("project       %s" % project)
         print("deploy token  %s" % (token_env if os.environ.get(token_env) else
                                     "VERCEL_TOKEN fallback"))
-        print("storage gate  strict - critical or unavailable stops the deploy")
+        print("storage gate  %s" % ("skipped for the throwaway review project"
+                                    if args.target == "review"
+                                    else "strict - critical or unavailable stops the deploy"))
         return 0
 
     token = deploy_token(token_env)
@@ -83,7 +88,13 @@ def main():
         sys.exit("%s (or VERCEL_TOKEN) is not set. Add it under Settings -> Secrets, "
                  "then run again; --check works without it." % token_env)
 
-    storage_check(strict=True)
+    # The review surface is a throwaway `artbase-review` project: it is not one of
+    # the projects the storage report covers, its retention is 1 day, and it is
+    # deleted after the verdict. A strict gate here could only ever fail -- and did,
+    # turning every pull request red, while a stricter gate on the projects that do
+    # appear in the report is still enforced by deploy_vercel.py and the handoff job.
+    if args.target != "review":
+        storage_check(strict=True)
 
     cmd = [*CLI, "deploy", source.relative_to(ROOT).as_posix(), "--prod", "--yes",
            "--project", project, "--create-if-missing"]

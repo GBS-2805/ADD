@@ -48,6 +48,57 @@ const project = (document: unknown, version = PROJECT_VERSION) => JSON.stringify
   document,
 });
 
+describe("effects from a newer library", () => {
+  // The shelf publishes effect presets, so a newer catalog can describe a kind this
+  // build has never heard of. Opened documents must survive that: degrade the render,
+  // never reject the file, and never lose the payload on re-save.
+  const futureEffect = {
+    kind: "gradient-mesh-v2",
+    preset: "riso-falloff",
+    stops: [{ at: 0.2, hex: "#111111" }, { at: 0.8, hex: "#8a8983" }],
+  };
+
+  const withFutureEffect = (): TwinDocument => {
+    const document = makeDocument();
+    document.background = futureEffect as unknown as TwinDocument["background"];
+    return document;
+  };
+
+  it("opens a file whose effect kind this build does not know", () => {
+    const parsed = parseProjectFile(project(withFutureEffect()));
+    expect(parsed.background).toMatchObject({
+      kind: "unsupported",
+      originalKind: "gradient-mesh-v2",
+    });
+  });
+
+  it("keeps the document's layers rather than failing the whole file", () => {
+    const parsed = parseProjectFile(project(withFutureEffect()));
+    expect(parsed.layers.map((layer) => layer.id)).toEqual(["headline", "star"]);
+    expect(parsed.selectedLayerIds).toEqual(["headline"]);
+  });
+
+  it("writes the unknown effect back byte-identical after a round-trip", async () => {
+    const parsed = parseProjectFile(project(withFutureEffect()));
+    const saved = JSON.parse(await serializeProject(parsed));
+    expect(saved.document.background).toEqual(futureEffect);
+  });
+
+  it("keeps the payload when only a layer effect is unknown", () => {
+    const document = makeDocument();
+    document.layers[1].effect = futureEffect as unknown as TwinDocument["layers"][number]["effect"];
+    const parsed = parseProjectFile(project(document));
+    expect(parsed.layers[1].effect).toMatchObject({ kind: "unsupported", originalKind: "gradient-mesh-v2" });
+    expect(parsed.layers[0].effect).toBeNull();
+  });
+
+  it("still rejects a malformed known effect", () => {
+    const document = makeDocument();
+    document.background = { kind: "field", preset: "x", colors: [] } as unknown as TwinDocument["background"];
+    expect(() => parseProjectFile(project(document))).toThrow(/between one and six colours/);
+  });
+});
+
 describe("Twin project files", () => {
   it("round-trips a v2 document and preserves an empty selection", async () => {
     const document = makeDocument();

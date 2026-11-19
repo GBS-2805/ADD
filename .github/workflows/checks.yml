@@ -106,7 +106,13 @@ jobs:
         run: python3 tools/check_all.py --visual --artboards
   publish:
     needs: [shelf, visual]
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    # A merge is not automatically a release. Put [skip publish] in the merge commit
+    # message to land checked work on main without deploying it; the site then stays
+    # on the previous release until a merge without the marker. The `handoff` job
+    # needs this one, so it is skipped with it and cannot publish half a release.
+    if: >-
+      github.event_name == 'push' && github.ref == 'refs/heads/main' &&
+      !contains(github.event.head_commit.message, '[skip publish]')
     runs-on: ubuntu-24.04
     environment: production
     timeout-minutes: 15

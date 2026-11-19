@@ -3,7 +3,15 @@ import react from "@vitejs/plugin-react";
 
 const allowedHost = process.env.VITE_ALLOWED_HOST;
 
+/**
+ * Where Twin is served from. A bare `vite` run and the test suite serve it at the
+ * root, but on the shelf it lives at /twin/ next to the site's own /assets/ folder --
+ * without the prefix its build would overwrite the shelf's asset directory.
+ */
+const base = process.env.TWIN_BASE ?? "/";
+
 export default defineConfig({
+  base,
   plugins: [react()],
   server: {
     host: "0.0.0.0",

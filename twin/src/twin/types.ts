@@ -73,7 +73,21 @@ export type TwinEffect =
       preset: string;
       colors: string[];
     }
-  | { kind: "solid"; hex: string };
+  | { kind: "solid"; hex: string }
+  /**
+   * An effect this build does not know, kept verbatim so the library can grow.
+   *
+   * The shelf is the source of effect presets, so a newer catalog will describe kinds
+   * this build has never heard of. Opening such a file must degrade to a stand-in and
+   * must never lose the payload: `raw` is exactly what was on disk, and it is written
+   * back untouched. Without this, one new catalog entry would make every older client
+   * refuse to open the file at all.
+   */
+  | {
+      kind: "unsupported";
+      originalKind: string;
+      raw: Record<string, unknown>;
+    };
 
 export interface LayerTransform {
   x: number;
