@@ -205,12 +205,13 @@ where the notes keep the history they shipped with.Icons, Fonts, Compress and th
   current folder times the retained count; exact Deployment Storage bytes are
   dashboard-only on Hobby. This is an operational guardrail, not an audit trail. See
   `DEPLOYMENT_STORAGE.md` for the token, approval and evidence runbook.
-- The shelf is sixteen pages, each a folder with an `index.html`: the root index,
+- The shelf is seventeen pages, each a folder with an `index.html`: the root index,
   then `tools/`, `compress/`, `icons/` and its four brand folders (`icons/lineicons/`,
   `icons/coolicons/`, `icons/phosphor/`, `icons/streamline/`) plus the all-brands
   sheet at `icons/all/`, `fonts/`, `portfolio/`, `download/`, `renders/`,
   `figma/` (written by `figma_publish.py`),
-  `releases/` and the generated `search/`. They share
+  `releases/`, the generated `search/` and the generated `twin/` (the browser
+  canvas editor, built by `tools/build_twin.py`). They share
   `assets/site.css` and `assets/site.js`; no page has its own copy of the palette.
   The page name sits on the left of the band beside a chevron control that opens a
   pull-down accordion with four destinations (index, icons, fonts, tools); the

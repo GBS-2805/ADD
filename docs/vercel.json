@@ -10,6 +10,11 @@
       "source": "/packs/",
       "destination": "/download/#font-packs",
       "permanent": true
+    },
+    {
+      "source": "/twin",
+      "destination": "/twin/",
+      "permanent": true
     }
   ],
   "headers": [

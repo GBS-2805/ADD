@@ -39,7 +39,7 @@ Agents and contributors: read [`AGENTS.md`](AGENTS.md).
 
 ## The shelf
 
-Sixteen pages, one stylesheet, no framework:
+Seventeen pages, one stylesheet, no framework:
 
 | Page | What it is |
 | --- | --- |
@@ -59,6 +59,7 @@ Sixteen pages, one stylesheet, no framework:
 | `docs/releases/` | Every build, with the day, the APK size and the note written for it |
 | `docs/figma/` | The design hand-off, listed so every artboard downloads from a phone |
 | `docs/search/` | Search over every page (generated) |
+| `docs/twin/` | Twin, the browser canvas editor: layers, text, effects, `.twin` files (generated) |
 
 Pages share `docs/assets/site.css` — palette, band, menus and type — plus
 `docs/assets/site.js` for both menus. The band is frame 6-27's geometry with the page

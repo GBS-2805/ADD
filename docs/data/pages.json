@@ -1,6 +1,6 @@
 {
   "origin": "https://artbase-olive.vercel.app",
-  "count": 16,
+  "count": 17,
   "pages": [
     {
       "path": "/compress/",
@@ -75,7 +75,7 @@
     {
       "path": "/",
       "title": "ADD — 4,373 icons. No account.",
-      "description": "A free design shelf: 4,373 icons, three type families, a photo compressor and one offline Android app. No account, no upload.",
+      "description": "A free design shelf: 4,373 icons, three type families, a photo compressor, a browser canvas editor and one offline Android app. No account, no upload.",
       "heading": "4,373 icons. No account.",
       "section": ""
     },
@@ -113,6 +113,13 @@
       "description": "Icons, fonts and the engine: the working parts of ADD, in one independent Android app. No account, no store.",
       "heading": "Resources",
       "section": "tools"
+    },
+    {
+      "path": "/twin/",
+      "title": "BMO Twin — printmaker's workbench",
+      "description": "Twin, the browser canvas editor: layers, type, shapes, PNG imports, shader and pattern effects, and portable .twin project files. Runs entirely in your browser, with no upload.",
+      "heading": "",
+      "section": "twin"
     }
   ]
 }

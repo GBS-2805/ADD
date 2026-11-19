@@ -470,6 +470,7 @@ public class ShelfActivity extends Activity {
         if (asset.contains("/renders/")) return "/renders/";
         if (asset.contains("/figma/")) return "/figma/";
         if (asset.contains("/packs/")) return "/packs/";
+        if (asset.contains("/twin/")) return "/twin/";
         if (asset.contains("/download/")) return "/download/";
         if (asset.contains("/portfolio/")) return "/portfolio/";
         if (asset.contains("/tools/")) return "/tools/";

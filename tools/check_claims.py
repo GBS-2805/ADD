@@ -25,7 +25,7 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-MODERN_PAGES = 16
+MODERN_PAGES = 17
 CLASSIC_PAGES = 16
 ENGINE_BASELINE = 231
 
@@ -111,12 +111,12 @@ def problems(root: Path = ROOT, engine: bool = False) -> list[str]:
         found.append("%s: %d classic pages, expected %d"
                      % (docs / "classic", len(classic), CLASSIC_PAGES))
 
-    if "Sixteen pages" not in readme_text:
-        found.append("%s: missing the 'Sixteen pages' claim" % readme)
+    if "Seventeen pages" not in readme_text:
+        found.append("%s: missing the 'Seventeen pages' claim" % readme)
     if "docs/compress/" not in readme_text:
         found.append("%s: missing the docs/compress/ row" % readme)
-    if "sixteen pages" not in reference_text:
-        found.append("%s: missing the 'sixteen pages' claim" % reference)
+    if "seventeen pages" not in reference_text:
+        found.append("%s: missing the 'seventeen pages' claim" % reference)
 
     published_path = docs / "data" / "tools.json"
     catalog_path = root / "tools" / "catalog.json"
@@ -179,7 +179,7 @@ def main(argv: list[str] | None = None) -> int:
         print("claims: %d problem(s)" % len(found))
         return 1
     suffix = " and engine baseline" if args.engine else ""
-    print("claims: OK - 16 modern pages, 16 classic pages, APK size%s" % suffix)
+    print("claims: OK - 17 modern pages, 16 classic pages, APK size%s" % suffix)
     return 0
 
 

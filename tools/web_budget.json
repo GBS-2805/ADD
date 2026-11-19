@@ -204,22 +204,22 @@
     },
     "index.html": {
       "measured": {
-        "html": 20351,
+        "html": 21376,
         "css": 53871,
         "js": 10536,
         "fonts": 254932,
         "first_viewport": 35197,
         "images": 35197,
-        "total": 410084
+        "total": 411109
       },
       "budget": {
-        "html": 22387,
+        "html": 23514,
         "css": 59259,
         "js": 11590,
         "fonts": 280426,
         "first_viewport": 38717,
         "images": 38717,
-        "total": 451093
+        "total": 452220
       }
     },
     "portfolio/index.html": {
@@ -268,18 +268,18 @@
         "css": 53871,
         "js": 10536,
         "fonts": 254932,
-        "first_viewport": 138412,
-        "images": 1723874,
-        "total": 2204292
+        "first_viewport": 156908,
+        "images": 1902470,
+        "total": 2401384
       },
       "budget": {
         "html": 24934,
         "css": 59259,
         "js": 11590,
         "fonts": 280426,
-        "first_viewport": 152254,
-        "images": 1896262,
-        "total": 2424722
+        "first_viewport": 172599,
+        "images": 2092718,
+        "total": 2641523
       }
     },
     "search/index.html": {
@@ -320,6 +320,26 @@
         "first_viewport": 0,
         "images": 0,
         "total": 439731
+      }
+    },
+    "twin/index.html": {
+      "measured": {
+        "html": 2248,
+        "css": 86347,
+        "js": 2148381,
+        "fonts": 173776,
+        "first_viewport": 0,
+        "images": 0,
+        "total": 2410752
+      },
+      "budget": {
+        "html": 2473,
+        "css": 94982,
+        "js": 2363220,
+        "fonts": 191154,
+        "first_viewport": 0,
+        "images": 0,
+        "total": 2651828
       }
     }
   },
