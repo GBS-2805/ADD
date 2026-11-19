@@ -255,6 +255,12 @@ function EffectSurfaceView({ effect }: { effect: TwinEffect | null }) {
       </div>
     );
   }
+  if (effect.kind === "unsupported") {
+    // A newer library entry this build does not render yet. Show a stand-in that names
+    // it, so the document opens and the user can see what is missing, and keep the
+    // payload untouched for the build that can draw it.
+    return <div className="effect-unsupported" aria-label={`${effect.originalKind} effect unsupported`} />;
+  }
   const particle = PARTICLE_EFFECTS[effect.preset] ?? PARTICLE_EFFECTS.dust;
   const density = Math.max(0.3, Math.min(2, Number(effect.controls.density ?? 1)));
   const count = Math.round(particle.count * density);

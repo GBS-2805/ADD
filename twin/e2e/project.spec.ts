@@ -195,6 +195,72 @@ test("opens a .twin project, replaces the document and resets edit history", asy
   await expect(page.locator(".ed-canvas").getByText("IMPORTED", { exact: true })).toBeVisible();
 });
 
+test("opens a project from a newer library and keeps the unknown effect on save", async ({ page }) => {
+  // The shelf publishes effect presets, so a newer catalog can describe a kind this
+  // build has never heard of. The document must open, say what it cannot draw, and
+  // write the effect back unchanged -- never refuse the file, never drop the payload.
+  const futureEffect = {
+    kind: "gradient-mesh-v2",
+    preset: "riso-falloff",
+    stops: [
+      { at: 0.2, hex: "#111111" },
+      { at: 0.8, hex: "#8a8983" },
+    ],
+  };
+  const futureProject = {
+    format: "bmo-twin-project",
+    version: 2,
+    savedAt: "2026-11-15T00:00:00.000Z",
+    document: {
+      background: futureEffect,
+      selectedLayerIds: ["future-headline"],
+      layers: [
+        {
+          id: "future-headline",
+          name: "Type / FUTURE",
+          kind: "text",
+          effect: futureEffect,
+          blend: "normal",
+          opacity: 1,
+          transform: { x: 0, y: 0, scaleX: 1, scaleY: 1, rotation: 0 },
+          visible: true,
+          text: { content: "FUTURE", size: 56, align: "center", font: "instrument-serif" },
+          fill: "#111111",
+        },
+      ],
+    },
+  };
+
+  await openEditor(page);
+  const chooserPromise = page.waitForEvent("filechooser");
+  await openDocumentMenu(page);
+  await page.getByRole("menuitem", { name: "Open .twin" }).click();
+  const chooser = await chooserPromise;
+  await chooser.setFiles({
+    name: "future.twin",
+    mimeType: "application/json",
+    buffer: Buffer.from(JSON.stringify(futureProject)),
+  });
+
+  await expect(page.locator(".ed-toast")).toContainText("Project opened.");
+  await expect(page.locator(".ed-canvas").getByText("FUTURE", { exact: true })).toBeVisible();
+  await expect(page.locator(".ed-canvas .artboard-ground .effect-unsupported")).toBeVisible();
+  await expect(page.locator(".ed-canvas .art-layer .effect-unsupported")).toHaveCount(1);
+  await expect(page.getByTestId("inspector-panel").getByText("gradient-mesh-v2 (unsupported)").first()).toBeVisible();
+
+  const downloadPromise = page.waitForEvent("download");
+  await openDocumentMenu(page);
+  await page.getByRole("menuitem", { name: "Save .twin" }).click();
+  const download = await downloadPromise;
+  const path = await download.path();
+  if (!path) throw new Error("The project download has no path.");
+  const saved = JSON.parse(await readFile(path, "utf8")) as {
+    document: { background: unknown; layers: Array<{ effect: unknown }> };
+  };
+  expect(saved.document.background).toEqual(futureEffect);
+  expect(saved.document.layers[0].effect).toEqual(futureEffect);
+});
+
 test("round-trips an empty document and keeps it printable", async ({ page }) => {
   await openEditor(page);
   const chooserPromise = page.waitForEvent("filechooser");

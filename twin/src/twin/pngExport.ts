@@ -561,6 +561,10 @@ function paintEffect(
     paintParticles(ctx, effect, rect);
   } else if (effect.kind === "texture") {
     paintTexture(ctx, effect, rect, images);
+  } else if (effect.kind === "unsupported") {
+    // A library entry this build cannot draw. Export the paper ground rather than
+    // throwing mid-export, so a document with one unknown effect still saves.
+    fillBase(ctx, rect, SHEET);
   } else {
     const colours = effect.colors.length ? effect.colors : [SHEET, "#e7e6e1", "#8a8983", INK];
     fillBase(ctx, rect, colours[0]);

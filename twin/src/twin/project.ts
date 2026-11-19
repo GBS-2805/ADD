@@ -19,11 +19,23 @@ const MAX_LAYER_TEXT = 2000;
 const MIGRATION_FACTOR = 765 / 338;
 const MAX_EFFECT_CONTROLS = 32;
 
+/**
+ * An effect exactly as it belongs on disk: a kind this build knows, or the untouched
+ * payload of one it does not. Reading turns the second back into an `unsupported`
+ * effect; writing turns it back into the payload.
+ */
+export type EffectOnDisk = TwinEffect | Record<string, unknown>;
+
+type DocumentOnDisk = Omit<TwinDocument, "background" | "layers"> & {
+  background: EffectOnDisk | null;
+  layers: (Omit<TwinLayer, "effect"> & { effect: EffectOnDisk | null })[];
+};
+
 export interface TwinProjectFile {
   format: typeof PROJECT_FORMAT;
   version: typeof PROJECT_VERSION;
   savedAt: string;
-  document: TwinDocument;
+  document: DocumentOnDisk;
 }
 
 export class ProjectFileError extends Error {
@@ -163,7 +175,14 @@ function sanitizeEffect(value: unknown): TwinEffect | null {
       controls: sanitizeControls(value.controls),
     };
   }
-  throw new ProjectFileError("An effect uses an unsupported kind.");
+  // A kind this build does not know. The shelf publishes effect presets, so a newer
+  // catalog will describe kinds that did not exist when this build shipped; refusing
+  // the whole file would mean one new entry locks every older client out of documents
+  // that use it. Keep the payload verbatim instead: the canvas shows a stand-in, and
+  // serialization writes `raw` back untouched, so opening and re-saving in an older
+  // build never destroys the effect.
+  const originalKind = typeof value.kind === "string" && value.kind.length <= 40 ? value.kind : "unknown";
+  return { kind: "unsupported", originalKind, raw: structuredClone(value) };
 }
 
 function encodeBase64(value: string): string {
@@ -365,11 +384,20 @@ async function inlineImageSource(src: string): Promise<string> {
   return readAsDataUrl(blob);
 }
 
+/**
+ * Writes an effect back to disk. An effect this build could not read is stored as the
+ * payload it was read from, not as the wrapper that stood in for it -- otherwise each
+ * open-and-save cycle would nest one more "unsupported" layer inside the file.
+ */
+function forDisk(effect: TwinEffect): EffectOnDisk {
+  return effect.kind === "unsupported" ? structuredClone(effect.raw) : structuredClone(effect);
+}
+
 export async function serializeProject(doc: TwinDocument): Promise<string> {
   const layers = await Promise.all(
     doc.layers.map(async (layer) => ({
       ...layer,
-      effect: layer.effect ? structuredClone(layer.effect) : null,
+      effect: layer.effect ? forDisk(layer.effect) : null,
       transform: { ...layer.transform },
       ...(layer.image
         ? { image: { ...layer.image, src: await inlineImageSource(layer.image.src) } }
@@ -382,7 +410,7 @@ export async function serializeProject(doc: TwinDocument): Promise<string> {
     savedAt: new Date().toISOString(),
     document: {
       ...doc,
-      background: doc.background ? structuredClone(doc.background) : null,
+      background: doc.background ? forDisk(doc.background) : null,
       layers,
     },
   };
