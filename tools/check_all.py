@@ -37,10 +37,12 @@ VERDICT = {"palette": "palette:", "menu": "menu:", "assets": "assets:",
            "notes": "notes regression:", "bundle": "bundle check:",
            "artboards": "artboards:", "engine": "engine:",
            "engine-claims": "claims:", "chrome": "chrome:",
-           "headers": "headers:", "perf": "web-perf:"}
+           "headers": "headers:", "perf": "web-perf:",
+           "twin": "twin:"}
 
 
-def gates(browser, artboards, visual, live=None, handoff=None, perf=False):
+def gates(browser, artboards, visual, live=None, handoff=None, perf=False,
+          twin=True):
     rows = [
         ["palette", [sys.executable, "tools/check_palette.py"]],
         ["assets", [sys.executable, "tools/hash_assets.py", "--check"]],
@@ -65,6 +67,11 @@ def gates(browser, artboards, visual, live=None, handoff=None, perf=False):
         ["pantone", [sys.executable, "tools/pantone_sheet.py", "--check"]],
         ["notes", [sys.executable, "tools/notes_regression.py"]],
         ["bundle", ["./build.sh", "stage"]],
+        # Twin's own suite. It builds the shelf's twin/ page but is outside every
+        # other gate, so before this row existed its 255 tests ran only by hand.
+        # Last because it is the slowest and the least likely to be the cause of a
+        # shelf failure; --no-twin skips it on a machine without twin/node_modules.
+        ["twin", [sys.executable, "tools/check_twin.py"]],
     ]
     if artboards:
         rows.insert(len(rows) - 1, ["artboards", [sys.executable, "tools/check_artboards.py"]])
@@ -89,6 +96,8 @@ def gates(browser, artboards, visual, live=None, handoff=None, perf=False):
     if perf:
         url = browser or "http://127.0.0.1:8799/"
         rows.append(["perf", ["node", "tools/check_web_perf.js", "--url", url]])
+    if not twin:
+        rows = [row for row in rows if row[0] != "twin"]
     return rows
 
 
@@ -121,10 +130,14 @@ def main():
     parser.add_argument("--perf", action="store_true",
                         help="also run the report-only browser timing measurement; "
                              "uses --browser as the base URL or the local port 8799")
+    parser.add_argument("--no-twin", action="store_true",
+                        help="skip the twin/ gate (typecheck, unit tests, payload). "
+                             "Needs node_modules installed in twin/; CI runs it in "
+                             "its own job because the typecheck alone takes 45s")
     args = parser.parse_args()
 
     rows = gates(args.browser, args.artboards, args.visual, args.live,
-                 args.handoff_origin, args.perf)
+                 args.handoff_origin, args.perf, twin=not args.no_twin)
     print("the checks")
     failures = []
     began = time.monotonic()

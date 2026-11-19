@@ -245,6 +245,13 @@ where the notes keep the history they shipped with.Icons, Fonts, Compress and th
   the page paints before the markup arrives; `load_catalog()` in `fetch_icons.py`
   merges the chunks back for anything that needs the whole set (the sheets), and
   `check_bundle.py` follows the `chunks` list inside the staged JSON.
+- `twin/` is the editor, and `python3 tools/check_twin.py` is its gate: `tsc -b`, the
+  asset licence check, `vitest run` (255 unit tests, JUnit into `test-results/`), and
+  the initial script weight of the built page against `tools/twin_budget.json`. The
+  payload row is what stops the plugin split regressing: the ceiling only moves by a
+  deliberate `--write-budget`. CI runs it in its own job alongside the 70 canvas
+  specs, because the typecheck alone is 45s. `check_all.py --no-twin` skips it on a
+  machine without `twin/node_modules`.
 - Releases go through `python3 tools/bump_version.py <version> --title "…" --note "…"
   --build`: it first runs the push verdict (`tools/check_all.py --visual` — both pixel
   baselines, the whole engine suite and the shelf's gates) and refuses to move anything

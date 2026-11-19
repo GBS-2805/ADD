@@ -11,6 +11,10 @@ __pycache__/
 # tools/render_pages.js; the published copies live in docs/renders/.
 artifacts/
 
+# Test reports. tools/check_twin.py writes the vitest JUnit here and CI uploads it as
+# an artifact; it is a result, not a source file.
+test-results/
+
 # The app's web bundle is staged out of docs/ by build.sh; never edit or commit it.
 app/assets/www/
 
