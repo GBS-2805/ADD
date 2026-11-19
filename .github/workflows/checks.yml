@@ -47,7 +47,11 @@ jobs:
     # that only ran when someone remembered. It gets its own job because the
     # typecheck alone takes about 45s on a cold cache and the shelf job should stay
     # a few seconds of python.
-    runs-on: ubuntu-latest
+    #
+    # 24.04 for the same reason the visual job pins it: `ubuntu-latest` is now 26.04
+    # and Playwright 1.57 refuses to install a browser there ("Playwright does not
+    # support chromium on ubuntu26.04-x64"), which failed the first run of this job.
+    runs-on: ubuntu-24.04
     # npm ci (~40s) + typecheck (~45s cold) + vitest (~80s) + install the browser
     # (~30s) + 70 canvas specs (~3.5m) leaves room without hiding a hang.
     timeout-minutes: 20

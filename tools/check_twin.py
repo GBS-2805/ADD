@@ -30,6 +30,7 @@ from __future__ import annotations
 
 import argparse
 import gzip
+import os
 import html
 import json
 import re
@@ -39,10 +40,16 @@ import time
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-TWIN = ROOT / "twin"
-PAGE = ROOT / "docs" / "twin" / "index.html"
-BUDGET = ROOT / "tools" / "twin_budget.json"
+DOCS = ROOT / "docs"
+
+def budget_path() -> Path:
+    return twin_dir() / "tools" / "twin_budget.json"
 REPORT = ROOT / "test-results" / "twin-junit.xml"
+NODE_MODULES = "twin/node_modules"
+
+# Exit status for "the dependencies are not here", distinct from pass and fail so
+# check_all.py can say what happened instead of printing a misleading green.
+SKIP = 2
 
 # A script tag in the built page. Anything matching here is downloaded before the
 # first paint; anything the app imports later is not, and is not counted.
@@ -59,9 +66,20 @@ def script(name: str) -> list[str]:
     return ["npm", "run", "--silent", name]
 
 
+def twin_dir() -> Path:
+    """The twin/ tree this run is about.
+
+    Defaults to the repository the script sits in. A caller can point it elsewhere
+    with TWIN_ROOT, which is what the self-tests do: they build a fixture tree and
+    need the tool to look at that tree rather than at this one.
+    """
+    return Path(os.environ.get("TWIN_ROOT", ROOT)).resolve()
+
+
 def run(name: str, command: list[str], timeout: int = 900) -> bool:
     began = time.monotonic()
-    result = subprocess.run(command, cwd=str(TWIN), capture_output=True, text=True,
+    result = subprocess.run(command, cwd=str(twin_dir() / "twin"), capture_output=True,
+                            text=True,
                             timeout=timeout)
     took = time.monotonic() - began
     output = (result.stdout or "") + (result.stderr or "")
@@ -82,8 +100,7 @@ def initial_scripts_at(page: Path) -> list[Path]:
     """
     if not page.is_file():
         raise SystemExit("check_twin: %s is missing; run python3 tools/build_twin.py"
-                         % page.relative_to(ROOT) if page.is_relative_to(ROOT)
-                         else "check_twin: %s is missing" % page)
+                         % page)
     found = []
     for raw in SCRIPT.findall(page.read_bytes()):
         src = html.unescape(raw.decode("utf-8", "replace"))
@@ -109,7 +126,7 @@ def compare_at(page: Path, ceiling: int) -> bool:
 
 
 def measure() -> dict:
-    return measure_at(PAGE)
+    return measure_at(twin_dir() / "docs" / "twin" / "index.html")
 
 
 def check_payload(write: bool) -> bool:
@@ -121,15 +138,15 @@ def check_payload(write: bool) -> bool:
                   "note": ("Initial script weight of docs/twin/ as built. gzip -9, so "
                            "the shelf's brotli is smaller. Tighten budget_bytes "
                            "deliberately when the plugin split lands.")}
-        BUDGET.write_text(json.dumps(record, indent=2) + "\n", encoding="utf-8")
-        print("  %-9s wrote %s (%d bytes)" % ("payload", BUDGET.relative_to(ROOT),
+        budget_path().write_text(json.dumps(record, indent=2) + "\n", encoding="utf-8")
+        print("  %-9s wrote %s (%d bytes)" % ("payload", budget_path().relative_to(twin_dir()),
                                               measured["bytes"]))
         return True
-    if not BUDGET.is_file():
-        print("  %-9s FAIL  no %s; run --write-budget" % ("payload",
-                                                          BUDGET.relative_to(ROOT)))
+    if not budget_path().is_file():
+        print("  %-9s FAIL  no %s; run --write-budget"
+              % ("payload", budget_path().relative_to(twin_dir())))
         return False
-    record = json.loads(BUDGET.read_text(encoding="utf-8"))
+    record = json.loads(budget_path().read_text(encoding="utf-8"))
     ceiling = int(record["budget_bytes"])
     grew = measured["bytes"] > ceiling
     print("  %-9s %-4s %d bytes in %d file(s), ceiling %d"
@@ -154,10 +171,12 @@ def main() -> int:
                         help="run the suite and nothing else, for a fast edit loop")
     args = parser.parse_args()
 
-    if not (TWIN / "node_modules").is_dir():
-        print("  %-9s FAIL  twin/node_modules is missing; run `npm ci` in twin/"
-              % "install")
-        return 1
+    if not (twin_dir() / "twin" / "node_modules").is_dir():
+        print("  %-9s SKIP  no %s; run `npm ci` in twin/. The shelf job has no node "
+              "toolchain by design, so this is a skip, not a failure; the twin CI "
+              "job runs the same gate with dependencies installed."
+              % ("install", NODE_MODULES))
+        return SKIP
 
     if args.write_budget:
         return 0 if check_payload(True) else 1

@@ -147,9 +147,18 @@ def main():
         took = time.monotonic() - started
         lines = [line.strip() for line in ((done.stdout or "") + (done.stderr or "")).splitlines()
                  if line.strip() and not line.strip().startswith("==")]
-        mark = "ok" if done.returncode == 0 else "FAIL"
+        # 2 means "could not run here", which is not a pass and not a failure: the
+        # shelf job has no node toolchain, and the twin CI job runs this gate with
+        # dependencies installed. Saying "ok" would be a lie; failing would make a
+        # clean clone red for the wrong reason.
+        if done.returncode == 0:
+            mark = "ok"
+        elif done.returncode == 2:
+            mark = "skip"
+        else:
+            mark = "FAIL"
         print("  %-10s %-4s %5.1fs  %s" % (name, mark, took, summary(name, lines)[:104]))
-        if done.returncode:
+        if done.returncode and done.returncode != 2:
             failures.append((name, lines))
     total = time.monotonic() - began
 
