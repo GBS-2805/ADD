@@ -17,6 +17,13 @@
       "section": "download"
     },
     {
+      "path": "/editor/",
+      "title": "Editor — ADD's browser canvas",
+      "description": "The ADD Editor, a browser canvas: layers, type, shapes, PNG imports, shader and pattern effects, and portable .twin project files. Runs entirely in your browser, with no upload.",
+      "heading": "",
+      "section": "editor"
+    },
+    {
       "path": "/figma/",
       "title": "Design files — every sketch and every palette",
       "description": "Every page as a Figma-importable artboard, the whole set on one canvas, and the Pantone match for every palette colour.",
@@ -113,13 +120,6 @@
       "description": "Icons, fonts and the engine: the working parts of ADD, in one independent Android app. No account, no store.",
       "heading": "Resources",
       "section": "tools"
-    },
-    {
-      "path": "/twin/",
-      "title": "BMO Twin — printmaker's workbench",
-      "description": "Twin, the browser canvas editor: layers, type, shapes, PNG imports, shader and pattern effects, and portable .twin project files. Runs entirely in your browser, with no upload.",
-      "heading": "",
-      "section": "twin"
     }
   ]
 }

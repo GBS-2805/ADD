@@ -4,342 +4,342 @@
   "pages": {
     "compress/index.html": {
       "measured": {
-        "html": 51078,
-        "css": 53871,
+        "html": 51135,
+        "css": 54867,
         "js": 82750,
-        "fonts": 254932,
+        "fonts": 257304,
         "first_viewport": 0,
         "images": 0,
-        "total": 442631
+        "total": 446056
       },
       "budget": {
-        "html": 56186,
-        "css": 59259,
+        "html": 56249,
+        "css": 60354,
         "js": 91026,
-        "fonts": 280426,
+        "fonts": 283035,
         "first_viewport": 0,
         "images": 0,
-        "total": 486895
+        "total": 490662
       }
     },
     "download/index.html": {
       "measured": {
-        "html": 12816,
-        "css": 53871,
+        "html": 12873,
+        "css": 54867,
         "js": 82750,
-        "fonts": 254932,
+        "fonts": 257304,
         "first_viewport": 0,
         "images": 0,
-        "total": 404369
+        "total": 407794
       },
       "budget": {
-        "html": 14098,
-        "css": 59259,
+        "html": 14161,
+        "css": 60354,
         "js": 91026,
-        "fonts": 280426,
+        "fonts": 283035,
         "first_viewport": 0,
         "images": 0,
-        "total": 444806
+        "total": 448574
+      }
+    },
+    "editor/index.html": {
+      "measured": {
+        "html": 2249,
+        "css": 86365,
+        "js": 2148383,
+        "fonts": 173776,
+        "first_viewport": 0,
+        "images": 0,
+        "total": 2410773
+      },
+      "budget": {
+        "html": 2474,
+        "css": 95002,
+        "js": 2363222,
+        "fonts": 191154,
+        "first_viewport": 0,
+        "images": 0,
+        "total": 2651851
       }
     },
     "figma/index.html": {
       "measured": {
-        "html": 16439,
-        "css": 53871,
+        "html": 16496,
+        "css": 54867,
         "js": 10536,
-        "fonts": 254932,
+        "fonts": 257304,
         "first_viewport": 0,
         "images": 0,
-        "total": 335778
+        "total": 339203
       },
       "budget": {
-        "html": 18083,
-        "css": 59259,
+        "html": 18146,
+        "css": 60354,
         "js": 11590,
-        "fonts": 280426,
+        "fonts": 283035,
         "first_viewport": 0,
         "images": 0,
-        "total": 369356
+        "total": 373124
       }
     },
     "fonts/index.html": {
       "measured": {
-        "html": 16421,
-        "css": 79047,
+        "html": 16478,
+        "css": 80043,
         "js": 10536,
-        "fonts": 254932,
+        "fonts": 257304,
         "first_viewport": 0,
         "images": 0,
-        "total": 360936
+        "total": 364361
       },
       "budget": {
-        "html": 18064,
-        "css": 86952,
+        "html": 18126,
+        "css": 88048,
         "js": 11590,
-        "fonts": 280426,
+        "fonts": 283035,
         "first_viewport": 0,
         "images": 0,
-        "total": 397030
+        "total": 400798
       }
     },
     "icons/all/index.html": {
       "measured": {
-        "html": 21783,
-        "css": 53871,
+        "html": 21843,
+        "css": 54867,
         "js": 10536,
-        "fonts": 254932,
+        "fonts": 257304,
         "first_viewport": 0,
         "images": 0,
-        "total": 341122
+        "total": 344550
       },
       "budget": {
-        "html": 23962,
-        "css": 59259,
+        "html": 24028,
+        "css": 60354,
         "js": 11590,
-        "fonts": 280426,
+        "fonts": 283035,
         "first_viewport": 0,
         "images": 0,
-        "total": 375235
+        "total": 379006
       }
     },
     "icons/coolicons/index.html": {
       "measured": {
-        "html": 103117,
-        "css": 53871,
+        "html": 103490,
+        "css": 54867,
         "js": 10536,
-        "fonts": 254932,
+        "fonts": 257304,
         "first_viewport": 0,
         "images": 0,
-        "total": 422456
+        "total": 426197
       },
       "budget": {
-        "html": 113429,
-        "css": 59259,
+        "html": 113840,
+        "css": 60354,
         "js": 11590,
-        "fonts": 280426,
+        "fonts": 283035,
         "first_viewport": 0,
         "images": 0,
-        "total": 464702
+        "total": 468817
       }
     },
     "icons/index.html": {
       "measured": {
-        "html": 8857,
-        "css": 79047,
+        "html": 8914,
+        "css": 80043,
         "js": 10536,
-        "fonts": 254932,
+        "fonts": 257304,
         "first_viewport": 0,
         "images": 0,
-        "total": 353372
+        "total": 356797
       },
       "budget": {
-        "html": 9743,
-        "css": 86952,
+        "html": 9806,
+        "css": 88048,
         "js": 11590,
-        "fonts": 280426,
+        "fonts": 283035,
         "first_viewport": 0,
         "images": 0,
-        "total": 388710
+        "total": 392477
       }
     },
     "icons/lineicons/index.html": {
       "measured": {
-        "html": 104010,
-        "css": 53871,
+        "html": 104383,
+        "css": 54867,
         "js": 10536,
-        "fonts": 254932,
+        "fonts": 257304,
         "first_viewport": 0,
         "images": 0,
-        "total": 423349
+        "total": 427090
       },
       "budget": {
-        "html": 114412,
-        "css": 59259,
+        "html": 114822,
+        "css": 60354,
         "js": 11590,
-        "fonts": 280426,
+        "fonts": 283035,
         "first_viewport": 0,
         "images": 0,
-        "total": 465684
+        "total": 469800
       }
     },
     "icons/phosphor/index.html": {
       "measured": {
-        "html": 102796,
-        "css": 53871,
+        "html": 103169,
+        "css": 54867,
         "js": 10536,
-        "fonts": 254932,
+        "fonts": 257304,
         "first_viewport": 0,
         "images": 0,
-        "total": 422135
+        "total": 425876
       },
       "budget": {
-        "html": 113076,
-        "css": 59259,
+        "html": 113486,
+        "css": 60354,
         "js": 11590,
-        "fonts": 280426,
+        "fonts": 283035,
         "first_viewport": 0,
         "images": 0,
-        "total": 464349
+        "total": 468464
       }
     },
     "icons/streamline/index.html": {
       "measured": {
-        "html": 103340,
-        "css": 53871,
+        "html": 103713,
+        "css": 54867,
         "js": 10536,
-        "fonts": 254932,
+        "fonts": 257304,
         "first_viewport": 0,
         "images": 0,
-        "total": 422679
+        "total": 426420
       },
       "budget": {
-        "html": 113675,
-        "css": 59259,
+        "html": 114085,
+        "css": 60354,
         "js": 11590,
-        "fonts": 280426,
+        "fonts": 283035,
         "first_viewport": 0,
         "images": 0,
-        "total": 464947
+        "total": 469063
       }
     },
     "index.html": {
       "measured": {
-        "html": 21376,
-        "css": 53871,
+        "html": 21811,
+        "css": 54867,
         "js": 10536,
-        "fonts": 254932,
+        "fonts": 257304,
         "first_viewport": 35197,
         "images": 35197,
-        "total": 411109
+        "total": 414912
       },
       "budget": {
-        "html": 23514,
-        "css": 59259,
+        "html": 23993,
+        "css": 60354,
         "js": 11590,
-        "fonts": 280426,
+        "fonts": 283035,
         "first_viewport": 38717,
         "images": 38717,
-        "total": 452220
+        "total": 456404
       }
     },
     "portfolio/index.html": {
       "measured": {
-        "html": 8045,
-        "css": 53871,
+        "html": 8102,
+        "css": 54867,
         "js": 82750,
-        "fonts": 254932,
+        "fonts": 257304,
         "first_viewport": 0,
         "images": 0,
-        "total": 399598
+        "total": 403023
       },
       "budget": {
-        "html": 8850,
-        "css": 59259,
+        "html": 8913,
+        "css": 60354,
         "js": 91026,
-        "fonts": 280426,
+        "fonts": 283035,
         "first_viewport": 0,
         "images": 0,
-        "total": 439558
+        "total": 443326
       }
     },
     "releases/index.html": {
       "measured": {
-        "html": 29632,
-        "css": 53871,
+        "html": 29689,
+        "css": 54867,
         "js": 10536,
-        "fonts": 254932,
+        "fonts": 257304,
         "first_viewport": 0,
         "images": 0,
-        "total": 348971
+        "total": 352396
       },
       "budget": {
-        "html": 32596,
-        "css": 59259,
+        "html": 32658,
+        "css": 60354,
         "js": 11590,
-        "fonts": 280426,
+        "fonts": 283035,
         "first_viewport": 0,
         "images": 0,
-        "total": 383869
+        "total": 387636
       }
     },
     "renders/index.html": {
       "measured": {
-        "html": 22667,
-        "css": 53871,
+        "html": 22724,
+        "css": 54867,
         "js": 10536,
-        "fonts": 254932,
-        "first_viewport": 156908,
-        "images": 1902470,
-        "total": 2401384
+        "fonts": 257304,
+        "first_viewport": 144016,
+        "images": 1728086,
+        "total": 2217533
       },
       "budget": {
-        "html": 24934,
-        "css": 59259,
+        "html": 24997,
+        "css": 60354,
         "js": 11590,
-        "fonts": 280426,
-        "first_viewport": 172599,
-        "images": 2092718,
-        "total": 2641523
+        "fonts": 283035,
+        "first_viewport": 158418,
+        "images": 1900895,
+        "total": 2439287
       }
     },
     "search/index.html": {
       "measured": {
-        "html": 12809,
-        "css": 53871,
+        "html": 12866,
+        "css": 54867,
         "js": 10536,
-        "fonts": 254932,
+        "fonts": 257304,
         "first_viewport": 0,
         "images": 0,
-        "total": 332148
+        "total": 335573
       },
       "budget": {
-        "html": 14090,
-        "css": 59259,
+        "html": 14153,
+        "css": 60354,
         "js": 11590,
-        "fonts": 280426,
+        "fonts": 283035,
         "first_viewport": 0,
         "images": 0,
-        "total": 365363
+        "total": 369131
       }
     },
     "tools/index.html": {
       "measured": {
-        "html": 8202,
-        "css": 53871,
+        "html": 8259,
+        "css": 54867,
         "js": 82750,
-        "fonts": 254932,
+        "fonts": 257304,
         "first_viewport": 0,
         "images": 0,
-        "total": 399755
+        "total": 403180
       },
       "budget": {
-        "html": 9023,
-        "css": 59259,
+        "html": 9085,
+        "css": 60354,
         "js": 91026,
-        "fonts": 280426,
+        "fonts": 283035,
         "first_viewport": 0,
         "images": 0,
-        "total": 439731
-      }
-    },
-    "twin/index.html": {
-      "measured": {
-        "html": 2248,
-        "css": 86347,
-        "js": 2148381,
-        "fonts": 173776,
-        "first_viewport": 0,
-        "images": 0,
-        "total": 2410752
-      },
-      "budget": {
-        "html": 2473,
-        "css": 94982,
-        "js": 2363220,
-        "fonts": 191154,
-        "first_viewport": 0,
-        "images": 0,
-        "total": 2651828
+        "total": 443499
       }
     }
   },

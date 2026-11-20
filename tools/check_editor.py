@@ -1,29 +1,20 @@
 #!/usr/bin/env python3
-"""Run Twin's own checks: typecheck, unit tests, asset licences, and payload.
+"""Run the editor's own checks: typecheck, unit tests, asset licences, and payload.
 
-    python3 tools/check_twin.py
-    python3 tools/check_twin.py --no-tests      # skip the slow suite while iterating
-    python3 tools/check_twin.py --write-budget  # record the current payload ceiling
+    python3 tools/check_editor.py
+    python3 tools/check_editor.py --no-tests      # skip the slow suite while iterating
+    python3 tools/check_editor.py --write-budget  # record the current payload ceiling
 
-Twin has 255 unit tests across 35 files and, until this gate existed, nothing ran
-them on a push. `tools/check_all.py` covers the shelf; Twin builds the shelf's twin/
-page but was outside every gate, so a broken test or a broken type was only found
-by whoever happened to run it.
+The editor app lives in `twin/` (its repository name) and builds the shelf's
+`docs/editor/` page. It has 255 unit tests across 35 files and, until this gate
+existed, nothing ran them on a push: `tools/check_all.py` covers the shelf, and the
+app was outside every gate, so a broken test or a broken type was only found by
+whoever happened to run it.
 
-Four checks, in the order that fails fastest:
-
-  typecheck   `tsc -b` -- a type error is a build failure on the deploy side
-  assets      `npm run check:assets` -- every binary needs a source, licence, SHA-256
-  tests       `vitest run` with a JUnit report, so the run is readable after the fact
-  payload     the initial script weight of the committed build, against a ceiling
-
-The payload check is the one that keeps the bundle split from regressing. Twin's page
-is 2.4 MB because every plugin is loaded up front; the ceiling here starts at what it
-is today and gets tightened when the split lands, so the number can only move by a
-deliberate edit rather than by someone adding an eager import.
-
-Needs `node_modules`: run `npm ci` in twin/ first. When it is absent the gate says so
-and fails, rather than passing on nothing.
+Needs `node_modules`: run `npm ci` in twin/ first. When it is absent the gate says
+so and exits 2, which `check_all.py` reports as a skip rather than a failure --
+the shelf's CI job has no Node toolchain by design, and the `editor` job runs this
+same gate with dependencies installed.
 """
 
 from __future__ import annotations
@@ -96,18 +87,18 @@ def initial_scripts_at(page: Path) -> list[Path]:
     """The scripts `page` loads before the app runs.
 
     Separate from `initial_scripts` so the arithmetic can be tested against pages
-    built for the purpose rather than against whatever docs/twin/ happens to be.
+    built for the purpose rather than against whatever docs/editor/ happens to be.
     """
     if not page.is_file():
-        raise SystemExit("check_twin: %s is missing; run python3 tools/build_twin.py"
+        raise SystemExit("check_editor: %s is missing; run python3 tools/build_editor.py"
                          % page)
     found = []
     for raw in SCRIPT.findall(page.read_bytes()):
         src = html.unescape(raw.decode("utf-8", "replace"))
-        if not src.startswith(("/twin/", "./", "../")):
+        if not src.startswith(("/editor/", "./", "../")):
             # Off-origin or inline: not part of what the shelf serves for this page.
             continue
-        relative = src[len("/twin/"):] if src.startswith("/twin/") else src
+        relative = src[len("/editor/"):] if src.startswith("/editor/") else src
         path = (page.parent / relative).resolve()
         if path.is_file():
             found.append(path)
@@ -126,7 +117,7 @@ def compare_at(page: Path, ceiling: int) -> bool:
 
 
 def measure() -> dict:
-    return measure_at(twin_dir() / "docs" / "twin" / "index.html")
+    return measure_at(twin_dir() / "docs" / "editor" / "index.html")
 
 
 def check_payload(write: bool) -> bool:
@@ -135,7 +126,7 @@ def check_payload(write: bool) -> bool:
         record = {"generated": time.strftime("%Y-%m-%d"),
                   "initial_gzip_bytes": measured["bytes"],
                   "budget_bytes": measured["bytes"],
-                  "note": ("Initial script weight of docs/twin/ as built. gzip -9, so "
+                  "note": ("Initial script weight of docs/editor/ as built. gzip -9, so "
                            "the shelf's brotli is smaller. Tighten budget_bytes "
                            "deliberately when the plugin split lands.")}
         budget_path().write_text(json.dumps(record, indent=2) + "\n", encoding="utf-8")
@@ -196,9 +187,9 @@ def main() -> int:
 
     total = time.monotonic() - began
     if ok:
-        print("twin: OK - typecheck, assets, tests and payload in %.0fs" % total)
+        print("editor: OK - typecheck, assets, tests and payload in %.0fs" % total)
         return 0
-    print("twin: FAILED in %.0fs" % total)
+    print("editor: FAILED in %.0fs" % total)
     return 1
 
 

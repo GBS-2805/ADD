@@ -13,7 +13,17 @@
     },
     {
       "source": "/twin",
-      "destination": "/twin/",
+      "destination": "/editor/",
+      "permanent": true
+    },
+    {
+      "source": "/twin/",
+      "destination": "/editor/",
+      "permanent": true
+    },
+    {
+      "source": "/editor",
+      "destination": "/editor/",
       "permanent": true
     }
   ],

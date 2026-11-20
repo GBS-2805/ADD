@@ -1,6 +1,6 @@
 {
-  "generated": "2026-11-19",
-  "initial_gzip_bytes": 622019,
-  "budget_bytes": 622019,
-  "note": "Initial script weight of docs/twin/ as built. gzip -9, so the shelf's brotli is smaller. Tighten budget_bytes deliberately when the plugin split lands."
+  "generated": "2026-11-20",
+  "initial_gzip_bytes": 622022,
+  "budget_bytes": 622022,
+  "note": "Initial script weight of docs/editor/ as built. gzip -9, so the shelf's brotli is smaller. Tighten budget_bytes deliberately when the plugin split lands."
 }

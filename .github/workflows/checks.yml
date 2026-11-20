@@ -8,7 +8,9 @@
 # test suite. Caches are kept between runs, and a baseline drift or a failing engine
 # test fails the push.
 #
-# The twin job covers twin/ itself -- the editor that builds the shelf's twin/ page.
+# The twin job covers twin/ itself -- the editor app that builds the shelf's
+# /editor/ page. The job id keeps its old name on purpose: the branch protection
+# rule requires a check called `twin`, and renaming it would silently unrequire it.
 # It needs a Node toolchain, so it is separate from the python-only job.
 #
 # The APK build stays local, on purpose: it needs the keystore.
@@ -43,7 +45,7 @@ jobs:
         run: python3 -m unittest discover -s tools/tests -v
 
   twin:
-    # twin/ builds the shelf's twin/ page but sat outside every gate: 255 unit tests
+    # twin/ builds the shelf's /editor/ page but sat outside every gate: 255 unit tests
     # that only ran when someone remembered. It gets its own job because the
     # typecheck alone takes about 45s on a cold cache and the shelf job should stay
     # a few seconds of python.
@@ -71,7 +73,7 @@ jobs:
         run: npm ci
         working-directory: twin
       - name: Typecheck, unit tests, assets and payload
-        run: python3 tools/check_twin.py
+        run: python3 tools/check_editor.py
       - name: Install the pinned browser
         run: npx --no-install playwright install --with-deps chromium
         working-directory: twin
