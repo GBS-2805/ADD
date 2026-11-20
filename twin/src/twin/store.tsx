@@ -8,6 +8,14 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import {
+  AUTOSAVE_DELAY_MS,
+  createIndexedDbBackend,
+  referencedAssets,
+  reviveFromStorage,
+  serializeForStorage,
+  type AutosaveBackend,
+} from "./autosave";
 import { commitHistory, createHistory, pushEffect, redoHistory, undoHistory, updateLayer } from "./history";
 import {
   downloadBlob,
@@ -100,6 +108,16 @@ export interface EffectPulse {
   nonce: number;
 }
 
+export interface AutosaveState {
+  /** "off" when the browser has no usable storage; "idle" until the first write. */
+  status: "idle" | "saved" | "off";
+  savedAt: string | null;
+  /** Layers restored from the last session, for the status line. Null until read. */
+  restoredLayers: number | null;
+  /** Pictures whose bytes were gone, so they could not be restored. */
+  droppedImages: number;
+}
+
 export interface TwinState {
   history: ReturnType<typeof createHistory>;
   doc: TwinDocument;
@@ -125,6 +143,7 @@ export interface TwinState {
   viewport: Viewport;
   canvasSize: Size;
   panels: { layers: boolean; inspector: boolean };
+  autosave: AutosaveState;
 }
 
 export interface TwinActions {
@@ -195,7 +214,16 @@ const cloneDoc = (doc: TwinDocument): TwinDocument => ({
   background: doc.background ? structuredClone(doc.background) : null,
 });
 
-export function TwinProvider({ children }: { children: ReactNode }) {
+export interface TwinProviderProps {
+  children: ReactNode;
+  /**
+   * Storage to autosave into. Omitted in the app, where IndexedDB is chosen; a
+   * test passes a memory backend, and `null` means "this browser has no storage".
+   */
+  autosaveBackend?: AutosaveBackend | null;
+}
+
+export function TwinProvider({ children, autosaveBackend }: TwinProviderProps) {
   const [history, setHistory] = useState(() => createHistory(cloneDoc(initialDocument)));
   const [surface, setSurface] = useState<Surface>("none");
   const [activePluginId, setActivePluginId] = useState<string | null>(null);
@@ -222,10 +250,149 @@ export function TwinProvider({ children }: { children: ReactNode }) {
   const toastTimer = useRef<number | null>(null);
   const pulseSequence = useRef(0);
   const stateRef = useRef(history);
+  const [autosave, setAutosave] = useState<AutosaveState>({
+    status: "idle",
+    savedAt: null,
+    restoredLayers: null,
+    droppedImages: 0,
+  });
+  /**
+   * Created once, lazily. A null backend means this browser has no usable storage
+   * (jsdom, private mode, storage switched off); the editor then stops autosaving
+   * instead of failing.
+   */
+  const backendRef = useRef<AutosaveBackend | null | undefined>(undefined);
+  const backend = () => {
+    if (backendRef.current === undefined) {
+      backendRef.current =
+        autosaveBackend !== undefined ? autosaveBackend : createIndexedDbBackend();
+    }
+    return backendRef.current;
+  };
+  /** Pictures whose bytes still need writing, keyed by asset id. */
+  const pendingAssets = useRef(new Map<string, Blob>());
+  const autosaveTimer = useRef<number | null>(null);
+  /**
+   * True until the first read finishes. Autosave is suppressed meanwhile, so the
+   * starter document can never overwrite the real one that is still loading.
+   */
+  const restoring = useRef(true);
 
   useEffect(() => {
     stateRef.current = history;
   }, [history]);
+
+  /** Reads the stored bytes for a live image layer, if it has any. */
+  const imageBlob = useCallback(async (layer: TwinLayer): Promise<Blob | null> => {
+    if (!layer.image) return null;
+    const known = pendingAssets.current.get(layer.image.assetId);
+    if (known) return known;
+    if (!layer.image.src.startsWith("blob:")) return null;
+    try {
+      const response = await fetch(layer.image.src);
+      return response.ok ? await response.blob() : null;
+    } catch {
+      return null;
+    }
+  }, []);
+
+  /** Writes the current document and the pictures it needs. Never throws. */
+  const writeAutosave = useCallback(async () => {
+    const handle = backend();
+    if (!handle) {
+      setAutosave((current) => (current.status === "off" ? current : { ...current, status: "off" }));
+      return;
+    }
+    const doc = stateRef.current.present;
+    try {
+      for (const layer of doc.layers) {
+        if (layer.kind !== "image" || !layer.image) continue;
+        const blob = await imageBlob(layer);
+        if (blob) await handle.writeAsset(layer.image.assetId, blob);
+      }
+      const payload = serializeForStorage(doc);
+      await handle.write(payload);
+      await handle.pruneAssets(referencedAssets(payload));
+      pendingAssets.current.clear();
+      setAutosave((current) => ({ ...current, status: "saved", savedAt: payload.savedAt, restoredLayers: null }));
+    } catch {
+      // A full quota or a blocked store must not interrupt editing.
+      setAutosave((current) => (current.status === "off" ? current : { ...current, status: "off" }));
+    }
+  }, [imageBlob]);
+
+  /** Coalesces a burst of edits into one write, `AUTOSAVE_DELAY_MS` after the last. */
+  const scheduleAutosave = useCallback(() => {
+    if (restoring.current) return;
+    if (autosaveTimer.current) window.clearTimeout(autosaveTimer.current);
+    autosaveTimer.current = window.setTimeout(() => {
+      autosaveTimer.current = null;
+      void writeAutosave();
+    }, AUTOSAVE_DELAY_MS);
+  }, [writeAutosave]);
+
+  /**
+   * Restore the last session once, before the first edit. A slow read leaves the
+   * starter document in place rather than blocking the editor.
+   */
+  useEffect(() => {
+    let cancelled = false;
+    const handle = backend();
+    if (!handle) {
+      restoring.current = false;
+      setAutosave((current) => ({ ...current, status: "off" }));
+      return;
+    }
+    let revivedDocument = false;
+    void (async () => {
+      try {
+        const stored = await handle.read();
+        if (cancelled) return;
+        const revived = stored
+          ? await reviveFromStorage(stored, (id) => handle.readAsset(id))
+          : null;
+        if (cancelled) return;
+        if (revived) {
+          revivedDocument = true;
+          setHistory(createHistory(revived.document));
+          setAutosave((current) => ({
+            ...current,
+            status: "saved",
+            savedAt:
+              typeof (stored as { savedAt?: unknown }).savedAt === "string"
+                ? (stored as { savedAt: string }).savedAt
+                : null,
+            restoredLayers: revived.document.layers.length,
+            droppedImages: revived.droppedImages,
+          }));
+        }
+      } catch {
+        if (!cancelled) setAutosave((current) => ({ ...current, status: "off" }));
+      } finally {
+        if (!cancelled) {
+          restoring.current = false;
+          // Nothing was stored: keep the starter document straight away, so the
+          // status line says "Saved" only after something really was written.
+          if (!revivedDocument) scheduleAutosave();
+        }
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+    // Reads once: a backend that changes identity must not re-run the restore.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  /** Every committed document change is an autosave candidate. */
+  useEffect(() => {
+    scheduleAutosave();
+  }, [history, scheduleAutosave]);
+
+  /** Clear a pending write on unmount. */
+  useEffect(() => () => {
+    if (autosaveTimer.current) window.clearTimeout(autosaveTimer.current);
+  }, []);
 
   const showToast = useCallback((message: string) => {
     setToastExiting(false);
@@ -699,6 +866,7 @@ export function TwinProvider({ children }: { children: ReactNode }) {
     state: {
       history,
       doc: history.present,
+      autosave,
       lastExport,
       surface,
       activePluginId,
@@ -841,6 +1009,7 @@ export function TwinProvider({ children }: { children: ReactNode }) {
     exportPng,
     printStage,
     showToast,
+    autosave,
   ]);
 
   return <TwinContext.Provider value={actions}>{children}</TwinContext.Provider>;

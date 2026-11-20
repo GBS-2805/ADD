@@ -92,6 +92,8 @@ describe("EditorShell device matrix", () => {
     expect(shell.style.height).toBe("100dvh");
   });
 
+  // The drawer's open/close settles over several animation frames, which jsdom
+  // fakes at real time; this runs ~6.8s on a loaded machine, past the 5s default.
   it("drawerReturnsFocusToTrigger", async () => {
     renderWorkbench(390, 844);
     const trigger = screen.getByRole("button", { name: "Layers" });
@@ -99,7 +101,7 @@ describe("EditorShell device matrix", () => {
     fireEvent.click(trigger);
     fireEvent.click(await screen.findByRole("button", { name: "Close Layers" }));
     await waitFor(() => expect(trigger).toHaveFocus());
-  });
+  }, 15000);
 
   it("tabletUsesDrawers", () => {
     renderWorkbench(900, 900);

@@ -1,9 +1,27 @@
-import { useTwinStore } from "../twin/store";
+import { useTwinStore, type AutosaveState } from "../twin/store";
 import { fitViewport, clampZoom } from "./model/viewport";
+
+/** The one-line description of what the browser store is doing. */
+export function autosaveLabel(autosave: AutosaveState): string {
+  if (autosave.status === "off") return "Not saved";
+  if (autosave.status === "saved") return "Saved";
+  return "Saving";
+}
+
+function autosaveTitle(autosave: AutosaveState): string {
+  if (autosave.status === "off") {
+    return "This browser is not keeping a copy. Use Save .twin to keep your work.";
+  }
+  if (autosave.status === "saved" && autosave.savedAt) {
+    const at = new Date(autosave.savedAt);
+    return `Kept in this browser, last written ${at.toLocaleTimeString()}. Save .twin keeps a file you can move.`;
+  }
+  return "Kept in this browser automatically.";
+}
 
 export function StatusBar() {
   const store = useTwinStore();
-  const { doc, viewport, snapEnabled, rulersVisible, canvasSize } = store.state;
+  const { doc, viewport, snapEnabled, rulersVisible, canvasSize, autosave } = store.state;
   const selected = doc.selectedLayerIds.length;
   const zoomPercent = Math.round(viewport.zoom * 100);
 
@@ -64,6 +82,12 @@ export function StatusBar() {
       <span>{selected ? `${selected} selected` : "Nothing selected"}</span>
       <span className="ed-status-seam" aria-hidden="true" />
       <span>{snapEnabled ? "Snap on" : "Snap off"}</span>
+      <span className="ed-status-seam" aria-hidden="true" />
+      {/* Autosave is a convenience, not a promise: say what it did, and when it
+          cannot, so nobody relies on it to keep work it never stored. */}
+      <span data-testid="autosave-status" title={autosaveTitle(autosave)}>
+        {autosaveLabel(autosave)}
+      </span>
       <span className="ed-sr-only" role="status" aria-live="polite">
         {selected} {selected === 1 ? "layer" : "layers"} selected. Zoom {zoomPercent}%.
       </span>
