@@ -38,7 +38,8 @@ VERDICT = {"palette": "palette:", "menu": "menu:", "assets": "assets:",
            "artboards": "artboards:", "engine": "engine:",
            "engine-claims": "claims:", "chrome": "chrome:",
            "headers": "headers:", "perf": "web-perf:",
-           "glyphs": "glyphs:", "twin": "twin:"}
+           "glyphs": "glyphs:", "effects": "effects:",
+           "effects-native": "effects-native:", "twin": "twin:"}
 
 
 def gates(browser, artboards, visual, live=None, handoff=None, perf=False,
@@ -68,6 +69,11 @@ def gates(browser, artboards, visual, live=None, handoff=None, perf=False,
         # failure mode is a silent system-font substitution that moves the
         # artboards, so it sits next to the other artboard inputs.
         ["glyphs", [sys.executable, "tools/check_glyphs.py"]],
+        # The library's effects catalog: the file Twin renders from, its shape, and
+        # the native tables it must agree with. No JDK: the Kotlin is read as text,
+        # so the dependency points from the table towards the JSON, not backwards.
+        ["effects", [sys.executable, "tools/build_effects.py", "--check"]],
+        ["effects-native", [sys.executable, "tools/check_effects_native.py"]],
         ["pantone", [sys.executable, "tools/pantone_sheet.py", "--check"]],
         ["notes", [sys.executable, "tools/notes_regression.py"]],
         ["bundle", ["./build.sh", "stage"]],
