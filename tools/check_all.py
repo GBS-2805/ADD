@@ -38,7 +38,7 @@ VERDICT = {"palette": "palette:", "menu": "menu:", "assets": "assets:",
            "artboards": "artboards:", "engine": "engine:",
            "engine-claims": "claims:", "chrome": "chrome:",
            "headers": "headers:", "perf": "web-perf:",
-           "twin": "twin:"}
+           "glyphs": "glyphs:", "twin": "twin:"}
 
 
 def gates(browser, artboards, visual, live=None, handoff=None, perf=False,
@@ -64,6 +64,10 @@ def gates(browser, artboards, visual, live=None, handoff=None, perf=False,
         ["catalog", [sys.executable, "tools/build_catalog.py", "--check"]],
         ["packs", [sys.executable, "tools/build_packs.py", "--check"]],
         ["figma", [sys.executable, "tools/check_figma.py"]],
+        # Every face the pages ship covers every character they paint. Its own
+        # failure mode is a silent system-font substitution that moves the
+        # artboards, so it sits next to the other artboard inputs.
+        ["glyphs", [sys.executable, "tools/check_glyphs.py"]],
         ["pantone", [sys.executable, "tools/pantone_sheet.py", "--check"]],
         ["notes", [sys.executable, "tools/notes_regression.py"]],
         ["bundle", ["./build.sh", "stage"]],
