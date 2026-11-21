@@ -12,7 +12,7 @@ export function TopChips() {
         <Menu.Trigger asChild>
           <button type="button" className="ed-document-chip" aria-label="Open document menu">
             <span className="ed-document-title">OPEN STUDIO</span>
-            <span className="ed-document-meta">TWIN / 765 × 1000</span>
+            <span className="ed-document-meta">EDITOR / 765 × 1000</span>
           </button>
         </Menu.Trigger>
         <Portal>

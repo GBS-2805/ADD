@@ -2,12 +2,12 @@
 
 A local, browser-only research workbench for the BMO Open Studio effects shelf. The editor has a graphite shell, a paper 765 × 1000 document, desktop panels with a splitter, tablet drawers, a phone bottom dock and sheet, a five-action cover Quick Mode, and a half-fold layout driven by viewport segments.
 
-This app is deliberately isolated in `twin/`. It does not touch the native engine, `handoff/`, the published `docs/` shelf, or any site files.
+This app is deliberately isolated in `editor/`. It does not touch the native engine, `handoff/`, the published `docs/` shelf, or any site files.
 
 ## Run
 
 ```bash
-cd twin
+cd editor
 npm install
 npm run dev
 ```
@@ -33,7 +33,7 @@ npm run test:e2e  # Playwright; run npx playwright install chromium first
 
 - The model is 765 × 1000 CSS pixels, origin at the artboard centre. X and Y in the inspector are document coordinates, not the old 338-unit stage coordinates.
 - PNG export renders at 1530 × 2000 (2×) with a valid PNG signature, the paper ground, effects, grain and print metadata. It contains no selection, handles, tags or editor chrome, and does not add a history entry.
-- Project files are `.twin` JSON schema v2, with separate `scaleX` and `scaleY`. Schema v1 files are migrated on open by the exact `765 / 338` factor for positions and layer text size; `scale` becomes both axes.
+- Project files are `.add` JSON schema v2 (older `.twin` files still open), with separate `scaleX` and `scaleY`. Schema v1 files are migrated on open by the exact `765 / 338` factor for positions and layer text size; `scale` becomes both axes.
 - Saving includes `selectedLayerIds`, so a round-trip keeps a still-valid selection. Empty documents are valid, saveable, printable and exportable; they show the empty-layers hint instead of invented layers.
 - The layer cap is 64 layers, with at most 12 image layers. Add actions reject further layers with a toast and leave the document intact.
 - Undo/redo is one document history capped at 30 edits. Selection, panel state and viewport are outside history. A still-valid selection survives undo/redo.
@@ -63,7 +63,7 @@ npm run test:e2e  # Playwright; run npx playwright install chromium first
 
 ## Files, print and boundaries
 
-- **Save .twin** downloads the portable project. **Open .twin** validates format, colours, fonts, effects, transforms and embedded image data before replacing the document and resetting history.
+- **Save .add** downloads the portable project. **Open .add** (or an older `.twin`) validates format, colours, fonts, effects, transforms and embedded image data before replacing the document and resetting history.
 - Imported PNGs are embedded as data URLs in the project file. Layer images live in memory for the session; there is no autosave or local storage.
 - **Export PNG** is a flattened raster only; it does not write PSDs or editable layer files.
 - **Print / Save PDF** calls the browser print dialog. A dedicated print root renders a 765 × 1000 artboard with a custom page size and no editor chrome or selection. A printer driver may still scale the custom page; PDF output is the exact path.
@@ -73,11 +73,11 @@ npm run test:e2e  # Playwright; run npx playwright install chromium first
 - Raster effects can soften above 200% zoom because shader/texture canvases are CSS-scaled; text and vector shapes are re-rasterized by the browser. The 2× export is unaffected.
 - A browser cannot run cover and main as two independent live surfaces. Cover is a separate Quick Mode, and Flex Mode uses the two segments of one browser viewport.
 - Pinch and segment support are Chromium-first. Samsung Internet 30+ supplies viewport segments; Safari/iOS is not claimed.
-- The app has not been checked on a physical Samsung Flip 7 in this environment. See `artifacts/twin/editor/flip7-device-notes.md` for the device matrix that remains not checked.
+- The app has not been checked on a physical Samsung Flip 7 in this environment. See `artifacts/editor/flip7-device-notes.md` for the device matrix that remains not checked.
 
 ## Verification
 
-The current local release gate is recorded in `docs/superpowers/plans/2026-11-16-twin-workbench-v2.md` under Task 5. It covers the focused and full unit suites, the full Playwright suite, the production build, and the offline asset check. Device and visual evidence lives in `artifacts/twin/editor/`.
+The current local release gate is recorded in `docs/superpowers/plans/2026-11-16-twin-workbench-v2.md` under Task 5. It covers the focused and full unit suites, the full Playwright suite, the production build, and the offline asset check. Device and visual evidence lives in `artifacts/editor/`.
 
 ## Third-party material
 
