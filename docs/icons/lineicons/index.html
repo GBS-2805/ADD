@@ -7,7 +7,7 @@
 <link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml" />
 <title>Lineicons — 606 icons, preview and variants</title>
 <meta name="description" content="Lineicons: 606 line style, the free set icons, MIT. Preview one, set weight, size and surface, copy the SVG." />
-<link rel="stylesheet" href="../../assets/site.6b1bb724fe.css" />
+<link rel="stylesheet" href="../../assets/site.fcabdc4952.css" />
 <style>
   /* Corners: one step for boxes and controls, a smaller one for menu rows. */
   :root { --r: 8px; --r-sm: 5px; }
@@ -529,6 +529,10 @@
     place-items: center;
     padding: 0;
     background: var(--sw, transparent);
+    /* It held a bare "M" in the user-agent's Arial, so its box moved by a pixel
+       depending on which Arial the machine has -- enough to make this page's
+       artboard differ between CI and a laptop. Name the page's face instead. */
+    font-family: "Libre Franklin", "ADD Symbols", system-ui, sans-serif;
     font-size: 12px;
     font-weight: 500;
     line-height: 1;
@@ -848,6 +852,7 @@
     <p>More</p>
     <button class="drawer-close" id="drawerClose" type="button" aria-label="Close side tab"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 6L18 18M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
   </div>
+  <a href="../../editor/">Editor<span>the canvas</span></a>
   <a href="../../download/">Download<span>app</span></a>
   <a href="../../portfolio/">Portfolio<span>3 projects</span></a>
   <a href="../../renders/">Renders<span>gallery</span></a>

@@ -36,7 +36,9 @@ W, PAD, ROW = 1300, 40, 96
 CREAM, INK = TOKENS["--page"], TOKENS["--on"]
 DIM = TOKENS["--on-dim"]
 RULE = INK + "38"
-FONT = "Libre Franklin, Helvetica Neue, Arial, sans-serif"
+# dE labels paint a Greek delta, which Libre Franklin does not have; naming the
+# subset keeps the sheet off the system's fallback, same as the pages.
+FONT = "Libre Franklin, ADD Symbols, Helvetica Neue, Arial, sans-serif"
 COL_ROLE, COL_MATCH, COL_ALT1, COL_ALT2 = 124, 340, 640, 900
 
 

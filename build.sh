@@ -181,14 +181,18 @@ stage_shelf_assets() {
     # registry. The top-level excludes are anchored at ./ and miss them, so they are
     # named here too; the archive's galleries are the same destinations, left to the
     # site by the same fallback.
+    # editor/ is the browser canvas editor. It is a web app, not a bundled tool: the
+    # app already ships its own native editor, and its 2.5 MB would buy nothing but
+    # a second, worse editor inside the APK. Leave it to the site, like the galleries.
     tar -C "$ROOT/docs" -cf - --exclude='ADD-*.apk' --exclude='vercel.json' \
         --exclude='sitemap.xml' --exclude='robots.txt' \
         --exclude='./renders' --exclude='./figma' --exclude='./packs' \
+        --exclude='./editor' \
         --exclude='./classic/renders' --exclude='./classic/figma' \
-        --exclude='./classic/packs' . | tar -C "$www" -xf -
+        --exclude='./classic/packs' --exclude='./classic/editor' . | tar -C "$www" -xf -
     python3 "$ROOT/tools/check_bundle.py" "$www"
     # Guard the trim: a future staging edit that quietly brings 3.2 MB back fails here.
-    for absent in renders figma packs classic/renders classic/figma classic/packs; do
+    for absent in renders figma packs editor classic/renders classic/figma classic/packs classic/editor; do
         if [ -e "$www/$absent" ]; then
             echo "stage_shelf_assets: $absent is staged; the galleries and the packs stay on the site" >&2
             exit 1

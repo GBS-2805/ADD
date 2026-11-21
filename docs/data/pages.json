@@ -1,6 +1,6 @@
 {
   "origin": "https://artbase-olive.vercel.app",
-  "count": 16,
+  "count": 17,
   "pages": [
     {
       "path": "/compress/",
@@ -15,6 +15,13 @@
       "description": "ADD 3.9 (17 MB): the whole shelf — every page, the icon browser, the fonts, the editor and the compressor — in one signed APK. Android 8.0+, SHA-256 listed, no store or account.",
       "heading": "Download",
       "section": "download"
+    },
+    {
+      "path": "/editor/",
+      "title": "Editor — ADD's browser canvas",
+      "description": "The ADD Editor, a browser canvas: layers, type, shapes, PNG imports, shader and pattern effects, and portable .add project files. Runs entirely in your browser, with no upload.",
+      "heading": "",
+      "section": "editor"
     },
     {
       "path": "/figma/",
@@ -75,7 +82,7 @@
     {
       "path": "/",
       "title": "ADD — 4,373 icons. No account.",
-      "description": "A free design shelf: 4,373 icons, three type families, a photo compressor and one offline Android app. No account, no upload.",
+      "description": "A free design shelf: 4,373 icons, three type families, a photo compressor, a browser canvas editor and one offline Android app. No account, no upload.",
       "heading": "4,373 icons. No account.",
       "section": ""
     },

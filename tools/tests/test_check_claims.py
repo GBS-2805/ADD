@@ -12,7 +12,11 @@ def make_tree(root: Path, *, bytes_count: int = 17_387_029,
               current_tests: int = 231) -> None:
     docs = root / "docs"
     (docs / "data").mkdir(parents=True)
-    for name in ["compress", *["page-%02d" % i for i in range(1, 15)]]:
+    # MODERN_PAGES counts this fixture's pages: the root index, "compress", and the
+    # numbered ones. Keep the total equal to the constant so the count and the words
+    # are tested against one number rather than against each other.
+    numbered = check_claims.MODERN_PAGES - 2
+    for name in ["compress", *["page-%02d" % i for i in range(1, numbered + 1)]]:
         (docs / name).mkdir(parents=True)
         (docs / name / "index.html").write_text("<html></html>\n", encoding="utf-8")
     (docs / "index.html").write_text("<html></html>\n", encoding="utf-8")
@@ -28,11 +32,11 @@ def make_tree(root: Path, *, bytes_count: int = 17_387_029,
     (root / "tools" / "catalog.json").write_text(
         json.dumps({"tools": [tool]}), encoding="utf-8")
     (root / "README.md").write_text(
-        "# Shelf\n\nSixteen pages, one stylesheet.\n\n"
+        "# Shelf\n\nSeventeen pages, one stylesheet.\n\n"
         "- **ADD 3.9** - APK (17 MB, signed), published from `docs/compress/`.\n",
         encoding="utf-8")
     (docs / "agent-reference.md").write_text(
-        "The shelf is sixteen pages.\n", encoding="utf-8")
+        "The shelf is seventeen pages.\n", encoding="utf-8")
 
     (root / "NATIVE_EDITOR_V2.md").write_text(
         "All tests stay green. Current baseline: **%d tests, 0 failures, 0 errors**.\n"
@@ -67,14 +71,16 @@ class ClaimsTests(unittest.TestCase):
             make_tree(root)
             (root / "docs" / "page-01" / "index.html").unlink()
             found = check_claims.problems(root)
-            self.assertTrue(any("docs: 15 modern pages" in item for item in found), found)
+            expected = check_claims.MODERN_PAGES - 1
+            self.assertTrue(any("docs: %d modern pages" % expected in item
+                                for item in found), found)
 
     def test_missing_compress_row_fails_at_readme(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             make_tree(root)
             (root / "README.md").write_text(
-                "# Shelf\n\nSixteen pages.\n- **ADD 3.9** - APK (17 MB).\n",
+                "# Shelf\n\nSeventeen pages.\n- **ADD 3.9** - APK (17 MB).\n",
                 encoding="utf-8")
             found = check_claims.problems(root)
             self.assertTrue(any("docs/compress/" in item for item in found), found)
