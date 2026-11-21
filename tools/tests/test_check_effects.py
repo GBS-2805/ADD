@@ -1,6 +1,6 @@
 """The effects catalog gate must fail for the right reasons.
 
-The catalog is what Twin will render from, so the cases that matter are the ones
+The catalog is what the Editor will render from, so the cases that matter are the ones
 that would look like a rendering bug rather than a data bug: a duplicate id, a
 default with no control behind it, a `visibleWhen` naming a preset that was
 renamed, and a native table that has quietly forked from the JSON.
@@ -64,16 +64,16 @@ def catalog() -> dict:
         },
         "presets": [
             {"id": "shader-mesh", "name": "Mesh", "note": "n", "kind": "shader",
-             "source": "twin", "render": "MeshGradient",
+             "source": "editor", "render": "MeshGradient",
              "defaults": {"speed": 0.5, "color": "#111111"}},
             {"id": "texture-paper", "name": "Paper", "note": "n", "kind": "texture",
-             "source": "twin", "render": "PaperTexture",
+             "source": "editor", "render": "PaperTexture",
              "defaults": {"opacity": 1}},
             {"id": "pattern-circuit", "name": "Circuit", "note": "n",
-             "kind": "pattern", "source": "twin", "render": "circuit",
+             "kind": "pattern", "source": "editor", "render": "circuit",
              "defaults": {"ink": "#111111"}},
             {"id": "particles-dust", "name": "Dust", "note": "n",
-             "kind": "particles", "source": "twin", "render": "dust",
+             "kind": "particles", "source": "editor", "render": "dust",
              "defaults": {"speed": 1}},
             {"id": "field-mica-dawn", "name": "Mica dawn", "note": "n",
              "kind": "field", "source": "native", "render": "FlowField",

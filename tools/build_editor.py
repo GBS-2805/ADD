@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Build the Editor into docs/editor/ as a page of the shelf.
 
-    python3 tools/build_twin.py
-    python3 tools/build_twin.py --check
+    python3 tools/build_editor.py
+    python3 tools/build_editor.py --check
 
 The Editor lives at /editor/, not at the site root, so its bundle must be built
 with that base or it would emit /assets/... and overwrite the shelf's own asset
@@ -25,7 +25,7 @@ import tempfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-APP = ROOT / "twin"          # the editor's source tree keeps its repo name
+APP = ROOT / "editor"
 TARGET = ROOT / "docs" / "editor"
 BASE = "/editor/"
 
@@ -36,11 +36,11 @@ import seo_meta  # noqa: E402 - the tools directory is on the path above
 def build(destination: Path) -> None:
     """Run Vite with the shelf's base path, writing into `destination`."""
     if not (APP / "node_modules").is_dir():
-        raise SystemExit("build_editor: run `npm ci` in twin/ first")
+        raise SystemExit("build_editor: run `npm ci` in editor/ first")
     command = ["npx", "vite", "build", "--outDir", str(destination), "--emptyOutDir"]
-    # TWIN_BASE is the app's own build switch; its value is the shelf path, so the
+    # EDITOR_BASE is the app's own build switch; its value is the shelf path, so the
     # bundle emits /editor/assets/... instead of /assets/....
-    env = {**os.environ, "TWIN_BASE": BASE}
+    env = {**os.environ, "EDITOR_BASE": BASE}
     result = subprocess.run(command, cwd=APP, env=env, capture_output=True, text=True)
     if result.returncode != 0:
         sys.stderr.write(result.stdout[-2000:] + result.stderr[-2000:])
@@ -98,7 +98,7 @@ def main() -> int:
         for label, names in (("missing", missing), ("stale", changed), ("unexpected", extra)):
             for name in names:
                 print("build_editor: %s %s" % (label, name))
-        print("build_editor: run python3 tools/build_twin.py, then commit the result")
+        print("build_editor: run python3 tools/build_editor.py, then commit the result")
         return 1
     print("build_editor: OK - %d files match a fresh build" % len(actual))
     return 0

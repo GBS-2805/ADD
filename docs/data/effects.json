@@ -1,6 +1,6 @@
 {
  "version": 1,
- "note": "The library's effects. Twin renders these; it does not own them. This file is the source of truth: Twin fetches it, and the native tables are checked against it rather than the other way round.",
+ "note": "The library's effects. The Editor renders these; it does not own them. This file is the source of truth: the Editor fetches it, and the native tables are checked against it rather than the other way round.",
  "kinds": [
   "shader",
   "texture",
@@ -305,7 +305,7 @@
    "name": "Mesh gradient",
    "note": "Soft ink field in motion",
    "kind": "shader",
-   "source": "twin",
+   "source": "editor",
    "render": "MeshGradient",
    "defaults": {
     "speed": 0.5,
@@ -320,7 +320,7 @@
    "name": "Grain gradient",
    "note": "Inky bands with paper grain",
    "kind": "shader",
-   "source": "twin",
+   "source": "editor",
    "render": "GrainGradient",
    "defaults": {
     "speed": 0.5,
@@ -335,7 +335,7 @@
    "name": "Warp",
    "note": "Striped ink under pressure",
    "kind": "shader",
-   "source": "twin",
+   "source": "editor",
    "render": "Warp",
    "defaults": {
     "speed": 0.5,
@@ -350,7 +350,7 @@
    "name": "Dot orbit",
    "note": "A field of small satellites",
    "kind": "shader",
-   "source": "twin",
+   "source": "editor",
    "render": "DotOrbit",
    "defaults": {
     "speed": 0.5,
@@ -365,7 +365,7 @@
    "name": "Ink panels",
    "note": "A fan of printed sheets",
    "kind": "shader",
-   "source": "twin",
+   "source": "editor",
    "render": "ColorPanels",
    "defaults": {
     "speed": 0.5,
@@ -380,7 +380,7 @@
    "name": "Liquid metal",
    "note": "Chrome ink in a circular well",
    "kind": "shader",
-   "source": "twin",
+   "source": "editor",
    "render": "LiquidMetal",
    "defaults": {
     "speed": 0.5,
@@ -395,7 +395,7 @@
    "name": "Gem smoke",
    "note": "A slow bloom of ink",
    "kind": "shader",
-   "source": "twin",
+   "source": "editor",
    "render": "GemSmoke",
    "defaults": {
     "speed": 0.5,
@@ -410,7 +410,7 @@
    "name": "Paper texture",
    "note": "The workbench itself",
    "kind": "shader",
-   "source": "twin",
+   "source": "editor",
    "render": "PaperTexture",
    "defaults": {
     "speed": 0.5,
@@ -425,7 +425,7 @@
    "name": "Paper 006",
    "note": "Neutral stock",
    "kind": "texture",
-   "source": "twin",
+   "source": "editor",
    "render": "PaperTexture",
    "defaults": {
     "paper": "#fafaf7",
@@ -440,7 +440,7 @@
    "name": "Fluted glass",
    "note": "Ribbed transparency",
    "kind": "texture",
-   "source": "twin",
+   "source": "editor",
    "render": "FlutedGlass",
    "defaults": {
     "paper": "#fafaf7",
@@ -455,7 +455,7 @@
    "name": "Image dither",
    "note": "A printed photograph",
    "kind": "texture",
-   "source": "twin",
+   "source": "editor",
    "render": "ImageDithering",
    "defaults": {
     "paper": "#fafaf7",
@@ -470,7 +470,7 @@
    "name": "Halftone dots",
    "note": "Newsprint at close range",
    "kind": "texture",
-   "source": "twin",
+   "source": "editor",
    "render": "HalftoneDots",
    "defaults": {
     "paper": "#fafaf7",
@@ -485,7 +485,7 @@
    "name": "Fur",
    "note": "A pettable silhouette",
    "kind": "texture",
-   "source": "twin",
+   "source": "editor",
    "render": "Fur",
    "defaults": {
     "paper": "#fafaf7",
@@ -500,7 +500,7 @@
    "name": "Jigsaw",
    "note": "Interlocking arcs",
    "kind": "pattern",
-   "source": "twin",
+   "source": "editor",
    "render": "jigsaw",
    "defaults": {
     "opacity": 0.78,
@@ -514,7 +514,7 @@
    "name": "Topography",
    "note": "Contour lines",
    "kind": "pattern",
-   "source": "twin",
+   "source": "editor",
    "render": "topography",
    "defaults": {
     "opacity": 0.78,
@@ -528,7 +528,7 @@
    "name": "Circuit",
    "note": "A board trace",
    "kind": "pattern",
-   "source": "twin",
+   "source": "editor",
    "render": "circuit",
    "defaults": {
     "opacity": 0.78,
@@ -542,7 +542,7 @@
    "name": "Diagonal",
    "note": "Cut paper stripes",
    "kind": "pattern",
-   "source": "twin",
+   "source": "editor",
    "render": "diagonal",
    "defaults": {
     "opacity": 0.78,
@@ -556,7 +556,7 @@
    "name": "Plus",
    "note": "A quiet cross grid",
    "kind": "pattern",
-   "source": "twin",
+   "source": "editor",
    "render": "plus",
    "defaults": {
     "opacity": 0.78,
@@ -570,7 +570,7 @@
    "name": "Rain",
    "note": "Short vertical marks",
    "kind": "pattern",
-   "source": "twin",
+   "source": "editor",
    "render": "rain",
    "defaults": {
     "opacity": 0.78,
@@ -584,7 +584,7 @@
    "name": "Bubbles",
    "note": "A loose foam",
    "kind": "pattern",
-   "source": "twin",
+   "source": "editor",
    "render": "bubbles",
    "defaults": {
     "opacity": 0.78,
@@ -598,7 +598,7 @@
    "name": "Aztec",
    "note": "A stepped border",
    "kind": "pattern",
-   "source": "twin",
+   "source": "editor",
    "render": "aztec",
    "defaults": {
     "opacity": 0.78,
@@ -612,7 +612,7 @@
    "name": "Dust",
    "note": "Slow motes in the light",
    "kind": "particles",
-   "source": "twin",
+   "source": "editor",
    "render": "dust",
    "defaults": {
     "density": 1,
@@ -626,7 +626,7 @@
    "name": "Sparks",
    "note": "A quick graphite shower",
    "kind": "particles",
-   "source": "twin",
+   "source": "editor",
    "render": "sparks",
    "defaults": {
     "density": 1,
@@ -640,7 +640,7 @@
    "name": "Orbit",
    "note": "A loose ring of ink",
    "kind": "particles",
-   "source": "twin",
+   "source": "editor",
    "render": "orbit",
    "defaults": {
     "density": 1,
@@ -654,7 +654,7 @@
    "name": "Confetti",
    "note": "Cut-paper celebration",
    "kind": "particles",
-   "source": "twin",
+   "source": "editor",
    "render": "confetti",
    "defaults": {
     "density": 1,

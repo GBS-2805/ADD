@@ -8,9 +8,7 @@
 # test suite. Caches are kept between runs, and a baseline drift or a failing engine
 # test fails the push.
 #
-# The twin job covers twin/ itself -- the editor app that builds the shelf's
-# /editor/ page. The job id keeps its old name on purpose: the branch protection
-# rule requires a check called `twin`, and renaming it would silently unrequire it.
+# The editor job covers editor/ -- the app that builds the shelf's /editor/ page.
 # It needs a Node toolchain, so it is separate from the python-only job.
 #
 # The APK build stays local, on purpose: it needs the keystore.
@@ -44,8 +42,8 @@ jobs:
       - name: Checker self-tests
         run: python3 -m unittest discover -s tools/tests -v
 
-  twin:
-    # twin/ builds the shelf's /editor/ page but sat outside every gate: 255 unit tests
+  editor:
+    # editor/ builds the shelf's /editor/ page but sat outside every gate: 255 unit tests
     # that only ran when someone remembered. It gets its own job because the
     # typecheck alone takes about 45s on a cold cache and the shelf job should stay
     # a few seconds of python.
@@ -68,30 +66,30 @@ jobs:
         with:
           node-version: "22"
           cache: npm
-          cache-dependency-path: twin/package-lock.json
+          cache-dependency-path: editor/package-lock.json
       - name: Install the pinned dependencies
         run: npm ci
-        working-directory: twin
+        working-directory: editor
       - name: Typecheck, unit tests, assets and payload
         run: python3 tools/check_editor.py
       - name: Install the pinned browser
         run: npx --no-install playwright install --with-deps chromium
-        working-directory: twin
+        working-directory: editor
       - name: The canvas specs against the built editor
         # TWIN_E2E_CI=1 skips *-captures.spec.ts (writes gitignored screenshots) and
         # the performance spec (a recorded 190 ms finding with its own plan). The
-        # other 70 assertions gate the push: undo, snapping, export, .twin round-trip,
+        # other 70 assertions gate the push: undo, snapping, export, .add round-trip,
         # every plugin opening, and no requests leaving the origin.
         run: npm run test:e2e:ci
-        working-directory: twin
+        working-directory: editor
       - name: Keep the test report
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
-          name: twin-junit
+          name: editor-junit
           path: |
-            test-results/twin-junit.xml
-            twin/test-results/
+            test-results/editor-junit.xml
+            editor/test-results/
           if-no-files-found: warn
 
   visual:
@@ -307,7 +305,7 @@ jobs:
 
   # Same-repo pull requests only. A fork never reaches the Vercel secret.
   review:
-    needs: [shelf, visual, twin]
+    needs: [shelf, visual, editor]
     if: >-
       github.event_name == 'pull_request' &&
       github.event.pull_request.head.repo.full_name == github.repository

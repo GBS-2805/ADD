@@ -140,8 +140,8 @@ def problems(data: dict) -> list[str]:
             found.append("%s (%s): needs a display name" % (where, pid))
         if not isinstance(preset.get("note"), str):
             found.append("%s (%s): needs a note" % (where, pid))
-        if preset.get("source") not in ("twin", "native"):
-            found.append("%s (%s): source must be \"twin\" or \"native\""
+        if preset.get("source") not in ("editor", "native"):
+            found.append("%s (%s): source must be \"editor\" or \"native\""
                          % (where, pid))
         defaults = preset.get("defaults")
         if not isinstance(defaults, dict) or not defaults:

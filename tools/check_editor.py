@@ -5,13 +5,13 @@
     python3 tools/check_editor.py --no-tests      # skip the slow suite while iterating
     python3 tools/check_editor.py --write-budget  # record the current payload ceiling
 
-The editor app lives in `twin/` (its repository name) and builds the shelf's
+The editor app lives in `editor/` and builds the shelf's
 `docs/editor/` page. It has 255 unit tests across 35 files and, until this gate
 existed, nothing ran them on a push: `tools/check_all.py` covers the shelf, and the
 app was outside every gate, so a broken test or a broken type was only found by
 whoever happened to run it.
 
-Needs `node_modules`: run `npm ci` in twin/ first. When it is absent the gate says
+Needs `node_modules`: run `npm ci` in editor/ first. When it is absent the gate says
 so and exits 2, which `check_all.py` reports as a skip rather than a failure --
 the shelf's CI job has no Node toolchain by design, and the `editor` job runs this
 same gate with dependencies installed.
@@ -34,9 +34,12 @@ ROOT = Path(__file__).resolve().parent.parent
 DOCS = ROOT / "docs"
 
 def budget_path() -> Path:
-    return twin_dir() / "tools" / "twin_budget.json"
-REPORT = ROOT / "test-results" / "twin-junit.xml"
-NODE_MODULES = "twin/node_modules"
+    """The recorded payload ceiling for the editor page."""
+    return repo_root() / "tools" / "editor_budget.json"
+
+
+REPORT = ROOT / "test-results" / "editor-junit.xml"
+NODE_MODULES = "editor/node_modules"
 
 # Exit status for "the dependencies are not here", distinct from pass and fail so
 # check_all.py can say what happened instead of printing a misleading green.
@@ -48,28 +51,28 @@ SCRIPT = re.compile(rb'<script[^>]*\bsrc="([^"]+)"', re.I)
 
 
 def npx(*args: str) -> list[str]:
-    """A local binary from twin/node_modules, never a download."""
+    """A local binary from editor/node_modules, never a download."""
     return ["npx", "--no-install", *args]
 
 
 def script(name: str) -> list[str]:
-    """A twin/package.json script, so the repository decides how it runs."""
+    """An editor/package.json script, so the repository decides how it runs."""
     return ["npm", "run", "--silent", name]
 
 
-def twin_dir() -> Path:
-    """The twin/ tree this run is about.
+def repo_root() -> Path:
+    """The repository this run is about.
 
     Defaults to the repository the script sits in. A caller can point it elsewhere
-    with TWIN_ROOT, which is what the self-tests do: they build a fixture tree and
+    with EDITOR_ROOT, which is what the self-tests do: they build a fixture tree and
     need the tool to look at that tree rather than at this one.
     """
-    return Path(os.environ.get("TWIN_ROOT", ROOT)).resolve()
+    return Path(os.environ.get("EDITOR_ROOT", ROOT)).resolve()
 
 
 def run(name: str, command: list[str], timeout: int = 900) -> bool:
     began = time.monotonic()
-    result = subprocess.run(command, cwd=str(twin_dir() / "twin"), capture_output=True,
+    result = subprocess.run(command, cwd=str(repo_root() / "editor"), capture_output=True,
                             text=True,
                             timeout=timeout)
     took = time.monotonic() - began
@@ -117,11 +120,15 @@ def compare_at(page: Path, ceiling: int) -> bool:
 
 
 def measure() -> dict:
-    return measure_at(twin_dir() / "docs" / "editor" / "index.html")
+    return measure_at(repo_root() / "docs" / "editor" / "index.html")
 
 
 def check_payload(write: bool) -> bool:
     measured = measure()
+    if measured["files"] == 0:
+        print("  %-9s FAIL  no initial script resolved to a file under docs/editor/; "
+              "the build's base path is wrong" % "payload")
+        return False
     if write:
         record = {"generated": time.strftime("%Y-%m-%d"),
                   "initial_gzip_bytes": measured["bytes"],
@@ -130,12 +137,12 @@ def check_payload(write: bool) -> bool:
                            "the shelf's brotli is smaller. Tighten budget_bytes "
                            "deliberately when the plugin split lands.")}
         budget_path().write_text(json.dumps(record, indent=2) + "\n", encoding="utf-8")
-        print("  %-9s wrote %s (%d bytes)" % ("payload", budget_path().relative_to(twin_dir()),
+        print("  %-9s wrote %s (%d bytes)" % ("payload", budget_path().relative_to(repo_root()),
                                               measured["bytes"]))
         return True
     if not budget_path().is_file():
         print("  %-9s FAIL  no %s; run --write-budget"
-              % ("payload", budget_path().relative_to(twin_dir())))
+              % ("payload", budget_path().relative_to(repo_root())))
         return False
     record = json.loads(budget_path().read_text(encoding="utf-8"))
     ceiling = int(record["budget_bytes"])
@@ -162,9 +169,9 @@ def main() -> int:
                         help="run the suite and nothing else, for a fast edit loop")
     args = parser.parse_args()
 
-    if not (twin_dir() / "twin" / "node_modules").is_dir():
-        print("  %-9s SKIP  no %s; run `npm ci` in twin/. The shelf job has no node "
-              "toolchain by design, so this is a skip, not a failure; the twin CI "
+    if not (repo_root() / "editor" / "node_modules").is_dir():
+        print("  %-9s SKIP  no %s; run `npm ci` in editor/. The shelf job has no node "
+              "toolchain by design, so this is a skip, not a failure; the editor CI "
               "job runs the same gate with dependencies installed."
               % ("install", NODE_MODULES))
         return SKIP

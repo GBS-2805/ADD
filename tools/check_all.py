@@ -141,10 +141,10 @@ def main():
     parser.add_argument("--perf", action="store_true",
                         help="also run the report-only browser timing measurement; "
                              "uses --browser as the base URL or the local port 8799")
-    parser.add_argument("--no-editor", "--no-twin", dest="no_editor",
+    parser.add_argument("--no-editor", dest="no_editor",
                         action="store_true",
                         help="skip the editor gate (typecheck, unit tests, payload). "
-                             "Needs node_modules installed in twin/; CI runs it in its "
+                             "Needs node_modules installed in editor/; CI runs it in its "
                              "own job because the typecheck alone takes 45s")
     args = parser.parse_args()
 
@@ -160,7 +160,7 @@ def main():
         lines = [line.strip() for line in ((done.stdout or "") + (done.stderr or "")).splitlines()
                  if line.strip() and not line.strip().startswith("==")]
         # 2 means "could not run here", which is not a pass and not a failure: the
-        # shelf job has no node toolchain, and the twin CI job runs this gate with
+        # shelf job has no node toolchain, and the editor CI job runs this gate with
         # dependencies installed. Saying "ok" would be a lie; failing would make a
         # clean clone red for the wrong reason.
         if done.returncode == 0:

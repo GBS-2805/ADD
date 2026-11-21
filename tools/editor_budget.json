@@ -1,0 +1,6 @@
+{
+  "generated": "2026-11-21",
+  "initial_gzip_bytes": 623758,
+  "budget_bytes": 623758,
+  "note": "Initial script weight of docs/editor/ as built. gzip -9, so the shelf's brotli is smaller. Tighten budget_bytes deliberately when the plugin split lands."
+}

@@ -122,25 +122,25 @@ def ring(i, count=4):
 presets = []
 
 for pid, name, note, shader in SHADERS:
-    presets.append(feature("shader-" + pid, name, note, kind="shader", source="twin",
+    presets.append(feature("shader-" + pid, name, note, kind="shader", source="editor",
         render=shader,
         defaults={ "speed": 0.5, "distortion": 0.35,
                   "swirl": 0.2, "grain": 0.2, "color": INK_SWATCHES[0]}))
 
 for pid, name, note, shader in TEXTURES:
-    presets.append(feature("texture-" + pid, name, note, kind="texture", source="twin",
+    presets.append(feature("texture-" + pid, name, note, kind="texture", source="editor",
         render=shader,
         defaults={ "paper": PAPER_SWATCHES[0], "roughness": 0.4,
                   "fluff": 1, "scale": 1, "opacity": 1}))
 
 for pid, name, note in PATTERNS:
-    presets.append(feature("pattern-" + pid, name, note, kind="pattern", source="twin",
+    presets.append(feature("pattern-" + pid, name, note, kind="pattern", source="editor",
         render=pid,
         defaults={ "opacity": 0.78, "ink": INK_SWATCHES[0],
                   "scale": 1, "rough": 0}))
 
 for pid, name, note in PARTICLES:
-    presets.append(feature("particles-" + pid, name, note, kind="particles", source="twin",
+    presets.append(feature("particles-" + pid, name, note, kind="particles", source="editor",
         render=pid,
         defaults={ "density": 1, "speed": 1,
                   "color": INK_SWATCHES[0], "trail": 0}))

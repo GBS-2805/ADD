@@ -74,7 +74,7 @@ class Budget(unittest.TestCase):
     def test_record_is_valid_json_with_a_note(self) -> None:
         # The committed file has to parse and say what it means; a bare number in a
         # file nobody documented is how a ceiling gets raised without anyone noticing.
-        path = Path(__file__).resolve().parents[2] / "tools/twin_budget.json"
+        path = Path(__file__).resolve().parents[2] / "tools/editor_budget.json"
         record = json.loads(path.read_text(encoding="utf-8"))
         self.assertIn("budget_bytes", record)
         self.assertIsInstance(record["budget_bytes"], int)
