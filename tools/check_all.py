@@ -77,6 +77,9 @@ def gates(browser, artboards, visual, live=None, handoff=None, perf=False,
         # One Editor row, and the row and the shelf's Editor card reach the editor
         # each build stages: the browser canvas in research, Quick in the shipping APK.
         ["editor-rows", [sys.executable, "tools/check_editor_rows.py"]],
+        # The two real bundles, not the routing test's flag: research ships the
+        # page and its assets, release ships none. Skips without local APKs.
+        ["editor-bundles", [sys.executable, "tools/check_editor_bundles.py"]],
         ["pantone", [sys.executable, "tools/pantone_sheet.py", "--check"]],
         ["notes", [sys.executable, "tools/notes_regression.py"]],
         ["bundle", ["./build.sh", "stage"]],
