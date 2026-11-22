@@ -183,6 +183,13 @@ def main():
     if failures:
         for name, lines in failures:
             print("\n%s said:" % name)
+            # The verdict line carries the failure detail (the engine gate puts the
+            # failing test and its samples there); the trailing lines are usually the
+            # runner's build error, which does not name the assertion.
+            wanted = VERDICT.get(name)
+            detail = [line for line in lines if wanted and line.startswith(wanted)][:3]
+            for line in detail:
+                print("  " + line)
             for line in (lines or ["(no output)"])[-8:]:
                 print("  " + line)
         print("\nchecks: %d of %d gates failed in %.1fs"

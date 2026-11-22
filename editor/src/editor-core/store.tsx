@@ -16,6 +16,7 @@ import {
   serializeForStorage,
   type AutosaveBackend,
 } from "./autosave";
+import { sameEffect } from "./catalogue";
 import { commitHistory, createHistory, pushEffect, redoHistory, undoHistory, updateLayer } from "./history";
 import {
   downloadBlob,
@@ -499,42 +500,47 @@ export function EditorProvider({ children, autosaveBackend }: EditorProviderProp
     const currentEffect = nextTarget === "artboard"
       ? currentDoc.background
       : currentDoc.layers.find((layer) => layer.id === primary)?.effect ?? null;
-    if (JSON.stringify(currentEffect) !== JSON.stringify(effect)) {
-      pulseSequence.current += 1;
-      setEffectPulse({
-        target: nextTarget,
-        layerId: nextTarget === "layer" ? primary ?? null : null,
-        nonce: pulseSequence.current,
-      });
+    // Decide the toast from the state we are about to commit. `pushEffect` is a
+    // no-op for the same effect, and React can replay a `setHistory` updater
+    // later, so a toast dispatched inside it may report the wrong outcome.
+    if (sameEffect(currentEffect, effect)) {
+      showToast("That effect is already on the artboard.");
+      return;
     }
+    pulseSequence.current += 1;
+    setEffectPulse({
+      target: nextTarget,
+      layerId: nextTarget === "layer" ? primary ?? null : null,
+      nonce: pulseSequence.current,
+    });
     setHistory((current) => {
       const next = pushEffect(current, nextTarget, effect);
       stateRef.current = next;
-      if (next === current) {
-        showToast("That effect is already on the artboard.");
-      } else {
-        showToast("Effect applied.");
-      }
       return next;
     });
+    showToast("Effect applied.");
   }, [showToast, target]);
 
   const undo = useCallback(() => {
+    // Same rule as `applyEffect`: report the outcome from the state this call is
+    // committing, not from a `setHistory` updater React may replay.
+    if (undoHistory(stateRef.current) === stateRef.current) return;
     setHistory((current) => {
       const next = undoHistory(current);
       stateRef.current = next;
-      if (next !== current) showToast("Undid the last edit.");
       return next;
     });
+    showToast("Undid the last edit.");
   }, [showToast]);
 
   const redo = useCallback(() => {
+    if (redoHistory(stateRef.current) === stateRef.current) return;
     setHistory((current) => {
       const next = redoHistory(current);
       stateRef.current = next;
-      if (next !== current) showToast("Redid the edit.");
       return next;
     });
+    showToast("Redid the edit.");
   }, [showToast]);
 
   const selectLayers = useCallback((ids: string[], mode: SelectionMode = "replace") => {

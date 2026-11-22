@@ -10,7 +10,7 @@ vi.mock("./pngExport", async (importOriginal) => ({
 import { commitHistory, createHistory } from "./history";
 import { serializeProject } from "./project";
 import { EditorProvider, useEditorStore, type EditorActions } from "./store";
-import type { EditorDocument } from "./types";
+import type { EditorDocument, EditorEffect } from "./types";
 
 let current: EditorActions | null = null;
 
@@ -197,6 +197,45 @@ describe("Editor store layers", () => {
       create.mockRestore();
       revoke.mockRestore();
     }
+  });
+
+  it("keeps the applied toast when the same effect lands twice in one batch", () => {
+    const store = renderStore();
+    const effect: EditorEffect = {
+      kind: "shader",
+      shader: "MeshGradient",
+      preset: "Ink",
+      controls: { speed: 0.5 },
+    };
+    act(() => {
+      store.applyEffect(effect, "artboard");
+      store.applyEffect(effect, "artboard");
+    });
+    expect(current!.state.doc.background).toEqual(effect);
+    expect(current!.state.toast).toBe("Effect applied.");
+  });
+
+  it("reports the undo and redo toast when their updaters run again", () => {
+    const store = renderStore();
+    const start = current!.state.doc.background;
+    const effect: EditorEffect = {
+      kind: "texture",
+      preset: "PaperTexture",
+      controls: { roughness: 0.4 },
+    };
+    act(() => store.applyEffect(effect, "artboard"));
+    act(() => {
+      store.undo();
+      store.undo();
+    });
+    expect(current!.state.doc.background).toEqual(start);
+    expect(current!.state.toast).toBe("Undid the last edit.");
+    act(() => {
+      store.redo();
+      store.redo();
+    });
+    expect(current!.state.doc.background).toEqual(effect);
+    expect(current!.state.toast).toBe("Redid the edit.");
   });
 
   it("historyEvictionRevokesUnusedImageUrl", () => {
