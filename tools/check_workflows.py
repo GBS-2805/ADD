@@ -4,8 +4,8 @@
 The checks are intentionally line-based so the fast gate stays standard-library
 only. They cover the policy the repository relies on: full-SHA action pins,
 least-privilege top-level permissions, no `pull_request_target`, production
-secrets kept out of pull-request jobs, publish/handoff restricted to main, and
-checkout credentials not persisted where no push happens.
+secrets kept out of pull-request jobs, publish/handoff restricted to a manual
+dispatch on main, and checkout credentials not persisted where no push happens.
 
     python3 tools/check_workflows.py --check
 """
@@ -104,9 +104,12 @@ def problems(root: Path = ROOT) -> list[str]:
             if name not in jobs:
                 continue
             job = jobs[name]
-            if ("github.event_name == 'push'" not in job
+            if ("github.event_name == 'workflow_dispatch'" not in job
                     or "refs/heads/main" not in job):
-                found.append("%s: job %s must run only on push to main" % (label, name))
+                found.append("%s: job %s must run only on manual dispatch to main"
+                             % (label, name))
+            if "github.event_name == 'push'" in job:
+                found.append("%s: job %s must not run on push" % (label, name))
 
         for name, job in jobs.items():
             if "pull_request" not in job and name != "review":

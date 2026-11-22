@@ -129,8 +129,11 @@ probe's ratio to the reference host (floored at 1×, capped at 4×), so a slower
 runner is judged on the work rather than on its clock. Each family gets nine CPU-time
 samples after 25 warmup passes; all ten are measured before the verdict, so a failure
 still prints every family's warmup passes and samples, and the visual job echoes
-them. All ten thumbnails warm in about 7ms; a ten-family 180×225 warm takes under
-35ms off the frame path.
+them. `tools/check_texture_trend.py` compares each family's normalized median with a
+checked-in baseline and prints a report-only `WARN` when a family grows by 30% even
+while it is still under budget; `--write` records a deliberate new baseline. All ten
+thumbnails warm in about 7ms; a ten-family 180×225 warm takes under 35ms off the
+frame path.
 
 ### Material Ink (3.8.5 / 55)
 

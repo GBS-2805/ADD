@@ -1,0 +1,18 @@
+{
+  "note": "Median of nine CPU-time samples per family at 300x375, divided by the run's host factor. Report-only baseline.",
+  "reference_ms": 2.65,
+  "warn_ratio": 1.3,
+  "recorded": "2026-11-22",
+  "families": {
+    "Brick": 3.297,
+    "Checker": 2.761,
+    "Concrete": 6.351,
+    "Fabric": 5.862,
+    "GradientMesh": 4.471,
+    "Grain": 2.432,
+    "Halftone": 4.331,
+    "Marble": 12.17,
+    "Scanline": 3.196,
+    "WoodGrain": 10.777
+  }
+}
