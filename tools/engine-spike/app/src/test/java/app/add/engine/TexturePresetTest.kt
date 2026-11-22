@@ -180,7 +180,6 @@ class TexturePresetTest {
         val rounds: List<List<Double>>,
     ) {
         val bestMs: Double = rounds.minOf { round -> round.min() }
-        val roundsCount: Int get() = rounds.size
     }
 
     private companion object {
@@ -204,17 +203,17 @@ class TexturePresetTest {
         val timings = TextureFamily.entries.map { family ->
             family to measureFamily(family, 300, 375)
         }
+        val overBudget = timings.filter { (_, timing) -> timing.bestMs >= FRAME_BUDGET_MS }
         // The windows travel with the failure: a CI log otherwise says only
         // "took Nms", which cannot tell a cold compiler from a slow family.
-        val detail = timings
-            .filter { (_, timing) -> timing.bestMs >= FRAME_BUDGET_MS }
-            .joinToString("\n") { (family, timing) ->
-                "%s took %.2fms at best over %d window(s) (%d samples, warmup %d passes, "
-                    .format(family, timing.bestMs, timing.roundsCount,
-                        timing.rounds.sumOf { it.size }, timing.warmupPasses) +
-                    "warm best %.2fms); samples: %s".format(timing.warmBestMs, timing.samplesText())
-            }
-        assertTrue(detail, timings.all { (_, timing) -> timing.bestMs < FRAME_BUDGET_MS })
+        val detail = overBudget.joinToString("\n") { (family, timing) ->
+            "%s took %.2fms at best over %d window(s) (%d samples, warmup %d passes, " +
+                "warm best %.2fms); samples: %s".format(
+                    family, timing.bestMs, timing.rounds.size, timing.rounds.sumOf { it.size },
+                    timing.warmupPasses, timing.warmBestMs, timing.samplesText(),
+                )
+        }
+        assertTrue(detail, overBudget.isEmpty())
     }
 
     @Test
