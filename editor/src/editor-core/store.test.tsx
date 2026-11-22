@@ -215,6 +215,29 @@ describe("Editor store layers", () => {
     expect(current!.state.toast).toBe("Effect applied.");
   });
 
+  it("reports the undo and redo toast when their updaters run again", () => {
+    const store = renderStore();
+    const start = current!.state.doc.background;
+    const effect: EditorEffect = {
+      kind: "texture",
+      preset: "PaperTexture",
+      controls: { roughness: 0.4 },
+    };
+    act(() => store.applyEffect(effect, "artboard"));
+    act(() => {
+      store.undo();
+      store.undo();
+    });
+    expect(current!.state.doc.background).toEqual(start);
+    expect(current!.state.toast).toBe("Undid the last edit.");
+    act(() => {
+      store.redo();
+      store.redo();
+    });
+    expect(current!.state.doc.background).toEqual(effect);
+    expect(current!.state.toast).toBe("Redid the edit.");
+  });
+
   it("historyEvictionRevokesUnusedImageUrl", () => {
     const revoke = vi.spyOn(URL, "revokeObjectURL").mockImplementation(() => undefined);
     const first: EditorDocument = { background: null, layers: [imageLayer], selectedLayerIds: [] };

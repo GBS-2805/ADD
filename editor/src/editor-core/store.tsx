@@ -522,21 +522,25 @@ export function EditorProvider({ children, autosaveBackend }: EditorProviderProp
   }, [showToast, target]);
 
   const undo = useCallback(() => {
+    // Same rule as `applyEffect`: report the outcome from the state this call is
+    // committing, not from a `setHistory` updater React may replay.
+    if (undoHistory(stateRef.current) === stateRef.current) return;
     setHistory((current) => {
       const next = undoHistory(current);
       stateRef.current = next;
-      if (next !== current) showToast("Undid the last edit.");
       return next;
     });
+    showToast("Undid the last edit.");
   }, [showToast]);
 
   const redo = useCallback(() => {
+    if (redoHistory(stateRef.current) === stateRef.current) return;
     setHistory((current) => {
       const next = redoHistory(current);
       stateRef.current = next;
-      if (next !== current) showToast("Redid the edit.");
       return next;
     });
+    showToast("Redid the edit.");
   }, [showToast]);
 
   const selectLayers = useCallback((ids: string[], mode: SelectionMode = "replace") => {
