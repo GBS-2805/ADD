@@ -154,6 +154,16 @@ public class ShelfActivity extends Activity {
         }
     }
 
+    /** True when this build carries the browser editor, rather than the shipping shelf. */
+    static boolean editorBundled(Context context) {
+        try {
+            context.getAssets().open("www/editor/index.html").close();
+            return true;
+        } catch (IOException missing) {
+            return false;
+        }
+    }
+
     private String entry() {
         String tool = getIntent() == null ? null : getIntent().getStringExtra(EXTRA_PAGE);
         if ("fonts".equals(tool)) {
@@ -346,8 +356,9 @@ public class ShelfActivity extends Activity {
         }
 
         /**
-         * A Tools card that names a native tool. The page keeps its href for the site;
-         * inside the app the bridge takes the tap and opens the native screen instead.
+         * A Tools card that names a tool. The page keeps its href for the site; inside
+         * the app the bridge takes the tap: Compress opens the native screen, and Editor
+         * opens the browser editor when this build carries it, else the native Quick one.
          */
         @JavascriptInterface
         public void openTool(final String slug) {
@@ -355,7 +366,12 @@ public class ShelfActivity extends Activity {
                 @Override
                 public void run() {
                     if ("editor".equals(slug)) {
-                        EditorActivity.open(ShelfActivity.this);
+                        if (editorBundled(ShelfActivity.this)) {
+                            startActivity(new Intent(ShelfActivity.this, ShelfActivity.class)
+                                    .putExtra(EXTRA_PAGE, "editor-web"));
+                        } else {
+                            EditorActivity.open(ShelfActivity.this);
+                        }
                     } else if ("compress".equals(slug)) {
                         startActivity(new Intent(ShelfActivity.this, MainActivity.class));
                     }

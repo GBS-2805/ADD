@@ -112,22 +112,6 @@
         android:textColor="?attr/on"
         android:textSize="17sp" />
 
-    <!-- The browser editor, bundled only in the research build so the app can paint
-         its projects natively. Hidden when the assets are absent, so a shipping APK
-         never offers a dead row. -->
-    <TextView
-        android:id="@+id/linkEditorWeb"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="?android:attr/selectableItemBackground"
-        android:clickable="true"
-        android:focusable="true"
-        android:fontFamily="@font/libre_franklin"
-        android:paddingTop="13dp"
-        android:paddingBottom="13dp"
-        android:text="Editor · web"
-        android:textColor="?attr/on"
-        android:textSize="17sp" />
 
     <View
         android:layout_width="match_parent"

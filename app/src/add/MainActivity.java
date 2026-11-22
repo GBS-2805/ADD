@@ -29,7 +29,6 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -415,16 +414,6 @@ public class MainActivity extends Activity {
         closeDrawer();
     }
 
-    /** True when this build carries the browser editor, rather than the shipping shelf. */
-    private boolean editorBundled() {
-        try {
-            getAssets().open("www/editor/index.html").close();
-            return true;
-        } catch (IOException missing) {
-            return false;
-        }
-    }
-
     private void openInBrowser(String url) {
         try {
             startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
@@ -457,20 +446,18 @@ public class MainActivity extends Activity {
         findViewById(R.id.linkIcons).setOnClickListener(v -> openShelf("icons"));
         findViewById(R.id.linkFonts).setOnClickListener(v -> openShelf("fonts"));
         findViewById(R.id.linkCompress).setOnClickListener(v -> closeDrawer());
+        // One Editor row. The research build carries Open Studio and opens it; the
+        // shipping build has no browser bundle, so the same row opens the native Quick
+        // editor instead.
         final View editorLink = findViewById(R.id.linkEditor);
         editorLink.setOnClickListener(v -> {
             closeDrawer();
-            EditorActivity.open(this);
+            if (ShelfActivity.editorBundled(this)) {
+                openShelf("editor-web");
+            } else {
+                EditorActivity.open(this);
+            }
         });
-
-        // The browser editor travels only in the research build. Without its assets the
-        // row would open the shelf's "lives on the site" fallback, so hide it instead.
-        final View editorWebLink = findViewById(R.id.linkEditorWeb);
-        if (editorBundled()) {
-            editorWebLink.setOnClickListener(v -> openShelf("editor-web"));
-        } else {
-            editorWebLink.setVisibility(View.GONE);
-        }
 
         link(R.id.linkDownload, "download/");
         link(R.id.linkPortfolio, "portfolio/");
