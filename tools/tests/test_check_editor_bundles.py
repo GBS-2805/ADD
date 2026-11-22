@@ -58,6 +58,18 @@ class EditorBundlesTest(unittest.TestCase):
         self.assertTrue(any("loads missing" in problem and "index.js" in problem
                             for problem in found))
 
+    def test_single_research_check_requires_the_page(self):
+        entries = self.research_entries()
+        entries.pop("assets/www/editor/index.html")
+        apk(self.research, entries)
+        found = check_editor_bundles.research_problems(self.research)
+        self.assertTrue(any("no assets/www/editor/index.html" in problem for problem in found))
+
+    def test_single_release_check_rejects_editor_assets(self):
+        apk(self.release, {"assets/www/editor/index.html": "should not be here"})
+        found = check_editor_bundles.release_problems(self.release)
+        self.assertTrue(any("release APK still ships" in problem for problem in found))
+
     def test_release_carrying_editor_assets_fails(self):
         apk(self.research, self.research_entries())
         apk(self.release, {"assets/www/editor/index.html": "should not be here"})

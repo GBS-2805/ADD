@@ -238,6 +238,9 @@ case "${1:-add}" in
         check_palette
         stage_shelf_assets
         build_app app ADD ADD-3.9.apk 41 3.9
+        # The release must carry no editor assets; fail here, not in a later check.
+        python3 "$ROOT/tools/check_editor_bundles.py" \
+            --expect release --apk "$OUT/ADD-3.9.apk"
         # The newest build, not a hard-coded one: a stale path silently proved a copy
         # the release had already replaced.
         check_fallback "$(ls -t "$OUT"/ADD-*.apk | head -1)"
@@ -250,6 +253,9 @@ case "${1:-add}" in
         stage_shelf_assets
         stage_editor
         build_app app ADD ADD-4.0-editor.apk 58 4.0-editor research
+        # The research APK must ship the page and its assets; fail here, not later.
+        python3 "$ROOT/tools/check_editor_bundles.py" \
+            --expect research --apk "$OUT/ADD-4.0-editor.apk"
         check_fallback "$(ls -t "$OUT"/ADD-*.apk | head -1)"
         ;;
     stage)

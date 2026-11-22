@@ -45,8 +45,8 @@ def newest(pattern: str, *exclude: str, directory: Path = DIST) -> Path | None:
     return max(found, key=lambda path: path.stat().st_mtime, default=None)
 
 
-def problems(research: Path, release: Path) -> list[str]:
-    """What is wrong with the two bundles; empty means the invariant holds."""
+def research_problems(research: Path) -> list[str]:
+    """A research APK must ship the page and every local asset it loads."""
     found = []
     try:
         with zipfile.ZipFile(research) as apk:
@@ -63,7 +63,12 @@ def problems(research: Path, release: Path) -> list[str]:
                 found.append(f"research APK has no {EDITOR_ROOT} entries")
     except (OSError, zipfile.BadZipFile) as exc:
         found.append(f"cannot read research APK {research}: {exc}")
+    return found
 
+
+def release_problems(release: Path) -> list[str]:
+    """A release APK must ship no editor assets at all."""
+    found = []
     try:
         with zipfile.ZipFile(release) as apk:
             leaked = sorted(name for name in apk.namelist() if name.startswith(EDITOR_ROOT))
@@ -72,15 +77,38 @@ def problems(research: Path, release: Path) -> list[str]:
                     f"release APK still ships {len(leaked)} editor asset(s), starting {leaked[0]}")
     except (OSError, zipfile.BadZipFile) as exc:
         found.append(f"cannot read release APK {release}: {exc}")
-
     return found
+
+
+def problems(research: Path, release: Path) -> list[str]:
+    """What is wrong with the two bundles; empty means the invariant holds."""
+    return research_problems(research) + release_problems(release)
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--research", type=Path, help="the research APK to inspect")
     parser.add_argument("--release", type=Path, help="the release APK to inspect")
+    parser.add_argument("--expect", choices=("research", "release"),
+                        help="check one freshly built APK instead of comparing the pair")
+    parser.add_argument("--apk", type=Path, help="the APK for --expect")
     args = parser.parse_args()
+
+    if args.expect:
+        if not args.apk:
+            parser.error("--expect needs --apk")
+        found = research_problems(args.apk) if args.expect == "research" else release_problems(args.apk)
+        if found:
+            for problem in found:
+                print(f"editor bundle: {problem}", file=sys.stderr)
+            return 1
+        if args.expect == "research":
+            with zipfile.ZipFile(args.apk) as apk:
+                shipped = sum(1 for name in apk.namelist() if name.startswith(EDITOR_ROOT))
+            print(f"editor bundle: research ships {shipped} editor asset(s) and the page")
+        else:
+            print("editor bundle: release ships none")
+        return 0
 
     research = args.research or newest("ADD-*-editor.apk")
     release = args.release or newest("ADD-*.apk", "*-editor.apk", "*-twin.apk")
