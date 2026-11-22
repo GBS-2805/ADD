@@ -414,6 +414,19 @@ public class MainActivity extends Activity {
         closeDrawer();
     }
 
+    /**
+     * The single Editor row: the bundled browser canvas when this build stages it,
+     * otherwise the native Quick editor. The flag comes from the staged assets, and
+     * being explicit keeps both branches testable without a real asset tree.
+     */
+    void openEditor(boolean bundled) {
+        if (bundled) {
+            openShelf("editor-web");
+        } else {
+            EditorActivity.open(this);
+        }
+    }
+
     private void openInBrowser(String url) {
         try {
             startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
@@ -452,11 +465,7 @@ public class MainActivity extends Activity {
         final View editorLink = findViewById(R.id.linkEditor);
         editorLink.setOnClickListener(v -> {
             closeDrawer();
-            if (ShelfActivity.editorBundled(this)) {
-                openShelf("editor-web");
-            } else {
-                EditorActivity.open(this);
-            }
+            openEditor(ShelfActivity.editorBundled(this));
         });
 
         link(R.id.linkDownload, "download/");

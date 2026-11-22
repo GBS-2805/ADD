@@ -52,8 +52,9 @@ mirror. Neither is committed, and neither belongs in `docs/renders/`.
 
 The **Shelf** screen and the **Studio** tab are Chromium WebViews. Robolectric has
 no Chromium compositor, so it can only draw a blank surface. Those surfaces are
-left out rather than faked. The Editor opens in Studio by default, and the test
-asserts that; the five Editor frames show the native Quick tab, which is one tap
+left out rather than faked. The Editor's ENGINE tab starts the engine activity;
+without that class the app falls back to Quick, and the test asserts the
+fallback. The five Editor frames show the native Quick tab, which is one tap
 away and deliberately labelled secondary in the gallery.
 
 ## Setup

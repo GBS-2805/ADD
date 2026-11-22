@@ -164,6 +164,28 @@ public class ShelfActivity extends Activity {
         }
     }
 
+    /**
+     * Where a Tools card goes. The bridge calls this on the UI thread; the render
+     * suite calls it directly to prove each build reaches the editor it carries.
+     */
+    void routeTool(String slug) {
+        routeTool(slug, editorBundled(this));
+    }
+
+    /** The destination split out, so both build branches can be tested without assets. */
+    void routeTool(String slug, boolean bundled) {
+        if ("editor".equals(slug)) {
+            if (bundled) {
+                startActivity(new Intent(this, ShelfActivity.class)
+                        .putExtra(EXTRA_PAGE, "editor-web"));
+            } else {
+                EditorActivity.open(this);
+            }
+        } else if ("compress".equals(slug)) {
+            startActivity(new Intent(this, MainActivity.class));
+        }
+    }
+
     private String entry() {
         String tool = getIntent() == null ? null : getIntent().getStringExtra(EXTRA_PAGE);
         if ("fonts".equals(tool)) {
@@ -365,16 +387,7 @@ public class ShelfActivity extends Activity {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    if ("editor".equals(slug)) {
-                        if (editorBundled(ShelfActivity.this)) {
-                            startActivity(new Intent(ShelfActivity.this, ShelfActivity.class)
-                                    .putExtra(EXTRA_PAGE, "editor-web"));
-                        } else {
-                            EditorActivity.open(ShelfActivity.this);
-                        }
-                    } else if ("compress".equals(slug)) {
-                        startActivity(new Intent(ShelfActivity.this, MainActivity.class));
-                    }
+                    routeTool(slug);
                 }
             });
         }

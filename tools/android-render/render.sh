@@ -18,7 +18,18 @@ export PATH="$JDK/bin:$PATH"
 rm -rf "$STAGE"
 mkdir -p "$STAGE"
 
-if ! "$MAVEN" -q -f "$ROOT/tools/android-render/pom.xml" test \
+# Record which editor this run rendered against: app/assets/www/editor is staged
+# by ./build.sh editor and absent in the shipping tree.
+if [ -f "$ROOT/app/assets/www/editor/index.html" ]; then
+    EDITOR_STATE=research
+else
+    EDITOR_STATE=release
+fi
+echo "== editor assets: $EDITOR_STATE =="
+
+# clean, not just test: R ids are inlined into the test class, so a resource change
+# would otherwise leave the suite running against the previous build's ids.
+if ! "$MAVEN" -q -f "$ROOT/tools/android-render/pom.xml" clean test \
     -Dandroid.jar="$SDK/platforms/android-35/android.jar" \
     -Drender.root="$ROOT" \
     -Dadd.out="$STAGE"; then
