@@ -207,8 +207,8 @@ class TexturePresetTest {
         // The windows travel with the failure: a CI log otherwise says only
         // "took Nms", which cannot tell a cold compiler from a slow family.
         val detail = overBudget.joinToString("\n") { (family, timing) ->
-            "%s took %.2fms at best over %d window(s) (%d samples, warmup %d passes, " +
-                "warm best %.2fms); samples: %s".format(
+            ("%s took %.2fms at best over %d window(s) (%d samples, warmup %d passes, " +
+                "warm best %.2fms); samples: %s").format(
                     family, timing.bestMs, timing.rounds.size, timing.rounds.sumOf { it.size },
                     timing.warmupPasses, timing.warmBestMs, timing.samplesText(),
                 )
