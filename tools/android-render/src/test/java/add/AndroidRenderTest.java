@@ -188,6 +188,10 @@ public class AndroidRenderTest {
                 assertNotNull("missing side-panel scrim", scrim);
                 assertEquals(View.VISIBLE, drawer.getVisibility());
                 assertEquals(View.VISIBLE, scrim.getVisibility());
+                assertEquals("the side panel has one Editor row",
+                        1, countEditorRows(drawer));
+                assertEquals("a second editor row came back", 0, controller.get().getResources()
+                        .getIdentifier("linkEditorWeb", "id", controller.get().getPackageName()));
 
                 // Pin the settled open state; the panel's property animation may still
                 // be mid-slide when Robolectric draws the frame.
@@ -202,6 +206,22 @@ public class AndroidRenderTest {
         }
     }
 
+    /** Counts visible labels that offer an editor, so a second row fails the render. */
+    private static int countEditorRows(View view) {
+        int count = 0;
+        if (view instanceof TextView
+                && ((TextView) view).getText().toString().trim().equals("Editor")) {
+            count++;
+        }
+        if (view instanceof ViewGroup) {
+            ViewGroup group = (ViewGroup) view;
+            for (int i = 0; i < group.getChildCount(); i++) {
+                count += countEditorRows(group.getChildAt(i));
+            }
+        }
+        return count;
+    }
+
     @Test
     public void editorQuickScreen() throws Exception {
         for (int i = 0; i < PALETTE_NAMES.length; i++) {
@@ -214,13 +234,15 @@ public class AndroidRenderTest {
     }
 
     @Test
-    public void editorDefaultsToStudio() {
+    public void editorFallsBackToQuickWithoutTheEngine() {
         ActivityController<EditorActivity> controller =
                 Robolectric.buildActivity(EditorActivity.class).setup();
         EditorActivity activity = controller.get();
-        // The Quick tab is captured deliberately, but it is not what the app opens.
-        assertEquals(View.VISIBLE, activity.findViewById(R.id.studioHost).getVisibility());
-        assertEquals(View.GONE, activity.findViewById(R.id.stage).getVisibility());
+        // The ENGINE tab starts app.add.engine.MainActivity. This harness compiles the
+        // shipping app only, so the missing engine class must leave the Quick surface
+        // usable rather than a blank stage.
+        assertEquals(View.VISIBLE, activity.findViewById(R.id.stage).getVisibility());
+        assertEquals(View.VISIBLE, activity.findViewById(R.id.quickTab).getVisibility());
         controller.pause().stop().destroy();
     }
 

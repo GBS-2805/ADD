@@ -414,6 +414,19 @@ public class MainActivity extends Activity {
         closeDrawer();
     }
 
+    /**
+     * The single Editor row: the bundled browser canvas when this build stages it,
+     * otherwise the native Quick editor. The flag comes from the staged assets, and
+     * being explicit keeps both branches testable without a real asset tree.
+     */
+    void openEditor(boolean bundled) {
+        if (bundled) {
+            openShelf("editor-web");
+        } else {
+            EditorActivity.open(this);
+        }
+    }
+
     private void openInBrowser(String url) {
         try {
             startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
@@ -446,10 +459,13 @@ public class MainActivity extends Activity {
         findViewById(R.id.linkIcons).setOnClickListener(v -> openShelf("icons"));
         findViewById(R.id.linkFonts).setOnClickListener(v -> openShelf("fonts"));
         findViewById(R.id.linkCompress).setOnClickListener(v -> closeDrawer());
+        // One Editor row. The research build carries Open Studio and opens it; the
+        // shipping build has no browser bundle, so the same row opens the native Quick
+        // editor instead.
         final View editorLink = findViewById(R.id.linkEditor);
         editorLink.setOnClickListener(v -> {
             closeDrawer();
-            EditorActivity.open(this);
+            openEditor(ShelfActivity.editorBundled(this));
         });
 
         link(R.id.linkDownload, "download/");

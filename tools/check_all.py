@@ -74,6 +74,12 @@ def gates(browser, artboards, visual, live=None, handoff=None, perf=False,
         # so the dependency points from the table towards the JSON, not backwards.
         ["effects", [sys.executable, "tools/build_effects.py", "--check"]],
         ["effects-native", [sys.executable, "tools/check_effects_native.py"]],
+        # One Editor row, and the row and the shelf's Editor card reach the editor
+        # each build stages: the browser canvas in research, Quick in the shipping APK.
+        ["editor-rows", [sys.executable, "tools/check_editor_rows.py"]],
+        # The two real bundles, not the routing test's flag: research ships the
+        # page and its assets, release ships none. Skips without local APKs.
+        ["editor-bundles", [sys.executable, "tools/check_editor_bundles.py"]],
         ["pantone", [sys.executable, "tools/pantone_sheet.py", "--check"]],
         ["notes", [sys.executable, "tools/notes_regression.py"]],
         ["bundle", ["./build.sh", "stage"]],
@@ -81,7 +87,7 @@ def gates(browser, artboards, visual, live=None, handoff=None, perf=False,
         # outside every other gate, so before this row existed its 255 tests ran
         # only by hand. Last because it is the slowest and the least likely to be
         # the cause of a shelf failure; --no-editor skips it on a machine without
-        # twin/node_modules (the app's source tree keeps its repository name).
+        # editor/node_modules.
         ["editor", [sys.executable, "tools/check_editor.py"]],
     ]
     if artboards:

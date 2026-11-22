@@ -2809,7 +2809,7 @@ input[type="range"] {
 
 .inspector-color [data-part="trigger"],
 .color-trigger {
-  min-height: 34px;
+  min-height: 40px;
   min-width: 132px;
   padding: 4px 8px;
   border: 1px solid var(--rule);
@@ -2821,6 +2821,13 @@ input[type="range"] {
   font-family: var(--meta);
   font-size: 8px;
   cursor: pointer;
+}
+
+.color-value-text {
+  font-family: var(--meta);
+  font-size: 10px;
+  letter-spacing: 0.02em;
+  font-variant-numeric: tabular-nums;
 }
 
 .color-value-swatch {

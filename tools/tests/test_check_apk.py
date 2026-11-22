@@ -27,6 +27,14 @@ class CheckApkTest(unittest.TestCase):
     def test_accepts_the_current_package_and_version(self):
         self.assertEqual(check_apk.validate(self.info(), APP), [])
 
+    def test_research_version_overrides_the_catalog_for_a_non_release_build(self):
+        info = self.info(GOOD.replace(
+            'android:versionCode="41" android:versionName="3.9"',
+            'android:versionCode="42" android:versionName="4.0-twin"'))
+        self.assertTrue(check_apk.validate(info, APP))
+        expected = check_apk.expected_app(APP, "4.0-twin", 42)
+        self.assertEqual(check_apk.validate(info, expected), [])
+
     def test_rejects_extra_permissions(self):
         xml = GOOD.replace("<uses-permission android:name=\"android.permission.INTERNET\" />",
                            "<uses-permission android:name=\"android.permission.CAMERA\" />")
