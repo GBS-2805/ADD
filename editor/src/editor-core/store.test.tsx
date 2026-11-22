@@ -143,21 +143,21 @@ describe("Editor store layers", () => {
   it("nativeExportWritesThroughTheBridge", async () => {
     const store = renderStore();
     pngMocks.renderArtboardPng.mockClear();
-    const saveTwin = vi.fn(() => JSON.stringify({
+    const saveEditor = vi.fn(() => JSON.stringify({
       status: "saved",
       bytes: 4096,
       filename: "open-studio.png",
       message: "Saved to Downloads/Shelf/open-studio.png",
     }));
     Object.defineProperty(window, "IconsApp", {
-      value: { saveTwin },
+      value: { saveEditor },
       configurable: true,
     });
     try {
       await act(async () => {
         await store.exportNativePng();
       });
-      expect(saveTwin).toHaveBeenCalledOnce();
+      expect(saveEditor).toHaveBeenCalledOnce();
       expect(pngMocks.renderArtboardPng).not.toHaveBeenCalled();
       expect(current!.state.lastExport?.filename).toBe("open-studio.png");
       expect(current!.state.lastExport?.bytes).toBe(4096);
@@ -169,11 +169,11 @@ describe("Editor store layers", () => {
 
   it("defaultExportStaysOnCanvasInsideTheApp", async () => {
     const store = renderStore();
-    const saveTwin = vi.fn(() => JSON.stringify({ status: "saved", bytes: 1, filename: "x.png" }));
+    const saveEditor = vi.fn(() => JSON.stringify({ status: "saved", bytes: 1, filename: "x.png" }));
     const create = vi.spyOn(URL, "createObjectURL").mockReturnValue("blob:png");
     const revoke = vi.spyOn(URL, "revokeObjectURL").mockImplementation(() => undefined);
     Object.defineProperty(window, "IconsApp", {
-      value: { saveTwin },
+      value: { saveEditor },
       configurable: true,
     });
     pngMocks.renderArtboardPng.mockClear();
@@ -190,7 +190,7 @@ describe("Editor store layers", () => {
         await store.exportPng();
       });
       expect(pngMocks.renderArtboardPng).toHaveBeenCalledOnce();
-      expect(saveTwin).not.toHaveBeenCalled();
+      expect(saveEditor).not.toHaveBeenCalled();
       expect(current!.state.toast).toContain("PNG exported");
     } finally {
       delete (window as unknown as { IconsApp?: unknown }).IconsApp;

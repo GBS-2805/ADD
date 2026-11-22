@@ -23,7 +23,7 @@ import org.json.JSONObject;
 /**
  * The editor's artboard, painted by the platform instead of the WebView's canvas.
  *
- * This is a straight port of the paint path in `twin/src/twin/pngExport.ts`: the same
+ * This is a straight port of the paint path in `editor/src/editor-core/pngExport.ts`: the same
  * paper, grain, meta rule, layer transforms, type metrics, shape geometry and shader
  * fields, in the same order, at the same design size (765 x 1000). The point is one
  * rasterizer: the PNG comes out of Skia with the app's own fonts, so an export does
