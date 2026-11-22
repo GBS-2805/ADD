@@ -122,8 +122,12 @@ field at 240k pixels and LRU-caches by family/seed/scale/dimensions, so frames r
 the overlay instead of regenerating it.
 
 Measured by `TexturePresetTest`: every cold family at 300×375 is under the 16ms
-frame budget (slowest: marble at about 12ms); all ten thumbnails warm in about 7ms;
-a ten-family 180×225 warm takes under 35ms off the frame path.
+frame budget (slowest: marble at about 12ms). Each family is measured in up to three
+nine-sample windows, with a short re-warmup between them, so a degraded runner has to
+stay degraded across all of them before the budget fails. All ten families are measured
+before the verdict, so a failure still prints every family's warmup passes and samples,
+and the visual job echoes them. All ten thumbnails warm in about 7ms; a ten-family
+180×225 warm takes under 35ms off the frame path.
 
 ### Material Ink (3.8.5 / 55)
 

@@ -43,12 +43,17 @@ import xml.etree.ElementTree as ET
 
 tests = failures = errors = skipped = 0
 failed = []
+diagnostics = []
 for path in glob.glob(sys.argv[1] + "/*.xml"):
     root = ET.parse(path).getroot()
     tests += int(root.get("tests", 0))
     failures += int(root.get("failures", 0))
     errors += int(root.get("errors", 0))
     skipped += int(root.get("skipped", 0))
+    for out in root.iter("system-out"):
+        for line in (out.text or "").splitlines():
+            if line.startswith("texture family="):
+                diagnostics.append(line.strip())
     for case in root.iter("testcase"):
         for child in case:
             if child.tag not in ("failure", "error"):
@@ -56,6 +61,12 @@ for path in glob.glob(sys.argv[1] + "/*.xml"):
             message = (child.get("message") or child.text or child.tag).strip()
             failed.append((case.get("classname", "?"), case.get("name", "?"),
                            message.splitlines()[0]))
+# The frame-budget measurement prints one line per family. Gradle keeps that in the
+# XML rather than the console, and the visual job only sees what this script prints,
+# so surface it on every run: a failed budget can be read from the log without
+# re-running the suite.
+for line in diagnostics:
+    print("engine-samples: " + line)
 if tests == 0:
     print("engine: no tests ran")
     raise SystemExit(1)
