@@ -205,6 +205,10 @@ test("opensEffectsFromToolbar", async ({ page }) => {
 });
 
 test("appliesShaderToArtboard", async ({ page }) => {
+  // Recompiling the shader under the CI software renderer can run past the 30s config
+  // timeout: one run timed out at 32.4s, the next passed in 21.3s. Give this test its
+  // own budget without dropping or loosening an assertion.
+  test.setTimeout(60_000);
   await openWorkbench(page);
   await page.getByRole("button", { name: "Effects", exact: true }).click();
   await page.getByTestId("catalogue-shader-lab").click();

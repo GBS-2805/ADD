@@ -122,12 +122,15 @@ field at 240k pixels and LRU-caches by family/seed/scale/dimensions, so frames r
 the overlay instead of regenerating it.
 
 Measured by `TexturePresetTest`: every cold family at 300×375 is under the 16ms
-frame budget (slowest: marble at about 12ms). Each family is measured in up to three
-nine-sample windows, with a short re-warmup between them, so a degraded runner has to
-stay degraded across all of them before the budget fails. All ten families are measured
-before the verdict, so a failure still prints every family's warmup passes and samples,
-and the visual job echoes them. All ten thumbnails warm in about 7ms; a ten-family
-180×225 warm takes under 35ms off the frame path.
+frame budget on the reference host (slowest: marble at about 12ms). The verdict is
+host-relative: a fixed integer-and-double probe, measured after the family run so
+tiered compilation has settled, sets the host scale, and the budget becomes 16ms × the
+probe's ratio to the reference host (floored at 1×, capped at 4×), so a slower CI
+runner is judged on the work rather than on its clock. Each family gets nine CPU-time
+samples after 25 warmup passes; all ten are measured before the verdict, so a failure
+still prints every family's warmup passes and samples, and the visual job echoes
+them. All ten thumbnails warm in about 7ms; a ten-family 180×225 warm takes under
+35ms off the frame path.
 
 ### Material Ink (3.8.5 / 55)
 
@@ -158,7 +161,7 @@ Reviewed captures: `artifacts/bmo/bmo-plugin-catalogue.png` and
 
 Full suite at the 3.8.5 cut: **160 tests, 0 failures, 0 errors, 0 skipped**. Chrome:
 **24/24 goldens match**, including the Material Ink capture and the Marble-under-layers
-repair. No bitmap assets or network calls were added. Current baseline: **231 tests, 0
+repair. No bitmap assets or network calls were added. Current baseline: **232 tests, 0
 failures, 0 errors, 0 skipped**; current field preview: **3.9.1 (56)**.
 Task 9–11, Studio and `app.offline.compress` were not touched. The review is built as
 **3.8.5 (55)** at `artifacts/engine-review/ADD-3.8.5-engine-review.apk`; it has not been

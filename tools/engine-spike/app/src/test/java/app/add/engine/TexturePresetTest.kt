@@ -115,48 +115,35 @@ class TexturePresetTest {
     }
 
     /**
-     * Best of nine samples at the measured size, after untimed passes until the cost
-     * settles, in up to three windows. Warming on a small field was not enough, and
-     * neither was a fixed three passes: the loop is compiled lazily, so a starved
-     * compiler still samples half-compiled code (the 22 November visual runs failed a
-     * family that a twin run measured inside the budget).
+     * Best of nine CPU-time samples at the measured size, after [WARMUP_PASSES] untimed
+     * passes. A shorter warmup was not enough: the loop is compiled lazily, and the probe
+     * needed 25 passes before it stopped sampling C1 code (the 22 November visual runs
+     * failed a family that a twin run measured inside the budget). An adaptive settle
+     * can stop on cold code because it cannot see a tier it has not reached yet, so
+     * every family and the probe use the same fixed warmup.
      *
-     * The samples are CPU time, so a descheduled thread does not inflate them; what a
-     * contended runner still changes is the CPU's effective rate, the compiler's state
-     * and the heap pressure. A single nine-sample window can land entirely inside such
-     * a stretch, so a window whose best is over budget is not a verdict: the family
-     * gets five recovery passes, a short pause, then another nine samples, up to three
-     * windows. The budget is unchanged and the result is still a minimum, so only a
-     * family that is slow once compiled in every window can fail.
+     * A retry window was tried on 22 November and did not earn its place: a normal host
+     * passed the first window, and a host that was about 1.3x slower failed all three,
+     * because the difference was the CPU, not a transient stall. CPU time already
+     * ignores descheduling, and [measureHost] handles the clock difference, so one
+     * settled window is enough.
      */
     private fun measureFamily(family: TextureFamily, width: Int, height: Int): Timing {
         val seed = TexturePresets.seedFor(family)
         var warmupPasses = 0
         var bestWarmMs = Double.MAX_VALUE
-        var settledPasses = 0
-        while (warmupPasses < MAX_WARMUP_PASSES) {
-            val passMs = timeRender(family, seed, width, height)
+        repeat(WARMUP_PASSES) {
+            bestWarmMs = minOf(bestWarmMs, timeRender(family, seed, width, height))
             warmupPasses += 1
-            bestWarmMs = minOf(bestWarmMs, passMs)
-            settledPasses = if (passMs <= bestWarmMs * 1.10) settledPasses + 1 else 0
-            if (warmupPasses >= MIN_WARMUP_PASSES && settledPasses >= SETTLED_PASSES) break
         }
-        val rounds = mutableListOf<List<Double>>()
-        while (rounds.size < MAX_ROUNDS) {
-            if (rounds.isNotEmpty()) {
-                repeat(RECOVERY_PASSES) {
-                    timeRender(family, seed, width, height)
-                    warmupPasses += 1
-                }
-                Thread.sleep(RETRY_PAUSE_MS)
-            }
-            rounds += (1..SAMPLES).map { timeRender(family, seed, width, height) }
-            if (rounds.last().min() < FRAME_BUDGET_MS) break
-        }
-        val timing = Timing(warmupPasses, bestWarmMs, rounds)
+        val timing = Timing(
+            warmupPasses,
+            bestWarmMs,
+            (1..SAMPLES).map { timeRender(family, seed, width, height) },
+        )
         println(
-            "texture family=$family ${width}x$height warmupPasses=$warmupPasses " +
-                "warmBestMs=%.3f rounds=${rounds.size} bestMs=%.3f samplesMs=%s".format(
+            ("texture family=$family ${width}x$height warmupPasses=$warmupPasses " +
+                "warmBestMs=%.3f bestMs=%.3f samplesMs=%s").format(
                     bestWarmMs,
                     timing.bestMs,
                     timing.samplesText(),
@@ -165,8 +152,74 @@ class TexturePresetTest {
         return timing
     }
 
+    /**
+     * The 16ms budget is a claim about work on the host it was measured on, not about
+     * whichever CPU a CI runner happens to hand us. On 22 November the same commit
+     * measured WoodGrain at 15.0ms on one runner and 19.8ms on another, and all three
+     * retry windows moved together, so an absolute threshold was reading clock speed.
+     *
+     * This fixed integer-and-double probe gives the host's scale: the family budget is
+     * 16ms times the probe's ratio to [CALIBRATION_REFERENCE_MS], measured on the host
+     * where the 16ms budget was established. A family must still do the same amount of
+     * work to pass; the ratio is floored at 1 so a faster host cannot tighten the
+     * budget, and capped at [MAX_HOST_FACTOR] because beyond that the probe, not the
+     * host, is the suspect.
+     *
+     * The probe runs after the ten families, when the compiler queue has drained, and
+     * uses the same [WARMUP_PASSES]-pass warmup as they do: a short warmup let tiered
+     * compilation masquerade as a slow host, because the probe sampled C1 code while
+     * the renderer ran at C2 speed (one suite run's budget jumped to 28ms on this host).
+     */
+    private fun measureHost(): HostSpeed {
+        var checksum = 0
+        fun pass(): Double {
+            val started = cpuNow()
+            checksum += calibrationPass()
+            return (cpuNow() - started) / 1_000_000.0
+        }
+        repeat(WARMUP_PASSES) { pass() }
+        val samples = (1..SAMPLES).map { pass() }
+        val calibrationMs = samples.min()
+        val host = hostBudget(calibrationMs)
+        println(
+            ("texture host warmupPasses=$WARMUP_PASSES calibrationMs=%.3f " +
+                "referenceMs=%.3f factor=%.3f budgetMs=%.3f checksum=%d samplesMs=%s").format(
+                    calibrationMs,
+                    CALIBRATION_REFERENCE_MS,
+                    host.factor,
+                    host.budgetMs,
+                    checksum,
+                    samples.joinToString(", ") { "%.3f".format(it) },
+                ),
+        )
+        return host
+    }
+
+    /** Pure so the floor, the slow-host scale and the cap are testable without timing. */
+    private fun hostBudget(calibrationMs: Double): HostSpeed {
+        val factor = (calibrationMs / CALIBRATION_REFERENCE_MS)
+            .coerceIn(1.0, MAX_HOST_FACTOR)
+        return HostSpeed(factor, FRAME_BUDGET_MS * factor)
+    }
+
+    /** Fixed probe data, so the host measurement is cheap, deterministic and JIT-stable. */
+    private val calibrationData = IntArray(CALIBRATION_MASK + 1) { index ->
+        ((index * 2_654_435_761L) xor (index.toLong() shl 13)).toInt()
+    }
+
+    private fun calibrationPass(): Int {
+        var hash = 0x811C9DC5.toInt()
+        var scalar = 0.25
+        for (index in 0 until CALIBRATION_STEPS) {
+            val value = calibrationData[index and CALIBRATION_MASK]
+            hash = (hash xor value) * 16_777_619
+            scalar += (value and 0xFF) * 0.000_1
+        }
+        return hash xor scalar.toInt()
+    }
+
     private fun Timing.samplesText(): String =
-        rounds.joinToString(" | ") { round -> round.joinToString(", ") { "%.3f".format(it) } }
+        samples.joinToString(", ") { "%.3f".format(it) }
 
     private fun timeRender(family: TextureFamily, seed: Int, width: Int, height: Int): Double {
         val started = cpuNow()
@@ -177,20 +230,37 @@ class TexturePresetTest {
     private data class Timing(
         val warmupPasses: Int,
         val warmBestMs: Double,
-        val rounds: List<List<Double>>,
+        val samples: List<Double>,
     ) {
-        val bestMs: Double = rounds.minOf { round -> round.min() }
+        val bestMs: Double = samples.min()
     }
+
+    private data class HostSpeed(val factor: Double, val budgetMs: Double)
 
     private companion object {
         const val FRAME_BUDGET_MS = 16.0
-        const val MIN_WARMUP_PASSES = 8
-        const val MAX_WARMUP_PASSES = 30
-        const val SETTLED_PASSES = 3
+        // Best of nine probe samples on the host where the 16ms budget was measured.
+        const val CALIBRATION_REFERENCE_MS = 2.65
+        const val MAX_HOST_FACTOR = 4.0
+        const val WARMUP_PASSES = 25
         const val SAMPLES = 9
-        const val MAX_ROUNDS = 3
-        const val RECOVERY_PASSES = 5
-        const val RETRY_PAUSE_MS = 250L
+        const val CALIBRATION_STEPS = 1 shl 21
+        const val CALIBRATION_MASK = 4_095
+    }
+
+    @Test
+    fun hostBudgetCoversFloorSlowHostAndCap() {
+        val faster = hostBudget(CALIBRATION_REFERENCE_MS / 2)
+        assertEquals(1.0, faster.factor, 0.0)
+        assertEquals(FRAME_BUDGET_MS, faster.budgetMs, 0.0)
+
+        val slow = hostBudget(CALIBRATION_REFERENCE_MS * 1.75)
+        assertEquals(1.75, slow.factor, 1e-9)
+        assertEquals(FRAME_BUDGET_MS * 1.75, slow.budgetMs, 1e-9)
+
+        val capped = hostBudget(CALIBRATION_REFERENCE_MS * 6.0)
+        assertEquals(MAX_HOST_FACTOR, capped.factor, 0.0)
+        assertEquals(FRAME_BUDGET_MS * MAX_HOST_FACTOR, capped.budgetMs, 0.0)
     }
 
     @Test
@@ -203,14 +273,18 @@ class TexturePresetTest {
         val timings = TextureFamily.entries.map { family ->
             family to measureFamily(family, 300, 375)
         }
-        val overBudget = timings.filter { (_, timing) -> timing.bestMs >= FRAME_BUDGET_MS }
-        // The windows travel with the failure: a CI log otherwise says only
-        // "took Nms", which cannot tell a cold compiler from a slow family.
+        // After the families, not before: tiered compilation has drained by then, so a
+        // C1-compiled probe cannot pass itself off as a slow host.
+        val host = measureHost()
+        val overBudget = timings.filter { (_, timing) -> timing.bestMs >= host.budgetMs }
+        // The samples travel with the failure: a CI log otherwise says only "took Nms",
+        // which cannot tell a cold compiler from a slow family or from a slow host.
         val detail = overBudget.joinToString("\n") { (family, timing) ->
-            ("%s took %.2fms at best over %d window(s) (%d samples, warmup %d passes, " +
-                "warm best %.2fms); samples: %s").format(
-                    family, timing.bestMs, timing.rounds.size, timing.rounds.sumOf { it.size },
-                    timing.warmupPasses, timing.warmBestMs, timing.samplesText(),
+            ("%s took %.2fms at best over %d samples (warmup %d passes, warm best %.2fms) " +
+                "against %.2fms (%.2fms x %.2f host); samples: %s").format(
+                    family, timing.bestMs, timing.samples.size, timing.warmupPasses,
+                    timing.warmBestMs, host.budgetMs, FRAME_BUDGET_MS, host.factor,
+                    timing.samplesText(),
                 )
         }
         assertTrue(detail, overBudget.isEmpty())

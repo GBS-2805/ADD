@@ -52,7 +52,7 @@ for path in glob.glob(sys.argv[1] + "/*.xml"):
     skipped += int(root.get("skipped", 0))
     for out in root.iter("system-out"):
         for line in (out.text or "").splitlines():
-            if line.startswith("texture family="):
+            if line.startswith(("texture host ", "texture family=")):
                 diagnostics.append(line.strip())
     for case in root.iter("testcase"):
         for child in case:
@@ -61,10 +61,10 @@ for path in glob.glob(sys.argv[1] + "/*.xml"):
             message = (child.get("message") or child.text or child.tag).strip()
             failed.append((case.get("classname", "?"), case.get("name", "?"),
                            message.splitlines()[0]))
-# The frame-budget measurement prints one line per family. Gradle keeps that in the
-# XML rather than the console, and the visual job only sees what this script prints,
-# so surface it on every run: a failed budget can be read from the log without
-# re-running the suite.
+# The frame-budget measurement prints one host line and one line per family. Gradle
+# keeps that in the XML rather than the console, and the visual job only sees what this
+# script prints, so surface it on every run: a failed budget can be read from the log
+# without re-running the suite.
 for line in diagnostics:
     print("engine-samples: " + line)
 if tests == 0:
