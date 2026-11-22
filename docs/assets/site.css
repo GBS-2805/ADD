@@ -7,6 +7,23 @@
    (krystonschwarze/coolicons, MIT), sized to the frame's measurements. Paths in
    url() are relative to this file, so a page can sit at any depth. */
 
+/* The marks no text face carries: the card arrows (U+2192), the outbound
+   arrow (U+2197), the burger (U+2630), and the compressor's pair (U+2190,
+   U+2194). Poppins stops well short of these and so does Redaction, so until
+   now every machine substituted its own system font for them -- DejaVu on CI,
+   WenQuanYi here -- which moved them a pixel or two and made the exported
+   artboards impossible to reproduce off CI. 2.4 KB, subset from DejaVu Sans
+   (Bitstream Vera licence; DejaVu changes are public domain), named so it is a
+   real fallback face rather than a silent substitution. unicode-range keeps the
+   browser from fetching it for text that cannot need it. */
+@font-face {
+  font-family: "ADD Symbols";
+  src: url("fonts/add-symbols.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: block;
+  unicode-range: U+0394, U+2190-2197, U+2630;
+}
 @font-face {
   font-family: "Poppins";
   src: url("fonts/poppins-400.woff2") format("woff2");
@@ -84,7 +101,7 @@ body {
   margin: 0;
   background: var(--page);
   color: var(--on);
-  font-family: "Poppins", "Helvetica Neue", Arial, sans-serif;
+  font-family: "Poppins", "ADD Symbols", "Helvetica Neue", Arial, sans-serif;
   font-weight: 400;
   font-size: 17px;
   line-height: 1.65;
@@ -581,9 +598,9 @@ footer a:hover { text-decoration: underline; }
   --wheat-bone: #f2e7d3;
   --wheat-orange: #dd4124;
   --wheat-acid: #c3d363;
-  --wheat-display: "Archivo Black", "Arial Black", Impact, sans-serif;
-  --wheat-body: "Archivo", "Helvetica Neue", Arial, sans-serif;
-  --wheat-mono: "Plex Mono", ui-monospace, monospace;
+  --wheat-display: "Archivo Black", "ADD Symbols", "Arial Black", Impact, sans-serif;
+  --wheat-body: "Archivo", "ADD Symbols", "Helvetica Neue", Arial, sans-serif;
+  --wheat-mono: "Plex Mono", "ADD Symbols", ui-monospace, monospace;
 }
 
 body {
@@ -1467,9 +1484,9 @@ html[data-palette] {
   --wheat-bone: #f0e7d4;
   --wheat-orange: #5b2a4b;
   --wheat-acid: #5b2a4b;
-  --wheat-display: "Instrument Serif", Georgia, serif;
-  --wheat-body: "Spectral", Georgia, serif;
-  --wheat-mono: "Libre Franklin", Arial, sans-serif;
+  --wheat-display: "Instrument Serif", "ADD Symbols", Georgia, serif;
+  --wheat-body: "Spectral", "ADD Symbols", Georgia, serif;
+  --wheat-mono: "Libre Franklin", "ADD Symbols", Arial, sans-serif;
 }
 
 body {

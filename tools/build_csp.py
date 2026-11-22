@@ -81,10 +81,10 @@ def policy(root: Path = ROOT, *, handoff: bool = False) -> str:
     # The handoff intentionally embeds screenshots served by the site origin.
     # Keep that exception on the handoff only; the site itself stays same-origin.
     #
-    # `blob:` is for /twin/, the canvas editor. It builds images it imported with
+    # `blob:` is for /editor/, the canvas editor. It builds images it imported with
     # URL.createObjectURL, so every imported PNG/SVG reaches the page as a blob: URL.
     # Without this, opening the editor works and importing a picture is silently
-    # blocked. connect-src needs it too: exporting a .twin re-reads those same blob
+    # blocked. connect-src needs it too: exporting an .add re-reads those same blob
     # URLs to inline them. Both are page-local objects, not remote sources.
     img_src = "img-src 'self' data: blob:"
     if handoff:

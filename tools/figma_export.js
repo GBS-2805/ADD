@@ -56,6 +56,7 @@ const STATES = [
 // Archivo/Plex Mono for controls that use them. The files are small enough to
 // travel inside every artboard, so the board looks the same in any browser.
 const FONT_FACES = [
+  ["ADD Symbols", "400", "add-symbols.woff2"],
   ["Poppins", "400", "poppins-400.woff2"],
   ["Poppins", "500", "poppins-500.woff2"],
   ["Poppins", "600", "poppins-600.woff2"],
@@ -79,6 +80,20 @@ const FONT_CSS =
 async function capture() {
   const SKIP = new Set(["SCRIPT", "STYLE", "NOSCRIPT", "TEMPLATE", "HEAD", "META", "LINK"]);
   const EMBEDDED_FAMILIES = new Set(["Poppins", "Spectral", "Archivo", "Plex Mono"]);
+  // The marks no embedded text face carries; they live only in the 2.4 KB
+  // add-symbols.woff2 subset.
+  const SYMBOL_RANGES = [[0x0394, 0x0394], [0x2190, 0x2197], [0x2630, 0x2630]];
+  const hasSymbol = (text) =>
+    Array.from(text).some((ch) => {
+      const cp = ch.codePointAt(0);
+      return SYMBOL_RANGES.some(([a, b]) => cp >= a && cp <= b);
+    });
+  // One run, at the position the browser laid out. The board names the symbol
+  // face when the line holds a mark no text face carries, because that is the
+  // face that paints it -- claiming Poppins is what made these bytes depend on
+  // whichever system font the machine happened to substitute.
+  const faceFor = (text, family) => (hasSymbol(text) ? `${family}, ADD Symbols` : family);
+
   const round = (v) => Math.round(v * 100) / 100;
   const esc = (s) =>
     s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
@@ -331,7 +346,7 @@ async function capture() {
           out.push(
             `<text x="${round(x)}" y="${round(baseline + scrollY)}" ${paint(
               ps.cs.color
-            )} font-family="Poppins" font-size="${round(parseFloat(ps.cs.fontSize))}" font-weight="${
+            )} font-family="${faceFor(ps.text, "Poppins")}" font-size="${round(parseFloat(ps.cs.fontSize))}" font-weight="${
               ps.cs.fontWeight
             }" xml:space="preserve">${esc(ps.text)}</text>`
           );
@@ -379,6 +394,7 @@ async function capture() {
       lines.push({
         text: value.trim(),
         left: whole[0].left,
+        right: whole[0].right,
         top: whole[0].top,
         bottom: whole[0].bottom,
       });
@@ -445,12 +461,22 @@ async function capture() {
       const m = metrics(font, lineText);
       const baseline = l.top + scrollY + m.asc;
       const ls = g.letterSpacing && g.letterSpacing !== "normal" ? ` letter-spacing="${round(parseFloat(g.letterSpacing))}"` : "";
+      const tail = `font-size="${round(parseFloat(g.fontSize))}" font-weight="${
+        g.fontWeight
+      }"${g.fontStyle === "italic" ? ' font-style="italic"' : ""}${
+        g.textDecorationLine.includes("underline") ? ' text-decoration="underline"' : ""
+      }${ls} xml:space="preserve"`;
+      // Place each stretch at the width of everything before it in the line. Not
+      // a running sum of per-run advances: measuring "text " and "text" differ by
+      // the space, and a trailing space in a run has to count or the mark lands
+      // 2-3px left of where the browser paints it.
+      // One run per line. The mark comes from the shipped ADD Symbols face via
+      // the page's own font stack, so the layout the exporter measures is the
+      // same everywhere -- splitting the line into faces was what made the
+      // position depend on which face the exporter happened to measure with.
       out.push(
-        `<text x="${round(l.left)}" y="${round(baseline)}" ${paint(g.color)} font-family="Poppins" font-size="${round(
-          parseFloat(g.fontSize)
-        )}" font-weight="${g.fontWeight}"${g.fontStyle === "italic" ? ' font-style="italic"' : ""}${
-          g.textDecorationLine.includes("underline") ? ' text-decoration="underline"' : ""
-        }${ls} xml:space="preserve">${esc(lineText)}</text>`
+        `<text x="${round(l.left)}" y="${round(baseline)}" ${paint(g.color)} ` +
+        `font-family="${faceFor(lineText, "Poppins")}" ${tail}>${esc(lineText)}</text>`
       );
       texts++;
     }

@@ -1,0 +1,1291 @@
+{
+ "version": 1,
+ "note": "The library's effects. The Editor renders these; it does not own them. This file is the source of truth: the Editor fetches it, and the native tables are checked against it rather than the other way round.",
+ "kinds": [
+  "shader",
+  "texture",
+  "pattern",
+  "particles",
+  "field",
+  "material",
+  "gradient",
+  "pattern-stroke"
+ ],
+ "controls": {
+  "shader": [
+   {
+    "id": "speed",
+    "label": "Speed",
+    "kind": "range",
+    "min": 0,
+    "max": 1,
+    "step": 0.05
+   },
+   {
+    "id": "distortion",
+    "label": "Distortion",
+    "kind": "range",
+    "min": 0,
+    "max": 1,
+    "step": 0.05
+   },
+   {
+    "id": "swirl",
+    "label": "Swirl",
+    "kind": "range",
+    "min": 0,
+    "max": 1,
+    "step": 0.05
+   },
+   {
+    "id": "grain",
+    "label": "Grain",
+    "kind": "range",
+    "min": 0,
+    "max": 1,
+    "step": 0.05
+   },
+   {
+    "id": "color",
+    "label": "Colour",
+    "kind": "swatch",
+    "options": [
+     "#111111",
+     "#5a5a56",
+     "#8a8983",
+     "#d8d7d1",
+     "#fafaf7"
+    ]
+   }
+  ],
+  "texture": [
+   {
+    "id": "paper",
+    "label": "Paper",
+    "kind": "swatch",
+    "options": [
+     "#fafaf7",
+     "#e7e6e1",
+     "#d8d7d1"
+    ]
+   },
+   {
+    "id": "roughness",
+    "label": "Roughness",
+    "kind": "range",
+    "min": 0,
+    "max": 1,
+    "step": 0.05
+   },
+   {
+    "id": "fluff",
+    "label": "Fluff",
+    "kind": "range",
+    "min": 1,
+    "max": 3,
+    "step": 0.1,
+    "visibleWhen": {
+     "preset": "texture-fur"
+    }
+   },
+   {
+    "id": "scale",
+    "label": "Scale",
+    "kind": "range",
+    "min": 0.5,
+    "max": 2,
+    "step": 0.05
+   },
+   {
+    "id": "opacity",
+    "label": "Opacity",
+    "kind": "range",
+    "min": 0,
+    "max": 1,
+    "step": 0.01
+   }
+  ],
+  "pattern": [
+   {
+    "id": "ink",
+    "label": "Ink",
+    "kind": "swatch",
+    "options": [
+     "#111111",
+     "#5a5a56",
+     "#8a8983",
+     "#d8d7d1"
+    ]
+   },
+   {
+    "id": "opacity",
+    "label": "Opacity",
+    "kind": "range",
+    "min": 0,
+    "max": 1,
+    "step": 0.01
+   },
+   {
+    "id": "scale",
+    "label": "Scale",
+    "kind": "range",
+    "min": 0.5,
+    "max": 3,
+    "step": 0.05
+   },
+   {
+    "id": "rough",
+    "label": "Rough edges",
+    "kind": "toggle"
+   }
+  ],
+  "particles": [
+   {
+    "id": "density",
+    "label": "Density",
+    "kind": "range",
+    "min": 0.2,
+    "max": 3,
+    "step": 0.05
+   },
+   {
+    "id": "speed",
+    "label": "Speed",
+    "kind": "range",
+    "min": 0.2,
+    "max": 4,
+    "step": 0.05
+   },
+   {
+    "id": "color",
+    "label": "Colour",
+    "kind": "swatch",
+    "options": [
+     "#111111",
+     "#5a5a56",
+     "#8a8983",
+     "#d8d7d1"
+    ]
+   },
+   {
+    "id": "trail",
+    "label": "Trail",
+    "kind": "toggle"
+   }
+  ],
+  "field": [
+   {
+    "id": "spots",
+    "label": "Colour spots",
+    "kind": "stops"
+   },
+   {
+    "id": "scale",
+    "label": "Scale",
+    "kind": "range",
+    "min": 0,
+    "max": 1,
+    "step": 0.01
+   },
+   {
+    "id": "distortion",
+    "label": "Distortion",
+    "kind": "range",
+    "min": 0,
+    "max": 1,
+    "step": 0.01
+   },
+   {
+    "id": "swirl",
+    "label": "Swirl",
+    "kind": "range",
+    "min": 0,
+    "max": 1,
+    "step": 0.01
+   },
+   {
+    "id": "speed",
+    "label": "Speed",
+    "kind": "range",
+    "min": 0,
+    "max": 1,
+    "step": 0.01
+   },
+   {
+    "id": "soften",
+    "label": "Soften",
+    "kind": "range",
+    "min": 0,
+    "max": 1,
+    "step": 0.01
+   },
+   {
+    "id": "noise",
+    "label": "Grain",
+    "kind": "range",
+    "min": 0,
+    "max": 1,
+    "step": 0.01
+   }
+  ],
+  "gradient": [
+   {
+    "id": "stops",
+    "label": "Stops",
+    "kind": "stops"
+   }
+  ],
+  "material": [
+   {
+    "id": "seed",
+    "label": "Seed",
+    "kind": "number",
+    "min": 0,
+    "max": 99999999,
+    "step": 1
+   },
+   {
+    "id": "opacity",
+    "label": "Opacity",
+    "kind": "range",
+    "min": 0,
+    "max": 1,
+    "step": 0.01
+   },
+   {
+    "id": "scale",
+    "label": "Scale",
+    "kind": "range",
+    "min": 0.25,
+    "max": 4,
+    "step": 0.05
+   },
+   {
+    "id": "blend",
+    "label": "Blend",
+    "kind": "toggle"
+   }
+  ],
+  "pattern-stroke": [
+   {
+    "id": "foreground",
+    "label": "Foreground",
+    "kind": "swatch",
+    "options": [
+     "#F5ECD8",
+     "#8A3B00",
+     "#5B2A4B",
+     "#1B1212"
+    ]
+   },
+   {
+    "id": "background",
+    "label": "Background",
+    "kind": "swatch",
+    "options": [
+     "#F5ECD8",
+     "#8A3B00",
+     "#5B2A4B",
+     "#1B1212"
+    ]
+   },
+   {
+    "id": "scale",
+    "label": "Scale",
+    "kind": "range",
+    "min": 0.25,
+    "max": 4,
+    "step": 0.05
+   }
+  ]
+ },
+ "presets": [
+  {
+   "id": "shader-mesh",
+   "name": "Mesh gradient",
+   "note": "Soft ink field in motion",
+   "kind": "shader",
+   "source": "editor",
+   "render": "MeshGradient",
+   "defaults": {
+    "speed": 0.5,
+    "distortion": 0.35,
+    "swirl": 0.2,
+    "grain": 0.2,
+    "color": "#111111"
+   }
+  },
+  {
+   "id": "shader-grain",
+   "name": "Grain gradient",
+   "note": "Inky bands with paper grain",
+   "kind": "shader",
+   "source": "editor",
+   "render": "GrainGradient",
+   "defaults": {
+    "speed": 0.5,
+    "distortion": 0.35,
+    "swirl": 0.2,
+    "grain": 0.2,
+    "color": "#111111"
+   }
+  },
+  {
+   "id": "shader-warp",
+   "name": "Warp",
+   "note": "Striped ink under pressure",
+   "kind": "shader",
+   "source": "editor",
+   "render": "Warp",
+   "defaults": {
+    "speed": 0.5,
+    "distortion": 0.35,
+    "swirl": 0.2,
+    "grain": 0.2,
+    "color": "#111111"
+   }
+  },
+  {
+   "id": "shader-orbit",
+   "name": "Dot orbit",
+   "note": "A field of small satellites",
+   "kind": "shader",
+   "source": "editor",
+   "render": "DotOrbit",
+   "defaults": {
+    "speed": 0.5,
+    "distortion": 0.35,
+    "swirl": 0.2,
+    "grain": 0.2,
+    "color": "#111111"
+   }
+  },
+  {
+   "id": "shader-panels",
+   "name": "Ink panels",
+   "note": "A fan of printed sheets",
+   "kind": "shader",
+   "source": "editor",
+   "render": "ColorPanels",
+   "defaults": {
+    "speed": 0.5,
+    "distortion": 0.35,
+    "swirl": 0.2,
+    "grain": 0.2,
+    "color": "#111111"
+   }
+  },
+  {
+   "id": "shader-metal",
+   "name": "Liquid metal",
+   "note": "Chrome ink in a circular well",
+   "kind": "shader",
+   "source": "editor",
+   "render": "LiquidMetal",
+   "defaults": {
+    "speed": 0.5,
+    "distortion": 0.35,
+    "swirl": 0.2,
+    "grain": 0.2,
+    "color": "#111111"
+   }
+  },
+  {
+   "id": "shader-smoke",
+   "name": "Gem smoke",
+   "note": "A slow bloom of ink",
+   "kind": "shader",
+   "source": "editor",
+   "render": "GemSmoke",
+   "defaults": {
+    "speed": 0.5,
+    "distortion": 0.35,
+    "swirl": 0.2,
+    "grain": 0.2,
+    "color": "#111111"
+   }
+  },
+  {
+   "id": "shader-paper",
+   "name": "Paper texture",
+   "note": "The workbench itself",
+   "kind": "shader",
+   "source": "editor",
+   "render": "PaperTexture",
+   "defaults": {
+    "speed": 0.5,
+    "distortion": 0.35,
+    "swirl": 0.2,
+    "grain": 0.2,
+    "color": "#111111"
+   }
+  },
+  {
+   "id": "texture-paper",
+   "name": "Paper 006",
+   "note": "Neutral stock",
+   "kind": "texture",
+   "source": "editor",
+   "render": "PaperTexture",
+   "defaults": {
+    "paper": "#fafaf7",
+    "roughness": 0.4,
+    "fluff": 1,
+    "scale": 1,
+    "opacity": 1
+   }
+  },
+  {
+   "id": "texture-creased",
+   "name": "Fluted glass",
+   "note": "Ribbed transparency",
+   "kind": "texture",
+   "source": "editor",
+   "render": "FlutedGlass",
+   "defaults": {
+    "paper": "#fafaf7",
+    "roughness": 0.4,
+    "fluff": 1,
+    "scale": 1,
+    "opacity": 1
+   }
+  },
+  {
+   "id": "texture-dither",
+   "name": "Image dither",
+   "note": "A printed photograph",
+   "kind": "texture",
+   "source": "editor",
+   "render": "ImageDithering",
+   "defaults": {
+    "paper": "#fafaf7",
+    "roughness": 0.4,
+    "fluff": 1,
+    "scale": 1,
+    "opacity": 1
+   }
+  },
+  {
+   "id": "texture-halftone",
+   "name": "Halftone dots",
+   "note": "Newsprint at close range",
+   "kind": "texture",
+   "source": "editor",
+   "render": "HalftoneDots",
+   "defaults": {
+    "paper": "#fafaf7",
+    "roughness": 0.4,
+    "fluff": 1,
+    "scale": 1,
+    "opacity": 1
+   }
+  },
+  {
+   "id": "texture-fur",
+   "name": "Fur",
+   "note": "A pettable silhouette",
+   "kind": "texture",
+   "source": "editor",
+   "render": "Fur",
+   "defaults": {
+    "paper": "#fafaf7",
+    "roughness": 0.4,
+    "fluff": 1,
+    "scale": 1,
+    "opacity": 1
+   }
+  },
+  {
+   "id": "pattern-jigsaw",
+   "name": "Jigsaw",
+   "note": "Interlocking arcs",
+   "kind": "pattern",
+   "source": "editor",
+   "render": "jigsaw",
+   "defaults": {
+    "opacity": 0.78,
+    "ink": "#111111",
+    "scale": 1,
+    "rough": 0
+   }
+  },
+  {
+   "id": "pattern-topography",
+   "name": "Topography",
+   "note": "Contour lines",
+   "kind": "pattern",
+   "source": "editor",
+   "render": "topography",
+   "defaults": {
+    "opacity": 0.78,
+    "ink": "#111111",
+    "scale": 1,
+    "rough": 0
+   }
+  },
+  {
+   "id": "pattern-circuit",
+   "name": "Circuit",
+   "note": "A board trace",
+   "kind": "pattern",
+   "source": "editor",
+   "render": "circuit",
+   "defaults": {
+    "opacity": 0.78,
+    "ink": "#111111",
+    "scale": 1,
+    "rough": 0
+   }
+  },
+  {
+   "id": "pattern-diagonal",
+   "name": "Diagonal",
+   "note": "Cut paper stripes",
+   "kind": "pattern",
+   "source": "editor",
+   "render": "diagonal",
+   "defaults": {
+    "opacity": 0.78,
+    "ink": "#111111",
+    "scale": 1,
+    "rough": 0
+   }
+  },
+  {
+   "id": "pattern-plus",
+   "name": "Plus",
+   "note": "A quiet cross grid",
+   "kind": "pattern",
+   "source": "editor",
+   "render": "plus",
+   "defaults": {
+    "opacity": 0.78,
+    "ink": "#111111",
+    "scale": 1,
+    "rough": 0
+   }
+  },
+  {
+   "id": "pattern-rain",
+   "name": "Rain",
+   "note": "Short vertical marks",
+   "kind": "pattern",
+   "source": "editor",
+   "render": "rain",
+   "defaults": {
+    "opacity": 0.78,
+    "ink": "#111111",
+    "scale": 1,
+    "rough": 0
+   }
+  },
+  {
+   "id": "pattern-bubbles",
+   "name": "Bubbles",
+   "note": "A loose foam",
+   "kind": "pattern",
+   "source": "editor",
+   "render": "bubbles",
+   "defaults": {
+    "opacity": 0.78,
+    "ink": "#111111",
+    "scale": 1,
+    "rough": 0
+   }
+  },
+  {
+   "id": "pattern-aztec",
+   "name": "Aztec",
+   "note": "A stepped border",
+   "kind": "pattern",
+   "source": "editor",
+   "render": "aztec",
+   "defaults": {
+    "opacity": 0.78,
+    "ink": "#111111",
+    "scale": 1,
+    "rough": 0
+   }
+  },
+  {
+   "id": "particles-dust",
+   "name": "Dust",
+   "note": "Slow motes in the light",
+   "kind": "particles",
+   "source": "editor",
+   "render": "dust",
+   "defaults": {
+    "density": 1,
+    "speed": 1,
+    "color": "#111111",
+    "trail": 0
+   }
+  },
+  {
+   "id": "particles-sparks",
+   "name": "Sparks",
+   "note": "A quick graphite shower",
+   "kind": "particles",
+   "source": "editor",
+   "render": "sparks",
+   "defaults": {
+    "density": 1,
+    "speed": 1,
+    "color": "#111111",
+    "trail": 0
+   }
+  },
+  {
+   "id": "particles-orbit",
+   "name": "Orbit",
+   "note": "A loose ring of ink",
+   "kind": "particles",
+   "source": "editor",
+   "render": "orbit",
+   "defaults": {
+    "density": 1,
+    "speed": 1,
+    "color": "#111111",
+    "trail": 0
+   }
+  },
+  {
+   "id": "particles-confetti",
+   "name": "Confetti",
+   "note": "Cut-paper celebration",
+   "kind": "particles",
+   "source": "editor",
+   "render": "confetti",
+   "defaults": {
+    "density": 1,
+    "speed": 1,
+    "color": "#111111",
+    "trail": 0
+   }
+  },
+  {
+   "id": "field-mica-dawn",
+   "name": "Mica dawn",
+   "note": "Colour spots in a warped field",
+   "kind": "field",
+   "source": "native",
+   "render": "FlowField",
+   "defaults": {
+    "spots": [
+     {
+      "hex": "#F3E9DA",
+      "x": 0.5,
+      "y": 0.26,
+      "band": 0.3
+     },
+     {
+      "hex": "#C7A88B",
+      "x": 0.77,
+      "y": 0.5,
+      "band": 0.3
+     },
+     {
+      "hex": "#6B5A4E",
+      "x": 0.5,
+      "y": 0.74,
+      "band": 0.3
+     },
+     {
+      "hex": "#2C2723",
+      "x": 0.23,
+      "y": 0.5,
+      "band": 0.3
+     }
+    ],
+    "scale": 0.5,
+    "distortion": 0.6,
+    "swirl": 0.1,
+    "speed": 0.3,
+    "soften": 0.0,
+    "noise": 0.06
+   }
+  },
+  {
+   "id": "field-sea-glass",
+   "name": "Sea glass",
+   "note": "Colour spots in a warped field",
+   "kind": "field",
+   "source": "native",
+   "render": "FlowField",
+   "defaults": {
+    "spots": [
+     {
+      "hex": "#E7F4EF",
+      "x": 0.5,
+      "y": 0.26,
+      "band": 0.3
+     },
+     {
+      "hex": "#9CD3C4",
+      "x": 0.77,
+      "y": 0.5,
+      "band": 0.3
+     },
+     {
+      "hex": "#3A8A7A",
+      "x": 0.5,
+      "y": 0.74,
+      "band": 0.3
+     },
+     {
+      "hex": "#123F3A",
+      "x": 0.23,
+      "y": 0.5,
+      "band": 0.3
+     }
+    ],
+    "scale": 0.5,
+    "distortion": 0.6,
+    "swirl": 0.1,
+    "speed": 0.3,
+    "soften": 0.0,
+    "noise": 0.06
+   }
+  },
+  {
+   "id": "field-plum-smoke",
+   "name": "Plum smoke",
+   "note": "Colour spots in a warped field",
+   "kind": "field",
+   "source": "native",
+   "render": "FlowField",
+   "defaults": {
+    "spots": [
+     {
+      "hex": "#F2E6EE",
+      "x": 0.5,
+      "y": 0.26,
+      "band": 0.3
+     },
+     {
+      "hex": "#C89DBB",
+      "x": 0.77,
+      "y": 0.5,
+      "band": 0.3
+     },
+     {
+      "hex": "#7B4C6D",
+      "x": 0.5,
+      "y": 0.74,
+      "band": 0.3
+     },
+     {
+      "hex": "#2B1B2A",
+      "x": 0.23,
+      "y": 0.5,
+      "band": 0.3
+     }
+    ],
+    "scale": 0.5,
+    "distortion": 0.6,
+    "swirl": 0.1,
+    "speed": 0.3,
+    "soften": 0.0,
+    "noise": 0.06
+   }
+  },
+  {
+   "id": "field-citrus-haze",
+   "name": "Citrus haze",
+   "note": "Colour spots in a warped field",
+   "kind": "field",
+   "source": "native",
+   "render": "FlowField",
+   "defaults": {
+    "spots": [
+     {
+      "hex": "#FFF6D9",
+      "x": 0.5,
+      "y": 0.26,
+      "band": 0.3
+     },
+     {
+      "hex": "#FFD37A",
+      "x": 0.77,
+      "y": 0.5,
+      "band": 0.3
+     },
+     {
+      "hex": "#F08A4B",
+      "x": 0.5,
+      "y": 0.74,
+      "band": 0.3
+     },
+     {
+      "hex": "#7A2E1F",
+      "x": 0.23,
+      "y": 0.5,
+      "band": 0.3
+     }
+    ],
+    "scale": 0.5,
+    "distortion": 0.6,
+    "swirl": 0.1,
+    "speed": 0.3,
+    "soften": 0.0,
+    "noise": 0.06
+   }
+  },
+  {
+   "id": "field-cobalt-rain",
+   "name": "Cobalt rain",
+   "note": "Colour spots in a warped field",
+   "kind": "field",
+   "source": "native",
+   "render": "FlowField",
+   "defaults": {
+    "spots": [
+     {
+      "hex": "#E8F1FA",
+      "x": 0.5,
+      "y": 0.26,
+      "band": 0.3
+     },
+     {
+      "hex": "#9CBCE8",
+      "x": 0.77,
+      "y": 0.5,
+      "band": 0.3
+     },
+     {
+      "hex": "#3767B1",
+      "x": 0.5,
+      "y": 0.74,
+      "band": 0.3
+     },
+     {
+      "hex": "#14274D",
+      "x": 0.23,
+      "y": 0.5,
+      "band": 0.3
+     }
+    ],
+    "scale": 0.5,
+    "distortion": 0.6,
+    "swirl": 0.1,
+    "speed": 0.3,
+    "soften": 0.0,
+    "noise": 0.06
+   }
+  },
+  {
+   "id": "field-olive-dusk",
+   "name": "Olive dusk",
+   "note": "Colour spots in a warped field",
+   "kind": "field",
+   "source": "native",
+   "render": "FlowField",
+   "defaults": {
+    "spots": [
+     {
+      "hex": "#F0EEDC",
+      "x": 0.5,
+      "y": 0.26,
+      "band": 0.3
+     },
+     {
+      "hex": "#C7C58F",
+      "x": 0.77,
+      "y": 0.5,
+      "band": 0.3
+     },
+     {
+      "hex": "#6C7A4A",
+      "x": 0.5,
+      "y": 0.74,
+      "band": 0.3
+     },
+     {
+      "hex": "#28301F",
+      "x": 0.23,
+      "y": 0.5,
+      "band": 0.3
+     }
+    ],
+    "scale": 0.5,
+    "distortion": 0.6,
+    "swirl": 0.1,
+    "speed": 0.3,
+    "soften": 0.0,
+    "noise": 0.06
+   }
+  },
+  {
+   "id": "field-rose-quartz",
+   "name": "Rose quartz",
+   "note": "Colour spots in a warped field",
+   "kind": "field",
+   "source": "native",
+   "render": "FlowField",
+   "defaults": {
+    "spots": [
+     {
+      "hex": "#FBEDEE",
+      "x": 0.5,
+      "y": 0.26,
+      "band": 0.3
+     },
+     {
+      "hex": "#E7B7BC",
+      "x": 0.77,
+      "y": 0.5,
+      "band": 0.3
+     },
+     {
+      "hex": "#B86B78",
+      "x": 0.5,
+      "y": 0.74,
+      "band": 0.3
+     },
+     {
+      "hex": "#4A2430",
+      "x": 0.23,
+      "y": 0.5,
+      "band": 0.3
+     }
+    ],
+    "scale": 0.5,
+    "distortion": 0.6,
+    "swirl": 0.1,
+    "speed": 0.3,
+    "soften": 0.0,
+    "noise": 0.06
+   }
+  },
+  {
+   "id": "field-ink-tide",
+   "name": "Ink tide",
+   "note": "Colour spots in a warped field",
+   "kind": "field",
+   "source": "native",
+   "render": "FlowField",
+   "defaults": {
+    "spots": [
+     {
+      "hex": "#E4EEF0",
+      "x": 0.5,
+      "y": 0.26,
+      "band": 0.3
+     },
+     {
+      "hex": "#8FB6C2",
+      "x": 0.77,
+      "y": 0.5,
+      "band": 0.3
+     },
+     {
+      "hex": "#3C6C7D",
+      "x": 0.5,
+      "y": 0.74,
+      "band": 0.3
+     },
+     {
+      "hex": "#0E2630",
+      "x": 0.23,
+      "y": 0.5,
+      "band": 0.3
+     }
+    ],
+    "scale": 0.5,
+    "distortion": 0.6,
+    "swirl": 0.1,
+    "speed": 0.3,
+    "soften": 0.0,
+    "noise": 0.06
+   }
+  },
+  {
+   "id": "material-brick",
+   "name": "Brick",
+   "note": "Masonry courses and mortar",
+   "kind": "material",
+   "source": "native",
+   "render": "brick",
+   "defaults": {
+    "seed": 104729,
+    "opacity": 0.34,
+    "scale": 1,
+    "blend": "MULTIPLY"
+   }
+  },
+  {
+   "id": "material-wood-grain",
+   "name": "Wood",
+   "note": "Laser-cut grain and rings",
+   "kind": "material",
+   "source": "native",
+   "render": "wood-grain",
+   "defaults": {
+    "seed": 112648,
+    "opacity": 0.38,
+    "scale": 1,
+    "blend": "MULTIPLY"
+   }
+  },
+  {
+   "id": "material-marble",
+   "name": "Marble",
+   "note": "Veined stone etching",
+   "kind": "material",
+   "source": "native",
+   "render": "marble",
+   "defaults": {
+    "seed": 120567,
+    "opacity": 0.3,
+    "scale": 1,
+    "blend": "MULTIPLY"
+   }
+  },
+  {
+   "id": "material-concrete",
+   "name": "Concrete",
+   "note": "Cast stone and plaster tooth",
+   "kind": "material",
+   "source": "native",
+   "render": "concrete",
+   "defaults": {
+    "seed": 128486,
+    "opacity": 0.34,
+    "scale": 1,
+    "blend": "MULTIPLY"
+   }
+  },
+  {
+   "id": "material-fabric",
+   "name": "Fabric",
+   "note": "Woven cloth and knit lines",
+   "kind": "material",
+   "source": "native",
+   "render": "fabric",
+   "defaults": {
+    "seed": 136405,
+    "opacity": 0.32,
+    "scale": 1,
+    "blend": "MULTIPLY"
+   }
+  },
+  {
+   "id": "material-halftone",
+   "name": "Halftone",
+   "note": "Print dot screens",
+   "kind": "material",
+   "source": "native",
+   "render": "halftone",
+   "defaults": {
+    "seed": 144324,
+    "opacity": 0.4,
+    "scale": 1,
+    "blend": "MULTIPLY"
+   }
+  },
+  {
+   "id": "material-gradient-mesh",
+   "name": "Mesh",
+   "note": "Smooth tonal meshes",
+   "kind": "material",
+   "source": "native",
+   "render": "gradient-mesh",
+   "defaults": {
+    "seed": 152243,
+    "opacity": 0.26,
+    "scale": 1,
+    "blend": "OVERLAY"
+   }
+  },
+  {
+   "id": "material-grain",
+   "name": "Grain",
+   "note": "Film and ink tooth",
+   "kind": "material",
+   "source": "native",
+   "render": "grain",
+   "defaults": {
+    "seed": 160162,
+    "opacity": 0.3,
+    "scale": 1,
+    "blend": "OVERLAY"
+   }
+  },
+  {
+   "id": "material-checker",
+   "name": "Checker",
+   "note": "Registration and tile grid",
+   "kind": "material",
+   "source": "native",
+   "render": "checker",
+   "defaults": {
+    "seed": 168081,
+    "opacity": 0.28,
+    "scale": 1,
+    "blend": "MULTIPLY"
+   }
+  },
+  {
+   "id": "material-scanline",
+   "name": "Scanline",
+   "note": "CRT and line-screen print",
+   "kind": "material",
+   "source": "native",
+   "render": "scanline",
+   "defaults": {
+    "seed": 176000,
+    "opacity": 0.3,
+    "scale": 1,
+    "blend": "MULTIPLY"
+   }
+  },
+  {
+   "id": "gradient-linear",
+   "name": "Linear",
+   "note": "A straight run between stops",
+   "kind": "gradient",
+   "source": "native",
+   "render": "Linear",
+   "defaults": {
+    "stops": [
+     {
+      "at": 0,
+      "hex": "#1B1212"
+     },
+     {
+      "at": 0.5,
+      "hex": "#5B2A4B"
+     },
+     {
+      "at": 1,
+      "hex": "#F5ECD8"
+     }
+    ]
+   }
+  },
+  {
+   "id": "gradient-radial",
+   "name": "Radial",
+   "note": "From the centre out",
+   "kind": "gradient",
+   "source": "native",
+   "render": "Radial",
+   "defaults": {
+    "stops": [
+     {
+      "at": 0,
+      "hex": "#1B1212"
+     },
+     {
+      "at": 0.5,
+      "hex": "#5B2A4B"
+     },
+     {
+      "at": 1,
+      "hex": "#F5ECD8"
+     }
+    ]
+   }
+  },
+  {
+   "id": "gradient-sweep",
+   "name": "Sweep",
+   "note": "Around the wheel",
+   "kind": "gradient",
+   "source": "native",
+   "render": "Sweep",
+   "defaults": {
+    "stops": [
+     {
+      "at": 0,
+      "hex": "#1B1212"
+     },
+     {
+      "at": 0.5,
+      "hex": "#5B2A4B"
+     },
+     {
+      "at": 1,
+      "hex": "#F5ECD8"
+     }
+    ]
+   }
+  },
+  {
+   "id": "gradient-diamond",
+   "name": "Diamond",
+   "note": "A four-corner spread",
+   "kind": "gradient",
+   "source": "native",
+   "render": "Diamond",
+   "defaults": {
+    "stops": [
+     {
+      "at": 0,
+      "hex": "#1B1212"
+     },
+     {
+      "at": 0.5,
+      "hex": "#5B2A4B"
+     },
+     {
+      "at": 1,
+      "hex": "#F5ECD8"
+     }
+    ]
+   }
+  },
+  {
+   "id": "stroke-checks",
+   "name": "Checks",
+   "note": "Alternating squares",
+   "kind": "pattern-stroke",
+   "source": "native",
+   "render": "Checks",
+   "defaults": {
+    "foreground": "#1B1212",
+    "background": "#F0E7D4",
+    "scale": 1
+   }
+  },
+  {
+   "id": "stroke-dots",
+   "name": "Dots",
+   "note": "A dot screen",
+   "kind": "pattern-stroke",
+   "source": "native",
+   "render": "Dots",
+   "defaults": {
+    "foreground": "#1B1212",
+    "background": "#F0E7D4",
+    "scale": 1
+   }
+  },
+  {
+   "id": "stroke-stripes",
+   "name": "Stripes",
+   "note": "Parallel bands",
+   "kind": "pattern-stroke",
+   "source": "native",
+   "render": "Stripes",
+   "defaults": {
+    "foreground": "#1B1212",
+    "background": "#F0E7D4",
+    "scale": 1
+   }
+  },
+  {
+   "id": "stroke-grid",
+   "name": "Grid",
+   "note": "Two crossing sets of lines",
+   "kind": "pattern-stroke",
+   "source": "native",
+   "render": "Grid",
+   "defaults": {
+    "foreground": "#1B1212",
+    "background": "#F0E7D4",
+    "scale": 1
+   }
+  }
+ ]
+}

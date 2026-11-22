@@ -37,10 +37,13 @@ VERDICT = {"palette": "palette:", "menu": "menu:", "assets": "assets:",
            "notes": "notes regression:", "bundle": "bundle check:",
            "artboards": "artboards:", "engine": "engine:",
            "engine-claims": "claims:", "chrome": "chrome:",
-           "headers": "headers:", "perf": "web-perf:"}
+           "headers": "headers:", "perf": "web-perf:",
+           "glyphs": "glyphs:", "effects": "effects:",
+           "effects-native": "effects-native:", "editor": "editor:"}
 
 
-def gates(browser, artboards, visual, live=None, handoff=None, perf=False):
+def gates(browser, artboards, visual, live=None, handoff=None, perf=False,
+          editor=True):
     rows = [
         ["palette", [sys.executable, "tools/check_palette.py"]],
         ["assets", [sys.executable, "tools/hash_assets.py", "--check"]],
@@ -62,9 +65,24 @@ def gates(browser, artboards, visual, live=None, handoff=None, perf=False):
         ["catalog", [sys.executable, "tools/build_catalog.py", "--check"]],
         ["packs", [sys.executable, "tools/build_packs.py", "--check"]],
         ["figma", [sys.executable, "tools/check_figma.py"]],
+        # Every face the pages ship covers every character they paint. Its own
+        # failure mode is a silent system-font substitution that moves the
+        # artboards, so it sits next to the other artboard inputs.
+        ["glyphs", [sys.executable, "tools/check_glyphs.py"]],
+        # The library's effects catalog: the file Twin renders from, its shape, and
+        # the native tables it must agree with. No JDK: the Kotlin is read as text,
+        # so the dependency points from the table towards the JSON, not backwards.
+        ["effects", [sys.executable, "tools/build_effects.py", "--check"]],
+        ["effects-native", [sys.executable, "tools/check_effects_native.py"]],
         ["pantone", [sys.executable, "tools/pantone_sheet.py", "--check"]],
         ["notes", [sys.executable, "tools/notes_regression.py"]],
         ["bundle", ["./build.sh", "stage"]],
+        # The editor's own suite. It builds the shelf's /editor/ page but is
+        # outside every other gate, so before this row existed its 255 tests ran
+        # only by hand. Last because it is the slowest and the least likely to be
+        # the cause of a shelf failure; --no-editor skips it on a machine without
+        # twin/node_modules (the app's source tree keeps its repository name).
+        ["editor", [sys.executable, "tools/check_editor.py"]],
     ]
     if artboards:
         rows.insert(len(rows) - 1, ["artboards", [sys.executable, "tools/check_artboards.py"]])
@@ -89,6 +107,8 @@ def gates(browser, artboards, visual, live=None, handoff=None, perf=False):
     if perf:
         url = browser or "http://127.0.0.1:8799/"
         rows.append(["perf", ["node", "tools/check_web_perf.js", "--url", url]])
+    if not editor:
+        rows = [row for row in rows if row[0] != "editor"]
     return rows
 
 
@@ -121,10 +141,15 @@ def main():
     parser.add_argument("--perf", action="store_true",
                         help="also run the report-only browser timing measurement; "
                              "uses --browser as the base URL or the local port 8799")
+    parser.add_argument("--no-editor", dest="no_editor",
+                        action="store_true",
+                        help="skip the editor gate (typecheck, unit tests, payload). "
+                             "Needs node_modules installed in editor/; CI runs it in its "
+                             "own job because the typecheck alone takes 45s")
     args = parser.parse_args()
 
     rows = gates(args.browser, args.artboards, args.visual, args.live,
-                 args.handoff_origin, args.perf)
+                 args.handoff_origin, args.perf, editor=not args.no_editor)
     print("the checks")
     failures = []
     began = time.monotonic()
@@ -134,9 +159,18 @@ def main():
         took = time.monotonic() - started
         lines = [line.strip() for line in ((done.stdout or "") + (done.stderr or "")).splitlines()
                  if line.strip() and not line.strip().startswith("==")]
-        mark = "ok" if done.returncode == 0 else "FAIL"
+        # 2 means "could not run here", which is not a pass and not a failure: the
+        # shelf job has no node toolchain, and the editor CI job runs this gate with
+        # dependencies installed. Saying "ok" would be a lie; failing would make a
+        # clean clone red for the wrong reason.
+        if done.returncode == 0:
+            mark = "ok"
+        elif done.returncode == 2:
+            mark = "skip"
+        else:
+            mark = "FAIL"
         print("  %-10s %-4s %5.1fs  %s" % (name, mark, took, summary(name, lines)[:104]))
-        if done.returncode:
+        if done.returncode and done.returncode != 2:
             failures.append((name, lines))
     total = time.monotonic() - began
 
