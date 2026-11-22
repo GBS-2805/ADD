@@ -4,6 +4,7 @@
     python3 tools/check_editor_bundles.py
     python3 tools/check_editor_bundles.py --research dist/ADD-4.0-editor.apk \\
         --release dist/ADD-3.9.apk
+    python3 tools/check_editor_bundles.py --expect research --apk dist/ADD-4.0-editor.apk
 
 The Robolectric routing test proves both branches, but it passes a build flag. This
 gate opens the two signed bundles instead: the research APK must ship
