@@ -46,13 +46,13 @@ async function openDocumentMenu(page: import("@playwright/test").Page) {
   await page.getByRole("button", { name: "Open document menu" }).click();
 }
 
-test("exports a portable .twin project file", async ({ page }) => {
+test("exports a portable .add project file", async ({ page }) => {
   await openEditor(page);
   const downloadPromise = page.waitForEvent("download");
   await openDocumentMenu(page);
-  await page.getByRole("menuitem", { name: "Save .twin" }).click();
+  await page.getByRole("menuitem", { name: "Save .add" }).click();
   const download = await downloadPromise;
-  expect(download.suggestedFilename()).toBe("open-studio.twin");
+  expect(download.suggestedFilename()).toBe("open-studio.add");
   const path = await download.path();
   if (!path) throw new Error("The project download has no path.");
   const project = JSON.parse(await readFile(path, "utf8")) as {
@@ -88,7 +88,7 @@ test("embeds imported PNG layers in the project file", async ({ page }) => {
 
   const downloadPromise = page.waitForEvent("download");
   await openDocumentMenu(page);
-  await page.getByRole("menuitem", { name: "Save .twin" }).click();
+  await page.getByRole("menuitem", { name: "Save .add" }).click();
   const download = await downloadPromise;
   const path = await download.path();
   if (!path) throw new Error("The project download has no path.");
@@ -176,7 +176,7 @@ test("opens a .twin project, replaces the document and resets edit history", asy
   await expect(page.locator(".ed-canvas .ed-layer-text")).toHaveCount(2);
   const chooserPromise = page.waitForEvent("filechooser");
   await openDocumentMenu(page);
-  await page.getByRole("menuitem", { name: "Open .twin" }).click();
+  await page.getByRole("menuitem", { name: "Open .add" }).click();
   const chooser = await chooserPromise;
   await chooser.setFiles({
     name: "imported.twin",
@@ -234,7 +234,7 @@ test("opens a project from a newer library and keeps the unknown effect on save"
   await openEditor(page);
   const chooserPromise = page.waitForEvent("filechooser");
   await openDocumentMenu(page);
-  await page.getByRole("menuitem", { name: "Open .twin" }).click();
+  await page.getByRole("menuitem", { name: "Open .add" }).click();
   const chooser = await chooserPromise;
   await chooser.setFiles({
     name: "future.twin",
@@ -250,7 +250,7 @@ test("opens a project from a newer library and keeps the unknown effect on save"
 
   const downloadPromise = page.waitForEvent("download");
   await openDocumentMenu(page);
-  await page.getByRole("menuitem", { name: "Save .twin" }).click();
+  await page.getByRole("menuitem", { name: "Save .add" }).click();
   const download = await downloadPromise;
   const path = await download.path();
   if (!path) throw new Error("The project download has no path.");
@@ -265,7 +265,7 @@ test("round-trips an empty document and keeps it printable", async ({ page }) =>
   await openEditor(page);
   const chooserPromise = page.waitForEvent("filechooser");
   await openDocumentMenu(page);
-  await page.getByRole("menuitem", { name: "Open .twin" }).click();
+  await page.getByRole("menuitem", { name: "Open .add" }).click();
   const chooser = await chooserPromise;
   await chooser.setFiles({
     name: "empty.twin",
@@ -278,7 +278,7 @@ test("round-trips an empty document and keeps it printable", async ({ page }) =>
 
   const downloadPromise = page.waitForEvent("download");
   await openDocumentMenu(page);
-  await page.getByRole("menuitem", { name: "Save .twin" }).click();
+  await page.getByRole("menuitem", { name: "Save .add" }).click();
   const download = await downloadPromise;
   const path = await download.path();
   if (!path) throw new Error("The empty project download has no path.");
