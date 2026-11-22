@@ -180,20 +180,26 @@ class TexturePresetTest {
         repeat(WARMUP_PASSES) { pass() }
         val samples = (1..SAMPLES).map { pass() }
         val calibrationMs = samples.min()
-        val factor = (calibrationMs / CALIBRATION_REFERENCE_MS).coerceIn(1.0, MAX_HOST_FACTOR)
-        val host = HostSpeed(calibrationMs, factor, FRAME_BUDGET_MS * factor)
+        val host = hostBudget(calibrationMs)
         println(
             ("texture host warmupPasses=$WARMUP_PASSES calibrationMs=%.3f " +
                 "referenceMs=%.3f factor=%.3f budgetMs=%.3f checksum=%d samplesMs=%s").format(
                     calibrationMs,
                     CALIBRATION_REFERENCE_MS,
-                    factor,
+                    host.factor,
                     host.budgetMs,
                     checksum,
                     samples.joinToString(", ") { "%.3f".format(it) },
                 ),
         )
         return host
+    }
+
+    /** Pure so the floor, the slow-host scale and the cap are testable without timing. */
+    private fun hostBudget(calibrationMs: Double): HostSpeed {
+        val factor = (calibrationMs / CALIBRATION_REFERENCE_MS)
+            .coerceIn(1.0, MAX_HOST_FACTOR)
+        return HostSpeed(factor, FRAME_BUDGET_MS * factor)
     }
 
     /** Fixed probe data, so the host measurement is cheap, deterministic and JIT-stable. */
@@ -229,11 +235,7 @@ class TexturePresetTest {
         val bestMs: Double = samples.min()
     }
 
-    private data class HostSpeed(
-        val calibrationMs: Double,
-        val factor: Double,
-        val budgetMs: Double,
-    )
+    private data class HostSpeed(val factor: Double, val budgetMs: Double)
 
     private companion object {
         const val FRAME_BUDGET_MS = 16.0
@@ -244,6 +246,21 @@ class TexturePresetTest {
         const val SAMPLES = 9
         const val CALIBRATION_STEPS = 1 shl 21
         const val CALIBRATION_MASK = 4_095
+    }
+
+    @Test
+    fun hostBudgetCoversFloorSlowHostAndCap() {
+        val faster = hostBudget(CALIBRATION_REFERENCE_MS / 2)
+        assertEquals(1.0, faster.factor, 0.0)
+        assertEquals(FRAME_BUDGET_MS, faster.budgetMs, 0.0)
+
+        val slow = hostBudget(CALIBRATION_REFERENCE_MS * 1.75)
+        assertEquals(1.75, slow.factor, 1e-9)
+        assertEquals(FRAME_BUDGET_MS * 1.75, slow.budgetMs, 1e-9)
+
+        val capped = hostBudget(CALIBRATION_REFERENCE_MS * 6.0)
+        assertEquals(MAX_HOST_FACTOR, capped.factor, 0.0)
+        assertEquals(FRAME_BUDGET_MS * MAX_HOST_FACTOR, capped.budgetMs, 0.0)
     }
 
     @Test

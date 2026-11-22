@@ -9,7 +9,7 @@ from tools import check_claims
 
 
 def make_tree(root: Path, *, bytes_count: int = 17_387_029,
-              current_tests: int = 231) -> None:
+              current_tests: int = check_claims.ENGINE_BASELINE) -> None:
     docs = root / "docs"
     (docs / "data").mkdir(parents=True)
     # MODERN_PAGES counts this fixture's pages: the root index, "compress", and the
@@ -100,11 +100,12 @@ class ClaimsTests(unittest.TestCase):
     def test_historical_160_mention_is_allowed(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
-            make_tree(root, current_tests=231)
+            make_tree(root)
             native = root / "NATIVE_EDITOR_V2.md"
             native.write_text(
                 "Historically this suite had 160 tests. They were expanded.\n"
-                "Current baseline: **231 tests, 0 failures, 0 errors**.\n",
+                "Current baseline: **%d tests, 0 failures, 0 errors**.\n"
+                % check_claims.ENGINE_BASELINE,
                 encoding="utf-8")
             self.assertEqual(check_claims.problems(root, engine=True), [])
 
