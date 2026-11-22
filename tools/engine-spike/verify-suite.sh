@@ -36,6 +36,14 @@ rm -rf "$RESULTS"
 status=0
 ./gradlew --no-daemon :app:testDebugUnitTest || status=$?
 
+# Host health is report-only and gets its own pass before the totals, so a failed
+# suite still leaves the factor and probe spread in the job summary.
+HOST_STATUS=0
+python3 "$ROOT/../../tools/check_texture_trend.py" --host-only --results "$RESULTS" || HOST_STATUS=$?
+if [ "$HOST_STATUS" -ne 0 ]; then
+    echo "engine-host: not checked (exit $HOST_STATUS)" >&2
+fi
+
 python3 - "$RESULTS" "$status" <<'PY'
 import glob
 import sys
@@ -67,6 +75,7 @@ for path in glob.glob(sys.argv[1] + "/*.xml"):
 # without re-running the suite.
 for line in diagnostics:
     print("engine-samples: " + line)
+
 if tests == 0:
     print("engine: no tests ran")
     raise SystemExit(1)
@@ -77,3 +86,12 @@ if int(sys.argv[2]) or failures or errors:
     raise SystemExit(1)
 print(f"engine: {tests} tests, 0 failures, 0 errors, {skipped} skipped")
 PY
+
+# Report-only: a family that doubles while still under the budget is a regression
+# the verdict cannot see. The comparison is deliberately not part of the exit status;
+# --strict exists for a future enforcing run after the baseline has history.
+TREND_STATUS=0
+python3 "$ROOT/../../tools/check_texture_trend.py" --no-host --results "$RESULTS" || TREND_STATUS=$?
+if [ "$TREND_STATUS" -ne 0 ]; then
+    echo "engine-trend: not checked (exit $TREND_STATUS)" >&2
+fi

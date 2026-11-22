@@ -10,7 +10,7 @@ SHA = "eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871"
 
 
 def workflow_text(*, ref: str = SHA, permissions: str = "contents: read",
-                  persist: bool = True, publish_if: str = "github.event_name == 'push' && github.ref == 'refs/heads/main'",
+                  persist: bool = True, publish_if: str = "github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'",
                   review_secret: str = "") -> str:
     return f"""name: test
 
@@ -73,9 +73,14 @@ class WorkflowTests(unittest.TestCase):
         found = self.check(workflow_text(review_secret="${{ secrets.VERCEL_ADMIN_TOKEN }}"))
         self.assertTrue(any("production secret" in item for item in found), found)
 
-    def test_publish_must_be_push_to_main(self):
+    def test_publish_must_be_manual_dispatch_to_main(self):
         found = self.check(workflow_text(publish_if="github.event_name == 'pull_request'"))
-        self.assertTrue(any("push to main" in item for item in found), found)
+        self.assertTrue(any("manual dispatch to main" in item for item in found), found)
+
+    def test_publish_must_not_run_on_push(self):
+        found = self.check(workflow_text(
+            publish_if="github.event_name == 'push' && github.ref == 'refs/heads/main'"))
+        self.assertTrue(any("must not run on push" in item for item in found), found)
 
 
 if __name__ == "__main__":

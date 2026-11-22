@@ -43,8 +43,9 @@ VERDICT = {"palette": "palette:", "menu": "menu:", "assets": "assets:",
 
 # Lines a gate prints on every run rather than only on failure, echoed after its row.
 # The engine gate's frame budget is timing-dependent, so the visual log carries each
-# family's warmup passes and samples and a failure can be read without re-running it.
-DETAIL = {"engine": "engine-samples:"}
+# family's warmup passes and samples plus the host factor and probe spread; a failure
+# can be read without re-running it, and a slow host is visible on a passing run.
+DETAIL = {"engine": ("engine-samples:", "engine-host:", "engine-trend:")}
 
 
 def gates(browser, artboards, visual, live=None, handoff=None, perf=False,
@@ -183,8 +184,9 @@ def main():
         print("  %-10s %-4s %5.1fs  %s" % (name, mark, took, summary(name, lines)[:104]))
         wanted_detail = DETAIL.get(name)
         if wanted_detail:
-            for line in (line for line in lines if line.startswith(wanted_detail)):
-                print("    " + line)
+            for prefix in wanted_detail:
+                for line in (line for line in lines if line.startswith(prefix)):
+                    print("    " + line)
         if done.returncode and done.returncode != 2:
             failures.append((name, lines))
     total = time.monotonic() - began
