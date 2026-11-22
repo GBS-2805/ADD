@@ -102,7 +102,14 @@ export function LayerView({
       ) : null}
 
       {layer.effect ? (
-        <span className="ed-layer-effect" data-testid={resolvedTestId ? "layer-effect-clip" : undefined} aria-hidden="true" style={{ overflow: "hidden", position: "absolute", inset: 0, pointerEvents: "none" }}>
+        <span
+          className="ed-layer-effect"
+          data-testid={resolvedTestId ? "layer-effect-clip" : undefined}
+          data-effect={layer.effect.kind}
+          data-effect-preset={"preset" in layer.effect ? layer.effect.preset : ""}
+          aria-hidden="true"
+          style={{ overflow: "hidden", position: "absolute", inset: 0, pointerEvents: "none" }}
+        >
           <EffectSurface effect={layer.effect} />
         </span>
       ) : null}
