@@ -114,31 +114,48 @@ class TexturePresetTest {
         }
     }
 
-    /**
-     * Best of nine at the measured size, after three untimed renders at that same
-     * size. Warming on a small field was not enough: the measured loop is compiled
-     * lazily, and on a shared runner the compiler threads are starving, so the first
-     * samples came from interpreted code and read at roughly twice the real cost.
-     * The warm passes are untimed and the samples are min-based, so the budget stays
-     * at one frame; only a family that is slow once compiled can fail.
+        /**
+     * Best of nine at the measured size, after untimed passes until the cost settles.
+     * Warming on a small field was not enough, and neither was a fixed three passes at
+     * the measured size: the loop is compiled lazily, and on a contended runner the
+     * compiler threads starve, so a fixed count can still sample half-compiled code
+     * (the 22 November visual runs failed a family that a twin run measured inside the
+     * budget). The warmup runs for at least eight passes, then until three consecutive
+     * passes are within 10% of the best, capped at thirty. The samples stay min-based
+     * and the budget stays at one frame, so only a family that is slow once compiled
+     * can fail.
      */
     private fun previewSamplesMs(family: TextureFamily, width: Int, height: Int): List<Double> {
         val seed = TexturePresets.seedFor(family)
-        repeat(WARMUP_PASSES) { TexturePresets.render(family, seed, width, height) }
+        var bestWarmMs = Double.MAX_VALUE
+        var settledPasses = 0
+        var warmupPasses = 0
+        while (warmupPasses < MAX_WARMUP_PASSES) {
+            val started = cpuNow()
+            TexturePresets.render(family, seed, width, height)
+            val passMs = (cpuNow() - started) / 1_000_000.0
+            warmupPasses += 1
+            bestWarmMs = minOf(bestWarmMs, passMs)
+            settledPasses = if (passMs <= bestWarmMs * 1.10) settledPasses + 1 else 0
+            if (warmupPasses >= MIN_WARMUP_PASSES && settledPasses >= SETTLED_PASSES) break
+        }
         val samples = (1..SAMPLES).map {
             val started = cpuNow()
             TexturePresets.render(family, seed, width, height)
             (cpuNow() - started) / 1_000_000.0
         }
         println(
-            "texture family=$family ${width}x$height passes=$WARMUP_PASSES " +
-                "samplesMs=${samples.joinToString(",") { "%.3f".format(it) }}",
+            "texture family=$family ${width}x$height warmupPasses=$warmupPasses " +
+                "warmBestMs=${"%.3f".format(bestWarmMs)} " +
+                "samplesMs=${samples.joinToString(", ") { "%.3f".format(it) }}",
         )
         return samples
     }
 
     private companion object {
-        const val WARMUP_PASSES = 3
+        const val MIN_WARMUP_PASSES = 8
+        const val MAX_WARMUP_PASSES = 30
+        const val SETTLED_PASSES = 3
         const val SAMPLES = 9
     }
 
