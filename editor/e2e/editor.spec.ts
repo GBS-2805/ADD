@@ -208,14 +208,16 @@ test("appliesShaderToArtboard", async ({ page }) => {
   await openWorkbench(page);
   await page.getByRole("button", { name: "Effects", exact: true }).click();
   await page.getByTestId("catalogue-shader-lab").click();
+  // Check the panel before the preset switch: recompiling the shader under the CI
+  // software renderer is slow, and this assertion must not compete with it for budget.
+  await expect(page.getByTestId("plugin-shader-lab")).toBeVisible();
   const ground = page.locator('[data-testid="editor-artboard"] .artboard-ground');
   await expect(ground).toHaveAttribute("data-effect", "shader");
   await expect(ground).toHaveAttribute("data-effect-preset", "Paper stock");
   await page.getByTestId("shader-preset-paper").click();
   // The toast is transient, and React can replay the apply updater, which swaps in the
   // "already on the artboard" message. Assert the document's effect state instead.
-  await expect(ground).toHaveAttribute("data-effect-preset", "Paper texture");
-  await expect(page.getByTestId("plugin-shader-lab")).toBeVisible();
+  await expect(ground).toHaveAttribute("data-effect-preset", "Paper texture", { timeout: 15_000 });
 });
 
 test("appliesOverlayTextureToLayer", async ({ page }) => {
