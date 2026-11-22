@@ -129,6 +129,29 @@ describe("EditorShell", () => {
     expect(screen.queryByRole("heading", { name: "BMO Editor" })).toBeNull();
   });
 
+  it("shaderPresetPublishesPersistentEffectState", async () => {
+    renderWorkbench();
+    fireEvent.click(screen.getByRole("button", { name: /^Effects$/ }));
+    fireEvent.click(screen.getByTestId("catalogue-shader-lab"));
+    const ground = screen.getByTestId("editor-artboard").querySelector(".artboard-ground");
+    expect(ground).toHaveAttribute("data-effect", "shader");
+    fireEvent.click(screen.getByTestId("shader-preset-paper"));
+    await waitFor(() => expect(ground).toHaveAttribute("data-effect-preset", "Paper texture"));
+  });
+
+  it("texturePresetPublishesPersistentLayerEffectState", async () => {
+    renderWorkbench();
+    fireEvent.click(screen.getByRole("button", { name: /^Effects$/ }));
+    fireEvent.click(screen.getByTestId("catalogue-texture-lab"));
+    await waitFor(() => expect(screen.getByTestId("plugin-texture-lab")).toBeInTheDocument());
+    // The right panel's Effects tab is inert in jsdom, so the plugin controls are hidden from role queries.
+    fireEvent.click(screen.getByRole("button", { name: /^Layer$/, hidden: true }));
+    fireEvent.click(screen.getByTestId("texture-preset-paper"));
+    const clip = await screen.findByTestId("layer-effect-clip");
+    expect(clip).toHaveAttribute("data-effect", "texture");
+    expect(clip).toHaveAttribute("data-effect-preset", "PaperTexture");
+  });
+
   it("editorFontsAreLocal", () => {
     const tokens = readFileSync(resolve(process.cwd(), "src/styles/tokens.css"), "utf8");
     const manifest = JSON.parse(readFileSync(resolve(process.cwd(), "asset-manifest.json"), "utf8"));

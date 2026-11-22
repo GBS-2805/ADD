@@ -27,6 +27,8 @@ export function ArtboardView({
   onLayerSelect,
 }: ArtboardViewProps) {
   const selection = selectedIds ?? doc.selectedLayerIds;
+  const background = doc.background;
+  const backgroundPreset = background && "preset" in background ? background.preset : "";
   const style: CSSProperties = {
     width: ARTBOARD_WIDTH,
     height: ARTBOARD_HEIGHT,
@@ -42,7 +44,11 @@ export function ArtboardView({
       data-artboard-height={ARTBOARD_HEIGHT}
       role="presentation"
     >
-      <div className="artboard-ground">
+      <div
+        className="artboard-ground"
+        data-effect={background?.kind ?? "none"}
+        data-effect-preset={backgroundPreset}
+      >
         <EffectSurface effect={doc.background} />
       </div>
       <div className="artboard-grain" aria-hidden="true" />

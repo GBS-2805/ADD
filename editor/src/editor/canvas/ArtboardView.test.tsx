@@ -44,6 +44,13 @@ describe("ArtboardView", () => {
     expect(artboard).toHaveClass("ed-artboard");
   });
 
+  it("publishes the background effect state", () => {
+    render(<ArtboardView doc={makeDocument()} />);
+    const ground = screen.getByTestId("artboard").querySelector(".artboard-ground");
+    expect(ground).toHaveAttribute("data-effect", "solid");
+    expect(ground).toHaveAttribute("data-effect-preset", "");
+  });
+
   it("renders each layer at its canonical frame", () => {
     render(<ArtboardView doc={makeDocument()} />);
     const headline = screen.getByTestId("art-layer-headline");
@@ -86,6 +93,9 @@ describe("ArtboardView", () => {
 
   it("clips effects to the layer frame", () => {
     render(<ArtboardView doc={makeDocument()} />);
-    expect(screen.getByTestId("layer-effect-clip")).toHaveStyle({ overflow: "hidden" });
+    const clip = screen.getByTestId("layer-effect-clip");
+    expect(clip).toHaveStyle({ overflow: "hidden" });
+    expect(clip).toHaveAttribute("data-effect", "solid");
+    expect(clip).toHaveAttribute("data-effect-preset", "");
   });
 });
