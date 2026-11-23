@@ -12,6 +12,17 @@ const PERF_RESULTS = "test-results/editor-perf.json";
 const CPU_THROTTLE = 4;
 const FRAME_P95_BUDGET_MS = 33;
 const FRAME_MAX_BUDGET_MS = 50;
+/**
+ * Promoted on 2026-11-23 from six clean 64-layer runs at 4x CPU: p95 16.7-16.8 ms
+ * (one frame interval in every run), max 16.8 / 33.4 / 33.4 / 50.0 / 16.8 /
+ * 16.8 ms. The ceilings are the worst observed value plus 10%, rounded up to a
+ * tenth: 16.8 * 1.1 = 18.48 -> 18.5; 50.0 * 1.1 = 55. Max is the noisiest
+ * statistic, so 55 ms sits only 5 ms above the worst run -- less than one 60 Hz
+ * frame. That is a deliberate ratchet: a fourth dropped frame fails. Do not raise
+ * either ceiling without three new clean baselines.
+ */
+const SIXTY_FOUR_LAYER_P95_CEILING_MS = 18.5;
+const SIXTY_FOUR_LAYER_MAX_CEILING_MS = 55;
 
 test.describe.configure({ timeout: 240_000 });
 // Trace snapshots walk the live DOM on every mutation. That instrumentation is
@@ -247,16 +258,14 @@ test("twentyLayerDragHoldsTheFrameBudgetAtFourTimesCpu", async ({ page }) => {
   expectFrameBudget(desktop);
 });
 
-test("sixtyFourLayerDragRecordsFrameMetricsWithoutACeiling", async ({ page }) => {
+test("sixtyFourLayerDragHoldsTheMeasuredFrameCeilingAtFourTimesCpu", async ({ page }) => {
   const evidence = await dragAndMeasure(page, 360, 840, 64, "64-layers-360x840");
   await record(evidence);
   expect(evidence.layers).toBe(64);
   expect(evidence.elapsedMs).toBeGreaterThan(8_000);
-  // Report-only until three clean 4x production runs exist. Do not add a p95 or
-  // max ceiling here without promoting a measured baseline in the same change.
   expect(evidence.frameStats.count).toBeGreaterThan(0);
-  expect(Number.isFinite(evidence.frameStats.p95Ms)).toBe(true);
-  expect(Number.isFinite(evidence.frameStats.maxMs)).toBe(true);
-  expect(evidence.frameStats.p95Ms).toBeGreaterThanOrEqual(0);
-  expect(evidence.frameStats.maxMs).toBeGreaterThanOrEqual(0);
+  // Both assertions are required: p95 alone hides one long stall, max alone
+  // hides a run full of merely slow frames.
+  expect(evidence.frameStats.p95Ms).toBeLessThanOrEqual(SIXTY_FOUR_LAYER_P95_CEILING_MS);
+  expect(evidence.frameStats.maxMs).toBeLessThanOrEqual(SIXTY_FOUR_LAYER_MAX_CEILING_MS);
 });

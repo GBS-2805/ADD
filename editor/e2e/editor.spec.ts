@@ -339,6 +339,27 @@ test("phoneBottomSheetAt360", async ({ page }) => {
   await expect(inspector).toHaveAttribute("data-placement", "bottom");
 });
 
+test("closedDrawerBodiesRenderNoPanels", async ({ page }) => {
+  await openWorkbench(page, 360, 840);
+  // A closed sheet may still mount its Ark shell, but its body must hold no
+  // document panels: mounted behind the canvas they re-render on every edit for
+  // no visible result. `> *` also passes when the shell itself is not mounted.
+  const closedDrawerChildren = page.locator('[data-testid^="bottom-sheet-"] .ed-sheet-body > *');
+  await expect(closedDrawerChildren).toHaveCount(0);
+
+  await page.getByRole("button", { name: "Layers", exact: true }).click();
+  await expect(page.getByTestId("layers-panel")).toBeVisible();
+  await page.getByRole("button", { name: "Close Layers" }).click();
+  await expect(page.getByTestId("layers-panel")).toHaveCount(0);
+  await expect(closedDrawerChildren).toHaveCount(0);
+
+  await page.getByRole("button", { name: "Inspector", exact: true }).click();
+  await expect(page.getByTestId("inspector-panel")).toBeVisible();
+  await page.getByRole("button", { name: "Close Inspector" }).click();
+  await expect(page.getByTestId("inspector-panel")).toHaveCount(0);
+  await expect(closedDrawerChildren).toHaveCount(0);
+});
+
 test("phoneKeyboardKeepsFieldVisible", async ({ page }) => {
   await page.addInitScript(() => {
     Object.defineProperty(window, "visualViewport", {

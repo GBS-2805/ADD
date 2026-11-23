@@ -10,7 +10,7 @@
 
 **Spec:** `PLAN.md` (one-editor rule and native v2 shipping decision), `FINAL-TEST.md` (4.0 candidate, Studio retirement, blocked device gate), `NATIVE_EDITOR_V2.md` (native task list; its checkboxes are stale and are not evidence), `docs/superpowers/plans/2026-11-16-twin-workbench-v2.md` (browser baseline and known limitations), `editor/README.md` (browser workbench state), `AGENTS.md` (verification and evidence rules).
 
-**Status:** Native accepted. Task 2 (save-size invariant) is implemented, green and committed (`9456452`); Task 3 (CPU-throttled frame gate) is implemented in the working tree with its 20-layer phone gate green. Task 1 remains **BLOCKED** at the real-device step. Tasks 4–7 are not started. There is no commit, deploy or publish authorization in this plan.
+**Status:** Native accepted. Task 2 (save-size invariant) is implemented, green and committed (`9456452`); Task 3 (CPU-throttled frame gate) is committed (`ac3eb76`) with its 20-layer phone gate green and its 64-layer ceiling promoted from six clean baselines. Task 1 remains **BLOCKED** at the real-device step. Tasks 4–7 are not started. There is no commit, deploy or publish authorization in this plan.
 
 ---
 
@@ -289,7 +289,7 @@ The 64-layer case starts as **report-only**. Record three clean production runs 
 **Measured 2026-11-23, after the fix (same preview, Chromium 1.57, 4× CPU):**
 
 - 20 layers at 360×840: frame p95 **16.8 ms**, frame max **16.8 ms**, max long task **0 ms**, 700 frames sampled. The hard gate passes with the 50 ms budget unchanged.
-- 64 layers at 360×840: frame p95 **16.7 ms**, frame max **16.8 ms**, 708 frames. Report-only; still one run.
+- 64 layers at 360×840: frame p95 **16.7 ms**, frame max **16.8 ms**, 708 frames. Report-only at that point; promoted separately below after three more runs.
 - Desktop 20 layers at 1440×900: **not measured**. This VM's headless shell crashes the renderer on any viewport at or above 1024 px, and the same crash reproduces on the Task 2 HEAD build, so it predates this change and is not evidence about the editor. The desktop assertion stays unverified here and must be checked in CI or on a machine whose browser survives that layout.
 
 **Steps:**
@@ -300,7 +300,20 @@ The 64-layer case starts as **report-only**. Record three clean production runs 
 - [x] Persist one JSON result per case under `editor/test-results/editor-perf.json` with `{ case, throttle, p95Ms, maxMs, count }`; attach it to the Playwright result so a failed run carries the numbers. The file is read-merged because Playwright restarts the worker after a failed test.
 - [x] Upload that JSON with the existing editor artifacts. Do not replace the JUnit artifact.
 - [x] Run the production perf config locally with a production build; record the actual p95/max. **Done:** the 20-layer phone gate is green after the render-scope fix (p95 16.8 ms, max 16.8 ms, max long task 0 ms). The 50 ms budget was not changed. The desktop case could not run on this VM because its browser crashes at desktop widths on the unmodified HEAD build as well; it is reported as not measured, not as passing.
-- [ ] Collect three clean 64-layer 4× runs. Only then set the committed ceilings to the worst observed p95/max plus 10%, make the assertions hard and record the three runs in the PR. Never promote a ceiling from one run or from an unthrottled number. One run exists; not promoted.
+- [x] Collect three clean 64-layer 4× runs. Only then set the committed ceilings to the worst observed p95/max plus 10%, make the assertions hard and record the three runs in the PR. Never promote a ceiling from one run or from an unthrottled number. **Done:** six clean runs collected; p95 16.7–16.8 ms in all six, max 16.8 / 33.4 / 33.4 / 50.0 / 16.8 / 16.8 ms; committed ceilings 18.5 ms p95 and 55 ms max with hard assertions.
+
+**Measured 2026-11-23, 64-layer promotion (six clean local production-preview runs, Chromium 1.57, 4× CPU, 360×840):**
+
+| Run | Frames | p95 | Max | Max long task |
+|---|---|---|---|---|
+| 1 | 665 | 16.8 ms | 33.4 ms | 0 ms |
+| 2 | 677 | 16.8 ms | 50.0 ms | 51 ms |
+| 3 | 674 | 16.8 ms | 33.4 ms | 0 ms |
+| 4 | 685 | 16.7 ms | 16.8 ms | 0 ms |
+| 5 | 692 | 16.7 ms | 16.8 ms | 0 ms |
+| 6 | 687 | 16.7 ms | 16.8 ms | 0 ms |
+
+All six runs hold p95 at one frame interval, so the p95 ceiling is solid. Max is an extreme-value statistic and does not agree as tightly: three later runs dropped no frame at all, while the worst run dropped three (50.0 ms). The ceilings are still the worst observed value plus 10%: p95 16.8 ms → 18.48 ms, rounded up to **18.5 ms**; max 50.0 ms → **55 ms**. Because 55 − 50 = 5 ms is less than one 60 Hz frame (16.7 ms), the max ceiling tolerates no additional dropped frame; that ratchet is deliberate for a stress case, and a future run that needs widening must bring three new baselines rather than loosening this one on a flaky result. Both assertions are hard; a p95-only or max-only gate was rejected because each hides a different failure. Run 2's 50.0 ms frame came with a 51 ms long task; the 64-layer case asserts frames only, and no long-task ceiling is claimed for it.
 
 **Verification:**
 
@@ -607,6 +620,6 @@ Both must pass, and the production perf job must still pass on its own. If the t
 
 ## Handoff
 
-Native v2 is accepted as the app editor; the browser workbench remains a separate web surface. Task 1 stays **BLOCKED** until a real Android 13+ device is attached. Task 2 is **complete** and green (`9456452`). Task 3 is implemented and its 20-layer 4× phone gate is **green** without changing the budget: p95 16.8 ms, frame max 16.8 ms, max long task 0 ms over 700 frames, after moving the document out of the single store context, isolating the undo buttons and stopping closed drawers from rendering their panels. The 64-layer case remains report-only (one clean run: p95 16.7 ms, max 16.8 ms); it is not promoted. The desktop 20-layer assertion is **not measured** on this VM: the headless shell crashes at desktop widths on the Task 2 HEAD build too, so the crash is environmental and predates this change. Static gates are 29/29 green and the editor unit suite is 282/282. Do not promote the 64-layer ceiling or call the desktop case green without evidence.
+Native v2 is accepted as the app editor; the browser workbench remains a separate web surface. Task 1 stays **BLOCKED** until a real Android 13+ device is attached. Task 2 is **complete** and green (`9456452`). Task 3 is implemented and its 20-layer 4× phone gate is **green** without changing the budget: p95 16.8 ms, frame max 16.8 ms, max long task 0 ms over 700 frames, after moving the document out of the single store context, isolating the undo buttons and stopping closed drawers from rendering their panels. The 64-layer case is **promoted** from six clean runs (p95 16.7–16.8 ms throughout, max 16.8 / 33.4 / 33.4 / 50.0 / 16.8 / 16.8 ms) to hard ceilings of 18.5 ms p95 and 55 ms max, the worst observed value plus 10%; the 55 ms max is a deliberate ratchet 5 ms above the worst run, less than one frame. The desktop 20-layer assertion is **not measured** on this VM: the headless shell crashes at desktop widths on the Task 2 HEAD build too, so the crash is environmental and predates this change. Static gates are 29/29 green and the editor unit suite is 282/282. Do not raise the 64-layer ceilings without three new clean baselines, and do not call the desktop case green without evidence.
 
 Execution method: subagent-driven task boundaries, with one review after Task 2 before the next task starts. This host exposed no coding subagent, so Task 2 was executed inline under the same task boundary and TDD gate; no dispatch is fabricated.
