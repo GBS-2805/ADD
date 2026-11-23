@@ -52,6 +52,7 @@ interface DragEvidence {
   idleAttribution: string[];
   longTasks: number[];
   longTaskStarts: number[];
+  dragStartedAtMs: number;
   maxLongTaskMs: number;
   attribution: string[];
   throttle: number;
@@ -64,6 +65,9 @@ interface PerfResult extends FrameStats {
   longTasks: number[];
   maxLongTaskMs: number;
   attribution: string[];
+  longTaskStarts: number[];
+  elapsedMs: number;
+  dragStartedAtMs: number;
 }
 
 async function open(page: Page, width: number, height: number) {
@@ -168,11 +172,12 @@ async function dragAndMeasure(page: Page, width: number, height: number, count: 
     // settle, then measure the 50 moves together with pointerup's commit and undo
     // step, so releasing the drag cannot hide a long task outside the budget.
     await page.waitForTimeout(1_000);
-    await page.evaluate(() => {
+    const dragStartedAtMs = await page.evaluate(() => {
       const state = window as unknown as { __longTasks: number[]; __longTaskStarts: number[]; __longTaskAttribution: string[] };
       state.__longTasks = [];
       state.__longTaskStarts = [];
       state.__longTaskAttribution = [];
+      return performance.now();
     });
     const start = Date.now();
     for (let index = 1; index <= 50; index += 1) {
@@ -211,6 +216,7 @@ async function dragAndMeasure(page: Page, width: number, height: number, count: 
       idleAttribution: [...new Set(idleTasks.attribution)].slice(0, 5),
       longTasks: longTasks.map((duration) => Math.round(duration * 10) / 10),
       longTaskStarts: measurement.starts,
+      dragStartedAtMs,
       maxLongTaskMs: longTasks.length ? Math.max(...longTasks) : 0,
       attribution: [...new Set(measurement.attribution)].slice(0, 5),
       throttle: CPU_THROTTLE,
@@ -231,6 +237,9 @@ async function record(evidence: DragEvidence) {
     longTasks: evidence.longTasks,
     maxLongTaskMs: evidence.maxLongTaskMs,
     attribution: evidence.attribution,
+    longTaskStarts: evidence.longTaskStarts,
+    elapsedMs: evidence.elapsedMs,
+    dragStartedAtMs: evidence.dragStartedAtMs,
     ...evidence.frameStats,
   };
   let results: PerfResult[] = [];
