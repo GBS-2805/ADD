@@ -96,6 +96,9 @@ jobs:
       - name: The production drag budget
         # Builds the production bundle and runs the 20-layer drag with pointerup
         # included, isolated to one worker so another test cannot compete for CPU.
+        # A canvas timeout (they cluster on the software-WebGL fallback) must not
+        # hide the drag profile; the job still fails on that step.
+        if: always()
         run: npm run test:e2e:perf
         working-directory: editor
       - name: Keep the drag metrics
