@@ -1,14 +1,24 @@
 import { act, render } from "@testing-library/react";
 import { useEffect } from "react";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const pngMocks = vi.hoisted(() => ({ renderArtboardPng: vi.fn() }));
+const projectMocks = vi.hoisted(() => ({
+  serializeProject: vi.fn(),
+  actual: null as null | ((document: never) => Promise<string>),
+}));
 vi.mock("./pngExport", async (importOriginal) => ({
   ...(await importOriginal<typeof import("./pngExport")>()),
   renderArtboardPng: pngMocks.renderArtboardPng,
 }));
+vi.mock("./project", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("./project")>();
+  projectMocks.actual = actual.serializeProject;
+  projectMocks.serializeProject.mockImplementation(actual.serializeProject);
+  return { ...actual, serializeProject: projectMocks.serializeProject };
+});
 import { commitHistory, createHistory } from "./history";
-import { serializeProject } from "./project";
+import { MAX_PROJECT_BYTES } from "./project";
 import { EditorProvider, useEditorStore, useTransientTransforms, type EditorActions } from "./store";
 import type { EditorDocument, EditorEffect } from "./types";
 
@@ -34,6 +44,11 @@ function renderStore() {
   );
   return current as unknown as EditorActions;
 }
+
+beforeEach(() => {
+  projectMocks.serializeProject.mockReset();
+  if (projectMocks.actual) projectMocks.serializeProject.mockImplementation(projectMocks.actual);
+});
 
 const imageLayer = {
   id: "image-one",
@@ -141,6 +156,23 @@ describe("Editor store layers", () => {
     create.mockRestore();
     revoke.mockRestore();
     print.mockRestore();
+  });
+
+  it("refuses to download a project over the parser cap", async () => {
+    const store = renderStore();
+    const create = vi.spyOn(URL, "createObjectURL").mockReturnValue("blob:saved");
+    projectMocks.serializeProject.mockResolvedValueOnce({
+      length: MAX_PROJECT_BYTES + 1,
+    } as unknown as string);
+    try {
+      await act(async () => {
+        await store.saveProject();
+      });
+      expect(create).not.toHaveBeenCalled();
+      expect(current!.state.toast).toMatch(/64 MB/);
+    } finally {
+      create.mockRestore();
+    }
   });
 
   it("nativeExportWritesThroughTheBridge", async () => {

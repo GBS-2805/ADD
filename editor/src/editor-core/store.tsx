@@ -850,6 +850,14 @@ export function EditorProvider({ children, autosaveBackend }: EditorProviderProp
     const doc = stateRef.current.present;
     try {
       const source = await serializeProject(doc);
+      if (source.length > MAX_PROJECT_BYTES) {
+        const limit = Math.round(MAX_PROJECT_BYTES / (1024 * 1024));
+        const actual = Math.ceil(source.length / (1024 * 1024));
+        showToast(
+          `This project is ${actual} MB; the editor cannot reopen files over ${limit} MB. Remove a layer or use a smaller PNG.`,
+        );
+        return;
+      }
       downloadBlob(new Blob([source], { type: "application/json" }), projectFilename(doc));
       showToast("Project file saved.");
     } catch (error) {
