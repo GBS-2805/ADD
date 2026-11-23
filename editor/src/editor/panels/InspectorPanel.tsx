@@ -1,4 +1,4 @@
-import { memo, useDeferredValue } from "react";
+import { memo, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import { useEditorDocument, useEditorStore } from "../../editor-core/store";
 import { layerBounds, selectionBounds } from "../model/geometry";
 import type { EditorDocument, EditorEffect, EditorLayer } from "../../editor-core/types";
@@ -43,7 +43,7 @@ function DocumentInspector({ doc }: { doc: EditorDocument }) {
   );
 }
 
-function SingleInspector({ doc, layer }: { doc: EditorDocument; layer: EditorLayer }) {
+function SingleInspector({ doc, layer, stage }: { doc: EditorDocument; layer: EditorLayer; stage: number }) {
   const store = useEditorStore();
   const bounds = layerBounds(layer);
   return (
@@ -53,23 +53,27 @@ function SingleInspector({ doc, layer }: { doc: EditorDocument; layer: EditorLay
         <span>{layer.kind}</span>
       </div>
       <TransformSection layer={layer} />
-      <AlignSection layers={doc.layers} selectedIds={[layer.id]} />
-      <Section title="Appearance">
-        <div className="ed-inspector-inline">
-          <NumericField
-            label="Opacity"
-            value={Math.round(layer.opacity * 100)}
-            min={0}
-            max={100}
-            suffix="%"
-            onCommit={(value) => store.setLayerOpacity(layer.id, value / 100)}
-          />
-          <span className="ed-bounds-readout">{round(bounds.width)} × {round(bounds.height)} bounds</span>
-        </div>
-        <BlendSelect layer={layer} />
-        <button type="button" className="ed-inspector-action" onClick={() => store.setRightTab("effects")}>Open effects</button>
-      </Section>
-      {layer.kind === "text" && layer.text ? (
+      {stage >= 1 ? (
+        <>
+          <AlignSection layers={doc.layers} selectedIds={[layer.id]} />
+          <Section title="Appearance">
+            <div className="ed-inspector-inline">
+              <NumericField
+                label="Opacity"
+                value={Math.round(layer.opacity * 100)}
+                min={0}
+                max={100}
+                suffix="%"
+                onCommit={(value) => store.setLayerOpacity(layer.id, value / 100)}
+              />
+              <span className="ed-bounds-readout">{round(bounds.width)} × {round(bounds.height)} bounds</span>
+            </div>
+            <BlendSelect layer={layer} />
+            <button type="button" className="ed-inspector-action" onClick={() => store.setRightTab("effects")}>Open effects</button>
+          </Section>
+        </>
+      ) : null}
+      {stage >= 2 && layer.kind === "text" && layer.text ? (
         <Section title="Type">
           <FontSelect layer={layer} />
           <label className="ed-textarea-field">
@@ -82,19 +86,19 @@ function SingleInspector({ doc, layer }: { doc: EditorDocument; layer: EditorLay
           </label>
         </Section>
       ) : null}
-      {layer.kind === "image" && layer.image ? (
+      {stage >= 2 && layer.kind === "image" && layer.image ? (
         <Section title="Image">
           <div className="ed-document-readout">
             <span>Source</span><strong>{layer.image.width} × {layer.image.height} px</strong>
           </div>
         </Section>
       ) : null}
-      {layer.kind === "shape" ? (
+      {stage >= 2 && layer.kind === "shape" ? (
         <Section title="Shape">
           <p className="ed-panel-empty">{layer.shape?.variant ?? "star"} shape · every edit is undoable.</p>
         </Section>
       ) : null}
-      {layer.effect ? (
+      {stage >= 2 && layer.effect ? (
         <Section title="Effect">
           <div className="ed-document-readout">
             <span>Preset</span><strong>{backgroundLabel(layer.effect)}</strong>
@@ -107,7 +111,7 @@ function SingleInspector({ doc, layer }: { doc: EditorDocument; layer: EditorLay
           ) : null}
         </Section>
       ) : null}
-      {layer.kind !== "image" ? (
+      {stage >= 2 && layer.kind !== "image" ? (
         <Section title="Fill"><FillPicker layer={layer} /></Section>
       ) : null}
     </section>
@@ -148,11 +152,11 @@ function MultiInspector({ layers, selectedIds }: { layers: EditorLayer[]; select
  * canvas (and settle the drag) before the readout catches up one frame later.
  * Memoizing the body is what makes the urgent render skip it at all.
  */
-const InspectorBody = memo(function InspectorBody({ doc }: { doc: EditorDocument }) {
+const InspectorBody = memo(function InspectorBody({ doc, stage }: { doc: EditorDocument; stage: number }) {
   useRenderSpan("inspector-panel");
   const selected = doc.layers.filter((layer) => doc.selectedLayerIds.includes(layer.id));
   if (selected.length === 0) return <DocumentInspector doc={doc} />;
-  if (selected.length === 1) return <SingleInspector doc={doc} layer={selected[0]} />;
+  if (selected.length === 1) return <SingleInspector doc={doc} layer={selected[0]} stage={stage} />;
   return <MultiInspector layers={selected} selectedIds={doc.selectedLayerIds} />;
 });
 
@@ -160,12 +164,52 @@ function sameSelection(a: string[], b: string[]): boolean {
   return a.length === b.length && a.every((id, index) => id === b[index]);
 }
 
+/**
+ * Opening a project replaces the selection, and mounting the full inspector for
+ * that new layer in the open commit cost 23 ms at 4x CPU. A replaced document
+ * brings its sections in over the next two frames; ordinary selections still
+ * render the whole inspector immediately.
+ */
+function useInspectorStage(doc: EditorDocument): number {
+  const ids = useMemo(() => doc.layers.map((layer) => layer.id), [doc.layers]);
+  const signature = useMemo(() => ids.join("\u0000"), [ids]);
+  const previous = useRef(new Set(ids));
+  const [reveal, setReveal] = useState<{ signature: string; stage: number }>({ signature, stage: 2 });
+  const changed = reveal.signature !== signature;
+  const replacement =
+    changed &&
+    ids.filter((id) => !previous.current.has(id)).length > Math.max(1, ids.length / 2);
+
+  useEffect(() => {
+    if (!changed) return;
+    const replacing =
+      ids.filter((id) => !previous.current.has(id)).length > Math.max(1, ids.length / 2);
+    previous.current = new Set(ids);
+    if (!replacing) {
+      setReveal({ signature, stage: 2 });
+      return;
+    }
+    setReveal({ signature, stage: 0 });
+    const frames: number[] = [];
+    frames.push(
+      requestAnimationFrame(() => {
+        setReveal({ signature, stage: 1 });
+        frames.push(requestAnimationFrame(() => setReveal({ signature, stage: 2 })));
+      }),
+    );
+    return () => frames.forEach((frame) => cancelAnimationFrame(frame));
+  }, [changed, ids, signature]);
+
+  return replacement ? 0 : reveal.stage;
+}
+
 export function InspectorPanel() {
   const { doc } = useEditorDocument();
   const deferredDoc = useDeferredValue(doc);
+  const stage = useInspectorStage(doc);
   // A new selection must reach the fields immediately: the same opacity field
   // exists for every layer, so deferring it would let the next keystroke edit
   // the previous layer. Only a same-selection change (a transform) may lag.
   const shownDoc = sameSelection(doc.selectedLayerIds, deferredDoc.selectedLayerIds) ? deferredDoc : doc;
-  return <InspectorBody doc={shownDoc} />;
+  return <InspectorBody doc={shownDoc} stage={stage} />;
 }

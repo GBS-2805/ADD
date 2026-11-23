@@ -229,6 +229,15 @@ export interface EditorActions {
 
 const EditorContext = createContext<EditorActions | null>(null);
 
+/** Autosave moves on its own clock; only the status line subscribes to it. */
+const AutosaveContext = createContext<AutosaveState | null>(null);
+
+export function useAutosaveState(): AutosaveState {
+  const value = useContext(AutosaveContext);
+  if (!value) throw new Error("useAutosaveState must be used inside EditorProvider");
+  return value;
+}
+
 interface TransientTransformsStore {
   read: () => Record<string, LayerTransform> | null;
   write: (updates: Record<string, LayerTransform> | null) => void;
@@ -1114,30 +1123,40 @@ export function EditorProvider({ children, autosaveBackend }: EditorProviderProp
     window.print();
   }, []);
 
+  /**
+   * The editor state is read through a ref so an autosave status change does
+   * not rebuild the actions object. Rebuilding it re-rendered the layers panel
+   * and canvas -- the whole document UI -- for a line of text in the status bar.
+   */
+  const editorStateRef = useRef<EditorState | null>(null);
+  editorStateRef.current = {
+    autosave,
+    lastExport,
+    surface,
+    activePluginId,
+    catalogueOpen,
+    pluginHidden,
+    pluginSessionKey,
+    nativeTab,
+    layout,
+    nativeLens,
+    target,
+    toast: toastMessage,
+    toastExiting,
+    presenting,
+    effectPulse,
+    tool,
+    snapEnabled,
+    rulersVisible,
+    rightTab,
+    viewport,
+    canvasSize,
+    panels,
+  };
+
   const actions = useMemo<EditorActions>(() => ({
-    state: {
-      autosave,
-      lastExport,
-      surface,
-      activePluginId,
-      catalogueOpen,
-      pluginHidden,
-      pluginSessionKey,
-      nativeTab,
-      layout,
-      nativeLens,
-      target,
-      toast: toastMessage,
-      toastExiting,
-      presenting,
-      effectPulse,
-      tool,
-      snapEnabled,
-      rulersVisible,
-      rightTab,
-      viewport,
-      canvasSize,
-      panels,
+    get state() {
+      return editorStateRef.current as EditorState;
     },
     openPlugin,
     openNative,
@@ -1259,13 +1278,14 @@ export function EditorProvider({ children, autosaveBackend }: EditorProviderProp
     exportNativePng,
     printStage,
     showToast,
-    autosave,
   ]);
 
   return (
     <DocumentContext.Provider value={documentStore}>
       <TransientTransformsContext.Provider value={transientTransformsStore}>
-        <EditorContext.Provider value={actions}>{children}</EditorContext.Provider>
+        <AutosaveContext.Provider value={autosave}>
+          <EditorContext.Provider value={actions}>{children}</EditorContext.Provider>
+        </AutosaveContext.Provider>
       </TransientTransformsContext.Provider>
     </DocumentContext.Provider>
   );

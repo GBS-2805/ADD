@@ -1,6 +1,7 @@
 import {
   useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState,
   type CSSProperties,
@@ -21,6 +22,7 @@ import { useViewportGestures } from "./useViewportGestures";
 import { useDeviceLayout } from "../useDeviceLayout";
 import { fitViewport, screenToDoc, zoomAt, clampZoom, type Point, type Size } from "../model/viewport";
 import { useRenderSpan } from "../perfProfile";
+import { useRevealLayerCount } from "../useRevealLayerCount";
 
 const NO_RULERS = new Set(["phone", "cover", "fold"]);
 
@@ -28,6 +30,8 @@ export function Canvas() {
   useRenderSpan("canvas");
   const store = useEditorStore();
   const { doc } = useEditorDocument();
+  const layerIds = useMemo(() => doc.layers.map((layer) => layer.id), [doc.layers]);
+  const layerLimit = useRevealLayerCount(layerIds);
   const { viewport, tool, snapEnabled, rulersVisible } = store.state;
   const layout = useDeviceLayout();
   const containerRef = useRef<HTMLDivElement>(null);
@@ -168,6 +172,7 @@ export function Canvas() {
         viewport={viewport}
         guides={session.guides}
         marquee={session.marquee}
+        layerLimit={layerLimit}
         onLayerSelect={handleLayerSelect}
       />
       <div className="ed-canvas-caption">
@@ -183,11 +188,12 @@ interface ArtboardStageProps {
   viewport: Viewport;
   guides: SnapGuide[];
   marquee: Rect | null;
+  layerLimit: number;
   onLayerSelect: (id: string, event: ReactMouseEvent<HTMLElement> | ReactKeyboardEvent<HTMLElement>) => void;
 }
 
 /** Subscribes to drag transforms so pointer moves leave the editor shell alone. */
-function ArtboardStage({ doc, viewport, guides, marquee, onLayerSelect }: ArtboardStageProps) {
+function ArtboardStage({ doc, viewport, guides, marquee, layerLimit, onLayerSelect }: ArtboardStageProps) {
   const transientTransforms = useTransientTransforms();
   const stageStyle = {
     "--zoom": viewport.zoom,
@@ -202,11 +208,12 @@ function ArtboardStage({ doc, viewport, guides, marquee, onLayerSelect }: Artboa
     >
       <ArtboardView
         doc={doc}
+        layerLimit={layerLimit}
         onLayerSelect={onLayerSelect}
         testId="editor-artboard"
       />
       <SelectionOverlay
-        layers={doc.layers}
+        layers={doc.layers.slice(0, layerLimit)}
         selectedIds={doc.selectedLayerIds}
         transforms={transientTransforms ?? undefined}
         guides={guides}

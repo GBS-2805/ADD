@@ -9,6 +9,7 @@ import type { SelectionMode } from "../model/selection";
 import { usePointerReorder } from "./usePointerReorder";
 import { AddLayerMenu } from "../AddLayerMenu";
 import { useRenderSpan } from "../perfProfile";
+import { useRevealLayerCount } from "../useRevealLayerCount";
 
 type RenameState = { id: string; value: string } | null;
 
@@ -41,6 +42,67 @@ function LayerGrip({ rowId, name, onReorder }: { rowId: string; name: string; on
   );
 }
 
+/**
+ * The row menu is mounted only while it is open. Twenty Ark menu machines on
+ * every project open were a large part of the layers-panel commit.
+ */
+function LayerMenu({
+  layer,
+  displayIndex,
+  displayCount,
+  onDelete,
+}: {
+  layer: Pick<EditorLayer, "id" | "name">;
+  displayIndex: number;
+  displayCount: number;
+  onDelete: () => void;
+}) {
+  const store = useEditorStore();
+  const [open, setOpen] = useState(false);
+  const trigger = (
+    <button
+      type="button"
+      className="ed-layer-action"
+      aria-label={`Layer actions for ${layer.name}`}
+      title="Layer actions"
+      onClick={(event) => {
+        event.stopPropagation();
+        setOpen(true);
+      }}
+    >
+      <MoreHorizontal size={14} strokeWidth={1.7} />
+    </button>
+  );
+
+  if (!open) return trigger;
+
+  return (
+    <Menu.Root open onOpenChange={({ open: next }) => setOpen(next)} positioning={{ placement: "bottom-end", gutter: 4 }}>
+      <Menu.Trigger asChild>{trigger}</Menu.Trigger>
+      <Portal>
+        <Menu.Positioner>
+          <Menu.Content className="ed-menu ed-layer-menu">
+            <Menu.Item value="up" disabled={displayIndex === 0} onSelect={() => store.moveLayer(layer.id, "up")}>
+              Move up
+            </Menu.Item>
+            <Menu.Item
+              value="down"
+              disabled={displayIndex === displayCount - 1}
+              onSelect={() => store.moveLayer(layer.id, "down")}
+            >
+              Move down
+            </Menu.Item>
+            <Menu.Separator />
+            <Menu.Item value="delete" onSelect={onDelete}>
+              Delete layer
+            </Menu.Item>
+          </Menu.Content>
+        </Menu.Positioner>
+      </Portal>
+    </Menu.Root>
+  );
+}
+
 export function LayersPanel({ collapsed = false, compact = false }: { collapsed?: boolean; compact?: boolean }) {
   useRenderSpan("layers-panel");
   const store = useEditorStore();
@@ -49,7 +111,10 @@ export function LayersPanel({ collapsed = false, compact = false }: { collapsed?
   const [dragId, setDragId] = useState<string | null>(null);
   const suppressArkSelection = useRef(false);
   const fine = pointerIsFine();
-  const collection = useMemo(() => createLayerCollection(layers), [layers]);
+  const layerIds = useMemo(() => layers.map((layer) => layer.id), [layers]);
+  const revealed = useRevealLayerCount(layerIds);
+  const visibleLayers = useMemo(() => layers.slice(0, revealed), [layers, revealed]);
+  const collection = useMemo(() => createLayerCollection(visibleLayers), [visibleLayers]);
   const display = useMemo(() => displayLayers(layers), [layers]);
   const selectedDisplayIds = selectedIds;
 
@@ -233,39 +298,14 @@ export function LayersPanel({ collapsed = false, compact = false }: { collapsed?
             {layer.visible ? <Eye size={13} strokeWidth={1.7} /> : <EyeOff size={13} strokeWidth={1.7} />}
           </button>
 
-          {compact ? null : <Menu.Root positioning={{ placement: "bottom-end", gutter: 4 }}>
-            <Menu.Trigger asChild>
-              <button
-                type="button"
-                className="ed-layer-action"
-                aria-label={`Layer actions for ${layer.name}`}
-                title="Layer actions"
-                onClick={(event) => event.stopPropagation()}
-              >
-                <MoreHorizontal size={14} strokeWidth={1.7} />
-              </button>
-            </Menu.Trigger>
-            <Portal>
-              <Menu.Positioner>
-                <Menu.Content className="ed-menu ed-layer-menu">
-                  <Menu.Item value="up" disabled={displayIndex === 0} onSelect={() => store.moveLayer(layer.id, "up")}>
-                    Move up
-                  </Menu.Item>
-                  <Menu.Item
-                    value="down"
-                    disabled={displayIndex === display.length - 1}
-                    onSelect={() => store.moveLayer(layer.id, "down")}
-                  >
-                    Move down
-                  </Menu.Item>
-                  <Menu.Separator />
-                  <Menu.Item value="delete" onSelect={() => deleteLayers([layer.id], layer.id)}>
-                    Delete layer
-                  </Menu.Item>
-                </Menu.Content>
-              </Menu.Positioner>
-            </Portal>
-          </Menu.Root>}
+          {compact ? null : (
+            <LayerMenu
+              layer={layer}
+              displayIndex={displayIndex}
+              displayCount={display.length}
+              onDelete={() => deleteLayers([layer.id], layer.id)}
+            />
+          )}
 
           {compact ? null : <LayerGrip rowId={layer.id} name={layer.name} onReorder={reorderToTarget} />}
         </TreeView.Item>

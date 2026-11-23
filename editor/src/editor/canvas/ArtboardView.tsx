@@ -14,6 +14,8 @@ export interface ArtboardViewProps {
   exposeLayerIds?: boolean;
   className?: string;
   onLayerSelect?: (id: string, event: MouseEvent<HTMLElement> | KeyboardEvent<HTMLElement>) => void;
+  /** Staged project reveals may show only the first N layers for a frame or two. */
+  layerLimit?: number;
 }
 
 export const ArtboardView = memo(function ArtboardView({
@@ -25,8 +27,10 @@ export const ArtboardView = memo(function ArtboardView({
   exposeLayerIds = true,
   className = "",
   onLayerSelect,
+  layerLimit,
 }: ArtboardViewProps) {
   const selection = selectedIds ?? doc.selectedLayerIds;
+  const layers = layerLimit === undefined ? doc.layers : doc.layers.slice(0, layerLimit);
   const background = doc.background;
   const backgroundPreset = background && "preset" in background ? background.preset : "";
   const style: CSSProperties = {
@@ -53,7 +57,7 @@ export const ArtboardView = memo(function ArtboardView({
       </div>
       <div className="artboard-grain" aria-hidden="true" />
       <div className="ed-layer-stack">
-        {doc.layers.map((layer) => (
+        {layers.map((layer) => (
           <LayerView
             key={layer.id}
             layer={layer}
