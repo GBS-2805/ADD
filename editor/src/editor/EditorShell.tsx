@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type CSSProperties } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 import { Splitter, useSplitter } from "@ark-ui/react";
 import { ChevronLeft, ChevronRight, PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen } from "lucide-react";
 import { useEditorDocument, useEditorStore, useEditorToast } from "../editor-core/store";
@@ -14,7 +14,6 @@ import { PreviewMode } from "./PreviewMode";
 import { PrintArtboard } from "./PrintArtboard";
 import { useDeviceLayout } from "./useDeviceLayout";
 import { useFoldSegments } from "./useFoldSegments";
-import { useRevealLayerCount } from "./useRevealLayerCount";
 import { useEditorHotkeys } from "./useEditorHotkeys";
 import { PhoneToolDock } from "./mobile/PhoneToolDock";
 import { CoverQuickBar } from "./mobile/CoverQuickBar";
@@ -252,11 +251,7 @@ function FoldShell() {
 /** Print needs the document; keeping the subscription here leaves the shell out. */
 function DocumentPrintArtboard() {
   const { doc } = useEditorDocument();
-  const layerIds = useMemo(() => doc.layers.map((layer) => layer.id), [doc.layers]);
-  // The hidden print surface otherwise mounts every layer of a replaced document
-  // in the same commit as the editor, outside the panel render spans.
-  const layerLimit = useRevealLayerCount(layerIds);
-  return <PrintArtboard doc={doc} layerLimit={layerLimit} />;
+  return <PrintArtboard doc={doc} />;
 }
 
 /** Only this line re-renders when the toast changes, not the editor shell. */
