@@ -12,6 +12,8 @@ const PERF_RESULTS = "test-results/editor-perf.json";
 const CPU_THROTTLE = 4;
 const FRAME_P95_BUDGET_MS = 33;
 const FRAME_MAX_BUDGET_MS = 50;
+/** One 60 Hz interval. Project open must not miss a frame; the drag gates do not use this. */
+const ONE_FRAME_MS = 16.8;
 /**
  * Promoted on 2026-11-23 from six clean 64-layer runs at 4x CPU: p95 16.7-16.8 ms
  * (one frame interval in every run), max 16.8 / 33.4 / 33.4 / 50.0 / 16.8 /
@@ -98,6 +100,16 @@ interface PerfResult extends FrameStats {
   longFrames: LongAnimationFrame[];
 }
 
+interface OpenEvidence {
+  label: string;
+  throttle: number;
+  longTasks: number[];
+  maxLongTaskMs: number;
+  renderSpans: RenderSpan[];
+  longFrames: LongAnimationFrame[];
+  frameStats: FrameStats;
+}
+
 async function open(page: Page, width: number, height: number) {
   await page.setViewportSize({ width, height });
   await page.goto("/");
@@ -142,11 +154,13 @@ function withLayers(project: Project, count: number): Project {
   };
 }
 
-async function openProject(page: Page, project: Project) {
+async function openProject(page: Page, project: Project, beforeFiles?: () => Promise<void>) {
   const chooserPromise = page.waitForEvent("filechooser");
   await page.getByRole("button", { name: "Open document menu" }).click();
   await page.getByRole("menuitem", { name: "Open .add" }).click();
-  await (await chooserPromise).setFiles({
+  const chooser = await chooserPromise;
+  await beforeFiles?.();
+  await chooser.setFiles({
     name: "performance.add",
     mimeType: "application/json",
     buffer: Buffer.from(JSON.stringify(project)),
@@ -337,6 +351,29 @@ async function dragAndMeasure(page: Page, width: number, height: number, count: 
   }
 }
 
+async function recordOpen(evidence: OpenEvidence) {
+  const result = {
+    case: evidence.label,
+    throttle: evidence.throttle,
+    longTasks: evidence.longTasks,
+    maxLongTaskMs: evidence.maxLongTaskMs,
+    renderSpans: evidence.renderSpans,
+    longFrames: evidence.longFrames,
+    ...evidence.frameStats,
+  };
+  let results: Array<Record<string, unknown> & { case: string }> = [];
+  try {
+    const parsed = JSON.parse(await readFile(PERF_RESULTS, "utf8"));
+    if (Array.isArray(parsed)) results = parsed;
+  } catch {
+    // A first run has no previous results file.
+  }
+  results = results.filter((item) => item.case !== result.case);
+  results.push(result);
+  await mkdir("test-results", { recursive: true });
+  await writeFile(PERF_RESULTS, `${JSON.stringify(results, null, 2)}\n`);
+}
+
 async function record(evidence: DragEvidence) {
   const result: PerfResult = {
     case: evidence.label,
@@ -381,6 +418,102 @@ test("twentyLayerDragHoldsTheFrameBudgetAtFourTimesCpu", async ({ page }) => {
   await record(desktop);
   expect(desktop.maxLongTaskMs).toBeLessThanOrEqual(50);
   expectFrameBudget(desktop);
+});
+
+test("twentyLayerProjectOpensWithinOneFrameAtFourTimesCpu", async ({ page }) => {
+  await page.addInitScript(() => {
+    (window as unknown as { __perfProfile?: boolean }).__perfProfile = true;
+  });
+  await open(page, 1440, 900);
+  const project = withLayers(await baselineProject(page), 20);
+  const restoreCpu = await throttleCpu(page, CPU_THROTTLE);
+  try {
+    await page.evaluate(() => {
+      const state = window as unknown as {
+        __perfSpans?: unknown[];
+        __longTasks: number[];
+        __longTaskStarts: number[];
+        __longTaskAttribution: string[];
+        __longFrames: Array<Record<string, unknown>>;
+      };
+      state.__perfSpans = [];
+      state.__longTasks = [];
+      state.__longTaskStarts = [];
+      state.__longTaskAttribution = [];
+      state.__longFrames = [];
+      new PerformanceObserver((list) => {
+        for (const entry of list.getEntries()) {
+          state.__longTasks.push(entry.duration);
+          state.__longTaskStarts.push(Math.round(entry.startTime));
+        }
+      }).observe({ type: "longtask" });
+      try {
+        new PerformanceObserver((list) => {
+          for (const entry of list.getEntries()) {
+            const frame = entry as PerformanceEntry & {
+              renderStart?: number;
+              styleAndLayoutStart?: number;
+              blockingDuration?: number;
+              scripts?: Array<{
+                invoker?: string;
+                duration?: number;
+                forcedStyleAndLayoutDuration?: number;
+                sourceURL?: string;
+                sourceFunctionName?: string;
+              }>;
+            };
+            state.__longFrames.push({
+              startTime: frame.startTime,
+              duration: frame.duration,
+              renderStart: frame.renderStart ?? 0,
+              styleAndLayoutStart: frame.styleAndLayoutStart ?? 0,
+              blockingDuration: frame.blockingDuration ?? 0,
+              scripts: (frame.scripts ?? []).map((script) => ({
+                invoker: script.invoker ?? "",
+                duration: script.duration ?? 0,
+                forcedStyleAndLayoutDuration: script.forcedStyleAndLayoutDuration ?? 0,
+                sourceURL: script.sourceURL ?? "",
+                sourceFunctionName: script.sourceFunctionName ?? "",
+              })),
+            });
+          }
+        }).observe({ type: "long-animation-frame" } as PerformanceObserverInit);
+      } catch {
+        // Chromium-only; frames and spans still locate the open cost.
+      }
+    });
+    await openProject(page, project, () => startFrameProbe(page, 0));
+    // Include the 500 ms autosave that opening the file schedules.
+    await page.waitForTimeout(1_000);
+    const frameStats = await stopFrameProbe(page);
+    const measurement = await page.evaluate(() => {
+      const state = window as unknown as {
+        __perfSpans?: Array<{ id: string; ms: number; atMs: number }>;
+        __longTasks?: number[];
+        __longFrames?: Array<Record<string, unknown>>;
+      };
+      return {
+        spans: state.__perfSpans ?? [],
+        longTasks: state.__longTasks ?? [],
+        longFrames: state.__longFrames ?? [],
+      };
+    });
+    const evidence: OpenEvidence = {
+      label: "20-layers-open-1440x900",
+      throttle: CPU_THROTTLE,
+      longTasks: measurement.longTasks,
+      maxLongTaskMs: measurement.longTasks.length ? Math.max(...measurement.longTasks) : 0,
+      renderSpans: measurement.spans,
+      longFrames: measurement.longFrames as unknown as LongAnimationFrame[],
+      frameStats,
+    };
+    await recordOpen(evidence);
+    expect(evidence.frameStats.count).toBeGreaterThan(0);
+    expect(evidence.maxLongTaskMs).toBeLessThanOrEqual(50);
+    expect(evidence.frameStats.maxMs).toBeLessThanOrEqual(ONE_FRAME_MS);
+  } finally {
+    await restoreCpu();
+  }
 });
 
 test("sixtyFourLayerDragHoldsTheMeasuredFrameCeilingAtFourTimesCpu", async ({ page }) => {

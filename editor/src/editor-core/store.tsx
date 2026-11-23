@@ -30,6 +30,7 @@ import {
 import { renderArtboardPng, type PngExportResult } from "./pngExport";
 import { saveArtboardNatively } from "./nativeExport";
 import { canAddLayer, fitImageInsideArtboard, type Size } from "../editor/model/geometry";
+import { recordPerfSpan } from "../editor/perfProfile";
 import { reorderLayerIds } from "../editor/model/layerTree";
 import { nextSelection, pruneSelection, selectAllIds, type SelectionMode } from "../editor/model/selection";
 import type { EditorTool, RightTab, Viewport } from "../editor/types";
@@ -483,8 +484,13 @@ export function EditorProvider({ children, autosaveBackend }: EditorProviderProp
         const blob = await imageBlob(layer);
         if (blob) await handle.writeAsset(layer.image.assetId, blob);
       }
+      const serializeStarted = performance.now();
       const payload = serializeForStorage(doc);
-      await handle.write(payload);
+      recordPerfSpan("autosave-serialize", serializeStarted);
+      const writeStarted = performance.now();
+      const write = handle.write(payload);
+      recordPerfSpan("autosave-write", writeStarted);
+      await write;
       await handle.pruneAssets(referencedAssets(payload));
       pendingAssets.current.clear();
       setAutosave((current) => ({ ...current, status: "saved", savedAt: payload.savedAt, restoredLayers: null }));
@@ -1023,7 +1029,10 @@ export function EditorProvider({ children, autosaveBackend }: EditorProviderProp
           return;
         }
         try {
-          const document = parseProjectFile(await file.text());
+          const source = await file.text();
+          const parseStarted = performance.now();
+          const document = parseProjectFile(source);
+          recordPerfSpan("project-parse", parseStarted);
           const previous = stateRef.current;
           const staleImages = new Set<string>();
           for (const snapshot of [...previous.past, previous.present, ...previous.future]) {
@@ -1032,7 +1041,9 @@ export function EditorProvider({ children, autosaveBackend }: EditorProviderProp
             }
           }
           for (const src of staleImages) URL.revokeObjectURL(src);
+          const applyStarted = performance.now();
           applyHistory(createHistory(document));
+          recordPerfSpan("project-apply", applyStarted);
           setSurface("none");
           setEffectPulse(null);
           showToast("Project opened.");

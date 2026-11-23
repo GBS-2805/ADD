@@ -18,6 +18,8 @@ interface ProbeState {
   frames: Array<{ at: number; ms: number }>;
   last: number;
   running: boolean;
+  /** Intervals discarded before summarising; the drag uses three, the open case none. */
+  warmup: number;
 }
 
 type ProbeWindow = Window & { __frameProbe?: ProbeState };
@@ -35,10 +37,10 @@ export async function throttleCpu(page: Page, rate = 4): Promise<() => Promise<v
   };
 }
 
-export async function startFrameProbe(page: Page): Promise<void> {
-  await page.evaluate(() => {
+export async function startFrameProbe(page: Page, warmup = 3): Promise<void> {
+  await page.evaluate((warmupCount) => {
     const target = window as unknown as ProbeWindow;
-    const state: ProbeState = { frames: [], last: performance.now(), running: true };
+    const state: ProbeState = { frames: [], last: performance.now(), running: true, warmup: warmupCount };
     target.__frameProbe = state;
     const tick = (now: number) => {
       if (!state.running) return;
@@ -47,10 +49,10 @@ export async function startFrameProbe(page: Page): Promise<void> {
       requestAnimationFrame(tick);
     };
     requestAnimationFrame(tick);
-  });
+  }, warmup);
 }
 
-/** Stops sampling, discards the first three warm-up intervals and summarizes the rest. */
+/** Stops sampling, discards the requested warm-up intervals and summarizes the rest. */
 export async function stopFrameProbe(page: Page): Promise<FrameStats> {
   return page.evaluate(() => {
     const target = window as unknown as ProbeWindow;
@@ -59,7 +61,7 @@ export async function stopFrameProbe(page: Page): Promise<FrameStats> {
     state.running = false;
 
     const frames = state.frames
-      .slice(3)
+      .slice(state.warmup)
       .filter((frame) => Number.isFinite(frame.ms) && frame.ms >= 0);
     const sorted = frames.map((frame) => frame.ms).sort((a, b) => a - b);
     const p95Ms = sorted.length
