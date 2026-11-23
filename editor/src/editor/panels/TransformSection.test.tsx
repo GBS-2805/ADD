@@ -82,6 +82,18 @@ describe("TransformSection", () => {
     expect(onCommit).toHaveBeenCalledWith(12);
   });
 
+  it("numericFieldDoesNotRepeatACommittedValueOnBlur", () => {
+    const onCommit = vi.fn();
+    render(<NumericField label="Test" value={5} onCommit={onCommit} />);
+    const input = screen.getByTestId("numeric-test");
+    fireEvent.input(input, { target: { value: "12" } });
+    fireEvent.keyDown(input, { key: "Enter" });
+    expect(onCommit).toHaveBeenCalledTimes(1);
+    fireEvent.blur(input);
+    expect(onCommit).toHaveBeenCalledTimes(1);
+    expect(onCommit).toHaveBeenCalledWith(12);
+  });
+
   it("numericFieldsUseDecimalInputMode", () => {
     render(<EditorProvider><Selected /></EditorProvider>);
     expect(screen.getByTestId("numeric-x")).toHaveAttribute("inputmode", "decimal");

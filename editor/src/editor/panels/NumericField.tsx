@@ -1,5 +1,5 @@
 import { NumberInput } from "@ark-ui/react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export interface NumericFieldProps {
   label: string;
@@ -20,8 +20,14 @@ const format = (value: number) => {
 
 export function NumericField({ label, value, min, max, step = 1, suffix, onCommit }: NumericFieldProps) {
   const [draft, setDraft] = useState(format(value));
+  // The value this field last sent, not the last value React handed back. A
+  // deferred inspector can still be showing the pre-commit value when Enter is
+  // followed by a blur (clicking Undo does exactly that), and re-sending the
+  // field's own commit would overwrite the undo.
+  const committed = useRef(value);
 
   useEffect(() => {
+    committed.current = value;
     setDraft(format(value));
   }, [value]);
 
@@ -33,7 +39,10 @@ export function NumericField({ label, value, min, max, step = 1, suffix, onCommi
     }
     const next = Math.max(min ?? -Infinity, Math.min(max ?? Infinity, parsed));
     setDraft(format(next));
-    if (next !== value) onCommit(next);
+    if (next !== committed.current) {
+      committed.current = next;
+      onCommit(next);
+    }
   };
 
   return (
