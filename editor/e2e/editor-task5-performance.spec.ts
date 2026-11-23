@@ -1,4 +1,4 @@
-import { readFile, writeFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { expect, test, type Page } from "@playwright/test";
 
 const EVIDENCE = "../artifacts/twin/editor";
@@ -157,6 +157,7 @@ async function dragAndMeasure(page: Page, width: number, height: number, count: 
     maxLongTaskMs: longTasks.length ? Math.max(...longTasks) : 0,
     attribution: [...new Set(measurement.attribution)].slice(0, 5),
   };
+  await mkdir(EVIDENCE, { recursive: true });
   await writeFile(`${EVIDENCE}/performance-${label}.json`, `${JSON.stringify(evidence, null, 2)}\n`);
   return evidence;
 }
