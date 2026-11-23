@@ -61,6 +61,9 @@ interface DragEvidence {
 interface PerfResult extends FrameStats {
   case: string;
   throttle: number;
+  longTasks: number[];
+  maxLongTaskMs: number;
+  attribution: string[];
 }
 
 async function open(page: Page, width: number, height: number) {
@@ -225,6 +228,9 @@ async function record(evidence: DragEvidence) {
   const result: PerfResult = {
     case: evidence.label,
     throttle: evidence.throttle,
+    longTasks: evidence.longTasks,
+    maxLongTaskMs: evidence.maxLongTaskMs,
+    attribution: evidence.attribution,
     ...evidence.frameStats,
   };
   let results: PerfResult[] = [];
