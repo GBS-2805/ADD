@@ -156,8 +156,16 @@ const InspectorBody = memo(function InspectorBody({ doc }: { doc: EditorDocument
   return <MultiInspector layers={selected} selectedIds={doc.selectedLayerIds} />;
 });
 
+function sameSelection(a: string[], b: string[]): boolean {
+  return a.length === b.length && a.every((id, index) => id === b[index]);
+}
+
 export function InspectorPanel() {
   const { doc } = useEditorDocument();
   const deferredDoc = useDeferredValue(doc);
-  return <InspectorBody doc={deferredDoc} />;
+  // A new selection must reach the fields immediately: the same opacity field
+  // exists for every layer, so deferring it would let the next keystroke edit
+  // the previous layer. Only a same-selection change (a transform) may lag.
+  const shownDoc = sameSelection(doc.selectedLayerIds, deferredDoc.selectedLayerIds) ? deferredDoc : doc;
+  return <InspectorBody doc={shownDoc} />;
 }
