@@ -53,7 +53,9 @@ interface DragEvidence {
   longTasks: number[];
   longTaskStarts: number[];
   dragStartedAtMs: number;
+  pointerUpAtMs: number | null;
   renderSpans: RenderSpan[];
+  longFrames: LongAnimationFrame[];
   maxLongTaskMs: number;
   attribution: string[];
   throttle: number;
@@ -66,6 +68,22 @@ interface RenderSpan {
   atMs: number;
 }
 
+interface LongAnimationFrame {
+  startTime: number;
+  offsetMs: number;
+  duration: number;
+  renderStart: number;
+  styleAndLayoutStart: number;
+  blockingDuration: number;
+  scripts: Array<{
+    invoker: string;
+    duration: number;
+    forcedStyleAndLayoutDuration: number;
+    sourceURL: string;
+    sourceFunctionName: string;
+  }>;
+}
+
 interface PerfResult extends FrameStats {
   case: string;
   throttle: number;
@@ -75,7 +93,9 @@ interface PerfResult extends FrameStats {
   longTaskStarts: number[];
   elapsedMs: number;
   dragStartedAtMs: number;
+  pointerUpAtMs: number | null;
   renderSpans: RenderSpan[];
+  longFrames: LongAnimationFrame[];
 }
 
 async function open(page: Page, width: number, height: number) {
@@ -150,10 +170,16 @@ async function dragAndMeasure(page: Page, width: number, height: number, count: 
   const restoreCpu = await throttleCpu(page, CPU_THROTTLE);
   try {
     await page.evaluate(() => {
-      const state = window as unknown as { __longTasks: number[]; __longTaskStarts: number[]; __longTaskAttribution: string[] };
+      const state = window as unknown as {
+        __longTasks: number[];
+        __longTaskStarts: number[];
+        __longTaskAttribution: string[];
+        __longFrames: Array<Record<string, unknown>>;
+      };
       state.__longTasks = [];
       state.__longTaskStarts = [];
       state.__longTaskAttribution = [];
+      state.__longFrames = [];
       new PerformanceObserver((list) => {
         for (const entry of list.getEntries()) {
           state.__longTasks.push(entry.duration);
@@ -162,6 +188,40 @@ async function dragAndMeasure(page: Page, width: number, height: number, count: 
           state.__longTaskAttribution.push(attribution.map((item) => `${item.name ?? ""} ${item.containerSelector ?? ""}`.trim()).join(" | "));
         }
       }).observe({ type: "longtask" });
+      try {
+        new PerformanceObserver((list) => {
+          for (const entry of list.getEntries()) {
+            const frame = entry as PerformanceEntry & {
+              renderStart?: number;
+              styleAndLayoutStart?: number;
+              blockingDuration?: number;
+              scripts?: Array<{
+                invoker?: string;
+                duration?: number;
+                forcedStyleAndLayoutDuration?: number;
+                sourceURL?: string;
+                sourceFunctionName?: string;
+              }>;
+            };
+            state.__longFrames.push({
+              startTime: frame.startTime,
+              duration: frame.duration,
+              renderStart: frame.renderStart ?? 0,
+              styleAndLayoutStart: frame.styleAndLayoutStart ?? 0,
+              blockingDuration: frame.blockingDuration ?? 0,
+              scripts: (frame.scripts ?? []).map((script) => ({
+                invoker: script.invoker ?? "",
+                duration: script.duration ?? 0,
+                forcedStyleAndLayoutDuration: script.forcedStyleAndLayoutDuration ?? 0,
+                sourceURL: script.sourceURL ?? "",
+                sourceFunctionName: script.sourceFunctionName ?? "",
+              })),
+            });
+          }
+        }).observe({ type: "long-animation-frame" } as PerformanceObserverInit);
+      } catch {
+        // Chromium-only; the frame probe still locates slow intervals without it.
+      }
     });
     await page.waitForTimeout(2_000);
     const idleTasks = await page.evaluate(() => {
@@ -186,11 +246,23 @@ async function dragAndMeasure(page: Page, width: number, height: number, count: 
     // step, so releasing the drag cannot hide a long task outside the budget.
     await page.waitForTimeout(1_000);
     const dragStartedAtMs = await page.evaluate(() => {
-      const state = window as unknown as { __longTasks: number[]; __longTaskStarts: number[]; __longTaskAttribution: string[]; __perfSpans?: unknown[] };
+      const state = window as unknown as {
+        __longTasks: number[];
+        __longTaskStarts: number[];
+        __longTaskAttribution: string[];
+        __perfSpans?: unknown[];
+        __longFrames?: unknown[];
+        __pointerUpAt?: number | null;
+      };
       state.__longTasks = [];
       state.__longTaskStarts = [];
       state.__longTaskAttribution = [];
       state.__perfSpans = [];
+      state.__longFrames = [];
+      state.__pointerUpAt = null;
+      window.addEventListener("pointerup", () => {
+        (window as unknown as { __pointerUpAt?: number }).__pointerUpAt = performance.now();
+      }, { capture: true, once: true });
       return performance.now();
     });
     const start = Date.now();
@@ -220,12 +292,16 @@ async function dragAndMeasure(page: Page, width: number, height: number, count: 
         __longTaskStarts: number[];
         __longTaskAttribution: string[];
         __perfSpans?: Array<{ id: string; ms: number; atMs: number }>;
+        __longFrames?: Array<Omit<LongAnimationFrame, "offsetMs">>;
+        __pointerUpAt?: number | null;
       };
       return {
         durations: state.__longTasks,
         starts: state.__longTaskStarts,
         attribution: state.__longTaskAttribution,
         spans: state.__perfSpans ?? [],
+        longFrames: state.__longFrames ?? [],
+        pointerUpAt: state.__pointerUpAt ?? null,
       };
     });
     const longTasks = measurement.durations;
@@ -241,7 +317,12 @@ async function dragAndMeasure(page: Page, width: number, height: number, count: 
       longTasks: longTasks.map((duration) => Math.round(duration * 10) / 10),
       longTaskStarts: measurement.starts,
       dragStartedAtMs,
+      pointerUpAtMs: measurement.pointerUpAt,
       renderSpans: measurement.spans,
+      longFrames: measurement.longFrames.map((frame) => ({
+        ...frame,
+        offsetMs: Math.round((frame.startTime - dragStartedAtMs) * 10) / 10,
+      })),
       maxLongTaskMs: longTasks.length ? Math.max(...longTasks) : 0,
       attribution: [...new Set(measurement.attribution)].slice(0, 5),
       throttle: CPU_THROTTLE,
@@ -265,7 +346,9 @@ async function record(evidence: DragEvidence) {
     longTaskStarts: evidence.longTaskStarts,
     elapsedMs: evidence.elapsedMs,
     dragStartedAtMs: evidence.dragStartedAtMs,
+    pointerUpAtMs: evidence.pointerUpAtMs,
     renderSpans: evidence.renderSpans,
+    longFrames: evidence.longFrames,
     ...evidence.frameStats,
   };
   let results: PerfResult[] = [];

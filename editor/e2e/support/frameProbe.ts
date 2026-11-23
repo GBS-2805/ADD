@@ -1,13 +1,21 @@
 import type { Page } from "@playwright/test";
 
+export interface SlowFrame {
+  /** Absolute `performance.now()` when the interval closed. */
+  atMs: number;
+  ms: number;
+}
+
 export interface FrameStats {
   count: number;
   p95Ms: number;
   maxMs: number;
+  /** Intervals above 25 ms, so a max at a vsync multiple can be located in time. */
+  slowFrames: SlowFrame[];
 }
 
 interface ProbeState {
-  frames: number[];
+  frames: Array<{ at: number; ms: number }>;
   last: number;
   running: boolean;
 }
@@ -34,7 +42,7 @@ export async function startFrameProbe(page: Page): Promise<void> {
     target.__frameProbe = state;
     const tick = (now: number) => {
       if (!state.running) return;
-      state.frames.push(now - state.last);
+      state.frames.push({ at: now, ms: now - state.last });
       state.last = now;
       requestAnimationFrame(tick);
     };
@@ -47,17 +55,20 @@ export async function stopFrameProbe(page: Page): Promise<FrameStats> {
   return page.evaluate(() => {
     const target = window as unknown as ProbeWindow;
     const state = target.__frameProbe;
-    if (!state) return { count: 0, p95Ms: 0, maxMs: 0 };
+    if (!state) return { count: 0, p95Ms: 0, maxMs: 0, slowFrames: [] };
     state.running = false;
 
     const frames = state.frames
       .slice(3)
-      .filter((frame) => Number.isFinite(frame) && frame >= 0);
-    const sorted = [...frames].sort((a, b) => a - b);
+      .filter((frame) => Number.isFinite(frame.ms) && frame.ms >= 0);
+    const sorted = frames.map((frame) => frame.ms).sort((a, b) => a - b);
     const p95Ms = sorted.length
       ? sorted[Math.max(0, Math.ceil(sorted.length * 0.95) - 1)]
       : 0;
-    const maxMs = frames.reduce((max, frame) => Math.max(max, frame), 0);
-    return { count: frames.length, p95Ms, maxMs };
+    const maxMs = sorted.length ? sorted[sorted.length - 1] : 0;
+    const slowFrames = frames
+      .filter((frame) => frame.ms > 25)
+      .map((frame) => ({ atMs: Math.round(frame.at * 10) / 10, ms: Math.round(frame.ms * 10) / 10 }));
+    return { count: frames.length, p95Ms, maxMs, slowFrames };
   });
 }

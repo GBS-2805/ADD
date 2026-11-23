@@ -16,8 +16,10 @@ interface PerfWindow extends Window {
  * `window.__perfProfile = true` before load; without that flag this costs one
  * boolean check and a no-op layout effect per render.
  *
- * The span starts at render and ends in this component's layout effect, which
- * React runs after its children's, so it covers the subtree's render and commit.
+ * The span starts in this component's render and ends in its layout effect.
+ * React finishes the whole render phase before running any layout effect, so the
+ * span can also include render work from components that render after this one;
+ * it is comparable across panels on the same commit, not an isolated subtree time.
  */
 export function useRenderSpan(id: string): void {
   const enabled = typeof window !== "undefined" && (window as PerfWindow).__perfProfile === true;
