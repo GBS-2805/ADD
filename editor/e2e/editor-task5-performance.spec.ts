@@ -1,7 +1,17 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { expect, test, type Page } from "@playwright/test";
+import {
+  startFrameProbe,
+  stopFrameProbe,
+  throttleCpu,
+  type FrameStats,
+} from "./support/frameProbe";
 
 const EVIDENCE = "../artifacts/twin/editor";
+const PERF_RESULTS = "test-results/editor-perf.json";
+const CPU_THROTTLE = 4;
+const FRAME_P95_BUDGET_MS = 33;
+const FRAME_MAX_BUDGET_MS = 50;
 
 test.describe.configure({ timeout: 240_000 });
 // Trace snapshots walk the live DOM on every mutation. That instrumentation is
@@ -18,6 +28,28 @@ interface Project {
     selectedLayerIds: string[];
     layers: Array<Record<string, unknown> & { id: string; transform: { x: number; y: number } }>;
   };
+}
+
+interface DragEvidence {
+  label: string;
+  viewport: string;
+  layers: number;
+  elapsedMs: number;
+  idleLongTasks: number[];
+  idleLongTaskStarts: number[];
+  idleMaxLongTaskMs: number;
+  idleAttribution: string[];
+  longTasks: number[];
+  longTaskStarts: number[];
+  maxLongTaskMs: number;
+  attribution: string[];
+  throttle: number;
+  frameStats: FrameStats;
+}
+
+interface PerfResult extends FrameStats {
+  case: string;
+  throttle: number;
 }
 
 async function open(page: Page, width: number, height: number) {
@@ -83,94 +115,148 @@ async function dragAndMeasure(page: Page, width: number, height: number, count: 
   const layer = page.getByTestId(`art-layer-perf-${count - 1}`);
   const box = await layer.boundingBox();
   if (!box) throw new Error("The performance layer has no box.");
-  await page.evaluate(() => {
-    const state = window as unknown as { __longTasks: number[]; __longTaskStarts: number[]; __longTaskAttribution: string[] };
-    state.__longTasks = [];
-    state.__longTaskStarts = [];
-    state.__longTaskAttribution = [];
-    new PerformanceObserver((list) => {
-      for (const entry of list.getEntries()) {
-        state.__longTasks.push(entry.duration);
-        state.__longTaskStarts.push(Math.round(entry.startTime));
-        const attribution = (entry as PerformanceEntry & { attribution?: Array<{ name?: string; containerSelector?: string }> }).attribution ?? [];
-        state.__longTaskAttribution.push(attribution.map((item) => `${item.name ?? ""} ${item.containerSelector ?? ""}`.trim()).join(" | "));
-      }
-    }).observe({ type: "longtask" });
-  });
-  await page.waitForTimeout(2_000);
-  const idleTasks = await page.evaluate(() => {
-    const state = window as unknown as { __longTasks: number[]; __longTaskStarts: number[]; __longTaskAttribution: string[] };
-    const snapshot = {
-      durations: [...state.__longTasks],
-      starts: [...state.__longTaskStarts],
-      attribution: [...state.__longTaskAttribution],
-    };
-    state.__longTasks = [];
-    state.__longTaskStarts = [];
-    state.__longTaskAttribution = [];
-    return snapshot;
-  });
-  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
-  await page.mouse.down();
-  // Pointerdown selects the layer and begins the session. Let that first task
-  // settle, then measure the 50 moves together with pointerup's commit and undo
-  // step, so releasing the drag cannot hide a long task outside the budget.
-  await page.waitForTimeout(1_000);
-  await page.evaluate(() => {
-    const state = window as unknown as { __longTasks: number[]; __longTaskStarts: number[]; __longTaskAttribution: string[] };
-    state.__longTasks = [];
-    state.__longTaskStarts = [];
-    state.__longTaskAttribution = [];
-  });
-  const start = Date.now();
-  for (let index = 1; index <= 50; index += 1) {
-    await page.mouse.move(
-      box.x + box.width / 2 + 90 * (index / 50),
-      box.y + box.height / 2 + 60 * (index / 50),
+
+  const restoreCpu = await throttleCpu(page, CPU_THROTTLE);
+  try {
+    await page.evaluate(() => {
+      const state = window as unknown as { __longTasks: number[]; __longTaskStarts: number[]; __longTaskAttribution: string[] };
+      state.__longTasks = [];
+      state.__longTaskStarts = [];
+      state.__longTaskAttribution = [];
+      new PerformanceObserver((list) => {
+        for (const entry of list.getEntries()) {
+          state.__longTasks.push(entry.duration);
+          state.__longTaskStarts.push(Math.round(entry.startTime));
+          const attribution = (entry as PerformanceEntry & { attribution?: Array<{ name?: string; containerSelector?: string }> }).attribution ?? [];
+          state.__longTaskAttribution.push(attribution.map((item) => `${item.name ?? ""} ${item.containerSelector ?? ""}`.trim()).join(" | "));
+        }
+      }).observe({ type: "longtask" });
+    });
+    await page.waitForTimeout(2_000);
+    const idleTasks = await page.evaluate(() => {
+      const state = window as unknown as { __longTasks: number[]; __longTaskStarts: number[]; __longTaskAttribution: string[] };
+      const snapshot = {
+        durations: [...state.__longTasks],
+        starts: [...state.__longTaskStarts],
+        attribution: [...state.__longTaskAttribution],
+      };
+      state.__longTasks = [];
+      state.__longTaskStarts = [];
+      state.__longTaskAttribution = [];
+      return snapshot;
+    });
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+    // Include pointerdown and the first frames of the session; the sampler drops
+    // its own first three intervals as warm-up.
+    await startFrameProbe(page);
+    await page.mouse.down();
+    // Pointerdown selects the layer and begins the session. Let that first task
+    // settle, then measure the 50 moves together with pointerup's commit and undo
+    // step, so releasing the drag cannot hide a long task outside the budget.
+    await page.waitForTimeout(1_000);
+    await page.evaluate(() => {
+      const state = window as unknown as { __longTasks: number[]; __longTaskStarts: number[]; __longTaskAttribution: string[] };
+      state.__longTasks = [];
+      state.__longTaskStarts = [];
+      state.__longTaskAttribution = [];
+    });
+    const start = Date.now();
+    for (let index = 1; index <= 50; index += 1) {
+      await page.mouse.move(
+        box.x + box.width / 2 + 90 * (index / 50),
+        box.y + box.height / 2 + 60 * (index / 50),
+      );
+      await page.waitForTimeout(180);
+    }
+    const elapsedMs = Date.now() - start;
+    await page.mouse.up();
+    // Give the pointerup commit two real frames before closing the sampler.
+    await page.evaluate(
+      () => new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve()))),
     );
-    await page.waitForTimeout(180);
+    const frameStats = await stopFrameProbe(page);
+    // Pointerup commits the transform and its undo step. Give React and the browser
+    // one settled frame so the release cost lands in this measurement window.
+    await page.waitForTimeout(250);
+    const after = await layer.boundingBox();
+    if (!after) throw new Error("The performance layer lost its box after the drag.");
+    expect(Math.abs(after.x - box.x)).toBeGreaterThan(1);
+    const measurement = await page.evaluate(() => {
+      const state = window as unknown as { __longTasks: number[]; __longTaskStarts: number[]; __longTaskAttribution: string[] };
+      return { durations: state.__longTasks, starts: state.__longTaskStarts, attribution: state.__longTaskAttribution };
+    });
+    const longTasks = measurement.durations;
+    const evidence: DragEvidence = {
+      label,
+      viewport: `${width}x${height}`,
+      layers: count,
+      elapsedMs,
+      idleLongTasks: idleTasks.durations.map((duration) => Math.round(duration * 10) / 10),
+      idleLongTaskStarts: idleTasks.starts,
+      idleMaxLongTaskMs: idleTasks.durations.length ? Math.max(...idleTasks.durations) : 0,
+      idleAttribution: [...new Set(idleTasks.attribution)].slice(0, 5),
+      longTasks: longTasks.map((duration) => Math.round(duration * 10) / 10),
+      longTaskStarts: measurement.starts,
+      maxLongTaskMs: longTasks.length ? Math.max(...longTasks) : 0,
+      attribution: [...new Set(measurement.attribution)].slice(0, 5),
+      throttle: CPU_THROTTLE,
+      frameStats,
+    };
+    await mkdir(EVIDENCE, { recursive: true });
+    await writeFile(`${EVIDENCE}/performance-${label}.json`, `${JSON.stringify(evidence, null, 2)}\n`);
+    return evidence;
+  } finally {
+    await restoreCpu();
   }
-  const elapsedMs = Date.now() - start;
-  await page.mouse.up();
-  // Pointerup commits the transform and its undo step. Give React and the browser
-  // one settled frame so the release cost lands in this measurement window.
-  await page.waitForTimeout(250);
-  const after = await layer.boundingBox();
-  if (!after) throw new Error("The performance layer lost its box after the drag.");
-  expect(Math.abs(after.x - box.x)).toBeGreaterThan(1);
-  const measurement = await page.evaluate(() => {
-    const state = window as unknown as { __longTasks: number[]; __longTaskStarts: number[]; __longTaskAttribution: string[] };
-    return { durations: state.__longTasks, starts: state.__longTaskStarts, attribution: state.__longTaskAttribution };
-  });
-  const longTasks = measurement.durations;
-  const evidence = {
-    label,
-    viewport: `${width}x${height}`,
-    layers: count,
-    elapsedMs,
-    idleLongTasks: idleTasks.durations.map((duration) => Math.round(duration * 10) / 10),
-    idleLongTaskStarts: idleTasks.starts,
-    idleMaxLongTaskMs: idleTasks.durations.length ? Math.max(...idleTasks.durations) : 0,
-    idleAttribution: [...new Set(idleTasks.attribution)].slice(0, 5),
-    longTasks: longTasks.map((duration) => Math.round(duration * 10) / 10),
-    longTaskStarts: measurement.starts,
-    maxLongTaskMs: longTasks.length ? Math.max(...longTasks) : 0,
-    attribution: [...new Set(measurement.attribution)].slice(0, 5),
-  };
-  await mkdir(EVIDENCE, { recursive: true });
-  await writeFile(`${EVIDENCE}/performance-${label}.json`, `${JSON.stringify(evidence, null, 2)}\n`);
-  return evidence;
 }
 
-test("twentyLayerDragHasNoLongTaskOver50ms", async ({ page }) => {
+async function record(evidence: DragEvidence) {
+  const result: PerfResult = {
+    case: evidence.label,
+    throttle: evidence.throttle,
+    ...evidence.frameStats,
+  };
+  let results: PerfResult[] = [];
+  try {
+    const parsed = JSON.parse(await readFile(PERF_RESULTS, "utf8"));
+    if (Array.isArray(parsed)) results = parsed;
+  } catch {
+    // A first run has no previous results file.
+  }
+  results = results.filter((item) => item.case !== result.case);
+  results.push(result);
+  await mkdir("test-results", { recursive: true });
+  await writeFile(PERF_RESULTS, `${JSON.stringify(results, null, 2)}\n`);
+}
+
+function expectFrameBudget(evidence: DragEvidence) {
+  expect(evidence.frameStats.count).toBeGreaterThan(0);
+  expect(evidence.frameStats.p95Ms).toBeLessThanOrEqual(FRAME_P95_BUDGET_MS);
+  expect(evidence.frameStats.maxMs).toBeLessThanOrEqual(FRAME_MAX_BUDGET_MS);
+}
+
+test("twentyLayerDragHoldsTheFrameBudgetAtFourTimesCpu", async ({ page }) => {
   const phone = await dragAndMeasure(page, 360, 840, 20, "20-layers-360x840");
+  await record(phone);
   expect(phone.maxLongTaskMs).toBeLessThanOrEqual(50);
+  expectFrameBudget(phone);
+
   const desktop = await dragAndMeasure(page, 1440, 900, 20, "20-layers-1440x900");
+  await record(desktop);
   expect(desktop.maxLongTaskMs).toBeLessThanOrEqual(50);
+  expectFrameBudget(desktop);
 });
 
-test("sixtyFourLayerDragRecordsTheObservedLimit", async ({ page }) => {
+test("sixtyFourLayerDragRecordsFrameMetricsWithoutACeiling", async ({ page }) => {
   const evidence = await dragAndMeasure(page, 360, 840, 64, "64-layers-360x840");
+  await record(evidence);
   expect(evidence.layers).toBe(64);
   expect(evidence.elapsedMs).toBeGreaterThan(8_000);
+  // Report-only until three clean 4x production runs exist. Do not add a p95 or
+  // max ceiling here without promoting a measured baseline in the same change.
+  expect(evidence.frameStats.count).toBeGreaterThan(0);
+  expect(Number.isFinite(evidence.frameStats.p95Ms)).toBe(true);
+  expect(Number.isFinite(evidence.frameStats.maxMs)).toBe(true);
+  expect(evidence.frameStats.p95Ms).toBeGreaterThanOrEqual(0);
+  expect(evidence.frameStats.maxMs).toBeGreaterThanOrEqual(0);
 });

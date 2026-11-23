@@ -1,22 +1,26 @@
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { useEffect } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { EditorProvider, useEditorStore, type EditorActions } from "../../editor-core/store";
+import { EditorProvider, useEditorDocument, useEditorStore, type EditorActions, type EditorDocumentState } from "../../editor-core/store";
 import { LayersPanel } from "./LayersPanel";
 
 type Store = EditorActions;
 let current: Store | null = null;
+let currentDocument: EditorDocumentState | null = null;
 
 function Bridge() {
   const store = useEditorStore();
+  const documentState = useEditorDocument();
   useEffect(() => {
     current = store;
-  }, [store]);
+    currentDocument = documentState;
+  }, [store, documentState]);
   return null;
 }
 
 function renderPanel() {
   current = null;
+  currentDocument = null;
   render(
     <EditorProvider>
       <Bridge />
@@ -72,13 +76,13 @@ describe("LayersPanel", () => {
   });
 
   it("eyeButtonTogglesVisibilityWithoutChangingSelection", async () => {
-    const store = renderPanel();
+    renderPanel();
     fireEvent.click(row("type-open-studio"));
-    const selectedBefore = store.state.doc.selectedLayerIds;
+    const selectedBefore = currentDocument!.doc.selectedLayerIds;
     fireEvent.click(screen.getByRole("button", { name: "Hide Shape / Star" }));
     expect(screen.getByRole("button", { name: "Show Shape / Star" })).toBeInTheDocument();
-    expect(current!.state.doc.selectedLayerIds).toEqual(selectedBefore);
-    expect(current!.state.doc.layers.find((layer) => layer.id === "shape-star")?.visible).toBe(false);
+    expect(currentDocument!.doc.selectedLayerIds).toEqual(selectedBefore);
+    expect(currentDocument!.doc.layers.find((layer) => layer.id === "shape-star")?.visible).toBe(false);
   });
 
   it("doubleClickRenamesWithEnter", async () => {
@@ -101,13 +105,13 @@ describe("LayersPanel", () => {
   });
 
   it("dragReordersLayers", async () => {
-    const store = renderPanel();
+    renderPanel();
     const dataTransfer = { setData: vi.fn(), getData: () => "", effectAllowed: "", dropEffect: "" };
     fireEvent.dragStart(row("shape-orbit"), { dataTransfer });
     fireEvent.dragOver(row("type-open-studio"), { dataTransfer });
     fireEvent.drop(row("type-open-studio"), { dataTransfer });
-    await waitFor(() => expect(current!.state.doc.layers.map((layer) => layer.id)).not.toEqual(["type-open-studio", "shape-star", "shape-orbit"]));
-    expect(current!.state.doc.layers[0]?.id).toBe("shape-orbit");
+    await waitFor(() => expect(currentDocument!.doc.layers.map((layer) => layer.id)).not.toEqual(["type-open-studio", "shape-star", "shape-orbit"]));
+    expect(currentDocument!.doc.layers[0]?.id).toBe("shape-orbit");
   });
 
   it("touchReorderUsesPointerNotHtmlDrag", () => {
@@ -123,13 +127,13 @@ describe("LayersPanel", () => {
   });
 
   it("moveUpDownActionsReorder", async () => {
-    const store = renderPanel();
+    renderPanel();
     fireEvent.click(row("shape-star"));
     const trigger = screen.getByRole("button", { name: "Layer actions for Shape / Star" });
     fireEvent.pointerDown(trigger);
     fireEvent.click(trigger);
     fireEvent.click(await screen.findByRole("menuitem", { name: "Move up" }));
-    await waitFor(() => expect(current!.state.doc.layers.at(-1)?.id).toBe("shape-star"));
+    await waitFor(() => expect(currentDocument!.doc.layers.at(-1)?.id).toBe("shape-star"));
   });
 
   it("keyboardArrowMovesSelection", async () => {

@@ -75,7 +75,9 @@ export function BottomSheet({
                 <X size={17} strokeWidth={1.7} />
               </button>
             </header>
-            <div className="ed-sheet-body">{children}</div>
+            {/* A closed drawer must not keep rendering its document panels: on a
+                phone they would re-render on every edit behind the canvas. */}
+            <div className="ed-sheet-body">{open ? children : null}</div>
           </Drawer.Content>
         </Drawer.Positioner>
       </Portal>

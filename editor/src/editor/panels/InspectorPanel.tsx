@@ -1,4 +1,4 @@
-import { useEditorStore } from "../../editor-core/store";
+import { useEditorDocument, useEditorStore } from "../../editor-core/store";
 import { layerBounds, selectionBounds } from "../model/geometry";
 import type { EditorEffect, EditorLayer } from "../../editor-core/types";
 import { BlendSelect, FillPicker, FontSelect } from "./controls";
@@ -27,7 +27,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 
 function DocumentInspector() {
   const store = useEditorStore();
-  const { doc } = store.state;
+  const { doc } = useEditorDocument();
   return (
     <section className="ed-panel-body ed-inspector-panel" data-testid="inspector-panel" aria-label="Inspector">
       <div className="ed-panel-heading"><span>Artboard</span><span>Document</span></div>
@@ -44,6 +44,7 @@ function DocumentInspector() {
 
 function SingleInspector({ layer }: { layer: EditorLayer }) {
   const store = useEditorStore();
+  const { doc } = useEditorDocument();
   const bounds = layerBounds(layer);
   return (
     <section className="ed-panel-body ed-inspector-panel" data-testid="inspector-panel" aria-label="Inspector panel">
@@ -52,7 +53,7 @@ function SingleInspector({ layer }: { layer: EditorLayer }) {
         <span>{layer.kind}</span>
       </div>
       <TransformSection layer={layer} />
-      <AlignSection layers={store.state.doc.layers} selectedIds={[layer.id]} />
+      <AlignSection layers={doc.layers} selectedIds={[layer.id]} />
       <Section title="Appearance">
         <div className="ed-inspector-inline">
           <NumericField
@@ -114,8 +115,8 @@ function SingleInspector({ layer }: { layer: EditorLayer }) {
 }
 
 function MultiInspector({ layers }: { layers: EditorLayer[] }) {
-  const store = useEditorStore();
-  const bounds = selectionBounds(layers, store.state.doc.selectedLayerIds);
+  const { doc } = useEditorDocument();
+  const bounds = selectionBounds(layers, doc.selectedLayerIds);
   const opacities = new Set(layers.map((layer) => layer.opacity));
   const blends = new Set(layers.map((layer) => layer.blend));
   return (
@@ -127,7 +128,7 @@ function MultiInspector({ layers }: { layers: EditorLayer[] }) {
           <span>Position</span><strong>{round(bounds.x)}, {round(bounds.y)}</strong>
         </div>
       ) : null}
-      <AlignSection layers={store.state.doc.layers} selectedIds={store.state.doc.selectedLayerIds} />
+      <AlignSection layers={doc.layers} selectedIds={doc.selectedLayerIds} />
       <Section title="Appearance">
         <div className="ed-inspector-inline">
           <span>Opacity</span>
@@ -144,8 +145,7 @@ function MultiInspector({ layers }: { layers: EditorLayer[] }) {
 }
 
 export function InspectorPanel() {
-  const store = useEditorStore();
-  const { doc } = store.state;
+  const { doc } = useEditorDocument();
   const selected = doc.layers.filter((layer) => doc.selectedLayerIds.includes(layer.id));
   if (selected.length === 0) return <DocumentInspector />;
   if (selected.length === 1) return <SingleInspector layer={selected[0]} />;

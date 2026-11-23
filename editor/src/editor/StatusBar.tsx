@@ -1,4 +1,4 @@
-import { useEditorStore, type AutosaveState } from "../editor-core/store";
+import { useEditorDocument, useEditorStore, type AutosaveState } from "../editor-core/store";
 import { fitViewport, clampZoom } from "./model/viewport";
 
 /** The one-line description of what the browser store is doing. */
@@ -21,7 +21,8 @@ function autosaveTitle(autosave: AutosaveState): string {
 
 export function StatusBar() {
   const store = useEditorStore();
-  const { doc, viewport, snapEnabled, rulersVisible, canvasSize, autosave } = store.state;
+  const { doc } = useEditorDocument();
+  const { viewport, snapEnabled, rulersVisible, canvasSize, autosave } = store.state;
   const selected = doc.selectedLayerIds.length;
   const zoomPercent = Math.round(viewport.zoom * 100);
 

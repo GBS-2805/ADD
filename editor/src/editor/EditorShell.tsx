@@ -1,7 +1,7 @@
 import { useEffect, useState, type CSSProperties } from "react";
 import { Splitter, useSplitter } from "@ark-ui/react";
 import { ChevronLeft, ChevronRight, PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen } from "lucide-react";
-import { useEditorStore } from "../editor-core/store";
+import { useEditorDocument, useEditorStore } from "../editor-core/store";
 import { Canvas } from "./canvas/Canvas";
 import { LayersPanel } from "./panels/LayersPanel";
 import { BottomSheet } from "./panels/BottomSheet";
@@ -248,6 +248,12 @@ function FoldShell() {
   );
 }
 
+/** Print needs the document; keeping the subscription here leaves the shell out. */
+function DocumentPrintArtboard() {
+  const { doc } = useEditorDocument();
+  return <PrintArtboard doc={doc} />;
+}
+
 export function EditorShell() {
   const store = useEditorStore();
   const layout = useDeviceLayout();
@@ -302,7 +308,7 @@ export function EditorShell() {
         <PreviewMode layout={store.state.layout} onLayoutChange={store.setLayout} onExit={store.closePresentation} />
       ) : null}
       {layout.mode !== "cover" ? <CommandPalette open={paletteOpen} onOpenChange={setPaletteOpen} /> : null}
-      <PrintArtboard doc={store.state.doc} />
+      <DocumentPrintArtboard />
       {store.state.lastExport ? (
         <output
           hidden

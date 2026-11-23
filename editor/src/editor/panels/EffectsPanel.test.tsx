@@ -1,13 +1,14 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { useEffect } from "react";
 import { describe, expect, it } from "vitest";
-import { EditorProvider, useEditorStore, type EditorActions } from "../../editor-core/store";
+import { EditorProvider, useEditorDocument, useEditorStore, type EditorActions } from "../../editor-core/store";
 import { EffectsPanel } from "./EffectsPanel";
 
 let current: EditorActions | null = null;
 
 function Bridge() {
   const store = useEditorStore();
+  const { doc } = useEditorDocument();
   useEffect(() => {
     current = store;
   });
@@ -15,8 +16,8 @@ function Bridge() {
     <>
       <button type="button" onClick={() => store.selectLayers(["type-open-studio", "shape-star"], "replace")}>Select two</button>
       <button type="button" onClick={store.toggleNativeLens}>Toggle lens</button>
-      <output data-testid="background">{JSON.stringify(store.state.doc.background)}</output>
-      <output data-testid="layer-effect">{JSON.stringify(store.state.doc.layers.find((layer) => layer.id === "type-open-studio")?.effect)}</output>
+      <output data-testid="background">{JSON.stringify(doc.background)}</output>
+      <output data-testid="layer-effect">{JSON.stringify(doc.layers.find((layer) => layer.id === "type-open-studio")?.effect)}</output>
       <output data-testid="toast">{store.state.toast}</output>
       <EffectsPanel />
     </>

@@ -1,12 +1,13 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { useState } from "react";
 import { describe, expect, it, vi } from "vitest";
-import { EditorProvider, useEditorStore } from "../editor-core/store";
+import { EditorProvider, useEditorDocument, useEditorStore } from "../editor-core/store";
 import { CommandPalette } from "./CommandPalette";
 
 function Host({ initialOpen = true, onOpenChange = () => undefined }: { initialOpen?: boolean; onOpenChange?: (open: boolean) => void }) {
   const [open, setOpen] = useState(initialOpen);
   const store = useEditorStore();
+  const { doc } = useEditorDocument();
   return (
     <>
       <button
@@ -18,7 +19,7 @@ function Host({ initialOpen = true, onOpenChange = () => undefined }: { initialO
       >
         Open palette
       </button>
-      <output data-testid="selection">{store.state.doc.selectedLayerIds.join(",")}</output>
+      <output data-testid="selection">{doc.selectedLayerIds.join(",")}</output>
       <output data-testid="tool">{store.state.tool}</output>
       <CommandPalette
         open={open}

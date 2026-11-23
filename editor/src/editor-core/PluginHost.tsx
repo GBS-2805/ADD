@@ -1,6 +1,6 @@
 import { useEffect, useRef, type RefObject } from "react";
 import { getPlugin } from "./registry";
-import { useEditorStore } from "./store";
+import { useEditorDocument, useEditorStore } from "./store";
 import { NATIVE_LENS_LABELS } from "./types";
 
 export function PluginHost({
@@ -11,6 +11,7 @@ export function PluginHost({
   scrollContainerRef?: RefObject<HTMLElement | null>;
 }) {
   const store = useEditorStore();
+  const { doc } = useEditorDocument();
   const plugin = getPlugin(store.state.activePluginId);
   const sessionRef = useRef<HTMLElement>(null);
 
@@ -47,7 +48,7 @@ export function PluginHost({
       </header>
       <div className="plugin-scroll" key={store.state.pluginSessionKey}>
         <Panel
-          doc={store.state.doc}
+          doc={doc}
           target={store.state.target}
           setTarget={store.setTarget}
           apply={(effect) => store.applyEffect(effect)}

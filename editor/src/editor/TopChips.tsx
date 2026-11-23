@@ -1,7 +1,37 @@
 import { Menu, Portal } from "@ark-ui/react";
 import { Cpu, Eye, FileDown, FolderOpen, Printer, Redo2, Save, Undo2 } from "lucide-react";
-import { useEditorStore } from "../editor-core/store";
+import { useEditorHistoryState, useEditorStore } from "../editor-core/store";
 import { nativeExportAvailable } from "../editor-core/nativeExport";
+
+/** Kept apart from the document menu: an edit flips undo without re-rendering it. */
+function HistoryButtons() {
+  const store = useEditorStore();
+  const { canUndo, canRedo } = useEditorHistoryState();
+  return (
+    <div className="ed-history-buttons" role="group" aria-label="History">
+      <button
+        type="button"
+        className="ed-chip-button"
+        aria-label="Undo"
+        title="Undo · ⌘Z"
+        disabled={!canUndo}
+        onClick={store.undo}
+      >
+        <Undo2 size={15} strokeWidth={1.7} />
+      </button>
+      <button
+        type="button"
+        className="ed-chip-button"
+        aria-label="Redo"
+        title="Redo · ⇧⌘Z"
+        disabled={!canRedo}
+        onClick={store.redo}
+      >
+        <Redo2 size={15} strokeWidth={1.7} />
+      </button>
+    </div>
+  );
+}
 
 export function TopChips() {
   const store = useEditorStore();
@@ -44,28 +74,7 @@ export function TopChips() {
       </Menu.Root>
 
       <div className="ed-top-actions">
-        <div className="ed-history-buttons" role="group" aria-label="History">
-          <button
-            type="button"
-            className="ed-chip-button"
-            aria-label="Undo"
-            title="Undo · ⌘Z"
-            disabled={!store.canUndo}
-            onClick={store.undo}
-          >
-            <Undo2 size={15} strokeWidth={1.7} />
-          </button>
-          <button
-            type="button"
-            className="ed-chip-button"
-            aria-label="Redo"
-            title="Redo · ⇧⌘Z"
-            disabled={!store.canRedo}
-            onClick={store.redo}
-          >
-            <Redo2 size={15} strokeWidth={1.7} />
-          </button>
-        </div>
+        <HistoryButtons />
         <button
           type="button"
           className="ed-preview-button"

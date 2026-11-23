@@ -1,6 +1,6 @@
 import { Hand, Layers, MousePointer2, Undo2 } from "lucide-react";
 import { AddLayerMenu } from "../AddLayerMenu";
-import { useEditorStore } from "../../editor-core/store";
+import { useEditorHistoryState, useEditorStore } from "../../editor-core/store";
 
 const buttonStyle = { minWidth: 44, minHeight: 44 } as const;
 
@@ -12,6 +12,7 @@ export function CoverQuickBar({
   onPreview: () => void;
 }) {
   const store = useEditorStore();
+  const { canUndo } = useEditorHistoryState();
   const hand = store.state.tool === "hand";
   return (
     <nav className="ed-cover-quick-bar" data-testid="cover-quick-bar" aria-label="Cover quick actions">
@@ -34,7 +35,7 @@ export function CoverQuickBar({
         className="ed-tool-button"
         aria-label="Undo"
         style={buttonStyle}
-        disabled={!store.canUndo}
+        disabled={!canUndo}
         onClick={store.undo}
       >
         <Undo2 size={18} strokeWidth={1.7} />

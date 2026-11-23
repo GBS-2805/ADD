@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import { EditorProvider, useEditorStore } from "../editor-core/store";
+import { EditorProvider, useEditorDocument, useEditorStore } from "../editor-core/store";
 import { useEditorHotkeys } from "./useEditorHotkeys";
 
 function Harness({
@@ -15,15 +15,16 @@ function Harness({
   enabled?: boolean;
 }) {
   const store = useEditorStore();
+  const { doc } = useEditorDocument();
   useEditorHotkeys({ enabled, onPreview, onPalette, onEscape });
-  const selected = store.state.doc.selectedLayerIds;
+  const selected = doc.selectedLayerIds;
   return (
     <>
       <output data-testid="tool">{store.state.tool}</output>
       <output data-testid="selection">{selected.join(",")}</output>
-      <output data-testid="order">{store.state.doc.layers.map((layer) => layer.id).join(",")}</output>
+      <output data-testid="order">{doc.layers.map((layer) => layer.id).join(",")}</output>
       <output data-testid="transform">
-        {JSON.stringify(store.state.doc.layers.find((layer) => layer.id === "type-open-studio")?.transform)}
+        {JSON.stringify(doc.layers.find((layer) => layer.id === "type-open-studio")?.transform)}
       </output>
       <input aria-label="Editable" />
       <div role="dialog" aria-label="Dialog">

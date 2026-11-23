@@ -1,11 +1,11 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import { EditorProvider, useEditorStore } from "../../editor-core/store";
+import { EditorProvider, useEditorDocument } from "../../editor-core/store";
 import { AlignSection } from "./AlignSection";
 
 function Harness({ ids }: { ids: string[] }) {
-  const store = useEditorStore();
-  const layers = store.state.doc.layers;
+  const { doc } = useEditorDocument();
+  const layers = doc.layers;
   return (
     <>
       <AlignSection layers={layers} selectedIds={ids} />

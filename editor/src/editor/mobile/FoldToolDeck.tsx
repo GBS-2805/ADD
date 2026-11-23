@@ -3,12 +3,13 @@ import { Hand, MousePointer2, ZoomIn } from "lucide-react";
 import { AddLayerMenu } from "../AddLayerMenu";
 import { InspectorPanel } from "../panels/InspectorPanel";
 import { LayersPanel } from "../panels/LayersPanel";
-import { useEditorStore } from "../../editor-core/store";
+import { useEditorHistoryState, useEditorStore } from "../../editor-core/store";
 
 type FoldTab = "tools" | "layers" | "properties";
 
 export function FoldToolDeck() {
   const store = useEditorStore();
+  const { canUndo } = useEditorHistoryState();
   const [tab, setTab] = useState<FoldTab>("tools");
   return (
     <section className="ed-fold-deck" data-testid="fold-tool-deck" aria-label="Fold tools">
@@ -39,7 +40,7 @@ export function FoldToolDeck() {
               <ZoomIn size={18} strokeWidth={1.7} />
             </button>
             <AddLayerMenu />
-            <button type="button" className="ed-fold-button" aria-label="Undo" disabled={!store.canUndo} onClick={store.undo}>
+            <button type="button" className="ed-fold-button" aria-label="Undo" disabled={!canUndo} onClick={store.undo}>
               Undo
             </button>
           </div>

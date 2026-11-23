@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState, type DragEvent, type KeyboardEven
 import { Menu, Portal } from "@ark-ui/react";
 import { TreeView } from "@ark-ui/react/tree-view";
 import { Eye, EyeOff, GripVertical, Image as ImageIcon, MoreHorizontal, Shapes, Type } from "lucide-react";
-import { useEditorStore } from "../../editor-core/store";
+import { useEditorDocument, useEditorStore } from "../../editor-core/store";
 import type { EditorLayer } from "../../editor-core/types";
 import { createLayerCollection, displayLayers, type LayerTreeNode } from "../model/layerTree";
 import type { SelectionMode } from "../model/selection";
@@ -42,7 +42,7 @@ function LayerGrip({ rowId, name, onReorder }: { rowId: string; name: string; on
 
 export function LayersPanel({ collapsed = false, compact = false }: { collapsed?: boolean; compact?: boolean }) {
   const store = useEditorStore();
-  const { doc } = store.state;
+  const { doc } = useEditorDocument();
   const [renaming, setRenaming] = useState<RenameState>(null);
   const [dragId, setDragId] = useState<string | null>(null);
   const suppressArkSelection = useRef(false);

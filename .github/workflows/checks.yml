@@ -98,6 +98,13 @@ jobs:
         # included, isolated to one worker so another test cannot compete for CPU.
         run: npm run test:e2e:perf
         working-directory: editor
+      - name: Keep the drag metrics
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: editor-perf
+          path: editor/test-results/editor-perf.json
+          if-no-files-found: warn
       - name: Keep the test report
         if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2

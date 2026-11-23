@@ -8,7 +8,7 @@ import {
   type MouseEvent as ReactMouseEvent,
   type PointerEvent as ReactPointerEvent,
 } from "react";
-import { useEditorStore, useTransientTransforms } from "../../editor-core/store";
+import { useEditorDocument, useEditorStore, useTransientTransforms } from "../../editor-core/store";
 import type { EditorDocument } from "../../editor-core/types";
 import type { Viewport } from "../types";
 import type { Rect } from "../model/geometry";
@@ -25,7 +25,8 @@ const NO_RULERS = new Set(["phone", "cover", "fold"]);
 
 export function Canvas() {
   const store = useEditorStore();
-  const { doc, viewport, tool, snapEnabled, rulersVisible } = store.state;
+  const { doc } = useEditorDocument();
+  const { viewport, tool, snapEnabled, rulersVisible } = store.state;
   const layout = useDeviceLayout();
   const containerRef = useRef<HTMLDivElement>(null);
   const didFit = useRef(false);

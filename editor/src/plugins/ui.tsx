@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { useEditorStore } from "../editor-core/store";
+import { useEditorDocument } from "../editor-core/store";
 import type { EffectTarget } from "../editor-core/types";
 
 export function PluginIntro({ children }: { children: ReactNode }) {
@@ -13,8 +13,8 @@ export function TargetSwitch({
   value: EffectTarget;
   onChange: (target: EffectTarget) => void;
 }) {
-  const store = useEditorStore();
-  const layerAvailable = store.state.doc.selectedLayerIds.length === 1;
+  const { doc } = useEditorDocument();
+  const layerAvailable = doc.selectedLayerIds.length === 1;
   return (
     <div className="ed-target-switch">
       <div className="segmented" role="group" aria-label="Apply to">

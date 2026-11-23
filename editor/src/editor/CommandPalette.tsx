@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Dialog, Portal } from "@ark-ui/react";
 import { Search, X } from "lucide-react";
 import { buildCommands } from "../editor-core/commands";
-import { useEditorStore } from "../editor-core/store";
+import { useEditorDocument, useEditorStore } from "../editor-core/store";
 import type { EditorCommand } from "../editor-core/types";
 
 export interface CommandPaletteProps {
@@ -12,7 +12,8 @@ export interface CommandPaletteProps {
 
 export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
   const store = useEditorStore();
-  const commands = useMemo(() => buildCommands(store), [store]);
+  const documentState = useEditorDocument();
+  const commands = useMemo(() => buildCommands(store, documentState), [store, documentState]);
   const [query, setQuery] = useState("");
   const [active, setActive] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);

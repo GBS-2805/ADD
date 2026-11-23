@@ -1,6 +1,6 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { EditorProvider, useEditorStore, useTransientTransforms } from "../../editor-core/store";
+import { EditorProvider, useEditorDocument, useEditorStore, useTransientTransforms } from "../../editor-core/store";
 import { Canvas } from "./Canvas";
 import { StatusBar } from "../StatusBar";
 import { docToScreen } from "../model/viewport";
@@ -22,13 +22,14 @@ const rect = {
 
 function Probe() {
   const store = useEditorStore();
+  const { doc } = useEditorDocument();
   const transient = useTransientTransforms();
-  const star = store.state.doc.layers.find((layer) => layer.id === "shape-star");
+  const star = doc.layers.find((layer) => layer.id === "shape-star");
   return (
     <>
       <output data-testid="star-transform">{star ? JSON.stringify(star.transform) : ""}</output>
       <output data-testid="star-frame">{star ? JSON.stringify(layerFrame(star)) : ""}</output>
-      <output data-testid="selection">{store.state.doc.selectedLayerIds.join(",")}</output>
+      <output data-testid="selection">{doc.selectedLayerIds.join(",")}</output>
       <output data-testid="transient">{JSON.stringify(transient)}</output>
       <button type="button" onClick={store.undo}>undo</button>
       <button type="button" onClick={() => store.setLayerTransform("shape-star", { rotation: 37 })}>rotate37</button>

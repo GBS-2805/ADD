@@ -6,21 +6,25 @@ const pngMocks = vi.hoisted(() => ({ renderArtboardPng: vi.fn() }));
 vi.mock("./pngExport", () => ({ renderArtboardPng: pngMocks.renderArtboardPng }));
 
 import { AUTOSAVE_DELAY_MS, createMemoryBackend, type AutosaveBackend } from "./autosave";
-import { EditorProvider, useEditorStore, type EditorActions } from "./store";
+import { EditorProvider, useEditorDocument, useEditorStore, type EditorActions, type EditorDocumentState } from "./store";
 
 let current: EditorActions | null = null;
+let currentDocument: EditorDocumentState | null = null;
 
 function Bridge() {
   const store = useEditorStore();
+  const documentState = useEditorDocument();
   useEffect(() => {
     current = store;
-  }, [store]);
+    currentDocument = documentState;
+  }, [store, documentState]);
   return null;
 }
 
 /** Mounts a provider over `backend` and returns the live actions. */
 function mount(backend: AutosaveBackend | null): EditorActions {
   current = null;
+  currentDocument = null;
   const view = render(
     <EditorProvider autosaveBackend={backend}>
       <Bridge />
@@ -61,7 +65,7 @@ describe("autosave", () => {
     const backend = createMemoryBackend();
     const first = mount(backend);
     await flush();
-    const before = current!.state.doc.layers.length;
+    const before = currentDocument!.doc.layers.length;
 
     act(() => first.selectAllLayers());
     act(() => first.removeSelectedLayers());
@@ -73,7 +77,7 @@ describe("autosave", () => {
     mount(backend);
     await flush();
     // The empty document survives the reload: the removed layers stay removed.
-    expect(current!.state.doc.layers).toHaveLength(0);
+    expect(currentDocument!.doc.layers).toHaveLength(0);
     expect(current!.state.autosave.restoredLayers).toBe(0);
     expect(before).toBeGreaterThan(0);
   });
@@ -114,7 +118,7 @@ describe("autosave", () => {
     act(() => store.selectAllLayers());
     act(() => store.removeSelectedLayers());
     await settle();
-    expect(current!.state.doc.layers).toHaveLength(0);
+    expect(currentDocument!.doc.layers).toHaveLength(0);
     expect(current!.state.autosave.status).toBe("off");
   });
 
@@ -139,7 +143,7 @@ describe("autosave", () => {
     act(() => store.removeSelectedLayers());
     await settle();
     // Editing continues and the status says honestly that nothing was kept.
-    expect(current!.state.doc.layers).toHaveLength(0);
+    expect(currentDocument!.doc.layers).toHaveLength(0);
     expect(current!.state.autosave.status).toBe("off");
   });
 });

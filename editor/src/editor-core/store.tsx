@@ -18,7 +18,7 @@ import {
   type AutosaveBackend,
 } from "./autosave";
 import { sameEffect } from "./catalogue";
-import { commitHistory, createHistory, pushEffect, redoHistory, undoHistory, updateLayer } from "./history";
+import { commitHistory, createHistory, pushEffect, redoHistory, undoHistory, updateLayer, type DocumentHistory } from "./history";
 import {
   downloadBlob,
   MAX_PROJECT_BYTES,
@@ -121,9 +121,13 @@ export interface AutosaveState {
   droppedImages: number;
 }
 
-export interface EditorState {
-  history: ReturnType<typeof createHistory>;
+export interface EditorDocumentState {
   doc: EditorDocument;
+  canUndo: boolean;
+  canRedo: boolean;
+}
+
+export interface EditorState {
   lastExport: Omit<PngExportResult, "blob"> | null;
   surface: Surface;
   activePluginId: string | null;
@@ -150,8 +154,6 @@ export interface EditorState {
 
 export interface EditorActions {
   state: EditorState;
-  canUndo: boolean;
-  canRedo: boolean;
   openPlugin: (id: string) => void;
   openNative: (tab: NativeTab) => void;
   setNativeTab: (tab: NativeTab) => void;
@@ -189,6 +191,12 @@ export interface EditorActions {
   setLayerTransform: (id: string, transform: Partial<LayerTransform>) => void;
   setLayerVisibility: (id: string, visible: boolean) => void;
   moveLayer: (id: string, direction: "up" | "down") => void;
+  /** Moves the selection when exactly one layer is selected, and does nothing otherwise. */
+  moveSelectedLayer: (direction: "up" | "down") => void;
+  /** Deletes the selection; returns whether there was one. */
+  deleteSelection: () => boolean;
+  /** Shifts the selection by a delta; returns whether there was one. */
+  nudgeSelection: (x: number, y: number) => boolean;
   setTool: (tool: EditorTool) => void;
   setSnapEnabled: (enabled: boolean) => void;
   setRulersVisible: (visible: boolean) => void;
@@ -254,6 +262,58 @@ export function useTransientLayerTransform(
   return useSyncExternalStore(subscribe, read, read);
 }
 
+interface DocumentStore {
+  read: () => EditorDocumentState;
+  write: (history: DocumentHistory) => void;
+  subscribe: (listener: () => void) => () => void;
+}
+
+function documentSnapshot(history: DocumentHistory): EditorDocumentState {
+  return {
+    doc: history.present,
+    canUndo: history.past.length > 0,
+    canRedo: history.future.length > 0,
+  };
+}
+
+function createDocumentStore(history: DocumentHistory): DocumentStore {
+  let value = documentSnapshot(history);
+  const listeners = new Set<() => void>();
+  return {
+    read: () => value,
+    write(next) {
+      value = documentSnapshot(next);
+      listeners.forEach((listener) => listener());
+    },
+    subscribe(listener) {
+      listeners.add(listener);
+      return () => listeners.delete(listener);
+    },
+  };
+}
+
+const DocumentContext = createContext<DocumentStore | null>(null);
+
+/**
+ * The document and its history change on every edit. Keeping them in their own
+ * subscription means one dragged layer commits without re-rendering the editor
+ * chrome -- toolbar, menus, plugin shelf -- which has no document to show.
+ */
+export function useEditorDocument(): EditorDocumentState {
+  const store = useContext(DocumentContext);
+  if (!store) throw new Error("useEditorDocument must be used inside EditorProvider");
+  return useSyncExternalStore(store.subscribe, store.read, store.read);
+}
+
+/** Undo and redo flip far less often than the document changes. */
+export function useEditorHistoryState(): { canUndo: boolean; canRedo: boolean } {
+  const store = useContext(DocumentContext);
+  if (!store) throw new Error("useEditorHistoryState must be used inside EditorProvider");
+  const canUndo = useSyncExternalStore(store.subscribe, () => store.read().canUndo);
+  const canRedo = useSyncExternalStore(store.subscribe, () => store.read().canRedo);
+  return { canUndo, canRedo };
+}
+
 const cloneDoc = (doc: EditorDocument): EditorDocument => ({
   ...doc,
   layers: doc.layers.map((layer) => ({
@@ -274,7 +334,8 @@ export interface EditorProviderProps {
 }
 
 export function EditorProvider({ children, autosaveBackend }: EditorProviderProps) {
-  const [history, setHistory] = useState(() => createHistory(cloneDoc(initialDocument)));
+  const [stateRef] = useState(() => ({ current: createHistory(cloneDoc(initialDocument)) }));
+  const [documentStore] = useState(() => createDocumentStore(stateRef.current));
   const [surface, setSurface] = useState<Surface>("none");
   const [activePluginId, setActivePluginId] = useState<string | null>(null);
   const [catalogueOpen, setCatalogueOpen] = useState(true);
@@ -301,7 +362,6 @@ export function EditorProvider({ children, autosaveBackend }: EditorProviderProp
   const [panels, setPanels] = useState({ layers: true, inspector: true });
   const toastTimer = useRef<number | null>(null);
   const pulseSequence = useRef(0);
-  const stateRef = useRef(history);
   const [autosave, setAutosave] = useState<AutosaveState>({
     status: "idle",
     savedAt: null,
@@ -329,10 +389,6 @@ export function EditorProvider({ children, autosaveBackend }: EditorProviderProp
    * starter document can never overwrite the real one that is still loading.
    */
   const restoring = useRef(true);
-
-  useEffect(() => {
-    stateRef.current = history;
-  }, [history]);
 
   /** Reads the stored bytes for a live image layer, if it has any. */
   const imageBlob = useCallback(async (layer: EditorLayer): Promise<Blob | null> => {
@@ -406,7 +462,7 @@ export function EditorProvider({ children, autosaveBackend }: EditorProviderProp
         if (cancelled) return;
         if (revived) {
           revivedDocument = true;
-          setHistory(createHistory(revived.document));
+          applyHistory(createHistory(revived.document));
           setAutosave((current) => ({
             ...current,
             status: "saved",
@@ -437,9 +493,7 @@ export function EditorProvider({ children, autosaveBackend }: EditorProviderProp
   }, []);
 
   /** Every committed document change is an autosave candidate. */
-  useEffect(() => {
-    scheduleAutosave();
-  }, [history, scheduleAutosave]);
+  useEffect(() => documentStore.subscribe(scheduleAutosave), [documentStore, scheduleAutosave]);
 
   /** Clear a pending write on unmount. */
   useEffect(() => () => {
@@ -531,13 +585,16 @@ export function EditorProvider({ children, autosaveBackend }: EditorProviderProp
     setPanels((current) => ({ ...current, [panel]: !current[panel] }));
   }, []);
 
+  /** The one write point: history ref, document subscribers and autosave. */
+  const applyHistory = useCallback((next: DocumentHistory) => {
+    if (next === stateRef.current) return;
+    stateRef.current = next;
+    documentStore.write(next);
+  }, [documentStore]);
+
   const commit = useCallback((update: (doc: EditorDocument) => EditorDocument) => {
-    setHistory((current) => {
-      const next = commitHistory(current, update(current.present));
-      stateRef.current = next;
-      return next;
-    });
-  }, []);
+    applyHistory(commitHistory(stateRef.current, update(stateRef.current.present)));
+  }, [applyHistory]);
 
   const applyEffect = useCallback((effect: EditorEffect, nextTarget: EffectTarget = target) => {
     const currentDoc = stateRef.current.present;
@@ -562,53 +619,38 @@ export function EditorProvider({ children, autosaveBackend }: EditorProviderProp
       layerId: nextTarget === "layer" ? primary ?? null : null,
       nonce: pulseSequence.current,
     });
-    setHistory((current) => {
-      const next = pushEffect(current, nextTarget, effect);
-      stateRef.current = next;
-      return next;
-    });
+    applyHistory(pushEffect(stateRef.current, nextTarget, effect));
     showToast("Effect applied.");
   }, [showToast, target]);
 
   const undo = useCallback(() => {
-    // Same rule as `applyEffect`: report the outcome from the state this call is
-    // committing, not from a `setHistory` updater React may replay.
-    if (undoHistory(stateRef.current) === stateRef.current) return;
-    setHistory((current) => {
-      const next = undoHistory(current);
-      stateRef.current = next;
-      return next;
-    });
+    const next = undoHistory(stateRef.current);
+    if (next === stateRef.current) return;
+    applyHistory(next);
     showToast("Undid the last edit.");
-  }, [showToast]);
+  }, [applyHistory, showToast]);
 
   const redo = useCallback(() => {
-    if (redoHistory(stateRef.current) === stateRef.current) return;
-    setHistory((current) => {
-      const next = redoHistory(current);
-      stateRef.current = next;
-      return next;
-    });
+    const next = redoHistory(stateRef.current);
+    if (next === stateRef.current) return;
+    applyHistory(next);
     showToast("Redid the edit.");
-  }, [showToast]);
+  }, [applyHistory, showToast]);
 
   const selectLayers = useCallback((ids: string[], mode: SelectionMode = "replace") => {
-    setHistory((current) => {
-      let selected = current.present.selectedLayerIds;
-      if (mode === "replace") selected = [...ids];
-      else for (const id of ids) selected = nextSelection(selected, id, mode);
-      const selectedLayerIds = pruneSelection(selected, current.present.layers);
-      if (
-        selectedLayerIds.length === current.present.selectedLayerIds.length &&
-        selectedLayerIds.every((id, index) => id === current.present.selectedLayerIds[index])
-      ) {
-        return current;
-      }
-      const next = { ...current, present: { ...current.present, selectedLayerIds } };
-      stateRef.current = next;
-      return next;
-    });
-  }, []);
+    const current = stateRef.current;
+    let selected = current.present.selectedLayerIds;
+    if (mode === "replace") selected = [...ids];
+    else for (const id of ids) selected = nextSelection(selected, id, mode);
+    const selectedLayerIds = pruneSelection(selected, current.present.layers);
+    if (
+      selectedLayerIds.length === current.present.selectedLayerIds.length &&
+      selectedLayerIds.every((id, index) => id === current.present.selectedLayerIds[index])
+    ) {
+      return;
+    }
+    applyHistory({ ...current, present: { ...current.present, selectedLayerIds } });
+  }, [applyHistory]);
 
   const selectLayer = useCallback((id: string) => selectLayers([id], "replace"), [selectLayers]);
 
@@ -794,6 +836,19 @@ export function EditorProvider({ children, autosaveBackend }: EditorProviderProp
     transientTransformsStore.write(updates);
   }, [transientTransformsStore]);
 
+  const nudgeSelection = useCallback((x: number, y: number) => {
+    const { present } = stateRef.current;
+    const selected = new Set(present.selectedLayerIds);
+    if (selected.size === 0) return false;
+    const updates: Record<string, LayerTransform> = {};
+    for (const layer of present.layers) {
+      if (!selected.has(layer.id)) continue;
+      updates[layer.id] = { ...layer.transform, x: layer.transform.x + x, y: layer.transform.y + y };
+    }
+    setLayerTransforms(updates);
+    return true;
+  }, [setLayerTransforms]);
+
   const setLayerTransform = useCallback((id: string, transform: Partial<LayerTransform>) => {
     const layer = stateRef.current.present.layers.find((item) => item.id === id);
     if (!layer) return;
@@ -816,6 +871,11 @@ export function EditorProvider({ children, autosaveBackend }: EditorProviderProp
     });
   }, [commit]);
 
+  const moveSelectedLayer = useCallback((direction: "up" | "down") => {
+    const selected = stateRef.current.present.selectedLayerIds;
+    if (selected.length === 1) moveLayer(selected[0], direction);
+  }, [moveLayer]);
+
   const removeSelectedLayers = useCallback((ids?: string[]) => {
     commit((doc) => {
       const targets = new Set(ids ?? doc.selectedLayerIds);
@@ -833,6 +893,16 @@ export function EditorProvider({ children, autosaveBackend }: EditorProviderProp
     });
     showToast("Layer removed.");
   }, [commit, showToast]);
+
+  /**
+   * Input handling asks the store rather than reading a document snapshot, so
+   * nothing outside the provider ever needs a non-reactive read.
+   */
+  const deleteSelection = useCallback(() => {
+    if (stateRef.current.present.selectedLayerIds.length === 0) return false;
+    removeSelectedLayers();
+    return true;
+  }, [removeSelectedLayers]);
 
   const removeLayer = useCallback((id: string) => {
     commit((doc) => {
@@ -889,9 +959,7 @@ export function EditorProvider({ children, autosaveBackend }: EditorProviderProp
             }
           }
           for (const src of staleImages) URL.revokeObjectURL(src);
-          const next = createHistory(document);
-          stateRef.current = next;
-          setHistory(next);
+          applyHistory(createHistory(document));
           setSurface("none");
           setEffectPulse(null);
           showToast("Project opened.");
@@ -906,7 +974,7 @@ export function EditorProvider({ children, autosaveBackend }: EditorProviderProp
     }, { once: true });
     document.body.append(input);
     input.click();
-  }, [showToast]);
+  }, [applyHistory, showToast]);
 
   const exportPng = useCallback(async () => {
     try {
@@ -964,8 +1032,6 @@ export function EditorProvider({ children, autosaveBackend }: EditorProviderProp
 
   const actions = useMemo<EditorActions>(() => ({
     state: {
-      history,
-      doc: history.present,
       autosave,
       lastExport,
       surface,
@@ -989,8 +1055,6 @@ export function EditorProvider({ children, autosaveBackend }: EditorProviderProp
       canvasSize,
       panels,
     },
-    canUndo: history.past.length > 0,
-    canRedo: history.future.length > 0,
     openPlugin,
     openNative,
     setNativeTab,
@@ -1028,6 +1092,9 @@ export function EditorProvider({ children, autosaveBackend }: EditorProviderProp
     setLayerTransform,
     setLayerVisibility,
     moveLayer,
+    moveSelectedLayer,
+    deleteSelection,
+    nudgeSelection,
     setTool,
     setSnapEnabled,
     setRulersVisible,
@@ -1043,7 +1110,6 @@ export function EditorProvider({ children, autosaveBackend }: EditorProviderProp
     printStage,
     toast: showToast,
   }), [
-    history,
     lastExport,
     surface,
     activePluginId,
@@ -1113,9 +1179,11 @@ export function EditorProvider({ children, autosaveBackend }: EditorProviderProp
   ]);
 
   return (
-    <TransientTransformsContext.Provider value={transientTransformsStore}>
-      <EditorContext.Provider value={actions}>{children}</EditorContext.Provider>
-    </TransientTransformsContext.Provider>
+    <DocumentContext.Provider value={documentStore}>
+      <TransientTransformsContext.Provider value={transientTransformsStore}>
+        <EditorContext.Provider value={actions}>{children}</EditorContext.Provider>
+      </TransientTransformsContext.Provider>
+    </DocumentContext.Provider>
   );
 }
 

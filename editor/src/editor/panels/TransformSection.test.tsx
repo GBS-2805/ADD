@@ -1,14 +1,14 @@
 import { readFileSync } from "node:fs";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import { EditorProvider, useEditorStore } from "../../editor-core/store";
+import { EditorProvider, useEditorDocument } from "../../editor-core/store";
 import { NumericField } from "./NumericField";
 import { TransformSection } from "./TransformSection";
 import { layerFrame } from "../model/geometry";
 
 function Selected({ id = "shape-star" }: { id?: string }) {
-  const store = useEditorStore();
-  const layer = store.state.doc.layers.find((item) => item.id === id);
+  const { doc } = useEditorDocument();
+  const layer = doc.layers.find((item) => item.id === id);
   if (!layer) return null;
   const frame = layerFrame(layer);
   return (

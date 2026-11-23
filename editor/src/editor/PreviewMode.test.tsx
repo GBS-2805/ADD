@@ -1,12 +1,12 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { useState } from "react";
 import { describe, expect, it, vi } from "vitest";
-import { EditorProvider, useEditorStore } from "../editor-core/store";
+import { EditorProvider, useEditorDocument } from "../editor-core/store";
 import { PreviewMode } from "./PreviewMode";
 
 function Bridge() {
-  const store = useEditorStore();
-  return <output data-testid="document">{JSON.stringify(store.state.doc)}</output>;
+  const { doc } = useEditorDocument();
+  return <output data-testid="document">{JSON.stringify(doc)}</output>;
 }
 
 function PreviewHost() {

@@ -19,24 +19,35 @@ vi.mock("./project", async (importOriginal) => {
 });
 import { commitHistory, createHistory } from "./history";
 import { MAX_PROJECT_BYTES } from "./project";
-import { EditorProvider, useEditorStore, useTransientTransforms, type EditorActions } from "./store";
+import {
+  EditorProvider,
+  useEditorDocument,
+  useEditorStore,
+  useTransientTransforms,
+  type EditorActions,
+  type EditorDocumentState,
+} from "./store";
 import type { EditorDocument, EditorEffect } from "./types";
 
 let current: EditorActions | null = null;
+let currentDocument: EditorDocumentState | null = null;
 let currentTransients: ReturnType<typeof useTransientTransforms> = null;
 
 function Bridge() {
   const store = useEditorStore();
+  const documentState = useEditorDocument();
   const transients = useTransientTransforms();
   useEffect(() => {
     current = store;
+    currentDocument = documentState;
     currentTransients = transients;
-  }, [store, transients]);
+  }, [store, documentState, transients]);
   return null;
 }
 
 function renderStore() {
   current = null;
+  currentDocument = null;
   render(
     <EditorProvider>
       <Bridge />
@@ -67,9 +78,9 @@ describe("Editor store layers", () => {
     const store = renderStore();
     act(() => store.selectAllLayers());
     act(() => store.removeSelectedLayers());
-    expect(current!.state.doc.layers).toEqual([]);
-    expect(current!.state.doc.selectedLayerIds).toEqual([]);
-    expect(current!.canUndo).toBe(true);
+    expect(currentDocument!.doc.layers).toEqual([]);
+    expect(currentDocument!.doc.selectedLayerIds).toEqual([]);
+    expect(currentDocument!.canUndo).toBe(true);
   });
 
   it("undoRestoresRemovedLayerSelection", () => {
@@ -77,8 +88,8 @@ describe("Editor store layers", () => {
     act(() => store.selectAllLayers());
     act(() => store.removeSelectedLayers());
     act(() => store.undo());
-    expect(current!.state.doc.layers).toHaveLength(3);
-    expect(current!.state.doc.selectedLayerIds.length).toBeGreaterThan(0);
+    expect(currentDocument!.doc.layers).toHaveLength(3);
+    expect(currentDocument!.doc.selectedLayerIds.length).toBeGreaterThan(0);
   });
 
   it("imageObjectUrlSurvivesRemoveUndo", async () => {
@@ -90,11 +101,11 @@ describe("Editor store layers", () => {
     await act(async () => {
       id = await store.addImageLayer(new File([new Uint8Array([1])], "one.png", { type: "image/png" }));
     });
-    expect(current!.state.doc.layers.some((layer) => layer.id === id)).toBe(true);
+    expect(currentDocument!.doc.layers.some((layer) => layer.id === id)).toBe(true);
 
     act(() => store.removeSelectedLayers());
     act(() => store.undo());
-    const restored = current!.state.doc.layers.find((layer) => layer.id === id);
+    const restored = currentDocument!.doc.layers.find((layer) => layer.id === id);
     expect(restored?.image?.src).toBe("blob:one");
     expect(restored?.visible).toBe(true);
     expect(revoke).not.toHaveBeenCalledWith("blob:one");
@@ -104,7 +115,7 @@ describe("Editor store layers", () => {
 
   it("saveExportAndPrintIgnoreTransientTransforms", async () => {
     const store = renderStore();
-    const orbit = current!.state.doc.layers.find((layer) => layer.id === "shape-orbit");
+    const orbit = currentDocument!.doc.layers.find((layer) => layer.id === "shape-orbit");
     if (!orbit) throw new Error("Orbit missing.");
     const committed = orbit.transform.x;
     const blobs: Blob[] = [];
@@ -131,7 +142,7 @@ describe("Editor store layers", () => {
       "shape-orbit": { ...orbit.transform, x: committed + 400 },
     }));
     expect(currentTransients?.["shape-orbit"].x).toBe(committed + 400);
-    expect(current!.state.doc.layers.find((layer) => layer.id === "shape-orbit")?.transform.x).toBe(committed);
+    expect(currentDocument!.doc.layers.find((layer) => layer.id === "shape-orbit")?.transform.x).toBe(committed);
 
     await act(async () => {
       await store.saveProject();
@@ -151,7 +162,7 @@ describe("Editor store layers", () => {
     expect(saved.document.layers.find((layer) => layer.id === "shape-orbit")?.transform.x).toBe(committed);
     expect(exported.doc?.layers.find((layer) => layer.id === "shape-orbit")?.transform.x).toBe(committed);
     expect(print).toHaveBeenCalledOnce();
-    expect(current!.state.doc.layers.find((layer) => layer.id === "shape-orbit")?.transform.x).toBe(committed);
+    expect(currentDocument!.doc.layers.find((layer) => layer.id === "shape-orbit")?.transform.x).toBe(committed);
     act(() => store.setTransientTransforms(null));
     create.mockRestore();
     revoke.mockRestore();
@@ -234,7 +245,7 @@ describe("Editor store layers", () => {
     }
   });
 
-  it("keeps the applied toast when the same effect lands twice in one batch", () => {
+  it("applies an effect once when it lands twice in one batch", () => {
     const store = renderStore();
     const effect: EditorEffect = {
       kind: "shader",
@@ -246,13 +257,15 @@ describe("Editor store layers", () => {
       store.applyEffect(effect, "artboard");
       store.applyEffect(effect, "artboard");
     });
-    expect(current!.state.doc.background).toEqual(effect);
-    expect(current!.state.toast).toBe("Effect applied.");
+    expect(currentDocument!.doc.background).toEqual(effect);
+    // Document writes are synchronous now, so the second call sees the effect
+    // already applied and says so instead of claiming a second application.
+    expect(current!.state.toast).toBe("That effect is already on the artboard.");
   });
 
   it("reports the undo and redo toast when their updaters run again", () => {
     const store = renderStore();
-    const start = current!.state.doc.background;
+    const start = currentDocument!.doc.background;
     const effect: EditorEffect = {
       kind: "texture",
       preset: "PaperTexture",
@@ -263,13 +276,13 @@ describe("Editor store layers", () => {
       store.undo();
       store.undo();
     });
-    expect(current!.state.doc.background).toEqual(start);
+    expect(currentDocument!.doc.background).toEqual(start);
     expect(current!.state.toast).toBe("Undid the last edit.");
     act(() => {
       store.redo();
       store.redo();
     });
-    expect(current!.state.doc.background).toEqual(effect);
+    expect(currentDocument!.doc.background).toEqual(effect);
     expect(current!.state.toast).toBe("Redid the edit.");
   });
 

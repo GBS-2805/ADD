@@ -51,8 +51,7 @@ export function useEditorHotkeys({ enabled = true, onPreview, onPalette, onEscap
       }
       if (mod && (key === "[" || key === "]")) {
         event.preventDefault();
-        const selected = store.state.doc.selectedLayerIds;
-        if (selected.length === 1) store.moveLayer(selected[0], key === "]" ? "up" : "down");
+        store.moveSelectedLayer(key === "]" ? "up" : "down");
         return;
       }
       if (mod) return;
@@ -76,9 +75,8 @@ export function useEditorHotkeys({ enabled = true, onPreview, onPalette, onEscap
         return;
       }
 
-      if ((key === "delete" || key === "backspace") && store.state.doc.selectedLayerIds.length > 0) {
-        event.preventDefault();
-        store.removeSelectedLayers();
+      if (key === "delete" || key === "backspace") {
+        if (store.deleteSelection()) event.preventDefault();
         return;
       }
 
@@ -88,20 +86,8 @@ export function useEditorHotkeys({ enabled = true, onPreview, onPalette, onEscap
             : key === "arrowdown" ? { x: 0, y: 1 }
               : null;
       if (!direction) return;
-      const selected = store.state.doc.selectedLayerIds;
-      if (selected.length === 0) return;
-      event.preventDefault();
       const distance = event.shiftKey ? 10 : 1;
-      const updates = Object.fromEntries(
-        store.state.doc.layers
-          .filter((layer) => selected.includes(layer.id))
-          .map((layer) => [layer.id, {
-            ...layer.transform,
-            x: layer.transform.x + direction.x * distance,
-            y: layer.transform.y + direction.y * distance,
-          }]),
-      );
-      store.setLayerTransforms(updates);
+      if (store.nudgeSelection(direction.x * distance, direction.y * distance)) event.preventDefault();
     };
 
     const onKeyUp = (event: KeyboardEvent) => {

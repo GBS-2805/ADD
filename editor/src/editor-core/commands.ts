@@ -1,11 +1,12 @@
 import { fitViewport } from "../editor/model/viewport";
 import { alignTransforms, distributeTransforms } from "../editor/model/align";
-import type { EditorActions } from "./store";
+import type { EditorActions, EditorDocumentState } from "./store";
 import type { EditorCommand } from "./types";
 import { ARTBOARD_EXPORT_HEIGHT, ARTBOARD_EXPORT_WIDTH } from "./pngExport";
 
-export function buildCommands(store: EditorActions): EditorCommand[] {
-  const { doc, canvasSize, panels } = store.state;
+export function buildCommands(store: EditorActions, document: EditorDocumentState): EditorCommand[] {
+  const { doc, canUndo, canRedo } = document;
+  const { canvasSize, panels } = store.state;
   const selected = doc.selectedLayerIds;
   const hasSelection = selected.length > 0;
   const canDistribute = selected.length >= 3;
@@ -54,7 +55,7 @@ export function buildCommands(store: EditorActions): EditorCommand[] {
       group: "Edit",
       hint: "Document history",
       shortcut: "⌘Z",
-      disabled: !store.canUndo,
+      disabled: !canUndo,
       run: store.undo,
     },
     {
@@ -63,7 +64,7 @@ export function buildCommands(store: EditorActions): EditorCommand[] {
       group: "Edit",
       hint: "Document history",
       shortcut: "⇧⌘Z",
-      disabled: !store.canRedo,
+      disabled: !canRedo,
       run: store.redo,
     },
     {

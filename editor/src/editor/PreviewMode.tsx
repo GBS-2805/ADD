@@ -3,7 +3,7 @@ import { SegmentGroup } from "@ark-ui/react";
 import { ArrowLeft } from "lucide-react";
 import { ArtboardView } from "./canvas/ArtboardView";
 import { DeviceFrame } from "../shell/DeviceFrame";
-import { useEditorStore } from "../editor-core/store";
+import { useEditorDocument, useEditorStore } from "../editor-core/store";
 import type { Layout } from "../editor-core/types";
 import { useDeviceLayout } from "./useDeviceLayout";
 
@@ -20,6 +20,7 @@ export interface PreviewModeProps {
 
 export function PreviewMode({ layout, onLayoutChange, onExit }: PreviewModeProps) {
   const store = useEditorStore();
+  const { doc } = useEditorDocument();
   const viewport = useDeviceLayout();
   const exitRef = useRef<HTMLButtonElement>(null);
   const returnFocus = useRef<HTMLElement | null>(null);
@@ -85,7 +86,7 @@ export function PreviewMode({ layout, onLayoutChange, onExit }: PreviewModeProps
             <DeviceFrame layout={layout}>
               <div className="ed-preview-artboard-fit" style={{ width: 765 * fit, height: 1000 * fit }}>
                 <div style={{ transform: `scale(${fit})`, transformOrigin: "top left" }}>
-                  <ArtboardView doc={store.state.doc} readOnly exposeLayerIds={false} testId="preview-artboard" />
+                  <ArtboardView doc={doc} readOnly exposeLayerIds={false} testId="preview-artboard" />
                 </div>
               </div>
             </DeviceFrame>
@@ -93,7 +94,7 @@ export function PreviewMode({ layout, onLayoutChange, onExit }: PreviewModeProps
         </div>
       </div>
       <p className="ed-preview-hint">
-        <span>{store.state.doc.layers.length} layers</span>
+        <span>{doc.layers.length} layers</span>
         <span>Read-only · Esc to return</span>
       </p>
     </section>
