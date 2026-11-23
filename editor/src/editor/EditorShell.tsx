@@ -1,7 +1,7 @@
 import { useEffect, useState, type CSSProperties } from "react";
 import { Splitter, useSplitter } from "@ark-ui/react";
 import { ChevronLeft, ChevronRight, PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen } from "lucide-react";
-import { useEditorDocument, useEditorStore } from "../editor-core/store";
+import { useEditorDocument, useEditorStore, useEditorToast } from "../editor-core/store";
 import { Canvas } from "./canvas/Canvas";
 import { LayersPanel } from "./panels/LayersPanel";
 import { BottomSheet } from "./panels/BottomSheet";
@@ -254,6 +254,17 @@ function DocumentPrintArtboard() {
   return <PrintArtboard doc={doc} />;
 }
 
+/** Only this line re-renders when the toast changes, not the editor shell. */
+function EditorToast() {
+  const toast = useEditorToast();
+  if (!toast.message) return null;
+  return (
+    <div className={`toast ed-toast ${toast.exiting ? "is-leaving" : ""}`} role="status" aria-live="polite">
+      {toast.message}
+    </div>
+  );
+}
+
 export function EditorShell() {
   const store = useEditorStore();
   const layout = useDeviceLayout();
@@ -322,11 +333,7 @@ export function EditorShell() {
           PNG exported, {store.state.lastExport.width} by {store.state.lastExport.height}, {store.state.lastExport.bytes} bytes.
         </output>
       ) : null}
-      {store.state.toast ? (
-        <div className={`toast ed-toast ${store.state.toastExiting ? "is-leaving" : ""}`} role="status" aria-live="polite">
-          {store.state.toast}
-        </div>
-      ) : null}
+      <EditorToast />
     </>
   );
 }

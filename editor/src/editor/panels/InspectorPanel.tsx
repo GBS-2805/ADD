@@ -52,7 +52,7 @@ function SingleInspector({ doc, layer, stage }: { doc: EditorDocument; layer: Ed
         <span>{layer.name}</span>
         <span>{layer.kind}</span>
       </div>
-      <TransformSection layer={layer} />
+      {stage >= 0 ? <TransformSection layer={layer} /> : null}
       {stage >= 1 ? (
         <>
           <AlignSection layers={doc.layers} selectedIds={[layer.id]} />
@@ -111,7 +111,7 @@ function SingleInspector({ doc, layer, stage }: { doc: EditorDocument; layer: Ed
           ) : null}
         </Section>
       ) : null}
-      {stage >= 2 && layer.kind !== "image" ? (
+      {stage >= 3 && layer.kind !== "image" ? (
         <Section title="Fill"><FillPicker layer={layer} /></Section>
       ) : null}
     </section>
@@ -167,14 +167,14 @@ function sameSelection(a: string[], b: string[]): boolean {
 /**
  * Opening a project replaces the selection, and mounting the full inspector for
  * that new layer in the open commit cost 23 ms at 4x CPU. A replaced document
- * brings its sections in over the next two frames; ordinary selections still
+ * brings its sections in over the next four frames; ordinary selections still
  * render the whole inspector immediately.
  */
 function useInspectorStage(doc: EditorDocument): number {
   const ids = useMemo(() => doc.layers.map((layer) => layer.id), [doc.layers]);
   const signature = useMemo(() => ids.join("\u0000"), [ids]);
   const previous = useRef(new Set(ids));
-  const [reveal, setReveal] = useState<{ signature: string; stage: number }>({ signature, stage: 2 });
+  const [reveal, setReveal] = useState<{ signature: string; stage: number }>({ signature, stage: 3 });
   const changed = reveal.signature !== signature;
   const replacement =
     changed &&
@@ -186,21 +186,31 @@ function useInspectorStage(doc: EditorDocument): number {
       ids.filter((id) => !previous.current.has(id)).length > Math.max(1, ids.length / 2);
     previous.current = new Set(ids);
     if (!replacing) {
-      setReveal({ signature, stage: 2 });
+      setReveal({ signature, stage: 3 });
       return;
     }
-    setReveal({ signature, stage: 0 });
+    setReveal({ signature, stage: -1 });
     const frames: number[] = [];
     frames.push(
       requestAnimationFrame(() => {
-        setReveal({ signature, stage: 1 });
-        frames.push(requestAnimationFrame(() => setReveal({ signature, stage: 2 })));
+        setReveal({ signature, stage: 0 });
+        frames.push(
+          requestAnimationFrame(() => {
+            setReveal({ signature, stage: 1 });
+            frames.push(
+              requestAnimationFrame(() => {
+                setReveal({ signature, stage: 2 });
+                frames.push(requestAnimationFrame(() => setReveal({ signature, stage: 3 })));
+              }),
+            );
+          }),
+        );
       }),
     );
     return () => frames.forEach((frame) => cancelAnimationFrame(frame));
   }, [changed, ids, signature]);
 
-  return replacement ? 0 : reveal.stage;
+  return replacement ? -1 : reveal.stage;
 }
 
 export function InspectorPanel() {

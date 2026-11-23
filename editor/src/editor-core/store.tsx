@@ -238,6 +238,15 @@ export function useAutosaveState(): AutosaveState {
   return value;
 }
 
+/** A toast must not rebuild the editor actions and re-render the document UI. */
+const ToastContext = createContext<{ message: string; exiting: boolean } | null>(null);
+
+export function useEditorToast(): { message: string; exiting: boolean } {
+  const value = useContext(ToastContext);
+  if (!value) throw new Error("useEditorToast must be used inside EditorProvider");
+  return value;
+}
+
 interface TransientTransformsStore {
   read: () => Record<string, LayerTransform> | null;
   write: (updates: Record<string, LayerTransform> | null) => void;
@@ -1223,8 +1232,6 @@ export function EditorProvider({ children, autosaveBackend }: EditorProviderProp
     layout,
     nativeLens,
     target,
-    toastMessage,
-    toastExiting,
     presenting,
     effectPulse,
     tool,
@@ -1280,11 +1287,15 @@ export function EditorProvider({ children, autosaveBackend }: EditorProviderProp
     showToast,
   ]);
 
+  const toast = useMemo(() => ({ message: toastMessage, exiting: toastExiting }), [toastMessage, toastExiting]);
+
   return (
     <DocumentContext.Provider value={documentStore}>
       <TransientTransformsContext.Provider value={transientTransformsStore}>
         <AutosaveContext.Provider value={autosave}>
-          <EditorContext.Provider value={actions}>{children}</EditorContext.Provider>
+          <ToastContext.Provider value={toast}>
+            <EditorContext.Provider value={actions}>{children}</EditorContext.Provider>
+          </ToastContext.Provider>
         </AutosaveContext.Provider>
       </TransientTransformsContext.Provider>
     </DocumentContext.Provider>
