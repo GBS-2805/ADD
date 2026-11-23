@@ -20,10 +20,12 @@ import { usePointerSession } from "./usePointerSession";
 import { useViewportGestures } from "./useViewportGestures";
 import { useDeviceLayout } from "../useDeviceLayout";
 import { fitViewport, screenToDoc, zoomAt, clampZoom, type Point, type Size } from "../model/viewport";
+import { useRenderSpan } from "../perfProfile";
 
 const NO_RULERS = new Set(["phone", "cover", "fold"]);
 
 export function Canvas() {
+  useRenderSpan("canvas");
   const store = useEditorStore();
   const { doc } = useEditorDocument();
   const { viewport, tool, snapEnabled, rulersVisible } = store.state;

@@ -53,10 +53,17 @@ interface DragEvidence {
   longTasks: number[];
   longTaskStarts: number[];
   dragStartedAtMs: number;
+  renderSpans: RenderSpan[];
   maxLongTaskMs: number;
   attribution: string[];
   throttle: number;
   frameStats: FrameStats;
+}
+
+interface RenderSpan {
+  id: string;
+  ms: number;
+  atMs: number;
 }
 
 interface PerfResult extends FrameStats {
@@ -68,6 +75,7 @@ interface PerfResult extends FrameStats {
   longTaskStarts: number[];
   elapsedMs: number;
   dragStartedAtMs: number;
+  renderSpans: RenderSpan[];
 }
 
 async function open(page: Page, width: number, height: number) {
@@ -126,7 +134,12 @@ async function openProject(page: Page, project: Project) {
   await expect(page.locator(".ed-canvas .art-layer")).toHaveCount(project.document.layers.length);
 }
 
-async function dragAndMeasure(page: Page, width: number, height: number, count: number, label: string) {
+async function dragAndMeasure(page: Page, width: number, height: number, count: number, label: string, profile = false) {
+  if (profile) {
+    await page.addInitScript(() => {
+      (window as unknown as { __perfProfile?: boolean }).__perfProfile = true;
+    });
+  }
   await open(page, width, height);
   const project = withLayers(await baselineProject(page), count);
   await openProject(page, project);
@@ -173,10 +186,11 @@ async function dragAndMeasure(page: Page, width: number, height: number, count: 
     // step, so releasing the drag cannot hide a long task outside the budget.
     await page.waitForTimeout(1_000);
     const dragStartedAtMs = await page.evaluate(() => {
-      const state = window as unknown as { __longTasks: number[]; __longTaskStarts: number[]; __longTaskAttribution: string[] };
+      const state = window as unknown as { __longTasks: number[]; __longTaskStarts: number[]; __longTaskAttribution: string[]; __perfSpans?: unknown[] };
       state.__longTasks = [];
       state.__longTaskStarts = [];
       state.__longTaskAttribution = [];
+      state.__perfSpans = [];
       return performance.now();
     });
     const start = Date.now();
@@ -201,8 +215,18 @@ async function dragAndMeasure(page: Page, width: number, height: number, count: 
     if (!after) throw new Error("The performance layer lost its box after the drag.");
     expect(Math.abs(after.x - box.x)).toBeGreaterThan(1);
     const measurement = await page.evaluate(() => {
-      const state = window as unknown as { __longTasks: number[]; __longTaskStarts: number[]; __longTaskAttribution: string[] };
-      return { durations: state.__longTasks, starts: state.__longTaskStarts, attribution: state.__longTaskAttribution };
+      const state = window as unknown as {
+        __longTasks: number[];
+        __longTaskStarts: number[];
+        __longTaskAttribution: string[];
+        __perfSpans?: Array<{ id: string; ms: number; atMs: number }>;
+      };
+      return {
+        durations: state.__longTasks,
+        starts: state.__longTaskStarts,
+        attribution: state.__longTaskAttribution,
+        spans: state.__perfSpans ?? [],
+      };
     });
     const longTasks = measurement.durations;
     const evidence: DragEvidence = {
@@ -217,6 +241,7 @@ async function dragAndMeasure(page: Page, width: number, height: number, count: 
       longTasks: longTasks.map((duration) => Math.round(duration * 10) / 10),
       longTaskStarts: measurement.starts,
       dragStartedAtMs,
+      renderSpans: measurement.spans,
       maxLongTaskMs: longTasks.length ? Math.max(...longTasks) : 0,
       attribution: [...new Set(measurement.attribution)].slice(0, 5),
       throttle: CPU_THROTTLE,
@@ -240,6 +265,7 @@ async function record(evidence: DragEvidence) {
     longTaskStarts: evidence.longTaskStarts,
     elapsedMs: evidence.elapsedMs,
     dragStartedAtMs: evidence.dragStartedAtMs,
+    renderSpans: evidence.renderSpans,
     ...evidence.frameStats,
   };
   let results: PerfResult[] = [];
@@ -267,7 +293,7 @@ test("twentyLayerDragHoldsTheFrameBudgetAtFourTimesCpu", async ({ page }) => {
   expect(phone.maxLongTaskMs).toBeLessThanOrEqual(50);
   expectFrameBudget(phone);
 
-  const desktop = await dragAndMeasure(page, 1440, 900, 20, "20-layers-1440x900");
+  const desktop = await dragAndMeasure(page, 1440, 900, 20, "20-layers-1440x900", true);
   await record(desktop);
   expect(desktop.maxLongTaskMs).toBeLessThanOrEqual(50);
   expectFrameBudget(desktop);

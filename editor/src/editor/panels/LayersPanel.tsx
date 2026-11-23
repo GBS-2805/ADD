@@ -8,6 +8,7 @@ import { createLayerCollection, displayLayers, type LayerTreeNode } from "../mod
 import type { SelectionMode } from "../model/selection";
 import { usePointerReorder } from "./usePointerReorder";
 import { AddLayerMenu } from "../AddLayerMenu";
+import { useRenderSpan } from "../perfProfile";
 
 type RenameState = { id: string; value: string } | null;
 
@@ -41,6 +42,7 @@ function LayerGrip({ rowId, name, onReorder }: { rowId: string; name: string; on
 }
 
 export function LayersPanel({ collapsed = false, compact = false }: { collapsed?: boolean; compact?: boolean }) {
+  useRenderSpan("layers-panel");
   const store = useEditorStore();
   const { doc } = useEditorDocument();
   const [renaming, setRenaming] = useState<RenameState>(null);

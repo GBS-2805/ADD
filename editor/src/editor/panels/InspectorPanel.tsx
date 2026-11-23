@@ -5,6 +5,7 @@ import { BlendSelect, FillPicker, FontSelect } from "./controls";
 import { AlignSection } from "./AlignSection";
 import { NumericField } from "./NumericField";
 import { TransformSection } from "./TransformSection";
+import { useRenderSpan } from "../perfProfile";
 
 const round = (value: number) => Math.round(value * 100) / 100;
 
@@ -145,6 +146,7 @@ function MultiInspector({ layers }: { layers: EditorLayer[] }) {
 }
 
 export function InspectorPanel() {
+  useRenderSpan("inspector-panel");
   const { doc } = useEditorDocument();
   const selected = doc.layers.filter((layer) => doc.selectedLayerIds.includes(layer.id));
   if (selected.length === 0) return <DocumentInspector />;
