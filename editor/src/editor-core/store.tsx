@@ -121,10 +121,23 @@ export interface AutosaveState {
   droppedImages: number;
 }
 
+export interface LayerSummary {
+  id: string;
+  name: string;
+  kind: EditorLayer["kind"];
+  visible: boolean;
+}
+
+export interface EditorLayerList {
+  layers: LayerSummary[];
+  selectedIds: string[];
+}
+
 export interface EditorDocumentState {
   doc: EditorDocument;
   canUndo: boolean;
   canRedo: boolean;
+  layerList: EditorLayerList;
 }
 
 export interface EditorState {
@@ -268,11 +281,56 @@ interface DocumentStore {
   subscribe: (listener: () => void) => () => void;
 }
 
-function documentSnapshot(history: DocumentHistory): EditorDocumentState {
+function sameLayerList(
+  previous: EditorLayerList,
+  layers: readonly EditorLayer[],
+  selectedIds: string[],
+): boolean {
+  if (previous.selectedIds !== selectedIds) {
+    if (previous.selectedIds.length !== selectedIds.length) return false;
+    for (let index = 0; index < selectedIds.length; index += 1) {
+      if (previous.selectedIds[index] !== selectedIds[index]) return false;
+    }
+  }
+  if (previous.layers.length !== layers.length) return false;
+  for (let index = 0; index < layers.length; index += 1) {
+    const entry = previous.layers[index];
+    const layer = layers[index];
+    if (
+      entry.id !== layer.id ||
+      entry.name !== layer.name ||
+      entry.kind !== layer.kind ||
+      entry.visible !== layer.visible
+    ) {
+      return false;
+    }
+  }
+  return true;
+}
+
+/**
+ * Only what the layers panel shows. Keeping this array stable is what lets a
+ * transform-only commit skip the panel's rows and menus entirely.
+ */
+function layerListSnapshot(doc: EditorDocument, previous?: EditorLayerList): EditorLayerList {
+  if (previous && sameLayerList(previous, doc.layers, doc.selectedLayerIds)) return previous;
+  return {
+    layers: doc.layers.map((layer) => ({
+      id: layer.id,
+      name: layer.name,
+      kind: layer.kind,
+      visible: layer.visible,
+    })),
+    selectedIds: doc.selectedLayerIds,
+  };
+}
+
+function documentSnapshot(history: DocumentHistory, previous?: EditorDocumentState): EditorDocumentState {
   return {
     doc: history.present,
     canUndo: history.past.length > 0,
     canRedo: history.future.length > 0,
+    layerList: layerListSnapshot(history.present, previous?.layerList),
   };
 }
 
@@ -282,7 +340,7 @@ function createDocumentStore(history: DocumentHistory): DocumentStore {
   return {
     read: () => value,
     write(next) {
-      value = documentSnapshot(next);
+      value = documentSnapshot(next, value);
       listeners.forEach((listener) => listener());
     },
     subscribe(listener) {
@@ -303,6 +361,13 @@ export function useEditorDocument(): EditorDocumentState {
   const store = useContext(DocumentContext);
   if (!store) throw new Error("useEditorDocument must be used inside EditorProvider");
   return useSyncExternalStore(store.subscribe, store.read, store.read);
+}
+
+/** The layers panel's projection; a transform-only commit leaves it identical. */
+export function useEditorLayerList(): EditorLayerList {
+  const store = useContext(DocumentContext);
+  if (!store) throw new Error("useEditorLayerList must be used inside EditorProvider");
+  return useSyncExternalStore(store.subscribe, () => store.read().layerList);
 }
 
 /** Undo and redo flip far less often than the document changes. */

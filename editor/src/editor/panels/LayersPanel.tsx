@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState, type DragEvent, type KeyboardEven
 import { Menu, Portal } from "@ark-ui/react";
 import { TreeView } from "@ark-ui/react/tree-view";
 import { Eye, EyeOff, GripVertical, Image as ImageIcon, MoreHorizontal, Shapes, Type } from "lucide-react";
-import { useEditorDocument, useEditorStore } from "../../editor-core/store";
+import { useEditorLayerList, useEditorStore } from "../../editor-core/store";
 import type { EditorLayer } from "../../editor-core/types";
 import { createLayerCollection, displayLayers, type LayerTreeNode } from "../model/layerTree";
 import type { SelectionMode } from "../model/selection";
@@ -44,14 +44,14 @@ function LayerGrip({ rowId, name, onReorder }: { rowId: string; name: string; on
 export function LayersPanel({ collapsed = false, compact = false }: { collapsed?: boolean; compact?: boolean }) {
   useRenderSpan("layers-panel");
   const store = useEditorStore();
-  const { doc } = useEditorDocument();
+  const { layers, selectedIds } = useEditorLayerList();
   const [renaming, setRenaming] = useState<RenameState>(null);
   const [dragId, setDragId] = useState<string | null>(null);
   const suppressArkSelection = useRef(false);
   const fine = pointerIsFine();
-  const collection = useMemo(() => createLayerCollection(doc.layers), [doc.layers]);
-  const display = useMemo(() => displayLayers(doc.layers), [doc.layers]);
-  const selectedDisplayIds = doc.selectedLayerIds;
+  const collection = useMemo(() => createLayerCollection(layers), [layers]);
+  const display = useMemo(() => displayLayers(layers), [layers]);
+  const selectedDisplayIds = selectedIds;
 
   const rowById = (id: string) => {
     const safe = typeof CSS !== "undefined" && CSS.escape ? CSS.escape(id) : id;
@@ -66,11 +66,11 @@ export function LayersPanel({ collapsed = false, compact = false }: { collapsed?
   };
 
   useEffect(() => {
-    const last = doc.selectedLayerIds[doc.selectedLayerIds.length - 1];
+    const last = selectedIds[selectedIds.length - 1];
     if (!last) return;
     rowById(last)?.scrollIntoView?.({ block: "nearest" });
     // Selecting from the canvas must not steal keyboard focus from the canvas.
-  }, [doc.selectedLayerIds.join("|")]);
+  }, [selectedIds.join("|")]);
 
   const selectFromRow = (id: string, event: ReactMouseEvent) => {
     const mode: SelectionMode = event.shiftKey ? "add" : event.metaKey || event.ctrlKey ? "toggle" : "replace";
@@ -88,7 +88,7 @@ export function LayersPanel({ collapsed = false, compact = false }: { collapsed?
 
   const reorderToTarget = (fromId: string, toId: string) => {
     if (fromId === toId) return;
-    const ids = doc.selectedLayerIds.includes(fromId) ? doc.selectedLayerIds : [fromId];
+    const ids = selectedIds.includes(fromId) ? selectedIds : [fromId];
     const fromIndex = display.findIndex((layer) => layer.id === fromId);
     const targetIndex = display.findIndex((layer) => layer.id === toId);
     if (fromIndex < 0 || targetIndex < 0) return;
@@ -132,7 +132,7 @@ export function LayersPanel({ collapsed = false, compact = false }: { collapsed?
       event.preventDefault();
       event.stopPropagation();
       const focusedId = row.dataset.layerRow;
-      const ids = doc.selectedLayerIds.includes(focusedId) ? doc.selectedLayerIds : [focusedId];
+      const ids = selectedIds.includes(focusedId) ? selectedIds : [focusedId];
       deleteLayers(ids, focusedId);
     }
   };
@@ -146,10 +146,9 @@ export function LayersPanel({ collapsed = false, compact = false }: { collapsed?
   };
 
   const renderRow = (node: LayerTreeNode, indexPath: number[]) => {
-    const layer = doc.layers.find((item) => item.id === node.id);
-    if (!layer) return null;
+    const layer = node;
     const displayIndex = display.findIndex((item) => item.id === layer.id);
-    const selected = doc.selectedLayerIds.includes(layer.id);
+    const selected = selectedIds.includes(layer.id);
     const isRenaming = renaming?.id === layer.id;
 
     return (
@@ -286,10 +285,10 @@ export function LayersPanel({ collapsed = false, compact = false }: { collapsed?
       ) : null}
       <div className="ed-panel-heading">
         <span>Layers</span>
-        <span>{doc.layers.length} layer{doc.layers.length === 1 ? "" : "s"}</span>
+        <span>{layers.length} layer{layers.length === 1 ? "" : "s"}</span>
       </div>
 
-      {doc.layers.length === 0 ? (
+      {layers.length === 0 ? (
         <div className="ed-layer-empty">
           <p>No layers. Add text, a shape or a PNG.</p>
           <AddLayerMenu />

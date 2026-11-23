@@ -22,32 +22,38 @@ import { MAX_PROJECT_BYTES } from "./project";
 import {
   EditorProvider,
   useEditorDocument,
+  useEditorLayerList,
   useEditorStore,
   useTransientTransforms,
   type EditorActions,
   type EditorDocumentState,
+  type EditorLayerList,
 } from "./store";
 import type { EditorDocument, EditorEffect } from "./types";
 
 let current: EditorActions | null = null;
 let currentDocument: EditorDocumentState | null = null;
+let currentLayerList: EditorLayerList | null = null;
 let currentTransients: ReturnType<typeof useTransientTransforms> = null;
 
 function Bridge() {
   const store = useEditorStore();
   const documentState = useEditorDocument();
+  const layerList = useEditorLayerList();
   const transients = useTransientTransforms();
   useEffect(() => {
     current = store;
     currentDocument = documentState;
+    currentLayerList = layerList;
     currentTransients = transients;
-  }, [store, documentState, transients]);
+  }, [store, documentState, layerList, transients]);
   return null;
 }
 
 function renderStore() {
   current = null;
   currentDocument = null;
+  currentLayerList = null;
   render(
     <EditorProvider>
       <Bridge />
@@ -74,6 +80,25 @@ const imageLayer = {
 };
 
 describe("Editor store layers", () => {
+  it("transformCommitLeavesTheLayerListSnapshotStable", () => {
+    const store = renderStore();
+    const before = currentLayerList!;
+    const orbit = currentDocument!.doc.layers.find((layer) => layer.id === "shape-orbit");
+    if (!orbit) throw new Error("Orbit missing.");
+
+    act(() => store.setLayerTransforms({
+      "shape-orbit": { ...orbit.transform, x: orbit.transform.x + 12 },
+    }));
+
+    expect(currentDocument!.doc.layers.find((layer) => layer.id === "shape-orbit")?.transform.x)
+      .toBe(orbit.transform.x + 12);
+    expect(currentLayerList).toBe(before);
+
+    act(() => store.renameLayer("shape-orbit", "Orbit renamed"));
+    expect(currentLayerList).not.toBe(before);
+    expect(currentLayerList!.layers.find((layer) => layer.id === "shape-orbit")?.name).toBe("Orbit renamed");
+  });
+
   it("removingLastLayerLeavesEmptyDocument", () => {
     const store = renderStore();
     act(() => store.selectAllLayers());

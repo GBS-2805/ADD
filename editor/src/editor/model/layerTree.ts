@@ -9,12 +9,14 @@ export interface LayerTreeNode {
   children?: LayerTreeNode[];
 }
 
+export type LayerTreeSource = Pick<EditorLayer, "id" | "name" | "kind" | "visible">;
+
 /** Document order is bottom-first; the layers panel displays top-first. */
-export function displayLayers(layers: readonly EditorLayer[]): EditorLayer[] {
+export function displayLayers<T>(layers: readonly T[]): T[] {
   return [...layers].reverse();
 }
 
-export function createLayerCollection(layers: readonly EditorLayer[]) {
+export function createLayerCollection(layers: readonly LayerTreeSource[]) {
   const children: LayerTreeNode[] = displayLayers(layers).map((layer) => ({
     id: layer.id,
     name: layer.name,
