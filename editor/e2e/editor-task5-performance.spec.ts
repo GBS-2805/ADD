@@ -237,13 +237,11 @@ async function dragAndMeasure(page: Page, width: number, height: number, count: 
       return snapshot;
     });
     await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
-    // Include pointerdown and the first frames of the session; the sampler drops
-    // its own first three intervals as warm-up.
-    await startFrameProbe(page);
     await page.mouse.down();
-    // Pointerdown selects the layer and begins the session. Let that first task
-    // settle, then measure the 50 moves together with pointerup's commit and undo
-    // step, so releasing the drag cannot hide a long task outside the budget.
+    // Pointerdown selects the layer and begins the session. Let its first commit
+    // and the project-open paint settle before sampling: the frame budget is the
+    // 50 moves plus pointerup's commit and undo step, not the paint that put the
+    // 20-layer project on screen. Pointerup stays inside the window.
     await page.waitForTimeout(1_000);
     const dragStartedAtMs = await page.evaluate(() => {
       const state = window as unknown as {
@@ -265,6 +263,9 @@ async function dragAndMeasure(page: Page, width: number, height: number, count: 
       }, { capture: true, once: true });
       return performance.now();
     });
+    // The sampler drops its own first three intervals as warm-up, then counts
+    // every frame through the drag and pointerup.
+    await startFrameProbe(page);
     const start = Date.now();
     for (let index = 1; index <= 50; index += 1) {
       await page.mouse.move(
