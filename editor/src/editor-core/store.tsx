@@ -558,7 +558,7 @@ export function EditorProvider({ children, autosaveBackend }: EditorProviderProp
   }, []);
 
   /** Every committed document change is an autosave candidate. */
-  useEffect(() => documentStore.subscribe(scheduleAutosave), [documentStore, scheduleAutosave]);
+
 
   /** Clear a pending write on unmount. */
   useEffect(() => () => {
@@ -650,12 +650,20 @@ export function EditorProvider({ children, autosaveBackend }: EditorProviderProp
     setPanels((current) => ({ ...current, [panel]: !current[panel] }));
   }, []);
 
-  /** The one write point: history ref, document subscribers and autosave. */
+  /**
+   * The one write point: history ref, document subscribers and autosave.
+   * Selection is UI state: persisting it would rewrite the document, and fire a
+   * debounced write, every time a layer is clicked. Only content changes save.
+   */
   const applyHistory = useCallback((next: DocumentHistory) => {
     if (next === stateRef.current) return;
+    const previous = stateRef.current.present;
     stateRef.current = next;
     documentStore.write(next);
-  }, [documentStore]);
+    if (previous.layers !== next.present.layers || previous.background !== next.present.background) {
+      scheduleAutosave();
+    }
+  }, [documentStore, scheduleAutosave]);
 
   const commit = useCallback((update: (doc: EditorDocument) => EditorDocument) => {
     applyHistory(commitHistory(stateRef.current, update(stateRef.current.present)));

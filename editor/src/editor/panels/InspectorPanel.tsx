@@ -1,6 +1,7 @@
+import { memo, useDeferredValue } from "react";
 import { useEditorDocument, useEditorStore } from "../../editor-core/store";
 import { layerBounds, selectionBounds } from "../model/geometry";
-import type { EditorEffect, EditorLayer } from "../../editor-core/types";
+import type { EditorDocument, EditorEffect, EditorLayer } from "../../editor-core/types";
 import { BlendSelect, FillPicker, FontSelect } from "./controls";
 import { AlignSection } from "./AlignSection";
 import { NumericField } from "./NumericField";
@@ -26,9 +27,8 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   );
 }
 
-function DocumentInspector() {
+function DocumentInspector({ doc }: { doc: EditorDocument }) {
   const store = useEditorStore();
-  const { doc } = useEditorDocument();
   return (
     <section className="ed-panel-body ed-inspector-panel" data-testid="inspector-panel" aria-label="Inspector">
       <div className="ed-panel-heading"><span>Artboard</span><span>Document</span></div>
@@ -43,9 +43,8 @@ function DocumentInspector() {
   );
 }
 
-function SingleInspector({ layer }: { layer: EditorLayer }) {
+function SingleInspector({ doc, layer }: { doc: EditorDocument; layer: EditorLayer }) {
   const store = useEditorStore();
-  const { doc } = useEditorDocument();
   const bounds = layerBounds(layer);
   return (
     <section className="ed-panel-body ed-inspector-panel" data-testid="inspector-panel" aria-label="Inspector panel">
@@ -115,9 +114,8 @@ function SingleInspector({ layer }: { layer: EditorLayer }) {
   );
 }
 
-function MultiInspector({ layers }: { layers: EditorLayer[] }) {
-  const { doc } = useEditorDocument();
-  const bounds = selectionBounds(layers, doc.selectedLayerIds);
+function MultiInspector({ layers, selectedIds }: { layers: EditorLayer[]; selectedIds: string[] }) {
+  const bounds = selectionBounds(layers, selectedIds);
   const opacities = new Set(layers.map((layer) => layer.opacity));
   const blends = new Set(layers.map((layer) => layer.blend));
   return (
@@ -129,7 +127,7 @@ function MultiInspector({ layers }: { layers: EditorLayer[] }) {
           <span>Position</span><strong>{round(bounds.x)}, {round(bounds.y)}</strong>
         </div>
       ) : null}
-      <AlignSection layers={doc.layers} selectedIds={doc.selectedLayerIds} />
+      <AlignSection layers={layers} selectedIds={selectedIds} />
       <Section title="Appearance">
         <div className="ed-inspector-inline">
           <span>Opacity</span>
@@ -145,11 +143,21 @@ function MultiInspector({ layers }: { layers: EditorLayer[] }) {
   );
 }
 
-export function InspectorPanel() {
+/**
+ * The inspector reads a deferred document: a transform commit can paint the
+ * canvas (and settle the drag) before the readout catches up one frame later.
+ * Memoizing the body is what makes the urgent render skip it at all.
+ */
+const InspectorBody = memo(function InspectorBody({ doc }: { doc: EditorDocument }) {
   useRenderSpan("inspector-panel");
-  const { doc } = useEditorDocument();
   const selected = doc.layers.filter((layer) => doc.selectedLayerIds.includes(layer.id));
-  if (selected.length === 0) return <DocumentInspector />;
-  if (selected.length === 1) return <SingleInspector layer={selected[0]} />;
-  return <MultiInspector layers={selected} />;
+  if (selected.length === 0) return <DocumentInspector doc={doc} />;
+  if (selected.length === 1) return <SingleInspector doc={doc} layer={selected[0]} />;
+  return <MultiInspector layers={selected} selectedIds={doc.selectedLayerIds} />;
+});
+
+export function InspectorPanel() {
+  const { doc } = useEditorDocument();
+  const deferredDoc = useDeferredValue(doc);
+  return <InspectorBody doc={deferredDoc} />;
 }

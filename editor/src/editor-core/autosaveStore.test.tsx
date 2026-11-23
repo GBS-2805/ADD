@@ -95,6 +95,22 @@ describe("autosave", () => {
     expect(current!.state.autosave.status).toBe("saved");
   });
 
+  it("does not rewrite storage for a selection-only change", async () => {
+    const backend = createMemoryBackend();
+    const store = mount(backend);
+    await settle();
+    const writes = backend.writes.length;
+    expect(writes).toBe(1);
+
+    act(() => store.selectAllLayers());
+    await settle();
+    expect(backend.writes.length).toBe(writes);
+
+    act(() => store.removeSelectedLayers());
+    await settle();
+    expect(backend.writes.length).toBeGreaterThan(writes);
+  });
+
   it("does not let the starter document overwrite a stored one", async () => {
     const backend = createMemoryBackend();
     const first = mount(backend);
