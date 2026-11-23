@@ -154,7 +154,12 @@ function withLayers(project: Project, count: number): Project {
   };
 }
 
-async function openProject(page: Page, project: Project, beforeFiles?: () => Promise<void>) {
+async function openProject(
+  page: Page,
+  project: Project,
+  beforeFiles?: () => Promise<void>,
+  waitForLayers = true,
+) {
   const chooserPromise = page.waitForEvent("filechooser");
   await page.getByRole("button", { name: "Open document menu" }).click();
   await page.getByRole("menuitem", { name: "Open .add" }).click();
@@ -165,7 +170,9 @@ async function openProject(page: Page, project: Project, beforeFiles?: () => Pro
     mimeType: "application/json",
     buffer: Buffer.from(JSON.stringify(project)),
   });
-  await expect(page.locator(".ed-canvas .art-layer")).toHaveCount(project.document.layers.length);
+  if (waitForLayers) {
+    await expect(page.locator(".ed-canvas .art-layer")).toHaveCount(project.document.layers.length);
+  }
 }
 
 async function dragAndMeasure(page: Page, width: number, height: number, count: number, label: string, profile = false) {
@@ -482,10 +489,13 @@ test("twentyLayerProjectOpensWithinOneFrameAtFourTimesCpu", async ({ page }) => 
         // Chromium-only; frames and spans still locate the open cost.
       }
     });
-    await openProject(page, project, () => startFrameProbe(page, 0));
+    // A locator assertion inside the sample polls the live DOM on the same
+    // main thread; check the completed reveal after the probe stops instead.
+    await openProject(page, project, () => startFrameProbe(page, 0), false);
     // Include the 500 ms autosave that opening the file schedules.
     await page.waitForTimeout(1_000);
     const frameStats = await stopFrameProbe(page);
+    await expect(page.locator(".ed-canvas .art-layer")).toHaveCount(project.document.layers.length);
     const measurement = await page.evaluate(() => {
       const state = window as unknown as {
         __perfSpans?: Array<{ id: string; ms: number; atMs: number }>;
