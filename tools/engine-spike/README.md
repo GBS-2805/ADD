@@ -131,9 +131,12 @@ samples after 25 warmup passes; all ten are measured before the verdict, so a fa
 still prints every family's warmup passes and samples, and the visual job echoes
 them. `tools/check_texture_trend.py` compares each family's normalized median with a
 checked-in baseline and prints a report-only `WARN` when a family grows by 30% even
-while it is still under budget; `--write` records a deliberate new baseline. All ten
-thumbnails warm in about 7ms; a ten-family 180×225 warm takes under 35ms off the
-frame path.
+while it is still under budget; `--write` records a deliberate new baseline. CI passes
+`TEXTURE_HISTORY` to append each run to a cached JSONL file and prints a sustained
+drift warning when a family is over the ratio in at least three of the last five runs.
+`TexturePresetTest` also pins the renderer's 240k-pixel field, eight-entry/8 MiB cache
+and ten-family cold-open allocation. All ten thumbnails warm in about 7ms; a ten-family
+180×225 warm takes under 35ms off the frame path.
 
 ### Material Ink (3.8.5 / 55)
 
@@ -164,7 +167,7 @@ Reviewed captures: `artifacts/bmo/bmo-plugin-catalogue.png` and
 
 Full suite at the 3.8.5 cut: **160 tests, 0 failures, 0 errors, 0 skipped**. Chrome:
 **24/24 goldens match**, including the Material Ink capture and the Marble-under-layers
-repair. No bitmap assets or network calls were added. Current baseline: **232 tests, 0
+repair. No bitmap assets or network calls were added. Current baseline: **234 tests, 0
 failures, 0 errors, 0 skipped**; current field preview: **3.9.1 (56)**.
 Task 9–11, Studio and `app.offline.compress` were not touched. The review is built as
 **3.8.5 (55)** at `artifacts/engine-review/ADD-3.8.5-engine-review.apk`; it has not been

@@ -91,7 +91,12 @@ PY
 # the verdict cannot see. The comparison is deliberately not part of the exit status;
 # --strict exists for a future enforcing run after the baseline has history.
 TREND_STATUS=0
-python3 "$ROOT/../../tools/check_texture_trend.py" --no-host --results "$RESULTS" || TREND_STATUS=$?
+HISTORY_ARGS=()
+if [ -n "${TEXTURE_HISTORY:-}" ]; then
+    HISTORY_ARGS=(--history "$TEXTURE_HISTORY")
+fi
+python3 "$ROOT/../../tools/check_texture_trend.py" --no-host --results "$RESULTS" \
+    "${HISTORY_ARGS[@]}" || TREND_STATUS=$?
 if [ "$TREND_STATUS" -ne 0 ]; then
     echo "engine-trend: not checked (exit $TREND_STATUS)" >&2
 fi

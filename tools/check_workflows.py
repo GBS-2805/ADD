@@ -108,8 +108,17 @@ def problems(root: Path = ROOT) -> list[str]:
                     or "refs/heads/main" not in job):
                 found.append("%s: job %s must run only on manual dispatch to main"
                              % (label, name))
+            if "github.event.inputs.confirm == 'publish'" not in job:
+                found.append("%s: job %s must require the typed publish confirmation"
+                             % (label, name))
             if "github.event_name == 'push'" in job:
                 found.append("%s: job %s must not run on push" % (label, name))
+
+        if "publish" in jobs:
+            publish = jobs["publish"]
+            if "expected_sha" not in publish or "GITHUB_SHA" not in publish:
+                found.append("%s: publish must verify an optional expected_sha against GITHUB_SHA"
+                             % label)
 
         for name, job in jobs.items():
             if "pull_request" not in job and name != "review":

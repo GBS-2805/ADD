@@ -9,16 +9,19 @@ vi.mock("./pngExport", async (importOriginal) => ({
 }));
 import { commitHistory, createHistory } from "./history";
 import { serializeProject } from "./project";
-import { EditorProvider, useEditorStore, type EditorActions } from "./store";
+import { EditorProvider, useEditorStore, useTransientTransforms, type EditorActions } from "./store";
 import type { EditorDocument, EditorEffect } from "./types";
 
 let current: EditorActions | null = null;
+let currentTransients: ReturnType<typeof useTransientTransforms> = null;
 
 function Bridge() {
   const store = useEditorStore();
+  const transients = useTransientTransforms();
   useEffect(() => {
     current = store;
-  }, [store]);
+    currentTransients = transients;
+  }, [store, transients]);
   return null;
 }
 
@@ -112,7 +115,7 @@ describe("Editor store layers", () => {
     act(() => store.setTransientTransforms({
       "shape-orbit": { ...orbit.transform, x: committed + 400 },
     }));
-    expect(current!.state.transientTransforms?.["shape-orbit"].x).toBe(committed + 400);
+    expect(currentTransients?.["shape-orbit"].x).toBe(committed + 400);
     expect(current!.state.doc.layers.find((layer) => layer.id === "shape-orbit")?.transform.x).toBe(committed);
 
     await act(async () => {

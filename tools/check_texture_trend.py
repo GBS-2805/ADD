@@ -18,6 +18,11 @@ healthy host look unstable. The factor itself already uses the minimum sample.
 It is report-only: a change above ``warn_ratio`` prints ``WARN`` and the final
 line counts it, but the exit status stays 0 so a noisy host cannot fail a push.
 ``--strict`` turns those warnings into exit status 1 for a future enforcing run.
+
+``--history PATH`` appends the normalized run as JSONL and reports sustained drift
+when a family is over the warning ratio in at least three of the last five runs.
+The older entries are read before the current run is appended, and the file is
+bounded so a long-lived CI cache cannot grow without limit.
 """
 
 from __future__ import annotations
@@ -34,6 +39,9 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 RESULTS = ROOT / "tools" / "engine-spike" / "app" / "build" / "test-results" / "testDebugUnitTest"
 BASELINE = ROOT / "tools" / "engine-spike" / "texture-trend.json"
+HISTORY_LIMIT = 200
+SUSTAINED_RUNS = 3
+SUSTAINED_WINDOW = 5
 
 FAMILY = re.compile(r"texture family=(\S+) .*samplesMs=(.*)$")
 FACTOR = re.compile(r"factor=([0-9.]+)")
@@ -115,6 +123,79 @@ def report_host(factor: float, budget: float | None, samples: list[float]) -> tu
     return spread, warnings
 
 
+def normalized_medians(medians: dict[str, float], factor: float) -> dict[str, float]:
+    return {name: round(value / max(factor, 1.0), 3) for name, value in sorted(medians.items())}
+
+
+def history_entry(medians: dict[str, float], factor: float, budget: float | None) -> dict:
+    """One normalized run. Commit is optional because local runs have no CI SHA."""
+    return {
+        "recorded": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+        "commit": os.environ.get("GITHUB_SHA", "")[:12],
+        "factor": round(factor, 3),
+        "budgetMs": None if budget is None else round(budget, 3),
+        "families": normalized_medians(medians, factor),
+    }
+
+
+def load_history(path: Path, limit: int = HISTORY_LIMIT) -> list[dict]:
+    """Read the newest usable entries; a truncated or hand-edited line is ignored."""
+    if not path.is_file():
+        return []
+    entries = []
+    try:
+        lines = path.read_text(encoding="utf-8").splitlines()
+    except OSError:
+        return []
+    for line in lines:
+        try:
+            entry = json.loads(line)
+        except ValueError:
+            continue
+        if isinstance(entry, dict) and isinstance(entry.get("families"), dict):
+            entries.append(entry)
+    return entries[-limit:]
+
+
+def append_history(path: Path, entry: dict, limit: int = HISTORY_LIMIT) -> None:
+    """Keep a bounded JSONL trail without ever rewriting an earlier run."""
+    entries = load_history(path, max(1, limit - 1)) + [entry]
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary = path.with_suffix(path.suffix + ".tmp")
+    temporary.write_text("".join(json.dumps(item, sort_keys=True) + "\n" for item in entries),
+                         encoding="utf-8")
+    temporary.replace(path)
+
+
+def sustained_drift(history: list[dict], medians: dict[str, float], factor: float,
+                    record: dict, warn_ratio: float,
+                    runs: int = SUSTAINED_RUNS,
+                    window: int = SUSTAINED_WINDOW) -> list[str]:
+    """Families above the ratio in at least `runs` of the last `window` runs.
+
+    A single noisy runner should warn but not look like a trend. The current run is
+    included, so three consecutive slow runs are enough to report sustained drift.
+    """
+    current = history_entry(medians, factor, None)
+    recent = (history + [current])[-window:]
+    baseline = record.get("families", {})
+    sustained = []
+    for name in sorted(baseline):
+        base = baseline.get(name)
+        if not isinstance(base, (int, float)) or base <= 0:
+            continue
+        values = [entry.get("families", {}).get(name) for entry in recent]
+        values = [value for value in values if isinstance(value, (int, float))]
+        over = sum(1 for value in values if value / base >= warn_ratio)
+        if over >= runs:
+            sustained.append(name)
+            print("engine-history: %s over %.2fx in %d of the last %d runs"
+                  % (name, warn_ratio, over, len(values)))
+    print("engine-history: %d of %d recent runs, %d sustained family warning(s)"
+          % (len(recent), window, len(sustained)))
+    return sustained
+
+
 def compare(medians: dict[str, float], factor: float, record: dict,
             warn_ratio: float) -> list[str]:
     """Print one line per family and return the names above the warning ratio."""
@@ -154,6 +235,8 @@ def main(argv: list[str] | None = None) -> int:
                         help="print the host report and stop; no baseline needed")
     parser.add_argument("--no-host", action="store_true",
                         help="skip the host report when comparing families")
+    parser.add_argument("--history", type=Path,
+                        help="append this run to a JSONL history and report sustained drift")
     args = parser.parse_args(argv)
 
     factor, budget, host_samples, medians = measure(args.results)
@@ -196,6 +279,17 @@ def main(argv: list[str] | None = None) -> int:
     warnings = compare(medians, factor, record, warn_ratio)
     print("engine-trend: %d families, %d above %.2fx"
           % (len(medians), len(warnings), warn_ratio))
+
+    sustained: list[str] = []
+    if args.history:
+        previous = load_history(args.history)
+        sustained = sustained_drift(previous, medians, factor, record, warn_ratio)
+        try:
+            append_history(args.history, history_entry(medians, factor, budget))
+            print("engine-history: appended run to %s (%d before)"
+                  % (args.history, len(previous)))
+        except OSError as error:
+            print("engine-history: cannot append to %s (%s)" % (args.history, error))
     summary = os.environ.get("GITHUB_STEP_SUMMARY")
     if summary:
         with open(summary, "a", encoding="utf-8") as out:
@@ -208,6 +302,8 @@ def main(argv: list[str] | None = None) -> int:
             if warnings:
                 out.write("\n**WARN** above %.2fx: %s\n"
                           % (warn_ratio, ", ".join(sorted(warnings))))
+            if sustained:
+                out.write("\n**Sustained drift**: %s\n" % ", ".join(sustained))
     if warnings:
         print("engine-trend: WARN " + ", ".join(sorted(warnings)))
         return 1 if args.strict else 0

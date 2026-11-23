@@ -1,5 +1,18 @@
-import { useCallback, useEffect, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from "react";
-import { useEditorStore } from "../../editor-core/store";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+  type KeyboardEvent as ReactKeyboardEvent,
+  type MouseEvent as ReactMouseEvent,
+  type PointerEvent as ReactPointerEvent,
+} from "react";
+import { useEditorStore, useTransientTransforms } from "../../editor-core/store";
+import type { EditorDocument } from "../../editor-core/types";
+import type { Viewport } from "../types";
+import type { Rect } from "../model/geometry";
+import type { SnapGuide } from "../model/snapping";
 import { ArtboardView } from "./ArtboardView";
 import { CanvasRulers } from "./CanvasRulers";
 import { SelectionOverlay } from "./SelectionOverlay";
@@ -12,10 +25,9 @@ const NO_RULERS = new Set(["phone", "cover", "fold"]);
 
 export function Canvas() {
   const store = useEditorStore();
-  const { doc, viewport, tool, snapEnabled, transientTransforms, rulersVisible } = store.state;
+  const { doc, viewport, tool, snapEnabled, rulersVisible } = store.state;
   const layout = useDeviceLayout();
   const containerRef = useRef<HTMLDivElement>(null);
-  const stageRef = useRef<HTMLDivElement>(null);
   const didFit = useRef(false);
   const [canvasSize, setCanvasSize] = useState<Size>({ width: 0, height: 0 });
   const [spacePressed, setSpacePressed] = useState(false);
@@ -117,10 +129,14 @@ export function Canvas() {
   };
 
   const showRulers = rulersVisible && !NO_RULERS.has(layout.mode) && layout.width > 0 && layout.height > 0;
-  const stageStyle = {
-    "--zoom": viewport.zoom,
-    transform: `translate(calc(-50% + ${viewport.panX}px), calc(-50% + ${viewport.panY}px)) scale(${viewport.zoom})`,
-  } as CSSProperties;
+  const handleLayerSelect = useCallback(
+    (id: string, event: ReactMouseEvent<HTMLElement> | ReactKeyboardEvent<HTMLElement>) => {
+      if (event.type !== "keydown") return;
+      const mode = event.shiftKey ? "add" : event.metaKey || event.ctrlKey ? "toggle" : "replace";
+      store.selectLayers([id], mode);
+    },
+    [store.selectLayers],
+  );
 
   return (
     <div
@@ -144,34 +160,55 @@ export function Canvas() {
       {showRulers && canvasSize.width > 0 ? (
         <CanvasRulers viewport={viewport} width={canvasSize.width} height={canvasSize.height} />
       ) : null}
-      <div
-        ref={stageRef}
-        className="ed-artboard-stage"
-        data-testid="artboard-stage"
-        style={stageStyle}
-      >
-        <ArtboardView
-          doc={doc}
-          transforms={transientTransforms ?? undefined}
-          onLayerSelect={(id, event) => {
-            if (event.type !== "keydown") return;
-            const mode = event.shiftKey ? "add" : event.metaKey || event.ctrlKey ? "toggle" : "replace";
-            store.selectLayers([id], mode);
-          }}
-          testId="editor-artboard"
-        />
-        <SelectionOverlay
-          layers={doc.layers}
-          selectedIds={doc.selectedLayerIds}
-          transforms={transientTransforms ?? undefined}
-          guides={session.guides}
-          marquee={session.marquee}
-        />
-      </div>
+      <ArtboardStage
+        doc={doc}
+        viewport={viewport}
+        guides={session.guides}
+        marquee={session.marquee}
+        onLayerSelect={handleLayerSelect}
+      />
       <div className="ed-canvas-caption">
         <span>765 × 1000</span>
         <span>{Math.round(viewport.zoom * 100)}%</span>
       </div>
+    </div>
+  );
+}
+
+interface ArtboardStageProps {
+  doc: EditorDocument;
+  viewport: Viewport;
+  guides: SnapGuide[];
+  marquee: Rect | null;
+  onLayerSelect: (id: string, event: ReactMouseEvent<HTMLElement> | ReactKeyboardEvent<HTMLElement>) => void;
+}
+
+/** Subscribes to drag transforms so pointer moves leave the editor shell alone. */
+function ArtboardStage({ doc, viewport, guides, marquee, onLayerSelect }: ArtboardStageProps) {
+  const transientTransforms = useTransientTransforms();
+  const stageStyle = {
+    "--zoom": viewport.zoom,
+    transform: `translate(calc(-50% + ${viewport.panX}px), calc(-50% + ${viewport.panY}px)) scale(${viewport.zoom})`,
+  } as CSSProperties;
+
+  return (
+    <div
+      className="ed-artboard-stage"
+      data-testid="artboard-stage"
+      style={stageStyle}
+    >
+      <ArtboardView
+        doc={doc}
+        onLayerSelect={onLayerSelect}
+        testId="editor-artboard"
+      />
+      <SelectionOverlay
+        layers={doc.layers}
+        selectedIds={doc.selectedLayerIds}
+        transforms={transientTransforms ?? undefined}
+        guides={guides}
+        marquee={marquee}
+      />
     </div>
   );
 }

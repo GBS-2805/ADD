@@ -317,6 +317,36 @@ class TexturePresetTest {
     }
 
     @Test
+    fun fieldAndCacheHaveFixedMemoryCeilings() {
+        // 1080x1350 is a full phone artboard. The overlay is sampled at a smaller
+        // field and scaled by the canvas, so its allocation never follows the screen.
+        val (width, height) = TextureRenderer.fieldDimensions(1080, 1350)
+        assertTrue(width * height <= TextureRenderer.MAX_FIELD_PIXELS)
+        assertTrue("the field was unexpectedly tiny: ${width}x$height", width * height > 200_000)
+        val fieldBytes = width.toLong() * height * 4
+        assertTrue("a field allocated ${fieldBytes}B", fieldBytes <= 960_000L)
+
+        // Eight maximum-size entries must fit the cache. The cache also caps entries
+        // at eight, so this is the real worst case rather than ten thumbnails.
+        assertEquals(8 * 1024 * 1024, TextureRenderer.MAX_CACHE_BYTES)
+        assertTrue("cache cannot hold eight maximum fields", fieldBytes * 8 <= TextureRenderer.MAX_CACHE_BYTES)
+    }
+
+    @Test
+    fun tenFamilyColdOpenFitsTheCacheBudget() {
+        val dimensions = TextureFamily.entries.map {
+            TextureRenderer.fieldDimensions(300, 375)
+        }
+        val bytes = dimensions.sumOf { (width, height) ->
+            width.toLong() * height * 4
+        }
+        assertTrue("ten cold fields allocated ${bytes}B", bytes <= TextureRenderer.MAX_CACHE_BYTES)
+        dimensions.forEach { (width, height) ->
+            assertTrue(width in 1..300 && height in 1..375)
+        }
+    }
+
+    @Test
     fun tenFamilyColdWarmIsBoundedEvenAtTheOldPreviewSize() {
         // A full ten-family warm at 180x225 is intentionally off the frame path. It
         // stays bounded and is the number recorded in the status notes.

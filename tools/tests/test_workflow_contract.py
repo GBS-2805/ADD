@@ -15,6 +15,7 @@ class WorkflowContractTest(unittest.TestCase):
         condition = jobs.split("runs-on:", 1)[0]
         self.assertIn("github.event_name == 'workflow_dispatch'", condition)
         self.assertIn("github.ref == 'refs/heads/main'", condition)
+        self.assertIn("github.event.inputs.confirm == 'publish'", condition)
         self.assertNotIn("github.event_name == 'push'", condition)
 
     def test_publish_uses_production_environment(self):
@@ -38,6 +39,17 @@ class WorkflowContractTest(unittest.TestCase):
         condition = handoff.split("runs-on:", 1)[0]
         self.assertIn("needs: publish", condition)
         self.assertIn("github.event_name == 'workflow_dispatch'", condition)
+        self.assertIn("github.event.inputs.confirm == 'publish'", condition)
+
+    def test_publish_requires_confirmation_and_optional_sha(self):
+        self.assertIn("confirm:", self.text)
+        self.assertIn("Type publish to deploy production", self.text)
+        inputs = self.text.split("inputs:", 1)[1].split("permissions:", 1)[0]
+        confirm = inputs.split("confirm:", 1)[1].split("expected_sha:", 1)[0]
+        self.assertIn("required: false", confirm)
+        self.assertIn("expected_sha:", self.text)
+        self.assertIn("EXPECTED_SHA: ${{ github.event.inputs.expected_sha }}", self.text)
+        self.assertIn('[ "$EXPECTED_SHA" != "$GITHUB_SHA" ]', self.text)
 
     def test_token_is_scoped_to_the_deploy_step(self):
         self.assertIn("VERCEL_ARTBASE_TOKEN: ${{ secrets.VERCEL_ARTBASE_TOKEN }}", self.text)

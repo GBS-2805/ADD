@@ -29,6 +29,14 @@ the same PixelCopy capture used by export without writing a file.
 7. **EXPORT** writes a PNG to `Pictures/Engine Spike`.
 8. Opening that PNG shows all visible gems and stickers, not the dark 3D placeholder.
 
+## Smoke the shipped app
+
+Before the deeper checks, run `python3 tools/device_smoke.py --apk <path>`. It installs
+the APK, launches the resolved launcher activity, waits, and fails on a missing process
+or a crash/ANR in logcat. With no device it exits 2 and says `blocked`; that is not a
+pass. Add `--json` for a machine-readable result and `--serial` when more than one
+device is connected.
+
 ## Performance evidence
 
 Run `bash tools/engine-spike/bench.sh` only with a real device attached. It writes

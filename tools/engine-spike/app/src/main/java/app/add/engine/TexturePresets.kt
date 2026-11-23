@@ -266,8 +266,8 @@ object TexturePresets {
  * size, and lets the canvas scale that raster to the current backing surface.
  */
 object TextureRenderer {
-    private const val MAX_FIELD_PIXELS = 240_000
-    private const val MAX_CACHE_BYTES = 8 * 1024 * 1024
+    internal const val MAX_FIELD_PIXELS = 240_000
+    internal const val MAX_CACHE_BYTES = 8 * 1024 * 1024
 
     private data class CacheKey(
         val family: TextureFamily,
@@ -285,16 +285,21 @@ object TextureRenderer {
         }
     }
 
-    @Synchronized
-    fun overlay(spec: TextureSpec, width: Int, height: Int): Bitmap {
+    /** The cached raster's dimensions for a requested backing size. */
+    internal fun fieldDimensions(width: Int, height: Int): Pair<Int, Int> {
         val w = width.coerceAtLeast(1)
         val h = height.coerceAtLeast(1)
         val pixels = w.toLong() * h
         val factor = if (pixels > MAX_FIELD_PIXELS) sqrt(MAX_FIELD_PIXELS.toDouble() / pixels).toFloat() else 1f
         // Floor, not round: rounding both axes can land just over the cap
         // (438 × 548 = 240,024), which would make the cache bound a lie.
-        val fieldWidth = floor(w * factor).toInt().coerceAtLeast(1)
-        val fieldHeight = floor(h * factor).toInt().coerceAtLeast(1)
+        return floor(w * factor).toInt().coerceAtLeast(1) to
+            floor(h * factor).toInt().coerceAtLeast(1)
+    }
+
+    @Synchronized
+    fun overlay(spec: TextureSpec, width: Int, height: Int): Bitmap {
+        val (fieldWidth, fieldHeight) = fieldDimensions(width, height)
         val key = CacheKey(spec.family, spec.seed, spec.scale.toRawBits(), fieldWidth, fieldHeight)
         cache[key]?.let { return it }
         val field = TexturePresets.render(spec.family, spec.seed, fieldWidth, fieldHeight, spec.scale)

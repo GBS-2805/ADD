@@ -10,7 +10,8 @@ SHA = "eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871"
 
 
 def workflow_text(*, ref: str = SHA, permissions: str = "contents: read",
-                  persist: bool = True, publish_if: str = "github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'",
+                  persist: bool = True,
+                  publish_if: str = "github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' && github.event.inputs.confirm == 'publish'",
                   review_secret: str = "") -> str:
     return f"""name: test
 
@@ -32,6 +33,11 @@ jobs:
     if: {publish_if}
     runs-on: ubuntu-latest
     steps:
+      - name: Confirm the expected commit
+        if: github.event.inputs.expected_sha != ''
+        env:
+          EXPECTED_SHA: ${{ github.event.inputs.expected_sha }}
+        run: test "$EXPECTED_SHA" = "$GITHUB_SHA"
       - run: echo publish
   review:
     if: github.event_name == 'pull_request'
@@ -81,6 +87,16 @@ class WorkflowTests(unittest.TestCase):
         found = self.check(workflow_text(
             publish_if="github.event_name == 'push' && github.ref == 'refs/heads/main'"))
         self.assertTrue(any("must not run on push" in item for item in found), found)
+
+    def test_publish_requires_typed_confirmation(self):
+        found = self.check(workflow_text(
+            publish_if="github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'"))
+        self.assertTrue(any("typed publish confirmation" in item for item in found), found)
+
+    def test_publish_requires_expected_sha_check(self):
+        text = workflow_text().replace("expected_sha", "removed_sha")
+        found = self.check(text)
+        self.assertTrue(any("expected_sha" in item for item in found), found)
 
 
 if __name__ == "__main__":
