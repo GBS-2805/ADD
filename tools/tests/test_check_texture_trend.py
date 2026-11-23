@@ -75,6 +75,59 @@ class TextureTrendTest(unittest.TestCase):
         self.assertIn("WoodGrain", output.getvalue())
         self.assertIn("WARN", output.getvalue())
 
+    def test_three_recent_runs_are_reported_as_sustained(self):
+        record = {"warn_ratio": 1.30, "families": {"Brick": 2.0, "WoodGrain": 2.0}}
+        history = [
+            {"families": {"Brick": 3.0, "WoodGrain": 2.0}},
+            {"families": {"Brick": 3.1, "WoodGrain": 3.0}},
+        ]
+        output = io.StringIO()
+        with contextlib.redirect_stdout(output):
+            sustained = check_texture_trend.sustained_drift(
+                history, {"Brick": 4.0, "WoodGrain": 4.0}, 1.0, record, 1.30)
+        self.assertEqual(["Brick"], sustained)
+        self.assertIn("Brick over 1.30x in 3 of the last 3 runs", output.getvalue())
+
+    def test_one_slow_run_is_not_sustained(self):
+        record = {"warn_ratio": 1.30, "families": {"Brick": 2.0}}
+        history = [
+            {"families": {"Brick": 1.0}},
+            {"families": {"Brick": 1.1}},
+        ]
+        output = io.StringIO()
+        with contextlib.redirect_stdout(output):
+            sustained = check_texture_trend.sustained_drift(
+                history, {"Brick": 4.0}, 1.0, record, 1.30)
+        self.assertEqual([], sustained)
+
+    def test_main_appends_normalized_history(self):
+        target = results_with([HOST, BRICK, WOOD])
+        baseline = target.parent / "texture-trend.json"
+        history = target.parent / "texture-history.jsonl"
+        with contextlib.redirect_stdout(io.StringIO()):
+            self.assertEqual(0, check_texture_trend.main([
+                "--results", str(target), "--baseline", str(baseline),
+                "--history", str(history), "--write", "--no-host"]))
+        # --write records the baseline and returns before appending.
+        self.assertFalse(history.exists())
+        with contextlib.redirect_stdout(io.StringIO()):
+            self.assertEqual(0, check_texture_trend.main([
+                "--results", str(target), "--baseline", str(baseline),
+                "--history", str(history), "--no-host"]))
+        entries = check_texture_trend.load_history(history)
+        self.assertEqual(1, len(entries))
+        self.assertEqual(2.0, entries[0]["families"]["Brick"])
+        self.assertEqual(5.0, entries[0]["families"]["WoodGrain"])
+
+    def test_corrupt_history_line_is_ignored(self):
+        target = results_with([HOST])
+        history = target.parent / "texture-history.jsonl"
+        history.write_text(
+            "not json\n" + json.dumps({"families": {"Brick": 2.0}}) + "\n",
+            encoding="utf-8")
+        entries = check_texture_trend.load_history(history)
+        self.assertEqual([{"families": {"Brick": 2.0}}], entries)
+
     def test_write_then_strict_compare(self):
         target = results_with([HOST, BRICK, WOOD])
         baseline = target.parent / "texture-trend.json"

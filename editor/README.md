@@ -24,7 +24,8 @@ VITE_ALLOWED_HOST=<preview-host> npm run dev -- --host 0.0.0.0 --port 3000
 npm test          # Vitest + jsdom unit and smoke tests
 npm run build     # TypeScript project build + production Vite build
 npm run check:assets
-npm run test:e2e  # Playwright; run npx playwright install chromium first
+npm run test:e2e       # Playwright regression specs; run npx playwright install chromium first
+npm run test:e2e:perf  # Production-build drag budget, isolated to one worker
 ```
 
 `scripts/check-assets.mjs` verifies that every runtime local asset has a source, licence and SHA-256 in `asset-manifest.json`; that the lockfile is pinned; that CSS and document references are local; and that the built HTML does not load remote code.

@@ -15,6 +15,10 @@ artifacts/
 # an artifact; it is a result, not a source file.
 test-results/
 
+# Calibration runs cached by CI; a local run may create it too. It is a trail, not
+# source, and never replaces the checked-in texture-trend.json baseline.
+tools/engine-spike/texture-history.jsonl
+
 # The app's web bundle is staged out of docs/ by build.sh; never edit or commit it.
 app/assets/www/
 

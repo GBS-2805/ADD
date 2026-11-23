@@ -1,5 +1,6 @@
-import type { CSSProperties, KeyboardEvent, MouseEvent } from "react";
+import { memo, type CSSProperties, type KeyboardEvent, type MouseEvent } from "react";
 import { EffectSurface } from "../../editor-core/ShaderView";
+import { useTransientLayerTransform } from "../../editor-core/store";
 import { textFontStack, type LayerTransform, type EditorLayer } from "../../editor-core/types";
 import { layerFrame } from "../model/geometry";
 
@@ -14,18 +15,20 @@ export interface LayerViewProps {
   onLayerSelect?: (id: string, event: MouseEvent<HTMLElement> | KeyboardEvent<HTMLElement>) => void;
 }
 
-export function LayerView({
+export const LayerView = memo(function LayerView({
   layer,
-  transform = layer.transform,
+  transform,
   selected = false,
   readOnly = false,
   testId,
   layerId,
   onLayerSelect,
 }: LayerViewProps) {
+  const transient = useTransientLayerTransform(layer.id, layer.transform);
+  const resolved = transform ?? transient;
   const resolvedTestId = testId === undefined ? `art-layer-${layer.id}` : testId;
   const resolvedLayerId = layerId === undefined ? layer.id : layerId;
-  const frame = layerFrame(layer, transform);
+  const frame = layerFrame(layer, resolved);
   const variant = layer.shape?.variant ?? (layer.id.includes("orbit") ? "orbit" : layer.id.includes("star") ? "star" : "block");
   const style: CSSProperties = {
     left: frame.x - frame.width / 2,
@@ -115,4 +118,4 @@ export function LayerView({
       ) : null}
     </div>
   );
-}
+});

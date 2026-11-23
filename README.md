@@ -273,7 +273,9 @@ needs a version bump to carry the new host. `AGENTS.md` has the full sequence.
   origin are reviewed code, not observed behaviour. Verified instead: resource/link
   compilation, javac type checking, dex packaging, zipalign, v1+v2 signature
   verification, `resources.arsc` stored uncompressed for targetSdk 30+ installs, and a
-  byte-exact download from the published page.
+  byte-exact download from the published page. `tools/device_smoke.py` installs and
+  launches the APK, checks the process and fails on a crash or ANR in logcat; with no
+  connected device it exits 2 and reports `blocked`, never a pass.
 - The restyle itself is unconfirmed on hardware: colours, Poppins metrics and the
   hairline spacing have only been checked as resource values and layouts.
 - HEIC input depends on the device decoder (`BitmapFactory`); output is JPEG/WebP.

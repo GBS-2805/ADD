@@ -19,6 +19,15 @@ on:
   push:
   pull_request:
   workflow_dispatch:
+    inputs:
+      confirm:
+        description: Optional. Type publish to deploy production; leave blank for checks only
+        required: false
+        type: string
+      expected_sha:
+        description: Optional full 40-character commit SHA that must match main
+        required: false
+        type: string
 
 permissions:
   contents: read
@@ -54,9 +63,8 @@ jobs:
     # support chromium on ubuntu26.04-x64"), which failed the first run of this job.
     runs-on: ubuntu-24.04
     # npm ci (~40s) + typecheck (~45s cold) + vitest (~80s) + install the browser
-    # (~30s) + the 70 canvas specs. The specs alone take about 15 minutes, and
-    # Playwright shards by spec file here: the files split 53/17, so a second
-    # runner moves only the lighter 17 tests. Keep one job until that is balanced.
+    # (~30s) + the canvas specs. Tests are independent and now run two at a time in
+    # one job; sharding across runners waits until the per-file split is balanced.
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -78,12 +86,17 @@ jobs:
       - name: Install the pinned browser
         run: npx --no-install playwright install --with-deps chromium
         working-directory: editor
-      - name: The canvas specs against the built editor
-        # TWIN_E2E_CI=1 skips *-captures.spec.ts (writes gitignored screenshots) and
-        # the performance spec (a recorded 190 ms finding with its own plan). The
-        # other 70 assertions gate the push: undo, snapping, export, .add round-trip,
-        # every plugin opening, and no requests leaving the origin.
+      - name: The canvas specs
+        # TWIN_E2E_CI=1 skips *-captures.spec.ts (writes gitignored screenshots).
+        # Two Playwright workers run independent tests within one job: undo,
+        # snapping, export, .add round-trip, every plugin opening, and no requests
+        # leaving the origin still gate the push.
         run: npm run test:e2e:ci
+        working-directory: editor
+      - name: The production drag budget
+        # Builds the production bundle and runs the 20-layer drag with pointerup
+        # included, isolated to one worker so another test cannot compete for CPU.
+        run: npm run test:e2e:perf
         working-directory: editor
       - name: Keep the test report
         if: always()
@@ -154,20 +167,29 @@ jobs:
             ~/.m2/repository/org/robolectric
           key: engine-${{ runner.os }}-${{ hashFiles('tools/engine-spike/**/*.gradle.kts', 'tools/engine-spike/gradle/wrapper/gradle-wrapper.properties') }}
           restore-keys: engine-${{ runner.os }}-
+      - name: Texture calibration history
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: tools/engine-spike/texture-history.jsonl
+          key: texture-history-${{ runner.os }}-${{ github.run_id }}
+          restore-keys: texture-history-${{ runner.os }}-
       - name: The engine suite, both pixel guards, and the rest of the verdict
         env:
           NODE_PATH: /tmp/pw/node_modules
           LD_LIBRARY_PATH: /tmp/rootfs/usr/lib/x86_64-linux-gnu:/tmp/rootfs/lib/x86_64-linux-gnu
           FONTCONFIG_FILE: /tmp/rootfs/fonts.conf
+          TEXTURE_HISTORY: tools/engine-spike/texture-history.jsonl
         run: python3 tools/check_all.py --visual --artboards
   publish:
     needs: [shelf, visual]
     # A merge is not a release. Publishing is a manual dispatch of this workflow on
-    # main: shelf and visual must come green before this job. The `handoff` job needs
-    # this one, so it is skipped with it and cannot publish half a release.
+    # main with the literal confirmation `publish`; shelf and visual must come green
+    # before this job. The `handoff` job needs this one, so it is skipped with it and
+    # cannot publish half a release.
     if: >-
       github.event_name == 'workflow_dispatch' &&
-      github.ref == 'refs/heads/main'
+      github.ref == 'refs/heads/main' &&
+      github.event.inputs.confirm == 'publish'
     runs-on: ubuntu-24.04
     environment: production
     timeout-minutes: 15
@@ -187,6 +209,19 @@ jobs:
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: "22"
+      - name: Confirm the expected commit
+        if: github.event.inputs.expected_sha != ''
+        env:
+          EXPECTED_SHA: ${{ github.event.inputs.expected_sha }}
+        run: |
+          case "$EXPECTED_SHA" in
+            *[!0-9a-f]*|'') echo "::error::expected_sha must be a full lowercase 40-character SHA" >&2; exit 1 ;;
+          esac
+          if [ "${#EXPECTED_SHA}" -ne 40 ] || [ "$EXPECTED_SHA" != "$GITHUB_SHA" ]; then
+            echo "::error::expected_sha $EXPECTED_SHA does not match checked-out $GITHUB_SHA" >&2
+            exit 1
+          fi
+          echo "confirmed $GITHUB_SHA" >> "$GITHUB_STEP_SUMMARY"
       - name: Deploy the checked main tree
         env:
           VERCEL_ARTBASE_TOKEN: ${{ secrets.VERCEL_ARTBASE_TOKEN }}
@@ -230,7 +265,10 @@ jobs:
   # publish job.
   handoff:
     needs: publish
-    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'
+    if: >-
+      github.event_name == 'workflow_dispatch' &&
+      github.ref == 'refs/heads/main' &&
+      github.event.inputs.confirm == 'publish'
     runs-on: ubuntu-24.04
     environment: production
     timeout-minutes: 15

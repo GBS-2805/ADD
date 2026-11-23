@@ -1,4 +1,4 @@
-import type { CSSProperties, KeyboardEvent, MouseEvent } from "react";
+import { memo, type CSSProperties, type KeyboardEvent, type MouseEvent } from "react";
 import { EffectSurface } from "../../editor-core/ShaderView";
 import type { LayerTransform, EditorDocument } from "../../editor-core/types";
 import { ARTBOARD_HEIGHT, ARTBOARD_WIDTH } from "../model/geometry";
@@ -16,7 +16,7 @@ export interface ArtboardViewProps {
   onLayerSelect?: (id: string, event: MouseEvent<HTMLElement> | KeyboardEvent<HTMLElement>) => void;
 }
 
-export function ArtboardView({
+export const ArtboardView = memo(function ArtboardView({
   doc,
   transforms,
   selectedIds,
@@ -72,4 +72,4 @@ export function ArtboardView({
       </div>
     </div>
   );
-}
+});

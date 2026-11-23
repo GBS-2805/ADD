@@ -4,6 +4,10 @@ import { expect, test, type Page } from "@playwright/test";
 const EVIDENCE = "../artifacts/twin/editor";
 
 test.describe.configure({ timeout: 240_000 });
+// Trace snapshots walk the live DOM on every mutation. That instrumentation is
+// valuable on failure, but it would be measured as editor work, so this file runs
+// without it and relies on the JSON evidence written next to the assertion.
+test.use({ trace: "off" });
 
 interface Project {
   format: string;
@@ -25,7 +29,7 @@ async function open(page: Page, width: number, height: number) {
 async function baselineProject(page: Page): Promise<Project> {
   const downloadPromise = page.waitForEvent("download");
   await page.getByRole("button", { name: "Open document menu" }).click();
-  await page.getByRole("menuitem", { name: "Save .twin" }).click();
+  await page.getByRole("menuitem", { name: "Save .add" }).click();
   const path = await (await downloadPromise).path();
   if (!path) throw new Error("No project download path.");
   return JSON.parse(await readFile(path, "utf8")) as Project;
@@ -51,6 +55,9 @@ function withLayers(project: Project, count: number): Project {
     ...project,
     document: {
       ...project.document,
+      // Isolate layer dragging from animated shader backgrounds: this budget is
+      // about the editor's per-pointer-move work, not the GPU renderer.
+      background: null,
       layers,
       selectedLayerIds: [`perf-${count - 1}`],
     },
@@ -60,9 +67,9 @@ function withLayers(project: Project, count: number): Project {
 async function openProject(page: Page, project: Project) {
   const chooserPromise = page.waitForEvent("filechooser");
   await page.getByRole("button", { name: "Open document menu" }).click();
-  await page.getByRole("menuitem", { name: "Open .twin" }).click();
+  await page.getByRole("menuitem", { name: "Open .add" }).click();
   await (await chooserPromise).setFiles({
-    name: "performance.twin",
+    name: "performance.add",
     mimeType: "application/json",
     buffer: Buffer.from(JSON.stringify(project)),
   });
@@ -77,12 +84,14 @@ async function dragAndMeasure(page: Page, width: number, height: number, count: 
   const box = await layer.boundingBox();
   if (!box) throw new Error("The performance layer has no box.");
   await page.evaluate(() => {
-    const state = window as unknown as { __longTasks: number[]; __longTaskAttribution: string[] };
+    const state = window as unknown as { __longTasks: number[]; __longTaskStarts: number[]; __longTaskAttribution: string[] };
     state.__longTasks = [];
+    state.__longTaskStarts = [];
     state.__longTaskAttribution = [];
     new PerformanceObserver((list) => {
       for (const entry of list.getEntries()) {
         state.__longTasks.push(entry.duration);
+        state.__longTaskStarts.push(Math.round(entry.startTime));
         const attribution = (entry as PerformanceEntry & { attribution?: Array<{ name?: string; containerSelector?: string }> }).attribution ?? [];
         state.__longTaskAttribution.push(attribution.map((item) => `${item.name ?? ""} ${item.containerSelector ?? ""}`.trim()).join(" | "));
       }
@@ -90,14 +99,29 @@ async function dragAndMeasure(page: Page, width: number, height: number, count: 
   });
   await page.waitForTimeout(2_000);
   const idleTasks = await page.evaluate(() => {
-    const state = window as unknown as { __longTasks: number[]; __longTaskAttribution: string[] };
-    const snapshot = { durations: [...state.__longTasks], attribution: [...state.__longTaskAttribution] };
+    const state = window as unknown as { __longTasks: number[]; __longTaskStarts: number[]; __longTaskAttribution: string[] };
+    const snapshot = {
+      durations: [...state.__longTasks],
+      starts: [...state.__longTaskStarts],
+      attribution: [...state.__longTaskAttribution],
+    };
     state.__longTasks = [];
+    state.__longTaskStarts = [];
     state.__longTaskAttribution = [];
     return snapshot;
   });
   await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
   await page.mouse.down();
+  // Pointerdown selects the layer and begins the session. Let that first task
+  // settle, then measure the 50 moves together with pointerup's commit and undo
+  // step, so releasing the drag cannot hide a long task outside the budget.
+  await page.waitForTimeout(1_000);
+  await page.evaluate(() => {
+    const state = window as unknown as { __longTasks: number[]; __longTaskStarts: number[]; __longTaskAttribution: string[] };
+    state.__longTasks = [];
+    state.__longTaskStarts = [];
+    state.__longTaskAttribution = [];
+  });
   const start = Date.now();
   for (let index = 1; index <= 50; index += 1) {
     await page.mouse.move(
@@ -108,9 +132,15 @@ async function dragAndMeasure(page: Page, width: number, height: number, count: 
   }
   const elapsedMs = Date.now() - start;
   await page.mouse.up();
+  // Pointerup commits the transform and its undo step. Give React and the browser
+  // one settled frame so the release cost lands in this measurement window.
+  await page.waitForTimeout(250);
+  const after = await layer.boundingBox();
+  if (!after) throw new Error("The performance layer lost its box after the drag.");
+  expect(Math.abs(after.x - box.x)).toBeGreaterThan(1);
   const measurement = await page.evaluate(() => {
-    const state = window as unknown as { __longTasks: number[]; __longTaskAttribution: string[] };
-    return { durations: state.__longTasks, attribution: state.__longTaskAttribution };
+    const state = window as unknown as { __longTasks: number[]; __longTaskStarts: number[]; __longTaskAttribution: string[] };
+    return { durations: state.__longTasks, starts: state.__longTaskStarts, attribution: state.__longTaskAttribution };
   });
   const longTasks = measurement.durations;
   const evidence = {
@@ -119,9 +149,11 @@ async function dragAndMeasure(page: Page, width: number, height: number, count: 
     layers: count,
     elapsedMs,
     idleLongTasks: idleTasks.durations.map((duration) => Math.round(duration * 10) / 10),
+    idleLongTaskStarts: idleTasks.starts,
     idleMaxLongTaskMs: idleTasks.durations.length ? Math.max(...idleTasks.durations) : 0,
     idleAttribution: [...new Set(idleTasks.attribution)].slice(0, 5),
     longTasks: longTasks.map((duration) => Math.round(duration * 10) / 10),
+    longTaskStarts: measurement.starts,
     maxLongTaskMs: longTasks.length ? Math.max(...longTasks) : 0,
     attribution: [...new Set(measurement.attribution)].slice(0, 5),
   };

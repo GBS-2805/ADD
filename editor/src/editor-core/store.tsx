@@ -6,6 +6,7 @@ import {
   useMemo,
   useRef,
   useState,
+  useSyncExternalStore,
   type ReactNode,
 } from "react";
 import {
@@ -137,7 +138,6 @@ export interface EditorState {
   toastExiting: boolean;
   presenting: boolean;
   effectPulse: EffectPulse | null;
-  transientTransforms: Record<string, LayerTransform> | null;
   tool: EditorTool;
   snapEnabled: boolean;
   rulersVisible: boolean;
@@ -207,6 +207,53 @@ export interface EditorActions {
 
 const EditorContext = createContext<EditorActions | null>(null);
 
+interface TransientTransformsStore {
+  read: () => Record<string, LayerTransform> | null;
+  write: (updates: Record<string, LayerTransform> | null) => void;
+  subscribe: (listener: () => void) => () => void;
+}
+
+function createTransientTransformsStore(): TransientTransformsStore {
+  let value: Record<string, LayerTransform> | null = null;
+  const listeners = new Set<() => void>();
+  return {
+    read: () => value,
+    write(updates) {
+      value = updates;
+      listeners.forEach((listener) => listener());
+    },
+    subscribe(listener) {
+      listeners.add(listener);
+      return () => listeners.delete(listener);
+    },
+  };
+}
+
+const TransientTransformsContext = createContext<TransientTransformsStore | null>(null);
+
+/** Drag state changes on every pointer move, so it deliberately bypasses the editor store. */
+export function useTransientTransforms(): Record<string, LayerTransform> | null {
+  const store = useContext(TransientTransformsContext);
+  if (!store) throw new Error("useTransientTransforms must be used inside EditorProvider");
+  return useSyncExternalStore(store.subscribe, store.read, store.read);
+}
+
+const NO_SUBSCRIBE = () => () => undefined;
+
+/**
+ * Only the layer whose transform changed re-renders. Layers outside a provider (print,
+ * preview tests) fall back to their committed transform and subscribe to nothing.
+ */
+export function useTransientLayerTransform(
+  id: string,
+  fallback: LayerTransform,
+): LayerTransform {
+  const store = useContext(TransientTransformsContext);
+  const subscribe = store?.subscribe ?? NO_SUBSCRIBE;
+  const read = () => store?.read()?.[id] ?? fallback;
+  return useSyncExternalStore(subscribe, read, read);
+}
+
 const cloneDoc = (doc: EditorDocument): EditorDocument => ({
   ...doc,
   layers: doc.layers.map((layer) => ({
@@ -242,7 +289,9 @@ export function EditorProvider({ children, autosaveBackend }: EditorProviderProp
   const [presenting, setPresenting] = useState(false);
   const [lastExport, setLastExport] = useState<Omit<PngExportResult, "blob"> | null>(null);
   const [effectPulse, setEffectPulse] = useState<EffectPulse | null>(null);
-  const [transientTransforms, setTransientTransformsState] = useState<Record<string, LayerTransform> | null>(null);
+  const transientTransformsRef = useRef<TransientTransformsStore | null>(null);
+  if (!transientTransformsRef.current) transientTransformsRef.current = createTransientTransformsStore();
+  const transientTransformsStore = transientTransformsRef.current;
   const [tool, setToolState] = useState<EditorTool>("move");
   const [snapEnabled, setSnapEnabledState] = useState(true);
   const [rulersVisible, setRulersVisibleState] = useState(false);
@@ -742,8 +791,8 @@ export function EditorProvider({ children, autosaveBackend }: EditorProviderProp
   }, [commit]);
 
   const setTransientTransforms = useCallback((updates: Record<string, LayerTransform> | null) => {
-    setTransientTransformsState(updates);
-  }, []);
+    transientTransformsStore.write(updates);
+  }, [transientTransformsStore]);
 
   const setLayerTransform = useCallback((id: string, transform: Partial<LayerTransform>) => {
     const layer = stateRef.current.present.layers.find((item) => item.id === id);
@@ -924,7 +973,6 @@ export function EditorProvider({ children, autosaveBackend }: EditorProviderProp
       toastExiting,
       presenting,
       effectPulse,
-      transientTransforms,
       tool,
       snapEnabled,
       rulersVisible,
@@ -1002,7 +1050,6 @@ export function EditorProvider({ children, autosaveBackend }: EditorProviderProp
     toastExiting,
     presenting,
     effectPulse,
-    transientTransforms,
     tool,
     snapEnabled,
     rulersVisible,
@@ -1057,7 +1104,11 @@ export function EditorProvider({ children, autosaveBackend }: EditorProviderProp
     autosave,
   ]);
 
-  return <EditorContext.Provider value={actions}>{children}</EditorContext.Provider>;
+  return (
+    <TransientTransformsContext.Provider value={transientTransformsStore}>
+      <EditorContext.Provider value={actions}>{children}</EditorContext.Provider>
+    </TransientTransformsContext.Provider>
+  );
 }
 
 export function useEditorStore(): EditorActions {
