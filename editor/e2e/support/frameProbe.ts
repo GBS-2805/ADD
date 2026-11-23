@@ -68,9 +68,12 @@ export async function stopFrameProbe(page: Page): Promise<FrameStats> {
       ? sorted[Math.max(0, Math.ceil(sorted.length * 0.95) - 1)]
       : 0;
     const maxMs = sorted.length ? sorted[sorted.length - 1] : 0;
+    // Evidence is reported to 0.1 ms. Comparing raw sums of vsync intervals let
+    // one 60 Hz frame read 16.800000000001 and fail an inclusive 16.8 ms gate.
+    const rounded = (ms: number) => Math.round(ms * 10) / 10;
     const slowFrames = frames
       .filter((frame) => frame.ms > 25)
       .map((frame) => ({ atMs: Math.round(frame.at * 10) / 10, ms: Math.round(frame.ms * 10) / 10 }));
-    return { count: frames.length, p95Ms, maxMs, slowFrames };
+    return { count: frames.length, p95Ms: rounded(p95Ms), maxMs: rounded(maxMs), slowFrames };
   });
 }
