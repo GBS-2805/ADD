@@ -9,7 +9,8 @@
  * `test:e2e:perf` builds the app in its `webServer` command and runs every case,
  * which is right for CI and slow for a one-case loop. This serves `dist/` on a free
  * port and lets Playwright reuse it, so the build is paid only when a source changed
- * and only the open-frame test runs. The spec, config and thresholds are unchanged.
+ * and only the open-frame test runs. The spec and config are unchanged; the open case
+ * itself is report-only, so this prints a trend rather than enforcing a ceiling.
  */
 import { spawn } from "node:child_process";
 import fs from "node:fs/promises";
@@ -18,7 +19,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const EDITOR = path.resolve(fileURLToPath(new URL("..", import.meta.url)));
-const CASE = "twentyLayerProjectOpensWithinOneFrameAtFourTimesCpu";
+const CASE = "twentyLayerProjectOpenIsRecordedAtFourTimesCpu";
 const RESULT_CASE = "20-layers-open-1440x900";
 const RESULT_FILE = path.join(EDITOR, "test-results", "editor-perf.json");
 const DIST_INDEX = path.join(EDITOR, "dist", "index.html");
