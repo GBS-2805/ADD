@@ -101,14 +101,28 @@ jobs:
     # shards unions to exactly the unsharded list (92 tests in 8 files). Each shard
     # runs the same TWIN_E2E_CI=1 suite, which skips the *-captures.spec.ts writers,
     # and keeps the two-worker setting inside its runner. Two is the count the 4-5
-    # minute suites were measured with; the browser now comes from a cache keyed on
-    # the lockfile instead of a 6-8 minute cold download.
+    # minute suites were measured with.
     #
-    # 24.04 for the Playwright 1.57 browser refusal described on `editor`.
+    # The browser and every OS package `playwright install --with-deps` used to apt
+    # install are in this image, so the job has no browser download and no apt pass.
+    # A warm cache did not help: `--with-deps` still fetched 32.1 MB the runner image
+    # lacks (libgbm1, Mesa, the CJK and Liberation fonts) in 5-8 minutes on a slow
+    # mirror (run 189) and 12 s on a fast one (run 190). The image tag moves only
+    # with `@playwright/test` in editor/package.json; `npm run check:browser` fails in
+    # seconds when they drift.
+    #
     # 20 minutes: a slow runner has measured 4-5 min of specs normally, up to
     # ~10 min when the dev server is slow, and the per-test budgets in
     # playwright.config.ts are what decide a failure; this only bounds a hung job.
     runs-on: ubuntu-24.04
+    container:
+      # The release image, built from Playwright 1.57.0 — the pin in
+      # editor/package.json — with the Chromium and runtime packages that release
+      # installs. It sets PLAYWRIGHT_BROWSERS_PATH=/ms-playwright.
+      image: mcr.microsoft.com/playwright:v1.57.0-noble
+      # The image starts as root; 1001 is the runner's uid and the image's pwuser,
+      # so the workspace, npm cache and artifact paths stay writable.
+      options: --user 1001
     timeout-minutes: 20
     strategy:
       fail-fast: false
@@ -126,19 +140,12 @@ jobs:
       - name: Install the pinned dependencies
         run: npm ci
         working-directory: editor
-      - name: The pinned browser, from the cache when the lockfile has not moved
-        # @playwright/test pins one Chromium revision and the lockfile hash changes
-        # exactly when it does, so a hit is always the right build. Without the
-        # cache this download plus its apt step took 6 to 8 minutes on a cold
-        # runner and varied by minutes between the two shards.
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        with:
-          path: ~/.cache/ms-playwright
-          key: playwright-browser-${{ runner.os }}-${{ hashFiles('editor/package-lock.json') }}
-      - name: Install the pinned browser
-        # A hit still runs; it verifies the revision and only the OS packages are
-        # left to apt, which the runner image mostly has already.
-        run: npx --no-install playwright install --with-deps chromium
+      - name: The image's Chromium is the build the baselines were recorded on
+        # The perf numbers in the plan were recorded on the Chromium that
+        # @playwright/test 1.57.0 installs: revision 1200, 143.0.7499.4. This
+        # launches the image's headless shell and compares its version to
+        # playwright-core's browsers.json, so the tag is checked, not trusted.
+        run: npm run check:browser
         working-directory: editor
       - name: The canvas specs
         # TWIN_E2E_CI=1 skips *-captures.spec.ts (writes gitignored screenshots).
@@ -164,7 +171,13 @@ jobs:
     # the performance config still runs one worker and builds the production bundle.
     # A canvas timeout (they cluster on the software-WebGL fallback) cannot hide the
     # drag profile now that this is its own job.
+    #
+    # The same release image as the shards: no download, no apt, and the Chromium the
+    # ceilings were recorded on.
     runs-on: ubuntu-24.04
+    container:
+      image: mcr.microsoft.com/playwright:v1.57.0-noble
+      options: --user 1001
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -178,18 +191,12 @@ jobs:
       - name: Install the pinned dependencies
         run: npm ci
         working-directory: editor
-      - name: The pinned browser, from the cache when the lockfile has not moved
-        # Same cache as the e2e shards: this job measured the cold download at
-        # 8 minutes before its 93-second budget ran, which is the cold-runner
-        # variance the open-frame number has to be read against.
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        with:
-          path: ~/.cache/ms-playwright
-          key: playwright-browser-${{ runner.os }}-${{ hashFiles('editor/package-lock.json') }}
-      - name: Install the pinned browser
-        # A hit still runs; it verifies the revision and only the OS packages are
-        # left to apt, which the runner image mostly has already.
-        run: npx --no-install playwright install --with-deps chromium
+      - name: The image's Chromium is the build the baselines were recorded on
+        # Same check as the shards: the open-frame ceiling was measured on
+        # Chromium 143.0.7499.4 (revision 1200), so this job refuses to profile a
+        # different build. A cold runner used to spend 8 minutes installing the
+        # browser before its 93-second budget ran; the image removes that confound.
+        run: npm run check:browser
         working-directory: editor
       - name: The production drag budget
         # Builds the production bundle and runs the 20-layer drag with pointerup

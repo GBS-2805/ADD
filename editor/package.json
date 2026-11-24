@@ -13,6 +13,7 @@
     "test:e2e:perf": "playwright test --config=playwright.performance.config.ts",
     "perf:open": "node scripts/perf-open.mjs",
     "check:assets": "node scripts/check-assets.mjs",
+    "check:browser": "node scripts/check-browser.mjs",
     "test:e2e:ci": "TWIN_E2E_CI=1 playwright test"
   },
   "dependencies": {
