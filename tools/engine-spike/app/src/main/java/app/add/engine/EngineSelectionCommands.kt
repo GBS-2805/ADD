@@ -8,14 +8,17 @@ package app.add.engine
         if (additive) {
             selectedIds = if (id in selectedIds) selectedIds - id else selectedIds + id
             if (selectedIds.isEmpty()) selectedIds = setOf(id)
+            // Removing the primary hands the role to the newest remaining selection;
+            // the inspector must never point at a layer that is no longer selected.
+            selectedId = if (id in selectedIds) id else selectedIds.lastOrNull().orEmpty()
         } else {
             selectedIds = setOf(id)
+            selectedId = id
         }
-        selectedId = id
         selectedNodeId = null
         // Selecting a nested row edits at that row's level; there is no way to have a
         // child selected while the stage still believes it is at the artboard.
-        editingGroupId = layers.parentGroup(id)?.id
+        editingGroupId = layers.parentGroup(selectedId)?.id
         if (tool == Tool.Sticker) tool = Tool.Select
     }
 

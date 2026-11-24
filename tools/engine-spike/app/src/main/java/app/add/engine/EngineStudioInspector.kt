@@ -1102,12 +1102,26 @@ internal fun LayersTab(doc: EngineDocument, modifier: Modifier = Modifier) {
     var draggingId by remember { mutableStateOf<String?>(null) }
     var carried by remember { mutableFloatStateOf(0f) }
     var expanded by remember { mutableStateOf(emptySet<String>()) }
+    var multiSelect by remember { mutableStateOf(false) }
     val selected = doc.selected
     val rows = doc.layers.visibleRows(expanded)
     Column(modifier.padding(horizontal = 14.dp, vertical = 12.dp)) {
-        StudioSectionLabel("YOUR STACK", "${rows.size}")
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            StudioSectionLabel("YOUR STACK", "${rows.size} ROWS", Modifier.weight(1f))
+            Box(Modifier.testTag("layers-multi")) {
+                HudChip(
+                    label = if (multiSelect) "MULTI ${doc.selectedIds.size}" else "MULTI",
+                    active = multiSelect,
+                ) { multiSelect = !multiSelect }
+            }
+        }
         Spacer(Modifier.height(3.dp))
-        Text("Front of the page is at the top. Hold a card to move it.", color = Dim, fontSize = 10.sp)
+        Text(
+            if (multiSelect) "Tap cards to add or remove them, then GROUP."
+            else "Front of the page is at the top. Hold a card to move it.",
+            color = Dim,
+            fontSize = 10.sp,
+        )
         Spacer(Modifier.height(8.dp))
         Column(
             modifier = Modifier.weight(1f).verticalScroll(rememberScrollState()),
@@ -1123,7 +1137,8 @@ internal fun LayersTab(doc: EngineDocument, modifier: Modifier = Modifier) {
                         expanded = layer.id in expanded,
                         dragging = draggingId == layer.id,
                         onSelect = {
-                            doc.select(layer.id)
+                            if (multiSelect) doc.select(layer.id, additive = true)
+                            else doc.select(layer.id)
                             haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                         },
                         onToggleExpand = if (layer is GroupLayer) {
@@ -1168,6 +1183,9 @@ internal fun LayersTab(doc: EngineDocument, modifier: Modifier = Modifier) {
                 modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
                 horizontalArrangement = Arrangement.spacedBy(5.dp),
             ) {
+                if (doc.selectedIds.size >= 2) {
+                    HudChip("GROUP SELECTION") { doc.groupSelection() }
+                }
                 HudChip("DUPLICATE") { doc.duplicateSelected() }
                 HudChip("BRING FORWARD") { doc.reorderSelected(1) }
                 HudChip("SEND BACK") { doc.reorderSelected(-1) }
