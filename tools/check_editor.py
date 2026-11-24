@@ -135,7 +135,8 @@ def check_payload(write: bool) -> bool:
                   "budget_bytes": measured["bytes"],
                   "note": ("Initial script weight of docs/editor/ as built. gzip -9, so "
                            "the shelf's brotli is smaller. Tighten budget_bytes "
-                           "deliberately when the plugin split lands.")}
+                           "deliberately; the eight plugin panels are lazy chunks "
+                           "and are not initial weight.")}
         budget_path().write_text(json.dumps(record, indent=2) + "\n", encoding="utf-8")
         print("  %-9s wrote %s (%d bytes)" % ("payload", budget_path().relative_to(repo_root()),
                                               measured["bytes"]))
