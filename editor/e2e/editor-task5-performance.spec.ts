@@ -93,6 +93,8 @@ interface LongAnimationFrame {
     forcedStyleAndLayoutDuration: number;
     sourceURL: string;
     sourceFunctionName: string;
+    /** -1 when the browser cannot name the script's character position. */
+    sourceCharPosition: number;
   }>;
 }
 
@@ -239,6 +241,7 @@ async function dragAndMeasure(page: Page, width: number, height: number, count: 
                 forcedStyleAndLayoutDuration?: number;
                 sourceURL?: string;
                 sourceFunctionName?: string;
+                sourceCharPosition?: number;
               }>;
             };
             state.__longFrames.push({
@@ -253,6 +256,7 @@ async function dragAndMeasure(page: Page, width: number, height: number, count: 
                 forcedStyleAndLayoutDuration: script.forcedStyleAndLayoutDuration ?? 0,
                 sourceURL: script.sourceURL ?? "",
                 sourceFunctionName: script.sourceFunctionName ?? "",
+                sourceCharPosition: script.sourceCharPosition ?? -1,
               })),
             });
           }
@@ -499,6 +503,7 @@ test("twentyLayerProjectOpensWithinOneFrameAtFourTimesCpu", async ({ page }) => 
                 forcedStyleAndLayoutDuration?: number;
                 sourceURL?: string;
                 sourceFunctionName?: string;
+                sourceCharPosition?: number;
               }>;
             };
             state.__longFrames.push({
@@ -513,6 +518,7 @@ test("twentyLayerProjectOpensWithinOneFrameAtFourTimesCpu", async ({ page }) => 
                 forcedStyleAndLayoutDuration: script.forcedStyleAndLayoutDuration ?? 0,
                 sourceURL: script.sourceURL ?? "",
                 sourceFunctionName: script.sourceFunctionName ?? "",
+                sourceCharPosition: script.sourceCharPosition ?? -1,
               })),
             });
           }

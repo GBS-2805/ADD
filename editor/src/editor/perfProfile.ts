@@ -9,6 +9,7 @@ export interface RenderSpan {
 interface PerfWindow extends Window {
   __perfProfile?: boolean;
   __perfSpans?: RenderSpan[];
+  __shaderLossWatched?: boolean;
 }
 
 /**
@@ -33,6 +34,53 @@ export function recordPerfSpan(id: string, startedAt: number): void {
     ms: Math.round((atMs - startedAt) * 10) / 10,
     atMs: Math.round(atMs * 10) / 10,
   });
+}
+
+/**
+ * Names a forced WebGL context loss in the perf artifact. `@paper-design/shaders`
+ * disposes a mount by calling `WEBGL_lose_context.loseContext()`, and a document
+ * swap that unmounts a shader host runs that inside the open. Only installed when
+ * the page enabled the profile, so a normal session never patches the prototype.
+ */
+export function watchShaderContextLoss(): void {
+  if (typeof window === "undefined") return;
+  const state = window as PerfWindow;
+  if (state.__perfProfile !== true || state.__shaderLossWatched) return;
+  const contexts = [window.WebGLRenderingContext, window.WebGL2RenderingContext].filter(
+    (context): context is typeof WebGLRenderingContext => Boolean(context),
+  );
+  if (contexts.length === 0) return;
+  state.__shaderLossWatched = true;
+  for (const context of contexts) {
+    const proto = context.prototype as unknown as {
+      getExtension: (this: WebGLRenderingContext, name: string) => unknown;
+    };
+    const getExtension = proto.getExtension;
+    proto.getExtension = function (this: WebGLRenderingContext, name: string) {
+      const extension = getExtension.call(this, name) as
+        | { loseContext?: () => void; __perfSpan?: boolean }
+        | null
+        | undefined;
+      if (
+        name === "WEBGL_lose_context" &&
+        extension &&
+        typeof extension.loseContext === "function" &&
+        !extension.__perfSpan
+      ) {
+        const loseContext = extension.loseContext.bind(extension);
+        extension.loseContext = () => {
+          const startedAt = performance.now();
+          try {
+            loseContext();
+          } finally {
+            recordPerfSpan("shader-context-loss", startedAt);
+          }
+        };
+        extension.__perfSpan = true;
+      }
+      return extension;
+    };
+  }
 }
 
 export function useRenderSpan(id: string): void {

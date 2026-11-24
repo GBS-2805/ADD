@@ -14,6 +14,7 @@ import {
 } from "@paper-design/shaders-react";
 import type { EditorEffect } from "./types";
 import { ADD_COLORS, PATTERN_PRESETS, SHADER_COLORS } from "./presets";
+import { watchShaderContextLoss } from "../editor/perfProfile";
 import { usePageVisible } from "./usePageVisible";
 import { useReducedMotion } from "./useReducedMotion";
 
@@ -69,6 +70,7 @@ class ShaderErrorBoundary extends Component<{ children: ReactNode }, { failed: b
 let webglSupport: boolean | null = null;
 
 export function canUseWebGL(): boolean {
+  watchShaderContextLoss();
   if (webglSupport !== null) return webglSupport;
   if (typeof window === "undefined" || typeof document === "undefined") return false;
   try {
@@ -81,6 +83,18 @@ export function canUseWebGL(): boolean {
     webglSupport = false;
     return false;
   }
+}
+
+/**
+ * Whether EffectSurface paints this effect with a WebGL canvas. Encodes the same
+ * branches EffectSurfaceView takes, so a host that keeps a shader mounted across a
+ * document swap knows which backgrounds own a context.
+ */
+export function surfacesShader(effect: EditorEffect | null): effect is EditorEffect {
+  if (!effect) return false;
+  if (effect.kind === "shader") return true;
+  if (effect.kind === "texture") return effect.preset !== "Fur" || Boolean(effect.image);
+  return false;
 }
 
 export function ShaderFallback({ label = "Paper texture" }: { label?: string }) {
