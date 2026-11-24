@@ -10,7 +10,7 @@
 
 **Spec:** `PLAN.md` (one-editor rule and native v2 shipping decision), `FINAL-TEST.md` (4.0 candidate, Studio retirement, blocked device gate), `NATIVE_EDITOR_V2.md` (native task list; its checkboxes are stale and are not evidence), `docs/superpowers/plans/2026-11-16-twin-workbench-v2.md` (browser baseline and known limitations), `editor/README.md` (browser workbench state), `AGENTS.md` (verification and evidence rules).
 
-**Status:** Native accepted. Task 2 (save-size invariant) is implemented, green and committed (`9456452`); Task 3 (CPU-throttled frame gate) is committed (`ac3eb76`) with its 20-layer phone gate green and its 64-layer ceiling promoted from six clean baselines. The desktop 20-layer gate is **green in CI** (`edf7999`): zero long tasks, p95 16.7 ms, **max frame 16.8 ms**, after deferring the inspector, skipping selection-only autosaves and starting the frame sampler after pointerdown settles. A separate project-open gate now covers the frame that mounts a 20-layer document: CI run 177 on `302565c` recorded **p95 16.7 ms, max 16.8 ms, zero long tasks over 61 frames**, while every drag case stayed at max 16.8 ms. Task 1 remains **BLOCKED** at the real-device step. Tasks 4 (autosave flush), 5 (lazy plugin panels) and 6 (parser/SVG fuzz) are implemented and green locally; Task 7 is not started. There is no commit, deploy or publish authorization in this plan.
+**Status:** Native accepted. Task 2 (save-size invariant) is implemented, green and committed (`9456452`); Task 3 (CPU-throttled frame gate) is committed (`ac3eb76`) with its 20-layer phone gate green and its 64-layer ceiling promoted from six clean baselines. The desktop 20-layer gate is **green in CI** (`edf7999`): zero long tasks, p95 16.7 ms, **max frame 16.8 ms**, after deferring the inspector, skipping selection-only autosaves and starting the frame sampler after pointerdown settles. A separate project-open gate now covers the frame that mounts a 20-layer document: CI run 177 on `302565c` recorded **p95 16.7 ms, max 16.8 ms, zero long tasks over 61 frames**, while every drag case stayed at max 16.8 ms. Task 1 remains **BLOCKED** at the real-device step. Tasks 4 (autosave flush), 5 (lazy plugin panels) and 6 (parser/SVG fuzz) are implemented, green locally and committed (`aef0bb3`). Task 7 (CI sharding) is implemented: the workflow checker, the tool self-tests and the shard-list union are green locally, while the two shard executions and the perf job remain CI-only because this VM's Chromium renderer crashes at desktop widths. There is no commit, deploy or publish authorization for Task 7 in this plan.
 
 ---
 
@@ -609,13 +609,21 @@ editor-perf:
 
 **Steps:**
 
-- [ ] Keep the existing `editor` job name for the unit/static job so a branch-protection check named `editor` still resolves.
-- [ ] Remove the “Install the pinned browser”, “The canvas specs” and “The production drag budget” steps from `editor`.
-- [ ] Add `editor-e2e` with the matrix above. Install only Node and Chromium; run `npm run test:e2e:ci -- --shard=${{ matrix.shard }}/2`.
-- [ ] Add `editor-perf` as a separate job with one worker via the existing performance config. Keep the production build and pointerup check; do not run it inside a shard.
-- [ ] Upload `editor/test-results/` under `editor-junit-${{ matrix.shard }}` in e2e and `editor-perf` in perf. Keep `if: always()`.
-- [ ] Update `review.needs`. Do not change `publish` or `handoff` conditions.
-- [ ] Run the workflow checker and the local shard count check.
+- [x] Keep the existing `editor` job name for the unit/static job so a branch-protection check named `editor` still resolves.
+- [x] Remove the “Install the pinned browser”, “The canvas specs” and “The production drag budget” steps from `editor`.
+- [x] Add `editor-e2e` with the matrix above. Install only Node and Chromium; run `npm run test:e2e:ci -- --shard=${{ matrix.shard }}/2`.
+- [x] Add `editor-perf` as a separate job with one worker via the existing performance config. Keep the production build and pointerup check; do not run it inside a shard.
+- [x] Upload `editor/test-results/` under `editor-junit-${{ matrix.shard }}` in e2e and `editor-perf` in perf. Keep `if: always()`.
+- [x] Update `review.needs`. Do not change `publish` or `handoff` conditions.
+- [x] Run the workflow checker and the local shard count check.
+
+**Implementation record (2026-11-24):**
+
+- `.github/workflows/checks.yml` now has four editor-related jobs. `editor` keeps its name and runs only checkout, Python 3.12, Node 22, `npm ci` and `python3 tools/check_editor.py` (12-minute timeout, no browser). `editor-e2e` is the `shard: [1, 2]` matrix with `fail-fast: false`, installs Chromium, runs `npm run test:e2e:ci -- --shard=${{ matrix.shard }}/2` and uploads `test-results/editor-junit.xml` plus `editor/test-results/` as `editor-junit-${{ matrix.shard }}` with `if: always()`. `editor-perf` is a separate 15-minute job that installs Chromium and runs `npm run test:e2e:perf`, so the performance config still builds the production bundle and runs its one worker alone on the runner; it uploads `editor-perf` under `if: always()`. `review.needs` is `[shelf, visual, editor, editor-e2e, editor-perf]`; `publish` still needs `[shelf, visual]` and `handoff` still needs `publish`, both untouched.
+- The reviewer note about the artifact name: shard 1 also uploads the historical `editor-junit` name (`if: always() && matrix.shard == 1`) with the same paths, because `tools/check_editor.py` writes `test-results/editor-junit.xml` and the unsplit job published that name. Shard 2 has only its numbered artifact.
+- Checked this session: `python3 tools/check_workflows.py` reports `workflows: OK - 4 workflow(s), action pins and permissions are safe`; `PyYAML` parses the file and shows the four jobs; `python3 -m unittest discover -s tools/tests` is green (242 tests) after fixing `tools/tests/test_check_editor.py`'s budget-note assertion, which the 950eb7c note edit had broken — the committed note and the `--write-budget` generator now both contain the `Tighten budget_bytes deliberately` sentence.
+- Shard coverage: the unsharded list has **92 tests in 8 files**, shard 1 and shard 2 list **46 each**, and the sorted name union equals the unsharded set with no duplicates and nothing missing. With `TWIN_E2E_CI=1` the capture writers are ignored first, so CI sees **73 tests in 5 files**, split **37 + 36**, again with an exact union.
+- Not checked: the two shard executions and the perf job. Shard 1 ran 37 tests here: **7 passed, 30 failed**, every failure `getByTestId('editor-shell')` never visible, while all 360 px touch specs passed. A probe at 1280×1000 crashed the renderer (`Target crashed`) at the first assertion, and the same desktop-width crash was recorded on the Task 2 build before this branch, so it is this VM's renderer, not the split. The plan's wall-time comparison is therefore **not measured**; the split's speed-up is unproven until CI runs both shards.
 
 **Verification:**
 

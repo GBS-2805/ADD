@@ -8,8 +8,10 @@
 # test suite. Caches are kept between runs, and a baseline drift or a failing engine
 # test fails the push.
 #
-# The editor job covers editor/ -- the app that builds the shelf's /editor/ page.
-# It needs a Node toolchain, so it is separate from the python-only job.
+# The editor jobs cover editor/ -- the app that builds the shelf's /editor/ page.
+# They need a Node toolchain, so they are separate from the python-only job: `editor`
+# runs the unit and static verdict, `editor-e2e` the browser specs in two shards, and
+# `editor-perf` the production drag budget alone on its runner.
 #
 # The APK build stays local, on purpose: it needs the keystore.
 # Before a release: python3 tools/check_all.py --browser <url> --artboards --visual
@@ -62,10 +64,9 @@ jobs:
     # and Playwright 1.57 refuses to install a browser there ("Playwright does not
     # support chromium on ubuntu26.04-x64"), which failed the first run of this job.
     runs-on: ubuntu-24.04
-    # npm ci (~40s) + typecheck (~45s cold) + vitest (~80s) + install the browser
-    # (~30s) + the canvas specs. Tests are independent and now run two at a time in
-    # one job; sharding across runners waits until the per-file split is balanced.
-    timeout-minutes: 20
+    # npm ci (~40s) + typecheck (~45s cold) + vitest (~80s). No browser here: the
+    # specs live in editor-e2e and the production budget in editor-perf.
+    timeout-minutes: 12
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -83,22 +84,90 @@ jobs:
         working-directory: editor
       - name: Typecheck, unit tests, assets and payload
         run: python3 tools/check_editor.py
+
+  editor-e2e:
+    # The browser specs, split across two runners so the job's wall time halves.
+    # Sharding is not coverage: `npx playwright test --list --shard=N/2` for both
+    # shards unions to exactly the unsharded list (92 tests in 8 files). Each shard
+    # runs the same TWIN_E2E_CI=1 suite, which skips the *-captures.spec.ts writers,
+    # and keeps the two-worker setting inside its runner.
+    #
+    # 24.04 for the Playwright 1.57 browser refusal described on `editor`.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: editor/package-lock.json
+      - name: Install the pinned dependencies
+        run: npm ci
+        working-directory: editor
       - name: Install the pinned browser
         run: npx --no-install playwright install --with-deps chromium
         working-directory: editor
       - name: The canvas specs
         # TWIN_E2E_CI=1 skips *-captures.spec.ts (writes gitignored screenshots).
-        # Two Playwright workers run independent tests within one job: undo,
-        # snapping, export, .add round-trip, every plugin opening, and no requests
-        # leaving the origin still gate the push.
-        run: npm run test:e2e:ci
+        # Undo, snapping, export, .add round-trip, every plugin opening, and no
+        # requests leaving the origin still gate the push.
+        run: npm run test:e2e:ci -- --shard=${{ matrix.shard }}/2
+        working-directory: editor
+      - name: Keep the test report
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: editor-junit-${{ matrix.shard }}
+          path: |
+            test-results/editor-junit.xml
+            editor/test-results/
+          if-no-files-found: warn
+      - name: Keep the original report name
+        # The historical `editor-junit` artifact, kept from the unsplit job for
+        # tooling that looks for that name. Shard 1 carries it; the shard-specific
+        # artifacts above carry each half.
+        if: always() && matrix.shard == 1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: editor-junit
+          path: |
+            test-results/editor-junit.xml
+            editor/test-results/
+          if-no-files-found: warn
+
+  editor-perf:
+    # The production drag budget, alone on its runner. It stays out of the e2e job
+    # because another browser competing for CPU turns a drag frame into a long task;
+    # the performance config still runs one worker and builds the production bundle.
+    # A canvas timeout (they cluster on the software-WebGL fallback) cannot hide the
+    # drag profile now that this is its own job.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: editor/package-lock.json
+      - name: Install the pinned dependencies
+        run: npm ci
+        working-directory: editor
+      - name: Install the pinned browser
+        run: npx --no-install playwright install --with-deps chromium
         working-directory: editor
       - name: The production drag budget
         # Builds the production bundle and runs the 20-layer drag with pointerup
         # included, isolated to one worker so another test cannot compete for CPU.
-        # A canvas timeout (they cluster on the software-WebGL fallback) must not
-        # hide the drag profile; the job still fails on that step.
-        if: always()
         run: npm run test:e2e:perf
         working-directory: editor
       - name: Keep the drag metrics
@@ -107,15 +176,6 @@ jobs:
         with:
           name: editor-perf
           path: editor/test-results/editor-perf.json
-          if-no-files-found: warn
-      - name: Keep the test report
-        if: always()
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
-        with:
-          name: editor-junit
-          path: |
-            test-results/editor-junit.xml
-            editor/test-results/
           if-no-files-found: warn
 
   visual:
@@ -357,7 +417,7 @@ jobs:
 
   # Same-repo pull requests only. A fork never reaches the Vercel secret.
   review:
-    needs: [shelf, visual, editor]
+    needs: [shelf, visual, editor, editor-e2e, editor-perf]
     if: >-
       github.event_name == 'pull_request' &&
       github.event.pull_request.head.repo.full_name == github.repository
