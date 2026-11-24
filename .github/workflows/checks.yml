@@ -172,11 +172,14 @@ jobs:
     # A canvas timeout (they cluster on the software-WebGL fallback) cannot hide the
     # drag profile now that this is its own job.
     #
-    # Deliberately not the Playwright image the shards use. Inside it the same open
-    # case measured two consecutive 33.3 ms frames in both attempts of run 192
-    # (navigation 10.5-12.1 s against the runner's 7.5 s) where the runner recorded at
-    # most one, so a ceiling measured there would no longer be the number in the plan.
-    # The browser cache keeps this job's install at 14-31 s on a hit.
+    # Runs on the runner rather than in the shards' Playwright image: run 192 recorded
+    # two consecutive 33.3 ms open frames in both of its container samples, with
+    # navigation at 10.5-12.1 s against 7.5 s here, so this job stays on the environment
+    # whose numbers are the ceilings in the plan. Run 193 then failed the same case here
+    # on its own terms: a 127 ms long task, 71 ms of it one anonymous `Promise.resolve`
+    # continuation after the first open paint, which is editor work and is what the open
+    # gate is red on. That failure is not explained by the container or the cold browser
+    # (the install took 17 s on a cache hit), and the cache keeps it at 14-31 s.
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
