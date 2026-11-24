@@ -219,7 +219,14 @@ function sanitizeImageSource(value: unknown, label: string, allowMaterial = fals
   } catch {
     throw new ProjectFileError(`${label} has invalid embedded SVG data.`);
   }
-  const safe = sanitizeSvgMarkup(markup);
+  let safe: string;
+  try {
+    safe = sanitizeSvgMarkup(markup);
+  } catch {
+    // The sanitizer is shared with the import UI, where a plain Error is fine. A
+    // project file must fail typed: a hostile SVG is invalid input, not a crash.
+    throw new ProjectFileError(`${label} contains active or external SVG content.`);
+  }
   return `data:image/svg+xml;base64,${encodeBase64(safe)}`;
 }
 
