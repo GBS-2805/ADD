@@ -105,8 +105,11 @@ jobs:
     # the lockfile instead of a 6-8 minute cold download.
     #
     # 24.04 for the Playwright 1.57 browser refusal described on `editor`.
+    # 20 minutes: a slow runner has measured 4-5 min of specs normally, up to
+    # ~10 min when the dev server is slow, and the per-test budgets in
+    # playwright.config.ts are what decide a failure; this only bounds a hung job.
     runs-on: ubuntu-24.04
-    timeout-minutes: 15
+    timeout-minutes: 20
     strategy:
       fail-fast: false
       matrix:

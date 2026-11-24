@@ -17,6 +17,14 @@ const executablePath = process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE;
  *
  * TWIN_E2E_CI=1 turns the capture writers off. CI runs two independent tests at a
  * time in one job; a local `npm run test:e2e` keeps one worker.
+ *
+ * CI also gets larger budgets, because it runs against the Vite dev server on a
+ * two-worker shard. Measured on GitHub's ubuntu-24.04: 8.7 s for the first shell to
+ * appear and more than 14 s for a reloaded page (run 45334196027), then 13.4 s for a
+ * page and 13.5 s for one click in a preview test (run 45336354958), where five
+ * preview and print tests failed on the 5 s expect default and the 30 s test budget
+ * even though the same specs pass on a quiet runner. These specs assert behaviour,
+ * not latency: the editorial perf job is where time is a gate.
  */
 const ci = process.env.TWIN_E2E_CI === "1";
 const ignored = ["**/editor-task5-performance.spec.ts", ...(ci ? ["**/*-captures.spec.ts"] : [])];
@@ -24,7 +32,11 @@ const ignored = ["**/editor-task5-performance.spec.ts", ...(ci ? ["**/*-captures
 export default defineConfig({
   testDir: "./e2e",
   testIgnore: ignored,
-  timeout: 30_000,
+  timeout: ci ? 90_000 : 30_000,
+  // One web-first assertion's own retry window, not the test's. 15 s still fails
+  // on a missing element; it only stops a busy runner from turning a 13 s render
+  // into a red push.
+  expect: { timeout: ci ? 15_000 : 5_000 },
   fullyParallel: true,
   workers: ci ? 2 : 1,
   reporter: "list",
