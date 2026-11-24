@@ -13,21 +13,26 @@ const CPU_THROTTLE = 4;
 const FRAME_P95_BUDGET_MS = 33;
 const FRAME_MAX_BUDGET_MS = 50;
 /**
- * The project-open case is a recorded trend, not a frame gate.
+ * The project-open case records its vsync frame statistics as a trend; its 50 ms
+ * long-task ceiling is still a gate.
  *
  * Runs 185-193 alternated on unchanged product code: 16.8 ms in 185, 186 and 189, a
  * single 33.3 ms interval in 187, 188 and 190, two in 192 (red), and a 127 ms task in
  * 193 (red) that did not reproduce in 194 or 195. None of the dropped intervals
  * carried a long task, Long Animation Frame or render span near it, so the miss is
  * runner/compositor weather rather than editor work. A one-vsync pass/fail turned
- * that noise into repeated CI cycles and gate maintenance.
+ * that noise into repeated CI cycles and gate maintenance. Run 193's 127 ms task is
+ * the opposite case: that is editor work this case exists to catch, and a pure trend
+ * would have let it through.
  *
  * The case still runs on every push and still records p95, max, dropped frames, long
- * tasks and LoAF attribution in test-results/editor-perf.json. It fails only when the
- * measurement is missing or non-finite. The drag gates (33/50 ms) and the promoted
- * 64-layer ceilings (18.5/55 ms) remain hard and unchanged. Promoting this case back
- * to a gate needs a signal that separates editor work from compositor misses, not
- * another rerun of the same threshold.
+ * tasks and LoAF attribution in test-results/editor-perf.json. Frame p95, max and
+ * dropped-frame counts are recorded, not asserted; the case fails when the
+ * measurement is missing or non-finite, or when a long task exceeds 50 ms. The drag
+ * gates (33/50 ms) and the promoted 64-layer ceilings (18.5/55 ms) remain hard and
+ * unchanged. Promoting the frame statistics back to a gate needs a signal that
+ * separates editor work from compositor misses, not another rerun of the same
+ * threshold.
  */
 /**
  * Promoted on 2026-11-23 from six clean 64-layer runs at 4x CPU: p95 16.7-16.8 ms
@@ -561,8 +566,7 @@ test("twentyLayerProjectOpenIsRecordedAtFourTimesCpu", async ({ page }) => {
       frameStats,
     };
     await recordOpen(evidence);
-    // Report-only by design: see the note at the top. The recorded numbers are the
-    // evidence; a measurement that did not happen is the only failure here.
+    // Frame statistics are a trend; the long-task ceiling is still a gate.
     expect(evidence.frameStats.count).toBeGreaterThan(0);
     const recorded = [
       evidence.frameStats.p95Ms,
@@ -571,6 +575,7 @@ test("twentyLayerProjectOpenIsRecordedAtFourTimesCpu", async ({ page }) => {
     ];
     expect(recorded.every(Number.isFinite)).toBe(true);
     expect(evidence.longTasks.every(Number.isFinite)).toBe(true);
+    expect(evidence.maxLongTaskMs).toBeLessThanOrEqual(50);
   } finally {
     await restoreCpu();
   }

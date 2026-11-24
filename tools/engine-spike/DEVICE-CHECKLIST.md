@@ -7,8 +7,11 @@ and containing `arm64-v8a`.
 ```bash
 ADB="${ANDROID_HOME:-$HOME/android-sdk}/platform-tools/adb"
 "$ADB" install -r artifacts/ADD-4.0-bmo.apk
-"$ADB" shell am start -n app.offline.compress/app.add.engine.MainActivity
+"$ADB" shell am start -n app.offline.compress/add.ShelfActivity
 ```
+
+`app.add.engine.MainActivity` is `exported=false`, so `am start` on it is refused.
+Open **ENGINE** from the shelf to reach the engine process.
 
 For the BMO shell, also check: canvas tap → Peek; page chip → Full; Hide UI →
 Canvas; restore handle; dock scroll; selection rail; sheet drag; plugin shelf
