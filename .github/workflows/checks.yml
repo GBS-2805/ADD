@@ -172,12 +172,12 @@ jobs:
     # A canvas timeout (they cluster on the software-WebGL fallback) cannot hide the
     # drag profile now that this is its own job.
     #
-    # The same release image as the shards: no download, no apt, and the Chromium the
-    # ceilings were recorded on.
+    # Deliberately not the Playwright image the shards use. Inside it the same open
+    # case measured two consecutive 33.3 ms frames in both attempts of run 192
+    # (navigation 10.5-12.1 s against the runner's 7.5 s) where the runner recorded at
+    # most one, so a ceiling measured there would no longer be the number in the plan.
+    # The browser cache keeps this job's install at 14-31 s on a hit.
     runs-on: ubuntu-24.04
-    container:
-      image: mcr.microsoft.com/playwright:v1.57.0-noble
-      options: --user 1001
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -191,11 +191,21 @@ jobs:
       - name: Install the pinned dependencies
         run: npm ci
         working-directory: editor
-      - name: The image's Chromium is the build the baselines were recorded on
-        # Same check as the shards: the open-frame ceiling was measured on
-        # Chromium 143.0.7499.4 (revision 1200), so this job refuses to profile a
-        # different build. A cold runner used to spend 8 minutes installing the
-        # browser before its 93-second budget ran; the image removes that confound.
+      - name: The pinned browser, from the cache when the lockfile has not moved
+        # @playwright/test pins one Chromium revision and the lockfile hash changes
+        # exactly when it does, so a hit is always the right build. On a hit the
+        # install still runs, but only apt is left and it has measured 14-31 s.
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-browser-${{ runner.os }}-${{ hashFiles('editor/package-lock.json') }}
+      - name: Install the pinned browser
+        run: npx --no-install playwright install --with-deps chromium
+        working-directory: editor
+      - name: The browser is the build the ceilings were recorded on
+        # The open-frame ceiling was measured on Chromium 143.0.7499.4 (revision
+        # 1200), so this job prints the version it will profile and fails on a
+        # different build instead of reporting a number from another browser.
         run: npm run check:browser
         working-directory: editor
       - name: The production drag budget
