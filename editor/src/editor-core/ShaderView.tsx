@@ -90,7 +90,7 @@ export function canUseWebGL(): boolean {
  * branches EffectSurfaceView takes, so a host that keeps a shader mounted across a
  * document swap knows which backgrounds own a context.
  */
-export function surfacesShader(effect: EditorEffect | null): effect is EditorEffect {
+export function surfacesShader(effect: EditorEffect | null): boolean {
   if (!effect) return false;
   if (effect.kind === "shader") return true;
   if (effect.kind === "texture") return effect.preset !== "Fur" || Boolean(effect.image);
