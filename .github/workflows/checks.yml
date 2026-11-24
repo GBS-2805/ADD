@@ -100,9 +100,9 @@ jobs:
     # Sharding is not coverage: `npx playwright test --list --shard=N/2` for both
     # shards unions to exactly the unsharded list (92 tests in 8 files). Each shard
     # runs the same TWIN_E2E_CI=1 suite, which skips the *-captures.spec.ts writers,
-    # and keeps the two-worker setting inside its runner. Two is the useful count:
-    # the pinned browser install (~6 min) dominates each shard, so a third runner
-    # would add more install time than it takes off the specs.
+    # and keeps the two-worker setting inside its runner. Two is the count the 4-5
+    # minute suites were measured with; the browser now comes from a cache keyed on
+    # the lockfile instead of a 6-8 minute cold download.
     #
     # 24.04 for the Playwright 1.57 browser refusal described on `editor`.
     runs-on: ubuntu-24.04
@@ -123,7 +123,18 @@ jobs:
       - name: Install the pinned dependencies
         run: npm ci
         working-directory: editor
+      - name: The pinned browser, from the cache when the lockfile has not moved
+        # @playwright/test pins one Chromium revision and the lockfile hash changes
+        # exactly when it does, so a hit is always the right build. Without the
+        # cache this download plus its apt step took 6 to 8 minutes on a cold
+        # runner and varied by minutes between the two shards.
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-browser-${{ runner.os }}-${{ hashFiles('editor/package-lock.json') }}
       - name: Install the pinned browser
+        # A hit still runs; it verifies the revision and only the OS packages are
+        # left to apt, which the runner image mostly has already.
         run: npx --no-install playwright install --with-deps chromium
         working-directory: editor
       - name: The canvas specs
@@ -164,7 +175,17 @@ jobs:
       - name: Install the pinned dependencies
         run: npm ci
         working-directory: editor
+      - name: The pinned browser, from the cache when the lockfile has not moved
+        # Same cache as the e2e shards: this job measured the cold download at
+        # 8 minutes before its 93-second budget ran, which is the cold-runner
+        # variance the open-frame number has to be read against.
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-browser-${{ runner.os }}-${{ hashFiles('editor/package-lock.json') }}
       - name: Install the pinned browser
+        # A hit still runs; it verifies the revision and only the OS packages are
+        # left to apt, which the runner image mostly has already.
         run: npx --no-install playwright install --with-deps chromium
         working-directory: editor
       - name: The production drag budget

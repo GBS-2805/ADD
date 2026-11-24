@@ -51,9 +51,18 @@ async function storedText(page: Page): Promise<string | null> {
   });
 }
 
-/** Waits for the first visit's starter document to land, so the restore has settled. */
+/**
+ * Waits for the app's own ready mark, not a storage poll.
+ *
+ * `data-editor-ready="true"` is set once the canvas has a real layout and the one
+ * restore read has settled, which is exactly the precondition these tests need.
+ * A poll on the stored document instead measured the 500 ms debounced write that
+ * follows the restore, a later and unrelated event: on a loaded runner it could
+ * miss a 5 s window while the app was already past the read (CI shard 1, run
+ * 45325496262). The locator wait is bounded by the test's own timeout.
+ */
 async function waitForRestore(page: Page) {
-  await expect.poll(() => storedText(page)).not.toBeNull();
+  await page.locator('html[data-editor-ready="true"]').waitFor({ state: "attached" });
 }
 
 async function editHeadline(page: Page, value: string) {
