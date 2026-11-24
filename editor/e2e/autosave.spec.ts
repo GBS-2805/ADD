@@ -75,6 +75,16 @@ async function expectHeadline(page: Page, value: string) {
   await expect(page.getByTestId("art-layer-type-open-studio")).toContainText(value);
 }
 
+/**
+ * Each test loads the app twice on a runner shared with the other shard's worker:
+ * the first visit waits for Vite's cold transform and the reload for the restored
+ * document and its paper shader. CI shard 1 (run 45334196027) measured 8.7 s to the
+ * shell on the first load and a reloaded page that took more than 14 s to answer a
+ * visibility check. The 30 s default is a render budget this spec cannot meet there;
+ * the assertions keep their own waits, only the outer budget moves.
+ */
+test.describe.configure({ timeout: 90_000 });
+
 test("restores an edited text layer after a reload", async ({ page }) => {
   await openEditor(page);
   await waitForRestore(page);
