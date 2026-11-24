@@ -10,7 +10,7 @@
 
 **Spec:** `PLAN.md` (one-editor rule and native v2 shipping decision), `FINAL-TEST.md` (4.0 candidate, Studio retirement, blocked device gate), `NATIVE_EDITOR_V2.md` (native task list; its checkboxes are stale and are not evidence), `docs/superpowers/plans/2026-11-16-twin-workbench-v2.md` (browser baseline and known limitations), `editor/README.md` (browser workbench state), `AGENTS.md` (verification and evidence rules).
 
-**Status:** Native accepted. Task 2 (save-size invariant) is implemented, green and committed (`9456452`); Task 3 (CPU-throttled frame gate) is committed (`ac3eb76`) with its 20-layer phone gate green and its 64-layer ceiling promoted from six clean baselines. The desktop 20-layer gate is **green in CI** (`edf7999`): zero long tasks, p95 16.7 ms, **max frame 16.8 ms**, after deferring the inspector, skipping selection-only autosaves and starting the frame sampler after pointerdown settles. The project-open case that mounts a 20-layer document was a gate through run 193 and is now a recorded trend, not a pass/fail (the 2026-11-24 decision below records why); CI run 177 on `302565c` recorded **p95 16.7 ms, max 16.8 ms, zero long tasks over 61 frames**, and every drag case stayed at max 16.8 ms. Task 1 remains **BLOCKED** at the real-device step. Tasks 4 (autosave flush), 5 (lazy plugin panels) and 6 (parser/SVG fuzz) are implemented, green locally and committed (`aef0bb3`). Task 7 (CI sharding) is implemented: the workflow checker, the tool self-tests and the shard-list union are green locally, while the two shard executions and the perf job remain CI-only because this VM's Chromium renderer crashes at desktop widths. There is no commit, deploy or publish authorization for Task 7 in this plan.
+**Status:** Native accepted. Task 2 (save-size invariant) is implemented, green and committed (`9456452`); Task 3 (CPU-throttled frame gate) is committed (`ac3eb76`) with its 20-layer phone gate green and its 64-layer ceiling promoted from six clean baselines. The desktop 20-layer gate is **green in CI** (`edf7999`): zero long tasks, p95 16.7 ms, **max frame 16.8 ms**, after deferring the inspector, skipping selection-only autosaves and starting the frame sampler after pointerdown settles. The project-open case that mounts a 20-layer document was a gate through run 193 and is now a recorded trend, not a pass/fail (the 2026-11-24 decision below records why); CI run 177 on `302565c` recorded **p95 16.7 ms, max 16.8 ms, zero long tasks over 61 frames**, and every drag case stayed at max 16.8 ms. Task 1 remains **BLOCKED** at the real-device step. Tasks 4 (autosave flush), 5 (lazy plugin panels) and 6 (parser/SVG fuzz) are implemented, green locally and committed (`aef0bb3`). Task 7 (CI sharding) is implemented: the workflow checker, the tool self-tests and the shard-list union are green locally, while the two shard executions and the perf job remain CI-only because this VM's Chromium renderer crashes at desktop widths. There is no commit, deploy or publish authorization for Task 7 in this plan. Task 1 was run on 2026-11-24 at `a3606a8`: the JVM suite is **234 tests** (green on rerun), chrome goldens are **23/23**, routing is **6/6**, and the rebuilt APK is **44,795,413 bytes** with SHA-256 `5bddae03…`. `adb devices` is empty, so the device gate remains **BLOCKED**.
 
 ---
 
@@ -136,19 +136,21 @@ The release build writes `artifacts/ADD-4.0-bmo.apk` and prints `apksigner verif
 
 **Steps:**
 
-- [ ] Record the starting commit and tree state: `git rev-parse HEAD`, `git status --short`. Stop if the tree is dirty; a release candidate must identify exactly one commit.
-- [ ] Run the JVM suite. Record the printed test/failure/error/skip counts. The `FINAL-TEST.md` figure of **209 tests** is from the 2026-11-14 candidate and is not assumed for the current tree; the report must use this run's count.
-- [ ] Run the chrome goldens. Record the printed match count; the existing candidate reported **24/24**, but the current run is the evidence.
-- [ ] Run `EngineRoutingTest` and record the route/absence results.
-- [ ] Build `bash tools/engine-review/build.sh release`. Record the output path, byte size and SHA-256 with `sha256sum artifacts/ADD-4.0-bmo.apk`.
-- [ ] Verify the APK directly, because `tools/check_apk.py --release` intentionally compares the 3.9 shipping identity and is **not applicable** to `4.0-bmo`:
+- [x] Record the starting commit and tree state: `git rev-parse HEAD`, `git status --short`. **Done:** `a3606a8`, clean tree.
+- [x] Run the JVM suite. **Done:** rerun **234 tests, 0 failures, 0 errors, 0 skipped**. The first run at the same commit reported 2 `TexturePresetTest` failures (Concrete 16.44 ms vs 16.00 ms; 138 ms ten-family warm); the rerun measured Concrete at 6.33 ms with no 169 ms outlier, so those were host contention. Both runs are recorded.
+- [x] Run the chrome goldens. **Done:** exit 0, **23/23 captures match**. The 24/24 in the 2026-11-14 record was the older capture set.
+- [x] Run `EngineRoutingTest` and record the route/absence results. **Done:** 6 tests, 0 failures, 0 errors, exit 0.
+- [x] Build `bash tools/engine-review/build.sh release`. **Done:** `artifacts/ADD-4.0-bmo.apk`, 44,795,413 bytes, SHA-256 `5bddae032c5152d60cbdc5f24ed673ed9f8b863b505342d6a1e77fd6aab06d2c`.
+- [x] Verify the APK directly, because `tools/check_apk.py --release` intentionally compares the 3.9 shipping identity and is **not applicable** to `4.0-bmo`. **Done:** package `app.offline.compress`, version `4.0-bmo (57)`, target SDK 35, no `application-debuggable`, launchable `add.ShelfActivity`, `app.add.engine.MainActivity` present on `:engine`, certificate SHA-256 `960b76985fb74b50ebe7fb3f368a586aa51f31ea59ab0d94be215e9441dd7fd6`:
   ```bash
   SDK="${ANDROID_HOME:-$HOME/android-sdk}"
   "$SDK/build-tools/35.0.0/aapt2" dump badging artifacts/ADD-4.0-bmo.apk
   "$SDK/build-tools/35.0.0/apksigner" verify --print-certs artifacts/ADD-4.0-bmo.apk
   ```
   Confirm package `app.offline.compress`, version `4.0-bmo (57)`, no `application-debuggable`, `app.add.engine.MainActivity` present, and the ADD release certificate. Record the certificate SHA-256.
-- [ ] Run `"$SDK/platform-tools/adb" devices`. If no device is listed, write the `BLOCKED` report now and stop. Do not run emulator substitutes, do not invent numbers, and do not promote the candidate.
+- [x] Run `"$SDK/platform-tools/adb" devices`. **Done:** `List of devices attached` was empty, so `artifacts/bmo/DEVICE-REPORT.md` now records **BLOCKED** for this candidate. Do not run emulator substitutes, do not invent numbers, and do not promote the candidate.
+
+Device install, smoke, checklist and benchmark remain **BLOCKED**; they are not marked complete.
 - [ ] Install over the shipped app and launch the resolved activity:
   ```bash
   "$SDK/platform-tools/adb" install -r artifacts/ADD-4.0-bmo.apk
@@ -157,7 +159,7 @@ The release build writes `artifacts/ADD-4.0-bmo.apk` and prints `apksigner verif
 - [ ] Run `python3 tools/device_smoke.py --apk artifacts/ADD-4.0-bmo.apk --json` and require exit 0, a live process and no crash/ANR in logcat.
 - [ ] Walk every item in `tools/engine-spike/DEVICE-CHECKLIST.md`: canvas tap → Peek, page chip → Full, Hide UI → Canvas, restore handle, dock scroll, selection rail, sheet drag, plugin shelf run/hide/reopen/close, one active plugin only; 3D visibility and orbit; vector add/delete closed; duplicate 3D; sticker/icon export; PNG in `Pictures/Engine Spike`; exported PNG shows visible gems/stickers; `TEST 3D` reports `PIXELCOPY OK` with lit samples; tap-to-inspect/hit testing; back behaviour; 50-layer drag; pinch latency; export.
 - [ ] Run `bash tools/engine-spike/bench.sh` with the device attached. Record cold start, median pan frame time, pinch latency, 1×/2× export time and peak bitmap allocation from `artifacts/bmo/bench.json`. If the device is absent, `status: blocked` and exit 2 are the only valid result.
-- [ ] Update `artifacts/bmo/DEVICE-REPORT.md` with device model, Android version, DIAG values, each checklist result, benchmark JSON values and any failure logs. Update `FINAL-TEST.md` to the current candidate's counts and hashes, and keep the known limitations that remain. Reconcile `NATIVE_EDITOR_V2.md` checkboxes only to what the evidence supports.
+- [x] Update `artifacts/bmo/DEVICE-REPORT.md` with device model, Android version, DIAG values, each checklist result, benchmark JSON values and any failure logs. **Done for the blocked case:** the report records the commit, counts, APK hashes and the empty `adb devices`. `FINAL-TEST.md` carries this run's counts and hashes. `NATIVE_EDITOR_V2.md` already states the 234-test baseline and has no device evidence to add, so it is unchanged.
 
 **Verification:**
 

@@ -1,8 +1,9 @@
-# Final BMO gate — 2026-11-14
+# Final BMO gate — 2026-11-24
 
-**Scope:** the BMO lane, Tasks 1–12, plus C2–C4 cleanup, committed on `main`; Studio
-retirement is included. The Vercel site and handoff are deployed, and their live
-security-header gates pass.
+**Scope:** the BMO lane, Tasks 1–12, plus C2–C4 cleanup; Studio retirement is included.
+This candidate was rebuilt from `a3606a8` on `perf/followups-2`, not from `main`, so it
+is a review artifact and not a promoted release. The deploy and live-header records
+below are from the 2026-11-14 run and were not re-run for this candidate.
 
 ## Candidate
 
@@ -11,10 +12,11 @@ security-header gates pass.
 | Artifact | `artifacts/ADD-4.0-bmo.apk` |
 | Package | `app.offline.compress` |
 | Version | `4.0-bmo (57)` |
-| Size | 49,834,215 bytes |
-| SHA-256 | `d74f71125d03f446c853097dabc25f1f23d2d7e9ee60d61b36ca6859fb4960bc` |
+| Size | 44,795,413 bytes |
+| SHA-256 | `5bddae032c5152d60cbdc5f24ed673ed9f8b863b505342d6a1e77fd6aab06d2c` |
 | Certificate SHA-256 | `960b76985fb74b50ebe7fb3f368a586aa51f31ea59ab0d94be215e9441dd7fd6` |
 | Build | `bash tools/engine-review/build.sh release` |
+| Commit | `a3606a8` on `perf/followups-2` |
 
 `aapt2 dump badging` reports no `application-debuggable` flag, the release
 certificate is the ADD key, and `app.add.engine.MainActivity` is present on the
@@ -24,18 +26,18 @@ certificate is the ADD key, and `app.add.engine.MainActivity` is present on the
 
 | Command | Result |
 |---|---|
-| `bash tools/engine-spike/verify-suite.sh` | **209 tests, 0 failures, 0 errors, 0 skipped** |
-| `bash tools/engine-spike/verify-chrome.sh` | **24/24 goldens match** |
+| `bash tools/engine-spike/verify-suite.sh` | **234 tests, 0 failures, 0 errors, 0 skipped** (rerun; the first run at this commit had 2 host-timing `TexturePresetTest` failures that did not reproduce) |
+| `bash tools/engine-spike/verify-chrome.sh` | **23/23 captures match**, exit 0 |
 | `cd tools/engine-review && ../engine-spike/gradlew :app:testReleaseUnitTest --tests add.EngineRoutingTest` | **6/6 route/absence tests pass** |
-| `python3 tools/check_all.py` | **23 gates green in 11.0s** |
-| `python3 tools/check_all.py --visual` (with the workspace Playwright environment) | **26 gates green in 78.0s**, including 209 engine tests, chrome and engine claims |
-| `python3 -m unittest discover -s tools/tests` | **171 tests OK** |
-| `python3 tools/check_claims.py --check --engine` | **OK — 16 modern pages, 16 classic pages, APK size and engine baseline** |
+| `python3 tools/check_all.py` | **29 gates green in 41.5s** |
+| `python3 tools/check_all.py --visual` | not run for this candidate |
+| `python3 -m unittest discover -s tools/tests` | not run separately; `check_all` and `editor` are green |
 
-The 209-test suite includes the new shell, command, plugin, responsive, capture,
-thumbnail, export-format, share-intent and legacy-look tests. `EngineScreen.kt` is **599 lines**;
-stage, inspector, dialog, model, selection, motion and content code live in focused
-files.
+The first JVM run at `a3606a8` reported 234 tests with two failures in
+`TexturePresetTest`: `Concrete` at 16.44 ms against the 16.00 ms host budget, and a
+138 ms ten-family warm. The rerun on the same commit was 234/0/0/0 with `Concrete` at
+6.33 ms and no 169 ms `Marble` outlier. Both runs are recorded; the failure was host
+contention, not a tree change.
 
 ## Blocked or not applicable
 
@@ -46,7 +48,7 @@ real cold-start, frame-time, pinch-latency, export, 3D-orbit, install-over or
 process-death results. See `artifacts/bmo/DEVICE-REPORT.md`. No device number in this
 report is estimated or inferred from Robolectric.
 
-### Live headers — **PASS**
+### Live headers — **PASS (recorded 2026-11-14, not re-run)**
 
 ```text
 python3 tools/check_headers.py --origin https://artbase-olive.vercel.app \
@@ -82,7 +84,7 @@ gate is not claimed as a pass. Signature and manifest were verified directly wit
 tested. `StudioPane.java`, `app/studio-assets/**` and `assets/www/studio/**` are
 deleted; the ENGINE tab opens the native engine activity and falls back to Quick only
 when the engine class is unavailable. `EngineRoutingTest` asserts the class and both
-asset trees stay absent. The 49,834,215-byte release candidate no longer packages the
+asset trees stay absent. The 44,795,413-byte release candidate no longer packages the
 WebView editor.
 
 ## Saved-look fields
