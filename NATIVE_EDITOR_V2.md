@@ -398,6 +398,13 @@ This is the cheapest decision in the plan and it constrains the shell that Task 
 
 ### Task 2: Add groups and a real layer tree
 
+> **Status 2026-11-24:** the tree exists in `LayerGroup.kt`, `EngineSelectionCommands.kt`,
+> `EngineStudioInspector.kt` and `DocumentCodec.kt`. `GroupTreeTest` (18 tests) and
+> `GroupRenderTest` (4 tests) cover the acceptance cases, including z-order slots,
+> ungroup reinsert order, selection hand-off, collapsed/expanded rows, the skewed
+> empty corner and reorder-within-parent. The checkboxes below record the original
+> plan, not the current tree.
+
 **Files:**
 - Create: `LayerGroup.kt`
 - Modify: `EngineDocument.kt`, `EngineStage.kt`, `EngineLayerPanel.kt`, `ArtboardPainter.kt`, `LayerCompositor.kt`, `DocumentCodec.kt`

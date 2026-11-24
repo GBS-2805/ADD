@@ -289,4 +289,92 @@ class GroupTreeTest {
         assertEquals(2, restored.children.size)
         assertEquals(groupId, back.editingGroupId)
     }
+
+    @Test
+    fun groupingTakesTheHighestSelectedSlotAndLeavesTheRestInOrder() {
+        val doc = document() // bottom to top: a, b, c
+        doc.select("a")
+        doc.select("b", additive = true)
+        val lower = doc.groupSelection() ?: error("group failed")
+        assertEquals(listOf(lower, "c"), doc.layers.map { it.id })
+
+        doc.undo()
+        doc.select("b")
+        doc.select("c", additive = true)
+        val upper = doc.groupSelection() ?: error("group failed")
+        assertEquals(listOf("a", upper), doc.layers.map { it.id })
+    }
+
+    @Test
+    fun ungroupingReinsertsTheChildrenInOrderAtTheGroupSlot() {
+        val doc = document()
+        val groupId = group(doc)
+        val children = (doc.layers.findLayer(groupId) as GroupLayer).children.map { it.id }
+        assertEquals(listOf("a", "b"), children)
+
+        doc.select(groupId)
+        assertTrue(doc.ungroupSelection())
+        assertEquals(listOf("a", "b", "c"), doc.layers.map { it.id })
+    }
+
+    @Test
+    fun groupingSelectsTheGroupAndUngroupingSelectsTheReleasedChildren() {
+        val doc = document()
+        val groupId = group(doc)
+        assertEquals(setOf(groupId), doc.selectedIds)
+        assertEquals(groupId, doc.selectedId)
+
+        assertTrue(doc.ungroupSelection())
+        assertEquals(setOf("a", "b"), doc.selectedIds)
+        assertEquals("b", doc.selectedId)
+    }
+
+    @Test
+    fun theLayerTreeShowsChildrenOnlyWhileTheGroupIsExpanded() {
+        val doc = document()
+        val groupId = group(doc)
+
+        val collapsed = doc.layers.visibleRows(emptySet())
+        assertEquals(listOf("c", groupId), collapsed.map { it.layer.id })
+        assertEquals(listOf(0, 0), collapsed.map { it.depth })
+
+        val expanded = doc.layers.visibleRows(setOf(groupId))
+        assertEquals(listOf("c", groupId, "b", "a"), expanded.map { it.layer.id })
+        assertEquals(listOf(0, 0, 1, 1), expanded.map { it.depth })
+        assertEquals(listOf(null, null, groupId, groupId), expanded.map { it.parentId })
+    }
+
+    @Test
+    fun aSkewedGroupsEmptyBoundingCornerIsNotTappable() {
+        val doc = document()
+        val groupId = group(doc)
+        doc.updateLayer(groupId) { (it as GroupLayer).copy(skewX = 30f) }
+        val group = doc.layers.findLayer(groupId) as GroupLayer
+        val bounds = group.worldBounds()
+
+        // The top-right corner of the axis-aligned box is outside the leaned
+        // parallelogram: the group's own frame must not claim it.
+        val emptyX = bounds.right - 0.01f
+        val emptyY = bounds.top + 0.01f
+        assertFalse(group.containsWorldPoint(emptyX, emptyY))
+        assertNull(doc.layerAt(emptyX, emptyY))
+
+        doc.select(groupId)
+        assertTrue(doc.enterGroup())
+        assertNull(doc.layerAt(emptyX, emptyY))
+    }
+
+    @Test
+    fun droppingARowOnASiblingReordersItWithinTheParent() {
+        val doc = document()
+        assertTrue(doc.dropLayer("c", "a"))
+        assertEquals(listOf("c", "a", "b"), doc.layers.map { it.id })
+
+        val groupId = group(doc)
+        assertEquals(listOf("c", groupId), doc.layers.map { it.id })
+        // Dropping b on a moves it below a and keeps it inside the group.
+        assertTrue(doc.dropLayer("b", "a"))
+        val children = (doc.layers.findLayer(groupId) as GroupLayer).children.map { it.id }
+        assertEquals(listOf("b", "a"), children)
+    }
 }
