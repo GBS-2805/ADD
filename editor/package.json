@@ -11,6 +11,7 @@
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "test:e2e:perf": "playwright test --config=playwright.performance.config.ts",
+    "perf:open": "node scripts/perf-open.mjs",
     "check:assets": "node scripts/check-assets.mjs",
     "test:e2e:ci": "TWIN_E2E_CI=1 playwright test"
   },

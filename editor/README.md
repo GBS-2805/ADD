@@ -26,7 +26,10 @@ npm run build     # TypeScript project build + production Vite build
 npm run check:assets
 npm run test:e2e       # Playwright regression specs; run npx playwright install chromium first
 npm run test:e2e:perf  # Production-build drag budget, isolated to one worker
+npm run perf:open      # The project-open frame case only, against dist/ (see below)
 ```
+
+`npm run perf:open` is the loop for frame work. It rebuilds `dist/` only when a build input is newer, serves that bundle on a free port and runs just `twentyLayerProjectOpensWithinOneFrameAtFourTimesCpu`; it prints the p95, max and long-task count and leaves the JSON in `test-results/editor-perf.json`. Pass `--build` to force a rebuild or `--no-build` to refuse a stale one. The full `test:e2e:perf` command still builds from scratch and remains the check for every drag gate.
 
 `scripts/check-assets.mjs` verifies that every runtime local asset has a source, licence and SHA-256 in `asset-manifest.json`; that the lockfile is pinned; that CSS and document references are local; and that the built HTML does not load remote code.
 

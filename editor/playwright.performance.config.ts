@@ -1,6 +1,12 @@
 import { defineConfig } from "@playwright/test";
 
 const executablePath = process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE;
+/**
+ * `scripts/perf-open.mjs` serves an existing `dist/` itself and sets this, so
+ * Playwright reuses that server and skips the build command below. CI leaves it
+ * unset and builds from the checkout as before.
+ */
+const port = Number(process.env.PERF_PORT ?? 4173);
 
 /**
  * The drag budget runs against the production bundle, not Vite's development
@@ -20,14 +26,14 @@ export default defineConfig({
   workers: 1,
   reporter: "list",
   use: {
-    baseURL: "http://127.0.0.1:4173",
+    baseURL: `http://127.0.0.1:${port}`,
     viewport: { width: 1280, height: 1000 },
     trace: "off",
     launchOptions: executablePath ? { executablePath } : {},
   },
   webServer: {
-    command: "npm run build && npm run preview -- --host 127.0.0.1 --port 4173",
-    url: "http://127.0.0.1:4173",
+    command: `npm run build && npm run preview -- --host 127.0.0.1 --port ${port}`,
+    url: `http://127.0.0.1:${port}`,
     reuseExistingServer: true,
     timeout: 180_000,
   },
