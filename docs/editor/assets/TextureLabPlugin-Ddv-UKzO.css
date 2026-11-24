@@ -1,0 +1,1 @@
+.fur{position:relative;display:block;overflow:visible;touch-action:pan-y;transition:transform .42s cubic-bezier(.32,.72,0,1)}.fur:hover{transform:scale(1.015) rotate(-.4deg)}.fur-canvas{position:absolute;pointer-events:none}.fur-content{position:absolute;inset:0;z-index:1}@media(prefers-reduced-motion:reduce){.fur{transition:none}.fur:hover{transform:none}}

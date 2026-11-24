@@ -110,6 +110,13 @@ interface OpenEvidence {
   frameStats: FrameStats;
 }
 
+interface StartupEvidence {
+  case: string;
+  throttle: number;
+  firstEditableMs: number;
+  navigationMs: number;
+}
+
 async function open(page: Page, width: number, height: number) {
   await page.setViewportSize({ width, height });
   await page.goto("/");
@@ -381,6 +388,21 @@ async function recordOpen(evidence: OpenEvidence) {
   await writeFile(PERF_RESULTS, `${JSON.stringify(results, null, 2)}\n`);
 }
 
+/** Report-only until three clean production runs set a ceiling. */
+async function recordStartup(evidence: StartupEvidence) {
+  let results: Array<Record<string, unknown> & { case: string }> = [];
+  try {
+    const parsed = JSON.parse(await readFile(PERF_RESULTS, "utf8"));
+    if (Array.isArray(parsed)) results = parsed;
+  } catch {
+    // A first run has no previous results file.
+  }
+  results = results.filter((item) => item.case !== evidence.case);
+  results.push(evidence);
+  await mkdir("test-results", { recursive: true });
+  await writeFile(PERF_RESULTS, `${JSON.stringify(results, null, 2)}\n`);
+}
+
 async function record(evidence: DragEvidence) {
   const result: PerfResult = {
     case: evidence.label,
@@ -521,6 +543,32 @@ test("twentyLayerProjectOpensWithinOneFrameAtFourTimesCpu", async ({ page }) => 
     expect(evidence.frameStats.count).toBeGreaterThan(0);
     expect(evidence.maxLongTaskMs).toBeLessThanOrEqual(50);
     expect(evidence.frameStats.maxMs).toBeLessThanOrEqual(ONE_FRAME_MS);
+  } finally {
+    await restoreCpu();
+  }
+});
+
+test("firstEditableIsMarkedAtFourTimesCpu", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  const restoreCpu = await throttleCpu(page, CPU_THROTTLE);
+  try {
+    const navigationStartedAt = Date.now();
+    await page.goto("/");
+    await page.locator('html[data-editor-ready="true"]').waitFor({ state: "attached", timeout: 60_000 });
+    const navigationMs = Date.now() - navigationStartedAt;
+    // The mark is written after the canvas has a real layout and the restore read
+    // has settled. Reading it after the ready attribute cannot race the mark: the
+    // same effect sets both, in that order.
+    const firstEditableMs = await page.evaluate(
+      () => performance.getEntriesByName("editor:first-editable")[0]?.startTime ?? 0,
+    );
+    expect(firstEditableMs).toBeGreaterThan(0);
+    await recordStartup({
+      case: "first-editable-1440x900",
+      throttle: CPU_THROTTLE,
+      firstEditableMs: Math.round(firstEditableMs * 10) / 10,
+      navigationMs,
+    });
   } finally {
     await restoreCpu();
   }

@@ -1,7 +1,7 @@
 import { useMemo, useState, type CSSProperties } from "react";
 import { Search, X } from "lucide-react";
 import { filterCatalogue } from "../editor-core/catalogue";
-import { PLUGINS } from "../editor-core/registry";
+import { PLUGINS, preloadPlugin } from "../editor-core/registry";
 import { useEditorStore } from "../editor-core/store";
 import { NATIVE_LENS_LABELS, type EditorPlugin } from "../editor-core/types";
 import { PatternSurface } from "../editor-core/ShaderView";
@@ -79,7 +79,12 @@ export function PluginCatalogue() {
             key={`${group}-${plugin.id}`}
             className={`plugin-card ${store.state.nativeLens && plugin.reality !== "native-ready" ? "is-lens-dimmed" : ""}`}
             style={{ "--card-index": Math.min(index, 4) } as CSSProperties}
-            onClick={() => store.openPlugin(plugin.id)}
+            onPointerEnter={() => preloadPlugin(plugin.id)}
+            onFocus={() => preloadPlugin(plugin.id)}
+            onClick={() => {
+              preloadPlugin(plugin.id);
+              store.openPlugin(plugin.id);
+            }}
             data-testid={`catalogue-${plugin.id}`}
           >
             <span className="plugin-card-preview">

@@ -135,7 +135,8 @@ describe("EditorShell", () => {
     fireEvent.click(screen.getByTestId("catalogue-shader-lab"));
     const ground = screen.getByTestId("editor-artboard").querySelector(".artboard-ground");
     expect(ground).toHaveAttribute("data-effect", "shader");
-    fireEvent.click(screen.getByTestId("shader-preset-paper"));
+    // The panel is a lazy chunk; its presets exist only after it resolves.
+    fireEvent.click(await screen.findByTestId("shader-preset-paper"));
     await waitFor(() => expect(ground).toHaveAttribute("data-effect-preset", "Paper texture"));
   });
 
@@ -143,9 +144,10 @@ describe("EditorShell", () => {
     renderWorkbench();
     fireEvent.click(screen.getByRole("button", { name: /^Effects$/ }));
     fireEvent.click(screen.getByTestId("catalogue-texture-lab"));
-    await waitFor(() => expect(screen.getByTestId("plugin-texture-lab")).toBeInTheDocument());
     // The right panel's Effects tab is inert in jsdom, so the plugin controls are hidden from role queries.
-    fireEvent.click(screen.getByRole("button", { name: /^Layer$/, hidden: true }));
+    // jsdom resolves the lazy chunk on a real timer; the default 1 s is tight on a
+    // loaded suite.
+    fireEvent.click(await screen.findByRole("button", { name: /^Layer$/, hidden: true }, { timeout: 5_000 }));
     fireEvent.click(screen.getByTestId("texture-preset-paper"));
     const clip = await screen.findByTestId("layer-effect-clip");
     expect(clip).toHaveAttribute("data-effect", "texture");

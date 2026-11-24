@@ -1,4 +1,4 @@
-import { useEffect, useRef, type RefObject } from "react";
+import { Suspense, useEffect, useRef, type RefObject } from "react";
 import { getPlugin } from "./registry";
 import { useEditorDocument, useEditorStore } from "./store";
 import { NATIVE_LENS_LABELS } from "./types";
@@ -47,13 +47,21 @@ export function PluginHost({
         </div>
       </header>
       <div className="plugin-scroll" key={store.state.pluginSessionKey}>
-        <Panel
-          doc={doc}
-          target={store.state.target}
-          setTarget={store.setTarget}
-          apply={(effect) => store.applyEffect(effect)}
-          toast={store.toast}
-        />
+        <Suspense
+          fallback={
+            <div className="plugin-empty" data-testid="plugin-loading">
+              Loading {plugin.name}…
+            </div>
+          }
+        >
+          <Panel
+            doc={doc}
+            target={store.state.target}
+            setTarget={store.setTarget}
+            apply={(effect) => store.applyEffect(effect)}
+            toast={store.toast}
+          />
+        </Suspense>
       </div>
     </section>
   );

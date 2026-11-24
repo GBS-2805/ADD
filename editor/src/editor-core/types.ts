@@ -1,4 +1,4 @@
-import type { ComponentType, ReactNode } from "react";
+import type { ComponentType, LazyExoticComponent, ReactNode } from "react";
 
 export type Reality = "native-ready" | "needs-native" | "browser-only";
 export type Tier = 1 | 2 | 3;
@@ -136,7 +136,7 @@ export interface EditorPlugin {
   tags: string[];
   reality: Reality;
   tier: Tier;
-  panel: ComponentType<PluginPanelProps>;
+  panel: ComponentType<PluginPanelProps> | LazyExoticComponent<ComponentType<PluginPanelProps>>;
 }
 
 export interface EditorCommand {

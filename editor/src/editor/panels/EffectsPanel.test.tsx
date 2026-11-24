@@ -45,9 +45,12 @@ describe("EffectsPanel", () => {
     expect(screen.queryByTestId("catalogue-texture-lab")).toBeNull();
   });
 
-  it("opensShaderLab", () => {
+  it("opensShaderLab", async () => {
     renderEffects();
     fireEvent.click(screen.getByTestId("catalogue-shader-lab"));
+    // Panels are lazy chunks now, so the first open is a real suspend: wait for
+    // content that only exists after the chunk has resolved.
+    await screen.findByTestId("shader-preset-paper");
     expect(screen.getByTestId("plugin-shader-lab")).toBeInTheDocument();
     expect(screen.queryByTestId("plugin-catalogue")).toBeNull();
     expect(current!.state.rightTab).toBe("effects");
@@ -56,7 +59,7 @@ describe("EffectsPanel", () => {
   it("appliesShaderToArtboard", async () => {
     renderEffects();
     fireEvent.click(screen.getByTestId("catalogue-shader-lab"));
-    fireEvent.click(screen.getByTestId("shader-preset-paper"));
+    fireEvent.click(await screen.findByTestId("shader-preset-paper"));
     fireEvent.click(screen.getByRole("button", { name: "Apply to artboard" }));
     await waitFor(() => expect(screen.getByTestId("background").textContent).toContain('"kind":"shader"'));
     expect(screen.getByTestId("background").textContent).toContain("Paper texture");
@@ -65,24 +68,25 @@ describe("EffectsPanel", () => {
   it("appliesTextureToSingleLayer", async () => {
     renderEffects();
     fireEvent.click(screen.getByTestId("catalogue-texture-lab"));
+    await screen.findByTestId("texture-preset-paper");
     fireEvent.click(screen.getByRole("button", { name: "Layer" }));
     fireEvent.click(screen.getByTestId("texture-preset-paper"));
     fireEvent.click(screen.getByRole("button", { name: "Apply to layer" }));
     await waitFor(() => expect(screen.getByTestId("layer-effect").textContent).toContain('"kind":"texture"'));
   });
 
-  it("layerEffectDisabledForMultiSelection", () => {
+  it("layerEffectDisabledForMultiSelection", async () => {
     renderEffects();
     fireEvent.click(screen.getByRole("button", { name: "Select two" }));
     fireEvent.click(screen.getByTestId("catalogue-texture-lab"));
-    expect(screen.getByRole("button", { name: "Layer" })).toBeDisabled();
+    expect(await screen.findByRole("button", { name: "Layer" })).toBeDisabled();
     expect(screen.getByText("Select one layer for a layer effect.")).toBeInTheDocument();
   });
 
-  it("hidePreservesPluginControls", () => {
+  it("hidePreservesPluginControls", async () => {
     renderEffects();
     fireEvent.click(screen.getByTestId("catalogue-shader-lab"));
-    const speed = screen.getByRole("slider", { name: /Speed/ });
+    const speed = await screen.findByRole("slider", { name: /Speed/ });
     fireEvent.change(speed, { target: { value: "0.8" } });
     fireEvent.click(screen.getByRole("button", { name: "Hide" }));
     expect(screen.getByTestId("catalogue-shader-lab")).toBeInTheDocument();
@@ -90,14 +94,14 @@ describe("EffectsPanel", () => {
     expect(screen.getByRole("slider", { name: /Speed/ })).toHaveValue("0.8");
   });
 
-  it("closeResetsPluginControls", () => {
+  it("closeResetsPluginControls", async () => {
     renderEffects();
     fireEvent.click(screen.getByTestId("catalogue-shader-lab"));
-    fireEvent.change(screen.getByRole("slider", { name: /Speed/ }), { target: { value: "0.8" } });
+    fireEvent.change(await screen.findByRole("slider", { name: /Speed/ }), { target: { value: "0.8" } });
     fireEvent.click(screen.getByRole("button", { name: "Close" }));
     expect(screen.queryByTestId("plugin-shader-lab")).toBeNull();
     fireEvent.click(screen.getByTestId("catalogue-shader-lab"));
-    expect(screen.getByRole("slider", { name: /Speed/ })).toHaveValue("0.5");
+    expect(await screen.findByRole("slider", { name: /Speed/ })).toHaveValue("0.5");
   });
 
   it("nativeLensStillDimsOnly", () => {

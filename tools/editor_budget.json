@@ -1,6 +1,6 @@
 {
-  "generated": "2026-11-22",
-  "initial_gzip_bytes": 623118,
-  "budget_bytes": 623118,
-  "note": "Initial script weight of docs/editor/ as built. gzip -9, so the shelf's brotli is smaller. Tighten budget_bytes deliberately when the plugin split lands."
+  "generated": "2026-11-24",
+  "initial_gzip_bytes": 274616,
+  "budget_bytes": 280109,
+  "note": "Initial script weight of docs/editor/ as built. gzip -9, so the shelf's brotli is smaller. Lowered when the plugin split landed: the entry chunk no longer carries the eight lazy panels, which are now separate chunks. budget_bytes is initial_gzip_bytes plus 2% headroom; a static plugin import coming back would exceed it."
 }

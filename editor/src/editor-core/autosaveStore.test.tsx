@@ -162,4 +162,82 @@ describe("autosave", () => {
     expect(currentDocument!.doc.layers).toHaveLength(0);
     expect(current!.state.autosave.status).toBe("off");
   });
+
+  it("writes a pending edit when the page hides", async () => {
+    const backend = createMemoryBackend();
+    const store = mount(backend);
+    await flush();
+    const writes = backend.writes.length;
+
+    act(() => store.selectAllLayers());
+    act(() => store.removeSelectedLayers());
+    // The debounce has not fired, so the edit exists only in memory.
+    expect(backend.writes.length).toBe(writes);
+
+    await act(async () => {
+      window.dispatchEvent(new Event("pagehide"));
+    });
+    await flush();
+    expect(backend.writes.length).toBe(writes + 1);
+    expect(backend.writes.at(-1)!.document.layers).toHaveLength(0);
+    expect(current!.state.autosave.status).toBe("saved");
+
+    // The first hide consumed the timer; a second one in the same window has
+    // nothing left to flush.
+    window.dispatchEvent(new Event("pagehide"));
+    await flush();
+    expect(backend.writes.length).toBe(writes + 1);
+  });
+
+  it("writes a pending edit once when the document becomes hidden", async () => {
+    const backend = createMemoryBackend();
+    const store = mount(backend);
+    await flush();
+    const writes = backend.writes.length;
+    act(() => store.selectAllLayers());
+    act(() => store.removeSelectedLayers());
+
+    Object.defineProperty(document, "visibilityState", { configurable: true, get: () => "hidden" });
+    try {
+      await act(async () => {
+        document.dispatchEvent(new Event("visibilitychange"));
+      });
+      await flush();
+      expect(backend.writes.length).toBe(writes + 1);
+      expect(backend.writes.at(-1)!.document.layers).toHaveLength(0);
+
+      document.dispatchEvent(new Event("visibilitychange"));
+      await flush();
+      expect(backend.writes.length).toBe(writes + 1);
+    } finally {
+      delete (document as unknown as { visibilityState?: string }).visibilityState;
+    }
+  });
+
+  it("stays usable when the page hides and there is no backend", async () => {
+    const store = mount(null);
+    await flush();
+    act(() => store.selectAllLayers());
+    act(() => store.removeSelectedLayers());
+
+    await act(async () => {
+      window.dispatchEvent(new Event("pagehide"));
+    });
+    await flush();
+    expect(currentDocument!.doc.layers).toHaveLength(0);
+    expect(current!.state.autosave.status).toBe("off");
+  });
+
+  it("flushes a pending edit when the editor unmounts", async () => {
+    const backend = createMemoryBackend();
+    const store = mount(backend);
+    await flush();
+    act(() => store.selectAllLayers());
+    act(() => store.removeSelectedLayers());
+
+    act(() => (store as unknown as { unmount: () => void }).unmount());
+    await flush();
+    expect(backend.writes).toHaveLength(1);
+    expect(backend.writes[0].document.layers).toHaveLength(0);
+  });
 });

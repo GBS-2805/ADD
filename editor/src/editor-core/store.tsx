@@ -18,6 +18,7 @@ import {
   type AutosaveBackend,
 } from "./autosave";
 import { sameEffect } from "./catalogue";
+import { preloadPlugin } from "./registry";
 import { commitHistory, createHistory, pushEffect, redoHistory, undoHistory, updateLayer, type DocumentHistory } from "./history";
 import {
   downloadBlob,
@@ -120,6 +121,8 @@ export interface AutosaveState {
   restoredLayers: number | null;
   /** Pictures whose bytes were gone, so they could not be restored. */
   droppedImages: number;
+  /** False until the one restore read has finished, or storage was unavailable. */
+  restoreSettled: boolean;
 }
 
 export interface LayerSummary {
@@ -451,6 +454,7 @@ export function EditorProvider({ children, autosaveBackend }: EditorProviderProp
     savedAt: null,
     restoredLayers: null,
     droppedImages: 0,
+    restoreSettled: false,
   });
   /**
    * Created once, lazily. A null backend means this browser has no usable storage
@@ -529,6 +533,19 @@ export function EditorProvider({ children, autosaveBackend }: EditorProviderProp
   }, [writeAutosave]);
 
   /**
+   * Writes a pending debounce now. A page that is hidden or unloaded may never run
+   * its timer, so the last edit has to go out with the event. With no timer
+   * pending this does nothing, which makes a second hide in the same window a
+   * no-op. `writeAutosave` owns the failure modes and never throws.
+   */
+  const flushAutosave = useCallback(async () => {
+    if (!autosaveTimer.current) return;
+    window.clearTimeout(autosaveTimer.current);
+    autosaveTimer.current = null;
+    await writeAutosave();
+  }, [writeAutosave]);
+
+  /**
    * Restore the last session once, before the first edit. A slow read leaves the
    * starter document in place rather than blocking the editor.
    */
@@ -537,7 +554,7 @@ export function EditorProvider({ children, autosaveBackend }: EditorProviderProp
     const handle = backend();
     if (!handle) {
       restoring.current = false;
-      setAutosave((current) => ({ ...current, status: "off" }));
+      setAutosave((current) => ({ ...current, status: "off", restoreSettled: true }));
       return;
     }
     let revivedDocument = false;
@@ -568,6 +585,9 @@ export function EditorProvider({ children, autosaveBackend }: EditorProviderProp
       } finally {
         if (!cancelled) {
           restoring.current = false;
+          setAutosave((current) =>
+            current.restoreSettled ? current : { ...current, restoreSettled: true },
+          );
           // Nothing was stored: keep the starter document straight away, so the
           // status line says "Saved" only after something really was written.
           if (!revivedDocument) scheduleAutosave();
@@ -581,13 +601,26 @@ export function EditorProvider({ children, autosaveBackend }: EditorProviderProp
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  /** Every committed document change is an autosave candidate. */
-
-
-  /** Clear a pending write on unmount. */
-  useEffect(() => () => {
-    if (autosaveTimer.current) window.clearTimeout(autosaveTimer.current);
-  }, []);
+  /**
+   * A tab close or a backgrounded app can end the page before the debounce fires.
+   * `pagehide` covers navigations and closes; the hidden `visibilitychange` covers
+   * a phone that is switched away from. Both share the one timer, so whichever
+   * arrives first writes and the other finds nothing to do. Unmount flushes too:
+   * it is a hide, and its timer must not outlive the provider.
+   */
+  useEffect(() => {
+    const flushPending = () => void flushAutosave();
+    const onVisibility = () => {
+      if (document.visibilityState === "hidden") flushPending();
+    };
+    window.addEventListener("pagehide", flushPending);
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => {
+      window.removeEventListener("pagehide", flushPending);
+      document.removeEventListener("visibilitychange", onVisibility);
+      flushPending();
+    };
+  }, [flushAutosave]);
 
   const showToast = useCallback((message: string) => {
     setToastExiting(false);
@@ -604,6 +637,10 @@ export function EditorProvider({ children, autosaveBackend }: EditorProviderProp
   }, []);
 
   const openPlugin = useCallback((id: string) => {
+    // The catalogue preloads on hover or focus; a command-palette or other
+    // programmatic open has no such signal, so start the chunk with the state
+    // change instead of waiting for the panel to suspend.
+    preloadPlugin(id);
     setSurface("plugins");
     setActivePluginId(id);
     setCatalogueOpen(false);

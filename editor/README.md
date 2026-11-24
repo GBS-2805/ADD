@@ -68,7 +68,7 @@ npm run perf:open      # The project-open frame case only, against dist/ (see be
 ## Files, print and boundaries
 
 - **Save .add** downloads the portable project. **Open .add** (or an older `.twin`) validates format, colours, fonts, effects, transforms and embedded image data before replacing the document and resetting history.
-- Imported PNGs are embedded as data URLs in the project file. Layer images live in memory for the session; there is no autosave or local storage.
+- Imported PNGs are embedded as data URLs in the project file. The open document and its picture bytes are also autosaved to IndexedDB after every edit (500 ms debounce) and restored on reload; a hidden or closed page flushes the pending write instead of waiting for the timer. A browser with storage disabled, a full quota or a private window says "Not saved" and keeps editing. The Flip 7 device path for this has not been checked.
 - **Export PNG** is a flattened raster only; it does not write PSDs or editable layer files.
 - **Print / Save PDF** calls the browser print dialog. A dedicated print root renders a 765 × 1000 artboard with a custom page size and no editor chrome or selection. A printer driver may still scale the custom page; PDF output is the exact path.
 - Print, export and save read committed document state, so a live pointer transform cannot leak into them.

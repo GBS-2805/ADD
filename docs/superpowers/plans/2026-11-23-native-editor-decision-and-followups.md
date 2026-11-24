@@ -10,7 +10,7 @@
 
 **Spec:** `PLAN.md` (one-editor rule and native v2 shipping decision), `FINAL-TEST.md` (4.0 candidate, Studio retirement, blocked device gate), `NATIVE_EDITOR_V2.md` (native task list; its checkboxes are stale and are not evidence), `docs/superpowers/plans/2026-11-16-twin-workbench-v2.md` (browser baseline and known limitations), `editor/README.md` (browser workbench state), `AGENTS.md` (verification and evidence rules).
 
-**Status:** Native accepted. Task 2 (save-size invariant) is implemented, green and committed (`9456452`); Task 3 (CPU-throttled frame gate) is committed (`ac3eb76`) with its 20-layer phone gate green and its 64-layer ceiling promoted from six clean baselines. The desktop 20-layer gate is **green in CI** (`edf7999`): zero long tasks, p95 16.7 ms, **max frame 16.8 ms**, after deferring the inspector, skipping selection-only autosaves and starting the frame sampler after pointerdown settles. A separate project-open gate now covers the frame that mounts a 20-layer document: CI run 177 on `302565c` recorded **p95 16.7 ms, max 16.8 ms, zero long tasks over 61 frames**, while every drag case stayed at max 16.8 ms. Task 1 remains **BLOCKED** at the real-device step. Tasks 4–7 are not started. There is no commit, deploy or publish authorization in this plan.
+**Status:** Native accepted. Task 2 (save-size invariant) is implemented, green and committed (`9456452`); Task 3 (CPU-throttled frame gate) is committed (`ac3eb76`) with its 20-layer phone gate green and its 64-layer ceiling promoted from six clean baselines. The desktop 20-layer gate is **green in CI** (`edf7999`): zero long tasks, p95 16.7 ms, **max frame 16.8 ms**, after deferring the inspector, skipping selection-only autosaves and starting the frame sampler after pointerdown settles. A separate project-open gate now covers the frame that mounts a 20-layer document: CI run 177 on `302565c` recorded **p95 16.7 ms, max 16.8 ms, zero long tasks over 61 frames**, while every drag case stayed at max 16.8 ms. Task 1 remains **BLOCKED** at the real-device step. Task 4 (autosave flush) and Task 5 (lazy plugin panels) are implemented and green locally; Tasks 6–7 are not started. There is no commit, deploy or publish authorization in this plan.
 
 ---
 
@@ -368,17 +368,26 @@ The current effect that only clears the timer on unmount is replaced, not duplic
 
 **Steps:**
 
-- [ ] Add `flushAutosave` after `writeAutosave` and before the restore effect; it must read the latest `stateRef.current.present`, not a stale closure.
-- [ ] Add a `useEffect` that registers `window.addEventListener("pagehide", flush)` and `document.addEventListener("visibilitychange", onVisibility)`, with a cleanup that removes both and flushes a pending timer once.
-- [ ] Keep `scheduleAutosave`’s 500 ms debounce and its restore suppression unchanged.
-- [ ] Unit-test: edit, advance less than `AUTOSAVE_DELAY_MS`, dispatch `pagehide`, await the write, assert the backend received the edited document and the status says saved.
-- [ ] Unit-test: edit, dispatch `visibilitychange` with `document.visibilityState === "hidden"`, assert one write; dispatch it again and assert no duplicate.
-- [ ] Unit-test: with the backend `null`, dispatch `pagehide` and assert no throw and `status` becomes `off` (or stays `off`).
-- [ ] Add `editor/e2e/autosave.spec.ts`:
+- [x] Add `flushAutosave` after `writeAutosave` and before the restore effect; it must read the latest `stateRef.current.present`, not a stale closure.
+- [x] Add a `useEffect` that registers `window.addEventListener("pagehide", flush)` and `document.addEventListener("visibilitychange", onVisibility)`, with a cleanup that removes both and flushes a pending timer once.
+- [x] Keep `scheduleAutosave`’s 500 ms debounce and its restore suppression unchanged.
+- [x] Unit-test: edit, advance less than `AUTOSAVE_DELAY_MS`, dispatch `pagehide`, await the write, assert the backend received the edited document and the status says saved.
+- [x] Unit-test: edit, dispatch `visibilitychange` with `document.visibilityState === "hidden"`, assert one write; dispatch it again and assert no duplicate.
+- [x] Unit-test: with the backend `null`, dispatch `pagehide` and assert no throw and `status` becomes `off` (or stays `off`).
+- [x] Add `editor/e2e/autosave.spec.ts`:
   - Load the editor, edit a text layer through the real UI, wait for “Saved”, reload, and assert the edited text is present.
   - Edit, immediately dispatch `pagehide` before the debounce, reload, and assert the edit is present. This is the last-write-loss regression.
   - Use a new browser context per test so one test’s IndexedDB does not seed another.
-- [ ] Update `editor/README.md`: autosave exists; the remaining limitation is that the Flip 7/device path has not been checked.
+- [x] Update `editor/README.md`: autosave exists; the remaining limitation is that the Flip 7/device path has not been checked.
+
+**Implementation record (2026-11-24):**
+
+- `flushAutosave` clears the pending timer, nulls it, and awaits `writeAutosave`, which already reads `stateRef.current.present` and owns every failure mode. The old clear-only unmount effect is replaced by one listener effect: `pagehide`, a hidden `visibilitychange`, and unmount all call the same flush, so the second event in a hide finds no timer. `scheduleAutosave`’s debounce and restore suppression are untouched.
+- Unit: `npx vitest run src/editor-core/autosaveStore.test.tsx` — **10/10 passed** with four new tests; the pagehide/visibility/unmount writes happen with fake timers never advanced, so the event, not the 500 ms timer, is what writes. The null-backend hide leaves the editor editing and the status `off`.
+- Browser: `npx playwright test e2e/autosave.spec.ts` — **2 passed** (16.6 s and 9.6 s) at 390×844 against real IndexedDB. Each test gets a fresh context; both reload and assert the edited headline. Deviation from the step wording: the phone shell has no status line, so the spec waits on the stored IndexedDB document (polled without the app’s help) instead of the “Saved” label. The fake-timer unit test is the proof that the hide writes; the browser spec proves the stored document survives a reload.
+- `editor/README.md` now says autosave exists, names IndexedDB and the flush, and keeps the unverified Flip 7/device path as the limitation.
+- `python3 tools/check_editor.py` — typecheck 7.1 s, assets 0.3 s, tests 16.2 s, payload 623118/623118; `editor: OK` in 24 s.
+- Not checked: the full e2e regression suite locally (its desktop viewport does not render in this VM); CI runs it. The Flip 7/device path was not exercised.
 
 **Verification:**
 
@@ -448,16 +457,27 @@ The production startup test waits for `html[data-editor-ready="true"]` and reads
 
 **Steps:**
 
-- [ ] Convert `registry.tsx` to lazy loaders. Remove all eight static imports; `lucide-react` and the metadata stay static.
-- [ ] Update the `EditorPlugin.panel` type to accept the lazy component; keep `PluginHost`’s props unchanged.
-- [ ] Wrap the active panel in `Suspense` with a lightweight fallback that has `data-testid="plugin-loading"` and does not import plugin code.
-- [ ] Add preload on catalogue pointer enter/focus and on `openPlugin`; do not preload all panels on app mount.
-- [ ] Add the one-shot first-editable mark and ready attribute in `EditorShell` after the canvas size is non-zero and the restore effect has settled.
-- [ ] Add the production startup test to `editor-task5-performance.spec.ts`; throttle 4×, navigate, wait for ready, read the mark, assert it is finite and positive, and write the measurement to `editor/test-results/editor-perf.json`. Keep it report-only until three clean baselines are collected.
+- [x] Convert `registry.tsx` to lazy loaders. Remove all eight static imports; `lucide-react` and the metadata stay static.
+- [x] Update the `EditorPlugin.panel` type to accept the lazy component; keep `PluginHost`’s props unchanged.
+- [x] Wrap the active panel in `Suspense` with a lightweight fallback that has `data-testid="plugin-loading"` and does not import plugin code.
+- [x] Add preload on catalogue pointer enter/focus and on `openPlugin`; do not preload all panels on app mount.
+- [x] Add the one-shot first-editable mark and ready attribute in `EditorShell` after the canvas size is non-zero and the restore effect has settled.
+- [x] Add the production startup test to `editor-task5-performance.spec.ts`; throttle 4×, navigate, wait for ready, read the mark, assert it is finite and positive, and write the measurement to `editor/test-results/editor-perf.json`. Keep it report-only until three clean baselines are collected.
 - [ ] After three clean runs, set `STARTUP_BUDGET_MS` to the worst observed first-editable time plus 10%, make the assertion hard and record the three measurements in the PR. Do not promote from one run.
-- [ ] Run `npm run build`; record the emitted initial chunk sizes. Set `tools/editor_budget.json` `initial_gzip` to the measured initial gzip with at most 2% headroom. The gate must fail if a static plugin import returns.
-- [ ] Add a unit/regression test that `getPlugin` still resolves every id and that `preloadPlugin` resolves the same module for a known id. Avoid asserting Vite chunk internals in jsdom.
-- [ ] Run the editor gate and the e2e startup test.
+- [x] Run `npm run build`; record the emitted initial chunk sizes. Set `tools/editor_budget.json` `initial_gzip` to the measured initial gzip with at most 2% headroom. The gate must fail if a static plugin import returns.
+- [x] Add a unit/regression test that `getPlugin` still resolves every id and that `preloadPlugin` resolves the same module for a known id. Avoid asserting Vite chunk internals in jsdom.
+- [x] Run the editor gate and the e2e startup test.
+
+**Implementation record (2026-11-24):**
+
+- `registry.tsx` now holds eight `import()` loaders and eight `lazy()` panels; the metadata and lucide glyphs stay in the entry chunk. `preloadPlugin` returns the loader’s promise, marks its rejection handled (a hover the user never opens has no awaiter), and is called from the catalogue’s pointer enter, focus and click plus `openPlugin` (so command-palette and other programmatic opens start the chunk), not from app mount. `PluginHost` wraps the panel in `Suspense` with a `plugin-loading` fallback that imports nothing.
+- Entry chunk **2,156.36 kB / 629.05 kB gzip → 900.67 kB / 275.45 kB gzip**. Separate chunks: Spatial Dock 1,084.06 kB (the three.js weight), Particle Field 102.93, Pattern Library 30.10, Texture Lab 15.58, Asset Shelf 6.85, Overlay Lab 4.79, Native Parity 3.05, Shader Lab 2.00, shared plugin UI 1.71. No panel code remains in the entry chunk.
+- `docs/editor` was regenerated (31 files); `python3 tools/build_editor.py --check` reports the tree matches a fresh build. Initial gzip is **274,520 bytes, down from 623,118 (-56%)**; `tools/editor_budget.json` records 274,520 measured with a **280,011 ceiling (+2%)**, so a static plugin import returning would fail the payload gate.
+- First-editable: `AutosaveState` gained `restoreSettled`, set in the restore effect’s `finally` and in the no-backend branch; `FirstEditableMark` in `EditorShell` writes `data-editor-ready="true"` and `performance.mark("editor:first-editable")` once, after the canvas has a non-zero size and the restore has settled. A real-browser probe at 800×600 (dev server, unthrottled) reported `ready=true`, mark 3913 ms, zero page errors. It was **not** run at 1440×900 under 4× here, for the same desktop-renderer reason as the open-frame case.
+- The startup perf case is added and listed by Playwright as `firstEditableIsMarkedAtFourTimesCpu`; it asserts only that the mark is present and positive and writes `first-editable-1440x900` to `editor-perf.json`. **No `STARTUP_BUDGET_MS` was set**: there are zero of the required three clean 4× baselines, so the case remains report-only and the promotion step is unchecked.
+- Unit tests that open a panel now await the lazy chunk: `EffectsPanel.test.tsx` and the two `EditorShell.test.tsx` preset tests wait for panel content instead of the session shell, which renders before the chunk resolves. `registry.test.ts` proves every id resolves and `preloadPlugin` settles on the same module twice.
+- `python3 tools/check_editor.py` — typecheck 7.0 s, assets 0.2 s, tests 13.8 s, payload 274,520/280,011; `editor: OK` in 21 s. `python3 tools/check_all.py` — **29 gates, all green in 33 s**.
+- Not checked: the e2e startup case and the full regression suite locally (both use the desktop viewport this VM cannot render); CI is the path. The Flip 7/device path remains unchecked.
 
 **Verification:**
 

@@ -1,7 +1,7 @@
 import { useEffect, useState, type CSSProperties } from "react";
 import { Splitter, useSplitter } from "@ark-ui/react";
 import { ChevronLeft, ChevronRight, PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen } from "lucide-react";
-import { useEditorDocument, useEditorStore, useEditorToast } from "../editor-core/store";
+import { useAutosaveState, useEditorDocument, useEditorStore, useEditorToast } from "../editor-core/store";
 import { Canvas } from "./canvas/Canvas";
 import { LayersPanel } from "./panels/LayersPanel";
 import { BottomSheet } from "./panels/BottomSheet";
@@ -254,6 +254,26 @@ function DocumentPrintArtboard() {
   return <PrintArtboard doc={doc} />;
 }
 
+/**
+ * The startup measurement: the canvas has a real layout and the one restore read
+ * has settled, so the document on screen is the document that will be edited.
+ * Marked once; a second call would make the startup number meaningless.
+ */
+function FirstEditableMark() {
+  const store = useEditorStore();
+  const autosave = useAutosaveState();
+  const ready =
+    store.state.canvasSize.width > 0 &&
+    store.state.canvasSize.height > 0 &&
+    autosave.restoreSettled;
+  useEffect(() => {
+    if (!ready || document.documentElement.dataset.editorReady === "true") return;
+    document.documentElement.dataset.editorReady = "true";
+    performance.mark("editor:first-editable");
+  }, [ready]);
+  return null;
+}
+
 /** Only this line re-renders when the toast changes, not the editor shell. */
 function EditorToast() {
   const toast = useEditorToast();
@@ -334,6 +354,7 @@ export function EditorShell() {
         </output>
       ) : null}
       <EditorToast />
+      <FirstEditableMark />
     </>
   );
 }

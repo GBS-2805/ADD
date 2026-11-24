@@ -17,6 +17,11 @@ vi.mock("./project", async (importOriginal) => {
   projectMocks.serializeProject.mockImplementation(actual.serializeProject);
   return { ...actual, serializeProject: projectMocks.serializeProject };
 });
+const registryMocks = vi.hoisted(() => ({ preloadPlugin: vi.fn() }));
+vi.mock("./registry", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("./registry")>();
+  return { ...actual, preloadPlugin: registryMocks.preloadPlugin };
+});
 import { commitHistory, createHistory } from "./history";
 import { MAX_PROJECT_BYTES } from "./project";
 import {
@@ -320,5 +325,16 @@ describe("Editor store layers", () => {
     }
     expect(revoke).toHaveBeenCalledWith("blob:one");
     revoke.mockRestore();
+  });
+
+  it("preloads the panel chunk when a plugin opens without the catalogue", () => {
+    const store = renderStore();
+    registryMocks.preloadPlugin.mockClear();
+    act(() => store.openPlugin("overlay-lab"));
+    // A command-palette open has no hover/focus preload; the action itself must
+    // start the chunk before the host suspends on it.
+    expect(registryMocks.preloadPlugin).toHaveBeenCalledWith("overlay-lab");
+    expect(current!.state.activePluginId).toBe("overlay-lab");
+    expect(current!.state.surface).toBe("plugins");
   });
 });

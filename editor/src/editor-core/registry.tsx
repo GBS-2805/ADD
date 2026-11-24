@@ -1,3 +1,4 @@
+import { lazy } from "react";
 import {
   Box,
   Grid3X3,
@@ -9,17 +10,31 @@ import {
   Shapes,
   type LucideIcon,
 } from "lucide-react";
-import ShaderLabPlugin from "../plugins/ShaderLabPlugin";
-import TextureLabPlugin from "../plugins/TextureLabPlugin";
-import ParticleFieldPlugin from "../plugins/ParticleFieldPlugin";
-import PatternLibraryPlugin from "../plugins/PatternLibraryPlugin";
-import SpatialDockPlugin from "../plugins/SpatialDockPlugin";
-import NativeParityPlugin from "../plugins/NativeParityPlugin";
-import AssetShelfPlugin from "../plugins/AssetShelfPlugin";
-import OverlayLabPlugin from "../plugins/OverlayLabPlugin";
 import type { EditorPlugin } from "./types";
 
 const glyph = (Icon: LucideIcon) => <Icon size={20} strokeWidth={1.6} />;
+
+/**
+ * Every panel used to be in the entry chunk even though startup shows the
+ * catalogue, not a panel. Each panel is now its own chunk: the catalogue keeps the
+ * metadata and glyph, and a panel's code arrives on hover, on focus, on click, or
+ * on the render that opens it. The loaders are the single source for both `lazy`
+ * and `preloadPlugin`, so a preload and the later render share one import.
+ */
+const loaders = {
+  "shader-lab": () => import("../plugins/ShaderLabPlugin"),
+  "texture-lab": () => import("../plugins/TextureLabPlugin"),
+  "particle-field": () => import("../plugins/ParticleFieldPlugin"),
+  "pattern-library": () => import("../plugins/PatternLibraryPlugin"),
+  "spatial-dock": () => import("../plugins/SpatialDockPlugin"),
+  "native-parity": () => import("../plugins/NativeParityPlugin"),
+  "asset-shelf": () => import("../plugins/AssetShelfPlugin"),
+  "overlay-lab": () => import("../plugins/OverlayLabPlugin"),
+} as const;
+
+type PluginId = keyof typeof loaders;
+
+const lazyPanel = (id: PluginId) => lazy(loaders[id]);
 
 export const PLUGINS: EditorPlugin[] = [
   {
@@ -31,7 +46,7 @@ export const PLUGINS: EditorPlugin[] = [
     tags: ["shader", "gradient", "mesh", "grain", "warp", "paper"],
     reality: "needs-native",
     tier: 1,
-    panel: ShaderLabPlugin,
+    panel: lazyPanel("shader-lab"),
   },
   {
     id: "texture-lab",
@@ -42,7 +57,7 @@ export const PLUGINS: EditorPlugin[] = [
     tags: ["texture", "paper", "fur", "halftone", "glass"],
     reality: "needs-native",
     tier: 1,
-    panel: TextureLabPlugin,
+    panel: lazyPanel("texture-lab"),
   },
   {
     id: "particle-field",
@@ -53,7 +68,7 @@ export const PLUGINS: EditorPlugin[] = [
     tags: ["particles", "dust", "sparks", "confetti", "motion"],
     reality: "browser-only",
     tier: 2,
-    panel: ParticleFieldPlugin,
+    panel: lazyPanel("particle-field"),
   },
   {
     id: "pattern-library",
@@ -64,7 +79,7 @@ export const PLUGINS: EditorPlugin[] = [
     tags: ["pattern", "print", "repeat", "rough", "ink"],
     reality: "needs-native",
     tier: 1,
-    panel: PatternLibraryPlugin,
+    panel: lazyPanel("pattern-library"),
   },
   {
     id: "spatial-dock",
@@ -75,7 +90,7 @@ export const PLUGINS: EditorPlugin[] = [
     tags: ["3d", "three", "motion", "tilt", "dock"],
     reality: "browser-only",
     tier: 3,
-    panel: SpatialDockPlugin,
+    panel: lazyPanel("spatial-dock"),
   },
   {
     id: "native-parity",
@@ -86,7 +101,7 @@ export const PLUGINS: EditorPlugin[] = [
     tags: ["native", "tone", "prism", "parity", "colour"],
     reality: "native-ready",
     tier: 1,
-    panel: NativeParityPlugin,
+    panel: lazyPanel("native-parity"),
   },
   {
     id: "asset-shelf",
@@ -97,7 +112,7 @@ export const PLUGINS: EditorPlugin[] = [
     tags: ["asset", "paper", "icon", "import", "svg"],
     reality: "needs-native",
     tier: 2,
-    panel: AssetShelfPlugin,
+    panel: lazyPanel("asset-shelf"),
   },
   {
     id: "overlay-lab",
@@ -108,10 +123,23 @@ export const PLUGINS: EditorPlugin[] = [
     tags: ["png", "layer", "blend", "overlay", "transform", "psd"],
     reality: "needs-native",
     tier: 1,
-    panel: OverlayLabPlugin,
+    panel: lazyPanel("overlay-lab"),
   },
 ];
 
 export function getPlugin(id: string | null): EditorPlugin | undefined {
   return PLUGINS.find((plugin) => plugin.id === id);
+}
+
+/**
+ * Starts a panel's import without opening it, and never throws. A preload the user
+ * never opens has nobody to await it, so the rejection is marked handled here; the
+ * panel's own render is where a chunk that really cannot load becomes visible.
+ */
+export function preloadPlugin(id: string): Promise<unknown> | undefined {
+  const load = loaders[id as PluginId];
+  if (!load) return undefined;
+  const loading = load();
+  void loading.catch(() => {});
+  return loading;
 }
