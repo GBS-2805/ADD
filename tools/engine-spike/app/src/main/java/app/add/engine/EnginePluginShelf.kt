@@ -89,7 +89,7 @@ fun EnginePluginShelf(
         modifier = modifier.testTag("bmo-plugin-shelf"),
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 5.dp),
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 4.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
@@ -107,7 +107,7 @@ fun EnginePluginShelf(
                     else -> "${ordered.size} MATCHES"
                 },
                 color = Dim,
-                fontSize = 8.sp,
+                fontSize = 7.5.sp,
                 fontWeight = FontWeight.Bold,
                 letterSpacing = 0.4.sp,
             )
@@ -115,8 +115,8 @@ fun EnginePluginShelf(
         Text(
             "Compiled-in, offline, one at a time.",
             color = Dim,
-            fontSize = 10.sp,
-            modifier = Modifier.padding(horizontal = 14.dp, vertical = 2.dp),
+            fontSize = 9.sp,
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 2.dp),
         )
         Row(
             modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp, vertical = 6.dp),
@@ -127,7 +127,7 @@ fun EnginePluginShelf(
                 value = query,
                 onValueChange = { query = it },
                 singleLine = true,
-                textStyle = TextStyle(color = Cream, fontSize = 12.sp),
+                textStyle = TextStyle(color = Cream, fontSize = 11.sp),
                 cursorBrush = SolidColor(Mint),
                 modifier = Modifier
                     .weight(1f)
@@ -143,7 +143,7 @@ fun EnginePluginShelf(
                             Text(
                                 "Search plugins, effects or commands",
                                 color = Dim,
-                                fontSize = 11.sp,
+                                fontSize = 10.sp,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis,
                             )
@@ -165,7 +165,7 @@ fun EnginePluginShelf(
                     background = PanelRaised,
                     contentPadding = PaddingValues(horizontal = 10.dp),
                 ) {
-                    Text("CLEAR", color = Cream, fontSize = 8.sp, fontWeight = FontWeight.Bold)
+                    Text("CLEAR", color = Cream, fontSize = 7.5.sp, fontWeight = FontWeight.Bold)
                 }
             }
         }
@@ -182,8 +182,8 @@ fun EnginePluginShelf(
             )
         } else {
             Column(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp, vertical = 6.dp),
-                verticalArrangement = Arrangement.spacedBy(6.dp),
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 5.dp),
+                verticalArrangement = Arrangement.spacedBy(5.dp),
             ) {
                 ordered.forEach { plugin ->
                     val running = plugin.id == activeId
@@ -193,7 +193,7 @@ fun EnginePluginShelf(
                             .clip(RoundedCornerShape(14.dp))
                             .background(PanelRaised)
                             .clickable { if (running) onOpen(plugin.id) else onRun(plugin.id) }
-                            .padding(horizontal = 10.dp, vertical = 9.dp)
+                            .padding(horizontal = 8.dp, vertical = 7.dp)
                             .testTag("bmo-plugin-${plugin.id}")
                             .semantics {
                                 contentDescription = "${if (running) "Open" else "Run"} ${plugin.name}"
@@ -201,30 +201,32 @@ fun EnginePluginShelf(
                             },
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        Text(plugin.glyph, color = Mint, fontSize = 18.sp)
+                        Text(plugin.glyph, color = Mint, fontSize = 16.sp)
                         Spacer(Modifier.padding(horizontal = 4.dp))
                         Column(Modifier.weight(1f)) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
-                                Text(plugin.name, color = Cream, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+                                Text(plugin.name, color = Cream, fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
                                 if (running) {
                                     Spacer(Modifier.padding(horizontal = 3.dp))
-                                    Text("RUNNING", color = Mint, fontSize = 7.5.sp, fontWeight = FontWeight.Bold)
+                                    Text("RUNNING", color = Mint, fontSize = 7.sp, fontWeight = FontWeight.Bold)
                                 }
                             }
-                            Text(plugin.summary, color = Dim, fontSize = 9.5.sp, maxLines = 2)
+                            Text(plugin.summary, color = Dim, fontSize = 8.5.sp, maxLines = 2)
                         }
                         Text(
                             if (running) "OPEN" else "RUN",
-                            color = if (running) Mint else Lime,
-                            fontSize = 8.5.sp,
+                            // Mint and Lime are both the accent after the restyle; RUN
+                            // needs the neutral colour to stay distinct from OPEN.
+                            color = if (running) Mint else Cream,
+                            fontSize = 8.sp,
                             fontWeight = FontWeight.Bold,
-                            modifier = Modifier.padding(start = 6.dp),
+                            modifier = Modifier.padding(start = 4.dp),
                         )
                     }
                 }
             }
         }
-        Row(horizontalArrangement = Arrangement.spacedBy(6.dp), modifier = Modifier.padding(horizontal = 12.dp)) {
+        Row(horizontalArrangement = Arrangement.spacedBy(5.dp), modifier = Modifier.padding(horizontal = 10.dp)) {
             if (activeId != null) {
                 Text(
                     "HIDE",

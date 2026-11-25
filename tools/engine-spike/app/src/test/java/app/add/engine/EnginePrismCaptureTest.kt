@@ -45,7 +45,7 @@ class EnginePrismCaptureTest {
     @Test
     fun capturePrismPluginPanel() {
         compose.waitForIdle()
-        compose.onNodeWithTag("bmo-plugins").performScrollTo().performClick()
+        compose.onNodeWithTag("bmo-plugins").performClick()
         compose.waitForIdle()
         compose.onNodeWithTag("bmo-plugin-prism").performClick()
         compose.waitForIdle()

@@ -2,6 +2,7 @@ package app.add.engine
 
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
 /**
@@ -10,25 +11,39 @@ import androidx.compose.ui.unit.dp
  * accidentally fall back to a default Material palette.
  */
 object EngineTokens {
-    // The names are the engine's old semantic roles; the values are generated from
-    // the site's Review edition. Ink is still the page, Cream is still the words.
-    val Ink = EngineEdition.Page
-    val Panel = EngineEdition.Card
-    val PanelRaised = EngineEdition.Panel
-    val Rule = EngineEdition.Rule
-    val Cream = EngineEdition.Ink
-    val Dim = EngineEdition.Dim
-    val Mint = EngineEdition.Plum
-    val Lime = EngineEdition.PlumHover
-    val Clay = EngineEdition.Warn
+    // Native studio chrome: charcoal around the bone artboard, warm vermilion
+    // accent. The artwork renderer reads EngineEdition directly, so exporting a
+    // page never follows the editor theme.
+    val StudioInk = Color(0xFF101010)
+    val StudioSurface = Color(0xFF1B1A17)
+    val StudioRaised = Color(0xFF2A2722)
+    val StudioText = Color(0xFFF4EDE0)
+    val StudioMuted = Color(0xFF9D9486)
+    val StudioAccent = Color(0xFFE8452A)
+    val StudioAccentInk = Color(0xFFFFF2E8)
+    val StudioWarn = Color(0xFFFF8A6A)
+    val StudioHairline = Color(0x24FFFFFF)
+    val StudioSelection = Color(0xFF8DB4FF)
+
+    // Chrome roles. The old names stay for call-site compatibility.
+    val Ink = StudioInk
+    val Panel = StudioSurface
+    val PanelRaised = StudioRaised
+    val Rule = StudioHairline
+    val Cream = StudioText
+    val Dim = StudioMuted
+    val Mint = StudioAccent
+    val Lime = StudioAccent
+    val Clay = StudioWarn
+    val Forest = StudioSurface
+    val PaperEdge = StudioRaised
+    val MintWash = StudioRaised
+    val StudioOutline = StudioText
+
+    // Artwork values: these never follow the chrome theme.
     val Artboard = EngineEdition.BandInk
     val ArtboardInk = EngineEdition.Ink
-
-    val Forest = EngineEdition.Card
     val Paper = EngineEdition.BandInk
-    val PaperEdge = EngineEdition.Panel
-    val MintWash = EngineEdition.Card
-    val StudioOutline = EngineEdition.Ink
 
     val MinTarget = 48.dp
     val PebbleShape = RoundedCornerShape(18.dp)
@@ -62,3 +77,14 @@ val StudioOutline = EngineTokens.StudioOutline
 val PebbleShape = EngineTokens.PebbleShape
 val SheetShape = EngineTokens.SheetShape
 val CardShape = EngineTokens.CardShape
+
+val StudioInk = EngineTokens.StudioInk
+val StudioSurface = EngineTokens.StudioSurface
+val StudioRaised = EngineTokens.StudioRaised
+val StudioText = EngineTokens.StudioText
+val StudioMuted = EngineTokens.StudioMuted
+val StudioAccent = EngineTokens.StudioAccent
+val StudioAccentInk = EngineTokens.StudioAccentInk
+val StudioWarn = EngineTokens.StudioWarn
+val StudioHairline = EngineTokens.StudioHairline
+val StudioSelection = EngineTokens.StudioSelection

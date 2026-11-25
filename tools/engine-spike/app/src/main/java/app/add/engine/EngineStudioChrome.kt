@@ -85,7 +85,7 @@ import kotlinx.coroutines.delay
 internal enum class StudioTab(val label: String) {
     Style("STYLE"),
     Effects("FX"),
-    Texture("TEXTURE"),
+    Texture("INK"),
     Layers("LAYERS"),
 }
 
@@ -163,6 +163,51 @@ internal fun TactileBox(
     )
 }
 
+/**
+ * A 48dp click/semantics bound around a compact drawn surface. The outer box owns
+ * the touch target and tag; the inner box is visual only, so density does not
+ * shrink the area a finger can actually hit.
+ */
+@Composable
+internal fun CompactHitTarget(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    shape: androidx.compose.ui.graphics.Shape = RoundedCornerShape(99.dp),
+    background: Color = PanelRaised,
+    border: BorderStroke? = null,
+    shadow: androidx.compose.ui.unit.Dp = 0.dp,
+    contentPadding: PaddingValues = PaddingValues(0.dp),
+    visualHeight: androidx.compose.ui.unit.Dp,
+    visualWidth: androidx.compose.ui.unit.Dp? = null,
+    haptic: Boolean = false,
+    pressScale: Float = StudioMotion.PressScale,
+    contentAlignment: Alignment = Alignment.Center,
+    content: @Composable androidx.compose.foundation.layout.BoxScope.() -> Unit,
+) {
+    TactileBox(
+        onClick = onClick,
+        modifier = modifier,
+        shape = shape,
+        background = Color.Transparent,
+        contentPadding = PaddingValues(0.dp),
+        haptic = haptic,
+        pressScale = pressScale,
+    ) {
+        Box(
+            modifier = Modifier
+                .then(if (visualWidth != null) Modifier.width(visualWidth) else Modifier)
+                .height(visualHeight)
+                .then(if (shadow > 0.dp) Modifier.shadow(shadow, shape, clip = false) else Modifier)
+                .clip(shape)
+                .background(background)
+                .then(if (border != null) Modifier.border(border, shape) else Modifier)
+                .padding(contentPadding),
+            contentAlignment = contentAlignment,
+            content = content,
+        )
+    }
+}
+
 @Composable
 internal fun StudioTopBar(
     doc: EngineDocument,
@@ -234,26 +279,6 @@ internal fun StudioTopBar(
 }
 
 @Composable
-internal fun StudioPeek(onClick: () -> Unit, modifier: Modifier = Modifier) {
-    TactileBox(
-        onClick = onClick,
-        shape = RoundedCornerShape(99.dp),
-        background = Forest.copy(alpha = 0.94f),
-        border = BorderStroke(1.dp, Cream.copy(alpha = 0.18f)),
-        shadow = 6.dp,
-        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
-        haptic = true,
-        modifier = modifier.height(40.dp).testTag("studio-peek"),
-    ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Text("PAGE 01", color = Cream, fontSize = 10.sp, fontWeight = FontWeight.SemiBold)
-            Spacer(Modifier.width(7.dp))
-            Text("TOOLS", color = Mint, fontSize = 9.sp, fontWeight = FontWeight.Bold, letterSpacing = 0.7.sp)
-        }
-    }
-}
-
-@Composable
 private fun BarIcon(
     glyph: String,
     label: String,
@@ -278,149 +303,6 @@ private fun BarIcon(
             color = if (enabled) Cream else Dim.copy(alpha = 0.35f),
             fontSize = 15.sp,
             fontWeight = FontWeight.SemiBold,
-        )
-    }
-}
-
-@Composable
-internal fun CreateDock(onClick: () -> Unit, modifier: Modifier = Modifier) {
-    TactileBox(
-        onClick = onClick,
-        shape = RoundedCornerShape(22.dp),
-        background = Forest,
-        border = BorderStroke(1.dp, Cream.copy(alpha = 0.16f)),
-        shadow = 10.dp,
-        contentPadding = PaddingValues(horizontal = 9.dp, vertical = 8.dp),
-        haptic = true,
-        modifier = modifier.fillMaxWidth().height(68.dp).testTag("engine-add"),
-    ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Box(
-                modifier = Modifier.size(48.dp).clip(CircleShape).background(Lime),
-                contentAlignment = Alignment.Center,
-            ) {
-                Text("+", color = Ink, fontSize = 27.sp, fontWeight = FontWeight.Medium)
-            }
-            Spacer(Modifier.width(11.dp))
-            Column(Modifier.weight(1f)) {
-                Text("Create", color = Cream, fontSize = 17.sp, fontWeight = FontWeight.SemiBold)
-                Text("Type · Shape · 3D · Photo", color = Dim, fontSize = 10.5.sp)
-            }
-            Text("OPEN", color = Mint, fontSize = 9.sp, fontWeight = FontWeight.Bold, letterSpacing = 0.9.sp)
-        }
-    }
-}
-
-@Composable
-internal fun ObjectBar(
-    doc: EngineDocument,
-    onOpen: (StudioTab) -> Unit,
-    onCreate: () -> Unit,
-    onDone: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    val layer = doc.selected
-    val displayName = layer?.name?.let { name ->
-        name.substringAfter(" / ", name).replaceFirstChar { it.uppercase() }
-    }
-    EngineFloatingToolbar(
-        modifier = modifier.fillMaxWidth().height(108.dp),
-        docked = true,
-    ) {
-        if (layer == null) {
-            CreateDock(onClick = onCreate, modifier = Modifier.weight(1f))
-            return@EngineFloatingToolbar
-        }
-        // Two rows instead of cramming the name and five actions into one. The old
-        // one-row bar reduced "Gradient Star" to "GRADL…" on a 411 dp phone.
-        Column(Modifier.fillMaxWidth().padding(horizontal = 4.dp, vertical = 5.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                TactileBox(
-                    onClick = { onOpen(StudioTab.Style) },
-                    shape = RoundedCornerShape(15.dp),
-                    background = Paper,
-                    border = BorderStroke(1.dp, Cream.copy(alpha = 0.16f)),
-                    modifier = Modifier.size(42.dp).testTag("object-thumb"),
-                ) {
-                    Text(layerGlyph(layer), color = layerStickerInk(layer), fontSize = 19.sp, fontWeight = FontWeight.Bold)
-                }
-                Spacer(Modifier.width(7.dp))
-                Column(
-                    modifier = Modifier
-                        .weight(1f)
-                        .clip(RoundedCornerShape(12.dp))
-                        .clickable { onOpen(StudioTab.Style) }
-                        .padding(horizontal = 3.dp, vertical = 2.dp),
-                ) {
-                    Text(
-                        displayName ?: layer.name,
-                        color = Cream,
-                        fontSize = 13.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                    Text(
-                        layer.kindLabel.lowercase().replaceFirstChar { it.uppercase() },
-                        color = Dim,
-                        fontSize = 9.sp,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                }
-                Spacer(Modifier.width(7.dp))
-                TactileBox(
-                    onClick = onDone,
-                    shape = RoundedCornerShape(99.dp),
-                    background = Lime,
-                    haptic = true,
-                    modifier = Modifier.height(40.dp).widthIn(min = 52.dp).testTag("object-done"),
-                ) {
-                    Text("DONE", color = Ink, fontSize = 9.5.sp, fontWeight = FontWeight.Bold, letterSpacing = 0.5.sp)
-                }
-            }
-            Spacer(Modifier.height(6.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(5.dp),
-            ) {
-                ObjectBarButton("+", "Create", onCreate, accent = true, tag = "engine-add")
-                ObjectBarButton("STYLE", "Style", { onOpen(StudioTab.Style) }, tag = "object-style")
-                ObjectBarButton("FX", "Effects", { onOpen(StudioTab.Effects) }, tag = "object-effects")
-                ObjectBarButton("INK", "Material ink", { onOpen(StudioTab.Texture) }, tag = "object-texture")
-                ObjectBarButton("LAYERS", "Layers", { onOpen(StudioTab.Layers) }, tag = "object-layers")
-            }
-        }
-    }
-}
-
-@Composable
-private fun ObjectBarButton(
-    label: String,
-    accessibility: String,
-    onClick: () -> Unit,
-    accent: Boolean = false,
-    tag: String = "object-${accessibility.lowercase()}",
-) {
-    TactileBox(
-        onClick = onClick,
-        shape = RoundedCornerShape(13.dp),
-        background = if (accent) Mint else PanelRaised,
-        haptic = true,
-        modifier = Modifier
-            .widthIn(min = if (label.length <= 1) 36.dp else 40.dp)
-            .testTag(tag)
-            .semantics {
-                contentDescription = accessibility
-                role = Role.Button
-            },
-    ) {
-        Text(
-            label,
-            color = if (accent) Ink else Cream,
-            fontSize = if (label.length <= 1) 15.sp else 9.5.sp,
-            fontWeight = FontWeight.Bold,
-            letterSpacing = if (label == "+") 0.sp else 0.2.sp,
         )
     }
 }
@@ -480,7 +362,7 @@ internal fun CreateDeck(
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(Cream.copy(alpha = 0.64f))
+                    .background(StudioInk.copy(alpha = 0.72f))
                     .clickable(onClick = onClose),
             )
             Column(
@@ -490,52 +372,53 @@ internal fun CreateDeck(
                     .offset(y = slide)
                     .alpha(fade)
                     .safeDrawingPadding()
-                    .padding(horizontal = 8.dp, vertical = 8.dp)
-                    .clip(RoundedCornerShape(topStart = 26.dp, topEnd = 26.dp))
-                    .background(Forest)
-                    .border(1.dp, Cream.copy(alpha = 0.18f), RoundedCornerShape(topStart = 26.dp, topEnd = 26.dp))
+                    .padding(horizontal = 6.dp, vertical = 6.dp)
+                    .clip(RoundedCornerShape(topStart = 22.dp, topEnd = 22.dp))
+                    .background(StudioSurface)
+                    .border(1.dp, StudioHairline, RoundedCornerShape(topStart = 22.dp, topEnd = 22.dp))
                     .clickable(
                         interactionSource = remember { MutableInteractionSource() },
                         indication = null,
                     ) { }
-                    .padding(16.dp),
+                    .padding(12.dp),
             ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Column(Modifier.weight(1f)) {
-                    Text("Make something", color = Cream, fontSize = 25.sp, fontWeight = FontWeight.SemiBold)
+                    Text("Make something", color = StudioText, fontSize = 20.sp, fontWeight = FontWeight.SemiBold)
                     Spacer(Modifier.height(2.dp))
-                    Text("Six ways in. Everything lands selected.", color = Dim, fontSize = 11.5.sp)
+                    Text("Six ways in. Everything lands selected.", color = StudioMuted, fontSize = 10.sp)
                 }
-                TactileBox(
+                CompactHitTarget(
                     onClick = onClose,
                     shape = RoundedCornerShape(99.dp),
-                    background = PanelRaised,
-                    contentPadding = PaddingValues(horizontal = 11.dp),
-                    modifier = Modifier.height(42.dp),
+                    background = StudioRaised,
+                    contentPadding = PaddingValues(horizontal = 10.dp),
+                    visualHeight = 36.dp,
+                    modifier = Modifier.testTag("create-dismiss"),
                 ) {
-                    Text("NOT NOW", color = Cream, fontSize = 9.sp, fontWeight = FontWeight.SemiBold)
+                    Text("NOT NOW", color = StudioText, fontSize = 8.5.sp, fontWeight = FontWeight.SemiBold)
                 }
             }
-            Spacer(Modifier.height(13.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                CreateCard("T", "TYPE", "Make a statement", "Type anything", 0, onType, Modifier.weight(1f))
+            Spacer(Modifier.height(8.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                CreateCard("¶", "TYPE", "Make a statement", "Type anything", 0, onType, Modifier.weight(1f))
                 CreateCard("◇", "SHAPE", "Draw a line or curve", "Start with a shape", 1, onShape, Modifier.weight(1f))
             }
-            Spacer(Modifier.height(8.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Spacer(Modifier.height(6.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 CreateCard("✿", "STICKER", "Pick a ready-made shape", "Local vector shapes", 2, onSticker, Modifier.weight(1f))
                 CreateCard("✦", "ICON", "Search 4,373 icons", "Four offline sets", 3, onIcon, Modifier.weight(1f))
             }
-            Spacer(Modifier.height(8.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Spacer(Modifier.height(6.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 CreateCard("◈", "3D", "Place the gem or ring", "A lit 3D object", 4, onModel, Modifier.weight(1f))
                 CreateCard("▧", "PHOTO", "Use a photo", "From your gallery", 5, onPhoto, Modifier.weight(1f))
             }
-            Spacer(Modifier.height(12.dp))
+            Spacer(Modifier.height(8.dp))
             Text(
                 "Nothing is permanent. Undo is always one tap away.",
-                color = Dim.copy(alpha = 0.85f),
-                fontSize = 9.5.sp,
+                color = StudioMuted,
+                fontSize = 8.5.sp,
             )
             }
         }
@@ -566,13 +449,13 @@ private fun CreateCard(
     TactileBox(
         onClick = onClick,
         shape = RoundedCornerShape(18.dp),
-        background = Paper,
-        border = BorderStroke(1.5.dp, StudioOutline),
-        shadow = 4.dp,
-        contentPadding = PaddingValues(11.dp),
+        background = StudioRaised,
+        border = BorderStroke(1.dp, StudioHairline),
+        shadow = 0.dp,
+        contentPadding = PaddingValues(9.dp),
         haptic = true,
         modifier = modifier
-            .height(124.dp)
+            .height(96.dp)
             .graphicsLayer {
                 alpha = entrance
                 scaleX = 0.93f + entrance * 0.07f
@@ -584,16 +467,16 @@ private fun CreateCard(
     ) {
         Column {
             Box(
-                modifier = Modifier.size(36.dp).clip(CircleShape).background(MintWash),
+                modifier = Modifier.size(28.dp).clip(CircleShape).background(StudioInk),
                 contentAlignment = Alignment.Center,
             ) {
-                Text(glyph, color = StudioOutline, fontSize = 19.sp, fontWeight = FontWeight.SemiBold)
+                Text(glyph, color = StudioAccent, fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
             }
-            Spacer(Modifier.height(7.dp))
-            Text(title, color = StudioOutline, fontSize = 12.sp, fontWeight = FontWeight.Bold, letterSpacing = 0.6.sp)
+            Spacer(Modifier.height(4.dp))
+            Text(title, color = StudioText, fontSize = 10.5.sp, fontWeight = FontWeight.Bold, letterSpacing = 0.6.sp)
             Spacer(Modifier.height(1.dp))
-            Text(note, color = StudioOutline, fontSize = 10.sp, fontWeight = FontWeight.Medium, lineHeight = 12.sp)
-            Text(hint, color = StudioOutline.copy(alpha = 0.52f), fontSize = 9.5.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(note, color = StudioText, fontSize = 9.sp, fontWeight = FontWeight.Medium, lineHeight = 11.sp)
+            Text(hint, color = StudioMuted, fontSize = 8.5.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
     }
 }
@@ -626,73 +509,79 @@ internal fun InspectorSheet(
     // this is a text layer. The object bar shows the shorter leaf name.
     val displayName = layer?.name ?: "The page"
     val content: @Composable ColumnScope.() -> Unit = {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(25.dp)
-                .pointerInput(Unit) {
-                    detectVerticalDragGestures(
-                        onDragStart = {
-                            dragging = true
-                            dragOffset = 0f
-                        },
-                        onVerticalDrag = { _, dy ->
-                            dragOffset = (dragOffset + dy / density.density * 0.42f).coerceIn(0f, 88f)
-                        },
-                        onDragEnd = {
-                            dragging = false
-                            if (dragOffset > 58f) onClose() else dragOffset = 0f
-                        },
-                        onDragCancel = {
-                            dragging = false
-                            dragOffset = 0f
-                        },
-                    )
-                },
-            contentAlignment = Alignment.Center,
-        ) {
-            Box(Modifier.width(46.dp).height(4.dp).clip(RoundedCornerShape(99.dp)).background(Cream.copy(alpha = 0.3f)))
+        if (layout == EngineLayout.Compact) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(18.dp)
+                    .pointerInput(Unit) {
+                        detectVerticalDragGestures(
+                            onDragStart = {
+                                dragging = true
+                                dragOffset = 0f
+                            },
+                            onVerticalDrag = { _, dy ->
+                                dragOffset = (dragOffset + dy / density.density * 0.42f).coerceIn(0f, 88f)
+                            },
+                            onDragEnd = {
+                                dragging = false
+                                if (dragOffset > 58f) onClose() else dragOffset = 0f
+                            },
+                            onDragCancel = {
+                                dragging = false
+                                dragOffset = 0f
+                            },
+                        )
+                    },
+                contentAlignment = Alignment.Center,
+            ) {
+                Box(Modifier.width(40.dp).height(3.dp).clip(RoundedCornerShape(99.dp)).background(Cream.copy(alpha = 0.3f)))
+            }
+        } else {
+            Spacer(Modifier.height(14.dp))
         }
         Row(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Column(Modifier.weight(1f)) {
-                Text("EDITING", color = Mint, fontSize = 9.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.4.sp)
+                Text("EDITING", color = StudioAccent, fontSize = 8.5.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.4.sp)
                 Text(
                     displayName,
                     color = Cream,
-                    fontSize = 17.sp,
+                    fontSize = 15.sp,
                     fontWeight = FontWeight.SemiBold,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
             }
-            TactileBox(
+            CompactHitTarget(
                 onClick = onHistory,
                 shape = RoundedCornerShape(99.dp),
                 background = PanelRaised,
-                contentPadding = PaddingValues(horizontal = 10.dp),
-                modifier = Modifier.height(40.dp),
+                contentPadding = PaddingValues(horizontal = 9.dp),
+                visualHeight = 36.dp,
+                modifier = Modifier.testTag("sheet-history"),
             ) {
-                Text("HISTORY", color = Cream, fontSize = 9.5.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 0.4.sp)
+                Text("HISTORY", color = Cream, fontSize = 8.5.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 0.4.sp)
             }
-            Spacer(Modifier.width(6.dp))
-            TactileBox(
+            Spacer(Modifier.width(5.dp))
+            CompactHitTarget(
                 onClick = {
                     doc.settle()
                     onClose()
                 },
                 shape = RoundedCornerShape(99.dp),
-                background = Lime,
-                contentPadding = PaddingValues(horizontal = 13.dp),
+                background = StudioAccent,
+                contentPadding = PaddingValues(horizontal = 11.dp),
+                visualHeight = 38.dp,
                 haptic = true,
-                modifier = Modifier.height(42.dp).testTag("sheet-done"),
+                modifier = Modifier.testTag("sheet-done"),
             ) {
-                Text("DONE", color = Ink, fontSize = 9.5.sp, fontWeight = FontWeight.Bold, letterSpacing = 0.5.sp)
+                Text("DONE", color = StudioAccentInk, fontSize = 8.5.sp, fontWeight = FontWeight.Bold, letterSpacing = 0.5.sp)
             }
         }
-        Spacer(Modifier.height(10.dp))
+        Spacer(Modifier.height(6.dp))
         EngineSegmentedControl(
             options = StudioTab.entries.map { entry ->
                 EngineSegment(
@@ -703,10 +592,11 @@ internal fun InspectorSheet(
             },
             selectedIndex = StudioTab.entries.indexOf(tab),
             onSelect = { index -> onTab(StudioTab.entries[index]) },
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp),
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp),
             description = "Inspector sections",
+            compact = true,
         )
-        Spacer(Modifier.height(8.dp))
+        Spacer(Modifier.height(6.dp))
         Box(Modifier.fillMaxWidth().weight(1f)) {
             when (tab) {
                 StudioTab.Style -> StyleTab(
@@ -728,9 +618,14 @@ internal fun InspectorSheet(
         }
     }
     if (layout == EngineLayout.Expanded) {
-        EnginePanelHost(layout = layout, title = displayName, onDismiss = onClose) {
-            content()
-        }
+        // The content's own EDITING header carries the title and the close action,
+        // so the panel host must not repeat them above it.
+        EnginePanelHost(
+            layout = layout,
+            title = displayName,
+            onDismiss = onClose,
+            showHeader = false,
+        ) { content() }
     } else {
         EngineSheet(
             title = displayName,
@@ -941,47 +836,49 @@ internal fun LayerLanded(
             .testTag("engine-notice")
             .shadow(12.dp, PebbleShape, clip = false)
             .clip(PebbleShape)
-            .background(Forest.copy(alpha = 0.98f))
-            .border(1.5.dp, Mint.copy(alpha = 0.6f), PebbleShape)
-            .padding(horizontal = 11.dp, vertical = 9.dp),
+            .background(StudioSurface.copy(alpha = 0.98f))
+            .border(1.dp, StudioHairline, PebbleShape)
+            .padding(horizontal = 9.dp, vertical = 7.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Box(Modifier.size(36.dp), contentAlignment = Alignment.Center) {
+        Box(Modifier.size(30.dp), contentAlignment = Alignment.Center) {
             Canvas(Modifier.matchParentSize()) {
                 drawCircle(
-                    color = Mint.copy(alpha = (1f - ring) * 0.55f),
+                    color = StudioAccent.copy(alpha = (1f - ring) * 0.55f),
                     radius = size.minDimension * (0.34f + ring * 0.5f),
                     style = Stroke(1.5.dp.toPx()),
                 )
             }
-            Box(Modifier.size(27.dp).clip(CircleShape).background(Mint), contentAlignment = Alignment.Center) {
-                Text("✓", color = Ink, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+            Box(Modifier.size(24.dp).clip(CircleShape).background(StudioAccent), contentAlignment = Alignment.Center) {
+                Text("✓", color = StudioAccentInk, fontSize = 11.sp, fontWeight = FontWeight.Bold)
             }
         }
-        Spacer(Modifier.width(8.dp))
+        Spacer(Modifier.width(6.dp))
         Column(Modifier.weight(1f)) {
-            Text("LAYER LANDED", color = Mint, fontSize = 9.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
-            Text(name, color = Cream, fontSize = 12.5.sp, fontWeight = FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text("LAYER LANDED", color = StudioAccent, fontSize = 8.5.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
+            Text(name, color = StudioText, fontSize = 11.sp, fontWeight = FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
-        TactileBox(
+        CompactHitTarget(
             onClick = onInspect,
             shape = RoundedCornerShape(99.dp),
-            background = PanelRaised,
-            contentPadding = PaddingValues(horizontal = 9.dp),
-            modifier = Modifier.height(38.dp).testTag("notice-inspect"),
+            background = StudioRaised,
+            contentPadding = PaddingValues(horizontal = 8.dp),
+            visualHeight = 34.dp,
+            modifier = Modifier.testTag("notice-inspect"),
         ) {
-            Text("STYLE", color = Cream, fontSize = 9.5.sp, fontWeight = FontWeight.SemiBold)
+            Text("STYLE", color = StudioText, fontSize = 8.5.sp, fontWeight = FontWeight.SemiBold)
         }
-        Spacer(Modifier.width(5.dp))
-        TactileBox(
+        Spacer(Modifier.width(4.dp))
+        CompactHitTarget(
             onClick = onDone,
             shape = RoundedCornerShape(99.dp),
-            background = Lime,
-            contentPadding = PaddingValues(horizontal = 11.dp),
+            background = StudioAccent,
+            contentPadding = PaddingValues(horizontal = 9.dp),
+            visualHeight = 36.dp,
             haptic = true,
-            modifier = Modifier.height(40.dp),
+            modifier = Modifier.testTag("notice-done"),
         ) {
-            Text("DONE", color = Ink, fontSize = 9.sp, fontWeight = FontWeight.Bold)
+            Text("DONE", color = StudioAccentInk, fontSize = 8.5.sp, fontWeight = FontWeight.Bold)
         }
     }
 }
@@ -1001,7 +898,7 @@ internal fun HudChip(
         background = when {
             !enabled -> PanelRaised.copy(alpha = 0.45f)
             warn -> Clay
-            active -> Mint
+            active -> StudioAccent
             else -> PanelRaised
         },
         contentPadding = PaddingValues(horizontal = 10.dp),
@@ -1014,7 +911,8 @@ internal fun HudChip(
             label,
             color = when {
                 !enabled -> Dim.copy(alpha = 0.5f)
-                warn || active -> Ink
+                warn -> Ink
+                active -> StudioAccentInk
                 else -> Cream
             },
             fontSize = 9.5.sp,
@@ -1027,10 +925,10 @@ internal fun HudChip(
 @Composable
 internal fun StudioSectionLabel(title: String, note: String? = null, modifier: Modifier = Modifier) {
     Row(modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-        Text(title, color = Cream, fontSize = 13.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 0.2.sp)
+        Text(title, color = Cream, fontSize = 11.5.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 0.2.sp)
         if (note != null) {
             Spacer(Modifier.weight(1f))
-            Text(note, color = Dim, fontSize = 9.5.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(note, color = Dim, fontSize = 8.5.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
     }
 }
@@ -1040,7 +938,7 @@ internal fun SheetBackgroundScrim(onClose: () -> Unit) {
     Box(
         Modifier
             .fillMaxSize()
-            .background(Cream.copy(alpha = 0.52f))
+            .background(StudioInk.copy(alpha = 0.62f))
             .clickable(onClick = onClose),
     )
 }

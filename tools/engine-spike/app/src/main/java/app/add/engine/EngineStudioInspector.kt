@@ -20,6 +20,7 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
@@ -89,47 +90,47 @@ internal fun StyleTab(
     modifier: Modifier = Modifier,
 ) {
     val scroll = rememberScrollState()
-    Column(modifier.verticalScroll(scroll).padding(horizontal = 14.dp, vertical = 12.dp)) {
+    Column(modifier.verticalScroll(scroll).padding(horizontal = 12.dp, vertical = 9.dp)) {
         if (doc.tool == Tool.Sticker) {
             StudioSectionLabel("PICK A SHAPE", "${StickerLibrary.presets.size} ready")
-            Spacer(Modifier.height(8.dp))
+            Spacer(Modifier.height(6.dp))
             StickerTray(doc)
-            Spacer(Modifier.height(18.dp))
+            Spacer(Modifier.height(14.dp))
             return@Column
         }
         if (doc.tool == Tool.Icon) {
             StudioSectionLabel("ICON", "4,373 glyphs")
-            Spacer(Modifier.height(8.dp))
+            Spacer(Modifier.height(6.dp))
             IconTray(onIcons)
-            Spacer(Modifier.height(18.dp))
+            Spacer(Modifier.height(14.dp))
             return@Column
         }
-        Spacer(Modifier.height(8.dp))
+        Spacer(Modifier.height(6.dp))
         ArtboardFieldCard(doc)
-        Spacer(Modifier.height(10.dp))
+        Spacer(Modifier.height(6.dp))
         val layer = doc.selected
         if (layer == null) {
-            Text("Nothing selected yet.", color = Cream, fontSize = 13.sp)
-            Spacer(Modifier.height(8.dp))
+            Text("Nothing selected yet.", color = Cream, fontSize = 11.5.sp)
+            Spacer(Modifier.height(6.dp))
             Text("Tap a layer, or make something new.", color = Dim, fontSize = 11.sp)
-            Spacer(Modifier.height(12.dp))
+            Spacer(Modifier.height(7.dp))
             ActionChip("MAKE SOMETHING", active = true, onClick = { doc.addText() })
             return@Column
         }
-        StudioSectionLabel("STYLE", layer.kindLabel)
+        StudioSectionLabel("LAYER", layer.kindLabel)
         Spacer(Modifier.height(6.dp))
         LayerIdentityRow(doc, layer)
         if (layer is TextLayer) {
-            Spacer(Modifier.height(10.dp))
+            Spacer(Modifier.height(6.dp))
             StudioSectionLabel("TYPE", "Words and rhythm")
             Spacer(Modifier.height(4.dp))
             TextInspector(doc, layer)
         }
-        Spacer(Modifier.height(10.dp))
+        Spacer(Modifier.height(6.dp))
         StudioSectionLabel("TRANSFORM", "Move it, size it, turn it")
         Spacer(Modifier.height(2.dp))
         TransformInspector(doc, layer)
-        Spacer(Modifier.height(10.dp))
+        Spacer(Modifier.height(6.dp))
         when (layer) {
             is VectorLayer -> {
                 StudioSectionLabel("DETAILS", "Shape and stroke")
@@ -162,11 +163,11 @@ internal fun StyleTab(
                 ImageInspector(doc, layer)
             }
         }
-        Spacer(Modifier.height(10.dp))
+        Spacer(Modifier.height(6.dp))
         MaskCallout(doc, layer, onMask)
-        Spacer(Modifier.height(10.dp))
+        Spacer(Modifier.height(6.dp))
         PaintAndBlend(doc, layer)
-        Spacer(Modifier.height(24.dp))
+        Spacer(Modifier.height(18.dp))
     }
 }
 
@@ -176,22 +177,22 @@ private fun MaskCallout(doc: EngineDocument, layer: Layer, onMask: () -> Unit) {
     TactileBox(
         onClick = onMask,
         shape = RoundedCornerShape(15.dp),
-        background = Mint.copy(alpha = 0.12f),
-        border = BorderStroke(1.2.dp, Mint.copy(alpha = 0.45f)),
-        contentPadding = PaddingValues(11.dp),
+        background = StudioAccent.copy(alpha = 0.12f),
+        border = BorderStroke(1.2.dp, StudioAccent.copy(alpha = 0.45f)),
+        contentPadding = PaddingValues(9.dp),
         haptic = true,
         modifier = Modifier.fillMaxWidth().testTag("mask-entry"),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Box(
-                modifier = Modifier.size(35.dp).clip(CircleShape).background(Mint.copy(alpha = 0.15f)),
+                modifier = Modifier.size(35.dp).clip(CircleShape).background(StudioAccent.copy(alpha = 0.15f)),
                 contentAlignment = Alignment.Center,
             ) {
-                Text("◐", color = Mint, fontSize = 18.sp)
+                Text("◐", color = StudioAccent, fontSize = 18.sp)
             }
             Spacer(Modifier.width(9.dp))
             Column(Modifier.weight(1f)) {
-                Text("MASK BRUSH", color = Mint, fontSize = 10.sp, fontWeight = FontWeight.Bold, letterSpacing = 0.8.sp)
+                Text("MASK BRUSH", color = StudioAccent, fontSize = 9.5.sp, fontWeight = FontWeight.Bold, letterSpacing = 0.8.sp)
                 Text(
                     when {
                         mask == null -> "Cut into this layer with a soft brush."
@@ -199,11 +200,11 @@ private fun MaskCallout(doc: EngineDocument, layer: Layer, onMask: () -> Unit) {
                         else -> "${mask.strokes.size} brush ${if (mask.strokes.size == 1) "stroke" else "strokes"} · keep going"
                     },
                     color = Cream,
-                    fontSize = 10.sp,
+                    fontSize = 9.5.sp,
                     lineHeight = 12.sp,
                 )
             }
-            Text("OPEN", color = Mint, fontSize = 9.sp, fontWeight = FontWeight.Bold, letterSpacing = 0.7.sp)
+            Text("OPEN", color = StudioAccent, fontSize = 9.sp, fontWeight = FontWeight.Bold, letterSpacing = 0.7.sp)
         }
     }
 }
@@ -223,7 +224,7 @@ private fun PaintAndBlend(doc: EngineDocument, layer: Layer) {
             .clip(CardShape)
             .background(PanelRaised)
             .border(1.dp, Rule, CardShape)
-            .padding(10.dp),
+            .padding(8.dp),
     ) {
         TactileBox(
             onClick = { open = !open },
@@ -234,7 +235,7 @@ private fun PaintAndBlend(doc: EngineDocument, layer: Layer) {
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Column(Modifier.weight(1f)) {
-                    Text("PAINT & BLEND", color = Cream, fontSize = 11.5.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 0.7.sp)
+                    Text("PAINT & BLEND", color = Cream, fontSize = 10.5.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 0.7.sp)
                     Text(
                         "${paint?.label ?: "LAYER COLOUR"} · ${layer.style.blend.label}",
                         color = Dim,
@@ -243,7 +244,7 @@ private fun PaintAndBlend(doc: EngineDocument, layer: Layer) {
                         overflow = TextOverflow.Ellipsis,
                     )
                 }
-                Text(if (open) "▴" else "▾", color = Mint, fontSize = 12.sp)
+                Text(if (open) "▴" else "▾", color = Mint, fontSize = 11.sp)
             }
         }
         AnimatedVisibility(
@@ -340,7 +341,7 @@ private fun PaintAndBlend(doc: EngineDocument, layer: Layer) {
                     Text(
                         layer.style.blend.label,
                         color = Cream,
-                        fontSize = 10.sp,
+                        fontSize = 9.5.sp,
                         fontWeight = FontWeight.SemiBold,
                         maxLines = 1,
                         modifier = Modifier.weight(1f),
@@ -359,7 +360,6 @@ private fun PaintAndBlend(doc: EngineDocument, layer: Layer) {
                 Spacer(Modifier.height(4.dp))
                 Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                     ActionChip("CLIP TO BELOW", active = layer.style.clipToBelow) { doc.toggleClip() }
-                    ActionChip("SAFE AREA", active = doc.safeArea) { doc.safeArea = !doc.safeArea }
                 }
                 Spacer(Modifier.height(4.dp))
                 InfoLine("PAINT AND BLEND STAY EDITABLE · NOTHING IS FLATTENED")
@@ -378,7 +378,7 @@ private fun ArtboardFieldCard(doc: EngineDocument) {
             .clip(CardShape)
             .background(PanelRaised)
             .border(1.dp, Rule, CardShape)
-            .padding(10.dp),
+            .padding(8.dp),
     ) {
         TactileBox(
             onClick = { open = !open },
@@ -389,7 +389,7 @@ private fun ArtboardFieldCard(doc: EngineDocument) {
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Column(Modifier.weight(1f)) {
-                    Text("ARTBOARD FIELD", color = Cream, fontSize = 11.5.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 0.7.sp)
+                    Text("ARTBOARD FIELD", color = Cream, fontSize = 10.5.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 0.7.sp)
                     Text(
                         field?.let { "${it.colors.size} COLOURS · ${if (it.animated) "FLOWING" else "STILL"}" }
                             ?: "CLEAN PAPER · ADD A FLOW FIELD",
@@ -397,7 +397,7 @@ private fun ArtboardFieldCard(doc: EngineDocument) {
                         fontSize = 9.5.sp,
                     )
                 }
-                Text(if (open) "▴" else "▾", color = Mint, fontSize = 12.sp)
+                Text(if (open) "▴" else "▾", color = Mint, fontSize = 11.sp)
             }
         }
         AnimatedVisibility(visible = open) {
@@ -588,7 +588,7 @@ private fun FieldPreview(doc: EngineDocument, field: FieldSpec, target: FieldTar
         field.colors.forEachIndexed { i, spot ->
             val center = Offset(spot.x * size.width, spot.y * size.height)
             drawCircle(
-                color = if (i == active) Lime else Color.White,
+                color = if (i == active) StudioAccent else Color.White,
                 radius = (if (i == active) 12.dp else 9.dp).toPx(),
                 center = center,
                 style = Stroke(2f),
@@ -666,7 +666,7 @@ internal fun FxTab(doc: EngineDocument, modifier: Modifier = Modifier) {
     val layer = doc.selected
     if (layer == null) {
         Column(modifier.padding(16.dp)) {
-            Text("Pick a layer first.", color = Cream, fontSize = 13.sp)
+            Text("Pick a layer first.", color = Cream, fontSize = 11.5.sp)
         }
         return
     }
@@ -675,13 +675,13 @@ internal fun FxTab(doc: EngineDocument, modifier: Modifier = Modifier) {
     var fineTune by remember(layer.id) { mutableStateOf(false) }
     val haptics = LocalHapticFeedback.current
     val reduceMotion = prefersReducedMotion()
-    Column(modifier.verticalScroll(rememberScrollState()).padding(horizontal = 14.dp, vertical = 12.dp)) {
+    Column(modifier.verticalScroll(rememberScrollState()).padding(horizontal = 12.dp, vertical = 9.dp)) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            Text("EFFECTS", color = Cream, fontSize = 13.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 0.2.sp)
+            Text("EFFECTS", color = Cream, fontSize = 11.5.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 0.2.sp)
             Spacer(Modifier.weight(1f))
             Text(if (fx.enabled) "LIVE" else "BYPASSED", color = Dim, fontSize = 9.5.sp, letterSpacing = 0.4.sp)
             Spacer(Modifier.width(8.dp))
-            TactileBox(
+            CompactHitTarget(
                 onClick = {
                     val choices = EffectPreset.entries.filter { it.result(fx) != fx }
                     val recipe = choices.ifEmpty { EffectPreset.entries }.random()
@@ -689,10 +689,10 @@ internal fun FxTab(doc: EngineDocument, modifier: Modifier = Modifier) {
                     doc.applyEffectsPreset("Surprise ${recipe.label}", recipe.result(fx))
                 },
                 shape = RoundedCornerShape(99.dp),
-                background = Lime,
+                background = StudioAccent,
                 contentPadding = PaddingValues(horizontal = 10.dp),
-                haptic = false,
-                modifier = Modifier.height(38.dp).testTag("fx-surprise"),
+                visualHeight = 34.dp,
+                modifier = Modifier.testTag("fx-surprise"),
             ) {
                 Text("SURPRISE ME", color = Ink, fontSize = 9.5.sp, fontWeight = FontWeight.Bold, letterSpacing = 0.3.sp)
             }
@@ -701,10 +701,12 @@ internal fun FxTab(doc: EngineDocument, modifier: Modifier = Modifier) {
         Text(
             "Start with a recipe. Open one card to change the dials.",
             color = Dim,
-            fontSize = 10.5.sp,
+            fontSize = 9.5.sp,
             lineHeight = 13.sp,
         )
-        Spacer(Modifier.height(10.dp))
+        Spacer(Modifier.height(6.dp))
+        BoxWithConstraints(Modifier.fillMaxWidth()) {
+        val cardWidth = (maxWidth - 20.dp) / 5f
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(5.dp),
@@ -716,19 +718,19 @@ internal fun FxTab(doc: EngineDocument, modifier: Modifier = Modifier) {
                         doc.applyEffectsPreset(preset.label, preset.result(fx))
                     },
                     shape = RoundedCornerShape(14.dp),
-                    background = Paper,
+                    background = Panel,
                     border = BorderStroke(1.dp, StudioOutline.copy(alpha = 0.16f)),
                     shadow = 3.dp,
                     haptic = false,
-                    modifier = Modifier.weight(1f).height(67.dp),
-                    contentPadding = PaddingValues(7.dp),
+                    modifier = Modifier.width(cardWidth).height(56.dp),
+                    contentPadding = PaddingValues(6.dp),
                     contentAlignment = Alignment.TopStart,
                 ) {
                     Column {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Box(Modifier.size(7.dp).clip(CircleShape).background(preset.dot))
                             Spacer(Modifier.width(4.dp))
-                            Text(preset.label, color = StudioOutline, fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                            Text(preset.label, color = StudioOutline, fontSize = 9.5.sp, fontWeight = FontWeight.Bold)
                         }
                         Spacer(Modifier.height(4.dp))
                         Text(
@@ -742,23 +744,28 @@ internal fun FxTab(doc: EngineDocument, modifier: Modifier = Modifier) {
                 }
             }
         }
-        Spacer(Modifier.height(12.dp))
+        }
+        Spacer(Modifier.height(7.dp))
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(14.dp))
                 .background(PanelRaised)
                 .border(1.dp, Rule, RoundedCornerShape(14.dp))
-                .padding(horizontal = 11.dp, vertical = 9.dp),
+                .padding(horizontal = 9.dp, vertical = 7.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Column(Modifier.weight(1f)) {
-                Text("THE WHOLE STACK", color = Cream, fontSize = 10.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 0.5.sp)
+                Text("THE WHOLE STACK", color = Cream, fontSize = 9.5.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 0.5.sp)
                 Text(if (fx.enabled) "All effects are on." else "Bypassed — the clean layer is showing.", color = Dim, fontSize = 9.5.sp)
             }
-            MiniSwitch(on = fx.enabled) { doc.toggleEffects() }
+            MiniSwitch(
+                on = fx.enabled,
+                tag = "fx-master-switch",
+                onToggle = { doc.toggleEffects() },
+            )
         }
-        Spacer(Modifier.height(10.dp))
+        Spacer(Modifier.height(6.dp))
         EffectCard(
             title = "Grade",
             glyph = EffectKind.Grade.glyph,
@@ -768,12 +775,13 @@ internal fun FxTab(doc: EngineDocument, modifier: Modifier = Modifier) {
             onExpand = { openCard = if (openCard == EffectKind.Grade) null else EffectKind.Grade },
             onToggle = { doc.toggleGrade() },
         ) {
-            TactileBox(
+            CompactHitTarget(
                 onClick = { fineTune = !fineTune },
                 shape = RoundedCornerShape(10.dp),
                 background = Cream.copy(alpha = 0.08f),
                 contentPadding = PaddingValues(horizontal = 10.dp),
-                modifier = Modifier.height(40.dp),
+                visualHeight = 40.dp,
+                modifier = Modifier.testTag("fx-fine-tune"),
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text("FINE TUNE", color = StudioOutline, fontSize = 9.sp, fontWeight = FontWeight.Bold, letterSpacing = 0.5.sp)
@@ -801,7 +809,7 @@ internal fun FxTab(doc: EngineDocument, modifier: Modifier = Modifier) {
                 }
             }
         }
-        Spacer(Modifier.height(7.dp))
+        Spacer(Modifier.height(5.dp))
         EffectCard(
             title = "Blur",
             glyph = EffectKind.Blur.glyph,
@@ -817,7 +825,7 @@ internal fun FxTab(doc: EngineDocument, modifier: Modifier = Modifier) {
         ) {
             CreamSlider("Blur amount", fx.blur, 0f..24f, { "${it.toInt()} px" }) { doc.setBlur(it) }
         }
-        Spacer(Modifier.height(7.dp))
+        Spacer(Modifier.height(5.dp))
         EffectCard(
             title = "Grain",
             glyph = EffectKind.Grain.glyph,
@@ -833,7 +841,7 @@ internal fun FxTab(doc: EngineDocument, modifier: Modifier = Modifier) {
         ) {
             CreamSlider("Grain amount", fx.grain, 0f..1f, { "${(it * 100).toInt()}%" }) { doc.setGrain(it) }
         }
-        Spacer(Modifier.height(7.dp))
+        Spacer(Modifier.height(5.dp))
         EffectCard(
             title = "Halftone",
             glyph = EffectKind.Halftone.glyph,
@@ -849,7 +857,7 @@ internal fun FxTab(doc: EngineDocument, modifier: Modifier = Modifier) {
         ) {
             CreamSlider("Dot size", fx.halftone, 0f..1f, { "${(it * 100).toInt()}%" }) { doc.setHalftone(it) }
         }
-        Spacer(Modifier.height(7.dp))
+        Spacer(Modifier.height(5.dp))
         EffectCard(
             title = "Duotone",
             glyph = EffectKind.Duotone.glyph,
@@ -874,18 +882,18 @@ internal fun FxTab(doc: EngineDocument, modifier: Modifier = Modifier) {
                 Text("INK / LIGHT", color = StudioOutline.copy(alpha = 0.45f), fontSize = 9.5.sp, fontWeight = FontWeight.Bold)
             }
         }
-        Spacer(Modifier.height(9.dp))
+        Spacer(Modifier.height(7.dp))
         InfoLine("EFFECTS STACK ON THE ORIGINAL · NOTHING IS DESTRUCTIVE")
         Spacer(Modifier.height(22.dp))
     }
 }
 
 private enum class EffectPreset(val label: String, val note: String, val dot: Color) {
-    Clean("Clean", "True colour", Mint),
-    Film("Film", "Soft contrast", Lime),
-    Print("Print", "Halftone ink", Clay),
-    Faded("Faded", "Low contrast", Dim),
-    Punch("Punch", "Bright + bold", Lime),
+    Clean("Clean", "True colour", StudioAccent),
+    Film("Film", "Soft contrast", StudioSelection),
+    Print("Print", "Halftone ink", StudioText),
+    Faded("Faded", "Low contrast", StudioMuted),
+    Punch("Punch", "Bright + bold", StudioWarn),
     ;
 
     fun result(current: LayerEffects): LayerEffects = when (this) {
@@ -994,29 +1002,29 @@ private fun EffectCard(
     TactileBox(
         onClick = onExpand,
         shape = RoundedCornerShape(17.dp),
-        background = Paper,
-        border = BorderStroke(1.2.dp, if (expanded) Mint else StudioOutline.copy(alpha = 0.14f)),
+        background = Panel,
+        border = BorderStroke(1.2.dp, if (expanded) StudioSelection else StudioOutline.copy(alpha = 0.14f)),
         shadow = if (expanded) 5.dp else 3.dp,
-        contentPadding = PaddingValues(11.dp),
+        contentPadding = PaddingValues(9.dp),
         modifier = Modifier.fillMaxWidth(),
         contentAlignment = Alignment.TopStart,
     ) {
         Column {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Box(
-                    modifier = Modifier.size(35.dp).clip(CircleShape).background(if (on) MintWash else Cream.copy(alpha = 0.05f)),
+                    modifier = Modifier.size(30.dp).clip(CircleShape).background(if (on) MintWash else Cream.copy(alpha = 0.05f)),
                     contentAlignment = Alignment.Center,
                 ) {
-                    Text(glyph, color = if (on) StudioOutline else StudioOutline.copy(alpha = 0.38f), fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
+                    Text(glyph, color = if (on) StudioOutline else StudioOutline.copy(alpha = 0.38f), fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
                 }
                 Spacer(Modifier.width(9.dp))
                 Column(Modifier.weight(1f)) {
-                    Text(title, color = StudioOutline, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+                    Text(title, color = StudioOutline, fontSize = 11.sp, fontWeight = FontWeight.Bold)
                     Text(summary, color = StudioOutline.copy(alpha = 0.55f), fontSize = 9.5.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 }
                 Text(if (expanded) "▴" else "▾", color = StudioOutline.copy(alpha = 0.42f), fontSize = 11.sp)
                 Spacer(Modifier.width(7.dp))
-                MiniSwitch(on = on, onToggle = onToggle)
+                MiniSwitch(on = on, onToggle = onToggle, tag = "fx-switch-${title.lowercase()}")
             }
             AnimatedVisibility(
                 visible = expanded,
@@ -1049,16 +1057,16 @@ private fun CreamSlider(
                 letterSpacing = 0.55.sp,
                 modifier = Modifier.weight(1f),
             )
-            Text(display(value), color = StudioOutline, fontSize = 10.sp, fontWeight = FontWeight.SemiBold)
+            Text(display(value), color = StudioOutline, fontSize = 9.5.sp, fontWeight = FontWeight.SemiBold)
         }
         Slider(
             value = value,
             onValueChange = onChange,
             valueRange = range,
-            modifier = Modifier.fillMaxWidth().height(31.dp),
+            modifier = Modifier.fillMaxWidth().height(28.dp),
             colors = SliderDefaults.colors(
-                thumbColor = Mint,
-                activeTrackColor = Mint,
+                thumbColor = StudioAccent,
+                activeTrackColor = StudioAccent,
                 inactiveTrackColor = StudioOutline.copy(alpha = 0.12f),
             ),
         )
@@ -1066,7 +1074,7 @@ private fun CreamSlider(
 }
 
 @Composable
-private fun MiniSwitch(on: Boolean, onToggle: () -> Unit) {
+private fun MiniSwitch(on: Boolean, onToggle: () -> Unit, tag: String? = null) {
     val haptics = LocalHapticFeedback.current
     val reduceMotion = prefersReducedMotion()
     val knob by animateDpAsState(
@@ -1076,21 +1084,28 @@ private fun MiniSwitch(on: Boolean, onToggle: () -> Unit) {
     )
     Box(
         modifier = Modifier
-            .width(46.dp)
-            .height(28.dp)
-            .clip(RoundedCornerShape(99.dp))
-            .background(if (on) Mint else StudioOutline.copy(alpha = 0.16f))
+            .size(48.dp)
+            .then(if (tag != null) Modifier.testTag(tag) else Modifier)
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null,
             ) {
                 haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                 onToggle()
-            }
-            .padding(3.dp),
-        contentAlignment = Alignment.CenterStart,
+            },
+        contentAlignment = Alignment.Center,
     ) {
-        Box(Modifier.offset(x = knob).size(22.dp).clip(CircleShape).background(if (on) Ink else Paper))
+        Box(
+            modifier = Modifier
+                .width(46.dp)
+                .height(28.dp)
+                .clip(RoundedCornerShape(99.dp))
+                .background(if (on) StudioAccent else StudioOutline.copy(alpha = 0.16f))
+                .padding(3.dp),
+            contentAlignment = Alignment.CenterStart,
+        ) {
+            Box(Modifier.offset(x = knob).size(22.dp).clip(CircleShape).background(if (on) StudioAccentInk else Paper))
+        }
     }
 }
 
@@ -1105,7 +1120,7 @@ internal fun LayersTab(doc: EngineDocument, modifier: Modifier = Modifier) {
     var multiSelect by remember { mutableStateOf(false) }
     val selected = doc.selected
     val rows = doc.layers.visibleRows(expanded)
-    Column(modifier.padding(horizontal = 14.dp, vertical = 12.dp)) {
+    Column(modifier.padding(horizontal = 12.dp, vertical = 9.dp)) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             StudioSectionLabel("YOUR STACK", "${rows.size} ROWS", Modifier.weight(1f))
             Box(Modifier.testTag("layers-multi")) {
@@ -1120,9 +1135,9 @@ internal fun LayersTab(doc: EngineDocument, modifier: Modifier = Modifier) {
             if (multiSelect) "Tap cards to add or remove them, then GROUP."
             else "Front of the page is at the top. Hold a card to move it.",
             color = Dim,
-            fontSize = 10.sp,
+            fontSize = 9.5.sp,
         )
-        Spacer(Modifier.height(8.dp))
+        Spacer(Modifier.height(6.dp))
         Column(
             modifier = Modifier.weight(1f).verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(6.dp),
@@ -1176,7 +1191,7 @@ internal fun LayersTab(doc: EngineDocument, modifier: Modifier = Modifier) {
             Text("HOLD + DRAG TO REORDER", color = Dim.copy(alpha = 0.65f), fontSize = 9.5.sp, letterSpacing = 0.5.sp)
         }
         if (selected != null) {
-            Spacer(Modifier.height(9.dp))
+            Spacer(Modifier.height(7.dp))
             StudioSectionLabel("THIS LAYER", selected.name)
             Spacer(Modifier.height(6.dp))
             Row(
@@ -1213,13 +1228,13 @@ private fun LayerCard(
     TactileBox(
         onClick = onSelect,
         shape = RoundedCornerShape(16.dp),
-        background = if (selected) MintWash else Paper,
-        border = BorderStroke(1.4.dp, if (selected) Mint else StudioOutline.copy(alpha = 0.14f)),
+        background = if (selected) MintWash else Panel,
+        border = BorderStroke(1.4.dp, if (selected) StudioSelection else StudioOutline.copy(alpha = 0.14f)),
         shadow = 0.dp,
-        contentPadding = PaddingValues(horizontal = 9.dp, vertical = 8.dp),
+        contentPadding = PaddingValues(horizontal = 7.dp, vertical = 6.dp),
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = (depth * 14).dp)
+            .padding(start = (depth * 12).dp)
             .offset(y = if (selected) (-2).dp else 0.dp)
             .graphicsLayer {
                 translationX = if (dragging) 5.dp.toPx() else 0f
@@ -1262,7 +1277,7 @@ private fun LayerCard(
             }
             Box(
                 modifier = Modifier
-                    .size(38.dp)
+                    .size(32.dp)
                     .clip(RoundedCornerShape(12.dp))
                     .background(layerStickerWash(layer))
                     .testTag("layer-thumb-${layer.id}"),
@@ -1275,7 +1290,7 @@ private fun LayerCard(
                 Text(
                     layer.name,
                     color = StudioOutline,
-                    fontSize = 12.sp,
+                    fontSize = 11.sp,
                     fontWeight = FontWeight.SemiBold,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
@@ -1299,10 +1314,10 @@ private fun LayerCard(
                         role = Role.Button
                     },
             ) {
-                Text(if (layer.visible) "◉" else "○", color = if (layer.visible) Mint else StudioOutline.copy(alpha = 0.35f), fontSize = 15.sp)
+                Text(if (layer.visible) "◉" else "○", color = if (layer.visible) StudioSelection else StudioOutline.copy(alpha = 0.35f), fontSize = 13.sp)
             }
             Spacer(Modifier.width(4.dp))
-            Text("⠿", color = StudioOutline.copy(alpha = 0.3f), fontSize = 16.sp)
+            Text("⠿", color = StudioOutline.copy(alpha = 0.3f), fontSize = 14.sp)
         }
     }
 }

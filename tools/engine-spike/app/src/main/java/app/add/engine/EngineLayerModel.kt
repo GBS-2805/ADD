@@ -5,13 +5,17 @@ package app.add.engine
  * document's history and commands lets both sides be tested without Compose.
  */
 
-enum class Tool(val label: String, val glyph: String) {
-    Select("Select", "V"),
-    Vector("Vector", "A"),
-    Type("Type", "T"),
-    Icon("Icon", "I"),
-    Sticker("Sticker", "S"),
-    Model("3D", "3"),
+/**
+ * The dock shows the label and a one- or two-word [hint] so a bare glyph and a
+ * single noun cannot be mistaken for another tool.
+ */
+enum class Tool(val label: String, val glyph: String, val hint: String) {
+    Select("Select", "↖", "MOVE"),
+    Vector("Vector", "◇", "DRAW"),
+    Type("Type", "¶", "SELECT TEXT"),
+    Icon("Icon", "✦", "BROWSE"),
+    Sticker("Sticker", "✿", "SHAPES"),
+    Model("3D", "◈", "MODELS"),
 }
 
 enum class TextAlign { Left, Center, Right }

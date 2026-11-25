@@ -3,6 +3,7 @@ package app.add.engine
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertHasClickAction
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.click
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
@@ -13,7 +14,9 @@ import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTouchInput
+import com.github.takahirom.roborazzi.ExperimentalRoborazziApi
 import com.github.takahirom.roborazzi.captureRoboImage
+import com.github.takahirom.roborazzi.captureScreenRoboImage
 import java.io.File
 import org.junit.AfterClass
 import org.junit.BeforeClass
@@ -53,6 +56,14 @@ class EngineFrameCaptureTest {
         val dir = File(System.getenv("ENGINE_RENDER_OUT") ?: "build/engine-render")
         dir.mkdirs()
         compose.onRoot().captureRoboImage(File(dir, name).absolutePath)
+    }
+
+    /** The page menu is a popup window, so it needs the whole-screen capture. */
+    @OptIn(ExperimentalRoborazziApi::class)
+    private fun captureScreen(name: String) {
+        val dir = File(System.getenv("ENGINE_RENDER_OUT") ?: "build/engine-render")
+        dir.mkdirs()
+        captureScreenRoboImage(File(dir, name).absolutePath)
     }
 
     @Test
@@ -166,12 +177,31 @@ class EngineFrameCaptureTest {
         capture("engine-studio-texture.png")
 
         // A first-party plugin on the same panel surface.
-        compose.onNodeWithTag("bmo-plugins").performScrollTo().performClick()
+        compose.onNodeWithTag("bmo-plugins").performClick()
         compose.waitForIdle()
+        // The shelf itself: RUN and OPEN must stay distinguishable after the restyle.
+        capture("engine-studio-plugins.png")
         compose.onNodeWithTag("bmo-plugin-tone").performClick()
         compose.waitForIdle()
         capture("bmo-plugin.png")
         capture("bmo-compact-plugin.png")
+    }
+
+    @Test
+    @Config(sdk = [35], qualifiers = "w360dp-h800dp-xxhdpi")
+    fun captureNarrowDock() {
+        compose.waitForIdle()
+        capture("bmo-narrow.png")
+    }
+
+    @Test
+    @Config(sdk = [35], qualifiers = "w360dp-h800dp-xxhdpi")
+    fun capturePageChipMenu() {
+        compose.waitForIdle()
+        compose.onNodeWithTag("bmo-page-chip").performClick()
+        compose.waitForIdle()
+        compose.onNodeWithText("Show safe area").assertIsDisplayed()
+        captureScreen("bmo-page-menu.png")
     }
 
     @Test
@@ -180,7 +210,7 @@ class EngineFrameCaptureTest {
         compose.waitForIdle()
         capture("bmo-expanded.png")
 
-        compose.onNodeWithTag("bmo-add").performScrollTo().performClick()
+        compose.onNodeWithTag("bmo-add").performClick()
         compose.waitForIdle()
         compose.onNodeWithTag("create-type").performClick()
         compose.waitForIdle()

@@ -3,7 +3,7 @@ package app.add.engine
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Typography
-import androidx.compose.material.lightColors
+import androidx.compose.material.darkColors
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
@@ -36,19 +36,19 @@ private val SpikeTypography = Typography(
 @Composable
 fun EngineTheme(content: @Composable () -> Unit) {
     MaterialTheme(
-        colors = lightColors(
+        colors = darkColors(
             primary = Mint,
-            primaryVariant = Lime,
+            primaryVariant = StudioAccent,
             secondary = Clay,
             secondaryVariant = Clay,
             background = Ink,
             surface = Panel,
             error = Clay,
-            onPrimary = Paper,
-            onSecondary = Paper,
+            onPrimary = StudioAccentInk,
+            onSecondary = Ink,
             onBackground = Cream,
             onSurface = Cream,
-            onError = Paper,
+            onError = Ink,
         ),
         typography = SpikeTypography,
         content = content,
@@ -58,6 +58,6 @@ fun EngineTheme(content: @Composable () -> Unit) {
 /** Shared timing for the chrome: quick press, springy expansion, gentle sheet. */
 object StudioMotion {
     const val PressScale = 0.96f
-    const val SheetFraction = 0.66f
+    const val SheetFraction = 0.58f
     const val StaggerMillis = 25L
 }

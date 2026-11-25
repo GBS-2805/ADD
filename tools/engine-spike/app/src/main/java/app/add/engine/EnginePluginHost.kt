@@ -40,9 +40,9 @@ fun EnginePluginHost(
             modifier = Modifier.fillMaxWidth().padding(horizontal = 14.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text(plugin.glyph, color = Mint, fontSize = 18.sp)
+            Text(plugin.glyph, color = StudioAccent, fontSize = 18.sp)
             Spacer(Modifier.weight(1f))
-            Text("RUNNING", color = Mint, fontSize = 8.sp, fontWeight = FontWeight.Bold)
+            Text("RUNNING", color = StudioAccent, fontSize = 8.sp, fontWeight = FontWeight.Bold)
             Spacer(Modifier.padding(horizontal = 4.dp))
             Text(
                 "HIDE",
@@ -59,12 +59,12 @@ fun EnginePluginHost(
             Spacer(Modifier.padding(horizontal = 2.dp))
             Text(
                 "CLOSE",
-                color = Ink,
+                color = StudioAccentInk,
                 fontSize = 9.sp,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier
                     .clip(RoundedCornerShape(10.dp))
-                    .background(Lime)
+                    .background(StudioAccent)
                     .clickable(onClick = onClose)
                     .padding(horizontal = 10.dp, vertical = 8.dp)
                     .testTag("bmo-plugin-close"),

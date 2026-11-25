@@ -83,6 +83,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -107,71 +111,6 @@ import kotlinx.coroutines.launch
  * Inspector bodies, panels and their shared property controls. This is the
  * detail-side surface; the shell owns placement and dismissal.
  */
-
-@Composable
-private fun Inspector(doc: EngineDocument, handle: SceneHandle, onIcons: () -> Unit, modifier: Modifier = Modifier) {
-    Column(modifier.verticalScroll(rememberScrollState()).padding(10.dp)) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Text("INSPECT", color = Cream, fontSize = 11.sp, letterSpacing = 1.1.sp, fontWeight = FontWeight.SemiBold)
-            Spacer(Modifier.weight(1f))
-            Text(doc.selected?.kindLabel ?: "NONE", color = Dim, fontSize = 8.sp, maxLines = 1)
-        }
-        Spacer(Modifier.height(7.dp))
-        if (doc.tool == Tool.Sticker) {
-            StickerTray(doc)
-        } else if (doc.tool == Tool.Icon) {
-            IconTray(onIcons)
-        } else {
-            doc.selected?.let { layer -> LayerIdentityRow(doc, layer); Spacer(Modifier.height(6.dp)) }
-            when (val layer = doc.selected) {
-                null -> Column {
-                    Text("Nothing selected.", color = Dim, fontSize = 9.sp)
-                    Spacer(Modifier.height(5.dp))
-                    ActionChip("ADD TEXT", active = true, onClick = { doc.addText() })
-                }
-                is VectorLayer -> {
-                    TransformInspector(doc, layer)
-                    VectorInspector(doc, layer)
-                }
-                is TextLayer -> {
-                    TransformInspector(doc, layer)
-                    TextInspector(doc, layer)
-                }
-                is IconLayer -> {
-                    TransformInspector(doc, layer)
-                    IconInspector(doc, layer, onIcons)
-                }
-                is ModelLayer -> {
-                    TransformInspector(doc, layer)
-                    ModelInspector(doc, layer, handle)
-                }
-                is ImageLayer -> {
-                    TransformInspector(doc, layer)
-                    ImageInspector(doc, layer)
-                }
-                is GroupLayer -> {
-                    TransformInspector(doc, layer)
-                    Spacer(Modifier.height(6.dp))
-                    Text(
-                        "${layer.children.size} LAYERS · ${if (layer.scaleX == 1f && layer.scaleY == 1f) "UNSCALED" else "SCALED"}",
-                        color = Dim,
-                        fontSize = 8.sp,
-                    )
-                    Spacer(Modifier.height(6.dp))
-                    Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                        ActionChip("ENTER GROUP", active = true, onClick = { doc.enterGroup() })
-                        ActionChip("UNGROUP", active = false, onClick = { doc.ungroupSelection() })
-                    }
-                }
-            }
-            doc.selected?.let { layer ->
-                Spacer(Modifier.height(6.dp))
-                MotionInspector(doc, layer)
-                CompositeInspector(doc, layer)
-            }
-        }
-    }
-}
 
 @Composable
 internal fun LayerIdentityRow(doc: EngineDocument, layer: Layer) {
@@ -286,32 +225,6 @@ internal fun TransformInspector(doc: EngineDocument, layer: Layer) {
         }
     )
     Spacer(Modifier.height(4.dp))
-}
-
-@Composable
-internal fun MotionInspector(doc: EngineDocument, layer: Layer) {
-    val path = doc.motion[layer.id]
-    Text("MOTION PATH", color = Cream, fontSize = 9.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 0.8.sp)
-    Spacer(Modifier.height(4.dp))
-    if (path == null) {
-        ActionChip("ADD PATH", active = true, onClick = { doc.createMotionPath(layer.id) })
-        Spacer(Modifier.height(3.dp))
-        InfoLine("A PATH STARTS AT THE LAYER CENTRE · DRAG ITS FOUR DOTS")
-    } else {
-        Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-            ActionChip(
-                label = if (doc.playingLayerId == layer.id) "STOP" else "PLAY PATH",
-                active = doc.playingLayerId == layer.id,
-                onClick = {
-                    if (doc.playingLayerId == layer.id) doc.stopMotion() else doc.playMotion(layer.id)
-                },
-            )
-            ActionChip("RESET PATH", onClick = { doc.resetMotionPath(layer.id) })
-            ActionChip("CLEAR", warn = true, onClick = { doc.clearMotionPath(layer.id) })
-        }
-        Spacer(Modifier.height(3.dp))
-        InfoLine("DRAG THE CURVE DOTS · THE LAYER KEEPS ITS CENTRE")
-    }
 }
 
 @Composable
@@ -803,212 +716,6 @@ internal fun ModelInspector(
     Actions(doc)
 }
 
-/**
- * The compositing controls every layer shares: its paint, blend, mask, clip and
- * non-destructive effect stack. They sit under the kind-specific inspector so a
- * gradient fill and a Difference blend are reachable without a second screen.
- */
-@Composable
-private fun CompositeInspector(doc: EngineDocument, layer: Layer) {
-    // The shared compositing stack is a wall of advanced controls. It stays closed on
-    // first open so the type/vector controls above it are not followed by a cut row;
-    // the disclosure names the live blend so the state is still readable.
-    var open by remember(layer.id) { mutableStateOf(false) }
-    Spacer(Modifier.height(9.dp))
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .testTag("composite-toggle")
-            .clip(RoundedCornerShape(6.dp))
-            .clickable { open = !open }
-            .padding(vertical = 4.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Text("COMPOSITE", color = Cream, fontSize = 8.sp, letterSpacing = 1.1.sp, fontWeight = FontWeight.SemiBold)
-        Spacer(Modifier.weight(1f))
-        Text(layer.style.blend.label, color = Mint, fontSize = 7.sp, maxLines = 1)
-        Spacer(Modifier.width(6.dp))
-        Text(if (open) "▴" else "▾", color = Mint, fontSize = 9.sp)
-    }
-    if (!open) return
-    val layerPaint = when (layer) {
-        is VectorLayer -> layer.paint
-        is TextLayer -> layer.paint
-        else -> null
-    }
-    if (layer is VectorLayer || layer is TextLayer) {
-        Spacer(Modifier.height(3.dp))
-        Row(
-            modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
-            horizontalArrangement = Arrangement.spacedBy(4.dp),
-        ) {
-            PaintKind.entries.forEach { kind ->
-                ActionChip(
-                    label = kind.label,
-                    active = when (val paint = layerPaint) {
-                        null -> kind == PaintKind.Solid
-                        is PaintSpec.Solid -> kind == PaintKind.Solid
-                        is PaintSpec.Gradient -> paint.kind == kind
-                        is PaintSpec.Image -> kind == PaintKind.Image
-                        is PaintSpec.Pattern -> kind == PaintKind.Pattern
-                        is PaintSpec.Field -> false
-                    },
-                    onClick = { doc.setPaintKind(kind) },
-                )
-            }
-            ActionChip(
-                label = "FIELD",
-                active = layerPaint is PaintSpec.Field,
-                onClick = { doc.setFieldPreset(FieldTarget.Layer, FieldPresets.all.first().field) },
-            )
-        }
-        (layerPaint as? PaintSpec.Gradient)?.let { gradient ->
-            GradientStops(doc, layer.id, gradient)
-        }
-        (layerPaint as? PaintSpec.Image)?.let { image ->
-            val photos = doc.layers.filterIsInstance<ImageLayer>()
-            Spacer(Modifier.height(3.dp))
-            if (photos.isEmpty()) {
-                InfoLine("NO PHOTO IN THE DOCUMENT TO FILL FROM")
-            } else {
-                Row(
-                    modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
-                    horizontalArrangement = Arrangement.spacedBy(4.dp),
-                ) {
-                    photos.forEach { photo ->
-                        ActionChip(
-                            label = photo.name,
-                            active = photo.path == image.path,
-                            onClick = { doc.setPaintImage(photo.path, image.fill) },
-                        )
-                    }
-                }
-                Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                    ActionChip("FILL FRAME", active = image.fill, onClick = { doc.setPaintImageFill(true) })
-                    ActionChip("FIT INSIDE", active = !image.fill, onClick = { doc.setPaintImageFill(false) })
-                }
-            }
-        }
-        (layerPaint as? PaintSpec.Field)?.let { field ->
-            FieldEditor(doc, field.field, FieldTarget.Layer)
-        }
-        (layerPaint as? PaintSpec.Pattern)?.let { pattern ->
-            Spacer(Modifier.height(3.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
-                horizontalArrangement = Arrangement.spacedBy(4.dp),
-            ) {
-                PatternKind.entries.forEach { kind ->
-                    ActionChip(
-                        label = kind.label,
-                        active = pattern.kind == kind,
-                        onClick = { doc.setPatternKind(kind) },
-                    )
-                }
-            }
-            SliderRow(
-                label = "PATTERN SCALE",
-                value = pattern.scale,
-                range = 0.25f..4f,
-                display = { String.format("%.2f×", it) },
-                onChange = { doc.setPatternScale(it) },
-            )
-        }
-    }
-    Spacer(Modifier.height(5.dp))
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        ActionChip("◀", onClick = { doc.cycleBlend(-1) })
-        Spacer(Modifier.width(4.dp))
-        Text(
-            layer.style.blend.label,
-            color = Cream,
-            fontSize = 8.sp,
-            fontWeight = FontWeight.SemiBold,
-            maxLines = 1,
-            modifier = Modifier.weight(1f),
-        )
-        ActionChip("▶", onClick = { doc.cycleBlend(1) })
-    }
-    Spacer(Modifier.height(3.dp))
-    Row(
-        modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
-        horizontalArrangement = Arrangement.spacedBy(4.dp),
-    ) {
-        BlendKind.entries.forEach { kind ->
-            ActionChip(
-                label = kind.label,
-                active = layer.style.blend == kind,
-                onClick = { doc.setBlend(kind) },
-            )
-        }
-    }
-    Spacer(Modifier.height(3.dp))
-    Row(
-        modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
-        horizontalArrangement = Arrangement.spacedBy(4.dp),
-    ) {
-        ActionChip("CLIP TO BELOW", active = layer.style.clipToBelow, onClick = { doc.toggleClip() })
-        ActionChip("MASK PAINT", active = doc.maskMode, onClick = { doc.toggleMaskMode() })
-        ActionChip(
-            label = if (doc.maskErase) "ERASE" else "RESTORE",
-            active = doc.maskErase,
-            onClick = { doc.toggleMaskErase() },
-        )
-        ActionChip("MASK ON", active = layer.style.mask?.enabled == true, onClick = { doc.toggleMask() })
-        ActionChip(
-            label = "CLEAR MASK",
-            enabled = layer.style.mask?.strokes?.isNotEmpty() == true,
-            onClick = { doc.clearMask() },
-        )
-        ActionChip(
-            label = "REMOVE MASK",
-            enabled = layer.style.mask != null,
-            warn = layer.style.mask != null,
-            onClick = { doc.removeMask() },
-        )
-    }
-    SliderRow(
-        label = "MASK SIZE",
-        value = doc.maskBrushSize,
-        range = 0.02f..0.35f,
-        display = { "${(it * 100).toInt()}%" },
-        onChange = { doc.setMaskRadius(it) },
-    )
-    Spacer(Modifier.height(5.dp))
-    val fx = layer.style.effects
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        Text("EFFECTS", color = Mint, fontSize = 7.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 0.8.sp)
-        Spacer(Modifier.weight(1f))
-        ActionChip(
-            label = if (fx.enabled) "ON" else "BYPASS",
-            active = fx.enabled,
-            onClick = { doc.toggleEffects() },
-        )
-    }
-    Spacer(Modifier.height(3.dp))
-    Row(
-        modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
-        horizontalArrangement = Arrangement.spacedBy(4.dp),
-    ) {
-        ActionChip("GRADE", active = fx.gradeEnabled, onClick = { doc.toggleGrade() })
-        ActionChip("BLUR", active = fx.blurEnabled, onClick = { doc.toggleBlur() })
-        ActionChip("GRAIN", active = fx.grainEnabled, onClick = { doc.toggleGrain() })
-        ActionChip("HALFTONE", active = fx.halftoneEnabled, onClick = { doc.toggleHalftone() })
-        ActionChip("DUOTONE", active = fx.duotone, onClick = { doc.toggleDuotone() })
-    }
-    TransformSlider(doc, "EXPOSURE", fx.exposure, -2f..2f, { String.format("%+.2f", it) }) { doc.setExposure(it) }
-    TransformSlider(doc, "CONTRAST", fx.contrast, -1f..1f, { String.format("%+.2f", it) }) { doc.setContrast(it) }
-    TransformSlider(doc, "SATURATION", fx.saturation, -1f..1f, { String.format("%+.2f", it) }) { doc.setSaturation(it) }
-    TransformSlider(doc, "SHADOWS", fx.shadows, -1f..1f, { String.format("%+.2f", it) }) { doc.setShadows(it) }
-    TransformSlider(doc, "MIDTONES", fx.midtones, -1f..1f, { String.format("%+.2f", it) }) { doc.setMidtones(it) }
-    TransformSlider(doc, "HIGHLIGHTS", fx.highlights, -1f..1f, { String.format("%+.2f", it) }) { doc.setHighlights(it) }
-    TransformSlider(doc, "BLUR", fx.blur, 0f..24f, { "${it.toInt()} px" }) { doc.setBlur(it) }
-    TransformSlider(doc, "GRAIN", fx.grain, 0f..1f, { "${(it * 100).toInt()}%" }) { doc.setGrain(it) }
-    TransformSlider(doc, "HALFTONE", fx.halftone, 0f..1f, { "${(it * 100).toInt()}%" }) { doc.setHalftone(it) }
-    Spacer(Modifier.height(4.dp))
-    InfoLine("EFFECTS RUN ON THE LAYER BITMAP · MASK CUTS THEM · CLIP USES THE LAYER BELOW")
-}
-
 @Composable
 internal fun GradientStops(doc: EngineDocument, layerId: String, gradient: PaintSpec.Gradient) {
     var chosen by remember(layerId) { mutableStateOf(0) }
@@ -1067,11 +774,11 @@ internal fun GradientStops(doc: EngineDocument, layerId: String, gradient: Paint
     )
     Row(horizontalArrangement = Arrangement.spacedBy(5.dp)) {
         listOf(
-            Mint.toArgb(),
-            Lime.toArgb(),
-            Clay.toArgb(),
-            Cream.toArgb(),
-            Paper.toArgb(),
+            EngineEdition.Plum.toArgb(),
+            EngineEdition.PlumHover.toArgb(),
+            EngineEdition.Warn.toArgb(),
+            EngineEdition.Ink.toArgb(),
+            EngineEdition.BandInk.toArgb(),
         ).forEach { value ->
             Box(
                 modifier = Modifier
@@ -1080,7 +787,7 @@ internal fun GradientStops(doc: EngineDocument, layerId: String, gradient: Paint
                     .background(Color(value))
                     .border(
                         1.dp,
-                        if ((value and 0xFFFFFF) == (stop.color and 0xFFFFFF)) Lime else Rule,
+                        if ((value and 0xFFFFFF) == (stop.color and 0xFFFFFF)) StudioSelection else StudioHairline,
                         CircleShape,
                     )
                     .clickable { doc.setPaintStopColor(index, value) },
@@ -1119,18 +826,18 @@ private fun Swatches(doc: EngineDocument, selected: Int) {
     LaunchedEffect(selected) { hex = String.format("%06X", selected and 0xFFFFFF) }
     Row(horizontalArrangement = Arrangement.spacedBy(5.dp)) {
         listOf(
-            Mint.toArgb(),
-            Lime.toArgb(),
-            Clay.toArgb(),
-            Cream.toArgb(),
-            Paper.toArgb(),
+            EngineEdition.Plum.toArgb(),
+            EngineEdition.PlumHover.toArgb(),
+            EngineEdition.Warn.toArgb(),
+            EngineEdition.Ink.toArgb(),
+            EngineEdition.BandInk.toArgb(),
         ).forEach { value ->
             Box(
                 modifier = Modifier
                     .size(19.dp)
                     .clip(CircleShape)
                     .background(Color(value))
-                    .border(1.dp, if (value == selected) Lime else Rule, CircleShape)
+                    .border(1.dp, if (value == selected) StudioSelection else StudioHairline, CircleShape)
                     .clickable { doc.setFill(value) },
             )
         }
@@ -1198,8 +905,8 @@ internal fun SliderRow(
         },
         modifier = Modifier.fillMaxWidth().height(30.dp),
         colors = SliderDefaults.colors(
-            thumbColor = Mint,
-            activeTrackColor = Mint,
+            thumbColor = StudioAccent,
+            activeTrackColor = StudioAccent,
             inactiveTrackColor = Rule,
         ),
     )
@@ -1213,39 +920,12 @@ private fun Actions(doc: EngineDocument) {
         ActionChip("FRONT", onClick = { doc.reorderSelected(1) })
         ActionChip("DUP", onClick = { doc.duplicateSelected() })
         ActionChip("DEL", warn = true, onClick = { doc.deleteSelected() })
-        ActionChip("SAFE", active = doc.safeArea, onClick = { doc.safeArea = !doc.safeArea })
     }
 }
 
 @Composable
 internal fun InfoLine(text: String) {
     Text(text, color = Dim, fontSize = 9.5.sp, lineHeight = 13.sp, letterSpacing = 0.2.sp, maxLines = 2, overflow = TextOverflow.Ellipsis)
-}
-
-@Composable
-private fun Tag(text: String) {
-    Box(
-        modifier = Modifier
-            .clip(RoundedCornerShape(99.dp))
-            .background(Mint.copy(alpha = 0.14f))
-            .padding(horizontal = 6.dp, vertical = 3.dp),
-    ) {
-        Text(text, color = Mint, fontSize = 8.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 0.6.sp)
-    }
-}
-
-@Composable
-private fun NavButton(text: String, enabled: Boolean, onClick: () -> Unit) {
-    Box(
-        modifier = Modifier
-            .size(32.dp)
-            .clip(RoundedCornerShape(6.dp))
-            .background(PanelRaised)
-            .clickable(enabled = enabled, onClick = onClick),
-        contentAlignment = Alignment.Center,
-    ) {
-        Text(text, color = if (enabled) Cream else Dim.copy(alpha = 0.35f), fontSize = 16.sp)
-    }
 }
 
 @Composable
@@ -1259,12 +939,13 @@ internal fun ActionChip(
     val background = when {
         !enabled -> PanelRaised.copy(alpha = 0.4f)
         warn -> Clay
-        active -> Mint
+        active -> StudioAccent
         else -> PanelRaised
     }
     val foreground = when {
         !enabled -> Dim.copy(alpha = 0.45f)
-        warn || active -> Ink
+        warn -> Ink
+        active -> StudioAccentInk
         else -> Cream
     }
     TactileBox(
@@ -1286,40 +967,59 @@ internal fun ZoomPill(
     onReset: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Row(
-        modifier = modifier
-            .testTag("stage-zoom")
-            .clip(RoundedCornerShape(99.dp))
-            .background(Panel.copy(alpha = 0.94f))
-            .border(1.dp, Rule, RoundedCornerShape(99.dp))
-            .padding(horizontal = 3.dp, vertical = 2.dp),
-        verticalAlignment = Alignment.CenterVertically,
+    Box(
+        modifier = modifier.testTag("stage-zoom"),
+        contentAlignment = Alignment.Center,
     ) {
-        ZoomStep("−") { onZoom(zoom / 1.3f) }
-        Text(
-            text = "${(zoom * 100).toInt()}%",
-            color = if (zoom > 1.001f) Lime else Cream,
-            fontSize = 9.sp,
-            fontWeight = FontWeight.SemiBold,
+        Box(
             modifier = Modifier
+                .matchParentSize()
+                .padding(vertical = 8.dp)
                 .clip(RoundedCornerShape(99.dp))
-                .clickable(onClick = onReset)
-                .padding(horizontal = 6.dp, vertical = 3.dp),
+                .background(StudioSurface.copy(alpha = 0.94f))
+                .border(1.dp, StudioHairline, RoundedCornerShape(99.dp)),
         )
-        ZoomStep("+") { onZoom(zoom * 1.3f) }
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            ZoomStep("−", "zoom-out") { onZoom(zoom / 1.3f) }
+            TactileBox(
+                onClick = onReset,
+                shape = RoundedCornerShape(99.dp),
+                background = Color.Transparent,
+                modifier = Modifier
+                    .size(48.dp)
+                    .testTag("zoom-reset")
+                    .semantics {
+                        contentDescription = "Reset zoom"
+                        role = Role.Button
+                    },
+            ) {
+                Text(
+                    text = "${(zoom * 100).toInt()}%",
+                    color = if (zoom > 1.001f) StudioAccent else StudioText,
+                    fontSize = 8.5.sp,
+                    fontWeight = FontWeight.SemiBold,
+                )
+            }
+            ZoomStep("+", "zoom-in") { onZoom(zoom * 1.3f) }
+        }
     }
 }
 
 @Composable
-private fun ZoomStep(label: String, onClick: () -> Unit) {
+private fun ZoomStep(label: String, tag: String, onClick: () -> Unit) {
     TactileBox(
         onClick = onClick,
         shape = CircleShape,
-        background = PanelRaised,
+        background = Color.Transparent,
         pressScale = 0.88f,
-        modifier = Modifier.size(32.dp),
+        modifier = Modifier.size(48.dp).testTag(tag),
     ) {
-        Text(label, color = Cream, fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
+        Box(
+            modifier = Modifier.size(28.dp).clip(CircleShape).background(StudioRaised),
+            contentAlignment = Alignment.Center,
+        ) {
+            Text(label, color = StudioText, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+        }
     }
 }
 

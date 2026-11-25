@@ -48,7 +48,7 @@ object TonePlugin : EnginePlugin {
     override fun Panel(scope: EnginePluginScope) {
         val enabled = toneEnabled(scope.doc)
         Column(Modifier.fillMaxWidth().padding(16.dp)) {
-            Text("TONE", color = Mint, fontSize = 10.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.2.sp)
+            Text("TONE", color = StudioAccent, fontSize = 10.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.2.sp)
             Spacer(Modifier.height(5.dp))
             Text(
                 if (enabled) "A fill for the selected layer." else "Select type or a shape first.",
@@ -77,21 +77,6 @@ object TonePlugin : EnginePlugin {
                         )
                     }
                 }
-            }
-            Spacer(Modifier.height(18.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
-                TactileBox(
-                    onClick = scope.hide,
-                    shape = RoundedCornerShape(12.dp),
-                    background = PanelRaised,
-                    modifier = Modifier.height(42.dp).testTag("tone-hide"),
-                ) { Text("HIDE", color = Cream, fontSize = 9.sp, fontWeight = FontWeight.Bold) }
-                TactileBox(
-                    onClick = scope.close,
-                    shape = RoundedCornerShape(12.dp),
-                    background = Lime,
-                    modifier = Modifier.height(42.dp).testTag("tone-close"),
-                ) { Text("CLOSE", color = Ink, fontSize = 9.sp, fontWeight = FontWeight.Bold) }
             }
         }
     }

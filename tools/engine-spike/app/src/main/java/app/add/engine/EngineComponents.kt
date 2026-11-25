@@ -66,8 +66,8 @@ internal fun EngineFloatingToolbar(
             .focusProperties { if (nextFocus != null) next = nextFocus }
             .shadow(if (docked) 0.dp else 12.dp, shape, clip = false)
             .clip(shape)
-            .background(Forest.copy(alpha = 0.97f))
-            .border(1.dp, Cream.copy(alpha = 0.16f), shape)
+            .background(StudioSurface.copy(alpha = 0.97f))
+            .border(1.dp, StudioHairline, shape)
             .heightIn(min = EngineTokens.MinTarget + 6.dp)
             .padding(horizontal = 5.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -197,14 +197,15 @@ internal fun EngineSegmentedControl(
     onSelect: (Int) -> Unit,
     modifier: Modifier = Modifier,
     description: String? = null,
+    compact: Boolean = false,
 ) {
     require(options.size in 2..5) { "a segmented control holds 2–5 options" }
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp))
-            .background(PanelRaised)
-            .padding(2.dp)
+            .clip(RoundedCornerShape(99.dp))
+            .background(Panel)
+            .padding(3.dp)
             .semantics {
                 if (description != null) contentDescription = description
             },
@@ -216,8 +217,8 @@ internal fun EngineSegmentedControl(
                 modifier = Modifier
                     .weight(1f)
                     .heightIn(min = EngineTokens.MinTarget)
-                    .clip(RoundedCornerShape(10.dp))
-                    .background(if (active) Mint else Color.Transparent)
+                    .clip(RoundedCornerShape(99.dp))
+                    .background(if (active) Cream else Color.Transparent)
                     .clickable(enabled = option.enabled) { onSelect(index) }
                     .semantics {
                         selected = active
@@ -232,9 +233,9 @@ internal fun EngineSegmentedControl(
                     color = when {
                         !option.enabled -> Dim.copy(alpha = 0.35f)
                         active -> Ink
-                        else -> Cream
+                        else -> Cream.copy(alpha = 0.72f)
                     },
-                    fontSize = 10.sp,
+                    fontSize = if (compact) 9.5.sp else 10.sp,
                     fontWeight = if (active) FontWeight.Bold else FontWeight.SemiBold,
                     letterSpacing = 0.3.sp,
                     maxLines = 1,

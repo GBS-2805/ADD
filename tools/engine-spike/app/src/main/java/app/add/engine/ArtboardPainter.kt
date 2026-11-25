@@ -258,14 +258,14 @@ object ArtboardPainter {
 
     private fun drawPhotoPlaceholder(canvas: Canvas, layer: ImageLayer, typefaces: Typefaces) {
         val rect = layerRect(layer)
-        canvas.drawRect(rect, Paint().apply { color = Cream.copy(alpha = 0.2f).toArgb() })
+        canvas.drawRect(rect, Paint().apply { color = EngineEdition.Ink.copy(alpha = 0.2f).toArgb() })
         val label = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = Cream.toArgb()
+            color = EngineEdition.Ink.toArgb()
             textSize = 16f
             typeface = typefaces.forWeight(500)
         }
         canvas.drawText("PHOTO MISSING", rect.left + 16f, rect.top + 30f, label)
-        val sub = Paint(label).apply { textSize = 12f; color = Dim.toArgb() }
+        val sub = Paint(label).apply { textSize = 12f; color = EngineEdition.Dim.toArgb() }
         canvas.drawText(layer.path, rect.left + 16f, rect.top + 50f, sub)
     }
 
@@ -307,20 +307,19 @@ object ArtboardPainter {
         }
 
         val box = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = Mint.toArgb()
+            color = StudioSelection.toArgb()
             style = Paint.Style.STROKE
             strokeWidth = 2f * unit
-            pathEffect = DashPathEffect(floatArrayOf(9f * unit, 6f * unit), 0f)
         }
         canvas.drawRect(innerLeft, innerTop, innerRight, innerBottom, box)
 
         if (showHandles) {
             val corner = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                color = Paper.toArgb()
+                color = EngineEdition.BandInk.toArgb()
                 style = Paint.Style.FILL
             }
             val ring = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                color = Cream.toArgb()
+                color = StudioSelection.toArgb()
                 style = Paint.Style.STROKE
                 strokeWidth = 2f * unit
             }
@@ -339,7 +338,7 @@ object ArtboardPainter {
                 val rotateY = if (innerTop - gap > 18f) innerTop - gap else innerBottom + gap
                 val rotateX = centerX.coerceIn(innerLeft, innerRight)
                 canvas.drawLine(centerX.coerceIn(innerLeft, innerRight), if (rotateY < innerTop) innerTop else innerBottom, rotateX, rotateY, ring)
-                val grip = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Mint.toArgb() }
+                val grip = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = StudioSelection.toArgb() }
                 canvas.drawCircle(rotateX, rotateY, 10f * unit, grip)
                 canvas.drawCircle(rotateX, rotateY, 10f * unit, ring)
             }
@@ -347,11 +346,11 @@ object ArtboardPainter {
 
         if (layer is VectorLayer) {
             val dot = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                color = Paper.toArgb()
+                color = EngineEdition.BandInk.toArgb()
                 style = Paint.Style.FILL
             }
             val ring = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                color = Cream.toArgb()
+                color = StudioSelection.toArgb()
                 style = Paint.Style.STROKE
                 strokeWidth = 2f * unit
             }
@@ -362,9 +361,9 @@ object ArtboardPainter {
                 canvas.drawCircle(x, y, radius, dot)
                 canvas.drawCircle(x, y, radius, ring)
                 if (point.id == selectedNodeId) {
-                    dot.color = Mint.toArgb()
+                    dot.color = StudioSelection.toArgb()
                     canvas.drawCircle(x, y, 4f * unit, dot)
-                    dot.color = Paper.toArgb()
+                    dot.color = EngineEdition.BandInk.toArgb()
                 }
             }
         }
@@ -380,22 +379,22 @@ object ArtboardPainter {
             points.drop(1).forEach { lineTo(it.x * W, it.y * H) }
         }
         val hull = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = Lime.copy(alpha = 0.4f).toArgb()
+            color = EngineEdition.PlumHover.copy(alpha = 0.4f).toArgb()
             style = Paint.Style.STROKE
             strokeWidth = 1f * unit
         }
         canvas.drawLine(path.start.x * W, path.start.y * H, path.c1.x * W, path.c1.y * H, hull)
         canvas.drawLine(path.end.x * W, path.end.y * H, path.c2.x * W, path.c2.y * H, hull)
         val line = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = Lime.toArgb()
+            color = EngineEdition.PlumHover.toArgb()
             style = Paint.Style.STROKE
             strokeWidth = 2.5f * unit
             pathEffect = DashPathEffect(floatArrayOf(10f * unit, 6f * unit), 0f)
         }
         canvas.drawPath(curve, line)
-        val dot = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Paper.toArgb() }
+        val dot = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = EngineEdition.BandInk.toArgb() }
         val ring = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = Cream.toArgb()
+            color = EngineEdition.Ink.toArgb()
             style = Paint.Style.STROKE
             strokeWidth = 2f * unit
         }
@@ -408,7 +407,7 @@ object ArtboardPainter {
 
     private fun drawPaper(canvas: Canvas, typefaces: Typefaces) {
         val grid = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = Cream.copy(alpha = 0.08f).toArgb()
+            color = EngineEdition.Ink.copy(alpha = 0.08f).toArgb()
             strokeWidth = 1f
         }
         var x = 54f
@@ -422,18 +421,18 @@ object ArtboardPainter {
             y += 54f
         }
 
-        val band = Paint().apply { color = Mint.toArgb() }
+        val band = Paint().apply { color = EngineEdition.Plum.toArgb() }
         canvas.drawRect(0f, 0f, W, 15f, band)
 
         val margin = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = Cream.copy(alpha = 0.2f).toArgb()
+            color = EngineEdition.Ink.copy(alpha = 0.2f).toArgb()
             style = Paint.Style.STROKE
             strokeWidth = 1f
         }
         canvas.drawRect(54f, 54f, W - 54f, H - 54f, margin)
 
         val cross = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = Cream.copy(alpha = 0.4f).toArgb()
+            color = EngineEdition.Ink.copy(alpha = 0.4f).toArgb()
             strokeWidth = 1f
         }
         canvas.drawLine(54f, 54f, 78f, 54f, cross)
@@ -442,7 +441,7 @@ object ArtboardPainter {
         canvas.drawLine(W - 54f, H - 54f, W - 54f, H - 78f, cross)
 
         val index = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = Cream.copy(alpha = 0.6f).toArgb()
+            color = EngineEdition.Ink.copy(alpha = 0.6f).toArgb()
             textSize = 15f
             typeface = typefaces.forWeight(500)
             letterSpacing = 0.12f
@@ -549,33 +548,33 @@ object ArtboardPainter {
     private fun drawModelPlaceholder(canvas: Canvas, layer: ModelLayer, typefaces: Typefaces) {
         val rect = layerRect(layer)
         val fill = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = Panel.toArgb()
+            color = EngineEdition.Card.toArgb()
         }
         canvas.drawRoundRect(rect, 18f, 18f, fill)
 
         val rule = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = Mint.copy(alpha = 0.33f).toArgb()
+            color = EngineEdition.Plum.copy(alpha = 0.33f).toArgb()
             style = Paint.Style.STROKE
             strokeWidth = 1.5f
         }
         canvas.drawRoundRect(rect, 18f, 18f, rule)
 
         val cross = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = Mint.copy(alpha = 0.4f).toArgb()
+            color = EngineEdition.Plum.copy(alpha = 0.4f).toArgb()
             strokeWidth = 1f
         }
         canvas.drawLine(rect.centerX(), rect.top, rect.centerX(), rect.bottom, cross)
         canvas.drawLine(rect.left, rect.centerY(), rect.right, rect.centerY(), cross)
 
         val label = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = Cream.toArgb()
+            color = EngineEdition.Ink.toArgb()
             textSize = 16f
             typeface = typefaces.forWeight(500)
             letterSpacing = 0.1f
         }
         canvas.drawText("3D LAYER / ${layer.asset.label.uppercase()}", rect.left + 18f, rect.bottom - 20f, label)
         val sub = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = Dim.toArgb()
+            color = EngineEdition.Dim.toArgb()
             textSize = 12f
             typeface = typefaces.forWeight(400)
         }
@@ -594,7 +593,7 @@ object ArtboardPainter {
 
     private fun drawFooter(canvas: Canvas, typefaces: Typefaces) {
         val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = Dim.toArgb()
+            color = EngineEdition.Dim.toArgb()
             textSize = 14f
             typeface = typefaces.forWeight(500)
             letterSpacing = 0.12f

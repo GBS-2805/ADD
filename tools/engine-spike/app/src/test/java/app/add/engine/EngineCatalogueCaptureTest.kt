@@ -42,7 +42,7 @@ class EngineCatalogueCaptureTest {
     @Test
     fun captureSearchablePluginCatalogue() {
         compose.waitForIdle()
-        compose.onNodeWithTag("bmo-plugins").performScrollTo().performClick()
+        compose.onNodeWithTag("bmo-plugins").performClick()
         compose.waitForIdle()
         compose.onNodeWithTag("bmo-plugin-catalogue-search").performTextInput("prism")
         compose.waitForIdle()

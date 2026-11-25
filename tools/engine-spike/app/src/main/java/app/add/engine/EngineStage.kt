@@ -695,7 +695,7 @@ contentAlignment = Alignment.Center,
                     Diagnostics.zoomFrom("reset")
                     doc.zoom = 1f
                 },
-                modifier = Modifier.align(Alignment.BottomEnd).padding(end = 6.dp, bottom = 128.dp),
+                modifier = Modifier.align(Alignment.TopEnd).padding(end = 8.dp, top = 6.dp),
             )
         }
         }

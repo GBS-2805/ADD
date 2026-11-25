@@ -276,7 +276,10 @@ fun EngineScreen() {
     // breakpoint is resolved once here for every panel host.
     val layout = engineLayout(LocalConfiguration.current.screenWidthDp.dp)
 
-    BoxWithConstraints(Modifier.fillMaxSize().background(Ink).safeDrawingPadding().imePadding()) {
+    BoxWithConstraints(Modifier.fillMaxSize().background(StudioInk).safeDrawingPadding().imePadding()) {
+        // The rail and the landed strip sit above the dock. At narrow widths the
+        // dock adds a second row, so both need the taller clearance.
+        val dockClearance = dockHeight(maxWidth - 8.dp) + 12.dp
         Stage(
             doc = doc,
             sceneHandles = sceneHandles,
@@ -313,14 +316,17 @@ fun EngineScreen() {
                 },
                 onInfo = { showInfo = true },
                 onCommands = { showCommands = true },
-                modifier = Modifier.align(Alignment.TopStart).padding(top = 6.dp, start = 8.dp),
+                onToggleSafeArea = { doc.safeArea = !doc.safeArea },
+                modifier = Modifier.align(Alignment.TopStart).padding(top = 4.dp, start = 6.dp),
                 restoreOnTap = shell.chrome == ChromeMode.Peek,
                 onRestore = { shell = shell.reduce(ShellEvent.PeekTapped) },
             )
         }
         if (shell.chrome == ChromeMode.Full) {
-            if (doc.selected != null && !doc.maskMode && !doc.inkMode &&
-                doc.editingModelId == null
+            // The open inspector already owns STYLE/FX/INK/LAYERS/DONE; a rail
+            // behind the scrim would be a dimmed second copy of the same actions.
+            if (doc.selected != null && !sheet && notice == null && !doc.maskMode &&
+                !doc.inkMode && doc.editingModelId == null
             ) {
                 BmoSelectionRail(
                     doc = doc,
@@ -331,7 +337,7 @@ fun EngineScreen() {
                     onTexture = { openSheet(StudioTab.Texture) },
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
-                        .padding(bottom = 74.dp),
+                        .padding(bottom = dockClearance),
                 )
             }
             BmoToolDock(
@@ -346,7 +352,18 @@ fun EngineScreen() {
                 onPluginLongPress = { showPlugins = true },
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
-                    .padding(bottom = 8.dp)
+                    // Same canvas inset as the rail: an expanded inspector must not
+                    // hide the add button or the page actions behind its panel.
+                    .padding(
+                        start = 4.dp,
+                        end = 4.dp + if (layout == EngineLayout.Expanded && sheet) {
+                            ExpandedPanelWidth
+                        } else {
+                            0.dp
+                        },
+                        top = 6.dp,
+                        bottom = 6.dp,
+                    )
                     .focusRequester(toolbarFocus),
             )
         }
@@ -419,7 +436,7 @@ fun EngineScreen() {
             exit = slideOutVertically(targetOffsetY = { it / 2 }) + fadeOut(tween(if (reduceMotion) 0 else 110)),
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .padding(start = 10.dp, end = 10.dp, bottom = 8.dp),
+                .padding(start = 10.dp, end = 10.dp, bottom = dockClearance),
         ) {
             LayerLanded(
                 name = notice.orEmpty(),

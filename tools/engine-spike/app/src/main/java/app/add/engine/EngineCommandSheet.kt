@@ -58,57 +58,57 @@ fun EngineCommandSheet(
         runCatching { focus.requestFocus() }
     }
     Dialog(onDismissRequest = onClose, properties = DialogProperties(usePlatformDefaultWidth = false)) {
-        Box(Modifier.fillMaxSize().background(Cream.copy(alpha = 0.55f)).clickable(onClick = onClose)) {
+        Box(Modifier.fillMaxSize().background(StudioInk.copy(alpha = 0.62f)).clickable(onClick = onClose)) {
             Column(
                 modifier = modifier
                     .align(Alignment.BottomCenter)
                     .fillMaxWidth()
                     .imePadding()
-                    .padding(10.dp)
+                    .padding(8.dp)
                     .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
                     .background(Forest)
                     .clickable { }
-                    .padding(12.dp)
+                    .padding(10.dp)
                     .testTag("bmo-command-sheet"),
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text("ACTIONS", color = Mint, fontSize = 10.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.2.sp)
+                    Text("ACTIONS", color = Mint, fontSize = 9.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.2.sp)
                     Spacer(Modifier.weight(1f))
                     Text(
                         "CLOSE",
                         color = Cream,
-                        fontSize = 9.sp,
+                        fontSize = 8.5.sp,
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier
                             .clip(RoundedCornerShape(10.dp))
                             .clickable(onClick = onClose)
-                            .padding(8.dp),
+                            .padding(7.dp),
                     )
                 }
-                Spacer(Modifier.height(8.dp))
+                Spacer(Modifier.height(6.dp))
                 BasicTextField(
                     value = query,
                     onValueChange = { query = it },
                     singleLine = true,
-                    textStyle = TextStyle(color = Cream, fontSize = 15.sp),
+                    textStyle = TextStyle(color = Cream, fontSize = 13.sp),
                     cursorBrush = SolidColor(Mint),
                     modifier = Modifier
                         .fillMaxWidth()
                         .focusRequester(focus)
                         .clip(RoundedCornerShape(12.dp))
                         .background(PanelRaised)
-                        .padding(horizontal = 12.dp, vertical = 12.dp)
+                        .padding(horizontal = 10.dp, vertical = 10.dp)
                         .testTag("bmo-command-search")
                         .semantics { contentDescription = "Search actions" },
                     decorationBox = { inner ->
-                        if (query.isEmpty()) Text("Search actions", color = Dim, fontSize = 13.sp)
+                        if (query.isEmpty()) Text("Search actions", color = Dim, fontSize = 11.sp)
                         inner()
                     },
                 )
-                Spacer(Modifier.height(8.dp))
+                Spacer(Modifier.height(6.dp))
                 val filtered = filterCommands(commands, query)
                 if (filtered.isEmpty()) {
-                    Text("No actions match.", color = Dim, fontSize = 12.sp, modifier = Modifier.padding(14.dp))
+                    Text("No actions match.", color = Dim, fontSize = 11.sp, modifier = Modifier.padding(12.dp))
                 } else {
                     Column(
                         modifier = Modifier
@@ -116,33 +116,33 @@ fun EngineCommandSheet(
                             .verticalScroll(rememberScrollState()),
                     ) {
                         filtered.groupBy { it.group }.forEach { (group, items) ->
-                            Text(group.uppercase(), color = Dim, fontSize = 9.sp,
+                            Text(group.uppercase(), color = Dim, fontSize = 8.5.sp,
                                 fontWeight = FontWeight.Bold, letterSpacing = 0.8.sp,
-                                modifier = Modifier.padding(top = 8.dp, bottom = 3.dp))
+                                modifier = Modifier.padding(top = 6.dp, bottom = 2.dp))
                             items.forEach { command ->
                                 Row(
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .clip(RoundedCornerShape(12.dp))
                                         .clickable(enabled = command.enabled) { onRun(command) }
-                                        .padding(horizontal = 8.dp, vertical = 9.dp)
+                                        .padding(horizontal = 7.dp, vertical = 8.dp)
                                         .testTag("bmo-command-${command.id}")
                                         .semantics {
                                             contentDescription = command.label
                                             role = Role.Button
                                         },
                                     verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(9.dp),
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
                                 ) {
-                                    Text(command.glyph, color = if (command.enabled) Mint else Dim, fontSize = 15.sp)
+                                    Text(command.glyph, color = if (command.enabled) Mint else Dim, fontSize = 13.sp)
                                     Text(
                                         command.label,
                                         color = if (command.enabled) Cream else Dim.copy(alpha = 0.45f),
-                                        fontSize = 12.sp,
+                                        fontSize = 11.sp,
                                         modifier = Modifier.widthIn(min = 160.dp),
                                     )
                                     Spacer(Modifier.weight(1f))
-                                    Text("ENTER", color = Dim.copy(alpha = 0.55f), fontSize = 7.5.sp)
+                                    Text("ENTER", color = Dim.copy(alpha = 0.55f), fontSize = 7.sp)
                                 }
                             }
                         }

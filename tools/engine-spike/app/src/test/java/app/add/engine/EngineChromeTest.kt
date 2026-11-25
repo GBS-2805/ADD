@@ -236,7 +236,7 @@ class EngineChromeFocusTest {
             click(androidx.compose.ui.geometry.Offset(width * 0.9f, height * 0.7f))
         }
         compose.onNodeWithTag("bmo-page-chip").performClick()
-        compose.onNodeWithTag("bmo-add").performScrollTo().performClick()
+        compose.onNodeWithTag("bmo-add").performClick()
         compose.onNodeWithTag("create-type").performClick()
         compose.onNodeWithTag("notice-inspect").performClick()
         compose.waitForIdle()
